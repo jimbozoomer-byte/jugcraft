@@ -787,6 +787,75 @@
       }
     ]
   },
+  "bifrons.arrive": {
+    "subtitle": "subtitles.jugcraft.bifrons.arrive",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/beast/banana_slug_slime_expand_0",
+        "attenuation_distance": 16,
+        "pitch": 0.8
+      }
+    ]
+  },
+  "bifrons.listen": {
+    "subtitle": "subtitles.jugcraft.bifrons.listen",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/beast/banana_slug_slime_expand_1",
+        "attenuation_distance": 16,
+        "pitch": 1.3
+      }
+    ]
+  },
+  "bifrons.inspect": {
+    "subtitle": "subtitles.jugcraft.bifrons.inspect",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/beast/banana_slug_hurt_2",
+        "attenuation_distance": 16,
+        "pitch": 1.1
+      }
+    ]
+  },
+  "bifrons.assent": {
+    "subtitle": "subtitles.jugcraft.bifrons.assent",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/beast/banana_slug_slime_expand_1",
+        "attenuation_distance": 16
+      }
+    ]
+  },
+  "bifrons.refuse": {
+    "subtitle": "subtitles.jugcraft.bifrons.refuse",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/beast/banana_slug_hurt_2",
+        "attenuation_distance": 16,
+        "pitch": 0.7
+      }
+    ]
+  },
+  "bifrons.depart": {
+    "subtitle": "subtitles.jugcraft.bifrons.depart",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/beast/banana_slug_slime_expand_0",
+        "attenuation_distance": 16,
+        "pitch": 0.6
+      }
+    ]
+  },
+  "bifrons.work": {
+    "subtitle": "subtitles.jugcraft.bifrons.work",
+    "sounds": [
+      {
+        "name": "jugcraft:menagerie/beast/banana_slug_slime_expand_0",
+        "attenuation_distance": 16,
+        "pitch": 1.2
+      }
+    ]
+  },
   "alchemy_chargetick": {
     "sounds": [
       "jugcraft:alchemy/chargetick"

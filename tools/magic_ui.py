@@ -989,6 +989,20 @@ WORK_GLANCES = {
     },
     # GC-07 unit 4
     # GC-08 unit 5
+    # GC-08: Bifrons's root-running (no on-request action: his kept page is his rows and his matter). His last run is drawn
+    # as its two beds, the amounts in its tip; his matter's question in at most 12 words, its answers in 3 (spec 1.1).
+    "root_running": {
+        "icon": "minecraft:rooted_dirt", "name": "Root-running", "line": "Runs roots from full to hungry beds",
+        "row.service": [("", "%1$s/%2$s today", (3, 24), "3/24 today", "chip")],
+        "row.asleep": [("", "Asleep until %1$s", ("19:00", "05:00"), "Asleep until 19:00", "row")],
+        "row.last": [("", "Last: %2$s → %4$s", (2, "102, 64, -18", 1, "98, 64, -18", 1), "Last: 102, 64, -18 → 98, 64, -18", "row")],
+        "row.reserved": [("", "%1$s growing beds kept as reserves", (2,), "2 growing beds kept as reserves", "row")],
+        "matter.reserves": [("", "Your full beds are growing: draw from them?", ("102, 64, -18", 32),
+                             "Your full beds are growing: draw from them?", "row")],
+        "missing": [("", "Needs two awake Verdant Beds of yours within %1$s blocks", (8,),
+                     "Needs two awake Verdant Beds of yours within 8 blocks", "blocker")],
+        "card": ("Needs two beds near", (8,), "Needs two beds near"),
+    },
     # GC-09 unit 6
 }
 # A work's fields that are not its rows' glances: its chooser reason, its icon, its name and its service line.
@@ -1179,6 +1193,11 @@ SENTENCES = {
     _JADE + "pact.note.habitat_reading.proud": ("Proud beds: %1$s", (2,), "Proud beds: 2", "jade"),
     # GC-07 unit 4
     # GC-08 unit 5
+    _JADE + "pact.matter.root_running.reserves": ("Full beds all growing", (), "Full beds all growing", "jade"),
+    _JADE + "pact.note.root_running.reserves": ("Growing full beds: %1$s", (2,), "Growing full beds: 2", "jade"),
+    _JADE + "pact.note.root_running.asleep": ("Asleep until night", (), "Asleep until night", "jade"),
+    _JADE + "pact.note.root_running.no_full": ("Nothing to run", (), "Nothing to run", "jade"),
+    _JADE + "pact.note.root_running.no_hungry": ("Nowhere to run it", (), "Nowhere to run it", "jade"),
     # GC-09 unit 6
     "message.jugcraft.concordance.disabled": ("Switched off", (), "Switched off", "jade"),
     "compose.jugcraft.diagnostic.conflicting_agreement": ("A copy: does nothing", (), "A copy: does nothing", "jade"),
@@ -1241,6 +1260,9 @@ SENTENCE_MARKS = {
     _JADE + "pact.note.habitat_reading.proud": "hourglass",
     # GC-07 unit 4
     # GC-08 unit 5
+    _JADE + "pact.matter.root_running.reserves": "ask", _JADE + "pact.note.root_running.reserves": "ask",
+    _JADE + "pact.note.root_running.asleep": "moon", _JADE + "pact.note.root_running.no_full": "moon",
+    _JADE + "pact.note.root_running.no_hungry": "hourglass",
     # GC-09 unit 6
 }
 SENTENCE_PREFIX = "screen.jugcraft.glance."

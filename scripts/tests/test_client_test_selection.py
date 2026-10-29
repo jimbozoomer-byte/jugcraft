@@ -199,6 +199,15 @@ class ClientTestSelectionTests(unittest.TestCase):
 
     # GC-07 unit 4
     # GC-08 unit 5
+    def test_bifrons_body_and_service_select_the_garden_client_test(self):
+        # Concordance garden cohort, GC-08: Bifrons's body, entity and service are shown by the garden's client class.
+        for path in ("src/main/resources/assets/jugcraft/textures/entity/bifrons.png",
+                     "src/main/resources/assets/jugcraft/geckolib/animations/entity/bifrons.animation.json",
+                     "src/main/java/io/github/jimbozoomer/jugcraft/concordance/spirits/BifronsEntity.java",
+                     "src/main/java/io/github/jimbozoomer/jugcraft/concordance/spirits/RootRunning.java"):
+            with self.subTest(path=path):
+                chosen, _ = selection.select([path], self.tests, set())
+                self.assertIn("ConcordanceGardenPactClientGameTests", chosen)
     # GC-09 unit 6
 
 

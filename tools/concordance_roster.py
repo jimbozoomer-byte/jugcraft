@@ -37,6 +37,7 @@ SERVICES = {
     "habitat_reading": "Habitat reading: one change named for your worst bed, when asked",
     # GC-07 unit 4
     # GC-08 unit 5
+    "root_running": "Root-running: by night, two nutrients from a full bed for one in a hungry bed",
     # GC-09 unit 6
 }
 # Ars Nouveau's helpers on the roster (G13; Java: nouveau/NouveauHelper.kind is "nouveau_" + its species,

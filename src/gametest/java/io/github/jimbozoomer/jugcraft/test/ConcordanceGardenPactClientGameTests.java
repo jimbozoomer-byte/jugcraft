@@ -27,9 +27,11 @@ import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.sky.AstralClaims;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.AgreementHolder;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BathinEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.BifronsEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BuerEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GardenPacts;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.GardenReach;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.HabitatReading;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.MaraxEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactKeeping;
@@ -39,6 +41,7 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.PactReading;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactRequestPayload;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactSpiritEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactStatePayload;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.RootRunning;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.RosterStatePayload;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.StrainTending;
@@ -243,6 +246,8 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 				marax(context, server, connection, perch);
 				// GC-07 unit 4
 				// GC-08 unit 5
+				// GC-08: Bifrons at the same perch, by night, chosen from the chooser, to his departure.
+				bifrons(context, server, connection, perch);
 				// GC-09 unit 6
 				context.runOnClient(client -> {
 					client.options.guiScale().set(scale);
@@ -2600,5 +2605,690 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 
 	// GC-07 unit 4
 	// GC-08 unit 5
+	// GC-08: Bifrons (tools/concordance_pacts.py SPIRITS["bifrons"]; check_spirit_bodies).
+	private static final String BIFRONS = "jugcraft:bifrons";
+	private static final String BIFRONS_IDLE = "animation.bifrons.idle";
+	/** His rise, played once as he begins to listen (SPIRITS["bifrons"]["body"]["rise_clip"]). */
+	private static final String BIFRONS_RISE = "animation.bifrons.rise";
+	private static final String BIFRONS_LISTEN = "animation.bifrons.listen";
+	private static final String BIFRONS_WAITING = "animation.bifrons.waiting";
+	private static final String BIFRONS_SUSPENDED = "animation.bifrons.suspended";
+	/** Midnight on the world clock: inside his hours (13,000 to 23,000). */
+	private static final long BIFRONS_NIGHT = 18_000L;
+	/** His refusal with fewer than two awake beds of the inviter's near (Dossier 5 item 2). */
+	private static final String NO_TWO_BEDS = "A root runs between two places. Show me two.";
+	/** His compact (data/jugcraft/concordance/pact/bifrons.json): no resonance, so no astrolabe. */
+	private static final List<String> BIFRONS_COMPACT = List.of("minecraft:oak_log 4", "minecraft:emerald 1");
+	/** His four bearings' shots as standingFacing takes them (tools/concordance_pacts.py GARDEN_CLIENT_SHOTS). */
+	private static final List<String> BIFRONS_FACES = List.of("jugcraft_garden_bifrons_faces_east", "jugcraft_garden_bifrons_faces_south",
+			"jugcraft_garden_bifrons_faces_west", "jugcraft_garden_bifrons_faces_north");
+
+	// ---------------------------------------------------------------- GC-08: Bifrons (Dossier 5)
+
+	/**
+	 * GC-08: Bifrons at the perch Marax left, by night (the clock paused at midnight, the player given night vision so his
+	 * pictures are not dark), from the chooser to his departure: listed not ready with one bed, chosen by keyboard and rising
+	 * beside the perch; his conversation at three sizes, refused and sealed; his two shapes; one run frozen at each beat; his
+	 * kept page naming the run; his matter at three sizes, answered; Jade; ten poses; four bearings round where he stands;
+	 * the end. The clock is set back to day and resumed, and night vision cleared, at its end.
+	 */
+	private static void bifrons(ClientGameTestContext context, TestDedicatedServerContext server, TestDedicatedServerConnection connection,
+			BlockPos perch) {
+		// Two beds on the yard's floor, south-east and south-west of the perch. He stands two west of it (the player south), so
+		// the west bed is three west, not two: no bed stands between him and a camera three south of him (his poses, his
+		// south bearing, Jade).
+		BlockPos source = perch.offset(2, 0, 2);
+		BlockPos destination = perch.offset(-3, 0, 2);
+		server.runOnServer(minecraft -> {
+			yard(minecraft, perch);
+			// The unit-5 review's item 4: Buer's bed (perch.west(3), awake and the player's; yard keeps it) would be a second bed
+			// of theirs in his area, so it leaves the yard: his refusal, his chooser and his thinks see only the beds set here.
+			ServerLevel level = minecraft.overworld();
+			level.setBlockAndUpdate(perch.west(3).above(), Blocks.AIR.defaultBlockState());
+			level.setBlockAndUpdate(perch.west(3), Blocks.STONE.defaultBlockState());
+		});
+		server.runCommand("time set 18000");
+		server.runCommand("time pause");
+		// The unit-5 review's item 12: a paused midnight in an unlit yard would leave every picture of him dark.
+		server.runCommand("effect give @a minecraft:night_vision infinite 0 true");
+		standSouth(context, server, perch);
+		connection.waitForChunksRender();
+		noTwoBeds(context, server, perch, destination);
+		bifronsChooser(context, server, perch, source);
+		bifronsConversation(context, server);
+		bifronsSizes(context);
+		Hearing hearing = hear(context);
+		bifronsAcceptance(context, server);
+		bifronsHeard(context, server, hearing, perch);
+		standSouth(context, server, perch);
+		bifronsShapes(context, server, perch);
+		bifronsMeasuring(context, server, connection, perch, source, destination);
+		standSouth(context, server, perch);
+		bifronsRunRow(context, server, perch, source, destination);
+		bifronsMatter(context, server, perch, source, destination);
+		bifronsJade(context, server, perch);
+		bifronsPoses(context, server, perch);
+		standingFacing(context, server, perch, BIFRONS, BIFRONS_FACES);
+		Jugcraft.LOGGER.info("[garden-check] bifrons's bearings photographed: {}", BIFRONS_FACES);
+		standSouth(context, server, perch);
+		bifronsEnding(context, server, perch);
+		server.runCommand("effect clear @a minecraft:night_vision");
+		server.runCommand("time set 6000");
+		server.runCommand("time resume");
+	}
+
+	/** An awake, wet Verdant Bed of the player's at {@code at}, on the yard's floor, holding {@code nutrients}. */
+	private static void bifronsBed(MinecraftServer minecraft, BlockPos at, int nutrients) {
+		minecraft.overworld().setBlockAndUpdate(at, Garden.VERDANT_BED.defaultBlockState().setValue(VerdantBedBlock.MOISTURE, VerdantBedBlock.WET));
+		VerdantBedBlockEntity kept = bed(minecraft, at);
+		kept.awaken(player(minecraft).getUUID());
+		kept.setNutrients(nutrients);
+	}
+
+	/** GC-08: Bifrons's presence at {@code perch}, asserted there (server side). */
+	private static BifronsEntity bifronsAt(MinecraftServer minecraft, BlockPos perch) {
+		ServerLevel level = minecraft.overworld();
+		PactSpiritEntity<?> found = ((PactPerchBlockEntity) level.getBlockEntity(perch)).presence(level);
+		check(found instanceof BifronsEntity, "Bifrons is beside his perch: " + found);
+		return (BifronsEntity) found;
+	}
+
+	/**
+	 * Dossier 5 item 2: one awake bed of the player's in his area (the server counts exactly one), and the chooser lists him
+	 * not ready, in his words.
+	 */
+	private static void noTwoBeds(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, BlockPos destination) {
+		int beds = server.computeOnServer(minecraft -> {
+			bifronsBed(minecraft, destination, 4);
+			ServerLevel level = minecraft.overworld();
+			UUID own = player(minecraft).getUUID();
+			return new GardenReach(perch, 8, bed -> own.equals(bed.keeper())).beds(level, level.getGameTime()).size();
+		});
+		Jugcraft.LOGGER.info("[garden-check] awake beds of the player's within 8 of the perch: {}", beds);
+		check(beds == 1, "Exactly one awake bed of the player's lies in his area: " + beds);
+		context.waitTicks(OPEN_GAP);
+		open(context, server, perch);
+		context.waitFor(client -> PactClient.state() != null && PactClient.state().mode() == PactStatePayload.INVITE, WAIT);
+		String entries = context.computeOnClient(client -> entries(PactClient.state()));
+		Jugcraft.LOGGER.info("[garden-check] chooser with one bed: {}", entries);
+		boolean listed = context.computeOnClient(client -> PactClient.state().patterns().stream()
+				.anyMatch(choice -> choice.id().equals(BifronsEntity.SIGN) && !choice.ready() && choice.amount() == 1)
+				&& PactClient.state().notes().stream().anyMatch(note -> note.getString().contains(NO_TWO_BEDS)));
+		check(listed, "Bifrons listed, not ready, in his words: " + entries);
+		fits(context, "the chooser with one bed");
+		named(context);
+		reasons(context);
+		budget(context, chooserWords(context), "the chooser with one bed");
+		shot(context, "jugcraft_garden_bifrons_no_two_beds");
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(null);
+	}
+
+	/**
+	 * A second awake bed of the player's; the chooser lists him ready (its readiness the server's missing); chosen by
+	 * keyboard, his sign hanging roots, he comes up two blocks west of the perch with his gesture.
+	 */
+	private static void bifronsChooser(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, BlockPos source) {
+		server.runOnServer(minecraft -> bifronsBed(minecraft, source, 4));
+		context.waitTicks(25);
+		open(context, server, perch);
+		context.waitFor(client -> PactClient.state() != null && PactClient.state().mode() == PactStatePayload.INVITE
+				&& PactClient.state().patterns().stream().anyMatch(choice -> choice.id().equals(BifronsEntity.SIGN) && choice.ready()), WAIT);
+		String entries = context.computeOnClient(client -> entries(PactClient.state()));
+		Jugcraft.LOGGER.info("[garden-check] chooser with his two beds: {}", entries);
+		context.waitFor(client -> client.gui.screen() instanceof PactScreen, WAIT);
+		fits(context, "the chooser with his two beds");
+		named(context);
+		reasons(context);
+		budget(context, chooserWords(context), "the chooser with his two beds");
+		shot(context, "jugcraft_garden_bifrons_chooser");
+		String name = context.computeOnClient(client -> Component.translatable("entity.jugcraft.bifrons").getString());
+		tabToNamed(context, name);
+		context.getInput().pressKey(InputConstants.KEY_RETURN);
+		context.waitFor(client -> PactClient.state() != null && PactClient.state().mode() == PactStatePayload.NEGOTIATE
+				&& BifronsEntity.SIGN.equals(PactClient.state().spirit().sign()) && spiritAt(client, perch, BIFRONS) != null, WAIT);
+		context.waitFor(client -> BifronsEntity.Gesture.ARRIVE.animation.equals(gesturedOf(client, perch, BIFRONS)), WAIT);
+		Vec3 at = server.computeOnServer(minecraft -> presenceOf(minecraft, perch).position());
+		Jugcraft.LOGGER.info("[garden-check] invited bifrons: he stands at {}", at);
+		check(at.distanceTo(Vec3.atBottomCenterOf(perch.west(2))) < 1.0E-3,
+				"Chosen, he comes up two blocks west of the perch, on the ground, never between it and the player: " + at);
+	}
+
+	/** His three beats, held to the magic interfaces' limits, then every term by keyboard (Enter three times), none naming an astrolabe or resonance. */
+	private static void bifronsConversation(ClientGameTestContext context, TestDedicatedServerContext server) {
+		String shown = context.computeOnClient(client -> describe(PactClient.state()));
+		Jugcraft.LOGGER.info("[garden-check] bifrons's offer: {}", shown);
+		boolean whole = context.computeOnClient(client -> PactClient.state().beats().size() == 3 && PactClient.state().notes().isEmpty()
+				&& PactClient.state().offers(PactRequestPayload.ACCEPT)
+				&& PactClient.state().terms().stream().map(PactStatePayload.Term::key).toList().equals(PactStatePayload.TERMS));
+		check(whole, "Bifrons speaks three beats, nothing stands in the way, and his terms name every term, in order: " + shown);
+		List<String> beats = context.computeOnClient(client -> PactClient.state().beats().stream().map(Component::getString).toList());
+		check(beats.get(0).contains("I take a better one when spoken to") && beats.get(1).contains("a root's measure")
+				&& beats.get(2).contains("A root must remember wood"), "His beats keep the contract's closing words: " + beats);
+		fits(context, "his beat at GUI scale 2");
+		named(context);
+		budget(context, BEAT_WORDS, "his first beat");
+		shot(context, "jugcraft_garden_bifrons_conversation");
+		tabTo(context, "next");
+		for (int beat = 0; beat < 3; beat++) {
+			context.getInput().pressKey(InputConstants.KEY_RETURN);
+			context.waitTicks(3);
+		}
+		settle(context);
+		boolean onTerms = context.computeOnClient(client -> screen(client).page() == PactScreen.TERMS_PAGE && "para:0".equals(screen(client).focusedKey()));
+		check(onTerms, "Enter three times reaches his terms, the keyboard on their first line, never on Accept");
+		String words = context.computeOnClient(client -> String.join(" ", PactClient.state().terms().stream()
+				.map(term -> term.value().getString()).toList()).toLowerCase(Locale.ROOT));
+		Jugcraft.LOGGER.info("[garden-check] his terms: {}", words);
+		check(!words.contains("astrolabe") && !words.contains("resonance") && words.contains("root") && words.contains("19:00 to 05:00"),
+				"His terms name his service and his hours, and no astrolabe or resonance: " + words);
+		fits(context, "his terms at GUI scale 2");
+		named(context);
+		budget(context, TERMS_WORDS, "his terms");
+		shot(context, "jugcraft_garden_bifrons_terms");
+		boolean held = server.computeOnServer(minecraft -> holds(minecraft, BIFRONS));
+		check(!held, "Hearing his terms records nothing");
+	}
+
+	/** His terms and a beat at GUI scale 4 (1920 x 1080) and in a 320 x 180 window. */
+	private static void bifronsSizes(ClientGameTestContext context) {
+		int width = context.computeOnClient(client -> client.getWindow().getWidth());
+		int height = context.computeOnClient(client -> client.getWindow().getHeight());
+		context.getInput().resizeWindow(1920, 1080);
+		context.runOnClient(client -> {
+			client.options.guiScale().set(4);
+			client.resizeGui();
+		});
+		context.waitTicks(10);
+		int applied = context.computeOnClient(client -> client.getWindow().getGuiScale());
+		check(applied == 4, "His high-scale shots are at GUI scale 4: " + applied);
+		fits(context, "his terms at GUI scale 4");
+		named(context);
+		budget(context, TERMS_WORDS, "his terms at GUI scale 4");
+		shot(context, "jugcraft_garden_bifrons_terms_scale4");
+		press(context, "back");
+		fits(context, "his beat at GUI scale 4");
+		named(context);
+		budget(context, BEAT_WORDS, "his last beat at GUI scale 4");
+		shot(context, "jugcraft_garden_bifrons_conversation_scale4");
+		press(context, "next");
+		context.runOnClient(client -> {
+			client.options.guiScale().set(2);
+			client.resizeGui();
+		});
+		context.getInput().resizeWindow(320, 180);
+		context.waitTicks(10);
+		String gui = context.computeOnClient(client -> client.getWindow().getGuiScaledWidth() + "x" + client.getWindow().getGuiScaledHeight());
+		Jugcraft.LOGGER.info("[garden-check] his terms in a 320x180 window: GUI {}", gui);
+		check("320x180".equals(gui), "A 320x180 window draws a 320x180 GUI: " + gui);
+		fits(context, "his terms at 320x180");
+		named(context);
+		budget(context, TERMS_WORDS, "his terms at 320x180");
+		shot(context, "jugcraft_garden_bifrons_terms_small");
+		press(context, "back");
+		fits(context, "his beat at 320x180");
+		named(context);
+		budget(context, BEAT_WORDS, "his last beat at 320x180");
+		shot(context, "jugcraft_garden_bifrons_conversation_small");
+		press(context, "next");
+		context.getInput().resizeWindow(width, height);
+		context.waitTicks(10);
+		boolean back = context.computeOnClient(client -> screen(client).page() == PactScreen.TERMS_PAGE);
+		check(back, "Back on his terms");
+	}
+
+	/**
+	 * Accept refused without his compact (worded without an astrolabe), then sealed with it: 4 oak logs and an emerald, spent
+	 * once. His kept page: today's runs 0 of 24 and his first task.
+	 */
+	private static void bifronsAcceptance(ClientGameTestContext context, TestDedicatedServerContext server) {
+		tabTo(context, "accept");
+		PactStatePayload.Result refused = answer(context);
+		String said = refused.message().getString();
+		int refusedMode = context.computeOnClient(client -> PactClient.state().mode());
+		Jugcraft.LOGGER.info("[garden-check] Accept without his compact: {} ({})", refused.reason(), said);
+		check("cannot_afford".equals(refused.reason()) && !refused.done() && !said.toLowerCase(Locale.ROOT).contains("astrolabe")
+				&& refusedMode == PactStatePayload.NEGOTIATE, "Without his compact Accept is refused, worded without an astrolabe: " + said);
+		boolean heldAfterRefusal = server.computeOnServer(minecraft -> holds(minecraft, BIFRONS));
+		check(!heldAfterRefusal, "A refusal records and spends nothing");
+		context.waitFor(client -> screen(client).control("result") instanceof PactScreen.Verdict verdict && verdict.refused(), WAIT);
+		budget(context, TERMS_WORDS, "his refusal");
+		shot(context, "jugcraft_garden_bifrons_refused");
+		List<String> cost = context.computeOnClient(client -> PactClient.state().compact().stream()
+				.map(stack -> BuiltInRegistries.ITEM.getKey(stack.getItem()) + " " + stack.getCount()).toList());
+		int resonance = context.computeOnClient(client -> PactClient.state().resonance());
+		Jugcraft.LOGGER.info("[garden-check] his compact: {} and {} resonance", cost, resonance);
+		check(cost.equals(BIFRONS_COMPACT) && resonance == 0, "His compact: 4 oak logs and an emerald, no resonance: " + cost);
+		server.runOnServer(minecraft -> cost.forEach(line -> player(minecraft).getInventory().add(stack(line))));
+		context.waitTicks(5);
+		tabTo(context, "accept");
+		PactStatePayload.Result sealed = answer(context);
+		int sealedMode = context.computeOnClient(client -> PactClient.state().mode());
+		check(sealed.done() && "sealed".equals(sealed.reason()) && sealedMode == PactStatePayload.KEEP, "Accepting with his compact seals the pact: " + sealed.reason());
+		String spent = server.computeOnServer(minecraft -> holds(minecraft, BIFRONS) + " "
+				+ cost.stream().mapToInt(line -> player(minecraft).getInventory().countItem(stack(line).getItem())).sum());
+		Jugcraft.LOGGER.info("[garden-check] sealed: held, compact left = {}", spent);
+		check("true 0".equals(spent), "Sealed once, his compact spent once: " + spent);
+		context.waitFor(client -> screen(client).control("result") instanceof PactScreen.Verdict verdict && !verdict.refused(), WAIT);
+		List<String> rows = context.computeOnClient(client -> lines(PactClient.state()));
+		Jugcraft.LOGGER.info("[garden-check] his kept page: {}", rows);
+		check(rows.stream().anyMatch(row -> row.contains("0 of 24 runs this game day")) && rows.stream().anyMatch(row -> row.startsWith("First obligation"))
+				&& rows.stream().noneMatch(row -> row.startsWith("Last:")), "His kept page: no run of 24 yet today, none made, and his first task: " + rows);
+		fits(context, "his kept pact at GUI scale 2");
+		named(context);
+		budget(context, keptWords(context), "his kept pact");
+		shot(context, "jugcraft_garden_bifrons_kept");
+	}
+
+	/**
+	 * His refuse and assent fired by the server, their subtitles his, heard where the machine can play sound; his arrival
+	 * fired too (the unit-5 review's item 14: it came before the hearing began). His listening cue is not fired yet (his
+	 * arrival carried that moment): bifronsShapes checks it when the perch is next opened.
+	 */
+	private static void bifronsHeard(ClientGameTestContext context, TestDedicatedServerContext server, Hearing hearing, BlockPos perch) {
+		String refuse = context.computeOnClient(client -> Component.translatable("subtitles.jugcraft.bifrons.refuse").getString());
+		String assent = context.computeOnClient(client -> Component.translatable("subtitles.jugcraft.bifrons.assent").getString());
+		String arrive = context.computeOnClient(client -> Component.translatable("subtitles.jugcraft.bifrons.arrive").getString());
+		String listen = context.computeOnClient(client -> Component.translatable("subtitles.jugcraft.bifrons.listen").getString());
+		String run = context.computeOnClient(client -> Component.translatable("subtitles.jugcraft.bifrons.work").getString());
+		boolean defined = context.computeOnClient(client -> refuse.equals(subtitle(client, "bifrons.refuse"))
+				&& assent.equals(subtitle(client, "bifrons.assent")) && arrive.equals(subtitle(client, "bifrons.arrive"))
+				&& listen.equals(subtitle(client, "bifrons.listen")) && run.equals(subtitle(client, "bifrons.work")));
+		check(!refuse.startsWith("subtitles.") && !arrive.startsWith("subtitles.") && !listen.startsWith("subtitles.") && defined,
+				"His refuse, assent, arrival, listening and run have their subtitles in the client's sounds: " + refuse + ", " + assent + ", "
+						+ arrive + ", " + listen + ", " + run);
+		List<String> cues = server.computeOnServer(minecraft -> bifronsAt(minecraft, perch).cues());
+		Jugcraft.LOGGER.info("[garden-check] Bifrons's cues so far: {}", cues);
+		check(cues.contains("arrive") && cues.contains("refuse") && "assent".equals(cues.getLast()),
+				"The server fired his arrival, his refusal, then his assent: " + cues);
+		try {
+			if (hearing.sounding()) {
+				context.waitFor(client -> hearing.heard().contains(refuse) && hearing.heard().contains(assent), WAIT);
+				Jugcraft.LOGGER.info("[garden-check] subtitles heard: {}", hearing.heard());
+			} else {
+				Jugcraft.LOGGER.info("[garden-check] no sound device: the sound engine is off, so no subtitle can show; checked as defined and as fired");
+			}
+		} finally {
+			context.runOnClient(client -> {
+				client.getSoundManager().removeListener(hearing.listener());
+				client.options.showSubtitles().set(hearing.subtitles());
+			});
+		}
+	}
+
+	/**
+	 * Dossier 5 detail (a): low by night with no one speaking; rising as the screen opens (his listening cue heard), caught
+	 * part-way with the screen closed under a frozen world; sunk again once it closes. His risen pose is bifronsPoses'.
+	 */
+	private static void bifronsShapes(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(null);
+		boolean hidden = hideHud(context);
+		try {
+			server.runCommand("time set 18000");
+			context.waitFor(client -> BIFRONS_IDLE.equals(drawingOf(client, perch, BIFRONS, MAIN)) && !blendingOf(client, perch, BIFRONS, MAIN), WAIT);
+			server.runCommand("tick freeze");
+			try {
+				context.waitTicks(3);
+				shot(context, "jugcraft_garden_bifrons_by_night");
+			} finally {
+				server.runCommand("tick unfreeze");
+			}
+			context.waitTicks(OPEN_GAP);
+			open(context, server, perch);
+			context.waitFor(client -> BIFRONS_RISE.equals(drawingOf(client, perch, BIFRONS, MAIN)) && !blendingOf(client, perch, BIFRONS, MAIN), WAIT);
+			context.waitTicks(6);
+			server.runCommand("tick freeze");
+			try {
+				context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+				context.waitForScreen(null);
+				context.waitTicks(3);
+				double at = context.computeOnClient(client -> BIFRONS_RISE.equals(drawingOf(client, perch, BIFRONS, MAIN))
+						? controllerOf(client, perch, BIFRONS, MAIN).getCurrentAnimationTime() : -1.0);
+				Jugcraft.LOGGER.info("[garden-check] bifrons rising, frozen {} s into his rise", at);
+				check(at >= 0.2 && at <= 0.8, "Caught rising, between his two shapes: " + at);
+				shot(context, "jugcraft_garden_bifrons_rising");
+			} finally {
+				server.runCommand("tick unfreeze");
+			}
+			List<String> cues = server.computeOnServer(minecraft -> bifronsAt(minecraft, perch).cues());
+			Jugcraft.LOGGER.info("[garden-check] Bifrons's cues after the perch was opened again: {}", cues);
+			check(cues.contains("listen"), "Spoken to again, the server fired his listening cue: " + cues);
+			context.waitFor(client -> BIFRONS_IDLE.equals(drawingOf(client, perch, BIFRONS, MAIN)), WAIT);
+			boolean low = context.computeOnClient(client -> spiritAt(client, perch, BIFRONS) instanceof BifronsEntity bifrons && !bifrons.listening());
+			check(low, "The screen closed, he sinks back to his low shape");
+		} finally {
+			restoreHud(context, hidden);
+		}
+	}
+
+	/**
+	 * Dossier 5 detail (b): one run, frozen at each beat, seen from seven south of the perch looking down over both beds and
+	 * him (the unit-5 review's item 5). With the world frozen (no think of his own between), the source is set fallow at 32
+	 * and the destination at 0 and his first beat is run in one server step; two ticks are stepped so this client takes the
+	 * sign and his inspect gesture, and the source is photographed. His second beat runs a beat later by his own clock
+	 * (MEASURE_TICKS on): the destination marked and the root run; the source is set below SOURCE_MIN in the same step, so no
+	 * think of his own begins another measure; two ticks stepped, photographed; thawed. The shared sign of preparation stands
+	 * at each bed (Signs.show; the server tests count them), so these two shots show the signs and the gestures' first ticks;
+	 * the inspect and work poses inside their telling windows are bifronsPoses'.
+	 */
+	private static void bifronsMeasuring(ClientGameTestContext context, TestDedicatedServerContext server, TestDedicatedServerConnection connection,
+			BlockPos perch, BlockPos source, BlockPos destination) {
+		boolean hidden = hideHud(context);
+		try {
+			// Seven south of the perch, looking north and 20 degrees down: both beds (2 east and 3 west, 5.5 ahead) and Bifrons on
+			// his station are in the frame.
+			server.runCommand(String.format(Locale.ROOT, "tp @a %.1f %d %.1f 180 20", perch.getX() + 0.5, perch.getY(), perch.getZ() + 7.5));
+			context.waitTicks(10);
+			connection.waitForChunksRender();
+			server.runCommand("time set 18000");
+			server.runCommand("tick freeze");
+			try {
+				context.waitTicks(2);
+				String first = server.computeOnServer(minecraft -> {
+					ServerLevel level = minecraft.overworld();
+					bed(minecraft, source).setNutrients(VerdantBedBlockEntity.CAPACITY);
+					bed(minecraft, destination).setNutrients(0);
+					BifronsEntity bifrons = bifronsAt(minecraft, perch);
+					bifrons.serviceMemory(RootRunning.Memory.class, RootRunning.Memory::new).forget();
+					Status status = bifrons.think(level, BIFRONS_NIGHT, level.getGameTime());
+					List<BifronsEntity.Mark> marks = bifrons.marks();
+					boolean marked = !marks.isEmpty() && marks.getLast().source() && marks.getLast().pos().equals(source);
+					return status.id + " " + marked + " " + marks;
+				});
+				Jugcraft.LOGGER.info("[garden-check] bifrons's first beat (status, the source marked, his marks): {}", first);
+				check(first.startsWith("working true "), "His first beat marks and measures the source: " + first);
+				server.runCommand("tick step 2");
+				context.waitTicks(5);
+				String drawn = context.computeOnClient(client -> drawingOf(client, perch, BIFRONS, GESTURES));
+				check(BifronsEntity.Gesture.INSPECT.clip().equals(drawn), "He measures the source (inspect): " + drawn);
+				shot(context, "jugcraft_garden_bifrons_measure_source");
+				String second = server.computeOnServer(minecraft -> {
+					ServerLevel level = minecraft.overworld();
+					BifronsEntity bifrons = bifronsAt(minecraft, perch);
+					RootRunning.Measure measure = bifrons.serviceMemory(RootRunning.Memory.class, RootRunning.Memory::new).measure();
+					long beat = measure == null ? level.getGameTime() : measure.at() + RootRunning.MEASURE_TICKS;
+					String status = bifrons.think(level, BIFRONS_NIGHT, beat).id;
+					List<BifronsEntity.Mark> marks = bifrons.marks();
+					boolean marked = !marks.isEmpty() && !marks.getLast().source() && marks.getLast().pos().equals(destination);
+					VerdantBedBlockEntity from = bed(minecraft, source);
+					VerdantBedBlockEntity to = bed(minecraft, destination);
+					String result = status + " " + from.nutrients() + " " + to.nutrients() + " " + marked;
+					from.setNutrients(4);
+					return result;
+				});
+				Jugcraft.LOGGER.info("[garden-check] bifrons's second beat (status, source, destination, the destination marked): {}", second);
+				check("working 30 1 true".equals(second), "A beat later he marks the destination and runs the root, two for one: " + second);
+				server.runCommand("tick step 2");
+				context.waitTicks(5);
+				String working = context.computeOnClient(client -> drawingOf(client, perch, BIFRONS, GESTURES));
+				check(BifronsEntity.Gesture.WORK.clip().equals(working), "His work plays toward the destination: " + working);
+				shot(context, "jugcraft_garden_bifrons_measure_destination");
+			} finally {
+				server.runCommand("tick unfreeze");
+			}
+		} finally {
+			restoreHud(context, hidden);
+		}
+		context.waitTicks(BifronsEntity.Gesture.WORK.ticks);
+	}
+
+	/** The unit-5 review's item 10, in the client: his kept page names today's run of 24 and his last, both beds, what was taken, given and lost. */
+	private static void bifronsRunRow(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, BlockPos source,
+			BlockPos destination) {
+		String last = "Last: 2 nutrients taken from the bed at " + source.toShortString() + ", 1 given to the bed at " + destination.toShortString()
+				+ ", 1 lost along the root";
+		context.waitTicks(OPEN_GAP);
+		open(context, server, perch);
+		context.waitFor(client -> PactClient.state() != null && PactClient.state().mode() == PactStatePayload.KEEP
+				&& lines(PactClient.state()).stream().anyMatch(row -> row.startsWith("Last:")), WAIT);
+		List<String> rows = context.computeOnClient(client -> lines(PactClient.state()));
+		Jugcraft.LOGGER.info("[garden-check] his kept page after one run: {}", rows);
+		check(rows.stream().anyMatch(row -> row.contains("1 of 24 runs this game day")) && rows.contains(last),
+				"His page names one run of 24 today and his last, both beds, two taken, one given, one lost: " + rows);
+		fits(context, "his kept page after a run");
+		named(context);
+		budget(context, keptWords(context), "his kept page after a run");
+		shot(context, "jugcraft_garden_bifrons_run_row");
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(null);
+	}
+
+	/**
+	 * Dossier 5 item 5: his matter, asked and answered by keyboard. Frozen, in one server step: a young Sunpetal on the source,
+	 * the source 32 and the destination 0, and his think raises the matter (his only full bed is growing). His kept page asks
+	 * which beds are reserves, "Fallow beds only" first (the safe course), none kept; it fits at GUI 2, GUI 4 and 320x180.
+	 * The unit-5 review's item 11: the world frozen before Enter on "Any full bed", so no think of his own measures the bed
+	 * before the answer is read; in the step that reads the answer the source is set to 4, so no run follows; his assent.
+	 */
+	private static void bifronsMatter(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, BlockPos source,
+			BlockPos destination) {
+		server.runCommand("tick freeze");
+		String raised;
+		try {
+			context.waitTicks(2);
+			raised = server.computeOnServer(minecraft -> {
+				ServerLevel level = minecraft.overworld();
+				level.setBlockAndUpdate(source.above(), Garden.SUNPETAL_CROP.defaultBlockState());
+				bed(minecraft, source).setNutrients(VerdantBedBlockEntity.CAPACITY);
+				bed(minecraft, destination).setNutrients(0);
+				BifronsEntity bifrons = bifronsAt(minecraft, perch);
+				bifrons.serviceMemory(RootRunning.Memory.class, RootRunning.Memory::new).forget();
+				return bifrons.think(level, BIFRONS_NIGHT, level.getGameTime()).id;
+			});
+		} finally {
+			server.runCommand("tick unfreeze");
+		}
+		Jugcraft.LOGGER.info("[garden-check] his only full bed growing: {}", raised);
+		check("awaiting_answer".equals(raised), "His matter waits on the player: " + raised);
+		context.waitTicks(OPEN_GAP);
+		open(context, server, perch);
+		context.waitFor(client -> PactClient.state() != null && PactClient.state().mode() == PactStatePayload.KEEP
+				&& PactClient.state().spirit().answers().size() == 2, WAIT);
+		settle(context);
+		context.waitFor(client -> screen(client).control("answer:1") != null, WAIT);
+		String shown = context.computeOnClient(client -> PactClient.state().spirit().matter().getString() + " / "
+				+ PactClient.state().spirit().answers().stream().map(answer -> answer.name().getString() + "=" + answer.amount()).toList());
+		Jugcraft.LOGGER.info("[garden-check] his matter on the kept page: {}", shown);
+		boolean asked = context.computeOnClient(client -> PactClient.state().spirit().matter().getString().contains("Your only full beds are growing")
+				&& PactClient.state().spirit().answers().stream().map(answer -> answer.name().getString()).toList()
+						.equals(List.of("Fallow beds only", "Any full bed"))
+				&& PactClient.state().spirit().answers().stream().allMatch(answer -> answer.amount() == 0)
+				&& screen(client).control("matter") != null && screen(client).control("answer:0") != null);
+		check(asked, "The page asks which beds are reserves, fallow beds only first, none kept: " + shown);
+		tabTo(context, "matter");
+		fits(context, "his matter at GUI scale 2");
+		named(context);
+		budget(context, keptWords(context) + firstTask(context), "his matter");
+		shot(context, "jugcraft_garden_bifrons_matter");
+		int width = context.computeOnClient(client -> client.getWindow().getWidth());
+		int height = context.computeOnClient(client -> client.getWindow().getHeight());
+		context.getInput().resizeWindow(1920, 1080);
+		context.runOnClient(client -> {
+			client.options.guiScale().set(4);
+			client.resizeGui();
+		});
+		context.waitTicks(10);
+		int applied = context.computeOnClient(client -> client.getWindow().getGuiScale());
+		check(applied == 4, "At GUI scale 4: " + applied);
+		fits(context, "his matter at GUI scale 4");
+		named(context);
+		budget(context, keptWords(context) + firstTask(context), "his matter at GUI scale 4");
+		shot(context, "jugcraft_garden_bifrons_matter_scale4");
+		context.runOnClient(client -> {
+			client.options.guiScale().set(2);
+			client.resizeGui();
+		});
+		context.getInput().resizeWindow(320, 180);
+		context.waitTicks(10);
+		String gui = context.computeOnClient(client -> client.getWindow().getGuiScaledWidth() + "x" + client.getWindow().getGuiScaledHeight());
+		Jugcraft.LOGGER.info("[garden-check] his matter in a 320x180 window: GUI {}", gui);
+		check("320x180".equals(gui), "A 320x180 window draws a 320x180 GUI: " + gui);
+		fits(context, "his matter at 320x180");
+		named(context);
+		budget(context, keptWords(context) + firstTask(context), "his matter at 320x180");
+		shot(context, "jugcraft_garden_bifrons_matter_small");
+		context.getInput().resizeWindow(width, height);
+		context.waitTicks(10);
+		tabTo(context, "answer:1");
+		server.runCommand("tick freeze");
+		try {
+			PactStatePayload.Result full = answer(context);
+			String kept = server.computeOnServer(minecraft -> {
+				String accord = String.valueOf(((PactPerchBlockEntity) minecraft.overworld().getBlockEntity(perch)).accord());
+				bed(minecraft, source).setNutrients(4);
+				return accord;
+			});
+			Jugcraft.LOGGER.info("[garden-check] his matter answered: {} ({}), kept at the perch: {}", full.reason(), full.done(), kept);
+			check(full.done() && "resolved".equals(full.reason()) && RootRunning.FULL.equals(kept),
+					"Enter on any full bed keeps it at the perch: " + full.reason() + " " + kept);
+			context.waitFor(client -> BifronsEntity.Gesture.ASSENT.animation.equals(gesturedOf(client, perch, BIFRONS)), WAIT);
+			context.waitFor(client -> screen(client).control("result") instanceof PactScreen.Verdict verdict && !verdict.refused(), WAIT);
+			boolean marked = context.computeOnClient(client -> PactClient.state().spirit().answers().get(0).amount() == 0
+					&& PactClient.state().spirit().answers().get(1).amount() == 1);
+			check(marked, "Any full bed is marked as his answer");
+			budget(context, keptWords(context) + firstTask(context), "his matter answered");
+			shot(context, "jugcraft_garden_bifrons_answered");
+		} finally {
+			server.runCommand("tick unfreeze");
+		}
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(null);
+	}
+
+	/** Jade's readings of his perch and of him (read on the server: no Jade class): nothing to run; with Jade loaded, his overlay. */
+	private static void bifronsJade(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
+		// His next think after the answer (the source lowered to 4) finds nothing to run, and his note says so.
+		untilServer(context, server, minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			return "no_full".equals(PactReading.holder(level, (PactPerchBlockEntity) level.getBlockEntity(perch), level.getGameTime()).getStringOr("note", ""));
+		}, "His note reads nothing to run");
+		String readings = server.computeOnServer(minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			CompoundTag ofPerch = PactReading.holder(level, (PactPerchBlockEntity) level.getBlockEntity(perch), level.getGameTime());
+			CompoundTag ofHim = PactReading.presence(level, bifronsAt(minecraft, perch), level.getGameTime());
+			String both = ofPerch + " " + ofHim;
+			boolean right = "kept".equals(ofPerch.getStringOr("standing", "")) && BIFRONS.equals(ofPerch.getStringOr("counterpart", ""))
+					&& RootRunning.WORK.equals(ofPerch.getStringOr("service", "")) && "active".equals(ofPerch.getStringOr("state", ""))
+					&& "no_full".equals(ofPerch.getStringOr("note", "")) && ofPerch.getIntOr("due_days", -1) == 7
+					&& "kept".equals(ofHim.getStringOr("standing", ""))
+					&& PactReading.KEYS.containsAll(ofPerch.keySet()) && PactReading.KEYS.containsAll(ofHim.keySet())
+					&& !both.contains(player(minecraft).getUUID().toString()) && !both.contains(player(minecraft).getName().getString());
+			return (right ? "ok " : "bad ") + both;
+		});
+		Jugcraft.LOGGER.info("[garden-check] Jade's readings of his perch and of Bifrons: {}", readings);
+		check(readings.startsWith("ok"), "Jade's readings: his pact, service, state, nothing to run and his next offering, naming no player: " + readings);
+		if (FabricLoader.getInstance().isModLoaded("jade")) {
+			boolean hidden = context.computeOnClient(client -> client.gui.hud.isHidden());
+			context.runOnClient(client -> {
+				if (client.gui.hud.isHidden()) {
+					client.gui.hud.toggle();
+				}
+			});
+			try {
+				maraxCamera(context, server, perch);
+				context.getInput().lookAt(perch.west(2));
+				context.waitTicks(20);
+				shot(context, "jugcraft_garden_bifrons_jade");
+			} finally {
+				restoreHud(context, hidden);
+			}
+		} else {
+			Jugcraft.LOGGER.info("[garden-check] Jade is not loaded: no Jade shot of Bifrons");
+		}
+	}
+
+	/**
+	 * His body from his front (three blocks south of where he stands, the camera Marax's poses use; he faces whoever opened
+	 * the perch there): each loop as the server drives it and each gesture frozen inside its telling pose, the HUD hidden.
+	 * Idle by night with nothing to run; listening (risen); suspended; waiting by day (the clock set to noon: outside his
+	 * hours, nothing switched off), then midnight again; his astir loop is not posed (an offering due would change the
+	 * upkeep later steps read, as Buer's and Bathin's). Departing he sinks into the ground (held), and arriving replaces it.
+	 */
+	private static void bifronsPoses(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
+		boolean hidden = hideHud(context);
+		try {
+			maraxCamera(context, server, perch);
+			context.waitTicks(OPEN_GAP);
+			open(context, server, perch);
+			context.waitFor(client -> spiritAt(client, perch, BIFRONS) instanceof LivingEntity body
+					&& Mth.degreesDifferenceAbs(body.yBodyRot, 0.0F) <= BATHIN_FACING_TOLERANCE, WAIT);
+			context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+			context.waitForScreen(null);
+			loopPoseOf(context, server, perch, BIFRONS, BIFRONS_IDLE, "jugcraft_garden_bifrons_idle", false);
+			context.waitTicks(OPEN_GAP);
+			open(context, server, perch);
+			context.waitFor(client -> spiritAt(client, perch, BIFRONS) instanceof BifronsEntity bifrons && bifrons.listening(), WAIT);
+			loopPoseOf(context, server, perch, BIFRONS, BIFRONS_LISTEN, "jugcraft_garden_bifrons_listen", true);
+			context.waitFor(client -> BIFRONS_IDLE.equals(drawingOf(client, perch, BIFRONS, MAIN)), WAIT);
+			AgreementHolder.Toggle suspended = server.computeOnServer(minecraft -> PactKeeping.suspend(minecraft.overworld(), player(minecraft),
+					holder(minecraft, perch), minecraft.overworld().getGameTime()));
+			check(suspended == AgreementHolder.Toggle.SUSPENDED, "Its holder suspends the pact: " + suspended);
+			loopPoseOf(context, server, perch, BIFRONS, BIFRONS_SUSPENDED, "jugcraft_garden_bifrons_suspended", false);
+			AgreementHolder.Toggle resumed = server.computeOnServer(minecraft -> PactKeeping.resume(minecraft.overworld(), player(minecraft),
+					holder(minecraft, perch), minecraft.overworld().getGameTime()));
+			check(resumed == AgreementHolder.Toggle.RESUMED, "and resumes it: " + resumed);
+			context.waitFor(client -> BIFRONS_IDLE.equals(drawingOf(client, perch, BIFRONS, MAIN)), WAIT);
+			// By day he rests low and still in the ground (OUTSIDE_AGREEMENT; the clock is paused, so it stays day).
+			server.runCommand("time set 6000");
+			try {
+				loopPoseOf(context, server, perch, BIFRONS, BIFRONS_WAITING, "jugcraft_garden_bifrons_waiting", false);
+			} finally {
+				server.runCommand("time set 18000");
+			}
+			context.waitFor(client -> BIFRONS_IDLE.equals(drawingOf(client, perch, BIFRONS, MAIN)), WAIT);
+			clipPose(context, server, perch, BIFRONS, BifronsEntity.Gesture.INSPECT, 0.5, 1.3, "jugcraft_garden_bifrons_inspect");
+			clipPose(context, server, perch, BIFRONS, BifronsEntity.Gesture.ASSENT, 0.3, 0.9, "jugcraft_garden_bifrons_assent");
+			clipPose(context, server, perch, BIFRONS, BifronsEntity.Gesture.REFUSE, 0.3, 1.0, "jugcraft_garden_bifrons_refuse");
+			clipPose(context, server, perch, BIFRONS, BifronsEntity.Gesture.WORK, 0.4, 1.2, "jugcraft_garden_bifrons_work");
+			// He leaves (depart holds its last frame: nothing of him above the ground) and comes back (his arrival replaces it).
+			clipPose(context, server, perch, BIFRONS, BifronsEntity.Gesture.DEPART, 0.3, 0.9, "jugcraft_garden_bifrons_depart");
+			clipPose(context, server, perch, BIFRONS, BifronsEntity.Gesture.ARRIVE, 0.5, 1.1, "jugcraft_garden_bifrons_arrive");
+			context.waitFor(client -> drawingOf(client, perch, BIFRONS, GESTURES).isEmpty()
+					&& BIFRONS_IDLE.equals(drawingOf(client, perch, BIFRONS, MAIN)), WAIT);
+			boolean kept = server.computeOnServer(minecraft -> holds(minecraft, BIFRONS) && bifronsAt(minecraft, perch).isAlive());
+			check(kept, "His gestures change nothing: the pact is kept and he stands beside his perch");
+		} finally {
+			restoreHud(context, hidden);
+		}
+	}
+
+	/** Dossier 5 item 4: End asks first; then he sinks into the ground; the pact ends once. */
+	private static void bifronsEnding(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
+		context.waitTicks(OPEN_GAP);
+		open(context, server, perch);
+		context.waitFor(client -> PactClient.state() != null && PactClient.state().mode() == PactStatePayload.KEEP, WAIT);
+		UUID him = server.computeOnServer(minecraft -> bifronsAt(minecraft, perch).getUUID());
+		press(context, "end");
+		context.waitForScreen(ConfirmScreen.class);
+		boolean keepFocused = context.computeOnClient(client -> client.gui.screen().getFocused() instanceof AbstractWidget keep
+				&& keep.getMessage().getString().equals(Component.translatable("screen.jugcraft.pact.end.no").getString()));
+		check(keepFocused, "End asks first, the keyboard on Keep it");
+		confirmBudget(context);
+		shot(context, "jugcraft_garden_bifrons_end_confirm");
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(PactScreen.class);
+		context.waitTicks(5);
+		boolean stillHeld = server.computeOnServer(minecraft -> holds(minecraft, BIFRONS));
+		check(stillHeld, "Keep it (Esc) ends nothing");
+		press(context, "end");
+		context.waitForScreen(ConfirmScreen.class);
+		tabToLabel(context, Component.translatable("screen.jugcraft.pact.end.yes").getString());
+		PactStatePayload.Result ended = answer(context);
+		context.waitFor(client -> BifronsEntity.Gesture.DEPART.animation.equals(gesturedOf(client, perch, BIFRONS)), WAIT);
+		RawAnimation going = context.computeOnClient(client -> gesturedOf(client, perch, BIFRONS));
+		String after = server.computeOnServer(minecraft -> holds(minecraft, BIFRONS) + " "
+				+ (minecraft.overworld().getEntity(him) instanceof BifronsEntity left ? "departing " + left.departing() : "gone"));
+		int endedMode = context.computeOnClient(client -> PactClient.state().mode());
+		Jugcraft.LOGGER.info("[garden-check] ended: {}; held, then his presence = {}", ended.reason(), after);
+		check(ended.done() && "ended".equals(ended.reason()) && BifronsEntity.Gesture.DEPART.animation.equals(going)
+				&& endedMode == PactStatePayload.CLOSED && after.startsWith("false"), "Ending ends the pact once; he sinks into the ground: " + after);
+		context.waitFor(client -> spiritAt(client, perch, BIFRONS) == null, WAIT);
+		budget(context, ENDED_WORDS, "the ended page");
+		shot(context, "jugcraft_garden_bifrons_ended");
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(null);
+	}
+
 	// GC-09 unit 6
 }

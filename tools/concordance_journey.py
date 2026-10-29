@@ -428,6 +428,28 @@ GARDEN = {
                    "maraxAnswersEachActionWithHisGesture"]},
         # GC-07 unit 4
         # GC-08 unit 5
+        # GC-08: Bifrons, from his perch to his departure (Dossier 5). No whole-path test of his own; unit 7's walk covers it.
+        {"research": [], "things": [],
+         "text": "Keep two awake Verdant Beds of yours within 8 blocks of your Pact Perch; use the perch and choose Bifrons: "
+                 "roots push up beside it into a low mound that rises into a lean man of roots while you speak, and he names "
+                 "every term before anything is spent (with fewer than two beds he does not come: \"A root runs between two "
+                 "places. Show me two.\"); accept, and his compact (4 oak logs, 1 emerald) is spent once",
+         "reaches": [f"pact:{rid('bifrons')}"],
+         "tests": ["bifronsRefusesWithFewerThanTwoBeds", "everySpiritSealsOnceAndSpendsOnce"]},
+        {"research": [], "things": [],
+         "text": "By night, while you are near, Bifrons runs a root from a full bed of yours (24 nutrients or more) to the "
+                 "hungriest with room: he measures both, a sign rising at each, then 2 nutrients leave the full bed and 1 "
+                 "reaches the hungry one. While your only full beds are growing he asks which beds are reserves. Feed a "
+                 "Verdant Bed in his area with bone meal by hand, or the crop growing on one: his first obligation",
+         "reaches": [f"practice:{rid('garden_pact_service')}"],
+         "tests": ["aRootRunnerLosesHalfAndMintsNone", "aRootRunnerMeasuresBeforeEachRun",
+                   "aRootRunnerTakesOnlyFromFallowBedsUntilAnswered", "bifronssFirstObligationIsAFeedingByHand"]},
+        {"research": [], "things": [],
+         "text": "Keep the pact with two logs a week, any wood (a missed week is warned and carried through a day's grace, "
+                 "then the service is suspended with nothing taken; an offering resumes it). End it at the perch: what was "
+                 "paid ahead comes back once, and he sinks back into the ground",
+         "reaches": [],
+         "tests": ["everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes", "endingAnySpiritsPactReturnsTheEscrowOnce"]},
         # GC-09 unit 6
     ],
 }

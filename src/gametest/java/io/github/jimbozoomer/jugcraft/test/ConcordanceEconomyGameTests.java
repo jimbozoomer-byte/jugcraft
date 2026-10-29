@@ -15,13 +15,16 @@ import io.github.jimbozoomer.jugcraft.concordance.alchemy.Heat;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Code;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
 import io.github.jimbozoomer.jugcraft.concordance.garden.GleanerBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantBedBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.garden.VerdantHeartBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BathinEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.BifronsEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactPerchBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.VerdanceCarrying;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Status;
 import io.github.jimbozoomer.jugcraft.energy.EnergyStorage;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
@@ -238,5 +241,47 @@ public class ConcordanceEconomyGameTests {
 	// GC-06 unit 3
 	// GC-07 unit 4
 	// GC-08 unit 5
+	/**
+	 * Concordance garden cohort, GC-08 (GC-P113; GE4; the economy audit's game half): a whole game day's quota of runs from
+	 * five full beds to two hungry ones. After every think the beds hold exactly as many fewer nutrients as runs were made (two
+	 * taken, one given, none made); the 24th run spends the quota and the next think says so; no item appears.
+	 */
+	@GameTest(maxTicks = 20)
+	public void rootRunningLeavesNoGainingCycle(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = ConcordanceWorkerGameTests.gardenHolder(helper);
+		long now = ConcordanceWorkerGameTests.dayStart(level, 1);
+		PactPerchBlockEntity perch = ConcordanceWorkerGameTests.bifronsPact(helper, keeper, new BlockPos(3, 1, 3), now);
+		BifronsEntity bifrons = ConcordanceWorkerGameTests.bifrons(helper, perch);
+		List<VerdantBedBlockEntity> beds = new ArrayList<>();
+		for (int i = 0; i < 5; i++) {
+			beds.add(ConcordanceWorkerGameTests.bifronsBed(helper, new BlockPos(1 + i, 1, 6), keeper.getUUID(), 32));
+		}
+		beds.add(ConcordanceWorkerGameTests.bifronsBed(helper, new BlockPos(1, 1, 1), keeper.getUUID(), 0));
+		beds.add(ConcordanceWorkerGameTests.bifronsBed(helper, new BlockPos(6, 1, 1), keeper.getUUID(), 0));
+		int before = sum(beds);
+		int quota = ConcordanceWorkerGameTests.bifronsOffer().quota();
+		for (int think = 0; think <= 2 * quota; think++) {
+			long at = now + 20L * think;
+			Status status = bifrons.think(level, ConcordanceWorkerGameTests.MIDNIGHT, at);
+			int done = Pacts.done(ConcordanceWorkerGameTests.pactOf(level, perch).pact(), at);
+			helper.assertValueEqual(sum(beds), before - done, "Think " + think + ": the beds hold one fewer for each of the " + done + " runs");
+			helper.assertValueEqual(status, think < 2 * quota ? Status.WORKING : Status.FINISHED, "Think " + think);
+		}
+		helper.assertTrue(sum(beds.subList(5, 7)) == quota && sum(beds.subList(0, 5)) == 5 * 32 - 2 * quota,
+				"48 taken, 24 given, 24 lost along the roots");
+		helper.assertTrue(ConcordanceWorkerGameTests.loose(helper) == 0, "No item appears");
+		helper.succeed();
+	}
+
+	/** The nutrients {@code beds} hold together. */
+	private static int sum(List<VerdantBedBlockEntity> beds) {
+		int sum = 0;
+		for (VerdantBedBlockEntity bed : beds) {
+			sum += bed.nutrients();
+		}
+		return sum;
+	}
+
 	// GC-09 unit 6
 }

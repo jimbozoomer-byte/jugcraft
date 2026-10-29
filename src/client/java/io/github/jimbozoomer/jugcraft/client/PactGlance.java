@@ -110,6 +110,7 @@ final class PactGlance {
 			Map.entry("habitat_reading", "jugcraft:habitat_gauge"),
 			// GC-07 unit 4
 			// GC-08 unit 5
+			Map.entry("root_running", "minecraft:rooted_dirt"),
 			// GC-09 unit 6
 			Map.entry("star_reckoning", "jugcraft:astrolabe"));
 

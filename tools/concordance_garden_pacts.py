@@ -90,6 +90,7 @@ OBLIGATIONS = {"strain_tending": "tend", "verdance_carrying": "device",
                "habitat_reading": "read",
                # GC-07 unit 4
                # GC-08 unit 5
+               "root_running": "feed",
                # GC-09 unit 6
                }
 # work -> {Java file under concordance/: {constant: value}}; each spirit's unit adds its own (check_garden_pacts).
@@ -105,6 +106,11 @@ CONSTANTS = {"strain_tending": {"spirits/StrainTending.java": {"MEMORY": 16, "MA
              "habitat_reading": {"spirits/HabitatReading.java": {"READ_BEDS": 8, "MAX_ASKED": 16, "PIQUE": 3, "SHOW_TICKS": 400}},
              # GC-07 unit 4
              # GC-08 unit 5
+             # GC-08: two taken, one given; a source at 24 and 3 above; two beds to come; 8 asked a think; a beat of 20 ticks,
+             # stale after 60; 16 reserves remembered.
+             "root_running": {"spirits/RootRunning.java": {"TAKE": 2, "GIVE": 1, "SOURCE_MIN": 24, "GAP": 3, "BEDS": 2,
+                                                           "MAX_ASKED": 8, "MEASURE_TICKS": 20, "MEASURE_LIMIT": 60,
+                                                           "MAX_RESERVES": 16}},
              # GC-09 unit 6
              }
 REACH = {"MAX_BEDS": 64, "REFRESH_TICKS": 200}  # Java: spirits/GardenReach (GC-P2)
@@ -124,6 +130,10 @@ DISTINCT = {
                         "call": "HabitatAdvice.one(niche, habitat, grafts)", "class": "HabitatReading"},
     # GC-07 unit 4
     # GC-08 unit 5
+    # GC-08: Bifrons's, nutrients moved from one bed to another with half lost (the source's exact take; "also" is the
+    # destination's give, made once by his class: check_garden_pacts).
+    "root_running": {"verb": "move with loss", "state": "two Verdant Beds' nutrients", "call": "source.take(TAKE)",
+                     "class": "RootRunning", "also": "destination.give(GIVE)"},
     # GC-09 unit 6
 }
 CODEX_PLACE = (6, 4)  # the Binding category's map: (0..6, 0..4) holds eleven entries; (6, 4) is free (check_concordance)
@@ -284,6 +294,32 @@ PAGES = [
      ("garden_regard", "understood")),
     # GC-07 unit 4
     # GC-08 unit 5
+    # GC-08: Bifrons's (Dossier 5), their numbers read from his offer, as Marax's; each page at most 60 words (the magic
+    # interfaces' spec 1.1, decided by the session as for Marax). No source quotation (GC-S14).
+    ("text", "Bifrons",
+     "A low mound of roots that rises into a lean man of roots while spoken to. Invite him at your **Pact Perch** once **two "
+     f"awake Verdant Beds** of yours lie within {pacts.SPIRITS['bifrons']['pact']['service']['radius']} blocks: \"A root "
+     "runs between two places. Show me two.\" He stands beside the perch. His compact: "
+     + " and ".join(f"{cost['count']} **{ {'minecraft:oak_log': 'oak logs', 'minecraft:emerald': 'emerald'}[cost['item']]}**"
+                    for cost in pacts.SPIRITS["bifrons"]["pact"]["compact"]["items"]) + ".",
+     ("garden_regard", "understood")),
+    ("text", "His Service",
+     f"By night ({workers.clock(pacts.SPIRITS['bifrons']['pact']['service']['from'])} to "
+     f"{workers.clock(pacts.SPIRITS['bifrons']['pact']['service']['to'])}), while you are near, he runs **one root** from "
+     "a full bed of yours or your party's (24 nutrients or more) to the hungriest: **two nutrients leave, one "
+     "arrives**, half lost, nothing made. He measures both beds first, never one you could not change by hand. At most "
+     f"{pacts.SPIRITS['bifrons']['pact']['service']['quota']} runs a game day.", ("garden_regard", "understood")),
+    ("text", "Which Beds Are Reserves",
+     "A full bed with a crop growing on it is a **reserve**: he draws only from fallow beds until you answer. When only "
+     "growing beds could give, he asks once at the perch: **Fallow beds only**, or **Any full bed**. He never draws from "
+     "the bed under a Verdant Heart, though he may feed it. You may change your answer.",
+     ("garden_regard", "understood")),
+    ("text", "His Price",
+     f"{_count(pacts.SPIRITS['bifrons']['pact']['upkeep']['count']).capitalize()} **logs** of any wood every "
+     f"{pacts.SPIRITS['bifrons']['pact']['upkeep']['period_days']} game days, up to "
+     f"{pacts.SPIRITS['bifrons']['pact']['upkeep']['cap']} paid ahead; past a day's grace a missed one suspends the pact, "
+     "with nothing lost. Your first obligation: feed a Verdant Bed in his area, or the crop on one, bone meal by hand while "
+     "the pact is active. Ended, he sinks back into the ground.", ("garden_regard", "understood")),
     # GC-09 unit 6
 ]
 # GC-06 (GB26, GC-P75): the mastered page, with the third garden spirit (check_garden_pacts refuses it while fewer ship).

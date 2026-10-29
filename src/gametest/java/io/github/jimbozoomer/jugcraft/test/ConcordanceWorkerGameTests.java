@@ -47,6 +47,7 @@ import io.github.jimbozoomer.jugcraft.concordance.sky.ObservatoryBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.sky.Sky;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.AgreementHolder;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BathinEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.BifronsEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BondingCharmItem;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BuerEntity;
@@ -72,6 +73,7 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.PactSpiritEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactSpirits;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactStatePayload;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PorterKeyItem;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.RootRunning;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Roster;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.RosterRequestPayload;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.RosterStatePayload;
@@ -8162,5 +8164,669 @@ public class ConcordanceWorkerGameTests {
 
 	// GC-07 unit 4
 	// GC-08 unit 5
+	// ---------------------------------------------------------------- Concordance garden cohort, GC-08: Bifrons (Dossier 5)
+
+	static final String RUNNING_KEY = "message.jugcraft.concordance.pact.root_running.";
+	/** Bifrons's perch in his tests. No floor two blocks out, so he keeps his station on its top (Station.BESIDE's rule). */
+	static final BlockPos BIFRONS_PERCH = new BlockPos(2, 1, 2);
+
+	static {
+		// GC-08 (SG12): Bifrons comes where two awake beds the inviter keeps lie within 8 of the perch: two at 4 nutrients each
+		// (nothing to run, so his SG12 thinks idle) in the floor of his cell's west column (perchFor leaves x - 1 free), so
+		// every shared case runs for him with no edit (none reads where he stands).
+		FIXTURES.put(BifronsEntity.COUNTERPART, (helper, player, perch) -> {
+			BlockPos one = perch.offset(-1, -1, 0);
+			BlockPos two = perch.offset(-1, -1, -1);
+			bifronsBed(helper, one, player.getUUID(), 4);
+			bifronsBed(helper, two, player.getUUID(), 4);
+			return List.of(one, two);
+		});
+	}
+
+	/** An awake, wet Verdant Bed at {@code at} kept by {@code keeper}, unstrained, holding {@code nutrients}. */
+	static VerdantBedBlockEntity bifronsBed(GameTestHelper helper, BlockPos at, UUID keeper, int nutrients) {
+		VerdantBedBlockEntity bed = keptBed(helper, at, keeper, 0);
+		bed.setNutrients(nutrients);
+		return bed;
+	}
+
+	/** A ripe Sunpetal on the bed at {@code bed} (ripe, so no random tick grows it and spends its bed's nutrients). */
+	static void ripeOn(GameTestHelper helper, BlockPos bed) {
+		helper.setBlock(bed.above(), ((OrganismCropBlock) Garden.SUNPETAL_CROP).getStateForAge(OrganismCropBlock.MAX_AGE));
+	}
+
+	/** Bifrons's offer as the server loaded it (data/jugcraft/concordance/pact/bifrons.json). */
+	static PactDefinition bifronsOffer() {
+		PactDefinition offer = PactPerchBlockEntity.definition(BifronsEntity.COUNTERPART);
+		if (offer == null) {
+			throw new AssertionError("Bifrons's offer is loaded");
+		}
+		return offer;
+	}
+
+	/** Bifrons's pact sealed for {@code holder} at a perch they placed at {@code at}, at game time {@code now}; they stand beside it. */
+	static PactPerchBlockEntity bifronsPact(GameTestHelper helper, ServerPlayer holder, BlockPos at, long now) {
+		return pactWith(helper, holder, bifronsOffer(), at, now);
+	}
+
+	/** The Bifrons kept at {@code perch} (its presence), asserted there. */
+	static BifronsEntity bifrons(GameTestHelper helper, PactPerchBlockEntity perch) {
+		PactSpiritEntity<?> found = perch.presence(helper.getLevel());
+		helper.assertTrue(found instanceof BifronsEntity, "Bifrons is at his perch: " + found);
+		return (BifronsEntity) found;
+	}
+
+	static RootRunning.Memory runner(BifronsEntity bifrons) {
+		return bifrons.serviceMemory(RootRunning.Memory.class, RootRunning.Memory::new);
+	}
+
+	/** The nutrients {@code beds} hold together. */
+	static int nutrientsIn(VerdantBedBlockEntity... beds) {
+		int sum = 0;
+		for (VerdantBedBlockEntity bed : beds) {
+			sum += bed.nutrients();
+		}
+		return sum;
+	}
+
+	/** The row of {@code rows} with the key {@code key} (under RUNNING_KEY), or null. */
+	static @Nullable Component runningRow(List<Component> rows, String key) {
+		return rows.stream().filter(row -> key(row).equals(RUNNING_KEY + key)).findFirst().orElse(null);
+	}
+
+	/** GC-08 (Dossier 5 item 3; GE4): each run takes two from the full bed and gives one to the hungriest; the beds hold exactly one fewer a run; no item appears. */
+	@GameTest(maxTicks = 20)
+	public void aRootRunnerLosesHalfAndMintsNone(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bifronsPact(helper, keeper, BIFRONS_PERCH, now);
+		BifronsEntity bifrons = bifrons(helper, perch);
+		VerdantBedBlockEntity full = bifronsBed(helper, new BlockPos(5, 1, 2), keeper.getUUID(), 32);
+		VerdantBedBlockEntity hungry = bifronsBed(helper, new BlockPos(2, 1, 5), keeper.getUUID(), 0);
+		VerdantBedBlockEntity middling = bifronsBed(helper, new BlockPos(5, 1, 5), keeper.getUUID(), 10);
+		int before = nutrientsIn(full, hungry, middling);
+		int items = carried(keeper);
+		for (int run = 1; run <= 5; run++) {
+			long first = now + 40L * (run - 1);
+			helper.assertValueEqual(bifrons.think(level, MIDNIGHT, first), Status.WORKING, "Run " + run + ": he measures first");
+			helper.assertValueEqual(nutrientsIn(full, hungry, middling), before - (run - 1), "Measuring moves nothing");
+			helper.assertValueEqual(bifrons.think(level, MIDNIGHT, first + RootRunning.MEASURE_TICKS), Status.WORKING, "A beat later he runs the root");
+			RootRunning.Run last = runner(bifrons).last();
+			helper.assertTrue(last != null && last.from().equals(full.getBlockPos()) && last.to().equals(hungry.getBlockPos())
+					&& last.taken() == RootRunning.TAKE && last.given() == RootRunning.GIVE && last.lost() == 1,
+					"Two taken from the full bed, one given to the hungriest: " + last);
+			helper.assertValueEqual(nutrientsIn(full, hungry, middling), before - run, "The beds hold exactly one fewer a run: half lost, none made");
+			helper.assertValueEqual(Pacts.done(pactOf(level, perch).pact(), first + RootRunning.MEASURE_TICKS), run, "Each run is counted once");
+		}
+		helper.assertTrue(full.nutrients() == 22 && hungry.nutrients() == 5 && middling.nutrients() == 10,
+				"32 less five times two; 0 plus five times one; the third bed untouched");
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + 200), Status.IDLE, "Below 24 no bed is full: he waits");
+		helper.assertTrue(new PactService.Note("no_full", 0).equals(RootRunning.SERVICE.note(level, bifrons, pactOf(level, perch), MIDNIGHT, now + 200)),
+				"and Jade says why");
+		helper.assertTrue(loose(helper) == 0 && carried(keeper) == items, "No item appears or is spent");
+		helper.succeed();
+	}
+
+	/** GC-08 (Dossier 5 detail b; GC-P102): he measures the source first and only a beat later marks the destination and runs; between beats nothing; a stale measure is made afresh at no cost. */
+	@GameTest(maxTicks = 20)
+	public void aRootRunnerMeasuresBeforeEachRun(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bifronsPact(helper, keeper, BIFRONS_PERCH, now);
+		BifronsEntity bifrons = bifrons(helper, perch);
+		VerdantBedBlockEntity full = bifronsBed(helper, new BlockPos(5, 1, 2), keeper.getUUID(), 32);
+		VerdantBedBlockEntity hungry = bifronsBed(helper, new BlockPos(2, 1, 5), keeper.getUUID(), 0);
+		try (SignWatch signs = new SignWatch(helper)) {
+			helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now), Status.WORKING, "His first beat");
+			helper.assertTrue(bifrons.marks().equals(List.of(new BifronsEntity.Mark(now, full.getBlockPos(), true)))
+					&& bifrons.cues().getLast().equals("inspect") && full.nutrients() == 32 && hungry.nutrients() == 0,
+					"A mark at the source and his inspect gesture; nothing moved: " + bifrons.marks() + " " + bifrons.cues());
+			helper.assertTrue(signs.at(BifronsEntity.MARK, new BlockPos(5, 1, 2)) == 1 && signs.all().size() == 1,
+					"The shared sign of preparation at the source alone: " + signs.all());
+			helper.assertTrue(bifrons.attending() instanceof BlockPosTracker tracked && tracked.currentBlockPosition().equals(full.getBlockPos()),
+					"He attends the source");
+			helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + 10), Status.WORKING, "Between his beats he is still measuring");
+			helper.assertTrue(bifrons.marks().size() == 1 && full.nutrients() == 32 && hungry.nutrients() == 0, "and nothing changes");
+			helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + RootRunning.MEASURE_TICKS), Status.WORKING, "His second beat");
+			helper.assertTrue(bifrons.marks().getLast().equals(new BifronsEntity.Mark(now + RootRunning.MEASURE_TICKS, hungry.getBlockPos(), false))
+					&& bifrons.cues().getLast().equals("work") && full.nutrients() == 30 && hungry.nutrients() == 1,
+					"A mark at the destination, then the run: " + bifrons.marks());
+			helper.assertTrue(signs.at(BifronsEntity.MARK, new BlockPos(2, 1, 5)) == 1 && signs.of(Sign.FLOW).isEmpty() && signs.all().size() == 2,
+					"A sign at each bed, nothing travelling between them: " + signs.all());
+			helper.assertTrue(bifrons.attending() instanceof BlockPosTracker tracked && tracked.currentBlockPosition().equals(hungry.getBlockPos()),
+					"He attends the destination while his work plays");
+		}
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + 40), Status.WORKING, "The next run is measured afresh");
+		helper.assertTrue(bifrons.marks().getLast().source() && full.nutrients() == 30, "a mark at the source; nothing moved");
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + 40 + RootRunning.MEASURE_LIMIT + 1), Status.WORKING, "Too late for its beat: measured again");
+		helper.assertTrue(bifrons.marks().getLast().source() && bifrons.marks().getLast().at() == now + 40 + RootRunning.MEASURE_LIMIT + 1
+				&& full.nutrients() == 30 && hungry.nutrients() == 1, "at the source again, at no cost: nothing was taken for the stale one");
+		helper.succeed();
+	}
+
+	/** GC-08 (GC-P103): a gap too small is no run; a destination filled between the beats is no run, nothing taken; every bed full, nowhere to run it. */
+	@GameTest(maxTicks = 20)
+	public void aRootRunnerNeverTakesWithoutRoom(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bifronsPact(helper, keeper, BIFRONS_PERCH, now);
+		BifronsEntity bifrons = bifrons(helper, perch);
+		VerdantBedBlockEntity source = bifronsBed(helper, new BlockPos(5, 1, 2), keeper.getUUID(), 32);
+		VerdantBedBlockEntity destination = bifronsBed(helper, new BlockPos(2, 1, 5), keeper.getUUID(), 31);
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now), Status.IDLE, "A gap of 1 is no run (GAP is 3)");
+		helper.assertTrue(new PactService.Note("no_full", 0).equals(RootRunning.SERVICE.note(level, bifrons, pactOf(level, perch), MIDNIGHT, now))
+				&& source.nutrients() == 32 && destination.nutrients() == 31, "Jade says nothing is full enough; nothing moved");
+		destination.setNutrients(29);
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + 20), Status.WORKING, "A gap of 3: his first beat");
+		destination.setNutrients(VerdantBedBlockEntity.CAPACITY);
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + 40), Status.IDLE, "Filled before his second beat: no run");
+		helper.assertTrue(source.nutrients() == 32 && destination.nutrients() == 32 && runner(bifrons).last() == null && runner(bifrons).measure() == null,
+				"Nothing taken, nothing given, the measure dropped");
+		runner(bifrons).forget();
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + 60), Status.IDLE, "Every bed full: nowhere to run it");
+		helper.assertTrue(new PactService.Note("no_hungry", 0).equals(RootRunning.SERVICE.note(level, bifrons, pactOf(level, perch), MIDNIGHT, now + 60)),
+				"and Jade says so");
+		helper.succeed();
+	}
+
+	/** GC-08 (CT GC-08: a run eases no strain): two from a strained full bed, one to a strained hungry one; both keep their strain. */
+	@GameTest(maxTicks = 20)
+	public void aRootRunnerNeverEasesStrain(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bifronsPact(helper, keeper, BIFRONS_PERCH, now);
+		BifronsEntity bifrons = bifrons(helper, perch);
+		VerdantBedBlockEntity full = keptBed(helper, new BlockPos(5, 1, 2), keeper.getUUID(), 3);
+		full.setNutrients(32);
+		VerdantBedBlockEntity hungry = keptBed(helper, new BlockPos(2, 1, 5), keeper.getUUID(), 2);
+		hungry.setNutrients(0);
+		int fullNow = full.strainNow();
+		int hungryNow = hungry.strainNow();
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now), Status.WORKING, "He measures");
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + RootRunning.MEASURE_TICKS), Status.WORKING, "and runs a root");
+		helper.assertTrue(full.nutrients() == 30 && hungry.nutrients() == 1, "Two out, one in");
+		helper.assertTrue(full.strain() == 3 && hungry.strain() == 2 && full.strainNow() == fullNow && hungry.strainNow() == hungryNow,
+				"No strain eased on either bed: " + full.strain() + " " + hungry.strain());
+		helper.succeed();
+	}
+
+	/** GC-08 (Dossier 5 item 5; GC-P106): growing full beds are reserves: unasked he draws from none, asks once and waits; "fallow beds only" keeps them; "any full bed" draws from them. */
+	@GameTest(maxTicks = 20)
+	public void aRootRunnerTakesOnlyFromFallowBedsUntilAnswered(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bifronsPact(helper, keeper, BIFRONS_PERCH, now);
+		BifronsEntity bifrons = bifrons(helper, perch);
+		VerdantBedBlockEntity growing = bifronsBed(helper, new BlockPos(5, 1, 2), keeper.getUUID(), 32);
+		ripeOn(helper, new BlockPos(5, 1, 2));
+		VerdantBedBlockEntity hungry = bifronsBed(helper, new BlockPos(2, 1, 5), keeper.getUUID(), 0);
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now), Status.AWAITING_ANSWER, "Only a growing bed could give: he asks");
+		helper.assertTrue(bifrons.cues().getLast().equals("inspect") && bifrons.marks().isEmpty() && growing.nutrients() == 32 && hungry.nutrients() == 0,
+				"He weighs it (inspect), marks nothing and draws nothing");
+		PactService.Complication matter = RootRunning.SERVICE.complication(level, pactOf(level, perch), perch, now);
+		helper.assertTrue(matter != null && matter.id().equals(RootRunning.RESERVES) && growing.getBlockPos().equals(matter.pos())
+				&& matter.answers().equals(List.of(RootRunning.FALLOW, RootRunning.FULL)), "His matter names the growing bed: " + matter);
+		helper.assertTrue(new PactService.Note("reserves", 1).equals(RootRunning.SERVICE.note(level, bifrons, pactOf(level, perch), MIDNIGHT, now)),
+				"Jade counts it");
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + 20), Status.AWAITING_ANSWER, "Unanswered, it still waits");
+		helper.assertTrue(growing.nutrients() == 32 && bifrons.marks().isEmpty(), "and nothing is drawn from it");
+		PactMenu menu = open(helper, keeper, perch);
+		helper.assertTrue(answered(send(keeper, menu, PactRequestPayload.RESOLVE, 0), PactMenu.RESOLVED) && RootRunning.FALLOW.equals(perch.accord()),
+				"Answered: fallow beds only");
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + 40), Status.IDLE, "He keeps the growing bed as a reserve");
+		helper.assertTrue(growing.nutrients() == 32 && keys(RootRunning.rows(level, pactOf(level, perch), MIDNIGHT, now + 40))
+				.contains(RUNNING_KEY + "row.reserved"), "and his page says so");
+		helper.assertTrue(answered(send(keeper, menu, PactRequestPayload.RESOLVE, 1), PactMenu.RESOLVED) && RootRunning.FULL.equals(perch.accord()),
+				"Answered again: any full bed");
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + 60), Status.WORKING, "He measures the growing bed");
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + 80), Status.WORKING, "and runs from it");
+		helper.assertTrue(growing.nutrients() == 30 && hungry.nutrients() == 1, "Two from the growing bed, one to the hungry one");
+		keeper.closeContainer();
+		helper.succeed();
+	}
+
+	/** GC-08 (Dossier 5 item 5): under "any full bed" a growing bed gives and the bed under a Verdant Heart never does, though it may be fed. */
+	@GameTest(maxTicks = 20)
+	public void aFullAnswerNeverTakesFromAHeartsBed(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bifronsPact(helper, keeper, BIFRONS_PERCH, now);
+		BifronsEntity bifrons = bifrons(helper, perch);
+		VerdantBedBlockEntity hearts = bifronsBed(helper, new BlockPos(5, 1, 2), keeper.getUUID(), 32);
+		helper.setBlock(new BlockPos(5, 2, 2), Garden.VERDANT_HEART.defaultBlockState());
+		VerdantBedBlockEntity growing = bifronsBed(helper, new BlockPos(5, 1, 5), keeper.getUUID(), 30);
+		ripeOn(helper, new BlockPos(5, 1, 5));
+		VerdantBedBlockEntity hungry = bifronsBed(helper, new BlockPos(2, 1, 5), keeper.getUUID(), 0);
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now), Status.AWAITING_ANSWER, "The growing bed is a reserve; the Heart's bed is none");
+		helper.assertTrue(runner(bifrons).reserves().equals(List.of(growing.getBlockPos())), "His reserves: the growing bed alone");
+		PactMenu menu = open(helper, keeper, perch);
+		helper.assertTrue(answered(send(keeper, menu, PactRequestPayload.RESOLVE, 1), PactMenu.RESOLVED), "Any full bed");
+		keeper.closeContainer();
+		for (int beat = 1; beat <= 4; beat++) {
+			helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + 20L * beat), Status.WORKING, "Beat " + beat);
+		}
+		helper.assertTrue(hearts.nutrients() == 32 && growing.nutrients() == 26 && hungry.nutrients() == 2,
+				"Two runs, both from the growing bed though the Heart's is fuller: never from under a Heart");
+		growing.setNutrients(10);
+		hungry.setNutrients(20);
+		hearts.setNutrients(0);
+		VerdantBedBlockEntity fallow = bifronsBed(helper, new BlockPos(2, 1, 6), keeper.getUUID(), 32);
+		runner(bifrons).forget();
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + 100), Status.WORKING, "A fallow bed measured");
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + 120), Status.WORKING, "and the run");
+		helper.assertTrue(fallow.nutrients() == 30 && hearts.nutrients() == 1, "The Heart's bed, now the hungriest, is fed");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-08 (GC-S7; the unit-5 review's item 8): a stranger's bed is never his; the holder's own inside a claim they may not
+	 * build in is never drawn from; a party member's is his only while they are in the party, refused at once when they leave
+	 * (asked at the change), and a former member's growing bed raises no matter.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aRootRunnerNeverTouchesAStrangersBed(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		ServerPlayer member = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bifronsPact(helper, keeper, BIFRONS_PERCH, now);
+		BifronsEntity bifrons = bifrons(helper, perch);
+		VerdantBedBlockEntity strangers = bifronsBed(helper, new BlockPos(5, 1, 2), STRANGER, 32);
+		VerdantBedBlockEntity hungry = bifronsBed(helper, new BlockPos(2, 1, 5), keeper.getUUID(), 0);
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now), Status.IDLE, "A stranger's full bed is no source of his");
+		helper.assertTrue(strangers.nutrients() == 32 && hungry.nutrients() == 0
+				&& new PactService.Note("no_full", 0).equals(RootRunning.SERVICE.note(level, bifrons, pactOf(level, perch), MIDNIGHT, now)),
+				"untouched; nothing he may draw from");
+		VerdantBedBlockEntity claimed = bifronsBed(helper, new BlockPos(5, 1, 5), keeper.getUUID(), 32);
+		runner(bifrons).forget();
+		try (TestClaims claims = TestClaims.open().block(helper.absolutePos(new BlockPos(5, 1, 5)), STRANGER)) {
+			helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + 20), Status.IDLE, "His holder could not change the claimed bed by hand");
+			helper.assertTrue(claimed.nutrients() == 32 && runner(bifrons).measure() == null, "so it is not measured, nor drawn from");
+		}
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + 40), Status.WORKING, "Unclaimed, it is measured");
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + 60), Status.WORKING, "and run from");
+		helper.assertTrue(claimed.nutrients() == 30 && hungry.nutrients() == 1, "Two out, one in");
+		claimed.setNutrients(10);
+		VerdantBedBlockEntity members = bifronsBed(helper, new BlockPos(6, 1, 6), member.getUUID(), 32);
+		runner(bifrons).forget();
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + 80), Status.IDLE, "Before the party, the other player's bed is not his");
+		helper.assertValueEqual(members.nutrients(), 32, "untouched");
+		PartyManager parties = JugcraftParties.manager();
+		long ms = System.currentTimeMillis();
+		try {
+			helper.assertTrue(parties.invite(keeper.getUUID(), member.getUUID(), ms) == PartyManager.Result.OK
+					&& parties.accept(member.getUUID(), ms) == PartyManager.Result.OK, "The holder and the other player form a party");
+			long joined = now + 80 + GardenReach.REFRESH_TICKS;
+			helper.assertValueEqual(bifrons.think(level, MIDNIGHT, joined), Status.WORKING, "Under party, the member's full bed is measured");
+			helper.assertValueEqual(bifrons.think(level, MIDNIGHT, joined + 20), Status.WORKING, "and run from");
+			helper.assertTrue(members.nutrients() == 30 && hungry.nutrients() == 2, "Two from the member's bed, one to the holder's");
+			ripeOn(helper, new BlockPos(6, 1, 6));
+			helper.assertValueEqual(bifrons.think(level, MIDNIGHT, joined + 40), Status.AWAITING_ANSWER,
+					"A crop on it, the member's bed is the only full one: a reserve, and he asks");
+			helper.assertTrue(parties.leave(member.getUUID()) == PartyManager.Result.OK, "The member leaves the party");
+			helper.assertValueEqual(bifrons.think(level, MIDNIGHT, joined + 60), Status.IDLE, "Their bed refused at once (asked at the change)");
+			helper.assertTrue(members.nutrients() == 30 && runner(bifrons).reserves().isEmpty()
+					&& RootRunning.SERVICE.complication(level, pactOf(level, perch), perch, joined + 60) == null,
+					"untouched, and a former member's growing bed raises no matter");
+		} finally {
+			parties.adminDisband(keeper.getUUID());
+		}
+		helper.succeed();
+	}
+
+	/** GC-08 (GC-P101): his hours are the night's (13,000 to 23,000): by day he waits and his page says so; a measure across dawn is dropped; by night again he measures afresh. */
+	@GameTest(maxTicks = 20)
+	public void aRootRunnerRunsOnlyByNight(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bifronsPact(helper, keeper, BIFRONS_PERCH, now);
+		BifronsEntity bifrons = bifrons(helper, perch);
+		VerdantBedBlockEntity full = bifronsBed(helper, new BlockPos(5, 1, 2), keeper.getUUID(), 32);
+		VerdantBedBlockEntity hungry = bifronsBed(helper, new BlockPos(2, 1, 5), keeper.getUUID(), 0);
+		helper.assertValueEqual(bifrons.think(level, NOON, now), Status.OUTSIDE_AGREEMENT, "At noon he rests");
+		List<Component> rows = RootRunning.rows(level, pactOf(level, perch), NOON, now);
+		Component asleep = runningRow(rows, "row.asleep");
+		helper.assertTrue(full.nutrients() == 32 && hungry.nutrients() == 0 && bifrons.marks().isEmpty()
+				&& new PactService.Note("asleep", 0).equals(RootRunning.SERVICE.note(level, bifrons, pactOf(level, perch), NOON, now))
+				&& asleep != null && "19:00".equals(arg(asleep, 0)) && "05:00".equals(arg(asleep, 1)),
+				"Nothing measured or moved; Jade and his page say he runs roots from 19:00 to 05:00: " + keys(rows));
+		helper.assertValueEqual(bifrons.think(level, 12_999L, now + 20), Status.OUTSIDE_AGREEMENT, "A tick before his hours");
+		helper.assertValueEqual(bifrons.think(level, 13_000L, now + 40), Status.WORKING, "At their first tick, his first beat");
+		helper.assertValueEqual(bifrons.think(level, 23_000L, now + 60), Status.OUTSIDE_AGREEMENT, "Their end: he stops");
+		helper.assertTrue(runner(bifrons).measure() == null && full.nutrients() == 32 && hungry.nutrients() == 0,
+				"The measure across his hours' end is dropped; nothing taken");
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + 80), Status.WORKING, "By night again he measures afresh");
+		helper.assertTrue(full.nutrients() == 32 && bifrons.marks().getLast().source() && bifrons.marks().getLast().at() == now + 80, "nothing moved yet");
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + 100), Status.WORKING, "and runs the root");
+		helper.assertTrue(full.nutrients() == 30 && hungry.nutrients() == 1, "Two out, one in");
+		helper.succeed();
+	}
+
+	/** GC-08 (GE1, GE2): nothing measured or run for a holder away; a measure made before they left goes stale and is made again. */
+	@GameTest(maxTicks = 20)
+	public void aRootRunnerWaitsForAPresentHolder(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bifronsPact(helper, keeper, BIFRONS_PERCH, now);
+		BifronsEntity bifrons = bifrons(helper, perch);
+		VerdantBedBlockEntity full = bifronsBed(helper, new BlockPos(5, 1, 2), keeper.getUUID(), 32);
+		VerdantBedBlockEntity hungry = bifronsBed(helper, new BlockPos(2, 1, 5), keeper.getUUID(), 0);
+		BlockPos home = helper.absolutePos(BIFRONS_PERCH);
+		keeper.snapTo(home.getX() + 100.5, home.getY(), home.getZ() + 0.5, 0.0F, 0.0F);
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now), Status.OWNER_OFFLINE, "100 blocks off: not near");
+		helper.assertTrue(bifrons.marks().isEmpty() && full.nutrients() == 32, "nothing measured or moved");
+		beside(helper, keeper, BIFRONS_PERCH);
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + 20), Status.WORKING, "Beside the perch, his first beat");
+		keeper.snapTo(home.getX() + 100.5, home.getY(), home.getZ() + 0.5, 0.0F, 0.0F);
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + 40), Status.OWNER_OFFLINE, "Away again before his second beat: he waits");
+		helper.assertTrue(full.nutrients() == 32 && hungry.nutrients() == 0, "nothing taken");
+		beside(helper, keeper, BIFRONS_PERCH);
+		long back = now + 40 + RootRunning.MEASURE_LIMIT + 20;
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, back), Status.WORKING, "Back long after: the old measure is stale, he measures again");
+		helper.assertTrue(full.nutrients() == 32 && bifrons.marks().getLast().source() && bifrons.marks().getLast().at() == back,
+				"at no cost, a fresh mark at the source");
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, back + RootRunning.MEASURE_TICKS), Status.WORKING, "and runs the root");
+		helper.assertTrue(full.nutrients() == 30 && hungry.nutrients() == 1, "Two out, one in");
+		helper.succeed();
+	}
+
+	/** GC-08 (S1): he holds nothing between his beats: a destination broken before the second beat costs the source nothing; a fresh pair loses exactly one. */
+	@GameTest(maxTicks = 20)
+	public void aRootRunnerNeverHoldsNutrients(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bifronsPact(helper, keeper, BIFRONS_PERCH, now);
+		BifronsEntity bifrons = bifrons(helper, perch);
+		VerdantBedBlockEntity full = bifronsBed(helper, new BlockPos(5, 1, 2), keeper.getUUID(), 32);
+		VerdantBedBlockEntity hungry = bifronsBed(helper, new BlockPos(2, 1, 5), keeper.getUUID(), 0);
+		VerdantBedBlockEntity middling = bifronsBed(helper, new BlockPos(5, 1, 5), keeper.getUUID(), 10);
+		int before = nutrientsIn(full, hungry, middling);
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now), Status.WORKING, "His first beat: the full bed for the hungry one");
+		helper.assertValueEqual(nutrientsIn(full, hungry, middling), before, "Measuring moves nothing");
+		helper.setBlock(new BlockPos(2, 1, 5), Blocks.AIR);
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + RootRunning.MEASURE_TICKS), Status.IDLE, "Its destination gone: no run");
+		helper.assertTrue(full.nutrients() == 32 && nutrientsIn(full, middling) == before && runner(bifrons).measure() == null
+				&& runner(bifrons).last() == null, "Nothing left the source; nothing was owed or held");
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + 40), Status.WORKING, "A fresh pair is measured");
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + 60), Status.WORKING, "and run");
+		helper.assertTrue(nutrientsIn(full, middling) == before - 1 && full.nutrients() == 30 && middling.nutrients() == 11,
+				"Exactly one fewer between them");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-08 (Dossier 5 item 2): fewer than two awake beds of the inviter's within 8 (a stranger's, a dormant one and one too far
+	 * do not count): the chooser lists him not ready, he does not come and nothing is spent; a second awake bed, and he comes.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 20)
+	public void bifronsRefusesWithFewerThanTwoBeds(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		helper.assertTrue(Language.getInstance().has(RUNNING_KEY + "missing"), "the server reads the mod's words (Fabric's language loader)");
+		ServerPlayer keeper = gardenHolder(helper);
+		pocketFor(keeper, bifronsOffer(), 1);
+		BlockPos at = new BlockPos(3, 1, 3);
+		PactPerchBlockEntity perch = perch(helper, at, keeper);
+		beside(helper, keeper, at);
+		bifronsBed(helper, new BlockPos(4, 1, 4), keeper.getUUID(), 4);
+		bifronsBed(helper, new BlockPos(6, 1, 3), STRANGER, 4);
+		helper.setBlock(new BlockPos(5, 1, 6), Garden.VERDANT_BED.defaultBlockState());
+		bifronsBed(helper, new BlockPos(13, 1, 13), keeper.getUUID(), 4);
+		PactMenu chooser = open(helper, keeper, perch);
+		PactStatePayload.Choice listed = chooser.lastSent().patterns().stream().filter(choice -> choice.id().equals(BifronsEntity.SIGN))
+				.findFirst().orElse(null);
+		helper.assertTrue(chooser.lastSent().mode() == PactStatePayload.INVITE && listed != null && !listed.ready() && listed.amount() == 1,
+				"The chooser lists him, not ready, one thing missing: " + chooser.lastSent().patterns());
+		keeper.closeContainer();
+		RateGate.forget(keeper.getUUID());
+		PactMenu menu = offerOf(helper, keeper, perch, bifronsOffer());
+		PactStatePayload state = menu.lastSent();
+		Component note = state.notes().stream().filter(line -> key(line).equals(RUNNING_KEY + "missing")).findFirst().orElse(null);
+		helper.assertTrue(note != null && Integer.valueOf(8).equals(arg(note, 0)) && perch.visitor() == null,
+				"One awake bed of theirs within 8: he says why and does not come: " + keys(state.notes()));
+		PactStatePayload refused = send(keeper, menu, PactRequestPayload.ACCEPT, 0);
+		helper.assertTrue(answered(refused, RootRunning.NO_TWO_BEDS) && !refused.result().get().done()
+				&& said(refused).equals(RUNNING_KEY + "missing") && pocketed(keeper, 1, bifronsOffer()) && recordOf(level, keeper) == null,
+				"Accepting is refused with his reason; nothing spent, nothing held");
+		helper.assertTrue(refused.result().get().message().getString().startsWith("\"A root runs between two places. Show me two.\""),
+				"His words: " + refused.result().get().message().getString());
+		keeper.closeContainer();
+		bifronsBed(helper, new BlockPos(4, 1, 6), keeper.getUUID(), 4);
+		RateGate.forget(keeper.getUUID());
+		PactStatePayload invited = offerOf(helper, keeper, perch, bifronsOffer()).lastSent();
+		helper.assertTrue(invited.notes().isEmpty() && invited.offers(PactRequestPayload.ACCEPT)
+				&& perch.visitor() != null && level.getEntity(perch.visitor()) instanceof BifronsEntity,
+				"A second awake bed of theirs within 8, and he comes (Dossier 5 item 2)");
+		helper.succeed();
+	}
+
+	/** GC-08 (GC-P111): his first obligation is the holder's own feeding by hand, a bed or the crop on one; never his runs; a refused feeding keeps nothing. */
+	@GameTest(maxTicks = 20)
+	public void bifronssFirstObligationIsAFeedingByHand(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bifronsPact(helper, keeper, BIFRONS_PERCH, now);
+		BifronsEntity bifrons = bifrons(helper, perch);
+		VerdantBedBlockEntity full = bifronsBed(helper, new BlockPos(5, 1, 2), keeper.getUUID(), 32);
+		VerdantBedBlockEntity hungry = bifronsBed(helper, new BlockPos(2, 1, 5), keeper.getUUID(), 0);
+		helper.assertTrue(RootRunning.SERVICE.obligation() == PactObligations.Act.FEED
+				&& keys(RootRunning.SERVICE.obligationRows(level, keeper, pactOf(level, perch), now))
+						.equals(List.of("message.jugcraft.concordance.garden_pact.obligation")), "His page names the act: a feeding by hand");
+		int heard = GARDEN_SERVED.getOrDefault(keeper.getUUID(), 0);
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now), Status.WORKING, "He measures");
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + RootRunning.MEASURE_TICKS), Status.WORKING, "and runs a root");
+		helper.assertTrue(!PactObligations.kept(keeper, BifronsEntity.COUNTERPART) && GARDEN_SERVED.getOrDefault(keeper.getUUID(), 0) == heard,
+				"His own run keeps nothing of the holder's");
+		full.setNutrients(VerdantBedBlockEntity.CAPACITY);
+		ConcordanceGardenGameTests.handUse(helper, keeper, new BlockPos(5, 1, 2), new ItemStack(Items.BONE_MEAL), false);
+		helper.assertTrue(!PactObligations.kept(keeper, BifronsEntity.COUNTERPART), "Bone meal a full bed refuses keeps nothing");
+		ConcordanceGardenGameTests.handUse(helper, keeper, new BlockPos(2, 1, 5), new ItemStack(Items.BONE_MEAL), false);
+		helper.assertTrue(PactObligations.kept(keeper, BifronsEntity.COUNTERPART) && GARDEN_SERVED.getOrDefault(keeper.getUUID(), 0) == heard + 1
+				&& hungry.nutrients() == 1 + Garden.BONE_MEAL_NUTRIENTS
+				&& keys(RootRunning.SERVICE.obligationRows(level, keeper, pactOf(level, perch), now))
+						.equals(List.of("message.jugcraft.concordance.garden_pact.obligation_kept")), "Their own feeding of a bed in his area keeps it, once");
+		ConcordanceGardenGameTests.handUse(helper, keeper, new BlockPos(2, 1, 5), new ItemStack(Items.BONE_MEAL), false);
+		helper.assertTrue(GARDEN_SERVED.getOrDefault(keeper.getUUID(), 0) == heard + 1, "and it is not recorded again");
+		ServerPlayer other = gardenHolder(helper);
+		bifronsPact(helper, other, new BlockPos(6, 1, 6), now);
+		bifronsBed(helper, new BlockPos(6, 1, 3), other.getUUID(), 4);
+		// A young crop: bone meal on a ripe one harvests it (OrganismCropBlock.useItemOn), so only a growing crop is fed.
+		helper.setBlock(new BlockPos(6, 2, 3), ((OrganismCropBlock) Garden.SUNPETAL_CROP).getStateForAge(0));
+		ConcordanceGardenGameTests.handUse(helper, other, new BlockPos(6, 2, 3), new ItemStack(Items.BONE_MEAL), false);
+		helper.assertTrue(PactObligations.kept(other, BifronsEntity.COUNTERPART), "So does feeding the crop on one (the bed below)");
+		helper.succeed();
+	}
+
+	/** GC-08 (Dossier 5 item 4): suspended by its holder he runs nothing and his page says so by name; resumed, the measure he made is run. */
+	@GameTest(maxTicks = 20)
+	public void aSuspendedBifronsRunsNothing(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bifronsPact(helper, keeper, BIFRONS_PERCH, now);
+		BifronsEntity bifrons = bifrons(helper, perch);
+		VerdantBedBlockEntity full = bifronsBed(helper, new BlockPos(5, 1, 2), keeper.getUUID(), 32);
+		VerdantBedBlockEntity hungry = bifronsBed(helper, new BlockPos(2, 1, 5), keeper.getUUID(), 0);
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now), Status.WORKING, "His first beat");
+		helper.assertTrue(PactKeeping.suspend(level, keeper, perch.holder(), now) == AgreementHolder.Toggle.SUSPENDED, "Its holder suspends it");
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + 20), Status.SUSPENDED, "Suspended, he waits");
+		Component row = RootRunning.SERVICE.suspendedRow(PactKeeping.name(BifronsEntity.COUNTERPART));
+		helper.assertTrue(full.nutrients() == 32 && hungry.nutrients() == 0 && Pacts.done(pactOf(level, perch).pact(), now) == 0
+				&& key(row).equals("message.jugcraft.concordance.pact.row.state.suspended.serves")
+				&& RootRunning.SERVICE.note(level, bifrons, pactOf(level, perch), MIDNIGHT, now + 20) == null,
+				"Nothing run or counted; his page says so by name; Jade has no note while the pact does not serve");
+		helper.assertTrue(PactKeeping.resume(level, keeper, perch.holder(), now + 40) == AgreementHolder.Toggle.RESUMED, "Resumed");
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + 40), Status.WORKING, "His measure, 40 ticks old, is run");
+		helper.assertTrue(full.nutrients() == 30 && hungry.nutrients() == 1, "Two out, one in");
+		helper.succeed();
+	}
+
+	/** GC-08: a second Bifrons at the perch, or a copy of his save, is no presence: it leaves at once and runs nothing; his own measures. */
+	@GameTest(maxTicks = 20)
+	public void aDuplicateBifronsRunsNothing(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bifronsPact(helper, keeper, BIFRONS_PERCH, now);
+		BifronsEntity bifrons = bifrons(helper, perch);
+		VerdantBedBlockEntity full = bifronsBed(helper, new BlockPos(5, 1, 2), keeper.getUUID(), 32);
+		VerdantBedBlockEntity hungry = bifronsBed(helper, new BlockPos(2, 1, 5), keeper.getUUID(), 0);
+		BifronsEntity stranger = Workers.BIFRONS.create(level, EntitySpawnReason.MOB_SUMMONED);
+		stranger.setOwner(keeper.getUUID());
+		stranger.setPerch(perch.getBlockPos());
+		helper.assertValueEqual(stranger.think(level, MIDNIGHT, now), Status.FINISHED, "A Bifrons not the perch's presence leaves");
+		TagValueOutput saved = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		bifrons.saveWithoutId(saved);
+		BifronsEntity twin = Workers.BIFRONS.create(level, EntitySpawnReason.LOAD);
+		twin.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved.buildResult()));
+		twin.setUUID(UUID.randomUUID());
+		helper.assertValueEqual(twin.think(level, MIDNIGHT, now), Status.FINISHED, "A copy of his save, under another id, leaves");
+		helper.assertTrue(full.nutrients() == 32 && hungry.nutrients() == 0 && stranger.marks().isEmpty() && twin.marks().isEmpty()
+				&& Pacts.done(pactOf(level, perch).pact(), now) == 0 && stranger.gone() && twin.gone(),
+				"Neither measured, ran or counted anything");
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now), Status.WORKING, "The presence measures, once");
+		helper.assertTrue(bifrons.marks().size() == 1 && full.nutrients() == 32, "his mark at the source; nothing moved yet");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-08 (Jade; GC-P106): the readings of his perch and of him: kept, his work, active. With his only full bed growing and
+	 * unanswered, both carry his note (reserves, one bed) and his matter, no answer yet; none of the four readings names a player.
+	 */
+	@GameTest(maxTicks = 20)
+	public void bifronssReadingSaysItsNoteAndNamesNoPlayer(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bifronsPact(helper, keeper, BIFRONS_PERCH, now);
+		BifronsEntity bifrons = bifrons(helper, perch);
+		CompoundTag ofPerch = PactReading.holder(level, perch, now);
+		CompoundTag ofHim = PactReading.presence(level, bifrons, now);
+		for (CompoundTag reading : List.of(ofPerch, ofHim)) {
+			helper.assertTrue("kept".equals(reading.getStringOr("standing", "")) && RootRunning.WORK.equals(reading.getStringOr("service", ""))
+					&& "active".equals(reading.getStringOr("state", "")) && PactReading.KEYS.containsAll(reading.keySet()),
+					"The reading: kept, his work, active: " + reading);
+		}
+		helper.assertTrue(BifronsEntity.COUNTERPART.equals(ofPerch.getStringOr("counterpart", "")) && !ofHim.contains("counterpart"),
+				"The perch's reading names him; his own does not repeat it: " + ofPerch + " " + ofHim);
+		bifronsBed(helper, new BlockPos(5, 1, 2), keeper.getUUID(), 32);
+		ripeOn(helper, new BlockPos(5, 1, 2));
+		bifronsBed(helper, new BlockPos(2, 1, 5), keeper.getUUID(), 0);
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now), Status.AWAITING_ANSWER, "His only full bed is growing: he asks");
+		CompoundTag perchAsked = PactReading.holder(level, perch, now);
+		CompoundTag himAsked = PactReading.presence(level, bifrons, now);
+		for (CompoundTag reading : List.of(perchAsked, himAsked)) {
+			helper.assertTrue("reserves".equals(reading.getStringOr("note", "")) && reading.getIntOr("note_count", 0) == 1
+					&& RootRunning.RESERVES.equals(reading.getStringOr("matter", "")) && !reading.contains("accord")
+					&& PactReading.KEYS.containsAll(reading.keySet()), "His note and his matter, no answer yet: " + reading);
+		}
+		String all = ofPerch + " " + ofHim + " " + perchAsked + " " + himAsked;
+		helper.assertTrue(!all.contains(keeper.getUUID().toString()) && !all.contains(keeper.getName().getString()), "and no player is named: " + all);
+		helper.succeed();
+	}
+
+	/** GC-08: which gesture answers which action, every cue's sound registered; an offering paid ahead through his page, he inspects it. */
+	@GameTest(maxTicks = 20)
+	public void bifronsAnswersEachActionWithHisGesture(GameTestHelper helper) {
+		helper.assertTrue(BifronsEntity.reaction(PactRequestPayload.ACCEPT, PactMenu.SEALED, true) == BifronsEntity.Gesture.ASSENT
+				&& BifronsEntity.reaction(PactRequestPayload.ACCEPT, RootRunning.NO_TWO_BEDS, false) == BifronsEntity.Gesture.REFUSE
+				&& BifronsEntity.reaction(PactRequestPayload.DEPOSIT, PactMenu.DEPOSITED, true) == BifronsEntity.Gesture.INSPECT
+				&& BifronsEntity.reaction(PactRequestPayload.DEPOSIT, PactMenu.NOTHING_DEPOSITED, false) == null
+				&& BifronsEntity.reaction(PactRequestPayload.RESUME, "resumed", true) == BifronsEntity.Gesture.ASSENT
+				&& BifronsEntity.reaction(PactRequestPayload.RESOLVE, PactMenu.RESOLVED, true) == BifronsEntity.Gesture.ASSENT
+				&& BifronsEntity.reaction(PactRequestPayload.RESOLVE, PactMenu.RESOLVED, false) == null
+				&& BifronsEntity.reaction(PactRequestPayload.RECALL, "recalled", true) == null, "His answers");
+		for (int action : new int[] {PactRequestPayload.DECLINE, PactRequestPayload.END, PactRequestPayload.SUSPEND, PactRequestPayload.SEAT,
+				PactRequestPayload.INVITE, PactRequestPayload.CHOOSE}) {
+			helper.assertTrue(BifronsEntity.reaction(action, "done", true) == null, "No gesture of his for action " + action);
+		}
+		for (int action = 0; action < PactRequestPayload.ACTIONS.size(); action++) {
+			helper.assertTrue(BifronsEntity.reaction(action, PactMenu.NOT_OFFERED, false) == null, "Not offered: no gesture (action " + action + ")");
+		}
+		for (String cue : BifronsEntity.SOUND_IDS) {
+			helper.assertTrue(BuiltInRegistries.SOUND_EVENT.containsKey(Jugcraft.id("bifrons." + cue)), "jugcraft:bifrons." + cue + " is registered");
+		}
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		PactPerchBlockEntity perch = bifronsPact(helper, keeper, BIFRONS_PERCH, level.getGameTime());
+		BifronsEntity bifrons = bifrons(helper, perch);
+		PactMenu menu = open(helper, keeper, perch);
+		give(keeper, new ItemStack(Items.OAK_LOG, 2));
+		send(keeper, menu, PactRequestPayload.CHOOSE, 0);
+		helper.assertTrue(answered(send(keeper, menu, PactRequestPayload.DEPOSIT, offering(menu.lastSent(), "minecraft:oak_log")), PactMenu.DEPOSITED)
+				&& "inspect".equals(bifrons.cues().getLast()), "An offering paid ahead: he measures it (inspect): " + bifrons.cues());
+		keeper.closeContainer();
+		helper.succeed();
+	}
+
+	/** GC-08 (Dossier 5 detail a; GC-P109): his loop is risen only while spoken to; low otherwise, and low and still by day (his rise played once first: check_spirit_bodies reads Loop.LISTEN). */
+	@GameTest(maxTicks = 20)
+	public void bifronsRisesOnlyWhileSpokenTo(GameTestHelper helper) {
+		helper.assertTrue(BifronsEntity.loop(Status.IDLE, false) == BifronsEntity.Loop.IDLE && BifronsEntity.loop(Status.IDLE, true) == BifronsEntity.Loop.LISTEN
+				&& BifronsEntity.loop(Status.WORKING, false) == BifronsEntity.Loop.IDLE
+				&& BifronsEntity.loop(Status.FINISHED, true) == BifronsEntity.Loop.LISTEN
+				&& BifronsEntity.loop(Status.FINISHED, false) == BifronsEntity.Loop.WAITING
+				&& BifronsEntity.loop(Status.OUTSIDE_AGREEMENT, false) == BifronsEntity.Loop.WAITING
+				&& BifronsEntity.loop(Status.DISABLED, true) == BifronsEntity.Loop.WAITING
+				&& BifronsEntity.loop(Status.UPKEEP_DUE, false) == BifronsEntity.Loop.ASTIR
+				&& BifronsEntity.loop(Status.SUSPENDED, false) == BifronsEntity.Loop.SUSPENDED
+				&& BifronsEntity.loop(Status.AWAITING_ANSWER, false) == BifronsEntity.Loop.IDLE, "His loops: risen only while spoken to");
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = level.getGameTime();
+		PactPerchBlockEntity perch = bifronsPact(helper, keeper, BIFRONS_PERCH, now);
+		BifronsEntity bifrons = bifrons(helper, perch);
+		bifrons.think(level, MIDNIGHT, now);
+		helper.assertTrue(!bifrons.listening(), "No one speaking: he keeps low");
+		open(helper, keeper, perch);
+		bifrons.think(level, MIDNIGHT, now);
+		helper.assertTrue(bifrons.listening(), "The perch's screen open: he rises to listen");
+		keeper.closeContainer();
+		bifrons.think(level, MIDNIGHT, now);
+		helper.assertTrue(!bifrons.listening(), "Closed: he sinks back");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-08 (the unit-5 review's item 10): his kept page's rows at the run's own times: today's runs of 24 and his last run (both
+	 * beds, what was taken, given and lost); with no presence of his, today's runs alone.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theKeptPageNamesBifronssLastRun(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		long now = dayStart(level, 1);
+		PactPerchBlockEntity perch = bifronsPact(helper, keeper, BIFRONS_PERCH, now);
+		BifronsEntity bifrons = bifrons(helper, perch);
+		VerdantBedBlockEntity from = bifronsBed(helper, new BlockPos(5, 1, 2), keeper.getUUID(), 32);
+		VerdantBedBlockEntity to = bifronsBed(helper, new BlockPos(2, 1, 5), keeper.getUUID(), 0);
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now), Status.WORKING, "He measures");
+		helper.assertValueEqual(bifrons.think(level, MIDNIGHT, now + RootRunning.MEASURE_TICKS), Status.WORKING, "and runs a root");
+		List<Component> rows = RootRunning.rows(level, pactOf(level, perch), MIDNIGHT, now + RootRunning.MEASURE_TICKS);
+		Component service = runningRow(rows, "row.service");
+		Component last = runningRow(rows, "row.last");
+		helper.assertTrue(service != null && Integer.valueOf(1).equals(arg(service, 0)) && Integer.valueOf(24).equals(arg(service, 1)),
+				"Today's runs: 1 of 24: " + keys(rows));
+		helper.assertTrue(last != null && Integer.valueOf(2).equals(arg(last, 0)) && from.getBlockPos().toShortString().equals(arg(last, 1))
+				&& Integer.valueOf(1).equals(arg(last, 2)) && to.getBlockPos().toShortString().equals(arg(last, 3))
+				&& Integer.valueOf(1).equals(arg(last, 4)), "His last run: 2 taken there, 1 given here, 1 lost: " + last);
+		helper.assertTrue(!keys(rows).contains(RUNNING_KEY + "row.asleep") && !keys(rows).contains(RUNNING_KEY + "row.reserved"),
+				"By night, with no reserve kept, nothing else: " + keys(rows));
+		bifrons.discard();
+		helper.assertTrue(GardenPacts.presence(level, pactOf(level, perch), BifronsEntity.class) == null
+				&& keys(RootRunning.rows(level, pactOf(level, perch), MIDNIGHT, now + RootRunning.MEASURE_TICKS)).equals(List.of(RUNNING_KEY + "row.service")),
+				"With no presence of his, today's runs alone");
+		helper.succeed();
+	}
+
 	// GC-09 unit 6
 }

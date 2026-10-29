@@ -40,6 +40,7 @@ import io.github.jimbozoomer.jugcraft.concordance.sky.AstrolabeItem;
 import io.github.jimbozoomer.jugcraft.concordance.spire.SpireRecord;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.AgreementHolder;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BathinEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.BifronsEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GardenReach;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GatheringShadeEntity;
@@ -47,6 +48,7 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.PactAccords;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactHistory;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactKeeping;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactPerchBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.RootRunning;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlock;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.SpiritAnchorBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.StarReckoning;
@@ -1086,5 +1088,43 @@ public class ConcordancePersistenceGameTests {
 	// GC-06 unit 3
 	// GC-07 unit 4
 	// GC-08 unit 5
+	/**
+	 * Concordance garden cohort, GC-08 (GC-P106): Bifrons's reserves answer is his perch's, saved with it. Asked of a growing
+	 * full bed and answered "any full bed", the perch read back from its save still holds the answer; his own save keeps no
+	 * service memory (no reserves, no measure), and read back after a restart he measures the growing bed, then runs from it.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theReservesAnswerSurvivesARestart(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = ConcordanceWorkerGameTests.gardenHolder(helper);
+		long now = ConcordanceWorkerGameTests.dayStart(level, 1);
+		long night = ConcordanceWorkerGameTests.MIDNIGHT;
+		PactPerchBlockEntity perch = ConcordanceWorkerGameTests.bifronsPact(helper, keeper, ConcordanceWorkerGameTests.BIFRONS_PERCH, now);
+		BifronsEntity bifrons = ConcordanceWorkerGameTests.bifrons(helper, perch);
+		VerdantBedBlockEntity growing = ConcordanceWorkerGameTests.bifronsBed(helper, new BlockPos(5, 1, 2), keeper.getUUID(), 32);
+		ConcordanceWorkerGameTests.ripeOn(helper, new BlockPos(5, 1, 2));
+		VerdantBedBlockEntity hungry = ConcordanceWorkerGameTests.bifronsBed(helper, new BlockPos(2, 1, 5), keeper.getUUID(), 0);
+		helper.assertValueEqual(bifrons.think(level, night, now), Status.AWAITING_ANSWER, "His only full bed is growing: he asks");
+		helper.assertTrue(RootRunning.SERVICE.complication(level, ConcordanceWorkerGameTests.pactOf(level, perch), perch, now) != null
+				&& ConcordanceWorkerGameTests.runner(bifrons).reserves().equals(List.of(growing.getBlockPos())), "His matter is raised; the bed kept as a reserve");
+		helper.assertTrue(PactAccords.resolve(level, keeper, perch, RootRunning.WORK, RootRunning.FULL, now), "Answered: any full bed");
+		perch.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), perch.saveWithoutMetadata(level.registryAccess())));
+		helper.assertTrue(RootRunning.FULL.equals(PactAccords.answer(level, perch)), "The perch read back from its save keeps the answer");
+		TagValueOutput out = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		bifrons.saveWithoutId(out);
+		bifrons.remove(Entity.RemovalReason.UNLOADED_TO_CHUNK);
+		BifronsEntity back = Workers.BIFRONS.create(level, EntitySpawnReason.LOAD);
+		back.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), out.buildResult()));
+		RootRunning.Memory memory = ConcordanceWorkerGameTests.runner(back);
+		helper.assertTrue(memory.reserves().isEmpty() && memory.measure() == null && memory.last() == null && back.marks().isEmpty()
+				&& level.addFreshEntity(back), "Read back after the restart, he remembers no reserve, measure or run");
+		helper.assertValueEqual(back.think(level, night, now + 20), Status.WORKING, "Answered, he measures the growing bed");
+		helper.assertTrue(growing.getBlockPos().equals(memory.measure() == null ? null : memory.measure().from()) && growing.nutrients() == 32,
+				"its mark at the growing bed; nothing moved yet");
+		helper.assertValueEqual(back.think(level, night, now + 20 + RootRunning.MEASURE_TICKS), Status.WORKING, "and a beat later runs from it");
+		helper.assertTrue(growing.nutrients() == 30 && hungry.nutrients() == 1, "Two from the growing bed, one to the hungry one");
+		helper.succeed();
+	}
+
 	// GC-09 unit 6
 }

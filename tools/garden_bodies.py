@@ -869,4 +869,306 @@ def marax_animations(read=None):
 
 # GC-07 unit 4
 # GC-08 unit 5
+# ------------------------------------------------------------------------------------------------- Bifrons (GC-08)
+
+PINE = pacts.PINE
+SPHALERITE = pacts.SPHALERITE
+_BIFRONS = pacts.SPIRITS["bifrons"]["body"]
+BIFRONS_TEXTURE = (128, 64)
+# Box-UV regions and sizes (pixels; a box (w, h, d) at (u, v) uses 2(w + d) x (d + h) from (u, v)); none overlaps another.
+# The two stones of one size share one region, as do the two front roots, the two side roots, the two legs and the two
+# arms, each pair drawn alike (check_geckolib allows a repeat).
+BIFRONS_UV = {"mound": (0, 0), "hump": (56, 0), "chest": (92, 0), "stone_a": (116, 0), "stone": (116, 6), "leg": (0, 21),
+              "head": (12, 21), "crown": (36, 21), "root": (52, 21), "root_side": (64, 21), "arm": (76, 21)}
+BIFRONS_SIZES = {"mound": (12, 5, 16), "hump": (8, 4, 10), "chest": (8, 10, 4), "stone_a": (3, 3, 3), "stone": (2, 2, 2),
+                 "leg": (3, 12, 3), "head": (6, 6, 6), "crown": (4, 2, 4), "root": (2, 2, 4), "root_side": (4, 2, 2),
+                 "arm": (2, 10, 2)}
+# His face risen (the head's front, 6 x 6, column 0 his right): R root hair, S bark skin, E an eye (the sphalerite's palest:
+# his glowmask lights exactly these), M his mouth. No nose holes (docs/ART_DIRECTION.md). His shy face in the roots: two
+# eyes on the hump's front (8 x 4), at these columns and row.
+BIFRONS_FACE = ["RRRRRR", "SSSSSS", "SESSES", "SSSSSS", "SSMMSS", "SSSSSS"]
+BIFRONS_HUMP_EYES = ((2, 1), (5, 1))
+
+
+def _bifrons_box(name, origin):
+    u, v = BIFRONS_UV[name]
+    return {"origin": list(origin), "size": list(BIFRONS_SIZES[name]), "uv": [u, v]}
+
+
+def bifrons_model(read=None):
+    """Bifrons's geometry, drawn at rest with both his shapes' parts (16 pixels a block; y = 0 is the ground he keeps his
+    station on; he faces north, -z; his left is +x). root > mass (the low mound of roots, two stones in it) > hump (its back,
+    a stone on it and his shy eyes on its front), the four roots it crawls on (two forward, one to each side); root > body
+    (the lean man the roots gather into) > leg_left, leg_right, torso (his chest) > head (and its crown of root hair),
+    arm_left, arm_right. His loops give each shape (SPIRITS["bifrons"]["body"]["low"] and ["risen"]: the body shrunk and
+    sunk inside the mass, or the mass drawn in to a pedestal of roots at his feet), so the rest pose here is neither. No
+    cube is flat or turned at rest, and no two faces lie on one plane facing the same way (coplanar is empty)."""
+    width, height = BIFRONS_TEXTURE
+    return {"format_version": "1.12.0", "minecraft:geometry": [{
+        "description": {"identifier": "geometry.bifrons", "texture_width": width, "texture_height": height,
+                        "visible_bounds_width": 3, "visible_bounds_height": 3, "visible_bounds_offset": [0, 1.5, 0]},
+        "bones": [
+            {"name": "root", "pivot": [0, 0, 0]},
+            {"name": "mass", "parent": "root", "pivot": [0, 0, 0], "cubes": [
+                _bifrons_box("mound", (-6, 0, -8)), _bifrons_box("stone", (-7.5, 1.5, -3)), _bifrons_box("stone", (-5, 4.5, -7.5))]},
+            {"name": "hump", "parent": "mass", "pivot": [0, 5, 0], "cubes": [
+                _bifrons_box("hump", (-4, 4.5, -5)), _bifrons_box("stone_a", (0.5, 8, 1.5))]},
+            {"name": "root_front_left", "parent": "mass", "pivot": [3, 1, -7.5], "cubes": [_bifrons_box("root", (2, 0.5, -11.5))]},
+            {"name": "root_front_right", "parent": "mass", "pivot": [-3, 1, -7.5], "cubes": [_bifrons_box("root", (-4, 0.5, -11.5))]},
+            {"name": "root_left", "parent": "mass", "pivot": [5.5, 1, 2], "cubes": [_bifrons_box("root_side", (5.5, 0.5, 1))]},
+            {"name": "root_right", "parent": "mass", "pivot": [-5.5, 1, 2], "cubes": [_bifrons_box("root_side", (-9.5, 0.5, 1))]},
+            {"name": "body", "parent": "root", "pivot": [0, 0, 0]},
+            {"name": "leg_left", "parent": "body", "pivot": [2, 12.5, 0], "cubes": [_bifrons_box("leg", (0.5, 0.5, -1.5))]},
+            {"name": "leg_right", "parent": "body", "pivot": [-2, 12.5, 0], "cubes": [_bifrons_box("leg", (-3.5, 0.5, -1.5))]},
+            {"name": "torso", "parent": "body", "pivot": [0, 12, 0], "cubes": [_bifrons_box("chest", (-4, 12, -2))]},
+            {"name": "head", "parent": "torso", "pivot": [0, 21.5, 0], "cubes": [
+                _bifrons_box("head", (-3, 21.5, -3)), _bifrons_box("crown", (-2, 27, -2))]},
+            {"name": "arm_left", "parent": "torso", "pivot": [4.5, 21, 0], "cubes": [_bifrons_box("arm", (3.5, 11, -1))]},
+            {"name": "arm_right", "parent": "torso", "pivot": [-4.5, 21, 0], "cubes": [_bifrons_box("arm", (-5.5, 11, -1))]},
+        ]}]}
+
+
+def bifrons_sheet(read):
+    """His 128 x 64 skin, every texel opaque or clear and one of the two paintings' colours (cute and clean: two or three
+    tones a part, light from the top left, regular patterns; docs/ART_DIRECTION.md "Creatures and faces"). The pine log's
+    six tones, darkest first, P0 to P5: his roots and mound in a grain of P2 grooved P1 every third column, lit P3 along the
+    top and seamed P0 below; his legs bundled roots of P2 and P3 bound with P1; his bark skin P3 lit P4 and shaded P2, his
+    root hair P1, his mouth P1. The sphalerite's five, S0 to S4: his stones S1 lit S3 and shaded S0, an S4 glint on top;
+    his eyes S4."""
+    P0, P1, P2, P3, P4, P5 = palette(read, PINE, 6)
+    S0, S1, S2, S3, S4 = palette(read, SPHALERITE, 5)
+    img = Image.new("RGBA", BIFRONS_TEXTURE, (0, 0, 0, 0))
+
+    def part(name):
+        return box_faces(BIFRONS_UV[name], BIFRONS_SIZES[name])
+
+    def grain(x, y, w, h):
+        if y == 0:
+            return P3
+        if y == h - 1:
+            return P0
+        return P1 if x % 3 == 2 else P2
+
+    def bark_top(x, y, w, h):
+        return P4 if (x + y) % 4 == 0 else P3
+
+    skin = _bevel(P3, P4, P2)
+    for name in ("mound", "hump", "root", "root_side"):
+        faces = part(name)
+        for side in SIDES:
+            _fill(img, faces[side], grain)
+        _fill(img, faces["up"], bark_top)
+        _fill(img, faces["down"], lambda x, y, w, h: P0)
+    hump_front = part("hump")["front"]
+    for x, y in BIFRONS_HUMP_EYES:
+        img.putpixel((hump_front[0] + x, hump_front[1] + y), S4 + (255,))
+    for name in ("stone_a", "stone"):
+        faces = part(name)
+        for side in SIDES:
+            _fill(img, faces[side], _bevel(S1, S3, S0))
+        _fill(img, faces["up"], lambda x, y, w, h: S4 if (x, y) == (0, 0) else S2)
+        _fill(img, faces["down"], lambda x, y, w, h: S0)
+    faces = part("leg")
+
+    def bundle(x, y, w, h):
+        if y % 4 == 3:
+            return P1
+        return P2 if x % 2 == 0 else P3
+    for side in SIDES:
+        _fill(img, faces[side], bundle)
+    _fill(img, faces["up"], lambda x, y, w, h: P3)
+    _fill(img, faces["down"], lambda x, y, w, h: P0)
+    faces = part("chest")
+
+    def chest(x, y, w, h):
+        if y == h - 3:
+            return P1  # a band of root bound round his waist
+        return skin(x, y, w, h)
+    for side in SIDES:
+        _fill(img, faces[side], chest)
+    _fill(img, faces["up"], lambda x, y, w, h: P3)
+    _fill(img, faces["down"], lambda x, y, w, h: P2)
+    faces = part("arm")
+
+    def arm(x, y, w, h):
+        return P2 if y >= h - 2 else skin(x, y, w, h)
+    for side in SIDES:
+        _fill(img, faces[side], arm)
+    _fill(img, faces["up"], lambda x, y, w, h: P3)
+    _fill(img, faces["down"], lambda x, y, w, h: P2)
+    faces = part("head")
+
+    def face(x, y, w, h):
+        key = BIFRONS_FACE[y][x]
+        if key == "S":
+            return P4 if x == 0 else P2 if x == w - 1 else P3
+        return {"R": P1, "E": S4, "M": P1}[key]
+    _fill(img, faces["front"], face)
+    _fill(img, faces["back"], lambda x, y, w, h: P1 if y < 2 else skin(x, y, w, h))
+    for side in ("right", "left"):
+        _fill(img, faces[side], lambda x, y, w, h: P1 if y < 1 else skin(x, y, w, h))
+    _fill(img, faces["up"], lambda x, y, w, h: P1)
+    _fill(img, faces["down"], lambda x, y, w, h: P2)
+    faces = part("crown")
+    for side in SIDES:
+        _fill(img, faces[side], lambda x, y, w, h: P1 if x % 2 == 0 else P2)
+    _fill(img, faces["up"], lambda x, y, w, h: P2 if (x + y) % 2 == 0 else P1)
+    _fill(img, faces["down"], lambda x, y, w, h: P1)
+    return img
+
+
+def bifrons_skin(read):
+    return bifrons_sheet(read)
+
+
+def bifrons_glowmask(read):
+    """His four eyes alone (SPIRITS["bifrons"]["body"]["eye_texels"]: two on his risen face, two in the roots), as his skin
+    draws them; everything else clear."""
+    sheet = bifrons_sheet(read)
+    out = Image.new("RGBA", sheet.size, (0, 0, 0, 0))
+    for texel in _BIFRONS["eye_texels"]:
+        out.putpixel(tuple(texel), sheet.getpixel(tuple(texel)))
+    return out
+
+
+def bifrons_clips():
+    """His own clips, keyed on bifrons_model's bones (degrees, Bedrock's sense). Two shapes (Dossier 5 detail a): his low
+    loops (idle, waiting, suspended, astir) hold the low shape and his listen loop the risen one, each by the same three
+    channels (mass scale, hump scale and position, body scale and position: SPIRITS["bifrons"]["body"]["low"] and
+    ["risen"]), which no gesture keys; his rise clip, at the head of his listening (BifronsEntity.Loop.LISTEN), carries him
+    from one to the other in a second, and he sinks back on the main controller's blend when the screen closes. His
+    gestures key only his roots, his hump's turn, his limbs and head, and his root bone for arriving and departing; each
+    of his screen gestures starts and ends on his listening pose (ATTEND) for the limbs it moves, his work and his measure
+    at rest for the roots."""
+    attend = {bone: [float(v) for v in angles] for bone, angles in _BIFRONS["attend"].items()}
+    lengths = _BIFRONS["loop_lengths"]
+    times = {name: length for name, (length, _) in _BIFRONS["gesture_times"].items()}
+    loops, gestures = _BIFRONS["loops"], _BIFRONS["gestures"]
+    zero, whole, gone = [0.0, 0.0, 0.0], [1.0, 1.0, 1.0], [0.0, 0.0, 0.0]
+    under = [0.0, -10.0, 0.0]
+    fronts, sides = ("root_front_left", "root_front_right"), ("root_left", "root_right")
+
+    def still(values):
+        return {"0.0": [round(float(v), 3) + 0.0 for v in values]}
+
+    def shape(which):
+        """The three shape channels held still at {which} ("low" or "risen")."""
+        pose = _BIFRONS[which]
+        return {"mass": {"scale": still(pose["mass"]["scale"])},
+                "hump": {"scale": still(pose["hump"]["scale"]), "position": still(pose["hump"]["position"])},
+                "body": {"scale": still(pose["body"]["scale"]), "position": still(pose["body"]["position"])}}
+
+    def merged(*parts):
+        out = {}
+        for part in parts:
+            for bone, channels in part.items():
+                out.setdefault(bone, {}).update(channels)
+        return out
+
+    def loop(length, bones):
+        return {"loop": True, "animation_length": length, "bones": bones}
+
+    def once(length, bones, hold=False):
+        return {"loop": "hold_on_last_frame" if hold else False, "animation_length": length, "bones": bones}
+
+    def from_attend(bone, *frames, length):
+        return _keys((0, attend[bone]), *frames, (length, attend[bone]), easing=EASE)
+
+    def at_rest(*frames, length):
+        return _keys((0, zero), *frames, (length, zero), easing=EASE)
+
+    low, risen = _BIFRONS["low"], _BIFRONS["risen"]
+    rise = _BIFRONS["rise"]
+    return {
+        # Idle (low): the mound breathing slowly, his roots feeling about in turn.
+        loops["idle"]: loop(lengths["idle"], merged(shape("low"), {
+            "hump": {"rotation": _wave(lengths["idle"], 1, zero, (2, 0, 0))},
+            "root_front_left": {"rotation": _wave(lengths["idle"], 1, zero, (0, 6, 0))},
+            "root_front_right": {"rotation": _wave(lengths["idle"], 1, zero, (0, 6, 0), phase=0.5)},
+            "root_left": {"rotation": _wave(lengths["idle"], 1, zero, (0, 0, 5), phase=0.25)},
+            "root_right": {"rotation": _wave(lengths["idle"], 1, zero, (0, 0, 5), phase=0.75)}})),
+        # Listening (risen): a lean man of roots standing on a pedestal of them, head a little down, breathing.
+        loops["listen"]: loop(lengths["listen"], merged(shape("risen"), {
+            "torso": {"rotation": _wave(lengths["listen"], 1, attend["torso"], (1.5, 0, 0))},
+            "head": {"rotation": still(attend["head"])},
+            "arm_left": {"rotation": still(attend["arm_left"])},
+            "arm_right": {"rotation": still(attend["arm_right"])}})),
+        # Rising (once, at the head of his listening): from the low shape to the risen one, his head lifting last.
+        _BIFRONS["rise_clip"]: once(rise, {
+            "mass": {"scale": _keys((0, low["mass"]["scale"]), (rise, risen["mass"]["scale"]), easing=EASE)},
+            "hump": {"scale": _keys((0, low["hump"]["scale"]), (rise * 0.6, risen["hump"]["scale"]), (rise, risen["hump"]["scale"]), easing=EASE),
+                     "position": _keys((0, low["hump"]["position"]), (rise * 0.6, risen["hump"]["position"]),
+                                       (rise, risen["hump"]["position"]), easing=EASE)},
+            "body": {"scale": _keys((0, low["body"]["scale"]), (rise, risen["body"]["scale"]), easing=EASE),
+                     "position": _keys((0, low["body"]["position"]), (rise, risen["body"]["position"]), easing=EASE)},
+            "head": {"rotation": _keys((0, (30, 0, 0)), (rise * 0.7, (30, 0, 0)), (rise, attend["head"]), easing=EASE)},
+            "arm_left": {"rotation": _keys((0, zero), (rise, attend["arm_left"]), easing=EASE)},
+            "arm_right": {"rotation": _keys((0, zero), (rise, attend["arm_right"]), easing=EASE)}}),
+        # Waiting (by day, his holder away, switched off): low and still, his roots drawn in under him.
+        loops["waiting"]: loop(lengths["waiting"], merged(shape("low"), {
+            "hump": {"rotation": _wave(lengths["waiting"], 1, (4, 0, 0), (1, 0, 0))},
+            "root_front_left": {"rotation": still((-15, -10, 0))},
+            "root_front_right": {"rotation": still((-15, 10, 0))},
+            "root_left": {"rotation": still((0, 0, -12))},
+            "root_right": {"rotation": still((0, 0, 12))}})),
+        # Suspended: the mound sagging, his hump bowed, his roots limp.
+        loops["suspended"]: loop(lengths["suspended"], merged(shape("low"), {
+            "mass": {"scale": still((1.05, 0.85, 1.05))},
+            "hump": {"rotation": _wave(lengths["suspended"], 1, (12, 0, 0), (1.5, 0, 0))},
+            "root_front_left": {"rotation": still((12, 0, 0))},
+            "root_front_right": {"rotation": still((12, 0, 0))}})),
+        # Astir (an offering due): low, his roots twitching, his hump turning about.
+        loops["astir"]: loop(lengths["astir"], merged(shape("low"), {
+            "hump": {"rotation": _wave(lengths["astir"], 2, zero, (0, 6, 0))},
+            "root_front_left": {"rotation": _wave(lengths["astir"], 3, zero, (10, 0, 0))},
+            "root_front_right": {"rotation": _wave(lengths["astir"], 3, zero, (10, 0, 0), phase=0.5)},
+            "root_left": {"rotation": _wave(lengths["astir"], 3, zero, (0, 0, 10), phase=0.25)},
+            "root_right": {"rotation": _wave(lengths["astir"], 3, zero, (0, 0, 10), phase=0.75)}})),
+        # Arrive: roots push up out of the ground beside the perch (the telling pose, half out, 0.5 to 1.1 s), then spread.
+        gestures["arrive"]: once(times["arrive"], {
+            "root": {"position": _keys((0, under), (0.2, under), (1.2, zero), (times["arrive"], zero), easing=EASE)},
+            **{bone: {"rotation": _keys((0, (-40, 0, 0)), (0.8, (-40, 0, 0)), (1.6, zero), (times["arrive"], zero), easing=EASE)}
+               for bone in fronts}}),
+        # Inspect (his measure, Dossier 5 detail b; and an offering looked over): his hump bows toward what he measures and
+        # his front roots splay over it (0.5 to 1.3 s); risen, his head bows with it.
+        gestures["inspect"]: once(times["inspect"], {
+            "hump": {"rotation": at_rest((0.4, (15, 0, 0)), (1.3, (15, 0, 0)), length=times["inspect"])},
+            "root_front_left": {"rotation": at_rest((0.4, (0, -25, 0)), (1.3, (0, -25, 0)), length=times["inspect"])},
+            "root_front_right": {"rotation": at_rest((0.4, (0, 25, 0)), (1.3, (0, 25, 0)), length=times["inspect"])},
+            "head": {"rotation": from_attend("head", (0.4, (25, 0, 0)), (1.3, (25, 0, 0)), length=times["inspect"])},
+            "torso": {"rotation": from_attend("torso", (0.4, (10, 0, 0)), (1.3, (10, 0, 0)), length=times["inspect"])}}),
+        # Assent: a dry little bow, his right hand to his chest (0.3 to 0.9 s).
+        gestures["assent"]: once(times["assent"], {
+            "torso": {"rotation": from_attend("torso", (0.3, (8, 0, 0)), (0.9, (8, 0, 0)), length=times["assent"])},
+            "head": {"rotation": from_attend("head", (0.3, (25, 0, 0)), (0.9, (25, 0, 0)), length=times["assent"])},
+            "arm_right": {"rotation": from_attend("arm_right", (0.3, (-70, 0, -20)), (0.9, (-70, 0, -20)), length=times["assent"])}}),
+        # Refuse: his head turned aside and down, both hands out low and open (0.3 to 1.0 s).
+        gestures["refuse"]: once(times["refuse"], {
+            "head": {"rotation": from_attend("head", (0.3, (10, 35, 0)), (1.0, (10, 35, 0)), length=times["refuse"])},
+            "arm_left": {"rotation": from_attend("arm_left", (0.3, (0, 0, -35)), (1.0, (0, 0, -35)), length=times["refuse"])},
+            "arm_right": {"rotation": from_attend("arm_right", (0.3, (0, 0, 35)), (1.0, (0, 0, 35)), length=times["refuse"])}}),
+        # Depart: he sinks back into the ground (the telling pose, half under, 0.3 to 0.9 s) and is gone at 1.05 s, held.
+        gestures["depart"]: once(times["depart"], {
+            "root": {"position": _keys((0, zero), (1.0, under), (times["depart"], under), easing=EASE),
+                     "scale": _keys((0, whole), (1.0, whole), (1.05, gone), (times["depart"], gone))},
+            **{bone: {"rotation": _keys((0, zero), (0.6, (-30, 0, 0)), (times["depart"], (-30, 0, 0)), easing=EASE)} for bone in fronts}},
+            hold=True),
+        # Work (the run, at the bed it gives to): his front roots dig down and his side roots clench (0.4 to 1.2 s), his hump
+        # heaving with it; risen, he bows and reaches down.
+        gestures["work"]: once(times["work"], {
+            "hump": {"rotation": at_rest((0.4, (-8, 0, 0)), (1.2, (-8, 0, 0)), length=times["work"])},
+            **{bone: {"rotation": at_rest((0.4, (35, 0, 0)), (1.2, (35, 0, 0)), length=times["work"])} for bone in fronts},
+            "root_left": {"rotation": at_rest((0.4, (0, 0, 25)), (1.2, (0, 0, 25)), length=times["work"])},
+            "root_right": {"rotation": at_rest((0.4, (0, 0, -25)), (1.2, (0, 0, -25)), length=times["work"])},
+            "torso": {"rotation": from_attend("torso", (0.4, (15, 0, 0)), (1.2, (15, 0, 0)), length=times["work"])},
+            "arm_left": {"rotation": from_attend("arm_left", (0.4, (-40, 0, 0)), (1.2, (-40, 0, 0)), length=times["work"])},
+            "arm_right": {"rotation": from_attend("arm_right", (0.4, (-40, 0, 0)), (1.2, (-40, 0, 0)), length=times["work"])}}),
+    }
+
+
+def bifrons_animations(read=None):
+    """The runtime animation file: his twelve clips (five loops, his rise, six gestures), sorted by name."""
+    return {"format_version": "1.8.0", "animations": dict(sorted(bifrons_clips().items()))}
+
+
 # GC-09 unit 6

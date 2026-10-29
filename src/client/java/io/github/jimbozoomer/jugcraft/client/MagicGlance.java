@@ -69,6 +69,11 @@ public final class MagicGlance {
 			Map.entry(JADE + "pact.note.habitat_reading.proud", MagicArt.Mark.HOURGLASS),
 			// GC-07 unit 4
 			// GC-08 unit 5
+			Map.entry(JADE + "pact.matter.root_running.reserves", MagicArt.Mark.ASK),
+			Map.entry(JADE + "pact.note.root_running.reserves", MagicArt.Mark.ASK),
+			Map.entry(JADE + "pact.note.root_running.asleep", MagicArt.Mark.MOON),
+			Map.entry(JADE + "pact.note.root_running.no_full", MagicArt.Mark.MOON),
+			Map.entry(JADE + "pact.note.root_running.no_hungry", MagicArt.Mark.HOURGLASS),
 			// GC-09 unit 6
 			Map.entry("message.jugcraft.concordance.disabled", MagicArt.Mark.LOCK),
 			Map.entry("compose.jugcraft.diagnostic.conflicting_agreement", MagicArt.Mark.CROSS),

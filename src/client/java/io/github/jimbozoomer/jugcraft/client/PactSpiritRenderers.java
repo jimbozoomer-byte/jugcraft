@@ -66,6 +66,10 @@ final class PactSpiritRenderers {
 		register(Workers.MARAX, new Row(1.0F, 0.9F, 0.9, 0.1, 0.8, true, "familiar"));
 		// GC-07 unit 4
 		// GC-08 unit 5
+		// Bifrons (GC-08): his built model drawn at its own size; his culling box reaches 0.2 sideways past his low box for his
+		// roots, 0.8 below for his arrival and departure under the ground, 1.3 above for his risen shape (1.8 tall over a box 0.7
+		// high: GC-P107); his four eyes lit.
+		register(Workers.BIFRONS, new Row(1.0F, 0.6F, 0.2, 0.8, 1.3, true));
 		// GC-09 unit 6
 	}
 

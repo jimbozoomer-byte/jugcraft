@@ -82,6 +82,8 @@ public final class Workers {
 	public static EntityType<MaraxEntity> MARAX;
 	// GC-07 unit 4
 	// GC-08 unit 5
+	/** Concordance garden cohort, GC-08 (Dossier 5): Bifrons, low beside his perch, rising while spoken to (root-running). */
+	public static EntityType<BifronsEntity> BIFRONS;
 	// GC-09 unit 6
 	public static Block PACT_PERCH;
 	public static BlockEntityType<PactPerchBlockEntity> PERCH_ENTITY;
@@ -143,6 +145,12 @@ public final class Workers {
 		PactSpirits.register(MaraxEntity.COUNTERPART, MARAX, MaraxEntity.SIGN);
 		// GC-07 unit 4
 		// GC-08 unit 5
+		// Concordance garden cohort, GC-08: Bifrons, MISC as every worker is (a transport crate refuses him), standing beside his
+		// perch. His box is his low shape, 1.2 long and 0.7 high (GC-P107); his risen shape is drawn above it (his render row's reach).
+		BIFRONS = entity("bifrons", EntityType.Builder.<BifronsEntity>of(BifronsEntity::new, MobCategory.MISC).sized(1.2F, 0.7F).eyeHeight(0.5F)
+				.fireImmune().clientTrackingRange(8));
+		FabricDefaultAttributeRegistry.register(BIFRONS, BifronsEntity.createAttributes());
+		PactSpirits.register(BifronsEntity.COUNTERPART, BIFRONS, BifronsEntity.SIGN);
 		// GC-09 unit 6
 		ResourceKey<Block> perchKey = ResourceKey.create(Registries.BLOCK, Jugcraft.id("pact_perch"));
 		PACT_PERCH = Registry.register(BuiltInRegistries.BLOCK, perchKey, new PactPerchBlock(BlockBehaviour.Properties.of()
@@ -161,6 +169,8 @@ public final class Workers {
 		PactServices.register(HabitatReading.SERVICE);
 		// GC-07 unit 4
 		// GC-08 unit 5
+		// GC-08: Bifrons's root-running.
+		PactServices.register(RootRunning.SERVICE);
 		// GC-09 unit 6
 		PactServices.verify();
 		PactMenu.register();
@@ -175,6 +185,8 @@ public final class Workers {
 		MaraxEntity.registerSounds();
 		// GC-07 unit 4
 		// GC-08 unit 5
+		// GC-08: Bifrons's cues (jugcraft:bifrons.*).
+		BifronsEntity.registerSounds();
 		// GC-09 unit 6
 		// The unit review: every pact spirit's departure ends on time, its chunk ticking it or not (one sweep, GC-01).
 		PactSpiritEntity.registerSweep();

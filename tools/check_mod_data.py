@@ -19739,6 +19739,7 @@ GC05_ACCORDS = {"verdance_carrying": ["yield", "claim"],
                 # GC-06 unit 3
                 # GC-07 unit 4
                 # GC-08 unit 5
+                "root_running": ["fallow", "full"],
                 # GC-09 unit 6
                 }
 # The accord machinery's game tests (check_pacts).
@@ -21163,6 +21164,40 @@ def check_pacts(co, root, lang, registered, research):
         body = _java_body(sg12, f"public void {name}(")
         if body.count("think(level, d.from(), ") != wanted or re.search(r"think\(level, 0L, g0[^)]*\)(, Status\.IDLE| == Status\.IDLE)", body):
             err(f"ConcordanceWorkerGameTests.{name}: a think asserting IDLE passes d.from(), the spirit's first hour (GC-P115)")
+    # --- Concordance garden cohort, GC-08: Bifrons as a character (GC-P107, GC-P110, GC-P112; docs/features/bifrons-pact.md) ---
+    bifrons_java = java("spirits/BifronsEntity.java")
+    bifrons_row = pa.SPIRITS.get("bifrons", {})
+    if "case PactRequestPayload.RESOLVE -> done ? Gesture.ASSENT : null;" not in _java_body(bifrons_java, "public static @Nullable Gesture reaction("):
+        err("spirits/BifronsEntity.java: he assents when his matter is answered (RESOLVE; every gesture paired with words)")
+    if "Bifrons" not in pa.PERCH_TOOLTIP or "two awake Verdant Beds" not in pa.PERCH_TOOLTIP:
+        err("tools/concordance_pacts.py PERCH_TOOLTIP: names what Bifrons wants (two awake Verdant Beds)")
+    # Dossier 5 detail (b): each bed of a measure shows the shared sign his row names, once, through Signs.show (nothing in
+    # concordance/ sends particles of its own: check_signs); nothing between the two beds; two marks remembered.
+    marking = _java_body(bifrons_java, "public void mark(ServerLevel level, BlockPos bed, boolean source, long now) {")
+    marks_code = re.sub(r"//[^\n]*|/\*.*?\*/", " ", bifrons_java, flags=re.S)
+    mark_sign = bifrons_row.get("body", {}).get("mark", "")
+    if mark_sign not in co.signs.SIGNS or f"public static final Sign MARK = Sign.{mark_sign.upper()};" not in bifrons_java \
+            or marks_code.count("Signs.show(") != 1 or "Signs.show(level, bed, MARK);" not in marking \
+            or "if (marks.size() == MARKS) {" not in marking or not re.search(r"\bint MARKS = 2;", bifrons_java) \
+            or "Signs.flow(" in marks_code or "Sign.FLOW" in marks_code:
+        err("spirits/BifronsEntity.java: each bed of a measure shows the shared sign his row names (MARK) once, nothing between "
+            "the two beds, two marks remembered (Dossier 5 detail b)")
+    # GC-P110: his cues play only the art plan's event's files (beast.banana_slug_slime_expand); his departing one, at its
+    # pitch, ends within his departure (an entity's sound stops when it is gone).
+    event = [entry["name"].split(":", 1)[-1] for entry in (load(ASSETS / "sounds.json") or {}).get("beast.banana_slug_slime_expand", {}).get("sounds", [])
+             if isinstance(entry, dict)]
+    for cue, (_, files) in bifrons_row.get("cues", {}).items():
+        if not files or not set(files) <= set(event):
+            err(f"bifrons's cue {cue} plays only the art plan's files (beast.banana_slug_slime_expand: {event}), not {files}")
+    departing = bifrons_row.get("cues", {}).get("depart", ("", []))[1]
+    seconds = max((_ogg_seconds(ASSETS / "sounds" / f"{f}.ogg") for f in departing), default=0.0) / bifrons_row.get("pitch", {}).get("depart", 1.0)
+    if not departing or seconds > bifrons_row.get("body", {}).get("gesture_times", {}).get("depart", (0.0,))[0]:
+        err(f"bifrons: his departing sound ({seconds:.2f} s at its pitch) outlasts his departure: an entity's sound stops when it is gone")
+    # All four of his pages, in order ("His Price" is every spirit's last title, so a set of titles could not see it dropped).
+    titles = [page[1] for page in co.garden_pacts.PAGES]
+    want = ["Bifrons", "His Service", "Which Beds Are Reserves", "His Price"]
+    if not any(titles[i:i + len(want)] == want for i in range(len(titles))):
+        err("tools/concordance_garden_pacts.py PAGES: Bifrons's codex pages, all four in order (GC-P118)")
     # GC-09 unit 6
 
 
@@ -21727,6 +21762,82 @@ def check_garden_pacts(co, root, lang, registered, research):
                 err(f"{cls}: missing the garden cohort's GC-06 game test {name}")
     # GC-07 unit 4
     # GC-08 unit 5
+    # --- GC-08 (Bifrons; docs/features/bifrons-pact.md): root-running and which beds are reserves. A run's take and give in one
+    # step after a room check; nothing else of his changes a bed (CT GC-08's audit; GC-P102 to GC-P106). Read without comments.
+    running = strip(text(spirits / "RootRunning.java"))
+    step = _java_body(running, "static Status run(")
+    order = [step.find(n) for n in (
+        "Pacts.inHours(service, time)", "Pacts.done(record.pact(), now) >= service.quota()", "memory.reach(record).beds(level, now)",
+        "String kept = answer(level, bifrons);", "new GardenAsking(level, record, time, now, MAX_ASKED)",
+        "now - measure.at() < MEASURE_TICKS ? Status.WORKING : ran(", "Garden.poorest(wanting)",
+        "asking.ask(poorest.getBlockPos(), poorest.keeper())",
+        "if (bed == to || !GardenPacts.benefits(record, bed.keeper()) || !gives(bed, to)) {", "if (fallow(level, bed)) {",
+        "} else if (!underAHeart(level, bed)) {", "new ArrayList<>(fallow.isEmpty() ? planted : List.of())",
+        "first = asking.ask(reserves.getFirst().getBlockPos(), reserves.getFirst().keeper());",
+        "memory.reserves(first == Asked.SPENT ? List.of() : reserves);",
+        "if (kept == null && reserve != null && first == Asked.MAY && memory.raise()) {", "if (full) {",
+        "Comparator.comparingInt(VerdantBedBlockEntity::nutrients).reversed()", "asking.ask(from.getBlockPos(), from.keeper())",
+        "memory.begin(new Measure(from.getBlockPos(), to.getBlockPos(), now));", "bifrons.mark(level, from.getBlockPos(), true, now);")]
+    if -1 in order or order != sorted(order):
+        err("RootRunning.run: hours, quota, the index, the answer, a measure's second beat, the poorest asked, sources by the "
+            "answer (fallow, or any full bed but a Heart's; a beneficiary's now), his matter only for a reserve he may change and "
+            "raised once, the fullest asked, then the first beat (GC-P102 to GC-P106; the unit-5 review's item 8)")
+    beat = _java_body(running, "private static Status ran(")
+    order = [beat.find(n) for n in (
+        "memory.drop();", "!gives(source, destination)", "fallow(level, source) || full && !underAHeart(level, source)",
+        "asking.both(source.getBlockPos(), source.keeper(), destination.getBlockPos(), destination.keeper())",
+        "bifrons.mark(level, destination.getBlockPos(), false, now);", "VerdantBedBlockEntity.CAPACITY - destination.nutrients() < GIVE",
+        "!source.take(TAKE)", "destination.give(GIVE)", "memory.ran(", "holder.taskDone(level, now);",
+        "bifrons.gesture(BifronsEntity.Gesture.WORK);", "return Status.WORKING;")]
+    if -1 in order or order != sorted(order):
+        err("RootRunning.ran: the measure dropped, both beds read and asked again, the destination marked, then room checked "
+            "before take(TAKE) before give(GIVE), remembered and counted once (CT GC-08)")
+    if "VerdantBedBlockEntity.CAPACITY - destination.nutrients() >= GIVE" not in _java_body(running, "static boolean gives("):
+        err("RootRunning.gives: a destination has room for what reaches it")
+    fallow_body = _java_body(running, "public static boolean fallow(")
+    if "above.getBlock() instanceof OrganismCropBlock" not in fallow_body or "above.is(Garden.VERDANT_HEART)" not in fallow_body \
+            or "is(Garden.VERDANT_HEART)" not in _java_body(running, "public static boolean underAHeart("):
+        err("RootRunning: fallow is the garden's own planted test (no organism crop, no Heart on it), and a Heart's bed is never "
+            "a source (GC-P104)")
+    for needle, count in (("source.take(TAKE)", 1), ("destination.give(GIVE)", 1), (".take(", 1), (".give(", 1),
+                          ("holder.taskDone(", 1), ("GardenPacts.target(", 0), ("new GardenAsking(level, record, time, now, MAX_ASKED)", 1),
+                          ("PactAccords.answer(level, perch)", 1), ("bifrons.mark(", 2)):
+        if running.count(needle) != count:
+            err(f"spirits/RootRunning.java: {needle} {count} time(s), not {running.count(needle)} (one run, one count, his "
+                "questions GardenAsking's, two marks a run)")
+    for banned in (".compost(", "setNutrients(", ".tend(", "setStrain(", "Garden.nourish(", "sendParticles(", "Signs.", "Courier",
+                   "ItemStack", "getInventory()", "level.setBlock(", "Transfers.", "Garden.sample(", ".habitat(", "cachedHabitat(",
+                   "ValueOutput", "output.store(", "ConcordanceProgress.record(", "Evidence.", "Authority."):
+        if banned in running:
+            err(f"spirits/RootRunning.java: never {banned} (he only runs roots: no compost, no strain, no item, no sign of his "
+                "own but his marks, no cargo, no sample, nothing saved; whose land is GardenPacts.target's)")
+    invited = _java_body(running, "public List<Missing> missing(")
+    if "bed -> own.equals(bed.keeper())" not in invited or "reach.beds(level, level.getGameTime()).size() >= BEDS" not in invited:
+        err("RootRunning.missing: two awake beds the inviter keeps within his radius (Dossier 5 item 2)")
+    matter = _java_body(running, "public PactService.@Nullable Complication complication(")
+    if "bed.nutrients() < SOURCE_MIN || fallow(level, bed) || underAHeart(level, bed)" not in matter \
+            or "!GardenPacts.benefits(record, bed.keeper())" not in matter:
+        err("RootRunning.complication: his matter stands only while its bed is still a beneficiary's full, growing reserve "
+            "(GC-P106; the unit-5 review's item 8)")
+    if running.count(gp.DISTINCT.get("root_running", {}).get("also", "?")) != 1:
+        err(f"spirits/RootRunning.java: makes {gp.DISTINCT.get('root_running', {}).get('also')} once (DISTINCT)")
+    if not re.search(r"public static final List<String> ACCORDS = List\.of\(FALLOW, FULL\);", running) \
+            or 'String FALLOW = "fallow";' not in running or 'String FULL = "full";' not in running \
+            or "PactAccords.answer(level, perch)" not in _java_body(running, "static @Nullable String answer(") \
+            or ".accord()" in running or list(co.pacts.SERVICE_WORDS.get("root_running", {}).get("accords", {})) != ["fallow", "full"]:
+        err("RootRunning: his answers are fallow then full (append only), worded in SERVICE_WORDS and read through "
+            "PactAccords.answer, so an unknown one reads as unanswered (GC-P106)")
+    # His page's service row names a run's take and give as the Java holds them.
+    limits = gp.CONSTANTS.get("root_running", {}).get("spirits/RootRunning.java", {})
+    service_row = co.pacts.SERVICE_WORDS.get("root_running", {}).get("messages", {}).get("row.service", "")
+    if f"each {limits.get('TAKE')} nutrients taken" not in service_row or f"and {limits.get('GIVE')} given" not in service_row:
+        err("tools/concordance_pacts.py SERVICE_WORDS root_running row.service: names TAKE and GIVE as "
+            "tools/concordance_garden_pacts.py CONSTANTS holds them")
+    for cls, names in GC08_TESTS.items():
+        source = text(tests / f"{cls}.java")
+        for name in names:
+            if not re.search(rf"@GameTest\([^)]*\)\s*public void {name}\(GameTestHelper helper\)", source):
+                err(f"{cls}: missing the garden cohort's GC-08 game test {name} (GC08_TESTS)")
     # GC-09 unit 6
 
 
@@ -22480,6 +22591,136 @@ def check_spirit_bodies(co):
             err(f"ConcordanceGardenPactClientGameTests: his {key} loop is photographed through loopPoseOf (no gesture over it)")
     # GC-07 unit 4
     # GC-08 unit 5
+    # --- GC-08: Bifrons's body, built (GC-P107 to GC-P109): two paintings' colours, two shapes by scale and position ---
+    body = pa.SPIRITS["bifrons"]["body"]
+    row = pa.SPIRITS["bifrons"]
+    built = {"geckolib/models/entity/bifrons.geo.json": ((), "garden_bodies.bifrons_model"),
+             "geckolib/animations/entity/bifrons.animation.json": ((), "garden_bodies.bifrons_animations"),
+             "textures/entity/bifrons.png": ((pa.PINE, pa.SPHALERITE), "garden_bodies.bifrons_skin"),
+             "textures/entity/bifrons_glowmask.png": ((pa.PINE, pa.SPHALERITE), "garden_bodies.bifrons_glowmask")}
+    if body.get("built") != built or body.get("owner_files") or body.get("adapted") \
+            or {t: v for t, v in pa.BUILT.items() if "/bifrons" in t} != built \
+            or not set(built) <= {target for target, _, _ in owner_art.builds()}:
+        err("tools/concordance_pacts.py SPIRITS['bifrons']: his body is built by tools/garden_bodies.py and painted only from the "
+            "pine log and the sphalerite; nothing of it is copied or adapted (GC-P108)")
+    # The two paintings are the catalogued ones (files.csv:2013 and :2071; the brief's table).
+    for painting, digest in ((pa.PINE, "a239df254b764327558f06a24604b5a6091b50016d7b283978258b3160e10d26"),
+                             (pa.SPHALERITE, "a32a3989555df6650fdf9a8888d328ffbfea274e0200545b0bd1f04feafe8b23")):
+        if not (blocks / painting).is_file() or hashlib.sha256((blocks / painting).read_bytes()).hexdigest() != digest:
+            err(f"bifrons: the painting {painting} is not the catalogued one (files.csv; docs/features/bifrons-pact.md)")
+    geo = load(ASSETS / "geckolib" / "models" / "entity" / "bifrons.geo.json") or {}
+    clips = (load(ASSETS / "geckolib" / "animations" / "entity" / "bifrons.animation.json") or {}).get("animations", {})
+    if geo != garden_bodies.bifrons_model(read) or clips != garden_bodies.bifrons_animations(read)["animations"]:
+        err("bifrons.geo.json and bifrons.animation.json: tools/garden_bodies.py's, unedited (run tools/owner_art.py)")
+    bones = (geo.get("minecraft:geometry") or [{}])[0].get("bones", [])
+    cubes = [cube for bone in bones for cube in bone.get("cubes", [])]
+    if not cubes or garden_bodies.coplanar(geo) or any(0 in cube["size"] for cube in cubes) \
+            or any("rotation" in bone for bone in bones) or any("rotation" in cube for cube in cubes):
+        err(f"bifrons.geo.json: no flat cube, nothing turned at rest, no two faces on one plane facing one way "
+            f"(docs/ART_DIRECTION.md): {garden_bodies.coplanar(geo) if cubes else 'no cubes'}")
+    parents = {bone["name"]: bone.get("parent") for bone in bones}
+    if parents != {"root": None, "mass": "root", "hump": "mass", "root_front_left": "mass", "root_front_right": "mass",
+                   "root_left": "mass", "root_right": "mass", "body": "root", "leg_left": "body", "leg_right": "body",
+                   "torso": "body", "head": "torso", "arm_left": "torso", "arm_right": "torso"}:
+        err(f"bifrons.geo.json: his bones are the mound's and the man's (GC-P108), not {parents}")
+    # His skin: every texel opaque or clear and one of the two paintings' colours; his glowmask his four eyes alone.
+    try:
+        colours = set(garden_bodies.palette(read, pa.PINE, 6)) | set(garden_bodies.palette(read, pa.SPHALERITE, 5))
+    except SystemExit as stopped:
+        colours = set()
+        err(str(stopped))
+    skin, mask = ASSETS / "textures" / "entity" / "bifrons.png", ASSETS / "textures" / "entity" / "bifrons_glowmask.png"
+    if skin.is_file() and mask.is_file():
+        with Image.open(skin) as a, Image.open(mask) as b:
+            sheet, glow = a.convert("RGBA"), b.convert("RGBA")
+            drawn = sheet.getcolors(1 << 16) or []
+            lit = {(x, y) for y in range(glow.height) for x in range(glow.width) if glow.getpixel((x, y))[3]}
+            if sheet.size != tuple(garden_bodies.BIFRONS_TEXTURE) or {p[3] for _, p in drawn} - {0, 255} \
+                    or not {p[:3] for _, p in drawn if p[3]} <= colours:
+                err("textures/entity/bifrons.png: 128 x 64, opaque or clear, only the pine log's and the sphalerite's colours")
+            fx, fy, _, _ = garden_bodies.box_faces(garden_bodies.BIFRONS_UV["head"], garden_bodies.BIFRONS_SIZES["head"])["front"]
+            hx, hy, _, _ = garden_bodies.box_faces(garden_bodies.BIFRONS_UV["hump"], garden_bodies.BIFRONS_SIZES["hump"])["front"]
+            eyes = {(fx + x, fy + y) for y, line in enumerate(garden_bodies.BIFRONS_FACE) for x, key in enumerate(line) if key == "E"} \
+                | {(hx + x, hy + y) for x, y in garden_bodies.BIFRONS_HUMP_EYES}
+            if glow.size != sheet.size or lit != eyes or {tuple(t) for t in body["eye_texels"]} != eyes \
+                    or any(glow.getpixel(p) != sheet.getpixel(p) for p in lit):
+                err(f"textures/entity/bifrons_glowmask.png: his four eyes alone, as his skin draws them ({sorted(eyes)}; "
+                    f"eye_texels {body['eye_texels']}): {sorted(lit)}")
+    else:
+        err("textures/entity/bifrons.png and bifrons_glowmask.png: run tools/owner_art.py (Bifrons's body)")
+    # His two shapes (detail a): about 0.6 high and 1.2 long low, within his 0.7 box; about 1.8 risen (CT Dossier 5).
+    def extent(names):
+        chosen = [cube for bone in bones if bone["name"] in names for cube in bone.get("cubes", [])]
+        if not chosen:
+            return [0.0, 0.0, 0.0]
+        low = [min(c["origin"][a] for c in chosen) for a in range(3)]
+        high = [max(c["origin"][a] + c["size"][a] for c in chosen) for a in range(3)]
+        return [(high[a] - low[a]) / 16 * body["scale"] for a in range(3)]
+    mound = extent({"mass", "hump", "root_front_left", "root_front_right", "root_left", "root_right"})
+    man = extent({"leg_left", "leg_right", "torso", "head", "arm_left", "arm_right"})
+    if not (1.1 <= max(mound[0], mound[2]) <= 1.3 and 0.55 <= mound[1] <= row["entity"]["height"] and 1.7 <= man[1] <= 1.9) \
+            or row["entity"]["height"] + body["render"]["above"] < man[1]:
+        err(f"bifrons.geo.json: low about 0.6 high and 1.2 long within his {row['entity']['height']} box, risen about 1.8 within "
+            f"his culling box (CT Dossier 5; GC-P107): {mound}, {man}")
+    # His shape is held by every loop and changed by his rise alone, never by a gesture; his clips are his own.
+    shape = {("mass", "scale"), ("hump", "scale"), ("hump", "position"), ("body", "scale"), ("body", "position")}
+    for name, clip in clips.items():
+        keyed = {(bone, channel) for bone, channels in clip.get("bones", {}).items() for channel in channels}
+        is_loop = name in body["loops"].values()
+        if is_loop and not shape <= keyed or not is_loop and name != body["rise_clip"] and keyed & shape:
+            err(f"bifrons.animation.json {name}: his shape is held by every loop and changed by his rise alone, never by a gesture")
+    if set(clips) != set(body["loops"].values()) | set(body["gestures"].values()) | {body["rise_clip"]}:
+        err(f"bifrons.animation.json: his five loops, his rise and his six gestures, not {sorted(clips)}")
+    for key, name in body["loops"].items():
+        if clips.get(name, {}).get("loop") is not True or clips[name].get("animation_length") != body["loop_lengths"][key]:
+            err(f"bifrons.animation.json: his {key} loop {name} loops, {body['loop_lengths'][key]} s")
+    rise = clips.get(body["rise_clip"], {})
+    if rise.get("loop") is not False or rise.get("animation_length") != body["rise"]:
+        err(f"bifrons.animation.json: his rise {body['rise_clip']} plays once, {body['rise']} s")
+    for key, (length, (start, end)) in body["gesture_times"].items():
+        clip = clips.get(body["gestures"][key], {})
+        held = "hold_on_last_frame" if key == "depart" else False
+        if clip.get("animation_length") != length or clip.get("loop") != held or not 0 < start < end < length or end - start < 0.5:
+            err(f"bifrons.animation.json: his {key} is {length} s, {'held' if held else 'played once'}, its telling pose inside it")
+    bifrons_java = text(JAVA_ROOT / "concordance" / "spirits" / "BifronsEntity.java")
+    for key in ("idle", "waiting", "suspended", "astir"):
+        if f'RawAnimation.begin().thenLoop("{body["loops"][key]}")' not in bifrons_java:
+            err(f"spirits/BifronsEntity.java: his {key} loop plays {body['loops'][key]}")
+    if f'LISTEN(RawAnimation.begin().thenPlay("{body["rise_clip"]}").thenLoop("{body["loops"]["listen"]}")),' not in bifrons_java:
+        err("spirits/BifronsEntity.java: his listening loop plays his rise once, then loops risen (GC-P109)")
+    declared = re.findall(r'^\t\t([A-Z]+)\("([a-z]+)", (\d+), RawAnimation\.begin\(\)\.then(Play|PlayAndHold)\("([a-z.]+)"\)\)[,;]$',
+                          bifrons_java, re.M)
+    wanted = [(key.upper(), key, str(round(length * 20)), "PlayAndHold" if key == "depart" else "Play", body["gestures"][key])
+              for key, (length, _) in body["gesture_times"].items()]
+    if declared != wanted:
+        err(f"spirits/BifronsEntity.java: Gesture is {[g[1] for g in wanted]}, each its clip and its length in ticks: {declared}")
+    check_geckolib("bifrons", bifrons_java, None, None, kind="entity")
+    sized = re.search(r'BIFRONS = entity\("bifrons".*?\.sized\(([0-9.]+)F, ([0-9.]+)F\)\.eyeHeight\(([0-9.]+)F\)',
+                      text(JAVA_ROOT / "concordance" / "spirits" / "Workers.java"), re.S)
+    if not sized or tuple(float(v) for v in sized.groups()) != (row["entity"]["width"], row["entity"]["height"], row["entity"]["eye"]):
+        err("spirits/Workers.java: BIFRONS is sized as SPIRITS['bifrons']['entity'] (his low shape; GC-P107)")
+    # His poses and shots, from his front, each gesture frozen inside its window, every loop but astir through loopPoseOf.
+    posed = {key.lower(): (float(a), float(b)) for key, a, b in re.findall(
+        r'clipPose\(context, server, perch, BIFRONS, BifronsEntity\.Gesture\.([A-Z]+), ([0-9.]+), ([0-9.]+), "jugcraft_garden_bifrons_[a-z]+"\);',
+        garden_client)}
+    if posed != {key: window for key, (_, window) in body["gesture_times"].items()}:
+        err(f"ConcordanceGardenPactClientGameTests: each of Bifrons's gestures frozen inside its telling pose: {posed}")
+    for name in body["shots"]:
+        if f'"{name}"' not in garden_client:
+            err(f"ConcordanceGardenPactClientGameTests: takes {name}")
+    for key in body["loops"]:
+        if key != "astir" and not re.search(rf'loopPoseOf\(context, server, perch, BIFRONS, BIFRONS_{key.upper()}, '
+                                            rf'"jugcraft_garden_bifrons_{key}", (true|false)\);', garden_client):
+            err(f"ConcordanceGardenPactClientGameTests: his {key} loop is photographed through loopPoseOf (no gesture over it)")
+    if f'"{body["rise_clip"]}"' not in garden_client:
+        err(f"ConcordanceGardenPactClientGameTests: catches him rising ({body['rise_clip']})")
+    # His flow photographs his four bearings round where he stands (the literal names above are only names), and leaves the
+    # clock running and night vision cleared for the flows after his (it pauses the clock at midnight).
+    flow = _java_body(garden_client, "private static void bifrons(")
+    for needle in ("standingFacing(context, server, perch, BIFRONS, BIFRONS_FACES);", 'server.runCommand("effect clear @a minecraft:night_vision");',
+                   'server.runCommand("time resume");'):
+        if needle not in flow:
+            err(f"ConcordanceGardenPactClientGameTests.bifrons: {needle} (his bearings taken; the clock and the player left as found)")
     # GC-09 unit 6
 
 
@@ -25400,7 +25641,8 @@ def check_economy(root):
     Concordance Chunk C (C-04), each ritual sink is its ritual's run as the data states it; since C-05, a crucible's heat
     is a sink that becomes nothing else, modelled at a Crucible Stand's cheapest rate; since Concordance Chunk D (D-05), a
     recalled attunement is a sink too, modelled at the cheapest recall, and Stolas's upkeep, quota and offerings are his
-    definition's and tag's."""
+    definition's and tag's; since the garden cohort (GC-08), root-running is a nutrient-to-nutrient conversion that loses
+    half, and Bifrons's upkeep, hours, quota and offerings are his definition's and tag's."""
     sys.path.insert(0, str(ROOT / "tools"))
     import concordance_alchemy as al
     import concordance_economy as ec
@@ -25458,6 +25700,21 @@ def check_economy(root):
         err("economy: RECALL_COSTS are not the patterns' cheapest and dearest recall")
     if any(source == "recalled_attunement" for source, _ in ec.edges()):
         err("economy: a recalled attunement becomes nothing else")
+    # Concordance garden cohort, GC-08 (GC-P113): root-running is RootRunning's TAKE for GIVE and loses; Bifrons's terms and
+    # offerings are the model's.
+    running = text(root / "spirits" / "RootRunning.java")
+    take, give = (re.search(rf"\bint {name} = (\d+);", running) for name in ("TAKE", "GIVE"))
+    modelled_run = {key: (amount, made) for key, _, amount, _, made in ec.CONVERSIONS}.get("root_running")
+    if not take or not give or modelled_run != (int(take.group(1)), int(give.group(1))) or modelled_run[1] >= modelled_run[0]:
+        err(f"economy: root_running is modelled as RootRunning's TAKE for GIVE and gives less than it takes, not {modelled_run}")
+    bifrons = load(DATA / MOD / "concordance" / "pact" / "bifrons.json") or {}
+    upkeep, service = bifrons.get("upkeep", {}), bifrons.get("service", {})
+    if {key: upkeep.get(key) for key in ec.BIFRONS_UPKEEP} != ec.BIFRONS_UPKEEP or service.get("quota") != ec.ROOT_RUNNING_QUOTA \
+            or (service.get("from"), service.get("to")) != ec.ROOT_RUNNING_HOURS:
+        err("economy: Bifrons's upkeep, hours and quota are not concordance/pact/bifrons.json's (tools/concordance_economy.py BIFRONS_UPKEEP)")
+    if (load(DATA / MOD / "tags" / "item" / "bifrons_offerings.json") or {}).get("values", []) != ec.BIFRONS_OFFERINGS \
+            or ec.BIFRONS_OFFERINGS != pa.SPIRITS["bifrons"]["offerings"]["items"]:
+        err("economy: #jugcraft:bifrons_offerings is not BIFRONS_OFFERINGS")
     gaining = ec.gaining_cycles(ec.edges())
     if gaining:
         err(f"economy: a cycle of conversions gives back at least what it took, from {gaining}")
@@ -25654,6 +25911,30 @@ GC06_TESTS = {
 }
 # GC-07 unit 4
 # GC-08 unit 5
+# The garden cohort, GC-08's game tests (check_garden_pacts), by class.
+GC08_TESTS = {
+    "ConcordanceWorkerGameTests": [
+        "aRootRunnerLosesHalfAndMintsNone", "aRootRunnerMeasuresBeforeEachRun", "aRootRunnerNeverTakesWithoutRoom",
+        "aRootRunnerNeverEasesStrain", "aRootRunnerTakesOnlyFromFallowBedsUntilAnswered", "aFullAnswerNeverTakesFromAHeartsBed",
+        "aRootRunnerNeverTouchesAStrangersBed", "aRootRunnerRunsOnlyByNight", "aRootRunnerWaitsForAPresentHolder",
+        "aRootRunnerNeverHoldsNutrients", "bifronsRefusesWithFewerThanTwoBeds", "bifronssFirstObligationIsAFeedingByHand",
+        "aSuspendedBifronsRunsNothing", "aDuplicateBifronsRunsNothing", "bifronssReadingSaysItsNoteAndNamesNoPlayer",
+        "bifronsAnswersEachActionWithHisGesture", "bifronsRisesOnlyWhileSpokenTo", "theKeptPageNamesBifronssLastRun"],
+    "ConcordancePersistenceGameTests": ["theReservesAnswerSurvivesARestart"],
+    "ConcordanceEconomyGameTests": ["rootRunningLeavesNoGainingCycle"],
+}
+
+
+def _ogg_seconds(path):
+    """GC-08: an Ogg Vorbis file's length in seconds: its last page's granule position over its identification header's rate."""
+    data = path.read_bytes() if path.exists() else b""
+    at = data.find(b"\x01vorbis")
+    last = data.rfind(b"OggS")
+    if at < 0 or last < 0:
+        return 0.0
+    rate = int.from_bytes(data[at + 12:at + 16], "little")
+    granule = int.from_bytes(data[last + 6:last + 14], "little")
+    return granule / rate if rate else 0.0
 # GC-09 unit 6
 # GC-04 (GB24): Stolas's Flashjack draws these six zero-thickness box-UV cubes on both faces, as the owner made them (D-D3
 # keeps his geometry byte for byte); the twin rule allows exactly these, so a seventh, in any spirit, fails. Recorded as a

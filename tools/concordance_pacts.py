@@ -102,6 +102,7 @@ WORK = ["star_reckoning", "strain_tending", "verdance_carrying",
         "habitat_reading",
         # GC-07 unit 4
         # GC-08 unit 5
+        "root_running",
         # GC-09 unit 6
         ]
 # The works that serve only their holder (Java: PactParser.HOLDER_ONLY): a definition with one must be "personal".
@@ -115,6 +116,7 @@ SERVICE_CLASSES = {"star_reckoning": "StarReckoning", "strain_tending": "StrainT
                    "habitat_reading": "HabitatReading",
                    # GC-07 unit 4
                    # GC-08 unit 5
+                   "root_running": "RootRunning",
                    # GC-09 unit 6
                    }
 # Java: spirits/PactStatePayload.java (MAX_*), PactSessions.java (TIMEOUT_TICKS), PactMenu.java (RATE_TICKS),
@@ -147,6 +149,13 @@ MAHOGANY = "biomes and tree blocks/mahogany_log.png"
 CYPRESS = "biomes and tree blocks/cypress_leaves.png"
 # GC-07 unit 4
 # GC-08 unit 5
+# Bifrons's body (GC-08; art plan) is painted in the colours of two of the owner's paintings under
+# art/owner-library/originals/Blocks/: catalog files.csv:2013 (the pine log's bark: his roots, mound and man; SHA-256
+# a239df254b764327558f06a24604b5a6091b50016d7b283978258b3160e10d26) and :2071 (the sphalerite: the stones in his roots and
+# his eyes; a32a3989555df6650fdf9a8888d328ffbfea274e0200545b0bd1f04feafe8b23). Colours only are read; no texel, shape or
+# layout is copied.
+PINE = "biomes and tree blocks/pine_log.png"
+SPHALERITE = "biomes and tree blocks/sphalerite.png"
 # GC-09 unit 6
 # Concordance garden cohort, GC-01 (SG11; docs/features/concordance-garden-cohort.md): one row a pact spirit. Its offer
 # (data/jugcraft/concordance/pact/<name>.json), offerings tag, three beats, service term, cues and body are written from
@@ -494,6 +503,105 @@ SPIRITS = {
     },
     # GC-07 unit 4
     # GC-08 unit 5
+    # Concordance garden cohort, GC-08 (Dossier 5; docs/features/bifrons-pact.md): Bifrons, the forty-sixth spirit,
+    # root-running. His body is built (tools/garden_bodies.py): a low mound of roots that rises into a lean man of roots.
+    "bifrons": {
+        "name": "Bifrons",
+        "java": "BifronsEntity",
+        # His box is his low shape (GC-P107): 1.2 long, 0.7 high; risen he is drawn to 1.8 above it (his render row's reach).
+        "entity": {"width": 1.2, "height": 0.7, "eye": 0.5},
+        # He stands on the ground two blocks beside the perch (PactSpiritEntity.Station.BESIDE; GC-P105, unit 3's GC-P67).
+        "station": "beside",
+        # His sign: hanging roots (GC-P107).
+        "sign": "minecraft:hanging_roots",
+        "pact": {
+            "agreement": rid("bifrons_pact"),
+            "research": rid("garden_regard"),
+            "service": {"work": "root_running", "radius": 8, "from": 13000, "to": 23000, "quota": 24},
+            "upkeep": {"offering": rid("bifrons_offerings"), "count": 2, "period_days": 7, "grace_days": 1, "cap": 4},
+            "beneficiaries": "party",
+            "compact": {"items": [{"item": "minecraft:oak_log", "count": 4}, {"item": "minecraft:emerald", "count": 1}],
+                        "resonance": 0},
+        },
+        # His offering (GC-P101): two logs a week, any wood ("A root must remember wood"); a tag of tags (GC-P114).
+        "offerings": {"name": "Bifrons's Offerings", "items": ["#minecraft:logs"]},
+        # His three beats (GC-P100) and the stage direction before the greeting, held to the magic interfaces' limits (spec 1.1
+        # and 1.5: a line at most 18 words, a stage direction at most 8; decided by the session, as Marax's were): the greeting
+        # and the price are the contract's words; the service's line shortened. The rest of the stage direction is shown, not
+        # told: his roots push up in his arrive gesture, and he rises as the screen opens. No source quotation in game.
+        "stage": "A mound of roots stirs beside the perch.",
+        "beats": {
+            "greeting": "A mound of roots stirs beside the perch. \"Pardon the shape. I am Bifrons; I take a better one when "
+                        "spoken to.\"",
+            "service": "\"From full beds to hungry ones I run roots. Half is lost: a root's measure.\"",
+            "price": "\"Two logs a week. A root must remember wood.\"",
+        },
+        # His service's two conditions (GC-S7), the holder near and only what the holder could change by hand, named before
+        # anything is spent, as Buer's, Bathin's and Marax's are.
+        "term": f"Root-running: by night ({workers.clock(13000)} to {workers.clock(23000)}) Bifrons runs one root at a time "
+                "from a full Verdant Bed of yours or your party's in his area (24 nutrients or more; fallow beds only until "
+                "you answer otherwise; never the bed under a Verdant Heart) to the hungriest with room, at least 3 poorer: 2 "
+                "nutrients leave the full bed and 1 reaches the hungry one, the other lost along the root. He measures both "
+                "beds before each run, moves no item and eases no strain. He works only while you are within "
+                f"{workers.PACT['REACH']} blocks of the perch, and never on a bed you could not change by hand",
+        # His cues, in BifronsEntity.SOUND_IDS' order: (subtitle, runtime files). The art plan's event
+        # beast.banana_slug_slime_expand's three mono files (GC-S13), told apart by pitch ("pitch" below; GC-P110).
+        "cues": {
+            "arrive": ("Roots push up beside the perch", ["menagerie/beast/banana_slug_slime_expand_0"]),
+            "listen": ("Bifrons rises to listen", ["menagerie/beast/banana_slug_slime_expand_1"]),
+            "inspect": ("Bifrons measures", ["menagerie/beast/banana_slug_hurt_2"]),
+            "assent": ("Bifrons assents", ["menagerie/beast/banana_slug_slime_expand_1"]),
+            "refuse": ("Bifrons refuses", ["menagerie/beast/banana_slug_hurt_2"]),
+            "depart": ("Bifrons sinks into the ground", ["menagerie/beast/banana_slug_slime_expand_0"]),
+            "work": ("Bifrons runs a root", ["menagerie/beast/banana_slug_slime_expand_0"]),
+        },
+        # The departing file (0.828 s) at 0.6 lasts 1.38 s, within his 1.5 s departure: an entity's sound stops when it is gone.
+        "pitch": {"arrive": 0.8, "listen": 1.3, "inspect": 1.1, "refuse": 0.7, "depart": 0.6, "work": 1.2},
+        # His body (GC-P108, GC-P109): every file built by tools/garden_bodies.py ("built": runtime path -> (the Blocks-folder
+        # paintings it reads, its builder)), written and checked by tools/owner_art.py.
+        "body": {
+            "built": {
+                "geckolib/models/entity/bifrons.geo.json": ((), "garden_bodies.bifrons_model"),
+                "geckolib/animations/entity/bifrons.animation.json": ((), "garden_bodies.bifrons_animations"),
+                "textures/entity/bifrons.png": ((PINE, SPHALERITE), "garden_bodies.bifrons_skin"),
+                "textures/entity/bifrons_glowmask.png": ((PINE, SPHALERITE), "garden_bodies.bifrons_glowmask"),
+            },
+            "scale": 1.0,
+            "render": {"shadow": 0.6, "wide": 0.2, "low": 0.8, "above": 1.3, "glow": True},
+            # His loops (BifronsEntity.Loop) and gestures (BifronsEntity.Gesture), every clip his own; his listening loop
+            # plays his rise once first (BifronsEntity.Loop.LISTEN).
+            "loops": {"idle": "animation.bifrons.idle", "listen": "animation.bifrons.listen", "waiting": "animation.bifrons.waiting",
+                      "suspended": "animation.bifrons.suspended", "astir": "animation.bifrons.astir"},
+            "rise_clip": "animation.bifrons.rise",
+            "rise": 1.0,
+            "gestures": {"arrive": "animation.bifrons.arrive", "inspect": "animation.bifrons.inspect",
+                         "assent": "animation.bifrons.assent", "refuse": "animation.bifrons.refuse",
+                         "depart": "animation.bifrons.depart", "work": "animation.bifrons.work"},
+            # (seconds, (the telling pose's window)): ConcordanceGardenPactClientGameTests freezes the world inside it.
+            "gesture_times": {"arrive": (2.0, (0.5, 1.1)), "inspect": (2.0, (0.5, 1.3)), "assent": (1.5, (0.3, 0.9)),
+                              "refuse": (1.6, (0.3, 1.0)), "depart": (1.5, (0.3, 0.9)), "work": (2.0, (0.4, 1.2))},
+            "loop_lengths": {"idle": 4.0, "listen": 3.0, "waiting": 6.0, "suspended": 6.0, "astir": 1.5},
+            # His listening pose (degrees), risen: chest a little forward, head inclined to his speaker, arms hanging; every
+            # screen gesture starts and ends on it.
+            "attend": {"torso": (2, 0, 0), "head": (8, 0, 0), "arm_left": (0, 0, -6), "arm_right": (0, 0, 6)},
+            # His two shapes (detail a), as scale and position channels of three bones: low, the man shrunk and sunk inside
+            # the mound; risen, the mound drawn in to a pedestal of roots at his feet.
+            "low": {"mass": {"scale": (1, 1, 1)}, "hump": {"scale": (1, 1, 1), "position": (0, 0, 0)},
+                    "body": {"scale": (0.3, 0.3, 0.3), "position": (0, -1, 0)}},
+            "risen": {"mass": {"scale": (0.7, 0.4, 0.7)}, "hump": {"scale": (0.6, 0.3, 0.6), "position": (0, -3, 0)},
+                      "body": {"scale": (1, 1, 1), "position": (0, 0, 0)}},
+            # The texels his glowmask lights: two eyes on the risen face, two in the roots (garden_bodies.BIFRONS_FACE, _HUMP_EYES).
+            "eye_texels": ((19, 29), (22, 29), (68, 11), (71, 11)),
+            # Detail (b): the sign each bed of a measure shows (tools/concordance_signs.py SIGNS; Java BifronsEntity.MARK): a
+            # preparation's glyphs drawn in to the bed. Nothing in concordance/ sends particles of its own (decided by the
+            # session over the specification's ring of rooted-dirt specks, which check_signs refuses).
+            "mark": "gather",
+            "shots": ["jugcraft_garden_bifrons_idle", "jugcraft_garden_bifrons_listen", "jugcraft_garden_bifrons_waiting",
+                      "jugcraft_garden_bifrons_suspended", "jugcraft_garden_bifrons_inspect", "jugcraft_garden_bifrons_assent",
+                      "jugcraft_garden_bifrons_refuse", "jugcraft_garden_bifrons_work", "jugcraft_garden_bifrons_depart",
+                      "jugcraft_garden_bifrons_arrive"],
+        },
+    },
     # GC-09 unit 6
 }
 # Derived (keep these names: tools/concordance.py, tools/owner_art.py, tools/stolas_body.py and check_mod_data read them).
@@ -515,6 +623,7 @@ PERCH_TOOLTIP = ("Use: invite a pact spirit whose Regard you understand (Stolas 
                  "blocks"
                  # GC-07 unit 4
                  # GC-08 unit 5
+                 f"; Bifrons two awake Verdant Beds of yours within {SPIRITS['bifrons']['pact']['service']['radius']} blocks"
                  # GC-09 unit 6
                  "); or keep the pact seated here. Break it and the pact stays yours, without its perch.")
 # Polished deepslate, not a slab: the progression graph follows only listed vanilla items (a slab is not in
@@ -894,6 +1003,7 @@ SERVICE_NAMES = {"gather": "Gathering", "courier": "Carrying its post's requests
                  "habitat_reading": "Habitat reading",
                  # GC-07 unit 4
                  # GC-08 unit 5
+                 "root_running": "Root-running",
                  # GC-09 unit 6
                  }
 JADE_PROVIDERS = {"pact_perch": "Pact Perch", "spirit_anchor": "Spirit Anchor"}
@@ -1111,6 +1221,39 @@ SERVICE_WORDS = {
     },
     # GC-07 unit 4
     # GC-08 unit 5
+    # GC-08 (Dossier 5 items 2, 3, 5 and 6; GC-P102 to GC-P106, GC-P112): Bifrons's root-running. His server sentences stay
+    # whole (each glance's tip, its narration and Jade's extended view); the restyled pages draw tools/magic_ui.py's glances.
+    "root_running": {
+        "messages": {
+            "missing": "\"A root runs between two places. Show me two.\" Bifrons comes only where two awake Verdant Beds you "
+                       "keep lie within %s blocks of the perch",
+            "row.service": "Root-running: %s of %s runs this game day, each 2 nutrients taken from a full bed and 1 given to "
+                           "a hungry one; the other is lost along the root",
+            "row.asleep": "By day he rests in the ground: he runs roots from %s to %s",
+            "row.last": "Last: %s nutrients taken from the bed at %s, %s given to the bed at %s, %s lost along the root",
+            "row.reserved": "Keeping %s growing beds as reserves, as you answered: he draws only from fallow beds",
+            "matter.reserves": "\"Your only full beds are growing. Shall I draw from them?\" (the bed at %s holds %s "
+                               "nutrients and a crop)",
+        },
+        "screen": {
+            "heading": "Root-running",
+            "about": "Bifrons works by himself, by night: the rows above say how many runs he has made today and his last. "
+                     "Before each run he measures both beds; a bed with a crop on it is a reserve until you answer.",
+        },
+        # Jade shows a reading to whoever looks, so his notes are in the third person, as Bathin's are.
+        "notes": {
+            "reserves": "Growing full beds: %s, waiting for his holder's answer at the perch",
+            "asleep": "Asleep: he runs roots only by night",
+            "no_full": "Nothing to run: no bed he may draw from holds 24 nutrients and 3 more than the hungriest",
+            "no_hungry": "Nowhere to run it: every bed in his area he may give to is full",
+        },
+        "answers": ["no_two_beds"],
+        # The accord machinery's words: his answers, the safe course first (Java RootRunning.ACCORDS, in this order; append
+        # only; each at most ACCORD_MAX characters), his matter in general and the one his complication raises (Jade's words).
+        "accords": {"fallow": "Fallow beds only", "full": "Any full bed"},
+        "question": "\"Which beds are reserves?\" (when the only full beds of yours he could draw from have crops growing on them)",
+        "matters": {"reserves": "His matter: the only full beds here are growing"},
+    },
     # GC-09 unit 6
 }
 MESSAGES.update({f"pact.{work}.{key}": text for work, words in SERVICE_WORDS.items() for key, text in words["messages"].items()})
@@ -1176,4 +1319,20 @@ GARDEN_CLIENT_SHOTS += ["jugcraft_garden_marax_nothing_grows", "jugcraft_garden_
                         "jugcraft_garden_marax_end_confirm", "jugcraft_garden_marax_ended"]
 # GC-07 unit 4
 # GC-08 unit 5
+# ------------------------------------------------------------------------------------------- garden cohort, GC-08: Bifrons
+ART_SOUNDS["bifrons"] = ["menagerie/beast/banana_slug_slime_expand_0", "menagerie/beast/banana_slug_slime_expand_1",
+                         "menagerie/beast/banana_slug_hurt_2"]
+# What ConcordanceGardenPactClientGameTests photographs of Bifrons besides his body shots (GC-P117).
+GARDEN_CLIENT_SHOTS += ["jugcraft_garden_bifrons_no_two_beds", "jugcraft_garden_bifrons_chooser",
+                        "jugcraft_garden_bifrons_conversation", "jugcraft_garden_bifrons_terms",
+                        "jugcraft_garden_bifrons_terms_scale4", "jugcraft_garden_bifrons_conversation_scale4",
+                        "jugcraft_garden_bifrons_terms_small", "jugcraft_garden_bifrons_conversation_small",
+                        "jugcraft_garden_bifrons_refused", "jugcraft_garden_bifrons_kept", "jugcraft_garden_bifrons_by_night",
+                        "jugcraft_garden_bifrons_rising", "jugcraft_garden_bifrons_measure_source",
+                        "jugcraft_garden_bifrons_measure_destination", "jugcraft_garden_bifrons_run_row",
+                        "jugcraft_garden_bifrons_matter", "jugcraft_garden_bifrons_matter_scale4",
+                        "jugcraft_garden_bifrons_matter_small", "jugcraft_garden_bifrons_answered", "jugcraft_garden_bifrons_jade",
+                        "jugcraft_garden_bifrons_faces_east", "jugcraft_garden_bifrons_faces_south",
+                        "jugcraft_garden_bifrons_faces_west", "jugcraft_garden_bifrons_faces_north",
+                        "jugcraft_garden_bifrons_end_confirm", "jugcraft_garden_bifrons_ended"]
 # GC-09 unit 6

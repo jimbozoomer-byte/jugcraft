@@ -108,6 +108,12 @@ WEIGHTS = {
                                              + 260
                                              # GC-07 unit 4
                                              # GC-08 unit 5
+                                             # GC-08 adds Bifrons at the same perch: the chooser twice, his conversation by
+                                             # keyboard at three sizes, a refused and a sealed acceptance, his two shapes by
+                                             # night, one run frozen at each beat, the run's page row, his matter asked and
+                                             # answered, Jade, ten poses, four bearings and the ending: 36 shots and their
+                                             # waits, about 240 s more (an estimate, not a measurement).
+                                             + 240
                                              # GC-09 unit 6
                                              ),
     "JugcraftServerClientGameTests": 90,

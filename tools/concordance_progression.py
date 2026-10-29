@@ -207,6 +207,8 @@ VANILLA_SOURCES = {
     "minecraft:dark_oak_planks": ("craftable", "dark oak logs, from trees that regrow", "", ""),
     "minecraft:dark_oak_slab": ("craftable", "dark oak planks", "", ""),
     "minecraft:dark_oak_log": ("renewable", "dark oak trees, grown from saplings", "", ""),
+    # GC-08: Bifrons's compact (4 oak logs); his offering, #minecraft:logs, is followed through VANILLA_TAGS.
+    "minecraft:oak_log": ("renewable", "oak trees, grown from saplings", "", ""),
     "minecraft:dirt": ("renewable", "rooted dirt under azalea trees; coarse dirt tilled", "", ""),
     "minecraft:glass_bottle": ("craftable", "glass, from sand", "", ""),
     "minecraft:glass": ("craftable", "sand smelted", "", ""),
