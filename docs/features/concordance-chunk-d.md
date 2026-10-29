@@ -1624,6 +1624,16 @@ Twenty-two findings were confirmed and fixed; nine were rejected and left unchan
   the level's time moves only while the tick rate runs normally), so the sweep, which ends a departure at its game time
   (`departAt`), holds a frozen departure; and GeckoLib's animation clock is the render state's `ageInTicks`
   (`EntityRenderStateMixin:46`). No test checks either by itself.
+- **Since the magic interfaces' unit 2** ([magic-interfaces.md](magic-interfaces.md), "Unit 2: the roster as relic cards,
+  and short Jade lines"): the roster is drawn on the magic layer as two columns of relic cards: the portrait in its gilded
+  card frame, the name, the state's mark and a few words (its row's own waiting reason, short), one fact with its item, the
+  kind, and its actions as the kit's icons. Every sentence of a row stays its narration and its tip; the payloads, the
+  requests, the rate gate and the server's decisions are unchanged; ending still asks first, now on the scroll, the
+  keyboard on Keep it. The portraits are the layer's (`MagicPortraits`; `RosterScreen.Portraits` is gone). A page holds
+  eight cards from 240 tall, six at 320x180. `check_roster_screen` follows the screen onto the layer, and the client test
+  holds each shot to the roster's budget of 70 words drawn with no card's words cut. Since that unit's review the
+  server's answer sits in the title row (never pushing the cards), "more not listed" in the footer, a click on a card's
+  action presses it, Resume draws a play triangle, and a familiar or construct not loaded says so.
 
 ### D-08. The contrasting service: the workshop hand (unit 4)
 

@@ -19471,7 +19471,9 @@ def check_ecology(co, root, lang, registered, research):
             or 'snapshot.putInt("strain", strain)' not in snapshot:
         err("ConcordanceDataProvider.bedSnapshot: the habitat stays the five factors, and the strain is its own value (C-08)")
     jade_client = java("compat/JugcraftJadeClient.java", CLIENT_JAVA_ROOT)
-    if "Factor.fromId(" not in _java_body(jade_client, "private static Component reasonText(") or '"compose.jugcraft.ecology.strain"' not in jade_client:
+    # The strain's whole line in strain() itself (the magic interfaces unit 2's review: the short lines repeat the key).
+    if "Factor.fromId(" not in _java_body(jade_client, "private static Component reasonText(") \
+            or '"compose.jugcraft.ecology.strain"' not in _java_body(jade_client, "private static void strain("):
         err("JugcraftJadeClient: a reason with no factor is shown as sent, and a bed's strain has its line (C-08)")
     if "bed.mixedLine(organism)" not in _java_body(java("encyclopedia/InspectPage.java"), "private static void garden("):
         err("InspectPage.garden: a mixed bed's bonus is on the page (C-P58)")
@@ -20837,7 +20839,10 @@ def check_pacts(co, root, lang, registered, research):
     reading_java = java("spirits/PactReading.java")
     if reading_java.count("matter(reading, level, ") != 2 or "PactAccords.matter(level, perch, record, now)" not in _java_body(reading_java, "private static void matter("):
         err("PactReading: both readings carry the matter and the answer (GC-P48)")
-    jade_text = (CLIENT_JAVA_ROOT / "compat" / "JugcraftJadeClient.java").read_text(encoding="utf-8")
+    # In the whole reading itself (pactLines, Jade's details; the magic interfaces unit 2's review: the short lines repeat
+    # these keys).
+    jade_text = _java_body((CLIENT_JAVA_ROOT / "compat" / "JugcraftJadeClient.java").read_text(encoding="utf-8"),
+                           "private static void pactLines(")
     if '"tooltip.jugcraft.concordance.jade.pact.matter." + service + "." + matter' not in jade_text \
             or '"tooltip.jugcraft.concordance.jade.pact.accord"' not in jade_text:
         err("JugcraftJadeClient: the matter and the answer kept, in its work's words (GC-P48)")
@@ -21004,7 +21009,8 @@ def check_pacts(co, root, lang, registered, research):
                 err(f"spirits/{cls}.java: its reason {answer} is its own constant, never one of PactMenu's ANSWERS")
     # Jade's note: two keys appended, both readings carry it by the world's clock, the client words it by its work.
     reading = java("spirits/PactReading.java")
-    jade = (CLIENT_JAVA_ROOT / "compat" / "JugcraftJadeClient.java").read_text(encoding="utf-8")
+    # In the whole reading itself (pactLines; the magic interfaces unit 2's review: the short lines repeat the key).
+    jade = _java_body((CLIENT_JAVA_ROOT / "compat" / "JugcraftJadeClient.java").read_text(encoding="utf-8"), "private static void pactLines(")
     if pa.JADE_KEYS[10:12] != ["note", "note_count"] or reading.count("note(reading, level, ") != 2 \
             or "level.getOverworldClockTime()" not in _java_body(reading, "private static void note(") \
             or '"tooltip.jugcraft.concordance.jade.pact.note." + service + "." + note' not in jade:
@@ -22557,7 +22563,7 @@ def check_magic_ui(lang):
         if str(ASSETS / (target + ".mcmeta")) not in expected:
             err(f"tools/owner_art.py: does not write {target}.mcmeta (magic_ui.MCMETA)")
     names = ("MagicArt", "MagicTheme", "MagicLayout", "MagicScreen", "MagicButton", "MagicText", "MagicChip", "MagicStacks",
-             "MagicPortrait", "MagicPortraits", "PactGlance", "RosterGlance")
+             "MagicPortrait", "MagicPortraits", "PactGlance", "RosterGlance", "MagicGlance")
     sources = {}
     for name in names:
         path = CLIENT_JAVA_ROOT / f"{name}.java"
@@ -22614,6 +22620,21 @@ def check_magic_ui(lang):
         namespace, path = item.split(":", 1)
         if namespace == MOD and f"item.{MOD}.{path}" not in lang and f"block.{MOD}.{path}" not in lang:
             err(f"tools/magic_ui.py: the icon {item} names no item of Jugcraft's")
+    # Unit 2: a whole sentence's short form and its mark (MagicGlance), as tools/magic_ui.py's SENTENCES and SENTENCE_MARKS.
+    sentence = sources.get("MagicGlance", "")
+    constants = dict(re.findall(r'private static final String (\w+) = "([^"]+)";', sentence))
+    entries = re.findall(r'Map\.entry\((?:(\w+) \+ )?"([^"]+)", MagicArt\.Mark\.(\w+)\)', sentence)
+    marks = {constants.get(prefix, "") + key: mark.lower() for prefix, key, mark in entries}
+    # Every entry read (the unit's review: one the pattern misses, a constant it does not know, would go unchecked).
+    if sentence.count("Map.entry(") != len(entries) or len(marks) != len(entries):
+        err(f"client/MagicGlance.MARKS: {sentence.count('Map.entry(')} entries, {len(entries)} read as a sentence's key and its mark, "
+            f"{len(marks)} keys (each entry read, none twice)")
+    if marks != mu.SENTENCE_MARKS:
+        err("client/MagicGlance.MARKS: its marks are not tools/magic_ui.py's SENTENCE_MARKS "
+            f"(Java only: {sorted(set(marks.items()) - set(mu.SENTENCE_MARKS.items()))[:4]}, "
+            f"Python only: {sorted(set(mu.SENTENCE_MARKS.items()) - set(marks.items()))[:4]})")
+    if f'static final String PREFIX = "{mu.SENTENCE_PREFIX}";' not in sentence:
+        err(f"client/MagicGlance.PREFIX is not tools/magic_ui.py's SENTENCE_PREFIX ({mu.SENTENCE_PREFIX})")
     glance = sources.get("PactGlance", "")
     for prefix in ('"screen.jugcraft.pact.glance." + rest', '"screen.jugcraft.roster.glance." + rest',
                    '"screen.jugcraft.pact.glance." + server', '"screen.jugcraft.pact.glance.card."',
@@ -22634,6 +22655,47 @@ def check_magic_ui(lang):
         text = (CLIENT_JAVA_ROOT / f"{name}.java").read_text(encoding="utf-8")
         if "new MagicButton(" not in text or "new MagicText(" not in text or "BookArt.Tab" in text or "BookArt.Paragraph" in text:
             err(f"client/{name}.java: a screen on the magic layer builds with MagicButton and MagicText (no BookArt.Tab or Paragraph)")
+    # Unit 2 (spec 2.14): the chooser's pieces are the layer's and the roster's too (the gold title over its underline, a
+    # state's mark beside its word, a lit card's light); Jade's lines on the pact perch, the Spirit Anchor, the spirits,
+    # beds and living devices are short (MagicGlance, a mark or item first, each narrating its whole sentence) unless
+    # Jade's details are asked for, which show every line whole as before.
+    pact_screen = (CLIENT_JAVA_ROOT / "PactScreen.java").read_text(encoding="utf-8")
+    roster_screen = (CLIENT_JAVA_ROOT / "RosterScreen.java").read_text(encoding="utf-8")
+    for where, text in (("PactScreen", pact_screen), ("RosterScreen", roster_screen)):
+        for needle in ("MagicArt.title(g, font, heading, ", "MagicArt.state(g, font, ", "MagicArt.CARD_LIGHT"):
+            if needle not in text:
+                err(f"client/{where}.java: the chooser's and the roster's shared pieces come from the layer ({needle})")
+    jade = (CLIENT_JAVA_ROOT / "compat" / "JugcraftJadeClient.java").read_text(encoding="utf-8")
+    for needle in ('data.getCompound("pact").ifPresent(pact -> pactGlances(tooltip, pact, false));',
+                   "accessor.getServerData().getCompound(provider.dataKey).ifPresent(data -> pactGlances(tooltip, data, true));",
+                   "bedGlances(tooltip, data, capacity);", "tooltip.append(JadeUI.text(shown).narration(full));",
+                   "line(tooltip, mark == null ? null : sprite(mark), MagicGlance.of(full), full);"):
+        if needle not in jade:
+            err(f"client/compat/JugcraftJadeClient.java: Jade's short lines (spec 1.1, 2.14) are drawn ({needle})")
+    if jade.count("accessor.showDetails()") < 4:
+        err("client/compat/JugcraftJadeClient.java: the spirit, the perch and anchor, the bed and the device each keep their whole "
+            "lines for Jade's details (accessor.showDetails())")
+    # The unit's review: which view is short, branch by branch: Jade's details draw the whole lines (the spirit's status and
+    # reading, the perch's and anchor's reading, the device's status, the crop's verdict), the plain view the short ones;
+    # a short line narrates its whole sentence, never its glance.
+    for needle in ("if (details) {\n\t\t\t\t\ttooltip.add(status);",
+                   'if (details) {\n\t\t\t\t\tdata.getCompound("pact").ifPresent(pact -> pactLines(tooltip, pact));',
+                   "if (accessor.showDetails()) {\n\t\t\t\taccessor.getServerData().getCompound(provider.dataKey).ifPresent(data -> pactLines(tooltip, data));",
+                   "if (capacity >= 0 && !accessor.showDetails()) {\n\t\t\t\t\t// Magic interfaces unit 2",
+                   "if (accessor.showDetails()) {\n\t\t\t\t\t\ttooltip.add(status);",
+                   'if (details) {\n\t\t\t\t\tverdict(tooltip, growth, String.join("\\n", bed.reasons()));'):
+        if needle not in jade:
+            err(f"client/compat/JugcraftJadeClient.java: Jade's details show the whole lines and the plain view the short ones ({needle!r})")
+    if jade.count(".narration(full)") != 2 or ".narration(shown)" in jade:
+        err("client/compat/JugcraftJadeClient.java: each short line narrates its whole sentence (.narration(full)), never its glance")
+    if jade.count("tooltip.add(status);") != 2 or jade.count("glance(tooltip, status);") != 2:
+        err("client/compat/JugcraftJadeClient.java: a spirit's and a device's status is whole only in Jade's details "
+            "(tooltip.add(status), twice) and short in the plain view (glance(tooltip, status), twice)")
+    glances = _java_body(jade, "private static void pactGlances(")
+    if "} else if (grace >= 0) {" not in glances or '} else if (waiting.equals("lost")) {' not in glances \
+            or "pactLines(" in glances:
+        err("JugcraftJadeClient.pactGlances: a kept pact's short reading is at most five lines (with whom, state, service, the "
+            "next offering or else the grace, and one more: the matter, else why it waits, else its note, else the answer)")
     for name, text in sources.items():
         for key in re.findall(r'"((?:screen|message)\.jugcraft\.[a-z_.]+[a-z_])"', text):
             if key not in lang:
@@ -22649,14 +22711,22 @@ def check_magic_ui(lang):
                 "SHA-256 and its own change (python3 tools/owner_art.py --provenance magic_ui)")
 
 
+def mu_roster_budget():
+    """The roster's word budget (spec 1.1: a page of eight cards, its title, page and footer)."""
+    return 70
+
+
 def check_roster_screen(co, lang):
     """Concordance Chunk D, D-07 client (D-S11; D-S21): the roster screen. Only RosterClient sends a roster request: four
     numbers naming a listed row and its revision; answers are read aloud; its key is not bound at first and opens from the
     game only. The screen is native, narrated and in-game (subtitles over it; no text box, chat, command, vanilla Dialog or
     literal words), fits the smallest GUI (ScreenKit.Fitted; the screen fit check opens it), pages with Page Up and Down,
     ends only from a confirmation whose keyboard starts on Keep it, marks each answer (PactScreen.Verdict) and draws a mark
-    of its own for every icon the payload names, beside its words. Every state and action has its words. The client class
-    that shows it is registered and takes its pictures."""
+    for every icon the payload names, beside its words. Every state and action has its words. The client class that shows
+    it is registered and takes its pictures. Since the magic interfaces' unit 2 (docs/features/magic-interfaces.md, spec
+    2.14) it is on the magic layer: MagicScreen (its fit, subtitles and in-game rule), its relic cards' portraits through
+    MagicPortrait and MagicPortraits, its marks the family's, its ending asked on the scroll, its shots held to the roster's
+    word budget with no card's words cut."""
     ro = co.roster
 
     def text(path):
@@ -22683,23 +22753,31 @@ def check_roster_screen(co, lang):
     for forbidden in ("new EditBox(", "sendCommand(", "sendChat(", "server.dialog", "Component.literal("):
         if forbidden in screen + client:
             err(f"roster screen: native, command-free, its words the generator's (D-S21): no {forbidden}")
-    for needle in ("implements ScreenKit.Fitted", "public ScreenRectangle panelArea()", "BookArt.Paragraph", "BookArt.Tab",
-                   "new ComposerScroll(", "protected Component getUsageNarration()", "InventoryScreen.extractEntityInInventoryFollowsMouse(",
+    magic_screen = text(CLIENT_JAVA_ROOT / "MagicScreen.java")
+    for needle in ("extends MagicScreen", "MagicLayout.roster(width, height)", "openBody(", "protected Component getUsageNarration()",
+                   "MagicPortrait.draw(", "MagicPortraits.of(row.portrait())", "MagicPortraits.clear();",
                    f"ROWS_PER_PAGE = {ro.ROWS_PER_PAGE};", "InputConstants.KEY_PAGEDOWN", "InputConstants.KEY_PAGEUP",
-                   "minecraft.gui.hud.extractDeferredSubtitles()", "public boolean isInGameUi()", "new PactScreen.Verdict("):
+                   "new PactScreen.Verdict(", "new MagicButton(", "new MagicText(", "RosterGlance.fact(row, rows)",
+                   "RosterGlance.state(row, ", "public List<String> cut()"):
         if needle not in screen:
-            err(f"client/RosterScreen.java: a native, narrated, in-game, paged screen that fits the smallest GUI, draws portraits, "
-                f"marks its answers and keeps subtitles ({needle})")
+            err(f"client/RosterScreen.java: a native, narrated, in-game, paged screen on the magic layer that fits the smallest GUI, "
+                f"draws portraits, marks its answers and keeps subtitles ({needle})")
+    for needle in ("implements ScreenKit.Fitted", "public ScreenRectangle panelArea()", "new ComposerScroll("):
+        if needle not in magic_screen:
+            err(f"client/MagicScreen.java: the magic screens fit the smallest GUI and scroll their body ({needle})")
+    if "class Portraits" in screen or "BookArt." in screen or "InventoryScreen" in screen:
+        err("client/RosterScreen.java: its portraits are the magic layer's (MagicPortrait, MagicPortraits), not a cache or BookArt of its own")
     act = _java_body(screen, "private void act(")
     confirm = _java_body(screen, "private void confirmEnd(")
     if "if (action == RosterRequestPayload.END) {\n\t\t\tconfirmEnd(row);" not in act \
-            or "new KeepFirstConfirmScreen(" not in confirm or "RosterClient.request(RosterRequestPayload.END, row.id(), row.revision())" not in confirm \
-            or screen.count("RosterRequestPayload.END, row.id(), row.revision())") != 1:
+            or "KeepFirstConfirmScreen.magic(" not in confirm \
+            or "if (yes) {\n\t\t\t\tRosterClient.request(RosterRequestPayload.END, row.id(), row.revision());" not in confirm \
+            or screen.count("RosterRequestPayload.END, row.id(), row.revision())") != 1 or "button.active = free;" not in screen:
         err("client/RosterScreen.java: an agreement is ended only from its confirmation's yes, the keyboard starting on Keep it")
-    marks = _java_body(screen, "static void mark(")
+    marks = _java_body(screen, "static MagicArt.Mark mark(int icon)")
     for name in ro.ICONS:
-        if f"case RosterStatePayload.{name.upper()}" not in marks:
-            err(f"client/RosterScreen.java mark: the icon {name} has a mark of its own beside its words (never colour alone)")
+        if not re.search(rf"\bRosterStatePayload\.{name.upper()}\b", marks):
+            err(f"client/RosterScreen.java mark: the icon {name} has its mark (the family's, spec 2.5) beside its words (never colour alone)")
     for key in re.findall(r'"((?:screen|key|message)\.jugcraft\.[a-z_.]+)"', screen + client):
         if not key.endswith(".") and key not in lang:
             err(f"roster screen: missing lang {key}")
@@ -22711,9 +22789,12 @@ def check_roster_screen(co, lang):
         for key in pair:
             if f"screen.{MOD}.roster.{key}" not in lang:
                 err(f"client/RosterScreen.java: missing lang screen.{MOD}.roster.{key} (chosen in a conditional)")
-    # The unit review (D4): as for the pact screen, the roster is an in-game screen whose subtitles draw over it.
-    if "minecraft.gui.hud.extractDeferredSubtitles();" not in _java_body(screen, "public void extractBackground(") \
-            or "return true;" not in _java_body(screen, "public boolean isInGameUi("):
+    # The unit review (D4): as for the pact screen, the roster is an in-game screen whose subtitles draw over it (read from
+    # the class that declares each: since unit 2, MagicScreen).
+    background = screen if "public void extractBackground(" in screen else magic_screen
+    in_game = screen if "public boolean isInGameUi(" in screen else magic_screen
+    if "minecraft.gui.hud.extractDeferredSubtitles();" not in _java_body(background, "public void extractBackground(") \
+            or "return true;" not in _java_body(in_game, "public boolean isInGameUi("):
         err("client/RosterScreen.java: an in-game screen (isInGameUi true) that draws his subtitles over its background")
     for action in ro.ACTIONS[1:]:
         for suffix in ("", ".hint"):
@@ -22735,6 +22816,35 @@ def check_roster_screen(co, lang):
     for name in ro.CLIENT_SHOTS:
         if f'"{name}"' not in shots:
             err(f"ConcordanceRosterClientGameTests: takes {name}")
+    # Unit 2 (spec 1.1, 4.5): before its shots the settled roster is held to its budget of 70 words drawn, with no card cut.
+    reads = _java_body(shots, "private static void reads(")
+    if f"private static final int BUDGET = {mu_roster_budget()};" not in shots or "screen(client).cut()" not in shots \
+            or "screen.settled() && !RosterClient.waiting()" not in shots or shots.count("reads(context, ") < 9 \
+            or "check(words <= BUDGET," not in reads or "check(cut.isEmpty()," not in reads \
+            or "check(!asked.isEmpty() && words(asked) <= CONFIRM_BUDGET, " not in shots \
+            or 'cut.add("row:" + row.id());' not in screen:
+        err("ConcordanceRosterClientGameTests: each shot of the roster reads the settled page within its 70 words, no card cut "
+            "(reads, settled), and the end confirmation within its 25")
+    # The unit's review: the page holds itself to the same budget (a page over it drops its cards' kinds), a click on an
+    # action reaches it and not its card, and the full roster's last page and a page of requests answered are read.
+    if f"private static final int BUDGET = {mu_roster_budget()};" not in screen or "if (words > BUDGET) {" not in screen \
+            or "return super.isMouseOver(mouseX, mouseY) && !overAction(mouseX, mouseY);" not in screen \
+            or "if (isHovered && overAction(mouseX, mouseY)) {" not in screen:
+        err("client/RosterScreen.java: a page keeps to its 70 words (its cards' kinds go first), and the mouse over an action "
+            "reaches the action, not its card")
+    # The answer, the notes and "more" pinned to the title row and the footer, never in the body (they pushed the cards
+    # out of it), and Resume its own icon, not Refresh's.
+    if 'pin("result", ' not in screen or 'pin("more", ' not in screen or 'inBody("result"' in screen \
+            or "onScreen(key, widget, room);" not in _java_body(screen, "private void pin(") \
+            or "case RosterRequestPayload.RESUME -> MagicButton.Look.ACTION_RESUME;" not in screen:
+        err("client/RosterScreen.java: the answer sits in the title row and \"more\" in the footer, each held there, and "
+            "Resume draws its own icon (the unit 2 review)")
+    if "context.getInput().pressMouse(InputConstants.MOUSE_BUTTON_LEFT);\n\t\tcontext.waitForScreen(KeepFirstConfirmScreen.class);" not in shots \
+            or 'screen(client).inView("more")' not in shots or "requestsAnswered(context, server);" not in shots:
+        err("ConcordanceRosterClientGameTests: a click on End asks first, the last page's \"more\" is in view, and a page of "
+            "requests is read with an answer (the unit 2 review)")
+    if "check(drawn.stream().anyMatch(text -> text.startsWith(card))" not in text(tests / "ConcordanceGardenPactClientGameTests.java"):
+        err("ConcordanceGardenPactClientGameTests: Bathin's roster card draws his state short (\"Bathin Awaits answer\")")
     # D-09 (D-P135; the unit 5 critique): the hand at work is walked in the run itself, after the recovery and the cancel and
     # before the full roster (which files all sixteen of the holder's open requests). Read without comments, so a step
     # commented out no longer counts (the unit 5 review).

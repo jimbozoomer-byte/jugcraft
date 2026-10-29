@@ -81,7 +81,7 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 	private static final int[] COLUMNS = {0, 355, 680, 1000};
 	/** The scroll's stain colour, behind the chosen pattern; the light outline of a lit card (spec 2.8). */
 	private static final int STAIN = 0xFFE2BA97;
-	private static final int CARD_LIGHT = 0xFFFFFCAB;
+	private static final int CARD_LIGHT = MagicArt.CARD_LIGHT;
 	/** The wood's brown, the price row's rule. */
 	private static final int WOOD = 0xFFB17245;
 	private static final int FOOTER_WIDEST = 76;
@@ -1467,9 +1467,7 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 	@Override
 	protected void extractChrome(GuiGraphicsExtractor g, int mouseX, int mouseY, float delta) {
 		if (surface == Surface.CHOOSER) {
-			int y = titleY();
-			g.text(font, heading, (width - font.width(heading)) / 2, y, MagicTheme.GOLD, true);
-			MagicArt.underline(g, (width - 132) / 2, y + 10, 132, MagicTheme.GOLD);
+			MagicArt.title(g, font, heading, (width - font.width(heading)) / 2, titleY(), 132);
 			return;
 		}
 		ScreenRectangle header = layout.header();
@@ -1603,14 +1601,25 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 		}
 
 		Verdict(Component full, Component shown, boolean done, Font font, int width, int colour, boolean shadow) {
+			this(full, shown, done, font, width, colour, shadow, false);
+		}
+
+		/**
+		 * As above; {@code oneLine}: on one line, cut with "…" when its words need more, the whole sentence then its tip (the
+		 * roster's title row holds its answer).
+		 */
+		Verdict(Component full, Component shown, boolean done, Font font, int width, int colour, boolean shadow, boolean oneLine) {
 			super(0, 0, Math.max(30, width), 1, full);
 			this.font = font;
 			this.colour = colour;
 			this.refused = !done;
 			this.shadow = shadow;
-			lines = font.split(shown, getWidth() - MagicArt.Mark.CROSS.width - 6);
-			drawn = shown.getString();
-			tip = drawn.equals(full.getString()) ? List.of() : font.split(full, 200);
+			int room = getWidth() - MagicArt.Mark.CROSS.width - 6;
+			List<FormattedCharSequence> split = font.split(shown, room);
+			boolean cut = oneLine && split.size() > 1;
+			lines = cut ? List.of(MagicArt.fit(font, shown, room)) : split;
+			drawn = cut ? MagicArt.fit(font, shown.getString(), room) : shown.getString();
+			tip = !cut && drawn.equals(full.getString()) ? List.of() : font.split(full, 200);
 			setHeight(Math.max(MagicArt.Mark.HEIGHT + 2, Math.max(1, lines.size()) * (font.lineHeight + 2) + 1));
 		}
 
@@ -1842,9 +1851,7 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 			int sy = py + MagicArt.PLATE_HEIGHT + 4;
 			MagicArt.Mark mark = choice.ready() ? MagicArt.Mark.TICK : MagicArt.Mark.LOCK;
 			Component state = choice.ready() ? ui("short.ready") : ui("short.not_yet");
-			int w = mark.width + 3 + font.width(state);
-			MagicArt.mark(g, mark, cx - w / 2, sy - 1);
-			g.text(font, state, cx - w / 2 + mark.width + 3, sy, choice.ready() ? MagicTheme.GOOD : MagicTheme.LAVENDER, true);
+			MagicArt.state(g, font, mark, state, cx - MagicArt.stateWidth(font, mark, state) / 2, sy, choice.ready() ? MagicTheme.GOOD : MagicTheme.LAVENDER);
 			int ry = sy + 11;
 			for (FormattedCharSequence line : reason) {
 				g.text(font, line, cx - font.width(line) / 2, ry, MagicTheme.LAVENDER, true);

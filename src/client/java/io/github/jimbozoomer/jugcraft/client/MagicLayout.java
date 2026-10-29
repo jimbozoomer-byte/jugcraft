@@ -66,6 +66,37 @@ record MagicLayout(int screenWidth, int screenHeight, boolean compact, boolean n
 		return new MagicLayout(width, height, true, narrow, new ScreenRectangle(x, y, w, footer.bottom() - y), header, body, footer);
 	}
 
+	/** The roster's widest card (unit 2, spec 2.14), the room between its two columns and its tallest panel. */
+	static final int ROSTER_CARD = 224;
+	static final int ROSTER_GAP = 6;
+	static final int ROSTER_HEIGHT = 262;
+	/** The roster's title row: its gold title and the page, over the cards. */
+	static final int ROSTER_TITLE = 18;
+
+	/**
+	 * The roster's layout (unit 2, spec 2.14) for a {@code width} x {@code height} GUI: two columns of cards as wide as the
+	 * screen allows (at most {@value #ROSTER_CARD} each, {@value #ROSTER_GAP} apart, 8 from the screen's edges when narrow,
+	 * 12 when wide), the title row, the cards' scroll and a footer of plates, at most {@value #ROSTER_HEIGHT} tall and
+	 * centred. Its paging plates are in the footer and nothing sits beside the panel (narrow, in this record's terms);
+	 * compact below 240 tall.
+	 */
+	static MagicLayout roster(int width, int height) {
+		int card = Math.max(40, Math.min(ROSTER_CARD, (width - (width < WIDE_FROM ? 8 : 24) - ROSTER_GAP) / 2));
+		int w = 2 * card + ROSTER_GAP;
+		int x = (width - w) / 2;
+		int h = Math.max(ROSTER_TITLE + 1 + 24 + 3 + FOOTER, Math.min(height - 6, ROSTER_HEIGHT));
+		int y = Math.max(0, (height - h) / 2);
+		ScreenRectangle header = new ScreenRectangle(x, y, w, ROSTER_TITLE);
+		ScreenRectangle footer = new ScreenRectangle(x, y + h - FOOTER, w, FOOTER);
+		ScreenRectangle body = new ScreenRectangle(x, header.bottom() + 1, w, Math.max(24, footer.top() - 3 - header.bottom() - 1));
+		return new MagicLayout(width, height, height < FULL_FROM, true, new ScreenRectangle(x, y, w, h), header, body, footer);
+	}
+
+	/** The roster's card width in this layout: its body's two columns. */
+	int rosterCard() {
+		return (body.width() - ROSTER_GAP) / 2;
+	}
+
 	/** Where the body's words go: inside the scroll's painted margins. */
 	ScreenRectangle text() {
 		return new ScreenRectangle(body.left() + TEXT_LEFT, body.top() + TEXT_TOP, Math.max(0, body.width() - TEXT_LEFT - TEXT_RIGHT),

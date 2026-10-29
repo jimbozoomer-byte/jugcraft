@@ -18,8 +18,8 @@ import net.minecraft.network.chat.Component;
  * <p>
  * The pact's (docs/features/magic-interfaces.md, spec 2.12) is drawn on the magic interfaces' scroll over the cosmos: its
  * question and two short lines in ink, End the pact (with its cross) and Keep it on wooden plates. It stays vanilla's
- * confirmation: its narration is its question and its whole message, and only the words drawn are shorter. The roster's
- * keeps vanilla's look until the roster moves (the design's unit 2).
+ * confirmation: its narration is its question and its whole message, and only the words drawn are shorter. Since the
+ * design's unit 2 the roster's End asks on the same scroll ({@link #magic}).
  */
 public final class KeepFirstConfirmScreen extends ConfirmScreen {
 	private static final int SCROLL_WIDTH = 300;
@@ -38,7 +38,7 @@ public final class KeepFirstConfirmScreen extends ConfirmScreen {
 		this.lines = List.copyOf(lines);
 	}
 
-	/** The pact's ending on the scroll: {@code title} and {@code lines} drawn, {@code message} (the whole sentence) narrated. */
+	/** An ending on the scroll (the pact's, the roster's): {@code title} and {@code lines} drawn, {@code message} (the whole sentence) narrated. */
 	static KeepFirstConfirmScreen magic(BooleanConsumer callback, Component title, Component message, List<Component> lines, Component yes, Component no) {
 		return new KeepFirstConfirmScreen(callback, title, message, lines, yes, no);
 	}

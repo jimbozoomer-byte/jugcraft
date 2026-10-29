@@ -151,6 +151,8 @@ DRAWN = {
     # The narrow footer's back plate (the arrow's mirror): cream on the plate, as the documentation's dark page arrows
     # could not be (1.3 to 1.9:1).
     "back": [".......", "...#...", "..#....", ".######", "..#....", "...#...", "......."],
+    # The roster's Resume (unit 2's review): a play triangle in the action frame, so Resume no longer looks like Refresh.
+    "play": ["#...", "##..", "###.", "####", "###.", "##..", "#..."],
 }
 GLYPHS = tuple(WYRM) + tuple(DRAWN)  # Java: MagicArt.Glyph, in this order
 # The state marks (spec 2.5): a glyph in colour with a one-pixel dark edge, nine rows tall and its glyph's width and two
@@ -223,6 +225,13 @@ ADAPTED = {
                                                     **({"overlay": JB + "ability/action_button_outline.png"}
                                                        if state == "_highlighted" else {})}}
        for name, glyph in (("end", "cross"), ("suspend", "pause")) for state in ("", "_inactive", "_highlighted")},
+    # The roster's Resume (unit 2's review): the same frame with the play triangle.
+    **{S + f"action/resume{state}.png": {"source": JB + f"ability/upgrade_button_{'inactive' if state == '_inactive' else 'active'}.png",
+                                         "adapter": "action", "glyph": "play", "state": state,
+                                         "region": {"boxes": [(3, 3, 10, 9)],
+                                                    **({"overlay": JB + "ability/action_button_outline.png"}
+                                                       if state == "_highlighted" else {})}}
+       for state in ("", "_inactive", "_highlighted")},
     **{S + f"action/{name}_highlighted.png": {"source": JB + f"ability/{source}_button_active.png", "adapter": "outlined",
                                               "outline": JB + "ability/action_button_outline.png",
                                               "region": {"overlay": JB + "ability/action_button_outline.png"}}
@@ -447,8 +456,9 @@ def _tint(img, colour):
 
 
 def action(read, entry):
-    """magic/action/end and suspend: the upgrade frame with its arrow covered and a cross (End: it no longer resembles
-    Refresh) or two bars (Suspend) set in it; inactive from the inactive frame; highlighted with the kit's outline."""
+    """magic/action/end, suspend and resume: the upgrade frame with its arrow covered and a cross (End: it no longer
+    resembles Refresh), two bars (Suspend) or a play triangle (Resume) set in it; inactive from the inactive frame;
+    highlighted with the kit's outline."""
     img = _source(read, entry)
     inactive = entry["state"] == "_inactive"
     fill, ink = (0x8E3E28, 0x40190E) if inactive else (0xC46A10, 0xFFF2C0)
@@ -572,7 +582,7 @@ def change(target, source=None):
                                                "_disabled": ", desaturated to a fifth and darkened to half"}[entry["state"]]
     if kind == "action":
         frame = "the inactive upgrade frame's" if entry["state"] == "_inactive" else "the upgrade frame's"
-        mark = "a cross" if entry["glyph"] == "cross" else "two bars"
+        mark = {"cross": "a cross", "pause": "two bars", "play": "a play triangle"}[entry["glyph"]]
         return (f"{frame} arrow covered (x 3-10, y 3-9) and {mark} set in it"
                 + (outline["action"] if entry["state"] == "_highlighted" else ""))
     if kind == "outlined":
@@ -667,7 +677,7 @@ FOLDED = ("pact.row.area", "pact.row.area_any", "pact.row.end", "pact.row.matter
 # The screens drawn with the Magic layer (client/<name>.java): each must build its controls from MagicButton and its words
 # from MagicText, with no BookArt.Tab or BookArt.Paragraph left (check_magic_ui). Each joins as it moves: PactScreen with
 # unit 1's screen commit, then the roster (unit 2), the composer and the Field Guide (unit 3).
-MAGIC_SCREENS = ["PactScreen"]
+MAGIC_SCREENS = ["PactScreen", "RosterScreen"]
 
 
 def nwords(text):
@@ -1006,7 +1016,7 @@ ROSTER_GLANCES = {
     "roster.next.offering": [("", "due in %3$s days", (1, "Stolas's Offerings", 7, 0, 4), "due in 7 days", "fact")],
     "roster.next.at_visit": [("", "due when you visit", (1, "Stolas's Offerings"), "due when you visit", "fact")],
     "roster.next.warned": [("", "due: %3$s days left", (1, "Stolas's Offerings", 1), "due: 1 days left", "fact")],
-    "roster.next.held": [("", "an offering resumes it", (1, "Stolas's Offerings"), "an offering resumes it", "fact")],
+    "roster.next.held": [("", "Offer to resume", (1, "Stolas's Offerings"), "Offer to resume", "fact")],
     "roster.next.suspended": [("", "suspended by you", (), "suspended by you", "fact")],
     "roster.next.quota": [("", "%1$s/%2$s tasks today", (2, 8), "2/8 tasks today", "fact")],
     "roster.next.none": [("", "nothing owed", (), "nothing owed", "fact")],
@@ -1014,6 +1024,28 @@ ROSTER_GLANCES = {
     "roster.task.carrying": [("", "Carrying #%1$s", (3, 16), "Carrying #3", "fact")],
     "roster.task.claimed": [("", "On request #%1$s", (3,), "On request #3", "fact")],
     "roster.task.none": [("", "Nothing now", (), "Nothing now", "fact")],
+    # Unit 2 (the roster's cards): a request card's name and kind, a card's state (its row's waiting reason, beside the
+    # mark its icon draws; at most three words and STATE_ROOM pixels) and the roster's own answers (at most six words).
+    "roster.request": [("", "Request #%1$s", (3, 16, "Copper Ingot"), "Request #3", "label")],
+    "roster.kind.request": [("", "Courier", (), "Courier", "label")],
+    "roster.waiting.active": [("", "At work", (), "At work", "state")],
+    "roster.waiting.unclaimed": [("", "Not yet claimed", (), "Not yet claimed", "state")],
+    "roster.waiting.without_place": [("", "Without a place", (), "Without a place", "state")],
+    "roster.waiting.stranded_place": [("", "Place gone", (), "Place gone", "state")],
+    "roster.waiting.lost": [("", "Presence lost", (), "Presence lost", "state")],
+    "roster.waiting.unloaded": [("", "Not loaded", (), "Not loaded", "state")],
+    "roster.waiting.reserved": [("", "%1$s reserved", (16, "12, 64, -30 in the Overworld"), "16 reserved", "state")],
+    "roster.waiting.reserved_unloaded": [("", "Not loaded", (16, "12, 64, -30 in the Overworld"), "Not loaded", "state")],
+    "roster.waiting.in_transit": [("", "In transit", (), "In transit", "state")],
+    "roster.waiting.destination_unloaded": [("", "Not loaded", (), "Not loaded", "state")],
+    "roster.waiting.stranded": [("", "Stranded", (), "Stranded", "state")],
+    "roster.waiting.returning": [("", "Going back", (), "Going back", "state")],
+    "roster.waiting.disabled": [("", "Switched off", (), "Switched off", "state")],
+    "roster.answer.not_listed": [("", "Not on your roster now", (), "Not on your roster now", "answer")],
+    "roster.answer.changed": [("", "Changed: read it again", (), "Changed: read it again", "answer")],
+    "roster.answer.too_fast": [("", "One moment", (), "One moment", "answer")],
+    "roster.answer.not_offered": [("", "Cannot be done now", (), "Cannot be done now", "answer")],
+    "roster.answer.not_permitted": [("", "Only you, in person", (), "Only you, in person", "answer")],
 }
 GLANCES.update(ROSTER_GLANCES)
 # The state mark a glance draws, by the shape of its server key (Java: PactGlance.MARKS, in this order; the first rule
@@ -1085,6 +1117,149 @@ SHORT = {
 SHORT_SAMPLES = {"carried": (12,), "resonance": (6, 8), "any_of": ("Stolas Starflower, Amethyst Shard",),
                  "have": ("Ender Pearl", 1, 2), "short_of": ("Ender Pearl 1/2, 6/8 resonance",)}
 
+# ------------------------------------------------------------------------------------------------ unit 2: the roster and Jade
+# Unit 2 (spec 4.6, 2.14): the roster as cards, and Jade's short lines. Its limits: a card's state and a Jade line.
+LIMITS.update({"state": 3, "jade": 4})
+# A roster card's text room at the narrowest card (the smallest GUI, 320 wide: two cards of 153, its text 37 in, its
+# actions in a column 19 from its right; client/RosterScreen.Card): a state after its mark (at most 10 wide, and 3 apart),
+# and a fact without its icon (the card drops the icon, then the kind, before it cuts a word).
+CARD_TEXT = 153 - 19 - 3 - 37
+STATE_ROOM = CARD_TEXT - 10 - 3
+FACT_ROOM = CARD_TEXT
+# The short form of a whole sentence that is not one of the pact screen's server glances: a roster card's state (a row's
+# waiting reason that is a worker's status or a courier's state or note) and Jade's lines on the pact perch, its spirits,
+# beds and living devices (screen.jugcraft.glance.<the sentence's own key>; Java: client/MagicGlance). Fed the sentence's
+# own arguments by position; a sentence without one, or given fewer arguments than its short form names, is shown whole.
+# The whole sentence stays the narration, and Jade's extended view (sneak) shows every line whole.
+# Its key -> (pattern, sample arguments in the sentence's order, expected English, kind).
+_STATUS = "compose.jugcraft.worker.status."
+_COURIER = "compose.jugcraft.courier."
+_ECOLOGY = "compose.jugcraft.ecology."
+_JADE = "tooltip.jugcraft.concordance.jade."
+SENTENCES = {
+    # A worker's status: a roster card's state (beside its icon's mark) and Jade's first line on a spirit.
+    **{_STATUS + status: (text, (), text, "state") for status, text in {
+        "awaiting_answer": "Awaits answer", "blocked_by_access": "No access", "cannot_navigate": "No way there",
+        "destination_unloaded": "Not loaded", "disabled": "Switched off", "finished": "Done for today",
+        "following": "Following you", "full": "Full: no room", "idle": "Idle", "needs_repair": "Needs repair",
+        "no_energy": "Out of Charge", "other_dimension": "Another world", "outside_agreement": "Off its terms",
+        "owner_offline": "You are away", "returning": "Going home", "supporting": "Mending you", "suspended": "Suspended",
+        "travelling": "On its way", "upkeep_due": "Offering due", "upkeep_held": "Upkeep held",
+        "waiting_for_resources": "No resources", "working": "At work"}.items()},
+    # A courier request's state and its last note: a request card's state.
+    **{_COURIER + key: (text, (), text, "state") for key, text in {
+        "state.claimed": "Claimed", "state.in_transit": "In transit", "state.open": "No courier yet",
+        "state.returning": "Going back", "state.stranded": "Stranded", "note.agreement_ended": "Courier ended",
+        "note.blocked": "No access", "note.cancelled": "Cancelled", "note.cannot_navigate": "No way there",
+        "note.destination_gone": "Drop-off gone", "note.full": "Drop-off full", "note.lapsed": "Courier lapsed",
+        "note.no_source": "No source", "note.nowhere_to_return": "No room back", "note.reassigned": "Courier busy",
+        "note.source_empty": "Source empty", "note.source_gone": "Source gone", "note.source_unloaded": "Source away"}.items()},
+    # Jade on the pact perch, the Spirit Anchor and a pact spirit (PactReading's lines).
+    _JADE + "pact.visiting": ("%1$s visits", ("Stolas",), "Stolas visits", "jade"),
+    _JADE + "pact.unreadable": ("Cannot be read", (), "Cannot be read", "jade"),
+    _JADE + "pact.keeps": ("With %1$s", ("Stolas",), "With Stolas", "jade"),
+    _JADE + "pact.state.suspended": ("Suspended", (), "Suspended", "jade"),
+    _JADE + "pact.state.upkeep_due": ("Offering due", (), "Offering due", "jade"),
+    _JADE + "pact.state.upkeep_held": ("Upkeep held", (), "Upkeep held", "jade"),
+    _JADE + "pact.next": ("%1$s d", (7,), "7 d", "jade"),
+    _JADE + "pact.grace": ("%1$s d", (1,), "1 d", "jade"),
+    _JADE + "pact.lost": ("Presence lost", (), "Presence lost", "jade"),
+    _JADE + "pact.accord": ("Answer: %1$s", ("Leave it",), "Answer: Leave it", "jade"),
+    _JADE + "pact.service.courier": ("Courier work", (), "Courier work", "jade"),
+    _JADE + "pact.matter.verdance_carrying.two_roads": ("Heart has own pylon", (), "Heart has own pylon", "jade"),
+    _JADE + "pact.note.strain_tending.asleep": ("Asleep until dawn", (), "Asleep until dawn", "jade"),
+    _JADE + "pact.note.strain_tending.overworked": ("Overworked beds: %1$s", (3,), "Overworked beds: 3", "jade"),
+    _JADE + "pact.note.verdance_carrying.empty": ("Nothing to carry", (), "Nothing to carry", "jade"),
+    _JADE + "pact.note.verdance_carrying.nowhere": ("Nowhere to carry it", (), "Nowhere to carry it", "jade"),
+    _JADE + "pact.note.verdance_carrying.two_roads": ("Two roads: %1$s", (2,), "Two roads: 2", "jade"),
+    # GC-06 unit 3
+    _JADE + "pact.note.habitat_reading.proud": ("Proud beds: %1$s", (2,), "Proud beds: 2", "jade"),
+    # GC-07 unit 4
+    # GC-08 unit 5
+    # GC-09 unit 6
+    "message.jugcraft.concordance.disabled": ("Switched off", (), "Switched off", "jade"),
+    "compose.jugcraft.diagnostic.conflicting_agreement": ("A copy: does nothing", (), "A copy: does nothing", "jade"),
+    _JADE + "body": ("Integrity %1$s/%2$s", (10, 20, 300, 400), "Integrity 10/20", "jade"),
+    # Jade on a Verdant Bed: dormant, its strain, and its reasons (Verdict.reasons; the factor named first).
+    _JADE + "dormant": ("Dormant", (), "Dormant", "jade"),
+    _ECOLOGY + "strain": ("Strain %1$s/%2$s", (2, 8), "Strain 2/8", "jade"),
+    _ECOLOGY + "short": ("%1$s too low", ("Moisture", 3, 5), "Moisture too low", "jade"),
+    _ECOLOGY + "excess": ("%1$s too high", ("Moisture", 9, 7), "Moisture too high", "jade"),
+    _ECOLOGY + "tolerable": ("%1$s tolerable", ("Moisture", 6, 3, 5), "Moisture tolerable", "jade"),
+    _ECOLOGY + "strained.excess": ("%1$s too high", ("Disturbance", 6, 2, 5), "Disturbance too high", "jade"),
+    _ECOLOGY + "strained.tolerable": ("%1$s tolerable", ("Disturbance", 4, 2, 0, 3), "Disturbance tolerable", "jade"),
+    # Jade on a living device: its status.
+    _ECOLOGY + "status.beds_full": ("Beds full", (), "Beds full", "jade"),
+    _ECOLOGY + "status.disabled": ("Switched off", (), "Switched off", "jade"),
+    _ECOLOGY + "status.keeper_away": ("Keeper away", (), "Keeper away", "jade"),
+    _ECOLOGY + "status.no_bed": ("Not on a bed", (), "Not on a bed", "jade"),
+    _ECOLOGY + "status.no_verdance": ("No Verdance", (), "No Verdance", "jade"),
+    _ECOLOGY + "status.stalled": ("Held back", (), "Held back", "jade"),
+    _ECOLOGY + "status.starved": ("Bed too poor", (), "Bed too poor", "jade"),
+    # Unit 2's review: a bed's growth and the rest of a living device's statuses, capitalised as Jade's other short lines.
+    _ECOLOGY + "growth.thriving": ("Thriving", (), "Thriving", "jade"),
+    _ECOLOGY + "growth.tolerating": ("Growing slowly", (), "Growing slowly", "jade"),
+    _ECOLOGY + "growth.stalled": ("Not growing", (), "Not growing", "jade"),
+    _ECOLOGY + "status.dormant": ("Dormant", (), "Dormant", "jade"),
+    _ECOLOGY + "status.full": ("Full", (), "Full", "jade"),
+    _ECOLOGY + "status.hungry": ("Nothing to eat", (), "Nothing to eat", "jade"),
+    _ECOLOGY + "status.idle": ("Nothing to do", (), "Nothing to do", "jade"),
+    _ECOLOGY + "status.waiting": ("Waiting for a reading", (), "Waiting for a reading", "jade"),
+    _ECOLOGY + "status.working": ("Working", (), "Working", "jade"),
+}
+# The mark Jade draws before a sentence's line, short or whole, by the sentence's own key (Java: client/MagicGlance.MARKS,
+# held equal by check_magic_ui); a line without one draws its own icon (the spirit's sign, the work's item, a glyph) or
+# none. The roster's cards draw the mark of their row's icon (client/RosterScreen.mark).
+SENTENCE_MARKS = {
+    **{_STATUS + status: mark for status, mark in {
+        "awaiting_answer": "ask", "blocked_by_access": "cross", "cannot_navigate": "cross", "destination_unloaded": "moon",
+        "disabled": "lock", "finished": "tick", "following": "tick", "full": "hourglass", "idle": "moon",
+        "needs_repair": "hourglass", "no_energy": "hourglass", "other_dimension": "moon", "outside_agreement": "moon",
+        "owner_offline": "moon", "returning": "tick", "supporting": "tick", "suspended": "moon", "travelling": "tick",
+        "upkeep_due": "hourglass", "upkeep_held": "moon", "waiting_for_resources": "hourglass", "working": "tick"}.items()},
+    _JADE + "pact.visiting": "ask", _JADE + "pact.unreadable": "lock", _JADE + "pact.state.active": "tick",
+    _JADE + "pact.state.suspended": "moon", _JADE + "pact.state.upkeep_due": "hourglass", _JADE + "pact.state.upkeep_held": "moon",
+    _JADE + "pact.lost": "moon", _JADE + "pact.accord": "tick", _JADE + "pact.matter.verdance_carrying.two_roads": "ask",
+    _JADE + "pact.note.strain_tending.asleep": "moon", _JADE + "pact.note.strain_tending.overworked": "hourglass",
+    _JADE + "pact.note.verdance_carrying.empty": "moon", _JADE + "pact.note.verdance_carrying.nowhere": "hourglass",
+    _JADE + "pact.note.verdance_carrying.two_roads": "ask", "message.jugcraft.concordance.disabled": "lock",
+    "compose.jugcraft.diagnostic.conflicting_agreement": "cross", _JADE + "dormant": "moon",
+    _ECOLOGY + "growth.thriving": "tick", _ECOLOGY + "growth.tolerating": "hourglass", _ECOLOGY + "growth.stalled": "cross",
+    _ECOLOGY + "strain": "hourglass", _ECOLOGY + "short": "hourglass", _ECOLOGY + "excess": "hourglass",
+    _ECOLOGY + "tolerable": "hourglass", _ECOLOGY + "strained.excess": "hourglass", _ECOLOGY + "strained.tolerable": "hourglass",
+    _ECOLOGY + "mixed": "tick",
+    **{_ECOLOGY + "status." + status: mark for status, mark in {
+        "beds_full": "hourglass", "disabled": "lock", "dormant": "moon", "full": "hourglass", "hungry": "moon", "idle": "moon",
+        "keeper_away": "moon", "no_bed": "cross", "no_verdance": "cross", "stalled": "cross", "starved": "cross",
+        "waiting": "moon", "working": "tick"}.items()},
+    # Unit 2's review: a departing spirit and a perch that keeps no agreement draw the moon.
+    _JADE + "pact.departing": "moon", _JADE + "pact.none": "moon",
+    # GC-06 unit 3
+    _JADE + "pact.note.habitat_reading.proud": "hourglass",
+    # GC-07 unit 4
+    # GC-08 unit 5
+    # GC-09 unit 6
+}
+SENTENCE_PREFIX = "screen.jugcraft.glance."
+# The roster screen's own short words (screen.jugcraft.roster.short.<name>; its whole sentences stay the messages, the
+# narration and the tips): name -> (text, kind); ROSTER_SAMPLES gives the arguments each is shown with.
+ROSTER_SHORT = {
+    "page": ("%1$s / %2$s", "label"),
+    "empty": ("Nothing on your roster yet", "row"),
+    "empty.hint": ("Bond a familiar, seal a pact or file a request", "row"),
+    "more": ("%1$s more not listed", "fact"),
+    "disabled": ("Concordance off", "row"),
+    "unavailable": ("No roster on this server", "row"),
+    "suspend.tip": ("Suspend %1$s", "label"),
+    "resume.tip": ("Resume %1$s", "label"),
+    "end.tip": ("End %1$s...", "label"),
+    "cancel.tip": ("Cancel %1$s", "label"),
+    "recover.tip": ("Recover %1$s", "label"),
+    "end.leaves": ("It leaves; anything held comes back once.", "row"),
+}
+ROSTER_SAMPLES = {"page": (1, 8), "more": (16,), **{f"{action}.tip": ("Bathin",) for action in ("suspend", "resume", "end")},
+                  "cancel.tip": ("Request #3",), "recover.tip": ("Request #3",)}
+
 
 def lang_entries(lang):
     """The glances, chooser reasons and short labels (English only, D-S21)."""
@@ -1097,6 +1272,10 @@ def lang_entries(lang):
         lang[f"screen.jugcraft.pact.glance.step.{step}"] = text
     for name, (text, _) in SHORT.items():
         lang[f"screen.jugcraft.pact.short.{name}"] = text
+    for key, (pattern, _, _, _) in SENTENCES.items():
+        lang[SENTENCE_PREFIX + key] = pattern
+    for name, (text, _) in ROSTER_SHORT.items():
+        lang[f"screen.jugcraft.roster.short.{name}"] = text
 
 
 # ------------------------------------------------------------------------------------------------ the check
@@ -1407,6 +1586,70 @@ def problems(lang=None, load=None, read=read_library):
                     out.append(f"{name}.beat.greeting.stage: {nwords(stage)} words, over {LIMITS['stage']} (spec 1.1)")
             if nwords(line) > LIMITS["beat"]:
                 out.append(f"{name}.beat.{beat}: his line is {nwords(line)} words, over {LIMITS['beat']} (spec 1.1)")
+    out.extend(unit2_problems(lang))
+    return out
+
+
+def unit2_problems(lang):
+    """Unit 2's words (the roster's cards, Jade's short lines): every roster state and answer the server sends has its
+    glance; a card's state and fact fit the narrowest card; every short form of a whole sentence renders its expected
+    English from the sentence's own arguments by position, within its limit; every mark names a sentence and a mark."""
+    out = []
+    import concordance_roster as roster
+    for key in roster.MESSAGES:
+        if key.startswith(("roster.waiting.", "roster.answer.")) and key not in ROSTER_GLANCES:
+            out.append(f"{key}: the roster can send it, but ROSTER_GLANCES holds no glance for it (a card's state, an answer)")
+    for server, glances in ROSTER_GLANCES.items():
+        for _, _, _, expected, kind in glances:
+            room = {"state": STATE_ROOM, "fact": FACT_ROOM}.get(kind)
+            if room and width(expected) > room:
+                out.append(f"{glance_key(server)}: {width(expected)} px, over a card's {room} for its {kind}: {expected!r}")
+    for key, (pattern, args, expected, kind) in SENTENCES.items():
+        short = SENTENCE_PREFIX + key
+        full = lang.get(key)
+        if full is None:
+            out.append(f"{short}: no sentence {key}")
+            continue
+        if lang.get(short) != pattern:
+            out.append(f"{short}: the language file is not tools/magic_ui.py's (run tools/generate_material_data.py)")
+        top, bare = placeholders(pattern)
+        arity = len(_PLACE.findall(full.replace("%%", "")))
+        if bare:
+            out.append(f"{short}: a bare %s; a short form names its arguments by position")
+        if len(args) != arity or top > arity:
+            out.append(f"{short}: its arguments do not fit {key} ({arity})")
+            continue
+        got = render(pattern, args)
+        if got != expected:
+            out.append(f"{short}: renders {got!r}, expected {expected!r}")
+        if nwords(got) > LIMITS[kind]:
+            out.append(f"{short}: {nwords(got)} words, over the {kind} limit of {LIMITS[kind]}: {got!r}")
+        if kind == "state" and width(got) > STATE_ROOM:
+            out.append(f"{short}: {width(got)} px, over a card's {STATE_ROOM} for its state: {got!r}")
+    for key, mark_name in SENTENCE_MARKS.items():
+        if key not in lang:
+            out.append(f"SENTENCE_MARKS {key}: no such sentence")
+        if mark_name not in MARKS:
+            out.append(f"SENTENCE_MARKS {key}: {mark_name} is not one of MARKS")
+    for name, (text, kind) in ROSTER_SHORT.items():
+        key = f"screen.jugcraft.roster.short.{name}"
+        shown = render(text, ROSTER_SAMPLES.get(name, ()))
+        if lang.get(key) != text:
+            out.append(f"{key}: the language file is not tools/magic_ui.py's (run tools/generate_material_data.py)")
+        if placeholders(text)[1]:
+            out.append(f"{key}: a bare %s")
+        if nwords(shown) > LIMITS[kind]:
+            out.append(f"{key}: {nwords(shown)} words, over the {kind} limit of {LIMITS[kind]}: {shown!r}")
+    for key in lang:
+        # A work's matter or note (a garden spirit's unit adds its own) is one of Jade's short lines: its short form and
+        # its mark are due with it (unit 2's review), or Jade draws it whole and unmarked.
+        if key.startswith((_JADE + "pact.matter.", _JADE + "pact.note.")) and (key not in SENTENCES or key not in SENTENCE_MARKS):
+            out.append(f"{key}: a work's matter or note Jade shows, without its short form in SENTENCES and its mark in "
+                       "SENTENCE_MARKS")
+        if key.startswith(SENTENCE_PREFIX) and key[len(SENTENCE_PREFIX):] not in SENTENCES:
+            out.append(f"{key}: a short form tools/magic_ui.py's SENTENCES does not hold")
+        if key.startswith("screen.jugcraft.roster.short.") and key[len("screen.jugcraft.roster.short."):] not in ROSTER_SHORT:
+            out.append(f"{key}: a roster short word tools/magic_ui.py's ROSTER_SHORT does not hold")
     return out
 
 

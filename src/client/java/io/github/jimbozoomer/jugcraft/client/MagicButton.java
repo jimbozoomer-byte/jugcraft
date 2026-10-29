@@ -44,6 +44,8 @@ class MagicButton extends Button implements MagicScreen.Drawn {
 		ACTION_SUSPEND(action("suspend"), null, 14, 13, 0, 0, true),
 		ACTION_REFRESH(action("refresh"), null, 14, 13, 0, 0, true),
 		ACTION_OFFER(action("offer"), null, 14, 13, 0, 0, true),
+		/** The roster's Resume: a play triangle in the action frame (it no longer looks like the footer's Refresh). */
+		ACTION_RESUME(action("resume"), null, 14, 13, 0, 0, true),
 		BOOKMARK_FAMILIAR(bookmark("familiar"), bookmark("familiar_selected"), 23, 20, 0, 0, true),
 		BOOKMARK_DOCUMENTATION(bookmark("documentation"), bookmark("documentation_selected"), 23, 20, 0, 0, true),
 		BOOKMARK_SUMMON_CIRCLE(bookmark("summon_circle"), bookmark("summon_circle_selected"), 23, 20, 0, 0, true),
@@ -210,6 +212,12 @@ class MagicButton extends Button implements MagicScreen.Drawn {
 	/** Places its tip for the footer row {@code band}: below it when there is room, else beside the button on the band. */
 	void footer(ScreenRectangle band) {
 		positioner = new FooterTip(band, this);
+	}
+
+	/** Places its tip by {@code at} (a roster card's action: inside its own card's band, spec 2.14); null: vanilla's placement. */
+	MagicButton at(@Nullable ClientTooltipPositioner at) {
+		positioner = at;
+		return this;
 	}
 
 	/** Whether it draws an icon and no words (the narrow footer's paging plates, a glyph alone). */
