@@ -81,3 +81,19 @@ class AlchemyValueTests(unittest.TestCase):
             self.assertEqual(plank,value('jugcraft:'+wood+'_planks'))
             self.assertEqual(6*value('jugcraft:aged_'+wood+'_slab'),3*plank)
             self.assertEqual(4*value('jugcraft:aged_'+wood+'_stairs'),6*plank)
+
+    def test_tablet_outputs_have_real_prices(self):
+        """Every tablet output is priced from recipes or references, never the one-essence fallback (docs/features/tablet-decorations.md)."""
+        tag=json.loads((ROOT/'src/main/resources/data/jugcraft/tags/item/tablet_outputs.json').read_text(encoding='utf-8'))['values']
+        for entry in tag:
+            item=entry if isinstance(entry,str) else entry['id']
+            self.assertIn(item,VALUES,item)
+            self.assertFalse(VALUES[item]['source'].startswith('fallback'),item)
+        names={e if isinstance(e,str) else e['id'] for e in tag}
+        for item in ('quartz_block','quartz_slab','copper_block','copper_bulb','exposed_copper_bulb','waxed_cut_copper'):
+            self.assertNotIn('minecraft:'+item,names,item)
+
+    def test_manipulation_essence_makes_no_calcite_or_tuff_from_tablet_stone(self):
+        essence=value('jugcraft:nouveau_manipulation_essence')
+        self.assertLessEqual(8*value('minecraft:calcite'),8*value('minecraft:tuff')+essence)
+        self.assertLessEqual(8*value('minecraft:tuff'),8*value('minecraft:deepslate')+essence)

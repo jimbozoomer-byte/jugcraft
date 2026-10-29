@@ -197,5 +197,23 @@ public class AlchemyPlayabilityGameTests {
         }
         h.assertFalse(TabletOutputs.allowed(item("klein_star_1")),"Modded equipment defaults to denied");h.succeed();
     }
+    /** Decorative blocks (docs/features/tablet-decorations.md) are made at their price; quartz and copper that turn back into materials or machines are not. */
+    @GameTest(maxTicks=20)public void tabletMakesDecorationsButNotReversibleQuartzOrCopper(GameTestHelper h){
+        var p=player(h);
+        for(var stack:List.of(new ItemStack(Items.STONE_BRICK_WALL),new ItemStack(Items.QUARTZ_PILLAR),new ItemStack(Items.OXIDIZED_CUT_COPPER),new ItemStack(Items.OAK_SHELF),
+                new ItemStack(Items.SEA_LANTERN),new ItemStack(Items.WHITE_CONCRETE),item("maple_planks"),item("household_oak_chair"))){
+            h.assertTrue(TabletOutputs.allowed(stack),"A decorative block is a tablet output: "+stack);
+            var material=AlchemicalWorkshopBlockEntity.material(stack);
+            h.assertTrue(material!=null&&!AlchemyValues.source(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString()).startsWith("fallback"),
+                    "and has a real price: "+stack);
+            var menu=tablet(p);menu.getSlot(0).set(stack.copy());press(menu,p,0);press(menu,p,0);
+            long saved=Assaying.balance(p);long price=Assay.form(material,1);
+            press(menu,p,1);h.assertTrue(menu.getSlot(1).getItem().is(stack.getItem())&&Assaying.balance(p)==saved-price,"Made at its price: "+stack);
+            menu.getSlot(1).set(ItemStack.EMPTY);
+        }
+        for(var item:List.of(Items.QUARTZ_BLOCK,Items.QUARTZ_SLAB,Items.COPPER_BLOCK,Items.COPPER_BULB,Items.EXPOSED_COPPER,Items.WAXED_CUT_COPPER))
+            h.assertFalse(TabletOutputs.allowed(new ItemStack(item)),"Quartz and copper that turn back into materials or go into machines stay out: "+item);
+        h.succeed();
+    }
 
 }
