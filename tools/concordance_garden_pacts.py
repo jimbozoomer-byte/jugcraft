@@ -248,8 +248,9 @@ PAGES = [
      ("garden_regard", "understood")),
     ("text", "The Logician's Objection",
      "A Dewlit graft narrows what a Sunpetal can bear: on a dry bed it would harm. So Foras grafts only where the graft "
-     "makes the host's place suit it better, read from the bed's last reading, and names the rest: \"Three hosts here "
-     "would gain nothing; shall I graft them anyway?\" Answer on the pact's page at the perch: **"
+     "makes the host's place suit it better, read from the bed's last reading, and names the rest: \"Hosts here a graft "
+     "would not help, or would harm: 3, the nearest at x, y, z. Shall I graft them anyway?\" Answer on the pact's page at "
+     "the perch: **"
      + pacts.SERVICE_WORDS["graft_keeping"]["accords"]["prudent"] + "**, or **"
      + pacts.SERVICE_WORDS["graft_keeping"]["accords"]["always"] + "**. Until you answer, the roster says \"awaiting your "
      "answer\" and he keeps to the first. You may change your answer whenever you like; nothing is spent either way.",

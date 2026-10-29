@@ -7526,7 +7526,7 @@ public class ConcordanceWorkerGameTests {
 		forasAnswer(helper, holder, perch, GraftKeeping.ALWAYS, now);
 		int items = carried(holder);
 		for (int i = 1; i <= 3; i++) {
-			// The second think at midnight: his hours are every hour (GC-P81; CR2 4's rule).
+			// The second think at midnight: his hours are every hour (GC-P81).
 			helper.assertValueEqual(foras.think(level, i == 2 ? MIDNIGHT : 6000L, now + i), Status.WORKING, "Think " + i + " grafts a host");
 			helper.assertValueEqual(dewmossIn(chest), 5 - i, "and spends exactly one Dewmoss");
 			helper.assertValueEqual(beds.stream().filter(bed -> FORAS_GRAFT.equals(bed.graft())).count(), (long) i, "One more bed carries Dewlit");
@@ -7612,6 +7612,8 @@ public class ConcordanceWorkerGameTests {
 	/**
 	 * GC-P83: he takes only from a plain container touching his perch that his holder could open and change by hand: a
 	 * stranger's chest beside the perch is never his store, a chest two blocks off is none; one of the holder's beside it is.
+	 * The stranger's chest, refused for itself, and the holder's, read empty, are not asked or read again until his index
+	 * is: a Dewmoss put in it is found at that read.
 	 */
 	@GameTest(maxTicks = 20)
 	public void forasTakesOnlyFromAStoreTheHolderMayChange(GameTestHelper helper) {
@@ -7635,8 +7637,13 @@ public class ConcordanceWorkerGameTests {
 					&& bed.graft().isEmpty(), "Nothing taken from the stranger's chest or the far one: " + keeping(foras).idle());
 			helper.assertTrue(keys(GraftKeeping.rows(level, pactOf(level, perch), now + 1)).contains(GRAFTING_KEY + "row.no_donor"),
 					"His page says he waits for a donor");
+			helper.assertTrue(keeping(foras).skipped(claimedChest.getBlockPos()) && keeping(foras).lacks(own.getBlockPos(), "jugcraft:dewmoss"),
+					"The stranger's chest is skipped and the holder's remembered without a donor until his index is read again");
 			own.setItem(0, new ItemStack(Garden.DEWMOSS, 1));
-			helper.assertValueEqual(foras.think(level, 6000L, now + 2), Status.WORKING, "A Dewmoss in the holder's own chest: he grafts");
+			helper.assertValueEqual(foras.think(level, 6000L, now + 2), Status.IDLE, "Before his index is read again, he does not read the chest");
+			helper.assertTrue(keeping(foras).idle() == GraftKeeping.Idle.NO_DONOR && dewmossIn(own) == 1, "and still waits for a donor");
+			keeping(foras).forget();
+			helper.assertValueEqual(foras.think(level, 6000L, now + 3), Status.WORKING, "His index read again, the Dewmoss in the holder's own chest: he grafts");
 			GraftKeeping.Grafted last = keeping(foras).last();
 			helper.assertTrue(dewmossIn(claimedChest) == 2 && dewmossIn(own) == 0 && dewmossIn(far) == 4 && last != null
 					&& last.store().equals(own.getBlockPos()) && FORAS_GRAFT.equals(bed.graft()), "From the holder's chest alone: " + last);
@@ -7669,6 +7676,57 @@ public class ConcordanceWorkerGameTests {
 		helper.assertValueEqual(foras.think(level, 6000L, now + 2), Status.WORKING, "The claims lifted, he grafts");
 		helper.assertTrue((FORAS_GRAFT.equals(bedClaimed.graft()) ? 1 : 0) + (FORAS_GRAFT.equals(cropClaimed.graft()) ? 1 : 0) == 1 && dewmossIn(chest) == 1,
 				"One host, one Dewmoss");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-07 (GC-P85, the unit review): a place refused for itself is skipped until his index is read again, so refused
+	 * places never crowd the rest out of a think's questions. Seven hosts of the holder's party, nearer the perch than the
+	 * holder's own, stand in a claim the holder is not trusted in: his first think spends seven of its eight questions on
+	 * their crops and the eighth on the holder's crop, and grafts nothing; his second skips the seven and grafts the
+	 * holder's host.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 20)
+	public void forasSkipsPlacesRefusedForThemselves(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		ServerPlayer member = gardenHolder(helper);
+		PartyManager parties = JugcraftParties.manager();
+		long ms = System.currentTimeMillis();
+		try {
+			helper.assertTrue(parties.invite(holder.getUUID(), member.getUUID(), ms) == PartyManager.Result.OK
+					&& parties.accept(member.getUUID(), ms) == PartyManager.Result.OK, "The holder and a party member");
+			long now = dayStart(level, 1);
+			BlockPos at = new BlockPos(8, 1, 8);
+			ChestBlockEntity chest = forasStore(helper, at.east(), 2);
+			// The party member's seven hosts two blocks north of the perch (at most 13 off, squared); the holder's four north (16).
+			List<VerdantBedBlockEntity> theirs = new ArrayList<>();
+			List<BlockPos> claimed = new ArrayList<>();
+			for (int x = 5; x <= 11; x++) {
+				BlockPos bed = new BlockPos(x, 1, 6);
+				theirs.add(forasHost(helper, bed, member.getUUID()));
+				claimed.add(helper.absolutePos(bed.above()));
+			}
+			VerdantBedBlockEntity own = forasHost(helper, new BlockPos(8, 1, 4), holder.getUUID());
+			try (TestClaims claims = TestClaims.open()) {
+				for (BlockPos crop : claimed) {
+					claims.block(crop, STRANGER);
+				}
+				PactPerchBlockEntity perch = forasPact(helper, holder, at, now);
+				ForasEntity foras = foras(helper, perch);
+				forasAnswer(helper, holder, perch, GraftKeeping.ALWAYS, now);
+				helper.assertValueEqual(foras.think(level, 6000L, now + 1), Status.IDLE,
+						"Seven refused crops and the holder's crop spend his eight questions: nothing grafted");
+				GraftKeeping.Memory memory = keeping(foras);
+				helper.assertTrue(own.graft().isEmpty() && dewmossIn(chest) == 2 && claimed.stream().allMatch(memory::skipped)
+						&& memory.idle() == GraftKeeping.Idle.NO_HOST, "The seven are skipped from now on, and Jade has a reason: " + memory.idle());
+				helper.assertValueEqual(foras.think(level, 6000L, now + 2), Status.WORKING, "His next think skips them and grafts the holder's host");
+				helper.assertTrue(FORAS_GRAFT.equals(own.graft()) && dewmossIn(chest) == 1 && theirs.stream().allMatch(bed -> bed.graft().isEmpty()),
+						"The holder's host carries Dewlit, one Dewmoss spent; no claimed host is touched");
+			}
+		} finally {
+			parties.adminDisband(holder.getUUID());
+		}
 		helper.succeed();
 	}
 
@@ -7731,7 +7789,7 @@ public class ConcordanceWorkerGameTests {
 	 * GC-P84, GC-P86 (Dossier 4 items 3 and 5): unanswered, Foras leaves a host the graft would not improve (full sky: ideal
 	 * either way), names it once (his matter, raised with his inspect gesture) and awaits the answer; a host whose bed holds
 	 * no reading he waits on too. Answered "where it helps", he still leaves both, Jade naming the first; that host gone,
-	 * Jade says hosts wait for their bed's first reading (CR4 8).
+	 * Jade says hosts wait for their bed's first reading (GC-P90).
 	 */
 	@GameTest(maxTicks = 20)
 	public void aPrudentForasSkipsAUselessGraft(GameTestHelper helper) {
@@ -7774,7 +7832,7 @@ public class ConcordanceWorkerGameTests {
 	 * GC-P84, GC-P86 (Dossier 4 items 3 and 5): unanswered, Foras grafts only where the graft helps. A Sunpetal shut in stone
 	 * beside crying obsidian (light 9: short for it, tolerable grafted) gains; one in full sky (light 15: ideal either way)
 	 * does not. His first think names the second (his matter, raised once with his inspect gesture), spends nothing and
-	 * awaits the answer; his next grafts the first under the safe course, still awaiting it (CR4 4); the second is left, and
+	 * awaits the answer; his next grafts the first under the safe course, still awaiting it (GC-P47); the second is left, and
 	 * his matter is not raised again. Sealed once the light engine has lit the new blocks (from the 30th tick, the beds
 	 * sampled one a tick: the shared sampling rule).
 	 */

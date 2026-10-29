@@ -666,7 +666,7 @@ def foras_model(read):
             {"name": "body", "parent": "root", "pivot": [0, 13, 0], "cubes": [
                 _foras_box("chest", (-6, 13, -4.5)), _foras_box("mantle", (-7, 19, -5.5))]},
             {"name": "head", "parent": "body", "pivot": [0, 21, -3], "cubes": [
-                _foras_box("head", (hx, hy, hz)), _foras_box("nose", (-1, 23.5, -8.25)), _foras_box("beard", (-3, 17, -8.75))]},
+                _foras_box("head", (hx, hy, hz)), _foras_box("nose", (-1, 23.5, -8.0)), _foras_box("beard", (-3, 17, -8.75))]},
             {"name": "cap", "parent": "head", "pivot": [0, hy + 8, hz], "cubes": acorn_cap(read)},
             {"name": "arm_left", "parent": "body", "pivot": [8, 21, -1], "cubes": [_foras_box("arm", (6.5, 6, -3))]},
             {"name": "arm_right", "parent": "body", "pivot": [-8, 21, -1], "cubes": [_foras_box("arm", (-10.5, 6, -3))]},

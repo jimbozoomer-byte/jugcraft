@@ -415,7 +415,7 @@ SPIRITS = {
         "name": "Foras",
         "java": "ForasEntity",
         # A tall, broad, stooped elder: his robe and shoulders 1.2 across, 2.2 tall (GC-P92; a fifth apart from every
-        # other spirit on one axis); his eyes at 1.55, where his face draws them (CR4 10).
+        # other spirit on one axis); his eyes at 1.55, where his face draws them (the brief's 1.95 was above his brow).
         "entity": {"width": 1.2, "height": 2.2, "eye": 1.55},
         # He stands beside his perch: unit 3's PactSpiritEntity.Station.BESIDE (GC-P67), no station code of his own (GC-P89).
         "station": "beside",
@@ -445,10 +445,10 @@ SPIRITS = {
         # His service's two conditions, the holder near and only what the holder could change by hand, named before
         # anything is spent (GC-S7, as Buer's and Bathin's); his quota is its own term.
         "term": "Graft keeping: at any hour Foras grafts a host crop on an awake Verdant Bed of yours or your party's in his "
-                "area with one donor from a chest or other plain container touching his perch: one graft at a time, one "
-                "donor spent for each, never a graft the rules already know replaced. Until you answer otherwise, only where "
-                f"the graft helps the host. He works only while you are within {workers.PACT['REACH']} blocks of the perch, "
-                "and never takes from a store, or grafts a crop or bed, you could not change by hand",
+                "area with one donor (a Dewmoss for a Sunpetal) from a chest or other plain container touching his perch: one "
+                "graft at a time, one donor spent for each, never a graft the rules already know replaced. Until you answer "
+                f"otherwise, only where the graft helps the host. He works only while you are within {workers.PACT['REACH']} "
+                "blocks of the perch, and never takes from a store, or grafts a crop or bed, you could not change by hand",
         # His cues, in ForasEntity.SOUND_IDS' order: (subtitle, runtime files). The art plan's mono files (GC-S13).
         "cues": {
             "arrive": ("Foras steps in", ["menagerie/fable/mojo_spawn"]),
@@ -463,7 +463,7 @@ SPIRITS = {
                                              "menagerie/cavern/block/thornwood_branch/thornwood_branch_break_2"]),
         },
         # An old man's voice, lower than the creature's (GC-P94); his 2.6 s departure cuts at most 0.02 s off the tail of
-        # the departing cue (2.62 s at 1.0; an entity's sound stops when it is gone; CR4 10).
+        # the departing cue (2.62 s at 1.0; an entity's sound stops when it is gone).
         "pitch": {"arrive": 0.85, "listen": 0.8, "refuse": 0.75},
         # His body (GC-S12, GC-P92, GC-P93): every file built by tools/garden_bodies.py ("built": runtime path -> (the owner
         # files it reads, its builder)), written and checked by tools/owner_art.py (its second root for the acorn cap).
@@ -1063,8 +1063,9 @@ SERVICE_WORDS = {
             "row.last": "Last: grafted the host at %s with a donor from the store at %s",
             "row.no_donor": "Waiting for donors: no store beside him that he may take from holds one for your hosts",
             "counted": "Foras: %s of %s grafts today.",
-            "matter.no_gain": "\"%s hosts here would gain nothing; shall I graft them anyway?\" (where a bed already suits a "
-                              "host as well, a graft that narrows what it bears would not help it)",
+            "matter.no_gain": "\"Hosts here a graft would not help, or would harm: %s, the nearest at %s. Shall I graft them "
+                              "anyway?\" (a graft narrows what a host bears: where its bed suits it as well already it gains "
+                              "nothing, and where a factor would fit worse it fares worse)",
         },
         "screen": {
             "heading": "Graft keeping",
@@ -1154,6 +1155,6 @@ GARDEN_CLIENT_SHOTS += ["jugcraft_garden_foras_no_store", "jugcraft_garden_foras
                         "jugcraft_garden_foras_matter_scale4", "jugcraft_garden_foras_matter_small", "jugcraft_garden_foras_answered",
                         "jugcraft_garden_foras_grafting", "jugcraft_garden_foras_jade", "jugcraft_garden_foras_faces_east",
                         "jugcraft_garden_foras_faces_south", "jugcraft_garden_foras_faces_west", "jugcraft_garden_foras_faces_north",
-                        "jugcraft_garden_foras_end_confirm", "jugcraft_garden_foras_ended"]
+                        "jugcraft_garden_foras_counted", "jugcraft_garden_foras_end_confirm", "jugcraft_garden_foras_ended"]
 # GC-08 unit 5
 # GC-09 unit 6

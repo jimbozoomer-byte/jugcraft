@@ -21706,8 +21706,33 @@ def check_garden_pacts(co, root, lang, registered, research):
     if -1 in order or order != sorted(order):
         err("GraftKeeping.keep: hours, quota, the hosts and the matter, then each host asked at crop and bed, each store asked as "
             "the holder's, the donor found, spent in its transaction, then grafted (GC-P85; Dossier 4 item 3)")
-    if "new GardenAsking(level, record, time, now, MAX_ASKED)" not in keeping:
-        err("GraftKeeping.keep: its questions are GardenAsking's, at most MAX_ASKED a think (GC-P85; CR4 6)")
+    if "new GardenAsking(level, record, time, now, MAX_ASKED, memory::skipped, memory::skip)" not in keeping:
+        err("GraftKeeping.keep: its questions are GardenAsking's, at most MAX_ASKED a think, a place refused for itself skipped "
+            "until his index is read again (GC-P85; as Bathin's)")
+    # The unit review: a store read without the donor is not asked or read again until the index is; a store is asked before
+    # it is read (reading a loot chest fills it); a think its questions ran out on still says why; a host's crop in his area.
+    memory_java = _java_body(keeping, "public static final class Memory {")
+
+    def member(start):
+        # A member of the nested Memory class: to its first closing brace at two tabs.
+        rest = memory_java[memory_java.find(start):] if start in memory_java else ""
+        return rest[:rest.find("\n\t\t}\n")] if "\n\t\t}\n" in rest else rest
+    order = [step.find(n) for n in ("if (memory.lacks(at, item)) {", "asking.ask(at, record.holder())", "CourierWork.store(level, at)",
+                                    "StorageUtil.findStoredResource(storage,", "memory.lacked(at, item);", "spend(storage, donor)")]
+    noticed, rebuilt = member("void noticed("), member("GardenReach reach(BoundWill record)")
+    if -1 in order or order != sorted(order) or step.count("CourierWork.store(") != 1 \
+            or step.count("memory.idle(reached ? Idle.NO_DONOR : Idle.NO_HOST);") != 3 \
+            or not all(n in noticed for n in ("reach.refreshes() != skippedAt", "skipped.clear();", "lacking.clear();")) \
+            or not all(n in rebuilt for n in ("skipped.clear();", "lacking.clear();")):
+        err("GraftKeeping.keep: a store read without the donor is skipped until his index is read again, asked before it is "
+            "read; a think whose questions ran out still says why; the places skipped forgotten at each read of the index "
+            "(GC-P85; the unit review)")
+    if "!inArea(level, record, host.crop())" not in step \
+            or "!inArea(level, record, crop)" not in _java_body(keeping, "public PactService.@Nullable Complication complication(") \
+            or "pact.place().within(Couriers.place(level, crop), pact.service().radius())" not in _java_body(keeping, "static boolean inArea(") \
+            or "Math.abs(bed.getBlockPos().above().getY() - perch.getBlockPos().getY()) <= definition.radius()" not in _java_body(keeping, "public List<Missing> missing("):
+        err("GraftKeeping: a host's crop stands in his area too (a bed on its top layer has its crop above it), in his step, "
+            "his matter and his invitation (GC-P88; the unit review)")
     if keeping.count(gp.DISTINCT.get("graft_keeping", {}).get("also", "?")) != 1:
         err(f"spirits/GraftKeeping.java: makes {gp.DISTINCT.get('graft_keeping', {}).get('also')} once (DISTINCT)")
     spend = _java_body(keeping, "public static boolean spend(")
@@ -21720,7 +21745,7 @@ def check_garden_pacts(co, root, lang, registered, research):
                    "forgetSample(", "sendParticles(", "CourierLedger", "Logistics.", "getPlayer(record.holder()).getInventory"):
         if banned in keeping:
             err(f"spirits/GraftKeeping.java: never {banned} (the graft is Grafting.apply's, the donor the store's in its "
-                "transaction; no inventory, no sample, never cargo: no courier ledger, reservation or transit; GC-07, CR2 6)")
+                "transaction; no inventory, no sample, never cargo: no courier ledger, reservation or transit; GC-07, GC-P85)")
     landed = _java_body(keeping, "private static Status grafted(")
     order = [landed.find(n) for n in ("memory.grafted(graft);", "holder.taskDone(level, now);",
                                       "foras.attendWork(graft.crop(), ForasEntity.Gesture.WORK.ticks, now);",
@@ -21740,13 +21765,13 @@ def check_garden_pacts(co, root, lang, registered, research):
             or list(co.pacts.SERVICE_WORDS.get("graft_keeping", {}).get("accords", {})) != ["prudent", "always"]:
         err("GraftKeeping: his answers are prudent then always (append only), worded in SERVICE_WORDS and read through "
             "PactAccords.answer, so an unknown one reads as unanswered (GC-P86)")
-    # CR4 8: Jade says why he waits: his matter (unless answered "graft every host"), then hosts whose beds hold no reading.
+    # GC-P90: Jade says why he waits: his matter (unless answered "graft every host"), then hosts whose beds hold no reading.
     noted = _java_body(keeping, "public PactService.@Nullable Note note(")
     if not 0 <= noted.find('new PactService.Note("no_gain", memory.useless().size())') \
             < noted.find('if (memory.idle() == Idle.NO_GAIN) {') < noted.find('new PactService.Note("no_reading", memory.unread())') \
             < noted.find('new PactService.Note("no_donor", 0)') or "!ALWAYS.equals(answer(level, foras))" not in noted:
         err("GraftKeeping.note: hosts that would gain nothing unless answered always, then hosts with no reading yet, then no "
-            "donor or no host (GC-P90; CR4 8)")
+            "donor or no host (GC-P90)")
     invited = _java_body(keeping, "public List<Missing> missing(")
     if "GardenReach.withStores(perch.getBlockPos(), definition.radius(), bed -> own.equals(bed.keeper()))" not in invited \
             or not 0 <= invited.find('"missing.store"') < invited.find('"missing.host"') or "knownHost(level, bed)" not in invited:
@@ -22486,7 +22511,7 @@ def check_spirit_bodies(co):
                 or not re.search(rf'{gesture.upper()}\("{gesture}", {ticks}, RawAnimation\.begin\(\)\.{play}\("animation\.foras\.{gesture}"\)\)',
                                  foras_java):
             err(f"foras.animation.json / ForasEntity.Gesture: {gesture} lasts {length} s ({ticks} ticks), its telling window inside it")
-    # Detail (a): his cap tips at his greeting and at each graft, and only then (each key a vector, eased ones as objects: CR4 3).
+    # Detail (a): his cap tips at his greeting and at each graft, and only then (each key a vector, or an object when eased).
     tipped = sorted(name for name, clip in clips.items() if "cap" in clip.get("bones", {}))
     vector = lambda key: key["vector"] if isinstance(key, dict) else key
     peaks = {name: max(abs(vector(v)[0]) for v in clips[name]["bones"]["cap"]["rotation"].values()) for name in tipped}
@@ -22506,7 +22531,7 @@ def check_spirit_bodies(co):
         size, r = pa.SPIRITS["foras"]["entity"], body["render"]
         if abs(size["height"] - tall) > 0.1 * tall or across > size["width"] + 2 * r["wide"] or tall > size["height"] + r["above"]:
             err(f"Foras's box {size['width']} x {size['height']} holds his height ({tall:.2f}); his culling box his reach ({across:.2f})")
-    # His poses and shots, from his front, each gesture frozen inside its window (CR4 5; the client read without comments).
+    # His poses and shots, from his front, each gesture frozen inside its window (the client read without comments).
     posed = {key.lower(): (float(a), float(b)) for key, a, b in re.findall(
         r'clipPose\(context, server, perch, FORAS, ForasEntity\.Gesture\.([A-Z]+), ([0-9.]+), ([0-9.]+), "jugcraft_garden_foras_[a-z]+"\);',
         garden_client)}
@@ -25641,7 +25666,8 @@ GC07_GRAFT_TESTS = {
                                    "theGardenReachIndexesStoresTouchingThePerch"],
     "ConcordanceWorkerGameTests": [
         "forasSpendsOneDonorAGraftAndNeverTwo", "forasNeverReplacesAKnownGraft", "forasGraftsAgainAfterAReplanting",
-        "forasTakesOnlyFromAStoreTheHolderMayChange", "forasRefusedWhereTheHolderMayNotBuild", "forasNeverGraftsAStrangersBed",
+        "forasTakesOnlyFromAStoreTheHolderMayChange", "forasRefusedWhereTheHolderMayNotBuild", "forasSkipsPlacesRefusedForThemselves",
+        "forasNeverGraftsAStrangersBed",
         "twoForasNeverGraftOneBedTwice", "aPrudentForasSkipsAUselessGraft", "aPrudentForasGraftsWhereItHelps",
         "anAlwaysAnswerGraftsEveryHost", "forasStopsAtHisQuota", "forasWaitsForAPresentHolder",
         "forassFirstObligationIsAGraftByHand", "theKeptPageCountsForasGrafts", "forassReadingSaysItsNoteAndNamesNoPlayer"],

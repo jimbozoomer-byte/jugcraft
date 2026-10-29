@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.concordance.spirits;
 
+import io.github.jimbozoomer.jugcraft.concordance.courier.Couriers;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Graft;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Habitat;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Organism;
@@ -12,6 +13,7 @@ import io.github.jimbozoomer.jugcraft.concordance.worker.PactDefinition;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Status;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
@@ -31,17 +33,21 @@ import org.jspecify.annotations.Nullable;
  * included, GC-P27) and while the day's quota lasts, he makes at most one graft, and a graft is one server step:
  * <ol>
  * <li>Hosts: the awake Verdant Beds of his beneficiaries in his area (GardenReach.withStores: loaded chunks only, at most
- * 64, nearest the perch first) whose crop is the host of a known graft with a donor item (Grafting.graftFor) and that
- * carry no graft the rules know (Grafting.holds). Under his default, {@link #PRUDENT} (also what an unanswered or unknown
- * accord means), only those the graft would improve by the bed's cached habitat (VerdantBedBlockEntity.cachedHabitat: he
- * never takes a sample himself; Grafting.gains: no factor's fit worse, one better); answered {@link #ALWAYS}, every host.
+ * 64, nearest the perch first) whose crop is the host of a known graft with a donor item (Grafting.graftFor) and stands
+ * in his area too (a bed on its top layer has its crop above it), and that carry no graft the rules know
+ * (Grafting.holds). Under his default, {@link #PRUDENT} (also what an unanswered or unknown accord means), only those
+ * the graft would improve by the bed's cached habitat (VerdantBedBlockEntity.cachedHabitat: he never takes a sample
+ * himself; Grafting.gains: no factor's fit worse, one better); answered {@link #ALWAYS}, every host.
  * Hosts the graft would not improve are his matter (the logician's objection), raised once a presence with his inspect
  * gesture; while it waits unanswered his presence says AWAITING_ANSWER instead of his step's status (PactSpiritEntity's
  * serve, GC-P47), his step meanwhile keeping to the safe course.</li>
  * <li>For each host, nearest first: its crop and its bed asked at the change (GardenPacts.target: serves there, a
  * beneficiary's, the holder near, the holder's own hands), then the plain containers touching his perch (the index's
  * stores, at most 16), each asked with the holder as its keeper, for one holding the graft's donor (its views read, no
- * transaction). At most {@value #MAX_ASKED} places asked a think (GardenAsking, every garden service's one rule).</li>
+ * transaction). At most {@value #MAX_ASKED} places asked a think (GardenAsking, every garden service's one rule); a place
+ * refused for itself, and a store read without the donor, are skipped until his index is read again (at most
+ * GardenReach.REFRESH_TICKS), so they never crowd the rest out of a think's questions. A store is asked before it is
+ * read.</li>
  * <li>Every precondition held: one donor taken from that store in one outer Fabric transaction, committed only when exactly
  * one came out ({@link #spend}); nothing in the world changes while it is open. Then, the transaction closed, the graft
  * applied (Grafting's apply: setGraft, which cannot fail, and forgetVerdict). A refused or short extraction spends nothing
@@ -86,11 +92,14 @@ public final class GraftKeeping {
 
 	/** Why his last think grafted nothing, for Jade and the kept page. */
 	public enum Idle {
-		/** No host he may graft: every host in his area carries a graft the rules know, or none is his holder's to change by hand. */
+		/**
+		 * No host he may graft: every host in his area carries a graft the rules know, or none is his holder's to change by
+		 * hand, or his questions ran out before one was (the places refused are skipped at his next think).
+		 */
 		NO_HOST,
 		/** Hosts wait, but none he would graft now: the graft would not improve them, or their beds hold no reading yet. */
 		NO_GAIN,
-		/** Hosts he would graft, but no store he may take from holds their donor. */
+		/** Hosts he would graft, but no store he may take from holds their donor (or his questions ran out before one was found). */
 		NO_DONOR
 	}
 
@@ -119,8 +128,8 @@ public final class GraftKeeping {
 		int unread = 0;
 		for (VerdantBedBlockEntity bed : reach.beds(level, now)) {
 			Host host = host(level, bed);
-			if (host == null) {
-				continue;
+			if (host == null || !inArea(level, record, host.crop())) {
+				continue; // no host, or a bed on his area's top layer, its crop above the area
 			}
 			Boolean helps = helps(level, host);
 			if (Boolean.FALSE.equals(helps)) {
@@ -146,7 +155,7 @@ public final class GraftKeeping {
 			return Status.IDLE;
 		}
 		List<BlockPos> stores = reach.stores(level, now);
-		GardenAsking asking = new GardenAsking(level, record, time, now, MAX_ASKED);
+		GardenAsking asking = new GardenAsking(level, record, time, now, MAX_ASKED, memory::skipped, memory::skip);
 		boolean reached = false;
 		for (Host host : hosts) {
 			Asked asked = asking.both(host.crop(), host.bed().keeper(), host.bed().getBlockPos(), host.bed().keeper());
@@ -154,6 +163,7 @@ public final class GraftKeeping {
 				return asking.stop();
 			}
 			if (asked == Asked.SPENT) {
+				memory.idle(reached ? Idle.NO_DONOR : Idle.NO_HOST);
 				return Status.IDLE;
 			}
 			if (asked != Asked.MAY) {
@@ -161,21 +171,33 @@ public final class GraftKeeping {
 			}
 			reached = true;
 			String item = Grafting.donorItem(host.graft());
+			if (item == null) {
+				continue;
+			}
 			for (BlockPos at : stores) {
+				if (memory.lacks(at, item)) {
+					continue; // read without this donor since his index was last read: no question spent on it
+				}
 				Asked store = asking.ask(at, record.holder());
 				if (store == Asked.PACT) {
 					return asking.stop();
 				}
 				if (store == Asked.SPENT) {
+					memory.idle(reached ? Idle.NO_DONOR : Idle.NO_HOST);
 					return Status.IDLE;
 				}
-				if (store != Asked.MAY || item == null) {
+				if (store != Asked.MAY) {
 					continue;
 				}
+				// Asked first, then read: reading a loot chest's items fills it (RandomizableContainerBlockEntity.getItem).
 				Storage<ItemVariant> storage = CourierWork.store(level, at);
 				ItemVariant donor = storage == null ? null
 						: StorageUtil.findStoredResource(storage, variant -> item.equals(BuiltInRegistries.ITEM.getKey(variant.getItem()).toString()));
-				if (donor != null && spend(storage, donor)) {
+				if (donor == null) {
+					memory.lacked(at, item);
+					continue;
+				}
+				if (spend(storage, donor)) {
 					Grafting.apply(level, host.crop(), host.bed(), host.graft());
 					return grafted(level, foras, record, holder, memory, new Grafted(host.crop(), host.graft().id(), at.immutable(), now), now);
 				}
@@ -236,6 +258,16 @@ public final class GraftKeeping {
 		return graft == null ? null : new Host(crop, bed, organism, graft);
 	}
 
+	/**
+	 * Whether {@code crop} stands in {@code record}'s area (the cube round the perch Pacts.serves reads): his index holds the
+	 * beds in it, and a bed on its top layer has its crop one block above it, where GardenPacts.target would refuse it.
+	 */
+	static boolean inArea(ServerLevel level, BoundWill record, BlockPos crop) {
+		BoundWill.Pact pact = record.pact();
+		return pact != null && pact.place() != null && pact.service() != null
+				&& pact.place().within(Couriers.place(level, crop), pact.service().radius());
+	}
+
 	/** Whether {@code host}'s graft would improve it by its bed's cached habitat (GC-P84); null while the bed holds no reading. Never samples. */
 	static @Nullable Boolean helps(ServerLevel level, Host host) {
 		Habitat habitat = host.bed().cachedHabitat(level);
@@ -283,12 +315,18 @@ public final class GraftKeeping {
 
 	/**
 	 * What one Foras presence remembers between its thinks (PactSpiritEntity.serviceMemory: never saved, lost with the
-	 * entity): his index, the hosts the graft would not improve, how many hosts' beds hold no reading yet, whether he has
-	 * raised his matter, why he last idled, and his last graft. It never holds a donor: a graft is over when its call
-	 * returns. Server thread only.
+	 * entity): his index, the places refused for themselves and the stores read without a donor since the index was last
+	 * read, the hosts the graft would not improve, how many hosts' beds hold no reading yet, whether he has raised his
+	 * matter, why he last idled, and his last graft. It never holds a donor: a graft is over when its call returns. Server
+	 * thread only.
 	 */
 	public static final class Memory {
+		/** The most places skipped, and the most stores remembered without a donor: every crop and bed an index holds, and its stores. */
+		private static final int MAX_SKIPPED = 2 * GardenReach.MAX_BEDS + GardenReach.MAX_STORES;
 		private @Nullable GardenReach reach;
+		private final HashSet<BlockPos> skipped = new HashSet<>();
+		private final HashSet<Lacking> lacking = new HashSet<>();
+		private int skippedAt = -1;
 		private List<BlockPos> useless = List.of();
 		private int unread;
 		private boolean raised;
@@ -298,26 +336,66 @@ public final class GraftKeeping {
 		public Memory() {
 		}
 
-		/** {@code record}'s store index, made again when its perch or radius changed (GardenReach.covers). */
+		/** {@code record}'s store index, made again (forgetting what it skipped) when its perch or radius changed (GardenReach.covers). */
 		GardenReach reach(BoundWill record) {
 			if (reach == null || !reach.covers(record)) {
 				reach = GardenReach.withStores(record);
+				skipped.clear();
+				lacking.clear();
+				skippedAt = -1;
 			}
 			return reach;
 		}
 
-		/** Forgets his index, so his next think reads his area again (GardenReach.forget): an operator's or a test's. */
+		/**
+		 * Forgets his index, so his next think reads his area again (GardenReach.forget): an operator's or a test's. The places
+		 * skipped and the stores read without a donor are forgotten at that read.
+		 */
 		public void forget() {
 			if (reach != null) {
 				reach.forget();
 			}
 		}
 
-		/** The hosts the graft would not improve now, nearest the perch first (their crops), and how many hosts' beds hold no reading; why he idled is forgotten. */
+		/**
+		 * The hosts the graft would not improve now, nearest the perch first (their crops), and how many hosts' beds hold no
+		 * reading; why he idled is forgotten. When the read that found them refreshed the index, the places skipped and the
+		 * stores read without a donor since the last are forgotten, so a claim lifted, a keeper who joined the party or a
+		 * donor put in a store is seen again.
+		 */
 		void noticed(List<BlockPos> found, int unreadNow) {
+			if (reach != null && reach.refreshes() != skippedAt) {
+				skippedAt = reach.refreshes();
+				skipped.clear();
+				lacking.clear();
+			}
 			useless = List.copyOf(found);
 			unread = unreadNow;
 			idle = null;
+		}
+
+		/** GardenPacts.target refused the place at {@code pos} for itself: not asked again until his index is next read. */
+		void skip(BlockPos pos) {
+			if (skipped.size() < MAX_SKIPPED) {
+				skipped.add(pos.immutable());
+			}
+		}
+
+		/** Whether the place at {@code pos} was refused for itself since his index was last read (tests and keep). */
+		public boolean skipped(BlockPos pos) {
+			return skipped.contains(pos);
+		}
+
+		/** The store at {@code store}, asked and read, held no {@code item} (a donor's id): not asked or read for it again until his index is next read. */
+		void lacked(BlockPos store, String item) {
+			if (lacking.size() < MAX_SKIPPED) {
+				lacking.add(new Lacking(store.immutable(), item));
+			}
+		}
+
+		/** Whether the store at {@code store} was read without {@code item} since his index was last read (tests and keep). */
+		public boolean lacks(BlockPos store, String item) {
+			return lacking.contains(new Lacking(store, item));
 		}
 
 		/** The crops of the hosts the graft would not improve at his last think, nearest first. */
@@ -361,6 +439,10 @@ public final class GraftKeeping {
 		public @Nullable Grafted last() {
 			return last;
 		}
+
+		/** A store read without a donor's item, by the item's id. */
+		private record Lacking(BlockPos store, String item) {
+		}
 	}
 
 	/** Graft keeping behind PactService (GC-01): no on-request action; his rows, refusal, obligation, matter and Jade note. */
@@ -391,7 +473,8 @@ public final class GraftKeeping {
 			}
 			boolean host = false;
 			for (VerdantBedBlockEntity bed : reach.beds(level, now)) {
-				if (knownHost(level, bed)) {
+				// A bed on the area's top layer has its crop above the area, where he could not graft it.
+				if (Math.abs(bed.getBlockPos().above().getY() - perch.getBlockPos().getY()) <= definition.radius() && knownHost(level, bed)) {
 					host = true;
 					break;
 				}
@@ -459,10 +542,12 @@ public final class GraftKeeping {
 				return null;
 			}
 			Host host = host(level, bed);
-			if (host == null || !Boolean.FALSE.equals(helps(level, host))) {
+			if (host == null || !inArea(level, record, crop) || !Boolean.FALSE.equals(helps(level, host))) {
 				return null;
 			}
-			return new PactService.Complication(NO_GAIN, Component.translatable(KEY + "matter.no_gain", memory.useless().size()), crop, ACCORDS);
+			// How many, and where the nearest stands: the matter keeps its place, as Bathin's names his Heart.
+			return new PactService.Complication(NO_GAIN, Component.translatable(KEY + "matter.no_gain", memory.useless().size(), crop.toShortString()),
+					crop, ACCORDS);
 		}
 
 		/**

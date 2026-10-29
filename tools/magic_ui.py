@@ -923,24 +923,29 @@ WORK_GLANCES = {
         "row.leaving": [("", "Hearts left to their own pylons: %1$s", (1,), "Hearts left to their own pylons: 1", "row")],
         "matter.two_roads": [("", "Heart at %1$s: take from it too?", ("12, 64, -30",), "Heart at 12, 64, -30: take from it too?",
                               "row")],
+        # His matter in general, drawn where none is raised now and an answer is kept (PactAccords: <work>.question).
+        "question": [("", "Take from Hearts that have a road?", (), "Take from Hearts that have a road?", "row")],
         "missing": [("", "Needs your awake Heart, a Gleaner or pylon, in %1$s blocks", (10, 10),
                      "Needs your awake Heart, a Gleaner or pylon, in 10 blocks", "blocker")],
         "card": ("Needs Heart and Gleaner", (10, 10), "Needs Heart and Gleaner"),
     },
     # GC-07 (Foras; docs/features/foras-pact.md): graft keeping. Two refusals, each its own blocker and card; today's gauge
-    # is his count (detail b); his matter asks whether to graft hosts that would gain nothing.
+    # is his count (detail b); his matter asks whether to graft hosts that would gain nothing, or would fare worse, naming
+    # the nearest (as Bathin's names his Heart); his service line names the host's donor and its cost.
     "graft_keeping": {
-        "icon": "jugcraft:dewmoss", "name": "Graft keeping", "line": "Grafts hosts from the store beside him",
+        "icon": "jugcraft:dewmoss", "name": "Graft keeping", "line": "Grafts your hosts, one Dewmoss each",
         "row.service": [("", "%1$s/%2$s today", (3, 8), "3/8 today", "chip")],
         "row.last": [("", "Last: the host at %1$s grafted", ("12, 64, -30", "13, 64, -28"),
                       "Last: the host at 12, 64, -30 grafted", "row")],
-        "row.no_donor": [("", "No donor in the store beside him", (), "No donor in the store beside him", "row")],
-        "matter.no_gain": [("", "%1$s hosts would gain nothing: graft them anyway?", (3,),
-                            "3 hosts would gain nothing: graft them anyway?", "row")],
+        "row.no_donor": [("", "No Dewmoss he may take", (), "No Dewmoss he may take", "row")],
+        "matter.no_gain": [("", "Gain nothing or worse: %1$s, nearest %2$s. Graft anyway?", (3, "12, 64, -30"),
+                            "Gain nothing or worse: 3, nearest 12, 64, -30. Graft anyway?", "row")],
+        # His matter in general, drawn where none is raised now and an answer is kept (PactAccords: <work>.question).
+        "question": [("", "Graft hosts that gain nothing?", (), "Graft hosts that gain nothing?", "row")],
         "missing.store": [("", "Needs a chest or store touching the perch", (), "Needs a chest or store touching the perch",
                            "blocker")],
-        "missing.host": [("", "Needs your host crop on a bed within %1$s blocks", (8,),
-                          "Needs your host crop on a bed within 8 blocks", "blocker")],
+        "missing.host": [("", "Needs a Sunpetal on your bed within %1$s blocks", (8,),
+                          "Needs a Sunpetal on your bed within 8 blocks", "blocker")],
         # Two words each: with Stolas ready and Buer, Bathin and Foras not, the chooser draws 25 words (its budget).
         "card": {"missing.store": ("Store needed", (), "Store needed"), "missing.host": ("Host needed", (8,), "Host needed")},
     },
@@ -1020,11 +1025,15 @@ GLANCES.update(ROSTER_GLANCES)
 # The state mark a glance draws, by the shape of its server key (Java: PactGlance.MARKS, in this order; the first rule
 # that matches decides; none: no mark). A garden spirit's rows named as these are get their marks with no change here.
 MARK_RULES = (
-    ("prefix", "pact.missing.", "lock"), ("suffix", ".missing", "lock"), ("exact", "pact.seat.offer", "lock"),
+    # A work's blockers: pact.<work>.missing, or one of several refusals' (GC-07: pact.graft_keeping.missing.store).
+    ("prefix", "pact.missing.", "lock"), ("suffix", ".missing", "lock"), ("contains", ".missing.", "lock"),
+    ("exact", "pact.seat.offer", "lock"),
     ("exact", "pact.unavailable", "lock"), ("exact", "pact.row.state.active", "tick"),
     ("exact", "pact.row.state.upkeep_due", "hourglass"), ("prefix", "pact.row.state.", "moon"),
     ("exact", "pact.row.lost", "moon"), ("suffix", ".row.asleep", "moon"), ("contains", ".row.overworked", "hourglass"),
     ("suffix", "obligation_kept", "tick"), ("suffix", "obligation", "hourglass"), ("contains", ".matter.", "ask"),
+    # GC-07: the row that waits on the player (a donor to put in his store) among the rows that need them.
+    ("exact", "pact.graft_keeping.row.no_donor", "hourglass"),
 )
 
 
@@ -1051,6 +1060,9 @@ ICON_RULES = (
     ("exact", "pact.verdance_carrying.row.poured", "item:jugcraft:ley_pylon"),
     ("exact", "pact.verdance_carrying.row.moved", "item:jugcraft:gleaner"),
     ("exact", "pact.verdance_carrying.row.leaving", "item:jugcraft:verdant_heart"),
+    # Foras's own rows: the donor he waits for, and the host he grafted last.
+    ("exact", "pact.graft_keeping.row.no_donor", "item:jugcraft:dewmoss"),
+    ("exact", "pact.graft_keeping.row.last", "item:jugcraft:sunpetal"),
     ("suffix", "obligation", "glyph:pin"),
     ("exact", "pact.ended_here", "glyph:pin"),
     ("exact", "pact.departed", "glyph:spiral"),
@@ -1140,7 +1152,7 @@ SENTENCES = {
     _JADE + "pact.note.verdance_carrying.nowhere": ("Nowhere to carry it", (), "Nowhere to carry it", "jade"),
     _JADE + "pact.note.verdance_carrying.two_roads": ("Two roads: %1$s", (2,), "Two roads: 2", "jade"),
     _JADE + "pact.matter.graft_keeping.no_gain": ("Hosts gain nothing", (), "Hosts gain nothing", "jade"),
-    _JADE + "pact.note.graft_keeping.no_gain": ("No gain: %1$s hosts", (3,), "No gain: 3 hosts", "jade"),
+    _JADE + "pact.note.graft_keeping.no_gain": ("Would gain nothing: %1$s", (3,), "Would gain nothing: 3", "jade"),
     _JADE + "pact.note.graft_keeping.no_reading": ("Unread hosts: %1$s", (2,), "Unread hosts: 2", "jade"),
     _JADE + "pact.note.graft_keeping.no_donor": ("No donor", (), "No donor", "jade"),
     _JADE + "pact.note.graft_keeping.no_host": ("Nothing to graft", (), "Nothing to graft", "jade"),
@@ -1498,12 +1510,18 @@ def problems(lang=None, load=None, read=read_library):
         if work not in WORK_GLANCES:
             out.append(f"{work}: no WORK_GLANCES row in tools/magic_ui.py (its service line, rows, blockers and card)")
         sent += [f"pact.{work}.{key}" for key in words["messages"] if key.startswith(("row.", "missing", "matter."))]
+        # The matter in general, which the kept page draws when none is raised now and an answer is kept (PactAccords).
+        sent += [f"pact.{work}.question"] if words.get("accords") else []
     for work in pacts.WORK:
         if work in pacts.SERVICE_WORDS or work == pacts.RECKONING_WORK:
             sent.append(f"pact.term.service.{work}")
     for server in sent:
         if server not in GLANCES and server not in FOLDED:
             out.append(f"{server}: the server can send it, but it has neither a glance nor a place in FOLDED (spec 1.7)")
+    # Every blocker is drawn as a lock line (spec 1.1, 1.2: never colour alone), so its key takes the lock mark.
+    for server, glances in GLANCES.items():
+        if any(kind == "blocker" for *_, kind in glances) and mark(server) != "lock":
+            out.append(f"{server}: a blocker, but MARK_RULES gives it {mark(server)!r}, not the lock (spec 1.1, 1.2)")
     for work, rows in WORK_GLANCES.items():
         carded = {key for key, _ in work_cards(rows)}
         for key in pacts.SERVICE_WORDS.get(work, {}).get("messages", {}):

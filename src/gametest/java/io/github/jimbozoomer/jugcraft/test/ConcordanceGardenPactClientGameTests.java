@@ -2057,7 +2057,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 	/**
 	 * GC-07: Foras at the perch Bathin left, standing beside it (unit 3's Station.BESIDE), from the chooser to his departure;
 	 * his matter raised, asked and answered on the kept page, and one graft frozen in his work. Noon and clear weather first,
-	 * and noon again before his poses: in the merged order he follows Marax (garden cohort collisions, item 9).
+	 * and noon again before his poses: in the merged order he follows Marax, whose flow may leave another hour or weather.
 	 */
 	private static void foras(ClientGameTestContext context, TestDedicatedServerContext server, TestDedicatedServerConnection connection,
 			BlockPos perch) {
@@ -2138,7 +2138,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 	/**
 	 * A chest touching the perch (north of it, so the side he takes stays clear); the chooser lists him ready; chosen by
 	 * keyboard, he steps in with his gesture and stands on the ground two blocks west of the perch, a quarter turn clockwise
-	 * from the player south of it (unit 3's Station.BESIDE, GC-P67; CR4 item 4).
+	 * from the player south of it (unit 3's Station.BESIDE, GC-P67).
 	 */
 	private static void forasChooser(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, BlockPos chest) {
 		server.runOnServer(minecraft -> minecraft.overworld().setBlockAndUpdate(chest, Blocks.CHEST.defaultBlockState()));
@@ -2355,7 +2355,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 	/**
 	 * Dossier 4 items 3 and 8: his matter on his kept page, by keyboard: the row and the question with two answers, none kept,
 	 * his matter a narrated line; it fits at GUI 2, GUI 4 and 320x180, every control named; Enter on "Graft every host" keeps
-	 * it at the perch (RESOLVE), marked, and he assents. The page is closed at the end (CR4 item 7).
+	 * it at the perch (RESOLVE), marked, and he assents. The page is closed at the end, so his graft is shown with the HUD.
 	 */
 	private static void forasMatter(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
 		context.waitTicks(OPEN_GAP);
@@ -2429,7 +2429,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 	 * Dossier 4 details (a) and (b): two Dewmoss put into his store and his think run in the same server step (so his perch's
 	 * own think cannot graft first): the host is grafted with one of them. The world is frozen 23 ticks into his work, inside
 	 * its telling window (0.8 to 1.5 s), his cap tipped, the action bar saying his count; photographed with the HUD, no screen
-	 * open (CR4 item 7). Returns the game time of the graft (his count is a game day's).
+	 * open (the action bar is the HUD's). Returns the game time of the graft (his count is a game day's).
 	 */
 	private static long forasGrafting(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, BlockPos chest, BlockPos host) {
 		List<String> did = server.computeOnServer(minecraft -> {
@@ -2569,8 +2569,9 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 
 	/**
 	 * Dossier 4 detail (b) and item 6: his kept page counts today's grafts against his quota (one, unless the game day turned
-	 * since his graft); End asks first; then he folds his satchel and fades (his depart held, removed after it), the pact
-	 * ended once.
+	 * since his graft); answered, with no matter raised now (his only host grafted), it draws his question in general, short,
+	 * within the kept page's budget; End asks first; then he folds his satchel and fades (his depart held, removed after it),
+	 * the pact ended once.
 	 */
 	private static void forasEnding(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, long grafted) {
 		context.waitTicks(OPEN_GAP);
@@ -2584,6 +2585,10 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		Jugcraft.LOGGER.info("[garden-check] his kept page ({} graft today expected): rows {}, drawn {}", count, rows, drawn);
 		check(rows.stream().anyMatch(row -> row.contains(count + " of 8 grafts today")) && String.join(" ", drawn).contains(count + "/8 today"),
 				"His kept page counts today's grafts against his quota (detail b): " + rows + " " + drawn);
+		String question = context.computeOnClient(client -> Component.translatable("screen.jugcraft.pact.glance.graft_keeping.question").getString());
+		check(String.join(" ", drawn).contains(question), "Answered, no matter raised now: his question in general, drawn short: " + drawn);
+		budget(context, keptWords(context) + firstTask(context), "his kept page answered");
+		shot(context, "jugcraft_garden_foras_counted");
 		UUID him = server.computeOnServer(minecraft -> forasAt(minecraft, perch).getUUID());
 		press(context, "end");
 		context.waitForScreen(ConfirmScreen.class);
