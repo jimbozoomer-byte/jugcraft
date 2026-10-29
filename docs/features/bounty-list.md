@@ -33,7 +33,7 @@ It is given on the server when the quest pays. Whether a player has had it is ke
 - `HalloweenQuestsGameTests.errandsPayOnceAHalloween` now also checks that the first errand gives the book, that it is given once, and that this survives a save.
 - `check_mod_data.py` `check_bounty_list`: the Java table is the tool's, every boss has a name, every item is registered, each page's words are in the language file and fit a page.
 - Local: `python3 tools/generate_material_data.py`, then `python3 tools/check_mod_data.py` passed (8186 material IDs, data files and recipe audit, with `check_bounty_list`), `python3 scripts/check_repository.py` passed, and `python3 -m unittest discover -s scripts/tests` passed (290 tests). The Java files parse (tree-sitter); they were not compiled locally.
-- CI on the fork: pending.
+- CI on the fork: [Build run 40931195328](https://github.com/mmme123-spec/jugcraftfork/actions/runs/40931195328) passed on ec48b44a2 (compilation, server game tests including `HalloweenQuestsGameTests` and `BountyListGameTests`, and the rendered client tests).
 
 Not run: a human reading the book in game. No client test shoots its pages.
 

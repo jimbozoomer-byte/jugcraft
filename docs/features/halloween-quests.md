@@ -49,7 +49,7 @@ All checks and rewards run on the server; the board's screen only shows what the
 - New server game test `HalloweenQuestsGameTests.errandsPayOnceAHalloween`: every errand names registered items; out of season nothing is taken; one short or named items do not count; carrying them all takes exactly the plain ones, pays the Jugs and gives the decoration; it cannot be done twice; the done mark survives a save; a full purse leaves the errand and the items alone; bad indexes are refused.
 - `check_mod_data.py` `check_halloween_quests`: the Java table is `tools/halloween_quests.py`'s, every item is registered, every job is held by a town resident and every errand has its lines.
 - Local: `python3 tools/generate_material_data.py`, then `python3 tools/check_mod_data.py` passed (8186 material IDs, data files and recipe audit, with `check_halloween_quests`), `python3 scripts/check_repository.py` passed, and the Foundation workflow's `python3 -m unittest discover -s scripts/tests` passed (290 tests). The Java files parse (tree-sitter); they were not compiled locally.
-- CI on the fork: pending.
+- CI on the fork: [Build run 40931195328](https://github.com/mmme123-spec/jugcraftfork/actions/runs/40931195328) passed on ec48b44a2 (compilation, server game tests including `HalloweenQuestsGameTests` and `BountyListGameTests`, and the rendered client tests).
 
 Not run: a human talking to the residents or using the board's new pages in a game. No client test shoots the new board pages.
 
