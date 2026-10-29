@@ -21,7 +21,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntitySpawnReason;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.item.ItemStack;
@@ -147,7 +147,7 @@ public class HarvestFestivalClientGameTests implements FabricClientGameTest {
 					.setValue(StringLightHookBlock.FACE, AttachFace.FLOOR).setValue(StringLightHookBlock.FACING, Direction.NORTH), Block.UPDATE_ALL);
 		}
 		StringLightsItem.string(level, origin.offset(-3, 2, 0), origin.offset(3, 2, 0), StringLightHookBlockEntity.Strand.HARVEST);
-		ArmorStand stand = EntityType.ARMOR_STAND.create(level, EntitySpawnReason.COMMAND);
+		ArmorStand stand = EntityTypes.ARMOR_STAND.create(level, EntitySpawnReason.COMMAND);
 		if (stand != null) {
 			stand.snapTo(origin.getX() + 0.5, origin.getY(), origin.getZ() + 0.5, 180.0F, 0.0F);
 			stand.setItemSlot(EquipmentSlot.LEGS, new ItemStack(JugcraftAgriculture.item("sack_race_sack")));

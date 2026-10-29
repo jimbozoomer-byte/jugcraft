@@ -21,7 +21,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.decoration.ArmorStand;
@@ -349,7 +349,7 @@ public class HarvestFestivalGameTests {
 	@GameTest(maxTicks = 40)
 	public void theSackRaceSackMakesItsWearerHop(GameTestHelper helper) {
 		floor(helper);
-		ArmorStand stand = helper.spawn(EntityType.ARMOR_STAND, new BlockPos(3, 2, 3));
+		ArmorStand stand = helper.spawn(EntityTypes.ARMOR_STAND, new BlockPos(3, 2, 3));
 		double speed = stand.getAttributeValue(Attributes.MOVEMENT_SPEED);
 		double step = stand.getAttributeValue(Attributes.STEP_HEIGHT);
 		double jump = stand.getAttributeValue(Attributes.JUMP_STRENGTH);
