@@ -1567,9 +1567,9 @@
       "source": "recipe jugcraft:beast/falconry_hood"
     },
     "jugcraft:beast_farseer_arm": {
-      "numerator": 1,
+      "numerator": 64,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local decorative accounting"
     },
     "jugcraft:beast_fedora": {
       "numerator": 769,
@@ -2547,7 +2547,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:beast_transmutation_table": {
-      "numerator": 139458,
+      "numerator": 139584,
       "denominator": 1,
       "source": "recipe jugcraft:beast/transmutation_table"
     },
@@ -3987,9 +3987,9 @@
       "source": "local decorative accounting"
     },
     "jugcraft:cavern_ancient_sapling": {
-      "numerator": 1,
+      "numerator": 32,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local decorative accounting"
     },
     "jugcraft:cavern_archaic_vine": {
       "numerator": 1,
@@ -5407,9 +5407,9 @@
       "source": "recipe jugcraft:furnace/cavern_pewen_sap_smelting"
     },
     "jugcraft:cavern_pewen_sapling": {
-      "numerator": 1,
+      "numerator": 32,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local decorative accounting"
     },
     "jugcraft:cavern_pewen_sign": {
       "numerator": 52,
@@ -6392,9 +6392,9 @@
       "source": "recipe jugcraft:cavern_thornwood_boat"
     },
     "jugcraft:cavern_thornwood_branch": {
-      "numerator": 1,
+      "numerator": 4,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local decorative accounting"
     },
     "jugcraft:cavern_thornwood_button": {
       "numerator": 8,
@@ -6442,7 +6442,7 @@
       "source": "recipe jugcraft:cavern_thornwood_pressure_plate"
     },
     "jugcraft:cavern_thornwood_sapling": {
-      "numerator": 25,
+      "numerator": 241,
       "denominator": 6,
       "source": "recipe jugcraft:cavern_thornwood_sapling"
     },
@@ -10897,9 +10897,9 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:ecology_maple_sapling": {
-      "numerator": 1,
+      "numerator": 32,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local decorative accounting"
     },
     "jugcraft:ecology_maple_shelf": {
       "numerator": 32,
@@ -17697,9 +17697,9 @@
       "source": "recipe jugcraft:jimtafacts_utilities/brewing_barrel"
     },
     "jugcraft:jimta_broken_rubber_boat": {
-      "numerator": 1,
+      "numerator": 5,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local decorative accounting"
     },
     "jugcraft:jimta_bronze_casing": {
       "numerator": 1,
@@ -21562,7 +21562,7 @@
       "source": "recipe jugcraft:jimtafacts_reactor/rtg_pellet"
     },
     "jugcraft:jimta_rubber_boat": {
-      "numerator": 4,
+      "numerator": 8,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_utilities/repair_rubber_boat"
     },
@@ -24947,9 +24947,9 @@
       "source": "local decorative accounting"
     },
     "jugcraft:landscape_cypress_sapling": {
-      "numerator": 1,
+      "numerator": 32,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local decorative accounting"
     },
     "jugcraft:landscape_dead_boat": {
       "numerator": 40,
@@ -25017,9 +25017,9 @@
       "source": "recipe jugcraft:landscape_dead_pressure_plate"
     },
     "jugcraft:landscape_dead_sapling": {
-      "numerator": 1,
+      "numerator": 32,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local decorative accounting"
     },
     "jugcraft:landscape_dead_shelf": {
       "numerator": 32,
@@ -25122,9 +25122,9 @@
       "source": "recipe jugcraft:landscape_empyreal_pressure_plate"
     },
     "jugcraft:landscape_empyreal_sapling": {
-      "numerator": 1,
+      "numerator": 32,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local decorative accounting"
     },
     "jugcraft:landscape_empyreal_shelf": {
       "numerator": 32,
@@ -25227,9 +25227,9 @@
       "source": "recipe jugcraft:landscape_fir_pressure_plate"
     },
     "jugcraft:landscape_fir_sapling": {
-      "numerator": 1,
+      "numerator": 32,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local decorative accounting"
     },
     "jugcraft:landscape_fir_shelf": {
       "numerator": 32,
@@ -25292,9 +25292,9 @@
       "source": "local decorative accounting"
     },
     "jugcraft:landscape_flowering_oak_sapling": {
-      "numerator": 1,
+      "numerator": 32,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local decorative accounting"
     },
     "jugcraft:landscape_garch_spawn_egg": {
       "numerator": 1,
@@ -25462,9 +25462,9 @@
       "source": "recipe jugcraft:landscape_hellbark_pressure_plate"
     },
     "jugcraft:landscape_hellbark_sapling": {
-      "numerator": 1,
+      "numerator": 32,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local decorative accounting"
     },
     "jugcraft:landscape_hellbark_shelf": {
       "numerator": 32,
@@ -25582,9 +25582,9 @@
       "source": "recipe jugcraft:landscape_jacaranda_pressure_plate"
     },
     "jugcraft:landscape_jacaranda_sapling": {
-      "numerator": 1,
+      "numerator": 32,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local decorative accounting"
     },
     "jugcraft:landscape_jacaranda_shelf": {
       "numerator": 32,
@@ -25722,9 +25722,9 @@
       "source": "recipe jugcraft:landscape_magic_pressure_plate"
     },
     "jugcraft:landscape_magic_sapling": {
-      "numerator": 1,
+      "numerator": 32,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local decorative accounting"
     },
     "jugcraft:landscape_magic_shelf": {
       "numerator": 32,
@@ -25812,9 +25812,9 @@
       "source": "recipe jugcraft:landscape_mahogany_pressure_plate"
     },
     "jugcraft:landscape_mahogany_sapling": {
-      "numerator": 1,
+      "numerator": 32,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local decorative accounting"
     },
     "jugcraft:landscape_mahogany_shelf": {
       "numerator": 32,
@@ -25902,9 +25902,9 @@
       "source": "recipe jugcraft:landscape_maple_pressure_plate"
     },
     "jugcraft:landscape_maple_sapling": {
-      "numerator": 1,
+      "numerator": 32,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local decorative accounting"
     },
     "jugcraft:landscape_maple_shelf": {
       "numerator": 32,
@@ -26092,9 +26092,9 @@
       "source": "recipe jugcraft:landscape_origin_oak_pressure_plate"
     },
     "jugcraft:landscape_origin_oak_sapling": {
-      "numerator": 1,
+      "numerator": 32,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local decorative accounting"
     },
     "jugcraft:landscape_origin_oak_shelf": {
       "numerator": 32,
@@ -26242,9 +26242,9 @@
       "source": "recipe jugcraft:landscape_palm_pressure_plate"
     },
     "jugcraft:landscape_palm_sapling": {
-      "numerator": 1,
+      "numerator": 32,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local decorative accounting"
     },
     "jugcraft:landscape_palm_shelf": {
       "numerator": 32,
@@ -26332,9 +26332,9 @@
       "source": "recipe jugcraft:landscape_pine_pressure_plate"
     },
     "jugcraft:landscape_pine_sapling": {
-      "numerator": 1,
+      "numerator": 32,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local decorative accounting"
     },
     "jugcraft:landscape_pine_shelf": {
       "numerator": 32,
@@ -26717,9 +26717,9 @@
       "source": "recipe jugcraft:landscape_redwood_pressure_plate"
     },
     "jugcraft:landscape_redwood_sapling": {
-      "numerator": 1,
+      "numerator": 32,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local decorative accounting"
     },
     "jugcraft:landscape_redwood_shelf": {
       "numerator": 32,
@@ -26912,9 +26912,9 @@
       "source": "local decorative accounting"
     },
     "jugcraft:landscape_snowblossom_sapling": {
-      "numerator": 1,
+      "numerator": 32,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local decorative accounting"
     },
     "jugcraft:landscape_soul_ash": {
       "numerator": 1,
@@ -27227,9 +27227,9 @@
       "source": "recipe jugcraft:landscape_umbran_pressure_plate"
     },
     "jugcraft:landscape_umbran_sapling": {
-      "numerator": 1,
+      "numerator": 32,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local decorative accounting"
     },
     "jugcraft:landscape_umbran_shelf": {
       "numerator": 32,
@@ -27387,9 +27387,9 @@
       "source": "recipe jugcraft:landscape_willow_pressure_plate"
     },
     "jugcraft:landscape_willow_sapling": {
-      "numerator": 1,
+      "numerator": 32,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local decorative accounting"
     },
     "jugcraft:landscape_willow_shelf": {
       "numerator": 32,
@@ -29092,7 +29092,7 @@
       "source": "recipe jugcraft:nouveau/allow_scroll"
     },
     "jugcraft:nouveau_alteration_table": {
-      "numerator": 2,
+      "numerator": 144,
       "denominator": 1,
       "source": "recipe jugcraft:nouveau/alteration_table"
     },
@@ -29287,7 +29287,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:nouveau_blank_glyph": {
-      "numerator": 2,
+      "numerator": 129,
       "denominator": 1,
       "source": "recipe jugcraft:survival_completion/nouveau_blank_glyph"
     },
@@ -30047,12 +30047,12 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:nouveau_magebloom": {
-      "numerator": 1,
+      "numerator": 16,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local decorative accounting"
     },
     "jugcraft:nouveau_magebloom_block": {
-      "numerator": 1,
+      "numerator": 16,
       "denominator": 1,
       "source": "recipe jugcraft:nouveau/magebloom_block"
     },
@@ -30062,8 +30062,8 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:nouveau_magebloom_fiber": {
-      "numerator": 1,
-      "denominator": 4,
+      "numerator": 4,
+      "denominator": 1,
       "source": "recipe jugcraft:nouveau/magebloom_fiber"
     },
     "jugcraft:nouveau_magelight_torch": {
@@ -30127,7 +30127,7 @@
       "source": "recipe jugcraft:nouveau/novice_spellbook_alt"
     },
     "jugcraft:nouveau_orange_sbed": {
-      "numerator": 50,
+      "numerator": 80,
       "denominator": 1,
       "source": "recipe jugcraft:nouveau/orange_sbed"
     },
@@ -30302,7 +30302,7 @@
       "source": "recipe jugcraft:nouveau/ritual_awakening"
     },
     "jugcraft:nouveau_ritual_binding": {
-      "numerator": 1060,
+      "numerator": 1441,
       "denominator": 1,
       "source": "recipe jugcraft:nouveau/ritual_binding"
     },
@@ -30427,8 +30427,8 @@
       "source": "recipe jugcraft:survival_completion/nouveau_rune"
     },
     "jugcraft:nouveau_runic_chalk": {
-      "numerator": 17,
-      "denominator": 12,
+      "numerator": 1369,
+      "denominator": 6,
       "source": "recipe jugcraft:nouveau/runic_chalk"
     },
     "jugcraft:nouveau_sconce": {
@@ -30437,9 +30437,9 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:nouveau_scribes_table": {
-      "numerator": 1,
+      "numerator": 128,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local decorative accounting"
     },
     "jugcraft:nouveau_scryer_scroll": {
       "numerator": 1,
@@ -30462,8 +30462,8 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:nouveau_sky_block": {
-      "numerator": 9,
-      "denominator": 8,
+      "numerator": 44,
+      "denominator": 1,
       "source": "recipe jugcraft:nouveau/sky_block"
     },
     "jugcraft:nouveau_smooth_gilded_sourcestone_alternating": {
@@ -30657,9 +30657,9 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:nouveau_source_berry_pie": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
+      "numerator": 154,
+      "denominator": 3,
+      "source": "recipe jugcraft:nouveau/source_berry_pie"
     },
     "jugcraft:nouveau_source_berry_roll": {
       "numerator": 73,
@@ -31112,7 +31112,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:nouveau_wixie_hat": {
-      "numerator": 2050,
+      "numerator": 2080,
       "denominator": 1,
       "source": "recipe jugcraft:nouveau/wixie_hat"
     },
