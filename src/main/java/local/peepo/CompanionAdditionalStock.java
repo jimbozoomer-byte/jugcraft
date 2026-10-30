@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.entity.*;
 final class CompanionAdditionalStock {
     static boolean supports(BlockEntity b){return b instanceof CiderPressBlockEntity || b instanceof CiderBarrelBlockEntity
         || b instanceof CanningKettleBlockEntity || b instanceof CandyKettleBlockEntity || b instanceof SpinningWheelBlockEntity
-        || b instanceof PunchBowlBlockEntity || b instanceof BrewingStandBlockEntity || b instanceof CrucibleBlockEntity;}
+        || b instanceof PunchBowlBlockEntity || b instanceof BrewingStandBlockEntity || b instanceof CrucibleBlockEntity || HandFarmCompanion.of(b)!=null;}
     private static ItemStack item(String id){return new ItemStack(JugcraftAgriculture.item(id));}
     static ItemStack product(BlockEntity b){
         if(b instanceof CiderPressBlockEntity)return item("sweet_cider");
@@ -24,12 +24,14 @@ final class CompanionAdditionalStock {
         return ItemStack.EMPTY;
     }
     static List<ItemStack> results(BlockEntity b,ItemStack raw){
+        var handFarm=HandFarmCompanion.of(b);if(handFarm!=null){var result=handFarm.result(raw);return result.isEmpty()?List.of():List.of(result);}
         if(b instanceof SpinningWheelBlockEntity){var color=Knitting.woolColor(raw);return color==null?List.of():List.of(Knitting.yarn(color.getTextureDiffuseColor(),Knitting.YARN_PER_WOOL));}
         if(b instanceof CanningKettleBlockEntity){if(!(raw.getItem() instanceof PreserveJarItem))return List.of();var out=raw.copyWithCount(1);PreserveJarItem.seal(out);return List.of(out);}
         var p=product(b);return p.isEmpty()?List.of():List.of(p);
     }
     private static int matching(List<ItemStack> stacks,java.util.function.Predicate<ItemStack> predicate){return stacks.stream().filter(predicate).mapToInt(ItemStack::getCount).sum();}
     static boolean busy(BlockEntity b){
+        var handFarm=HandFarmCompanion.of(b);if(handFarm!=null)return handFarm.busy();
         if(b instanceof CiderPressBlockEntity c)return c.pendingCider()>0;
         if(b instanceof CiderBarrelBlockEntity c)return c.servings()>0;
         if(b instanceof CanningKettleBlockEntity c)return !c.jars().isEmpty();
@@ -40,6 +42,7 @@ final class CompanionAdditionalStock {
         return b instanceof CrucibleBlockEntity c && c.companion.stockBusy();
     }
     private static Storage<ItemVariant> outputs(BlockEntity b){
+        var handFarm=HandFarmCompanion.of(b);if(handFarm!=null)return handFarm.outputs();
         if(b instanceof CiderPressBlockEntity c)return c.companionOutputs();
         if(b instanceof CiderBarrelBlockEntity c)return c.companionOutputs();
         if(b instanceof CanningKettleBlockEntity c)return c.companionOutputs();
@@ -54,6 +57,7 @@ final class CompanionAdditionalStock {
         int n=0;for(var view:outputs(b))if(!view.isResourceBlank() && stock.matches(icon,view.getResource().toStack(1)))n+=(int)view.getAmount();return n;
     }
     static int pending(BlockEntity b,ItemStack icon,List<ItemStack> incoming,CompanionProductionStock stock){
+        var handFarm=HandFarmCompanion.of(b);if(handFarm!=null)return handFarm.pending(icon,incoming);
         if(b instanceof SpinningWheelBlockEntity c){
             int n=c.wool()!=null && stock.matches(icon,Knitting.yarn(c.wool().getTextureDiffuseColor(),1))?Knitting.YARN_PER_WOOL:0;
             for(var raw:incoming)for(var out:results(b,raw))if(stock.matches(icon,out))n+=raw.getCount()*out.getCount();return n;
@@ -77,7 +81,7 @@ final class CompanionAdditionalStock {
     private static int cap(int nativeNeed,int missing,int yield){return missing==Integer.MAX_VALUE?nativeNeed:Math.min(nativeNeed,(missing+yield-1)/yield);}
     static int limit(PeepoEntity npc,BlockEntity b,ItemStack raw,int nativeNeed,CompanionProductionStock stock){
         if(nativeNeed<=0)return 0;var incoming=stock.incoming();int reserved=matching(incoming,s->ItemStack.isSameItemSameComponents(s,raw));
-        if(b instanceof SpinningWheelBlockEntity || b instanceof CanningKettleBlockEntity && raw.getItem() instanceof PreserveJarItem){
+        if(HandFarmCompanion.of(b)!=null || b instanceof SpinningWheelBlockEntity || b instanceof CanningKettleBlockEntity && raw.getItem() instanceof PreserveJarItem){
             var results=results(b,raw);if(results.isEmpty())return 0;var out=results.getFirst();return cap(nativeNeed,deficit(npc,b,out,stock),out.getCount());
         }
         if(b instanceof CanningKettleBlockEntity){

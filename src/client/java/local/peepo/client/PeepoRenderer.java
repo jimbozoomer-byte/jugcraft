@@ -194,7 +194,9 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
                 || !entity.getMainHandItem().is(io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture.KNIVES))state.work=WorkAnimation.NONE;
             else{
                 state.bodyRot=entity.getYRot();state.yRot=0;state.xRot=0;
-                state.workPhase=(float)((entity.level().getGameTime()-entity.workStarted()+partialTick)*net.minecraft.util.Mth.TWO_PI/entity.uniforms.duration(CompanionUniforms.Type.CHEF,40));
+                int chopTicks=entity.uniforms.duration(CompanionUniforms.Type.CHEF,40);
+                // A batch keeps the same action start; repeat the lift instead of holding the first impact.
+                state.workPhase=(Math.floorMod(entity.level().getGameTime()-entity.workStarted(),chopTicks)+partialTick)*net.minecraft.util.Mth.TWO_PI/chopTicks;
                 var delta=net.minecraft.world.phys.Vec3.atBottomCenterOf(target).add(0,1.05/16,0).subtract(entity.getPosition(partialTick));
                 double a=Math.toRadians(entity.getYRot());
                 state.toolPose.chop(state.workPhase,(float)(24-delta.y*16),(float)((delta.x*Math.sin(a)-delta.z*Math.cos(a))*16));

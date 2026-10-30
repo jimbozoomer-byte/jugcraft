@@ -70,6 +70,8 @@ New assignments must be within 64 blocks of the companion. Planner editing requi
 
 ## Supplies, tools and delivery routes
 
+**Farm storage:** Apple Bins, Picking Bags, Orchard Handcarts, Corn Cribs, Feed Troughs and Firewood Racks can be assigned as Supply or Output. Click any part of a large store; its parts share one assignment. Each keeps its normal item restrictions and capacity. Handcarts remain stationary, and Feed Troughs are storage rather than automatic feeders.
+
 Open **Supplies** to access these three views:
 
 | View | Setup |
@@ -117,6 +119,8 @@ On a recipe-capable job row, click the **funnel icon** (hover label **Filter**) 
 Filters are available for Cooking Pots, supported standard processors, Hearth Ovens, Cutting Boards, Skillets, Kitchen Stoves, Cider Presses/Barrels, Candy and Canning Kettles, Spinning Wheels, Punch Bowls, vanilla cooking/brewing stations, Beehives/Bee Nests and both Crafters. The Electroplating Bath accepts the tool/armor type as its output filter. Hearth Ovens accept whole raw or baked pies/cakes as filter icons and display the baked result. Canning Kettles display sealed preserve jars; Spinning Wheels accept the yarn color produced by the desired wool. Gardens have a separate single crop/seed selector.
 
 ### Production stock targets
+
+**Querns and Butter Churns** also support these controls. Set Flour/Paprika or Butter in the Filter. Querns grind Wheat or Dried Chili; Churns consume Milk Buckets and return empty Buckets along with Butter through Output. Both use one helper at normal native processing speed and 4 companion energy per working tick. Shift-right-click the station with an empty hand to retrieve waiting tray contents manually.
 
 Cooking Pot, Hearth Oven, Cutting Board, Skillet, Kitchen Stove, vanilla Furnace/Smoker/Blast Furnace/Campfires, all three starter workshops, standard item-recipe processors, the vanilla Crafter and Auto-Crafter can maintain finished-product stock. Open **Filter**, select a ghost product with an empty-hand left-click, and switch **Unlimited** to **Maintain stock**. Set **Target** and **Restock at**; arrows apply immediately, while typed values use **Apply quantities** or Enter. Values count items, not stacks. For example, Target 64 / Restock at 32 refills to 64, then waits until 32 or fewer remain. Right-click clears a ghost; empty filters still allow any available recipe (Crafters retain their configured pattern).
 
@@ -174,6 +178,8 @@ Normal right-click still opens the player's vanilla crafting menu. **Shift-right
 | Canning Kettle | Provide active heat, a water bucket when dry, and **full, fresh, unsealed preserve jars**. It holds four jars and processes them together; Output takes sealed jars, rejected spoiled jars and the returned empty water bucket. Empty Mason Jars are not ingredients. |
 | Hearth Oven | Supply **prepared raw pies/cakes** and suitable fuel such as hearth logs, charcoal, coal or coke. One bake fits at a time. Peepo loads it, waits nearby, collects it when baked and carries it to Output. It does not craft raw bakes from dough, batter or fruit. Ordinary heat/burning rules remain. |
 | Farmland zone | Harvest mature supported crops, replant, and plant empty farmland/planter boxes inside the selected corners with available seeds. A hoe improves speed and energy efficiency. See garden setup below. |
+| Squash/gourd garden | Select the fruit or its seeds in the garden's crop filter and provide real seeds through Supply. Leave soil beside stems for fruit growth. Peepo picks attached fruit inside the zone and preserves the mature stem; standalone decorative gourds are left alone. Includes all new Turban/Blue Hubbard/Sweet Dumpling squashes, Long Island Cheese pumpkins, and Spoon/Swan gourds. |
+| Quern / Butter Churn | Assign with the Planner, use Filter and optional stock targets, and link Supply/Output. Quern: Wheat to Flour or Dried Chili to Paprika. Churn: Milk Bucket to two Butter plus the returned Bucket. |
 | Sheep area | Give shears in Hand or through a Tools supply. Peepo shears eligible adult woolly sheep within **8 blocks** of the anchor. Output receives wool. |
 | Cow area | Give empty buckets in cargo or Supply. Peepo milks eligible adult cows within **8 blocks** of the anchor. Output receives milk buckets. Companion milking has a **60-second cooldown per cow**. |
 | Chicken area | Peepo picks up dropped eggs within **8 blocks** of the anchor and delivers them to linked Output. No tools or Supply are needed. White, brown and blue eggs are supported. |

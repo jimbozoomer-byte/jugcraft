@@ -21,6 +21,7 @@ public final class CompanionJobs {
         var livestock=npc.livestock.job(pos);if(livestock!=null)return livestock;
         var garden=npc.garden.job(pos);if(garden!=null)return garden;
         var be=npc.level().getBlockEntity(pos);if(be==null || be.isRemoved())return null;
+        var handFarm=io.github.jimbozoomer.jugcraft.agriculture.HandFarmCompanion.of(be);if(handFarm!=null)return handFarm.job.prepare(npc);
         if(be instanceof CraftingTableCompanionBlockEntity table)return table.job.prepare(npc);
         if(be instanceof io.github.jimbozoomer.jugcraft.workshop.WorkshopBlockEntity workshop)return workshop.station()==0?workshop.companion.job.prepare(npc):null;
         if(be instanceof io.github.jimbozoomer.jugcraft.agriculture.BatHouseBlockEntity house)return house.companionJob.prepare(npc);

@@ -65,6 +65,7 @@ public final class CompanionLogistics {
         var serving=ServingCompanion.of(be);if(serving!=null)return serving.forCompanion(npc);
         var magic=MagicGardenCompanion.of(npc,be);if(magic!=null)return magic;
         if(be instanceof io.github.jimbozoomer.jugcraft.agriculture.FarmStandBlockEntity stand)return stand.companion.forCompanion(npc);
+        var handFarm=io.github.jimbozoomer.jugcraft.agriculture.HandFarmCompanion.of(be);if(handFarm!=null)return handFarm.port(npc);
         if(be instanceof io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity crucible)return crucible.companion;
         var vanilla=VanillaCompanionPort.of(be);if(vanilla!=null)return vanilla;
         if(be instanceof io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity machine

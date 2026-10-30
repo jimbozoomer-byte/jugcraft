@@ -16,14 +16,16 @@ final class CompanionGardenCrops {
     private CompanionGardenCrops(){}
     static boolean column(BlockState state){return state.is(Blocks.SUGAR_CANE) || state.is(Blocks.BAMBOO) || state.is(Blocks.CACTUS);}
     static boolean vine(BlockState state){return state.is(Blocks.CAVE_VINES) || state.is(Blocks.CAVE_VINES_PLANT);}
-    static boolean fruit(BlockState state){return state.is(Blocks.PUMPKIN) || state.is(Blocks.MELON);}
-    static boolean stem(BlockState state){return state.getBlock() instanceof StemBlock || state.getBlock() instanceof AttachedStemBlock;}
+    static boolean fruit(BlockState state){return state.is(Blocks.PUMPKIN) || state.is(Blocks.MELON) || state.getBlock() instanceof GourdBlock;}
+    static boolean stem(BlockState state){return state.getBlock() instanceof StemBlock || state.getBlock() instanceof AttachedStemBlock || state.getBlock() instanceof GourdStemBlock || state.getBlock() instanceof AttachedGourdStemBlock;}
     static boolean supported(BlockState state){return fruit(state) || stem(state) || column(state) || state.is(Blocks.BAMBOO_SAPLING) || vine(state)
         || state.is(Blocks.COCOA) || state.is(Blocks.SWEET_BERRY_BUSH) || state.getBlock() instanceof CranberryBushBlock;}
-    static boolean seed(ItemStack stack){return stack.is(Items.PUMPKIN_SEEDS) || stack.is(Items.MELON_SEEDS) || stack.is(Items.SUGAR_CANE) || stack.is(Items.BAMBOO) || stack.is(Items.CACTUS)
+    static boolean seed(ItemStack stack){return stack.getItem() instanceof BlockItem item && item.getBlock() instanceof GourdStemBlock || stack.is(Items.PUMPKIN_SEEDS) || stack.is(Items.MELON_SEEDS) || stack.is(Items.SUGAR_CANE) || stack.is(Items.BAMBOO) || stack.is(Items.CACTUS)
         || stack.is(Items.SWEET_BERRIES) || stack.is(Items.GLOW_BERRIES) || stack.is(Items.COCOA_BEANS)
         || stack.is(JugcraftAgriculture.item("cranberries"));}
     static Item seedFor(BlockState state){
+        if(state.getBlock() instanceof GourdStemBlock stem)return stem.seed();
+        if(state.getBlock() instanceof AttachedGourdStemBlock stem)return stem.seed();
         if(state.is(Blocks.PUMPKIN_STEM) || state.is(Blocks.ATTACHED_PUMPKIN_STEM))return Items.PUMPKIN_SEEDS;
         if(state.is(Blocks.MELON_STEM) || state.is(Blocks.ATTACHED_MELON_STEM))return Items.MELON_SEEDS;
         if(state.is(Blocks.SUGAR_CANE))return Items.SUGAR_CANE;
@@ -35,6 +37,7 @@ final class CompanionGardenCrops {
         return state.getBlock() instanceof CranberryBushBlock?JugcraftAgriculture.item("cranberries"):Items.AIR;
     }
     static BlockState start(BlockState state){
+        if(state.getBlock() instanceof AttachedGourdStemBlock stem)return stem.stem().defaultBlockState();
         if(state.is(Blocks.ATTACHED_PUMPKIN_STEM))return Blocks.PUMPKIN_STEM.defaultBlockState();
         if(state.is(Blocks.ATTACHED_MELON_STEM))return Blocks.MELON_STEM.defaultBlockState();
         if(state.is(Blocks.COCOA))return state.setValue(CocoaBlock.AGE,0);
@@ -43,6 +46,7 @@ final class CompanionGardenCrops {
         return state.getBlock().defaultBlockState();
     }
     static BlockState seedState(ItemStack stack){
+        if(stack.getItem() instanceof BlockItem item && item.getBlock() instanceof GourdStemBlock)return item.getBlock().defaultBlockState();
         if(stack.is(Items.PUMPKIN_SEEDS))return Blocks.PUMPKIN_STEM.defaultBlockState();
         if(stack.is(Items.MELON_SEEDS))return Blocks.MELON_STEM.defaultBlockState();
         if(stack.is(Items.SUGAR_CANE))return Blocks.SUGAR_CANE.defaultBlockState();
@@ -64,6 +68,10 @@ final class CompanionGardenCrops {
     static BlockPos fruitStem(Level level,BlockPos pos,BlockState fruit){
         if(!fruit(fruit) || !neighborsLoaded(level,pos))return null;
         for(var side:Direction.Plane.HORIZONTAL){var at=pos.relative(side);var state=level.getBlockState(at);
+            if(fruit.getBlock() instanceof GourdBlock){
+                if(state.getBlock() instanceof AttachedGourdStemBlock stem && fruit.is(stem.gourd()) && stem.holds(state,at,pos))return at;
+                continue;
+            }
             if(state.is(fruit.is(Blocks.PUMPKIN)?Blocks.ATTACHED_PUMPKIN_STEM:Blocks.ATTACHED_MELON_STEM)
                 && state.getValue(AttachedStemBlock.FACING)==side.getOpposite())return at;
         }

@@ -78,22 +78,38 @@ public final class PeepoCuttingBatchClientTests implements FabricClientGameTest 
         int dropped=level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,drops).stream().filter(e->e.getItem().is(Items.PORKCHOP)).mapToInt(e->e.getItem().getCount()).sum();
         check(dropped==2,"breaking board drops active and queued raw inputs once");
     }
-    private void cycle(TestServerContext server,boolean pink,boolean limited){
+    private void cycle(ClientGameTestContext context,TestServerContext server,boolean pink,boolean limited){
         int amount=limited?2:12;
         server.runOnServer(s->{reset(s.overworld(),pink);if(limited)goal();source.setItem(0,new ItemStack(Items.PORKCHOP,limited?8:amount));npc.setNoAi(false);});
         server.waitFor(s->count(npc.belongings,Items.PORKCHOP)==amount,900);
         server.runOnServer(s->check(queued()==0,"batch physically carried before board changes"));
         server.waitFor(s->finished()>0,900);
+        if(!limited)looping(context,server);
         server.waitFor(s->{if(queued()>0){check(count(npc.belongings,bacon)==0 && output.isEmpty(),"stays chopping instead of hauling partial batch");return false;}return true;},900);
         server.waitFor(s->count(output,bacon)==amount*2,1000);
         server.runOnServer(s->{check(npc.assignedHand().getDamageValue()==amount,"one knife wear per processed ingredient");check(queued()==0 && finished()==0 && count(npc.belongings,bacon)==0,"complete batch delivered without stranded goods");check(count(source,Items.PORKCHOP)==(limited?6:0),"Supply respects batch and stock limit");});
+    }
+    private void looping(ClientGameTestContext context,TestServerContext server){
+        int id=server.computeOnServer(s->npc.getId());long started=server.computeOnServer(s->npc.workStarted());
+        for(boolean raised:new boolean[]{true,false}){
+            context.waitFor(c->{
+                if(!(c.level.getEntity(id) instanceof PeepoEntity p) || p.workAnimation()!=WorkAnimation.CHOP)return false;
+                int period=p.uniforms.duration(CompanionUniforms.Type.CHEF,40);long elapsed=p.level().getGameTime()-p.workStarted();
+                double phase=(Math.floorMod(elapsed,period)+.5)/period;
+                if(elapsed<(raised?2:3)*period || (raised?phase<.55 || phase>.65:phase>.10))return false;
+                var renderer=(local.peepo.client.PeepoRenderer)c.getEntityRenderDispatcher().getRenderer(p);
+                var state=renderer.createRenderState();renderer.extractRenderState(p,state,.5F);
+                local.peepo.client.CompanionClipChecks.choppingBatchFrame(state,raised,this::check);return true;
+            },200);
+        }
+        server.runOnServer(s->check(queued()>0 && npc.workStarted()==started,"later swings keep the same active batch and action start"));
     }
     @Override public void runTest(ClientGameTestContext context){
         try(var world=context.worldBuilder().adjustSettings(c->{c.setGameMode(WorldCreationUiState.SelectedGameMode.CREATIVE);c.setWorldType(new WorldCreationUiState.WorldTypeEntry(c.getSettings().worldgenLoadContext().lookupOrThrow(Registries.WORLD_PRESET).getOrThrow(WorldPresets.FLAT)));c.setGenerateStructures(false);}).create()){
             world.getConnection().waitForChunksRender();var server=world.getServer();base=context.computeOnClient(c->c.player.blockPosition().above(4));server.runCommand("time set noon");server.runCommand("weather clear");
             server.runCommand(String.format(Locale.ROOT,"tp @a %.1f %d %.1f",base.getX()+.5,base.getY(),base.getZ()-5.5));
             server.runOnServer(s->planning(s.overworld()));
-            for(boolean pink:new boolean[]{false,true}){cycle(server,pink,false);cycle(server,pink,true);}
+            for(boolean pink:new boolean[]{false,true}){cycle(context,server,pink,false);cycle(context,server,pink,true);}
             server.runOnServer(s->{npc.transport.stop();npc.resetCompanionRoutine();npc.discard();});
         }
         LoggerFactory.getLogger("peepo-cutting-batch-test").info("[peepo-cutting-batch-test] PASS {} assertions",assertions);

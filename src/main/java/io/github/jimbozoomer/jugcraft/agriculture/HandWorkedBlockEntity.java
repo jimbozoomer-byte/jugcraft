@@ -23,6 +23,8 @@ import net.minecraft.world.level.storage.ValueOutput;
 public abstract class HandWorkedBlockEntity extends BlockEntity {
 	/** When the last stroke began. */
 	private long strokedAt = Long.MIN_VALUE / 2;
+	long strokeTime() { return strokedAt; }
+	void restoreStroke(long time) { strokedAt = time; }
 
 	protected HandWorkedBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
 		super(type, pos, state);
@@ -49,6 +51,7 @@ public abstract class HandWorkedBlockEntity extends BlockEntity {
 	/** Saves the change and tells clients (the stroke, and whatever the subclass shows). */
 	protected void changed() {
 		setChanged();
+		if (HandFarmCompanion.of(this) != null) local.peepo.CompanionReadiness.invalidate(this);
 		if (level != null) {
 			BlockState state = getBlockState();
 			level.sendBlockUpdated(worldPosition, state, state, Block.UPDATE_CLIENTS);

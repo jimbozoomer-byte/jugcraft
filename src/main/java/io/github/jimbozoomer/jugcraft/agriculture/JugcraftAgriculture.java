@@ -2827,6 +2827,7 @@ public final class JugcraftAgriculture {
 		Block cart = registerBlock("orchard_handcart", OrchardHandcartBlock::new, displayProperties());
 		FRUIT_STORE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("fruit_store"),
 				FabricBlockEntityTypeBuilder.create(FruitStoreBlockEntity::new, bin, bag, cart).build());
+		net.fabricmc.fabric.api.transfer.v1.item.ItemStorage.SIDED.registerForBlockEntity((store, side) -> store.storage, FRUIT_STORE_ENTITY);
 		List<Block> gear = new ArrayList<>(List.of(ladder, bin, bag, cart));
 		// Part 2: the apple crates and the windfall apples.
 		for (String kind : new String[] {"red", "green", "golden"}) {
@@ -2883,6 +2884,7 @@ public final class JugcraftAgriculture {
 		CORN_CRIB_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("corn_crib"),
 				FabricBlockEntityTypeBuilder.<FruitStoreBlockEntity>create((pos, state) -> new FruitStoreBlockEntity(CORN_CRIB_ENTITY, pos, state), crib)
 						.build());
+		net.fabricmc.fabric.api.transfer.v1.item.ItemStorage.SIDED.registerForBlockEntity((store, side) -> store.storage, CORN_CRIB_ENTITY);
 		for (Block block : List.of(rack, crib)) {
 			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
 					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
@@ -2912,6 +2914,7 @@ public final class JugcraftAgriculture {
 		FEED_TROUGH_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("feed_trough"),
 				FabricBlockEntityTypeBuilder.<FruitStoreBlockEntity>create((pos, state) -> new FruitStoreBlockEntity(FEED_TROUGH_ENTITY, pos, state),
 						trough).build());
+		net.fabricmc.fabric.api.transfer.v1.item.ItemStorage.SIDED.registerForBlockEntity((store, side) -> store.storage, FEED_TROUGH_ENTITY);
 		Block lantern = registerBlock("barn_lantern", BarnLanternBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(1.0F)
 				.sound(SoundType.LANTERN).noOcclusion().pushReaction(PushReaction.POPPED)
 				.lightLevel(state -> state.getValue(BarnLanternBlock.LIT) ? BarnLanternBlock.LIGHT : 0));
@@ -2992,6 +2995,7 @@ public final class JugcraftAgriculture {
 				.strength(2.0F, 6.0F).sound(SoundType.METAL).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
 		FIREWOOD_RACK_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("firewood_rack"),
 				FabricBlockEntityTypeBuilder.create(FirewoodRackBlockEntity::new, rack).build());
+		net.fabricmc.fabric.api.transfer.v1.item.ItemStorage.SIDED.registerForBlockEntity((store, side) -> store.storage, FIREWOOD_RACK_ENTITY);
 		Block chopping = registerBlock("chopping_block", ChoppingBlockBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
 				.strength(2.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
 		CHOPPING_BLOCK_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("chopping_block"),
@@ -4157,7 +4161,7 @@ public final class JugcraftAgriculture {
 		VoxelShape[] shapes = GOURD_SHAPES.get(id);
 		// Pumpkins are whole blocks, like vanilla's; the smaller gourds let light and faces past them.
 		BlockBehaviour.Properties properties = BlockBehaviour.Properties.ofFullCopy(Blocks.PUMPKIN).mapColor(color);
-		Block gourd = registerBlock(id, props -> new GourdBlock(props, shapes[0], shapes[1]),
+		Block gourd = registerBlock(id, props -> new GourdBlock(props, shapes[0], shapes[1], seedId),
 				shapes[0] == Shapes.block() ? properties : properties.noOcclusion());
 		registerItem(id, props -> new BlockItem(gourd, props), new Item.Properties().useBlockDescriptionPrefix().compostable(COMPOST_MEDIUM),
 				SEEDS_TAB);

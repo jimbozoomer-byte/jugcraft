@@ -59,6 +59,13 @@ public final class CompanionClipChecks {
             state.work=WorkAnimation.NONE;model.setupAnim(state);check.accept(root.getChild("left_arm").yScale==1,"chop clears on idle");
         }
     }
+    /** Live renderer samples after the first cut, while the same batch/action is still running. */
+    public static void choppingBatchFrame(PeepoState state,boolean raised,BiConsumer<Boolean,String> check){
+        check.accept(state.work==WorkAnimation.CHOP && !state.knife.isEmpty(),"batch still renders the equipped chopping knife");
+        check.accept(state.workPhase>=0 && state.workPhase<net.minecraft.util.Mth.TWO_PI,"chopping phase stays in one cycle after multiple cuts");
+        check.accept(raised?state.toolPose.xRot<.4F:state.toolPose.xRot>1.4F,"knife lifts and strikes again during the batch");
+        check.accept(raised?state.toolPose.bodyPitch<0:state.toolPose.bodyPitch>.25F,"body follows the repeated lift and strike");
+    }
     public static void run(BiConsumer<Boolean,String> check){
         var root=PeepoGeometry.create().bakeRoot();var model=new PeepoModel(root);
         for(boolean jughead:new boolean[]{false,true})for(boolean pumpkin:new boolean[]{false,true})

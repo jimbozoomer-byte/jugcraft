@@ -53,6 +53,7 @@ public final class CompanionGarden extends SnapshotParticipant<CompanionGarden.S
     public static Item selectionSeed(ItemStack icon){
         if(icon.isEmpty())return null;
         if(seedItem(icon))return icon.getItem();
+        if(icon.getItem() instanceof BlockItem item && item.getBlock() instanceof GourdBlock gourd)return gourd.seed();
         if(icon.is(Items.PUMPKIN))return Items.PUMPKIN_SEEDS;
         if(icon.is(Items.MELON) || icon.is(Items.MELON_SLICE))return Items.MELON_SEEDS;
         if(icon.is(Items.WHEAT))return Items.WHEAT_SEEDS;

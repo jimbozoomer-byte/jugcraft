@@ -17,6 +17,11 @@ public final class CompanionStorage {
     public static Storage<ItemVariant> find(PeepoEntity npc,CompanionAssignments.Target target){
         if(target==null || !target.present(npc.level()) || !open(npc,target.at().pos()))return null;
         var pos=target.at().pos();var state=npc.level().getBlockState(pos);
+        if(state.getBlock() instanceof io.github.jimbozoomer.jugcraft.agriculture.FruitBinBlock bin){
+            var owner=npc.level().getBlockEntity(pos);
+            if(owner==null || !io.github.jimbozoomer.jugcraft.agriculture.FarmStoreStorage.complete(owner))return null;
+            for(int i=0;i<bin.cells().length;i++)if(!open(npc,bin.partPos(pos,state.getValue(io.github.jimbozoomer.jugcraft.agriculture.MultiDecorationBlock.FACING),i)))return null;
+        }
         if(state.getBlock() instanceof ChestBlock && state.getValue(ChestBlock.TYPE)!=ChestType.SINGLE
             && !open(npc,pos.relative(ChestBlock.getConnectedDirection(state))))return null;
         if(npc.level().getBlockEntity(pos) instanceof LunchBlockEntity lunch)return lunch.feeds(npc)?lunch.source():null;
