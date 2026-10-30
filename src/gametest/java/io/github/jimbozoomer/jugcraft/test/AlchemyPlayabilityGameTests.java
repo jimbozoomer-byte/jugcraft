@@ -212,8 +212,10 @@ public class AlchemyPlayabilityGameTests {
             press(menu,p,1);h.assertTrue(menu.getSlot(1).getItem().is(stack.getItem())&&Assaying.balance(p)==saved-price,"Made at its price: "+stack);
             menu.getSlot(1).set(ItemStack.EMPTY);
         }
-        for(var item:List.of(Items.QUARTZ_BLOCK,Items.QUARTZ_SLAB,Items.COPPER_BLOCK,Items.COPPER_BULB,vanilla("exposed_copper").getItem(),vanilla("waxed_cut_copper").getItem()))
-            h.assertTrue(item!=Items.AIR&&!TabletOutputs.allowed(new ItemStack(item)),"Quartz and copper that turn back into materials or go into machines stay out: "+item);
+        for(String id:List.of("quartz_block","quartz_slab","copper_block","copper_bulb","exposed_copper","waxed_cut_copper")){
+            ItemStack stack=vanilla(id);
+            h.assertTrue(!stack.isEmpty()&&!TabletOutputs.allowed(stack),"Quartz and copper that turn back into materials or go into machines stay out: "+id);
+        }
         h.succeed();
     }
 
