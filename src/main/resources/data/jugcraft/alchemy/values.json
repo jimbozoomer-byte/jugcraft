@@ -12782,7 +12782,7 @@
       "source": "recipe jugcraft:pot_cooking/ghost_taffy"
     },
     "jugcraft:ghost_train": {
-      "numerator": 2509,
+      "numerator": 3277,
       "denominator": 8,
       "source": "recipe jugcraft:ghost_train"
     },
@@ -25667,37 +25667,37 @@
       "source": "local decorative accounting"
     },
     "jugcraft:landscape_magic_boat": {
-      "numerator": 40,
+      "numerator": 80,
       "denominator": 1,
       "source": "recipe jugcraft:landscape_magic_boat"
     },
     "jugcraft:landscape_magic_button": {
-      "numerator": 8,
+      "numerator": 16,
       "denominator": 1,
       "source": "recipe jugcraft:landscape_magic_button"
     },
     "jugcraft:landscape_magic_chest_boat": {
-      "numerator": 104,
+      "numerator": 144,
       "denominator": 1,
       "source": "recipe jugcraft:landscape_magic_chest_boat"
     },
     "jugcraft:landscape_magic_door": {
-      "numerator": 16,
+      "numerator": 32,
       "denominator": 1,
       "source": "recipe jugcraft:landscape_magic_door"
     },
     "jugcraft:landscape_magic_fence": {
-      "numerator": 40,
-      "denominator": 3,
+      "numerator": 24,
+      "denominator": 1,
       "source": "recipe jugcraft:landscape_magic_fence"
     },
     "jugcraft:landscape_magic_fence_gate": {
-      "numerator": 32,
+      "numerator": 48,
       "denominator": 1,
       "source": "recipe jugcraft:landscape_magic_fence_gate"
     },
     "jugcraft:landscape_magic_hanging_sign": {
-      "numerator": 3680,
+      "numerator": 4544,
       "denominator": 27,
       "source": "recipe jugcraft:landscape_magic_hanging_sign"
     },
@@ -25707,52 +25707,52 @@
       "source": "local decorative accounting"
     },
     "jugcraft:landscape_magic_log": {
-      "numerator": 32,
+      "numerator": 64,
       "denominator": 1,
       "source": "local decorative accounting"
     },
     "jugcraft:landscape_magic_planks": {
-      "numerator": 8,
+      "numerator": 16,
       "denominator": 1,
       "source": "recipe jugcraft:landscape_magic_planks"
     },
     "jugcraft:landscape_magic_pressure_plate": {
-      "numerator": 16,
+      "numerator": 32,
       "denominator": 1,
       "source": "recipe jugcraft:landscape_magic_pressure_plate"
     },
     "jugcraft:landscape_magic_sapling": {
-      "numerator": 32,
+      "numerator": 64,
       "denominator": 1,
       "source": "local decorative accounting"
     },
     "jugcraft:landscape_magic_shelf": {
-      "numerator": 32,
+      "numerator": 64,
       "denominator": 1,
       "source": "recipe jugcraft:landscape_magic_shelf"
     },
     "jugcraft:landscape_magic_sign": {
-      "numerator": 52,
+      "numerator": 100,
       "denominator": 3,
       "source": "recipe jugcraft:landscape_magic_sign"
     },
     "jugcraft:landscape_magic_slab": {
-      "numerator": 4,
+      "numerator": 8,
       "denominator": 1,
       "source": "recipe jugcraft:landscape_magic_slab"
     },
     "jugcraft:landscape_magic_stairs": {
-      "numerator": 12,
+      "numerator": 24,
       "denominator": 1,
       "source": "recipe jugcraft:landscape_magic_stairs"
     },
     "jugcraft:landscape_magic_trapdoor": {
-      "numerator": 24,
+      "numerator": 48,
       "denominator": 1,
       "source": "recipe jugcraft:landscape_magic_trapdoor"
     },
     "jugcraft:landscape_magic_wood": {
-      "numerator": 128,
+      "numerator": 256,
       "denominator": 3,
       "source": "recipe jugcraft:landscape_magic_wood"
     },
@@ -27052,12 +27052,12 @@
       "source": "recipe jugcraft:landscape_stripped_jacaranda_wood"
     },
     "jugcraft:landscape_stripped_magic_log": {
-      "numerator": 32,
+      "numerator": 64,
       "denominator": 1,
       "source": "local decorative accounting"
     },
     "jugcraft:landscape_stripped_magic_wood": {
-      "numerator": 128,
+      "numerator": 256,
       "denominator": 3,
       "source": "recipe jugcraft:landscape_stripped_magic_wood"
     },
@@ -29087,7 +29087,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:nouveau_allow_scroll": {
-      "numerator": 2633,
+      "numerator": 4361,
       "denominator": 9,
       "source": "recipe jugcraft:nouveau/allow_scroll"
     },
@@ -29167,77 +29167,77 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:nouveau_archwood_boat": {
-      "numerator": 40,
+      "numerator": 160,
       "denominator": 1,
       "source": "recipe jugcraft:nouveau/archwood_boat"
     },
     "jugcraft:nouveau_archwood_button": {
-      "numerator": 8,
+      "numerator": 32,
       "denominator": 1,
       "source": "recipe jugcraft:nouveau/archwood_button"
     },
     "jugcraft:nouveau_archwood_chest": {
-      "numerator": 2624,
+      "numerator": 4352,
       "denominator": 9,
       "source": "recipe jugcraft:nouveau/archwood_chest"
     },
     "jugcraft:nouveau_archwood_door": {
-      "numerator": 16,
+      "numerator": 64,
       "denominator": 1,
       "source": "recipe jugcraft:nouveau/archwood_door"
     },
     "jugcraft:nouveau_archwood_fence": {
-      "numerator": 40,
+      "numerator": 136,
       "denominator": 3,
       "source": "recipe jugcraft:nouveau/archwood_fence"
     },
     "jugcraft:nouveau_archwood_fence_gate": {
-      "numerator": 32,
+      "numerator": 80,
       "denominator": 1,
       "source": "recipe jugcraft:nouveau/archwood_fence_gate"
     },
     "jugcraft:nouveau_archwood_grate": {
-      "numerator": 416,
+      "numerator": 512,
       "denominator": 1,
       "source": "recipe jugcraft:nouveau/archwood_grate"
     },
     "jugcraft:nouveau_archwood_hanging_sign": {
-      "numerator": 3680,
+      "numerator": 6272,
       "denominator": 27,
       "source": "recipe jugcraft:nouveau/archwood_hanging_sign"
     },
     "jugcraft:nouveau_archwood_planks": {
-      "numerator": 8,
+      "numerator": 32,
       "denominator": 1,
-      "source": "reference tag minecraft:planks"
+      "source": "local decorative accounting"
     },
     "jugcraft:nouveau_archwood_pressure_plate": {
-      "numerator": 16,
+      "numerator": 64,
       "denominator": 1,
       "source": "recipe jugcraft:nouveau/archwood_pressure_plate"
     },
     "jugcraft:nouveau_archwood_sconce": {
-      "numerator": 144,
+      "numerator": 192,
       "denominator": 1,
       "source": "recipe jugcraft:nouveau/archwood_sconce"
     },
     "jugcraft:nouveau_archwood_sign": {
-      "numerator": 52,
+      "numerator": 196,
       "denominator": 3,
       "source": "recipe jugcraft:nouveau/archwood_sign"
     },
     "jugcraft:nouveau_archwood_slab": {
-      "numerator": 4,
+      "numerator": 16,
       "denominator": 1,
       "source": "recipe jugcraft:nouveau/archwood_slab"
     },
     "jugcraft:nouveau_archwood_stairs": {
-      "numerator": 12,
+      "numerator": 48,
       "denominator": 1,
       "source": "recipe jugcraft:nouveau/archwood_stairs"
     },
     "jugcraft:nouveau_archwood_trapdoor": {
-      "numerator": 24,
+      "numerator": 96,
       "denominator": 1,
       "source": "recipe jugcraft:nouveau/archwood_trapdoor"
     },
@@ -29307,19 +29307,19 @@
       "source": "reference tag minecraft:leaves"
     },
     "jugcraft:nouveau_blue_archwood_log": {
-      "numerator": 32,
+      "numerator": 128,
       "denominator": 1,
-      "source": "reference tag minecraft:logs"
+      "source": "local decorative accounting"
     },
     "jugcraft:nouveau_blue_archwood_sapling": {
-      "numerator": 32,
+      "numerator": 128,
       "denominator": 1,
-      "source": "reference tag minecraft:saplings"
+      "source": "local decorative accounting"
     },
     "jugcraft:nouveau_blue_archwood_wood": {
-      "numerator": 32,
+      "numerator": 128,
       "denominator": 1,
-      "source": "reference tag minecraft:logs"
+      "source": "local decorative accounting"
     },
     "jugcraft:nouveau_blue_sbed": {
       "numerator": 1,
@@ -29372,7 +29372,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:nouveau_dowsing_rod": {
-      "numerator": 2064,
+      "numerator": 2112,
       "denominator": 1,
       "source": "recipe jugcraft:nouveau/dowsing_rod"
     },
@@ -29997,19 +29997,19 @@
       "source": "reference tag minecraft:leaves"
     },
     "jugcraft:nouveau_green_archwood_log": {
-      "numerator": 32,
+      "numerator": 128,
       "denominator": 1,
-      "source": "reference tag minecraft:logs"
+      "source": "local decorative accounting"
     },
     "jugcraft:nouveau_green_archwood_sapling": {
-      "numerator": 32,
+      "numerator": 128,
       "denominator": 1,
-      "source": "reference tag minecraft:saplings"
+      "source": "local decorative accounting"
     },
     "jugcraft:nouveau_green_archwood_wood": {
-      "numerator": 32,
+      "numerator": 128,
       "denominator": 1,
-      "source": "reference tag minecraft:logs"
+      "source": "local decorative accounting"
     },
     "jugcraft:nouveau_green_sbed": {
       "numerator": 1,
@@ -30017,7 +30017,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:nouveau_imbuement_chamber": {
-      "numerator": 4144,
+      "numerator": 4288,
       "denominator": 1,
       "source": "recipe jugcraft:nouveau/imbuement_chamber"
     },
@@ -30082,7 +30082,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:nouveau_mimic_scroll": {
-      "numerator": 3209,
+      "numerator": 4937,
       "denominator": 9,
       "source": "recipe jugcraft:nouveau/mimic_scroll"
     },
@@ -30182,19 +30182,19 @@
       "source": "reference tag minecraft:leaves"
     },
     "jugcraft:nouveau_purple_archwood_log": {
-      "numerator": 32,
+      "numerator": 128,
       "denominator": 1,
-      "source": "reference tag minecraft:logs"
+      "source": "local decorative accounting"
     },
     "jugcraft:nouveau_purple_archwood_sapling": {
-      "numerator": 32,
+      "numerator": 128,
       "denominator": 1,
-      "source": "reference tag minecraft:saplings"
+      "source": "local decorative accounting"
     },
     "jugcraft:nouveau_purple_archwood_wood": {
-      "numerator": 32,
+      "numerator": 128,
       "denominator": 1,
-      "source": "reference tag minecraft:logs"
+      "source": "local decorative accounting"
     },
     "jugcraft:nouveau_purple_sbed": {
       "numerator": 1,
@@ -30207,19 +30207,19 @@
       "source": "reference tag minecraft:leaves"
     },
     "jugcraft:nouveau_red_archwood_log": {
-      "numerator": 32,
+      "numerator": 128,
       "denominator": 1,
-      "source": "reference tag minecraft:logs"
+      "source": "local decorative accounting"
     },
     "jugcraft:nouveau_red_archwood_sapling": {
-      "numerator": 32,
+      "numerator": 128,
       "denominator": 1,
-      "source": "reference tag minecraft:saplings"
+      "source": "local decorative accounting"
     },
     "jugcraft:nouveau_red_archwood_wood": {
-      "numerator": 32,
+      "numerator": 128,
       "denominator": 1,
-      "source": "reference tag minecraft:logs"
+      "source": "local decorative accounting"
     },
     "jugcraft:nouveau_red_sbed": {
       "numerator": 1,
@@ -30297,12 +30297,12 @@
       "source": "recipe jugcraft:nouveau/ritual_animal_summon"
     },
     "jugcraft:nouveau_ritual_awakening": {
-      "numerator": 672,
+      "numerator": 1152,
       "denominator": 1,
       "source": "recipe jugcraft:nouveau/ritual_awakening"
     },
     "jugcraft:nouveau_ritual_binding": {
-      "numerator": 1441,
+      "numerator": 1537,
       "denominator": 1,
       "source": "recipe jugcraft:nouveau/ritual_binding"
     },
@@ -30317,12 +30317,12 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:nouveau_ritual_challenge": {
-      "numerator": 16417,
+      "numerator": 16513,
       "denominator": 1,
       "source": "recipe jugcraft:nouveau/challenge_2"
     },
     "jugcraft:nouveau_ritual_cloudshaping": {
-      "numerator": 592,
+      "numerator": 688,
       "denominator": 1,
       "source": "recipe jugcraft:nouveau/ritual_cloudshaping"
     },
@@ -30337,17 +30337,17 @@
       "source": "recipe jugcraft:nouveau/ritual_conjure_island_plains"
     },
     "jugcraft:nouveau_ritual_containment": {
-      "numerator": 36,
+      "numerator": 355,
       "denominator": 1,
       "source": "recipe jugcraft:nouveau/ritual_containment"
     },
     "jugcraft:nouveau_ritual_disintegration": {
-      "numerator": 49475,
+      "numerator": 49859,
       "denominator": 4,
       "source": "recipe jugcraft:nouveau/ritual_disintegration"
     },
     "jugcraft:nouveau_ritual_fertility": {
-      "numerator": 18152,
+      "numerator": 18248,
       "denominator": 1,
       "source": "recipe jugcraft:nouveau/ritual_fertility"
     },
@@ -30397,12 +30397,12 @@
       "source": "recipe jugcraft:nouveau/ritual_sanctuary"
     },
     "jugcraft:nouveau_ritual_scrying": {
-      "numerator": 2464,
+      "numerator": 2560,
       "denominator": 1,
       "source": "recipe jugcraft:nouveau/ritual_scrying"
     },
     "jugcraft:nouveau_ritual_sunrise": {
-      "numerator": 8336,
+      "numerator": 8432,
       "denominator": 1,
       "source": "recipe jugcraft:nouveau/ritual_sunrise"
     },
@@ -30412,7 +30412,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:nouveau_ritual_wilden_summon": {
-      "numerator": 7811,
+      "numerator": 7907,
       "denominator": 1,
       "source": "recipe jugcraft:nouveau/ritual_wilden_summon"
     },
@@ -30812,7 +30812,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:nouveau_spell_prism": {
-      "numerator": 9248,
+      "numerator": 9344,
       "denominator": 1,
       "source": "recipe jugcraft:nouveau/spell_prism"
     },
@@ -30867,44 +30867,44 @@
       "source": "recipe jugcraft:survival_completion/nouveau_starby_gift"
     },
     "jugcraft:nouveau_stripped_blue_archwood_log": {
-      "numerator": 32,
+      "numerator": 128,
       "denominator": 1,
-      "source": "reference tag minecraft:logs"
+      "source": "local decorative accounting"
     },
     "jugcraft:nouveau_stripped_blue_archwood_wood": {
-      "numerator": 32,
+      "numerator": 128,
       "denominator": 1,
-      "source": "reference tag minecraft:logs"
+      "source": "local decorative accounting"
     },
     "jugcraft:nouveau_stripped_green_archwood_log": {
-      "numerator": 32,
+      "numerator": 128,
       "denominator": 1,
-      "source": "reference tag minecraft:logs"
+      "source": "local decorative accounting"
     },
     "jugcraft:nouveau_stripped_green_archwood_wood": {
-      "numerator": 32,
+      "numerator": 128,
       "denominator": 1,
-      "source": "reference tag minecraft:logs"
+      "source": "local decorative accounting"
     },
     "jugcraft:nouveau_stripped_purple_archwood_log": {
-      "numerator": 32,
+      "numerator": 128,
       "denominator": 1,
-      "source": "reference tag minecraft:logs"
+      "source": "local decorative accounting"
     },
     "jugcraft:nouveau_stripped_purple_archwood_wood": {
-      "numerator": 32,
+      "numerator": 128,
       "denominator": 1,
-      "source": "reference tag minecraft:logs"
+      "source": "local decorative accounting"
     },
     "jugcraft:nouveau_stripped_red_archwood_log": {
-      "numerator": 32,
+      "numerator": 128,
       "denominator": 1,
-      "source": "reference tag minecraft:logs"
+      "source": "local decorative accounting"
     },
     "jugcraft:nouveau_stripped_red_archwood_wood": {
-      "numerator": 32,
+      "numerator": 128,
       "denominator": 1,
-      "source": "reference tag minecraft:logs"
+      "source": "local decorative accounting"
     },
     "jugcraft:nouveau_summon_focus": {
       "numerator": 1,

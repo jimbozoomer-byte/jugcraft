@@ -104,3 +104,14 @@ class AlchemyValueTests(unittest.TestCase):
     def test_decorative_woods_cost_like_vanilla(self):
         for wood in ('landscape_maple','landscape_redwood','cavern_pewen'):
             self.assertEqual(value('jugcraft:'+wood+'_planks'),value('minecraft:oak_planks'),wood)
+
+    def test_magic_and_archwood_saplings_cost_more(self):
+        self.assertEqual(value('jugcraft:landscape_magic_sapling'),64)
+        for colour in ('blue','green','purple','red'):
+            self.assertEqual(value('jugcraft:nouveau_'+colour+'_archwood_sapling'),128,colour)
+        self.assertEqual(value('jugcraft:landscape_magic_log'),64)
+        self.assertEqual(value('jugcraft:landscape_magic_planks'),16)
+        self.assertEqual(value('jugcraft:nouveau_red_archwood_log'),128)
+        self.assertEqual(value('jugcraft:nouveau_archwood_planks'),32)
+        # Manipulation essence turns one archwood sapling into the next: it must not make essence.
+        self.assertLessEqual(value('jugcraft:nouveau_blue_archwood_sapling'),value('jugcraft:nouveau_manipulation_essence')+value('jugcraft:nouveau_red_archwood_sapling'))
