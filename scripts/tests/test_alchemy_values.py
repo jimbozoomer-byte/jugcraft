@@ -97,3 +97,10 @@ class AlchemyValueTests(unittest.TestCase):
         essence=value('jugcraft:nouveau_manipulation_essence')
         self.assertLessEqual(8*value('minecraft:calcite'),8*value('minecraft:tuff')+essence)
         self.assertLessEqual(8*value('minecraft:tuff'),8*value('minecraft:deepslate')+essence)
+
+    def test_sulfur_dust_makes_no_gunpowder_profit(self):
+        self.assertLessEqual(value('minecraft:gunpowder'),2*value('jugcraft:cavern_sulfur_dust')+value('minecraft:gravel'))
+
+    def test_decorative_woods_cost_like_vanilla(self):
+        for wood in ('landscape_maple','landscape_redwood','cavern_pewen'):
+            self.assertEqual(value('jugcraft:'+wood+'_planks'),value('minecraft:oak_planks'),wood)

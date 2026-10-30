@@ -83,6 +83,10 @@ def build(jar):
     # calcite worth 224 more. This is the least price that makes that recipe (and deepslate to tuff) gain nothing.
     values['jugcraft:nouveau_manipulation_essence'] = 8 * Fraction(32) - 8 * Fraction(4)
     origins['jugcraft:nouveau_manipulation_essence'] = 'local tuff/calcite conversion accounting'
+    # Materials no recipe makes under the tablet's decorations (and the metals and sulfur beside them): without these
+    # they fell to the one-essence fallback, and a Landscapes plank was worth a quarter.
+    for item, price in json.loads((ROOT / 'tools/data/alchemy_decorative_roots.json').read_text())['items'].items():
+        values[item] = Fraction(price); origins[item] = 'local decorative accounting'
     locked=set(values)
     edges=[]
     for rid,r in recipes.items():
