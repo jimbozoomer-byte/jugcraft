@@ -2765,6 +2765,19 @@
     "jugcraft:household_yellow_grill",
     "jugcraft:household_yellow_trampoline",
     "jugcraft:household_doorbell",
-    "jugcraft:crafted_oven"
+    "jugcraft:crafted_oven",
+    "jugcraft:artificer_bench",
+    "jugcraft:lampwright_bench",
+    "jugcraft:workshop_bench",
+    "jugcraft:household_workbench",
+    "jugcraft:drafting_table",
+    "jugcraft:map_table",
+    "jugcraft:blueprint_table",
+    "jugcraft:cavern_spelunkery_table",
+    "jugcraft:fortune_teller_table",
+    "jugcraft:jimta_spellbooks_inscription_table",
+    "jugcraft:apothecary_shelf",
+    "jugcraft:lab_bench",
+    "jugcraft:lab_table"
   ]
 }

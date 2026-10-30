@@ -198,12 +198,12 @@ public class AlchemyPlayabilityGameTests {
         }
         h.assertFalse(TabletOutputs.allowed(item("klein_star_1")),"Modded equipment defaults to denied");h.succeed();
     }
-    /** Decorative blocks, saplings, boats, containers, household appliances, vanilla work tables and game tables (docs/features/tablet-decorations.md) are made at their price; quartz and copper that turn back into materials or machines are not. */
+    /** Decorative blocks, saplings, boats, containers, household appliances, work tables and game tables (docs/features/tablet-decorations.md) are made at their price; quartz and copper that turn back into materials or machines are not. */
     @GameTest(maxTicks=20)public void tabletMakesDecorationsButNotReversibleQuartzOrCopper(GameTestHelper h){
         var p=player(h);
         for(var stack:List.of(new ItemStack(Items.STONE_BRICK_WALL),new ItemStack(Items.QUARTZ_PILLAR),vanilla("oxidized_cut_copper"),new ItemStack(Items.OAK_SHELF),
                 new ItemStack(Items.SEA_LANTERN),vanilla("white_concrete"),item("maple_planks"),item("household_oak_chair"),
-                vanilla("oak_sapling"),vanilla("oak_boat"),vanilla("chest"),item("landscape_maple_boat"),item("household_oak_drawer"),item("household_light_fridge"),vanilla("smithing_table"),item("blackjack_table"))){
+                vanilla("oak_sapling"),vanilla("oak_boat"),vanilla("chest"),item("landscape_maple_boat"),item("household_oak_drawer"),item("household_light_fridge"),vanilla("smithing_table"),item("lampwright_bench"),item("blackjack_table"))){
             h.assertTrue(TabletOutputs.allowed(stack),"A decorative block is a tablet output: "+stack);
             var material=AlchemicalWorkshopBlockEntity.material(stack);
             h.assertTrue(material!=null&&!AlchemyValues.source(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString()).startsWith("fallback"),
