@@ -81,7 +81,16 @@ public class MachineMenu extends AbstractContainerMenu {
 	}
 
 	public static int fluidItemOutputX(FluidMachineSpec spec, int slot) {
+		if (stackedFluidOutputs(spec)) return outputTankX(spec, 0) - 22;
 		return outputTankX(spec, 0) - 22 - (spec.itemOutputs() - 1 - slot) * 18;
+	}
+
+	/** The compact reactor's three coproducts fit vertically beside its tank, clear of both reagent inputs. */
+	private static boolean stackedFluidOutputs(FluidMachineSpec spec) {
+		return spec.itemOutputs() == 3 && spec.itemInputs() == 2 && spec.inputTanks().size() == 3;
+	}
+	public static int fluidItemOutputY(FluidMachineSpec spec, int slot) {
+		return stackedFluidOutputs(spec) ? TANK_Y + slot * 18 : SLOT_Y;
 	}
 
 	/**
@@ -147,7 +156,7 @@ public class MachineMenu extends AbstractContainerMenu {
 				});
 			}
 			for (int slot = 0; slot < spec.itemOutputs(); slot++) {
-				addSlot(new Slot(container, spec.itemInputs() + slot, fluidItemOutputX(spec, slot), SLOT_Y) {
+				addSlot(new Slot(container, spec.itemInputs() + slot, fluidItemOutputX(spec, slot), fluidItemOutputY(spec, slot)) {
 					@Override
 					public boolean mayPlace(ItemStack stack) {
 						return false;

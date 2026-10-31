@@ -47,7 +47,8 @@ def processes():
         ingredients=[dict(ingredient='minecraft:quartz',count=1),dict(ingredient='minecraft:charcoal',count=1)],
         result=dict(id='jugcraft:silicon',count=1),time=200,heated=True,high_heat=True,
         **{'fabric:load_conditions':conditions(['machines','silicon'])})))
-    return rows
+    import mineral_sand_processing
+    return rows + mineral_sand_processing.workshop_recipes()
 
 def conditions(features):
     return [dict(condition='jugcraft:feature_enabled',feature=f) for f in features]

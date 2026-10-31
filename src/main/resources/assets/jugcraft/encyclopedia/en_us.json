@@ -299,12 +299,22 @@
           }
         },
         {
+          "title": "Mineral Sand Processing",
+          "icon": "jugcraft:rare_earth_sand",
+          "text": "Four sands, familiar machines, Short zirconia tooling, Independent rare-earth recovery and more",
+          "link": {
+            "type": "handbook",
+            "chapter": 20,
+            "page": 0
+          }
+        },
+        {
           "title": "Stainless and Structural Alloys",
           "icon": "jugcraft:stainless_steel_ingot",
           "text": "Regional chromite to stainless steel, Chemical vessels and precision valves, Lightweight structural alloy and more",
           "link": {
             "type": "handbook",
-            "chapter": 20,
+            "chapter": 21,
             "page": 0
           }
         },
@@ -314,7 +324,7 @@
           "text": "Lead-acid workshop storage, Expanded lithium cells, Paired flow modules and mineral electrolyte and more",
           "link": {
             "type": "handbook",
-            "chapter": 21,
+            "chapter": 22,
             "page": 0
           }
         },
@@ -324,7 +334,7 @@
           "text": "One liquefier, three cooling stages, Insulated storage and gas recovery, Storable propellants and residue and more",
           "link": {
             "type": "handbook",
-            "chapter": 22,
+            "chapter": 23,
             "page": 0
           }
         },
@@ -334,7 +344,7 @@
           "text": "Independent cobalt supply, Clean gases to synthetic crude, One refinery, standard finished fuels and more",
           "link": {
             "type": "handbook",
-            "chapter": 23,
+            "chapter": 24,
             "page": 0
           }
         },
@@ -344,7 +354,7 @@
           "text": "Phosphate into useful supplies, Choose a fertilizer for your farm, Sprinklers and hydroponics and more",
           "link": {
             "type": "handbook",
-            "chapter": 24,
+            "chapter": 25,
             "page": 0
           }
         },
@@ -354,7 +364,7 @@
           "text": "From silicon to a polished wafer, Wafer reagents and waste, Exposure and useful chips and more",
           "link": {
             "type": "handbook",
-            "chapter": 25,
+            "chapter": 26,
             "page": 0
           }
         },
@@ -364,7 +374,7 @@
           "text": "Trains, Coupling and fuel",
           "link": {
             "type": "handbook",
-            "chapter": 26,
+            "chapter": 27,
             "page": 0
           }
         }

@@ -2796,6 +2796,7 @@ def write_all(write, assets, data, lang, condition, self_drop):
     polymers.write_extras(write, assets, data, lang, condition)
     fluorochemistry.write_extras(write, assets, data, lang, condition)
     ceramics.write_extras(write, assets, data, lang, condition)
+    mineral_sand_processing.write_extras(write, assets, data, lang, condition)
     structural_alloys.write_extras(write, assets, data, lang, condition)
     battery_expansion.write_extras(write, assets, data, lang, condition)
     advanced_electronics.write_extras(write, assets, data, lang, condition)
@@ -2944,10 +2945,13 @@ machine_expansion_compat.apply(_RELEASED, FORMS, FORM_RECIPES, HANDBOOK, MODELS,
 # Owner package 1 extends the shared oven without moving any saved ports or slots.
 import ceramics
 import ceramics_models
+import mineral_sand_processing
 FORMS.update(ceramics.FORMS)
 FORMS['alumina_calciner']['capabilities'].append('jugcraft:ceramic_firing')
 FORM_RECIPES.update(ceramics.RECIPES)
 for machine, recipes in ceramics.EXTRA_RECIPES.items():
+    FORM_RECIPES[machine].extend(recipes)
+for machine, recipes in mineral_sand_processing.FORM_RECIPES.items():
     FORM_RECIPES[machine].extend(recipes)
 HANDBOOK.update(ceramics.HANDBOOK)
 HANDBOOK['alumina_calciner'].append('Also fires porcelain, alumina and zirconia blanks and calcines zirconia precursor. The solution tank must be empty for dry firing. Use Recipes to select a ceramic job; old calcination, drying and PTFE recipes remain supported.')
