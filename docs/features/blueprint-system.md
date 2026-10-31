@@ -236,3 +236,36 @@ Affected machines, including the original Bio Generator:
 - Combined Cycle Power Plant (`jugcraft:combined_cycle_power_plant`)
 - Precision Finishing Station (`jugcraft:precision_finisher`)
 - Wafer Wet-processing Bench (`jugcraft:wet_processing_bench`)
+
+## Pickaxe harvesting and chemical reactor recovery (October 31 2026)
+
+The chemical reactor's loot table drops only its controller so that it can copy
+stored acid from the block entity. The teardown policy omitted that reactor from
+`MachineKind.keepsContents`, so mining another part removed the controller without
+dropping the machine. The retention policy now agrees with the loot table.
+
+All 46 industrial-form machines also lacked `minecraft:mineable/pickaxe` despite
+inheriting the furnace's correct-tool requirement. The shared data generator now
+adds every industrial form to that tag. No tool tier, recipes, registry IDs or
+save formats change. Pickaxes can harvest the machines, and powered drills inherit
+the tag through their existing pickaxe tag reference.
+
+Regression coverage uses survival players holding netherite pickaxes. It mines
+every chemical reactor part in four orientations, and the controller, next and
+last structural parts of every registered Jugcraft MachineBlock, checking tool
+eligibility, successful removal, exactly one machine item and no remaining parts.
+
+Industrial forms explicitly keep per-part self-drop loot handling even when they
+share the chemical reactor family, preventing duplicate drops from a second
+controller drop.
+
+Implementation: OpenAI Codex (GPT-6). Verified on upstream base f82f88c5a,
+Minecraft 26.3 / Fabric Loader 0.19.5 / Fabric API 0.161.0+26.3 / Java 25.
+Before the fix, both focused tests failed on chemical reactor part 1 returning no
+machine item. After the fix, both tests passed: 32 reactor breaks (eight parts in
+four directions, each retaining exactly one bucket of acid) and controller/next/
+last-part harvesting across 137 registered machines. Repository checks, generator
+syntax, industrial-form tag coverage and diff checks passed. The full data audit
+and generator import could not run because the local asset tooling lacks
+DejaVuSansCondensed-Bold.ttf. No human client, multiplayer or full-suite run was
+performed for this fix.
