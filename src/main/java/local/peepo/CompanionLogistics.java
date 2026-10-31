@@ -18,8 +18,10 @@ public final class CompanionLogistics {
         Identifier plan();
         default void prepare(Storage<ItemVariant> source){}
         int needed(ItemStack stack);
+        /** Gate new pickup once before simulation; committed cargo may still finish unloading. */
+        default boolean acceptsSupplyBatch(){return true;}
         /** Cheap discovery demand; a pickup may expand this into a larger balanced batch. */
-        default int pickupNeeded(ItemStack stack){return needed(stack);}
+        default int pickupNeeded(ItemStack stack){return acceptsSupplyBatch()?needed(stack):0;}
         /** Fuel, retained tools and ceramics are not production ingredients. */
         default int stockAuxiliaryNeed(ItemStack stack){return 0;}
         default double supplyPriority(ItemStack stack){return 0;}
@@ -30,6 +32,7 @@ public final class CompanionLogistics {
         Storage<ItemVariant> outputs();
         /** Pickup-only planning; the real transfer still commits in CompanionTransport. */
         default List<ItemStack> supplyBatch(Storage<ItemVariant> source,int slots){
+            if(!acceptsSupplyBatch())return List.of();
             return CompanionDeliveryPlan.create(source,inputs(),slots,this::needed,null);
         }
         /** Status for logistics-only stations that process without a resident helper. */

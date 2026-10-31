@@ -67,7 +67,7 @@ public final class CraftingTableCompanionBlockEntity extends BlockEntity {
         cachedPlan=new Plan(recipe.id(),pattern.stream().map(ItemStack::copy).toList(),parts,result);return cachedPlan;
     }
     public void prepare(Storage<ItemVariant> source,ToDoubleFunction<ItemStack> priority){
-        if(!live() || hasInputs() || !filter.stock.incoming().isEmpty())return;
+        if(!live() || hasInputs() || filter.stock.hasIncoming(this))return;
         var choices=new ArrayList<>(recipes().choices(filter));if(choices.isEmpty()){selected=null;entry=null;pattern=List.of();cachedPlan=null;touch();return;}
         var scores=new HashMap<Item,Double>();ToDoubleFunction<CraftingTableRecipes.Entry> score=e->priority==null?0:scores.computeIfAbsent(e.icon().getItem(),i->priority.applyAsDouble(e.icon()));
         choices.sort(Comparator.<CraftingTableRecipes.Entry>comparingDouble(score).reversed().thenComparingInt(e->e.id().equals(selected)?0:1));
@@ -121,6 +121,8 @@ public final class CraftingTableCompanionBlockEntity extends BlockEntity {
         public Identifier plan(){var p=CraftingTableCompanionBlockEntity.this.plan();return accessible(npc) && p!=null?p.id():null;}
         public void prepare(Storage<ItemVariant> source){if(accessible(npc))CraftingTableCompanionBlockEntity.this.prepare(source,null);}
         public int needed(ItemStack stack){return accessible(npc)?CraftingTableCompanionBlockEntity.this.needed(stack):0;}
+        public boolean acceptsSupplyBatch(){return !complete() && !hasOutput() && !filter.stock.hasIncoming(CraftingTableCompanionBlockEntity.this);}
+        public int pickupNeeded(ItemStack stack){return acceptsSupplyBatch()?needed(stack):0;}
         public Storage<ItemVariant> inputs(){return new InsertionOnlyStorage<>(){public long insert(ItemVariant item,long amount,TransactionContext tx){return accessible(npc)?CraftingTableCompanionBlockEntity.this.inputs.insert(item,amount,tx):0;}};}
         public Storage<ItemVariant> outputs(){return accessible(npc)?outputs:Storage.empty();}
         public CompanionStatus status(){return accessible(npc)?CraftingTableCompanionBlockEntity.this.status():CompanionStatus.FORBIDDEN;}

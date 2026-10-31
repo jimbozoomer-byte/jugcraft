@@ -91,10 +91,10 @@ public final class CompanionProductionStock {
             }
             cached=Map.copyOf(tally);cacheValid=valid;
         }
-        return cacheValid && reconcile(npc,block);
+        return cacheValid && reconcile(block);
     }
-    private boolean reconcile(PeepoEntity npc,BlockEntity block){
-        var level=(ServerLevel)npc.level();boolean available=true,changed=false;
+    private boolean reconcile(BlockEntity block){
+        var level=(ServerLevel)block.getLevel();boolean available=true,changed=false;
         for(var id:ProductionDeliveryCancellations.get(level.getServer()).take(GlobalPos.of(level.dimension(),block.getBlockPos())))try{changed|=deliveries.remove(UUID.fromString(id))!=null;}catch(IllegalArgumentException ignored){}
         for(var entry:new ArrayList<>(deliveries.entrySet())){
             var entity=level.getEntity(entry.getKey());
@@ -121,6 +121,11 @@ public final class CompanionProductionStock {
     public void forget(UUID worker,BlockEntity block){if(deliveries.remove(worker)!=null){invalidate();block.setChanged();}}
     public List<ItemStack> incoming(){
         var stacks=new ArrayList<ItemStack>();for(var d:deliveries.values())if(d.input)for(var s:d.stacks)stacks.add(s.copy());return stacks;
+    }
+    /** Pickup-time check, including Unlimited jobs: reconcile only registered couriers, never scan entities. */
+    public boolean hasIncoming(BlockEntity block){
+        if(!(block.getLevel() instanceof ServerLevel))return true;
+        reconcile(block);return deliveries.values().stream().anyMatch(Delivery::input);
     }
     private static void add(Map<ItemVariant,Integer> counts,ItemVariant item,long amount){counts.merge(item,(int)Math.min(1_000_000,amount),(a,b)->Math.min(1_000_000,a+b));}
     private int count(List<ItemStack> stacks,ItemStack item){int n=0;for(var s:stacks)if(matches(item,s))n=Math.min(1_000_000,n+s.getCount());return n;}
@@ -249,12 +254,14 @@ public final class CompanionProductionStock {
                 else base.prepare(source);
             }
             public int needed(ItemStack stack){return base.needed(stack);} // Already committed cargo can finish.
+            public boolean acceptsSupplyBatch(){return base.acceptsSupplyBatch();}
             private boolean pickupAllowed(ItemStack stack){
                 if(!allowPickup(npc,block,stack))return false;
                 if(block instanceof CuttingBoardBlockEntity && !incoming().isEmpty())return false;
                 return !(block instanceof HearthOvenBlockEntity && HearthOvenBlockEntity.rawFilling(stack)!=null && incoming().stream().anyMatch(s->HearthOvenBlockEntity.rawFilling(s)!=null));
             }
             public int pickupNeeded(ItemStack stack){
+                if(!acceptsSupplyBatch())return 0;
                 if(CompanionAdditionalStock.supports(block))return CompanionAdditionalStock.limit(npc,block,stack,base.pickupNeeded(stack),CompanionProductionStock.this);
                 if(CompanionStockRecipes.supports(block))return CompanionStockRecipes.limit(npc,block,stack,base.pickupNeeded(stack),base.stockAuxiliaryNeed(stack),CompanionProductionStock.this);
                 if(!pickupAllowed(stack))return 0;
@@ -273,6 +280,7 @@ public final class CompanionProductionStock {
             public Storage<ItemVariant> inputs(){return CompanionStockRecipes.supports(block)?base.stockInputs(raw->CompanionStockRecipes.ingredientRoom(npc,block,raw,CompanionProductionStock.this)):base.inputs();}
             public Storage<ItemVariant> outputs(){return base.outputs();}
             public List<ItemStack> supplyBatch(Storage<ItemVariant> source,int slots){
+                if(!acceptsSupplyBatch())return List.of();
                 if(block instanceof CuttingBoardBlockEntity board && board.companionKitchen.cuttingBatchActive())return List.of();
                 invalidate();if(!refresh(npc,block) || !canRegister(npc.getUUID()))return List.of();
                 if(block instanceof CookingPotBlockEntity pot)return CookingPotSupplies.create(pot,source,npc.assignments.supplies.combined(work,false),slots,npc);

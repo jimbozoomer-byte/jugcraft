@@ -35,7 +35,9 @@ public final class HandFarmJob implements CompanionJob {
     private PeepoEntity occupant(){return station.getLevel() instanceof ServerLevel l && worker!=null && l.getEntity(worker) instanceof PeepoEntity p?p:null;}
     private void expire(){if(worker!=null && (station.isRemoved() || occupant()==null || !occupant().isAlive() || station.getLevel().getGameTime()>lease))removed();}
     public void removed(){var p=occupant();if(p!=null)p.setWorkAnimation(WorkAnimation.NONE,stationPosition());worker=null;nextSpace=0;}
-    public boolean timeCritical(){return companion.busy();}
+    public boolean timeCritical(){return companion.busy() && companion.status()==CompanionStatus.READY;}
+    public boolean finishLoadedBatch(PeepoEntity npc){return companion.busy() && workStatus(npc)==CompanionStatus.READY;}
+    public boolean collectAfterWork(){return true;}
     public Kind kind(){return Kind.WORK;}
     public void approachFailed(PeepoEntity npc){nextSpace=nextClearance=0;entrance=null;}
     public BlockPos stationPosition(){return station.getBlockPos();}

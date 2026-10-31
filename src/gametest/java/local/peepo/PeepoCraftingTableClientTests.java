@@ -155,11 +155,34 @@ public final class PeepoCraftingTableClientTests implements FabricClientGameTest
             check(CompanionHazards.safeAt(npc,npc.position()),"helper remains clear of the full-height table");});
         if(!honey){server.runOnServer(s->{output.clearContent();stock().invalidate();});server.waitFor(s->count(output,product)==1,1800);server.runOnServer(s->check(count(source,ingredient)==per*2,"consumed stock restarts another exact craft"));}
     }
+    private void batchHandoff(TestServerContext server,boolean jughead){
+        phase("eight-craft uninterrupted batch and immediate handoff jughead="+jughead);
+        server.runOnServer(s->{setup(s.overworld(),jughead);goal(Items.BREAD,jughead?8:0);source.setItem(0,new ItemStack(Items.WHEAT,48));
+            var plan=batch();check(count(plan,Items.WHEAT)==24,"eight bread crafts plan one balanced wheat delivery");npc.setNoAi(false);});
+        long[] finishedAt={-1};boolean[] sawWork={false};
+        try{server.waitFor(s->{
+            int made=finished(Items.BREAD)+count(npc.belongings,Items.BREAD)+count(output,Items.BREAD);
+            sawWork[0]|=npc.workAnimation()==WorkAnimation.CRAFT;
+            if(made>0 && made<8){
+                check(count(output,Items.BREAD)==0 && count(npc.belongings,Items.BREAD)==0,"table finishes loaded crafts before hauling early results");
+                check(count(source,Items.WHEAT)==24,"partly processed table is not topped up from Supply");
+                check(!port().acceptsSupplyBatch(),"loaded table rejects a fresh pickup while accepting committed cargo");
+            }
+            if(made>=8){
+                long now=s.overworld().getGameTime();if(finishedAt[0]<0)finishedAt[0]=now;
+                var state=npc.transport.activity();boolean picked=count(npc.belongings,Items.BREAD)>0 || count(output,Items.BREAD)>0;
+                check(now-finishedAt[0]<=10 || picked || state==CompanionStatus.COLLECTING_OUTPUT || state==CompanionStatus.DELIVERING,"table schedules finished batch within ten ticks");
+                check(now-finishedAt[0]<=40 || picked,"table collects batch without a later job-search delay");
+            }
+            return count(output,Items.BREAD)==8;
+        },2400);}catch(AssertionError e){throw new AssertionError(server.computeOnServer(s->"Table batch: "+npc.routineStatus()+" / "+npc.transport.activity()+" / "+table.status()+" inputs="+table.installed()+" bread="+finished(Items.BREAD)),e);}
+        server.runOnServer(s->{npc.setNoAi(true);check(sawWork[0] && finishedAt[0]>=0,"real batch displays work and finishes");check(count(source,Items.WHEAT)==24 && finished(Items.BREAD)==0,"eight crafts conserve ingredients and deliver all products");});
+    }
     @Override public void runTest(ClientGameTestContext context){
         try(var world=context.worldBuilder().adjustSettings(c->{c.setGameMode(WorldCreationUiState.SelectedGameMode.CREATIVE);c.setWorldType(new WorldCreationUiState.WorldTypeEntry(c.getSettings().worldgenLoadContext().lookupOrThrow(Registries.WORLD_PRESET).getOrThrow(WorldPresets.FLAT)));c.setGenerateStructures(false);}).create()){
             world.getConnection().waitForChunksRender();var server=world.getServer();base=context.computeOnClient(c->c.player.blockPosition().above(4));server.runCommand("time set noon");server.runCommand("weather clear");server.runCommand(String.format(Locale.ROOT,"tp @a %.1f %d %.1f",base.getX()+.5,base.getY(),base.getZ()-5.5));
             phase("planning, filters, migration and shared reservations");server.runOnServer(s->planning(s.overworld()));manual(server);server.runOnServer(s->{fullOutput(s.overworld());breakCleanup(s.overworld());});
-            live(server,false,false);live(server,true,true);server.runOnServer(s->cleanup());
+            live(server,false,false);live(server,true,true);batchHandoff(server,false);batchHandoff(server,true);server.runOnServer(s->cleanup());
         }
         phase("PASS "+assertions+" assertions");
     }

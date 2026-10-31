@@ -30,6 +30,8 @@ public final class CompanionTransport extends Goal {
     private final CompanionNavigation.Progress travel=new CompanionNavigation.Progress();
     private long nextSearch,deadline,nextPath;
     private long handoffUntil;
+    private CompanionAssignments.Target finishedWork;
+    private long finishedWorkUntil;
     private long nextValidity;
     private boolean validRoute;
     private io.github.jimbozoomer.jugcraft.agriculture.HearthOvenBlockEntity tending;
@@ -48,6 +50,17 @@ public final class CompanionTransport extends Goal {
     }
     /** A known job transition may need supplies or unloading; retain the shared admission budget. */
     void workChanged(){if(!active)nextSearch=0;}
+    /** A completed opted-in batch keeps its finishing/output step in the bounded planner. */
+    void workFinished(BlockPos pos){
+        if(active)return;
+        int priority=npc.assignments.workPriority(pos);
+        if(priority<1 || priority>4)return;
+        finishedWork=npc.assignments.get(priority);finishedWorkUntil=npc.level().getGameTime()+40;
+        workChanged();
+    }
+    boolean awaitingWorkOutput(BlockPos pos){
+        return finishedWork!=null && finishedWork.at().pos().equals(pos) && npc.level().getGameTime()<finishedWorkUntil;
+    }
     boolean hasPendingDelivery(){return !manifest.isEmpty() || tending!=null || handoffUntil!=0;}
     public boolean reserved(int slot){
         if(cargoSlot==slot && (tending!=null || !manifest.isEmpty()))return true;
@@ -179,7 +192,7 @@ public final class CompanionTransport extends Goal {
         faceOven();piePose(action,stack);npc.getNavigation().stop();
         return now-pieActionStarted>=npc.uniforms.duration(CompanionUniforms.Type.BAKER,PIE_ACTION_TICKS);
     }
-    private void forget(){releaseStock();handoffUntil=0;releaseTending();clearPiePose();manifest=ItemStack.EMPTY;cargoSlot=-1;pending.clear();unused.clear();workstation=store=null;recipe=null;returning=porter=tooling=false;route=-1;approach=null;}
+    private void forget(){releaseStock();handoffUntil=0;finishedWork=null;finishedWorkUntil=0;releaseTending();clearPiePose();manifest=ItemStack.EMPTY;cargoSlot=-1;pending.clear();unused.clear();workstation=store=null;recipe=null;returning=porter=tooling=false;route=-1;approach=null;}
     private boolean advanceCargo(){
         clearPiePose();manifest=ItemStack.EMPTY;cargoSlot=-1;
         while(!pending.isEmpty()){
@@ -201,8 +214,12 @@ public final class CompanionTransport extends Goal {
     private void beginHandoff(){
         // Stay here while choosing the next bounded step: return to work, restock,
         // collect another output, or continue a porter route. Never wander between legs.
+        var completed=!porter && !tooling && !returning?workstation:null;
         if(workstation!=null)jobDetails.remove(workstation.at().pos());
         forget();handoffUntil=npc.level().getGameTime()+40;active=true;
+        // Retain this batch through physical finishing supplies and multi-trip unloading.
+        // Selection still checks live readiness and yields to urgent hearth tending.
+        finishedWork=completed;finishedWorkUntil=handoffUntil;
         status=CompanionStatus.WAITING;npc.getNavigation().stop();
     }
     private void deferUnused(){
@@ -329,12 +346,25 @@ public final class CompanionTransport extends Goal {
     /** At most four jobs and the existing bounded container/route lists; caller owns a search grant. */
     private boolean chooseRoute(boolean continuing){
         long now=npc.level().getGameTime();
+        var completed=now<finishedWorkUntil?finishedWork:null;
+        finishedWork=null;finishedWorkUntil=0;
         forget();if(emptySlot()<0 && npc.orders.porter()){porterState=CompanionStatus.FULL;return false;}
         blocked.entrySet().removeIf(e->e.getValue()<=now);
 
         // Rescue/tend an existing hot pie before ordinary job priority. At most four assigned blocks.
         for(int i=1;i<5;i++){
             var work=npc.assignments.get(i);if(work!=null && !blocked.containsKey(work.at().pos()) && readyTending(work,false))return true;
+        }
+        // Finish the batch we were just working on before a new ordinary task or tool trip.
+        // This is only a hint: normal loaded/permission/mode/capacity checks still own the route.
+        if(completed!=null && !blocked.containsKey(completed.at().pos())){
+            for(int i=1;i<5;i++)if(completed.equals(npc.assignments.get(i)) && completed.present(npc.level())){
+                var job=CompanionJobs.resolve(npc,completed.at().pos());
+                if(job!=null && job.collectAfterWork() && !job.finishLoadedBatch(npc)){
+                    if(job.completionNeedsSupplies(npc) && readyRoute(completed,true))return true;
+                    if(readyRoute(completed,false))return true;
+                }
+            }
         }
         // Required tools use the same physical delivery lifecycle as ingredients.
         for(int i=1;i<5;i++){
@@ -344,21 +374,19 @@ public final class CompanionTransport extends Goal {
         for(int i=1;i<5;i++){
             var work=npc.assignments.get(i);if(work==null || blocked.containsKey(work.at().pos()))continue;
             if(npc.deferJobTransport(work.at().pos()))continue;
-            // Finish a stocked pot or cutting batch before collecting its results.
+            // Finish a station's opted-in loaded batch before collecting its results.
             // This also applies after reload, before the routine has reclaimed its rim position.
-            var batchBlock=work.present(npc.level())?npc.level().getBlockEntity(work.at().pos()):null;
-            if(batchBlock instanceof io.github.jimbozoomer.jugcraft.agriculture.CookingPotBlockEntity pot && pot.cookingStatus()==CompanionStatus.READY
-                || batchBlock instanceof io.github.jimbozoomer.jugcraft.agriculture.CuttingBoardBlockEntity board && board.companionKitchen.kitchenStatus(npc)==CompanionStatus.READY){
-                var job=CompanionJobs.resolve(npc,work.at().pos());
-                if(job!=null && npc.orders.station(job) && job.worthStarting(npc))return false;
+            var job=work.present(npc.level())?CompanionJobs.resolve(npc,work.at().pos()):null;
+            if(job!=null && job.finishLoadedBatch(npc)){
+                if(npc.orders.station(job) && job.worthStarting(npc))return false;
                 continue;
             }
             // A supplied processor/plot should start working before we plan another haul.
             // This also lets a higher-priority productive job interrupt a delivery chain.
             if(continuing && work.present(npc.level())){
-                var job=CompanionJobs.resolve(npc,work.at().pos());
                 if(job!=null && npc.orders.station(job) && job.worthStarting(npc))return false;
             }
+            if(job!=null && job.completionNeedsSupplies(npc) && readyRoute(work,true))return true;
             if(readyRoute(work,false) || readyRoute(work,true))return true;
         }
         // Generic routes yield to productive work, but do not consume a workstation assignment.
@@ -371,10 +399,11 @@ public final class CompanionTransport extends Goal {
     @Override public boolean canContinueToUse(){return active && allowed() && (handoffUntil!=0 || travelValid() && npc.level().getGameTime()<deadline);}
     @Override public boolean requiresUpdateEveryTick(){return true;}
     @Override public void start(){
+        finishedWork=null;finishedWorkUntil=0;
         handling.reset();handoffUntil=0;active=true;npc.resetCompanionRoutine();npc.leaveCompanionBed();npc.setRestMode(CompanionEnergy.Rest.NONE);
         deadline=npc.level().getGameTime()+600;nextPath=nextValidity=0;approach=null;travel.reset();lastPosition=npc.position();
     }
-    @Override public void stop(){handling.reset();handoffUntil=0;active=false;clearPiePose();npc.clearCarryGesture();npc.getNavigation().stop();approach=null;if(npc.level().getGameTime()>=deadline)nextSearch=npc.level().getGameTime()+200;if(manifest.isEmpty())forget();}
+    @Override public void stop(){finishedWork=null;finishedWorkUntil=0;handling.reset();handoffUntil=0;active=false;clearPiePose();npc.clearCarryGesture();npc.getNavigation().stop();approach=null;if(npc.level().getGameTime()>=deadline)nextSearch=npc.level().getGameTime()+200;if(manifest.isEmpty())forget();}
     private CompanionAssignments.Target destination(){return manifest.isEmpty()?(supply?store:workstation):supply && !returning?workstation:store;}
     private void fail(CompanionStatus why){
         handling.reset();npc.handlingRemainder(carried());
@@ -488,7 +517,12 @@ public final class CompanionTransport extends Goal {
         }
         if(approach==null || npc.position().distanceToSqr(approach)>.64){
             if(pieAction==WorkAnimation.PIE_LOAD)clearPiePose();
-            if(now>=nextPath && (approach==null || travel.needsPath(npc,approach)))pathTo(target);
+            if(now>=nextPath && (approach==null || travel.needsPath(npc,approach))){
+                // Leaving a board/pot can briefly put the worker in the air. Wait for
+                // ground navigation instead of blacklisting a perfectly reachable output.
+                if(!npc.onGround() && !npc.isInLiquid() && !npc.isPassenger()){status=CompanionStatus.WAITING;return;}
+                pathTo(target);
+            }
             if(npc.position().distanceToSqr(lastPosition)>.0001)try(var tx=Transaction.openOuter()){npc.extractWorkEnergy(deliveryUniform(),movementCost(),tx);tx.commit();}
             lastPosition=npc.position();return;
         }

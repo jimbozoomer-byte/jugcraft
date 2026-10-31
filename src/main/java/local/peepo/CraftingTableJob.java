@@ -7,6 +7,8 @@ import net.minecraft.world.phys.*;
 
 /** One crafter standing on a checked tabletop; the table owns paid progress and real items. */
 public final class CraftingTableJob implements CompanionJob {
+    public boolean finishLoadedBatch(PeepoEntity npc){return planningStatus(npc)==CompanionStatus.READY;}
+    public boolean collectAfterWork(){return true;}
     public static final double STANDING_OFFSET=.24;
     private final CraftingTableCompanionBlockEntity table;
     private UUID worker;

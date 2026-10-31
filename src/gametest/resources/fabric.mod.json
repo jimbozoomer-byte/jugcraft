@@ -472,6 +472,8 @@
       "local.peepo.PeepoFarmCropsClientTests",
       "local.peepo.PeepoFarmStorageClientTests",
       "local.peepo.PeepoHandFarmClientTests",
+      "local.peepo.PeepoProcessorBatchClientTests",
+      "local.peepo.PeepoPressCandyBatchClientTests",
       "local.peepo.PeepoDryingRackClientTests",
       "local.peepo.PeepoCaramelAppleClientTests",
       "local.peepo.PeepoMidwayConfectionClientTests",
