@@ -81,3 +81,51 @@ class AlchemyValueTests(unittest.TestCase):
             self.assertEqual(plank,value('jugcraft:'+wood+'_planks'))
             self.assertEqual(6*value('jugcraft:aged_'+wood+'_slab'),3*plank)
             self.assertEqual(4*value('jugcraft:aged_'+wood+'_stairs'),6*plank)
+
+    def test_tablet_outputs_have_real_prices(self):
+        """Every tablet output is priced from recipes or references, never the one-essence fallback (docs/features/tablet-decorations.md)."""
+        tag=json.loads((ROOT/'src/main/resources/data/jugcraft/tags/item/tablet_outputs.json').read_text(encoding='utf-8'))['values']
+        for entry in tag:
+            item=entry if isinstance(entry,str) else entry['id']
+            self.assertIn(item,VALUES,item)
+            self.assertFalse(VALUES[item]['source'].startswith('fallback'),item)
+        names={e if isinstance(e,str) else e['id'] for e in tag}
+        for item in ('quartz_block','quartz_slab','copper_block','copper_bulb','exposed_copper_bulb','waxed_cut_copper'):
+            self.assertNotIn('minecraft:'+item,names,item)
+
+    def test_manipulation_essence_makes_no_calcite_or_tuff_from_tablet_stone(self):
+        essence=value('jugcraft:nouveau_manipulation_essence')
+        self.assertLessEqual(8*value('minecraft:calcite'),8*value('minecraft:tuff')+essence)
+        self.assertLessEqual(8*value('minecraft:tuff'),8*value('minecraft:deepslate')+essence)
+
+    def test_sulfur_dust_makes_no_gunpowder_profit(self):
+        self.assertLessEqual(value('minecraft:gunpowder'),2*value('jugcraft:cavern_sulfur_dust')+value('minecraft:gravel'))
+
+    def test_decorative_woods_cost_like_vanilla(self):
+        for wood in ('landscape_maple','landscape_redwood','cavern_pewen'):
+            self.assertEqual(value('jugcraft:'+wood+'_planks'),value('minecraft:oak_planks'),wood)
+
+    def test_magic_and_archwood_saplings_cost_more(self):
+        self.assertEqual(value('jugcraft:landscape_magic_sapling'),64)
+        for colour in ('blue','green','purple','red'):
+            self.assertEqual(value('jugcraft:nouveau_'+colour+'_archwood_sapling'),128,colour)
+        self.assertEqual(value('jugcraft:landscape_magic_log'),64)
+        self.assertEqual(value('jugcraft:landscape_magic_planks'),16)
+        self.assertEqual(value('jugcraft:nouveau_red_archwood_log'),128)
+        self.assertEqual(value('jugcraft:nouveau_archwood_planks'),32)
+        # Manipulation essence turns one archwood sapling into the next: it must not make essence.
+        self.assertLessEqual(value('jugcraft:nouveau_blue_archwood_sapling'),value('jugcraft:nouveau_manipulation_essence')+value('jugcraft:nouveau_red_archwood_sapling'))
+
+    def test_metal_chain_is_priced(self):
+        """Steel is iron and coke, plates are pressed from ingots and brass is three copper and a zinc (docs/features/tablet-decorations.md)."""
+        self.assertEqual(value('jugcraft:coke'),value('minecraft:coal'))
+        self.assertEqual(value('jugcraft:steel_ingot'),value('minecraft:iron_ingot')+value('jugcraft:coke'))
+        self.assertEqual(value('jugcraft:steel_plate'),value('jugcraft:steel_ingot'))
+        self.assertEqual(value('jugcraft:zinc_ingot'),value('minecraft:copper_ingot'))
+        self.assertEqual(4*value('jugcraft:brass_ingot'),3*value('minecraft:copper_ingot')+value('jugcraft:zinc_ingot'))
+        self.assertEqual(9*value('jugcraft:steel_plate'),value('jugcraft:jimta_dense_steel_plate'))
+        self.assertEqual(3*value('jugcraft:silver_wire'),value('jugcraft:silver_ingot'))
+
+    def test_mud_bricks_follow_mud(self):
+        self.assertEqual(value('minecraft:mud'),5)
+        self.assertEqual(value('minecraft:packed_mud'),value('minecraft:mud')+value('minecraft:wheat'))
