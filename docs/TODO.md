@@ -1,5 +1,16 @@
 # Jugcraft TODO
 
+## Simplified mineral sand processing — October 31 implementation
+
+The owner requested fewer steps and **no new machines**. The [replacement processing plan](features/mineral-sand-processing-simple.md) uses only existing general-purpose processors and supersedes the October 29 proposal. All four lines and their immediate consumers are implemented locally; the feature record distinguishes automated verification from owner playtesting.
+
+- [x] Titanium: Mineral Conditioner -> Chemical Reactor -> Arc Furnace, feeding existing titanium items; optional direct White Dye recipe in the reactor.
+- [x] Zircon: Chemical Reactor -> Industrial Oven -> Precision Finisher, producing existing zirconia cutting inserts without the separate precursor/charge/shaping chain.
+- [x] Rare earths: Mineral Conditioner -> Chemical Reactor, with independent 50% chances for neodymium, cerium and yttrium oxides, allowing all three together. Shared reactor output slots preserve old saves and commit rolls once; connect to magnets, optical polishing and an existing Efficiency Upgrade recipe.
+- [x] Garnet: Pulverizer -> useful grit; craft reusable tools for the existing Workshop Bench and Precision Finisher.
+- [x] Validate short routes, complete input costs, conservative alchemy values, existing machine layouts, saved work, recipe guidance and automated client synchronization. No new machine, extraction system or mandatory waste line.
+- [ ] Owner survival-cost/balance acceptance and two-human multiplayer playtest; keep this separate from automated server/client checks.
+
 ## Local cosmetic costume — October 26
 
 - [x] Implemented locally: **Tony Tony Chompa costume**, using the existing bat costume as the

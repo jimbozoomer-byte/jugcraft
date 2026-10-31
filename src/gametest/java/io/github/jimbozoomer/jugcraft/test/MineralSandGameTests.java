@@ -11,6 +11,7 @@ import java.util.List;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.item.ItemStack;
@@ -48,7 +49,22 @@ public class MineralSandGameTests {
                         "Reserve multiplied or lost family: " + drops);
             }
             for (var machine : List.of(MachineKind.CRUSHER, MachineKind.PULVERIZER)) {
-                helper.assertTrue(MachineRecipes.find(level, machine, new ItemStack(sand)).isEmpty(), "Sand acquired generic ore bonus processing");
+                var found=MachineRecipes.find(level, machine, new ItemStack(sand));
+                if(sand==JugcraftMaterials.GARNET_SAND && machine==MachineKind.PULVERIZER) {
+                    var recipe=found.orElseThrow(()->helper.assertionException("Approved direct garnet processing recipe is missing"));
+                    var output=recipe.output().create();
+                    helper.assertTrue(recipe.inputCount()==1 && recipe.time()==120 && recipe.byproducts().isEmpty()
+                        && output.is(BuiltInRegistries.ITEM.getValue(Jugcraft.id("garnet_grit"))) && output.getCount()==1,
+                        "Only the approved one-sand to one-grit, 120-tick recipe is allowed; no ore-yield bonuses or coproducts");
+                    helper.assertTrue(recipe.input().items().count()==1 && !recipe.input().test(new ItemStack(Items.SAND))
+                        && !recipe.input().test(new ItemStack(Items.RED_SAND)), "Garnet recovery accepts its exact rich sand, never a generic sand tag");
+                    long matches=level.getServer().getRecipeManager().getRecipes().stream()
+                        .filter(holder->holder.value() instanceof MachineRecipe r && r.machine()==machine
+                            && r.input().test(new ItemStack(sand))).count();
+                    helper.assertTrue(matches==1,"Exactly one approved garnet pulverizing route, without a competing ore-bonus recipe");
+                } else {
+                    helper.assertTrue(found.isEmpty(), "Other sands and all crusher routes retain the generic ore-bonus ban");
+                }
             }
         }
         for (int i = 0; i < 4; i++) {

@@ -43,6 +43,14 @@ class AlchemyValueTests(unittest.TestCase):
             self.assertEqual(value('minecraft:'+metal+'_block'),9*unit)
             if 'minecraft:'+metal+'_nugget' in VALUES:self.assertEqual(9*value('minecraft:'+metal+'_nugget'),unit)
 
+    def test_rarest_all_success_batch_cannot_mint_essence(self):
+        products = ('jugcraft:neodymium_oxide', 'jugcraft:cerium_oxide', 'jugcraft:yttrium_oxide')
+        worst_case = value(products[0]) + 2 * value(products[1]) + value(products[2])
+        self.assertLessEqual(worst_case, value('jugcraft:rare_earth_oxide'))
+        self.assertLessEqual(worst_case / 2, value('jugcraft:rare_earth_oxide'))
+        for item in products:
+            self.assertIn('coproduct', VALUES[item]['source'])
+
     def test_filled_buckets_cannot_create_a_cheaper_empty_shell(self):
         for item in ('water_bucket','lava_bucket','milk_bucket','cod_bucket','powder_snow_bucket'):
             self.assertGreaterEqual(value('minecraft:'+item),value('minecraft:bucket'))

@@ -6,6 +6,7 @@ tools/materials.py, and that no recipe creates metal from nothing.
 """
 import hashlib
 import json
+import math
 import re
 import sys
 from functools import cache
@@ -432,6 +433,11 @@ def item_units(ref):
     """Returns {metal: units} for an item or tag reference."""
     import vehicle_bays
     ns, path = split(ref.lstrip("#"))
+    if ns == MOD and path in {"zircon_sand", "garnet_sand", "rare_earth_sand"}:
+        return {}  # Non-metal mineral feeds; no recoverable metal in this audit's tracked metal families.
+    if ns == MOD and path == "titanium_sand":
+        from fractions import Fraction
+        return {"titanium": Fraction(9, 2)}  # Two finite sand units prepare one nine-unit Raw Titanium.
     if ns == MOD and path in {'jimta_' + name for name in jimtafacts.FOOD}:
         return {}  # Reusable food; neither cooking route contains or recovers metal.
     if ns == MOD and path == "deep_drilling_assembly":
@@ -709,6 +715,17 @@ def check_fluid_recipes(registered):
                 + sum(len(r) for r in industrial_forms.FORM_RECIPES.values()) + len(collection_recipes))
     types = {spec["recipe_type"] for spec in petro.FLUID_MACHINES.values() if spec["recipe_type"]}
     files = [p for p in (DATA / MOD / "recipe").glob("*/*.json") if p.parent.name in types]
+    for path in files:
+        record = load(path)
+        chances = record.get('result_chances', [])
+        if not isinstance(chances, list):
+            err(f'{path.relative_to(DATA)}: result_chances must be a list')
+        elif chances:
+            if len(chances) != len(record.get('results', [])):
+                err(f'{path.relative_to(DATA)}: result_chances must align with every solid result')
+            elif any(not isinstance(chance, (int, float)) or isinstance(chance, bool)
+                     or not math.isfinite(chance) or not 0 <= chance <= 1 for chance in chances):
+                err(f'{path.relative_to(DATA)}: result chances must be finite numbers in [0, 1]')
     if len(files) != expected:
         err(f"{len(files)} fluid recipe files, but the canonical petro/drone/form/collection recipes define {expected}")
     for machine, recipes in petro.FLUID_RECIPES.items():

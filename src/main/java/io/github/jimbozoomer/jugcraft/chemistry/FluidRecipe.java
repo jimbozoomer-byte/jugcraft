@@ -8,6 +8,7 @@ import io.github.jimbozoomer.jugcraft.machine.MachineKind;
 import io.github.jimbozoomer.jugcraft.machine.MachineCompanionEffort;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.DoubleSupplier;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.RegistryFriendlyByteBuf;
@@ -89,6 +90,7 @@ public class FluidRecipe implements Recipe<MachineInput> {
 	private final int energyPerTick;
 	private final int emissions;
 	private final int priority;
+	private final List<Float> resultChances;
 
 	public FluidRecipe(MachineKind machine, Recipe.CommonInfo commonInfo, List<ItemPart> items, List<FluidAmount> fluids,
 			List<FluidAmount> fluidResults, List<ItemStackTemplate> results, int time) {
@@ -115,6 +117,18 @@ public class FluidRecipe implements Recipe<MachineInput> {
 	public FluidRecipe(MachineKind machine, Recipe.CommonInfo commonInfo, List<ItemPart> items, List<FluidAmount> fluids,
 			List<FluidAmount> fluidResults, List<ItemStackTemplate> results, int time, int companionEffort, String capability,
 			Optional<Ingredient> tool, int energyPerTick, int emissions, int priority) {
+		this(machine, commonInfo, items, fluids, fluidResults, results, time, companionEffort, capability,
+				tool, energyPerTick, emissions, priority, List.of());
+	}
+
+	public FluidRecipe(MachineKind machine, Recipe.CommonInfo commonInfo, List<ItemPart> items, List<FluidAmount> fluids,
+			List<FluidAmount> fluidResults, List<ItemStackTemplate> results, int time, int companionEffort, String capability,
+			Optional<Ingredient> tool, int energyPerTick, int emissions, int priority, List<Float> resultChances) {
+		if (!resultChances.isEmpty() && resultChances.size() != results.size())
+			throw new IllegalArgumentException("result_chances must contain one chance per item result");
+		for (float chance : resultChances) if (!Float.isFinite(chance) || chance < 0 || chance > 1)
+			throw new IllegalArgumentException("Item result chances must be between zero and one");
+		this.resultChances = List.copyOf(resultChances);
 		this.priority = Math.clamp(priority, -100, 100);
 		this.energyPerTick = Math.max(0, energyPerTick);
 		this.emissions = Math.max(0, emissions);
@@ -148,6 +162,25 @@ public class FluidRecipe implements Recipe<MachineInput> {
 
 	public List<ItemStackTemplate> results() {
 		return results;
+	}
+
+	/** Independent item-result probabilities; an absent list preserves guaranteed old recipes. */
+	public List<Float> resultChances() { return resultChances; }
+	public float resultChance(int index) { return resultChances.isEmpty() ? 1.0F : resultChances.get(index); }
+	public boolean hasChancedResults() { return resultChances.stream().anyMatch(chance -> chance < 1.0F); }
+
+	/**
+	 * Rolls each result independently once. Positions are preserved with EMPTY for failed rolls, so a successful
+	 * coproduct never moves into another product's slot. Call only at irreversible completion after maximum-output
+	 * preflight; consuming inputs and inserting this list are one server-thread commit, with no rerollable wait state.
+	 */
+	public List<ItemStack> rollResults(DoubleSupplier random) {
+		java.util.ArrayList<ItemStack> rolled = new java.util.ArrayList<>(results.size());
+		for (int i = 0; i < results.size(); i++) {
+			float chance = resultChance(i);
+			rolled.add(chance >= 1.0F || random.getAsDouble() < chance ? results.get(i).create() : ItemStack.EMPTY);
+		}
+		return List.copyOf(rolled);
 	}
 
 	/** Zero preserves the family draw of old recipes. Forms snapshot a positive override with their batch. */
@@ -265,7 +298,7 @@ public class FluidRecipe implements Recipe<MachineInput> {
 	}
 
 	/** The fields added after the first fluid recipes, sent to clients together. */
-	private record Extras(int companionEffort, String capability, Optional<Ingredient> tool, int energyPerTick, int emissions, int priority) {
+	private record Extras(int companionEffort, String capability, Optional<Ingredient> tool, int energyPerTick, int emissions, int priority, List<Float> resultChances) {
 		static final StreamCodec<RegistryFriendlyByteBuf, Extras> STREAM_CODEC = StreamCodec.composite(
 				ByteBufCodecs.VAR_INT, Extras::companionEffort,
 				ByteBufCodecs.STRING_UTF8, Extras::capability,
@@ -273,6 +306,7 @@ public class FluidRecipe implements Recipe<MachineInput> {
 				ByteBufCodecs.VAR_INT, Extras::energyPerTick,
 				ByteBufCodecs.VAR_INT, Extras::emissions,
 				ByteBufCodecs.VAR_INT, Extras::priority,
+				ByteBufCodecs.FLOAT.apply(ByteBufCodecs.list()), Extras::resultChances,
 				Extras::new);
 	}
 
@@ -289,9 +323,10 @@ public class FluidRecipe implements Recipe<MachineInput> {
 				Ingredient.CODEC.optionalFieldOf("tool").forGetter(FluidRecipe::tool),
 				Codec.intRange(0, 65_535).optionalFieldOf("energy_per_tick", 0).forGetter(FluidRecipe::energyPerTick),
 				Codec.intRange(0, 65_535).optionalFieldOf("emissions", 0).forGetter(FluidRecipe::emissions),
-				Codec.intRange(-100, 100).optionalFieldOf("priority", 0).forGetter(FluidRecipe::priority)
-		).apply(i, (info, items, fluids, fluidResults, results, time, effort, capability, tool, energy, emissions, priority) ->
-				new FluidRecipe(machine, info, items, fluids, fluidResults, results, time, effort, capability, tool, energy, emissions, priority)));
+				Codec.intRange(-100, 100).optionalFieldOf("priority", 0).forGetter(FluidRecipe::priority),
+				Codec.floatRange(0, 1).listOf().optionalFieldOf("result_chances", List.of()).forGetter(FluidRecipe::resultChances)
+		).apply(i, (info, items, fluids, fluidResults, results, time, effort, capability, tool, energy, emissions, priority, chances) ->
+				new FluidRecipe(machine, info, items, fluids, fluidResults, results, time, effort, capability, tool, energy, emissions, priority, chances)));
 		StreamCodec<RegistryFriendlyByteBuf, FluidRecipe> stream = StreamCodec.composite(
 				Recipe.CommonInfo.STREAM_CODEC, recipe -> recipe.commonInfo,
 				ItemPart.STREAM_CODEC.apply(ByteBufCodecs.list()), FluidRecipe::items,
@@ -299,9 +334,9 @@ public class FluidRecipe implements Recipe<MachineInput> {
 				FluidAmount.STREAM_CODEC.apply(ByteBufCodecs.list()), FluidRecipe::fluidResults,
 				ItemStackTemplate.STREAM_CODEC.apply(ByteBufCodecs.list()), FluidRecipe::results,
 				ByteBufCodecs.VAR_INT, FluidRecipe::time,
-				Extras.STREAM_CODEC, recipe -> new Extras(recipe.companionEffort, recipe.capability, recipe.tool, recipe.energyPerTick, recipe.emissions, recipe.priority),
+				Extras.STREAM_CODEC, recipe -> new Extras(recipe.companionEffort, recipe.capability, recipe.tool, recipe.energyPerTick, recipe.emissions, recipe.priority, recipe.resultChances),
 				(info, items, fluids, fluidResults, results, time, extras) -> new FluidRecipe(machine, info, items, fluids,
-						fluidResults, results, time, extras.companionEffort(), extras.capability(), extras.tool(), extras.energyPerTick(), extras.emissions(), extras.priority()));
+						fluidResults, results, time, extras.companionEffort(), extras.capability(), extras.tool(), extras.energyPerTick(), extras.emissions(), extras.priority(), extras.resultChances()));
 		return new RecipeSerializer<>(codec, stream);
 	}
 }

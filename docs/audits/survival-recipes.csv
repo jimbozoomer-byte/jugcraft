@@ -102,8 +102,10 @@ jugcraft:anaerobic_digester,chain_with_acquisition_evidence,,src/main/resources/
 jugcraft:angel_at_the_tomb,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/angel_at_the_tomb.json,,
 jugcraft:angelheart_vial,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/angelheart_vial.json,,
 jugcraft:angelic_feather,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/angelic_feather.json,,
+jugcraft:animatronic_werewolf,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/animatronic_werewolf.json,,
 jugcraft:antidote,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/antidote.json,,
 jugcraft:apothecary_shelf,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/apothecary_shelf.json,,
+jugcraft:apple_bin,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/apple_bin.json,,
 jugcraft:apple_butter,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pot_cooking/apple_butter.json,,
 jugcraft:apple_cake,recipe_chain_reachable,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java,,
 jugcraft:apple_cake_slice,recipe_chain_reachable,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/PieBlock.java,,
@@ -147,9 +149,12 @@ jugcraft:asphodel,natural_or_interaction_source,,,,src/main/resources/data/jugcr
 jugcraft:aspirin,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/aspirin.json,,
 jugcraft:assay_glass,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/assay_glass.json,,
 jugcraft:assayers_scale,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/assayers_scale.json,,
+jugcraft:aster,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/aster.json
 jugcraft:astral_verbena,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/styx/Styxhexenhammer.java
 jugcraft:astrolabe,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/astrolabe.json,,
 jugcraft:atm,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/survival_completion/atm.json,,
+jugcraft:auger_rifle,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/auger_rifle.json,,
+jugcraft:auger_shotgun,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/auger_shotgun.json,,
 jugcraft:aura_candle,recipe_chain_reachable,,tools/agriculture.py:CHANDLERY,,
 jugcraft:auto_crafter,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/auto_crafter.json | src/main/resources/data/jugcraft/recipe/jimtafacts_industry/jimta_advanced_crafting_table_restore.json | src/main/resources/data/jugcraft/recipe/jimtafacts_industry/jimta_auto_workbench_restore.json,,
 jugcraft:automation_upgrade,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/electronics_automation.json,,
@@ -208,6 +213,7 @@ jugcraft:barley_bread,chain_with_acquisition_evidence,,src/main/resources/data/j
 jugcraft:barley_seeds,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/barley_seeds.json,,
 jugcraft:barmbrack,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/barmbrack.json,,
 jugcraft:barmbrack_ring,recipe_chain_reachable,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/BarmbrackBlock.java,,
+jugcraft:barn_lantern,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/barn_lantern.json,,
 jugcraft:basic_ceramic_lining,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/starter_workshop/fire_lining.json,,
 jugcraft:basic_circuit,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/circuit_assembly/basic_circuit.json | src/main/resources/data/jugcraft/recipe/jimtafacts_industry/chipset_red_basic.json | src/main/resources/data/jugcraft/recipe/starter_workshop/basic_circuit.json,,
 jugcraft:basil,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/basil.json | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/TallCropBlock.java,,
@@ -230,9 +236,11 @@ jugcraft:bat_in_a_jar,recipe_chain_reachable,,src/main/resources/data/jugcraft/r
 jugcraft:bat_pinata,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/bat_pinata.json,,
 jugcraft:bat_plush,loot_only,,,,src/main/resources/data/jugcraft/loot_table/gameplay/midway_prize.json
 jugcraft:bat_sweater,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/bat_sweater_dyed.json | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/KnittingNeedlesItem.java,,
+jugcraft:bat_table_runner,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/bat_table_runner.json,,
 jugcraft:bat_weathervane,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/bat_weathervane.json,,
 jugcraft:bat_wing_cookie,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/bat_wing_cookie.json,,
 jugcraft:bat_wings,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/bat_wings.json,,
+jugcraft:bat_wreath,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/bat_wreath.json,,
 jugcraft:battery_box,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/battery_box.json | src/main/resources/data/jugcraft/recipe/jimtafacts_industry/jimta_bat_box_restore.json,,
 jugcraft:battery_separator,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pressing/battery_separator.json,,
 jugcraft:bauxite,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/ore_bauxite.json
@@ -523,12 +531,15 @@ jugcraft:berserker_chestplate,deferred_acquisition_design,Deferred acquisition d
 jugcraft:berserker_helmet,deferred_acquisition_design,Deferred acquisition design: owner requested preview armor only on October 6; tools/gear.py ARMOR_TIERS records the still-unassigned recipe/drop choice.,,,
 jugcraft:berserker_leggings,deferred_acquisition_design,Deferred acquisition design: owner requested preview armor only on October 6; tools/gear.py ARMOR_TIERS records the still-unassigned recipe/drop choice.,,,
 jugcraft:best_costume_ribbon,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/JudgesTableBlockEntity.java
+jugcraft:beware_doormat,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/beware_doormat.json,,
 jugcraft:bio_generator,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/bio_generator.json | src/main/resources/data/jugcraft/recipe/expanded_bio_generator.json,,
 jugcraft:bioethanol_bucket,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/chemistry/PetroFluids.java,,
 jugcraft:biogas_cleaner,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/biogas_cleaner.json,,
 jugcraft:birch_cabinet,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/birch_cabinet.json,,
 jugcraft:birthday_cake,recipe_chain_reachable,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java,,
 jugcraft:birthday_cake_slice,recipe_chain_reachable,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/PieBlock.java,,
+jugcraft:bittersweet,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/bittersweet.json
+jugcraft:bittersweet_wreath,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/bittersweet_wreath.json,,
 jugcraft:bitumen,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/crushing/oil_sand.json,,
 jugcraft:black_alchemical_bag,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/black_alchemical_bag.json,,
 jugcraft:black_cat_figure,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/black_cat_figure.json,,
@@ -546,6 +557,7 @@ jugcraft:black_rose,natural_or_interaction_source,,,,src/main/resources/data/jug
 jugcraft:blackjack_table,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/blackjack_table.json,,
 jugcraft:blackstone_sarcophagus,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/blackstone_sarcophagus.json,,
 jugcraft:blank_stencil,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/blank_stencil.json,,
+jugcraft:blanket_ladder,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/blanket_ladder.json,,
 jugcraft:blast_door,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/blast_door.json,,
 jugcraft:blast_glass,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/blast_glass.json,,
 jugcraft:blastproof_concrete,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/blastproof_concrete.json,,
@@ -560,6 +572,8 @@ jugcraft:bloodthorn_chestplate,deferred_acquisition_design,Deferred acquisition 
 jugcraft:bloodthorn_helmet,deferred_acquisition_design,Deferred acquisition design: owner requested preview armor only on October 6; tools/gear.py ARMOR_TIERS records the still-unassigned recipe/drop choice.,,,
 jugcraft:bloodthorn_leggings,deferred_acquisition_design,Deferred acquisition design: owner requested preview armor only on October 6; tools/gear.py ARMOR_TIERS records the still-unassigned recipe/drop choice.,,,
 jugcraft:blue_alchemical_bag,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/blue_alchemical_bag.json,,
+jugcraft:blue_hubbard_squash,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/blue_hubbard_squash_seeds.json,,src/main/resources/data/jugcraft/worldgen/feature/blue_hubbard_squash.json
+jugcraft:blue_hubbard_squash_seeds,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/blue_hubbard_squash_seeds.json | src/main/resources/data/jugcraft/recipe/hydroponics/blue_hubbard_squash_seeds.json,,
 jugcraft:blue_plastic,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/blue_plastic.json,,
 jugcraft:blueberries,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/blueberry_seeds.json | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/TallCropBlock.java,,
 jugcraft:blueberry_jam,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/blueberry_jam.json,,
@@ -573,7 +587,7 @@ jugcraft:blueprint_table,recipe_chain_reachable,,src/main/resources/data/jugcraf
 jugcraft:bobbing_tub,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/bobbing_tub.json,,
 jugcraft:body_stone,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/body_stone.json,,
 jugcraft:bogfang,loot_only,,,,src/main/resources/data/jugcraft/loot_table/bosses/mire_hag.json | src/main/resources/data/jugcraft/loot_table/entities/mire_hag.json
-jugcraft:boiled_corn,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/boiled_corn.json,,
+jugcraft:boiled_corn,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pot_cooking/boiled_corn.json,,
 jugcraft:bonding_charm,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/bonding_charm.json,,
 jugcraft:bone_broth,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/bone_broth.json,,
 jugcraft:bone_pile,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/bone_pile.json,,
@@ -700,10 +714,12 @@ jugcraft:bullfrog,recipe_chain_reachable,,src/main/resources/data/jugcraft/recip
 jugcraft:bunker_bunk,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/bunker_bunk.json,,
 jugcraft:bunker_door,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/bunker_door.json,,
 jugcraft:bunker_lamp,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/bunker_lamp.json,,
-jugcraft:burnt_cake,recipe_chain_reachable,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java,,
+jugcraft:burnt_cake,recipe_chain_reachable,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java,,
 jugcraft:burnt_marshmallow,recipe_chain_reachable,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/MarshmallowStickItem.java,,
 jugcraft:burnt_pie,recipe_chain_reachable,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java,,
 jugcraft:burnt_sugar,recipe_chain_reachable,,tools/agriculture.py:CANDY/syrup | tools/agriculture.py:CANDY/cream,,
+jugcraft:butter,recipe_chain_reachable,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/ButterChurnBlock.java,,
+jugcraft:butter_churn,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/butter_churn.json,,
 jugcraft:butternut_squash,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/butternut_squash_seeds.json,,src/main/resources/data/jugcraft/worldgen/feature/butternut_squash.json
 jugcraft:butternut_squash_seeds,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/butternut_squash_seeds.json | src/main/resources/data/jugcraft/recipe/hydroponics/butternut_squash_seeds.json,,
 jugcraft:butternut_squash_soup,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/butternut_squash_soup.json,,
@@ -715,6 +731,7 @@ jugcraft:cabbage_seeds,chain_with_acquisition_evidence,,src/main/resources/data/
 jugcraft:cable_insulation,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/extrude_insulation.json | src/main/resources/data/jugcraft/recipe/chemical_reaction/mold_insulation.json | src/main/resources/data/jugcraft/recipe/film_insulation.json,,
 jugcraft:cable_tray,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/cable_tray.json,,
 jugcraft:cafe_chair,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/cafe_chair.json,,
+jugcraft:cafe_string_lights,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/cafe_string_lights.json,,
 jugcraft:cafe_table,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/cafe_table.json,,
 jugcraft:caged_ladder,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/caged_ladder.json,,
 jugcraft:caisson_pistol,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/caisson_pistol.json,,
@@ -725,7 +742,9 @@ jugcraft:candle_skull,recipe_chain_reachable,,src/main/resources/data/jugcraft/r
 jugcraft:candy_bag,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/candy_bag.json,,
 jugcraft:candy_bowl,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/candy_bowl.json,,
 jugcraft:candy_cache,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/candy_cache.json,,
-jugcraft:candy_corn,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/candy_corn.json | tools/agriculture.py:CANDY/syrup,,src/main/resources/data/jugcraft/loot_table/entities/costumed_mob_candy.json | src/main/resources/data/jugcraft/loot_table/entities/headless_horseman.json | src/main/resources/data/jugcraft/loot_table/gameplay/trick_or_treat.json
+jugcraft:candy_chute,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/candy_chute.json,,
+jugcraft:candy_corn,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/candy_corn.json | tools/agriculture.py:CANDY/syrup,,src/main/resources/data/jugcraft/loot_table/entities/costumed_mob_candy.json | src/main/resources/data/jugcraft/loot_table/entities/headless_horseman.json | src/main/resources/data/jugcraft/loot_table/gameplay/graveyard_rising.json | src/main/resources/data/jugcraft/loot_table/gameplay/trick_or_treat.json
+jugcraft:candy_corn_dispenser,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/candy_corn_dispenser.json,,
 jugcraft:candy_kettle,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/candy_kettle.json,,
 jugcraft:candy_tray,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/candy_tray.json,,
 jugcraft:canning_kettle,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/canning_kettle.json,,
@@ -733,9 +752,10 @@ jugcraft:cannon_shell,chain_with_acquisition_evidence,,src/main/resources/data/j
 jugcraft:capacitor_bank,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/capacitor_bank.json | src/main/resources/data/jugcraft/recipe/jimtafacts_industry/jimta_mfe_restore.json,,
 jugcraft:capacity_module,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/capacity_module.json,,
 jugcraft:captain_cutler_spawn_egg,intentional_noncraftable,Creative spawn egg; acquire creatures through world encounters.,,,
-jugcraft:caramel,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/caramel.json | src/main/resources/data/jugcraft/recipe/caramel_from_campfire_cooking.json | src/main/resources/data/jugcraft/recipe/caramel_from_smoking.json | tools/agriculture.py:CANDY/syrup,,src/main/resources/data/jugcraft/loot_table/entities/costumed_mob_candy.json | src/main/resources/data/jugcraft/loot_table/gameplay/trick_or_treat.json
+jugcraft:caramel,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/caramel.json | src/main/resources/data/jugcraft/recipe/caramel_from_campfire_cooking.json | src/main/resources/data/jugcraft/recipe/caramel_from_smoking.json | tools/agriculture.py:CANDY/syrup,,src/main/resources/data/jugcraft/loot_table/entities/costumed_mob_candy.json | src/main/resources/data/jugcraft/loot_table/gameplay/graveyard_rising.json | src/main/resources/data/jugcraft/loot_table/gameplay/trick_or_treat.json
 jugcraft:caramel_apple,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/caramel_apple.json,,src/main/resources/data/jugcraft/loot_table/gameplay/trick_or_treat.json
-jugcraft:caramel_popcorn,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/caramel_popcorn.json,,
+jugcraft:caramel_apple_stand,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/caramel_apple_stand.json,,
+jugcraft:caramel_popcorn,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/caramel_popcorn.json | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/PopcornWagonBlock.java,,
 jugcraft:carbon_anode,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pressing/battery_carbon_anode.json,,
 jugcraft:carbon_composite_panel,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/carbon_composite_panel.json | src/main/resources/data/jugcraft/recipe/jimtafacts_industry/advanced_alloy_panel.json | src/main/resources/data/jugcraft/recipe/jimtafacts_industry/carbon_composite_panel.json | src/main/resources/data/jugcraft/recipe/molded_composite_panel.json,,
 jugcraft:carbon_composite_panel_slab,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/carbon_composite_panel_slab.json,,
@@ -1324,7 +1344,10 @@ jugcraft:cemetery_lamp_post,recipe_chain_reachable,,src/main/resources/data/jugc
 jugcraft:ceramic_bearing_set,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/finish_ceramic_bearing_set.json,,
 jugcraft:ceramic_crucible,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/starter_workshop/fire_crucible.json,,
 jugcraft:ceramic_insulator,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/ceramic_insulator.json | src/main/resources/data/jugcraft/recipe/ceramics_placed_insulators.json | src/main/resources/data/jugcraft/recipe/starter_workshop/fire_insulators.json,,
+jugcraft:cerium_oxide,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/sands_rare_earth_separation.json,,
+jugcraft:cerium_polishing_head,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/sands_cerium_polishing_head.json,,
 jugcraft:chainsaw,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chainsaw.json,,
+jugcraft:chalkboard_sign,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/chalkboard_sign.json,,
 jugcraft:chanterelle,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/chanterelle.json
 jugcraft:charging_station,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/charging_station.json,,
 jugcraft:check_source,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/jimtafacts_reactor/isotope_check_source.json,,
@@ -1366,6 +1389,7 @@ jugcraft:chocolate_milkshake,recipe_chain_reachable,,src/main/resources/data/jug
 jugcraft:chocolate_pie,recipe_chain_reachable,,tools/agriculture.py:PIES/chocolate | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java,,
 jugcraft:chocolate_pie_slice,recipe_chain_reachable,,tools/agriculture.py:PIES/chocolate | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/PieBlock.java,,
 jugcraft:chompa_costume,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/chompa_costume.json,,
+jugcraft:chopping_block,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/chopping_block.json,,
 jugcraft:chromite,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chromite_from_chromite_block.json | src/main/resources/data/jugcraft/recipe/crushing/chromite_ore.json | src/main/resources/data/jugcraft/recipe/crushing/deepslate_chromite_ore.json,,
 jugcraft:chromite_block,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chromite_block.json,,
 jugcraft:chromite_concentrate,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/condition_chromite.json,,
@@ -1394,6 +1418,7 @@ jugcraft:clay_powder,chain_with_acquisition_evidence,,src/main/resources/data/ju
 jugcraft:clean_process_wafer,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/electronics_clean_wafer.json,,
 jugcraft:clear_sky_rocket,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/rocket_assembly/clear_sky_rocket.json,,
 jugcraft:clockwork_porter,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/clockwork_porter.json,,
+jugcraft:clockwork_raven,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/clockwork_raven.json,,
 jugcraft:cloud_seeding_rocket,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/rocket_assembly/cloud_seeding_rocket.json,,
 jugcraft:cloudburst_gun,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/cloudburst_gun.json,,
 jugcraft:clover,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/clover.json
@@ -1438,6 +1463,7 @@ jugcraft:colossal_skull,recipe_chain_reachable,,src/main/resources/data/jugcraft
 jugcraft:colossal_vertebra,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/colossal_vertebra.json,,
 jugcraft:columbarium,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/columbarium.json,,
 jugcraft:combined_cycle_power_plant,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/combined_cycle_power_plant.json,,
+jugcraft:comet_pistol,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/comet_pistol.json,,
 jugcraft:compact_monopole,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/compact_monopole.json,,
 jugcraft:companion_acorn,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/companion_acorn.json,,src/main/resources/data/jugcraft/loot_table/entities/companion_weevil.json
 jugcraft:companion_acorn_hat,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/companion_acorn_hat.json,,
@@ -1533,28 +1559,32 @@ jugcraft:copper_dust,chain_with_acquisition_evidence,,src/main/resources/data/ju
 jugcraft:copper_plate,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/jimtafacts_industry/blade_cut_copper.json | src/main/resources/data/jugcraft/recipe/jimtafacts_industry/recover_copper_casings.json | src/main/resources/data/jugcraft/recipe/jimtafacts_industry/split_dense_copper_plate.json | src/main/resources/data/jugcraft/recipe/pressing/copper_ingot.json | src/main/resources/data/jugcraft/recipe/starter_workshop/copper_plate.json,,
 jugcraft:copper_wire,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/jimtafacts_industry/cut_copper_wire.json | src/main/resources/data/jugcraft/recipe/starter_workshop/copper_wire.json | src/main/resources/data/jugcraft/recipe/wire_drawing/copper_ingot.json,,
 jugcraft:corelance,loot_only,,,,src/main/resources/data/jugcraft/loot_table/bosses/cydonian_sentinel.json | src/main/resources/data/jugcraft/loot_table/entities/cydonian_sentinel.json
-jugcraft:corn,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/corn_from_crate.json | src/main/resources/data/jugcraft/recipe/hydroponics/corn_kernels.json | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/TallCropBlock.java,,
-jugcraft:corn_crate,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/corn_crate.json,,
-jugcraft:corn_dog,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/corn_dog.json,,
-jugcraft:corn_kernel_bag,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/corn_kernel_bag.json,,
-jugcraft:corn_kernels,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/corn_kernels.json | src/main/resources/data/jugcraft/recipe/corn_kernels_from_bag.json | src/main/resources/data/jugcraft/recipe/hydroponics/corn_kernels.json,,
+jugcraft:corn,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/corn_from_crate.json | src/main/resources/data/jugcraft/recipe/hydroponics/corn_kernels.json | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/TallCropBlock.java,,
+jugcraft:corn_crate,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/corn_crate.json,,
+jugcraft:corn_crib,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/corn_crib.json,,
+jugcraft:corn_dog,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/corn_dog.json,,
+jugcraft:corn_dolly,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/corn_dolly.json,,
+jugcraft:corn_kernel_bag,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/corn_kernel_bag.json,,
+jugcraft:corn_kernels,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/corn_kernels.json | src/main/resources/data/jugcraft/recipe/corn_kernels_from_bag.json | src/main/resources/data/jugcraft/recipe/hydroponics/corn_kernels.json,,
 jugcraft:corn_maze_gate,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/corn_maze_gate.json,,
 jugcraft:corn_plush,loot_only,,,,src/main/resources/data/jugcraft/loot_table/gameplay/midway_prize.json
-jugcraft:corn_popsicle,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/corn_popsicle.json,,
+jugcraft:corn_popsicle,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/corn_popsicle.json,,
 jugcraft:corn_relish,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/corn_relish.json,,
-jugcraft:corn_shock,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/corn_shock.json,,
+jugcraft:corn_shock,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/corn_shock.json,,
 jugcraft:corn_soup,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/corn_soup.json,,
-jugcraft:corn_stalks,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/TallCropBlock.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/TallCropBlock.java,,
-jugcraft:cornbread,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/cornbread.json | src/main/resources/data/jugcraft/recipe/cornbread_from_campfire_cooking.json | src/main/resources/data/jugcraft/recipe/cornbread_from_smoking.json,,
-jugcraft:cornbread_batter,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/cornbread_batter.json,,
+jugcraft:corn_stalks,recipe_chain_reachable,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/TallCropBlock.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/TallCropBlock.java,,
+jugcraft:cornbread,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/cornbread.json | src/main/resources/data/jugcraft/recipe/cornbread_from_campfire_cooking.json | src/main/resources/data/jugcraft/recipe/cornbread_from_smoking.json,,
+jugcraft:cornbread_batter,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/cornbread_batter.json,,
 jugcraft:cornbread_stuffing,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/cornbread_stuffing.json,,
-jugcraft:corncob,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/JugcraftAgriculture.java,,
+jugcraft:corncob,recipe_chain_reachable,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/JugcraftAgriculture.java,,
 jugcraft:corrugated_iron,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/corrugated_iron.json,,
 jugcraft:corrugated_iron_slab,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/corrugated_iron_slab.json,,
 jugcraft:corrugated_iron_stairs,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/corrugated_iron_stairs.json,,
 jugcraft:costume_runway,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/costume_runway.json,,
 jugcraft:costume_trunk,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/costume_trunk.json,,
 jugcraft:cotton,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/cotton_seeds.json,,
+jugcraft:cotton_candy,recipe_chain_reachable,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/CottonCandyCartBlock.java,,
+jugcraft:cotton_candy_cart,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/cotton_candy_cart.json,,
 jugcraft:cotton_seeds,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/cotton_seeds.json | src/main/resources/data/jugcraft/recipe/sifting/coarse_dirt.json,,
 jugcraft:coupler,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/coupler.json,,
 jugcraft:courier_post,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/courier_post.json,,
@@ -1854,10 +1884,11 @@ jugcraft:cranberry_pie_slice,chain_with_acquisition_evidence,,tools/agriculture.
 jugcraft:cranberry_preserves,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/cranberry_preserves.json,,
 jugcraft:cranberry_sauce,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/cranberry_sauce.json,,
 jugcraft:craps_table,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/craps_table.json,,
+jugcraft:crashed_witch,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/crashed_witch.json,,
 jugcraft:crawling_hand,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/crawling_hand.json,,
 jugcraft:cream_caramel,recipe_chain_reachable,,tools/agriculture.py:CANDY/cream,,
-jugcraft:creamed_corn,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/creamed_corn.json,,
-jugcraft:creamy_corn_drink,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/creamy_corn_drink.json,,
+jugcraft:creamed_corn,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pot_cooking/creamed_corn.json,,
+jugcraft:creamy_corn_drink,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pot_cooking/creamy_corn_drink.json,,
 jugcraft:creative_drone,intentional_noncraftable,Creative/debug entry; any internal transformation is not a survival unlock.,,,
 jugcraft:creative_energy_cell,intentional_noncraftable,Creative/debug entry; any internal transformation is not a survival unlock.,,,
 jugcraft:creative_supply_crate,intentional_noncraftable,Creative/debug entry; any internal transformation is not a survival unlock.,,,
@@ -1890,6 +1921,7 @@ jugcraft:cucumber,chain_with_acquisition_evidence,,src/main/resources/data/jugcr
 jugcraft:cucumber_seeds,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/cucumber_seeds.json | src/main/resources/data/jugcraft/recipe/hydroponics/cucumber_seeds.json,,
 jugcraft:culverin,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/culverin.json,,
 jugcraft:curiosity_cabinet,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/curiosity_cabinet.json,,
+jugcraft:cursed_mirror,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/cursed_mirror.json,,
 jugcraft:cursed_spindle,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/cursed_spindle.json | src/main/resources/data/jugcraft/recipe/cursed_spindle_from_silk.json,,
 jugcraft:cutting_board,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/cutting_board.json,,
 jugcraft:cyan_alchemical_bag,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/cyan_alchemical_bag.json,,
@@ -1921,6 +1953,7 @@ jugcraft:dark_matter_shears,recipe_chain_reachable,,src/main/resources/data/jugc
 jugcraft:dark_matter_shovel,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/dark_matter_shovel.json,,
 jugcraft:dark_matter_sword,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/dark_matter_sword.json,,
 jugcraft:dark_oak_cabinet,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/dark_oak_cabinet.json,,
+jugcraft:dart,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/dart.json,,
 jugcraft:data_cable,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/data_cable.json,,
 jugcraft:date_cluster,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/date_palm.json
 jugcraft:dates,natural_or_interaction_source,,,,
@@ -1936,7 +1969,7 @@ jugcraft:dc_switchboard,chain_with_acquisition_evidence,,src/main/resources/data
 jugcraft:dead_fence,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/dead_fence.json,,
 jugcraft:dead_fence_gate,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/dead_fence_gate.json,,
 jugcraft:dead_hollow_tree,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/dead_hollow_tree.json,,
-jugcraft:dead_log,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/sagebrush_sapling.json,,src/main/resources/data/jugcraft/worldgen/feature/creeping_ivy.json | src/main/resources/data/jugcraft/worldgen/feature/dead_snag.json | src/main/resources/data/jugcraft/worldgen/feature/dead_snag_bent.json | src/main/resources/data/jugcraft/worldgen/feature/dead_tree.json | src/main/resources/data/jugcraft/worldgen/feature/fallen_dead_tree.json | src/main/resources/data/jugcraft/worldgen/feature/sagebrush.json
+jugcraft:dead_log,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/sagebrush_sapling.json,,src/main/resources/data/jugcraft/worldgen/feature/bittersweet.json | src/main/resources/data/jugcraft/worldgen/feature/creeping_ivy.json | src/main/resources/data/jugcraft/worldgen/feature/dead_snag.json | src/main/resources/data/jugcraft/worldgen/feature/dead_snag_bent.json | src/main/resources/data/jugcraft/worldgen/feature/dead_tree.json | src/main/resources/data/jugcraft/worldgen/feature/fallen_dead_tree.json | src/main/resources/data/jugcraft/worldgen/feature/sagebrush.json
 jugcraft:dead_mans_fingers,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/dead_mans_fingers.json
 jugcraft:dead_planks,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/dead_planks.json | src/main/resources/data/jugcraft/recipe/sawing/dead_logs.json,,
 jugcraft:dead_slab,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/dead_slab.json,,
@@ -2028,6 +2061,7 @@ jugcraft:dreamglass,natural_or_interaction_source,,,,src/main/java/io/github/jim
 jugcraft:dried_bottle_gourd,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/dried_bottle_gourd.json | src/main/resources/data/jugcraft/recipe/dried_bottle_gourd_from_campfire_cooking.json | src/main/resources/data/jugcraft/recipe/dried_bottle_gourd_from_smoking.json,,
 jugcraft:dried_chili,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/dried_chili.json | src/main/resources/data/jugcraft/recipe/dried_chili_from_campfire_cooking.json | src/main/resources/data/jugcraft/recipe/dried_chili_from_smoking.json,,
 jugcraft:dried_herbs,natural_or_interaction_source,,,,
+jugcraft:dried_sunflower,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/dried_sunflower.json,,src/main/resources/data/jugcraft/worldgen/feature/dried_sunflower.json
 jugcraft:drone_depot_terminal,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/drone_depot_terminal.json,,
 jugcraft:drone_motor,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/drone_motor.json,,
 jugcraft:drone_t1,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/drone_t1.json,,
@@ -2046,6 +2080,7 @@ jugcraft:drowned_diver_helmet,natural_or_interaction_source,,,,src/main/java/io/
 jugcraft:dry_lead_cell,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/battery_dry_lead_cell.json,,
 jugcraft:dry_magnesium_chloride,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/dry_magnesium_chloride.json | src/main/resources/data/jugcraft/recipe/electrolysis/reduce_and_clean_titanium_sponge.json,,
 jugcraft:dry_storage_cask,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/dry_storage_cask.json,,
+jugcraft:drying_rack,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/drying_rack.json,,
 jugcraft:duckboard,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/duckboard.json,,
 jugcraft:duckweed,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/duckweed.json
 jugcraft:ducted_fan,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/ducted_fan.json,,
@@ -2214,7 +2249,7 @@ jugcraft:edg_generator_panel,chain_with_acquisition_evidence,,src/main/resources
 jugcraft:edg_load_sequencer,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/edg_load_sequencer.json,,
 jugcraft:edg_protection_panel,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/edg_protection_panel.json,,
 jugcraft:edg_voltage_regulator,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/edg_voltage_regulator.json,,
-jugcraft:efficiency_upgrade,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/ceramics_efficiency_upgrade.json | src/main/resources/data/jugcraft/recipe/efficiency_upgrade.json | src/main/resources/data/jugcraft/recipe/electronics_efficiency.json,,
+jugcraft:efficiency_upgrade,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/ceramics_efficiency_upgrade.json | src/main/resources/data/jugcraft/recipe/efficiency_upgrade.json | src/main/resources/data/jugcraft/recipe/electronics_efficiency.json | src/main/resources/data/jugcraft/recipe/sands_efficiency_upgrade.json,,
 jugcraft:effigy_ashes,recipe_chain_reachable,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HarvestEffigyBlockEntity.java,,
 jugcraft:egg_sac_cluster,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/egg_sac_cluster.json,,
 jugcraft:egg_sandwich,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/egg_sandwich.json,,
@@ -2245,6 +2280,7 @@ jugcraft:enriched_uranium_cylinder,chain_with_acquisition_evidence,,src/main/res
 jugcraft:epoxy_floor,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/epoxy_floor.json,,
 jugcraft:epr_reactor_vessel,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/epr_reactor_vessel.json,,
 jugcraft:equipment_rack,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/equipment_rack.json,,
+jugcraft:ermine_rifle,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/ermine_rifle.json,,
 jugcraft:esf_control_board,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/esf_control_board.json,,
 jugcraft:etched_process_wafer,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/electronics_etch_wafer.json,,
 jugcraft:ethanol_broth_bucket,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/chemistry/PetroFluids.java,,
@@ -2270,6 +2306,8 @@ jugcraft:exosuit_leggings,chain_with_acquisition_evidence,,src/main/resources/da
 jugcraft:exposed_process_wafer,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/lithography/electronics_expose_wafer.json,,
 jugcraft:extended_barrel,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/extended_barrel.json,,
 jugcraft:extended_magazine,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/extended_magazine.json,,
+jugcraft:eyeball_jelly,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/eyeball_jelly.json,,
+jugcraft:eyeball_jelly_mould,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/eyeball_jelly_mould.json,,
 jugcraft:eyewash_station,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/eyewash_station.json,,
 jugcraft:fable_blowgun,loot_only,,,,src/main/resources/data/jugcraft/loot_table/entities/fable_jinx.json
 jugcraft:fable_bullfrog_spawn_egg,intentional_noncraftable,Creative spawn egg; acquire creatures through world encounters.,,,
@@ -2331,6 +2369,7 @@ jugcraft:fauna_turkey_spawn_egg,intentional_noncraftable,Creative spawn egg; acq
 jugcraft:fauna_venison_cooked,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/survival_completion/fauna_venison_cooked_campfire_cooking.json | src/main/resources/data/jugcraft/recipe/survival_completion/fauna_venison_cooked_smelting.json | src/main/resources/data/jugcraft/recipe/survival_completion/fauna_venison_cooked_smoking.json,,
 jugcraft:fauna_venison_raw,loot_only,,,,src/main/resources/data/jugcraft/loot_table/entities/fauna_deer.json
 jugcraft:feast_table,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/feast_table.json,,
+jugcraft:feed_trough,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/feed_trough.json,,
 jugcraft:feeder_conduit,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/feeder_conduit.json,,
 jugcraft:feeder_conduit_base,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/feeder_conduit_base.json,,
 jugcraft:feeder_conduit_ceiling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/feeder_conduit_ceiling.json,,
@@ -2376,13 +2415,14 @@ jugcraft:fire_extinguisher,recipe_chain_reachable,,src/main/resources/data/jugcr
 jugcraft:fire_focus,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/fire_focus.json,,
 jugcraft:fired_alumina_blank,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/fire_alumina.json,,
 jugcraft:fired_porcelain_blank,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/fire_porcelain.json,,
-jugcraft:fired_zirconia_blank,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/fire_zirconia.json,,
+jugcraft:fired_zirconia_blank,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/fire_zirconia.json | src/main/resources/data/jugcraft/recipe/chemical_reaction/sands_fire_zirconia_blank.json,,
 jugcraft:firedrake,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/firedrake.json,,
+jugcraft:firewood_rack,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/firewood_rack.json,,
 jugcraft:first_aid_kit,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/first_aid_kit.json,,
-jugcraft:first_prize_ribbon,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HarvestScaleBlockEntity.java
+jugcraft:first_prize_ribbon,recipe_chain_reachable,,,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HarvestScaleBlockEntity.java
 jugcraft:fish_stew,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/fish_stew.json,,
 jugcraft:fitting_mold,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/ceramics_fitting_mold.json | src/main/resources/data/jugcraft/recipe/fitting_mold.json,,
-jugcraft:fizz_rocks,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pot_cooking/fizz_rocks.json | src/main/resources/data/jugcraft/villager_trade/halloween_peddler/emerald_fizz_rocks.json,,src/main/resources/data/jugcraft/loot_table/entities/costumed_mob_candy.json
+jugcraft:fizz_rocks,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pot_cooking/fizz_rocks.json | src/main/resources/data/jugcraft/villager_trade/halloween_peddler/emerald_fizz_rocks.json,,src/main/resources/data/jugcraft/loot_table/entities/costumed_mob_candy.json | src/main/resources/data/jugcraft/loot_table/gameplay/graveyard_rising.json
 jugcraft:flak_gun,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/flak_gun.json,,
 jugcraft:flak_shell,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/flak_shell.json,,
 jugcraft:flame_arrester,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/flame_arrester.json,,
@@ -2402,6 +2442,7 @@ jugcraft:floating_candle,recipe_chain_reachable,,src/main/resources/data/jugcraf
 jugcraft:floating_table_setting,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/floating_table_setting.json,,
 jugcraft:floating_witch_hat,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/floating_witch_hat.json,,
 jugcraft:floor_candelabrum,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/floor_candelabrum.json,,
+jugcraft:flour,recipe_chain_reachable,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/QuernBlock.java,,
 jugcraft:flow_battery,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/flow_battery.json,,
 jugcraft:flow_cell_stack,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/battery_flow_cell_stack.json,,
 jugcraft:flow_stack_module,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/battery_flow_stack_module.json,,
@@ -2421,6 +2462,7 @@ jugcraft:fluorophosphate_precursor,chain_with_acquisition_evidence,,src/main/res
 jugcraft:fluted_marble_column,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/fluted_marble_column.json,,
 jugcraft:fly_agaric,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/fly_agaric.json
 jugcraft:flying_broomstick,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/flying_broomstick.json,,
+jugcraft:flying_crank_ghost,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/flying_crank_ghost.json,,
 jugcraft:flying_eyeball,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/flying_eyeball.json,,
 jugcraft:flying_ointment,recipe_chain_reachable,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/BubblingCauldronBlock.java,,
 jugcraft:flywheel,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/flywheel.json,,
@@ -2472,13 +2514,18 @@ jugcraft:furniture_material,recipe_chain_reachable,,src/main/resources/data/jugc
 jugcraft:galefeather,loot_only,,,,src/main/resources/data/jugcraft/loot_table/bosses/storm_roc.json
 jugcraft:galena_concentrate,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/battery_galena.json,,
 jugcraft:gallant_rifle,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/gallant_rifle.json,,
+jugcraft:galvanized_tub_planter,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/galvanized_tub_planter.json,,
 jugcraft:garden_herb_soup,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/garden_herb_soup.json,,
 jugcraft:garden_salad,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/garden_salad.json,,
 jugcraft:gargoyle,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/gargoyle.json,,
+jugcraft:gargoyle_knocker,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/gargoyle_knocker.json,,
 jugcraft:gargoyle_rainspout,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/gargoyle_rainspout.json,,
 jugcraft:gargoyle_sentinel,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/gargoyle_sentinel.json,,
 jugcraft:garlic,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/garlic.json | tools/agriculture.py:CROPS/garlic,,
+jugcraft:garnet_abrasive_head,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/sands_garnet_abrasive_head.json,,
+jugcraft:garnet_grit,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pulverizing/sands_garnet_grit.json,,
 jugcraft:garnet_sand,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/ore_garnet_sand.json
+jugcraft:garnet_sanding_block,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/sands_garnet_sanding_block.json,,
 jugcraft:garrison_rifle,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/garrison_rifle.json,,
 jugcraft:gas_burning_generator,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/gas_burning_generator.json,,
 jugcraft:gas_centrifuge_cascade,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/gas_centrifuge_cascade.json,,
@@ -2500,20 +2547,30 @@ jugcraft:gem_helmet,recipe_chain_reachable,,src/main/resources/data/jugcraft/rec
 jugcraft:gem_leggings,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/gem_leggings.json,,
 jugcraft:gem_of_eternal_density,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/gem_of_eternal_density.json,,
 jugcraft:general_chip_pattern,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/electronics_pattern.json,,
+jugcraft:geode_cutter,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/geode_cutter.json,,
 jugcraft:geothermal_generator,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/geothermal_generator.json | src/main/resources/data/jugcraft/recipe/jimtafacts_industry/jimta_geothermal_generator_restore.json,,
 jugcraft:ghost_bell,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/ghost_bell.json,,
 jugcraft:ghost_fern,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/ghost_fern.json
 jugcraft:ghost_firework,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/ghost_firework_1.json | src/main/resources/data/jugcraft/recipe/ghost_firework_1_twinkle.json | src/main/resources/data/jugcraft/recipe/ghost_firework_2.json | src/main/resources/data/jugcraft/recipe/ghost_firework_2_twinkle.json | src/main/resources/data/jugcraft/recipe/ghost_firework_3.json | src/main/resources/data/jugcraft/recipe/ghost_firework_3_twinkle.json,,
+jugcraft:ghost_meringue,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/ghost_meringue.json,,
+jugcraft:ghost_meringue_platter,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/ghost_meringue_platter.json,,
 jugcraft:ghost_pipe,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/ghost_pipe.json
 jugcraft:ghost_plush,loot_only,,,,src/main/resources/data/jugcraft/loot_table/gameplay/midway_prize.json
 jugcraft:ghost_sheet,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/ghost_sheet.json | src/main/resources/data/jugcraft/villager_trade/halloween_peddler/emerald_ghost_sheet.json,,
-jugcraft:ghost_taffy,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pot_cooking/ghost_taffy.json | src/main/resources/data/jugcraft/villager_trade/halloween_peddler/emerald_ghost_taffy.json,,src/main/resources/data/jugcraft/loot_table/entities/costumed_mob_candy.json
+jugcraft:ghost_taffy,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pot_cooking/ghost_taffy.json | src/main/resources/data/jugcraft/villager_trade/halloween_peddler/emerald_ghost_taffy.json,,src/main/resources/data/jugcraft/loot_table/entities/costumed_mob_candy.json | src/main/resources/data/jugcraft/loot_table/gameplay/graveyard_rising.json
+jugcraft:ghost_train,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/ghost_train.json,,
 jugcraft:giant_beating_heart,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/giant_beating_heart.json,,
 jugcraft:giant_bone_hand,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/giant_bone_hand.json,,
+jugcraft:giant_cabbage,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/giant_cabbage.json,,
 jugcraft:giant_candy,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/giant_candy.json,,
+jugcraft:giant_carrot,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/giant_carrot.json,,
+jugcraft:giant_cornucopia,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/giant_cornucopia.json,,
 jugcraft:giant_fake_spider,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/giant_fake_spider.json,,
+jugcraft:giant_marrow,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/giant_marrow.json,,
 jugcraft:giant_pumpkin,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/GiantPumpkinVineBlock.java
 jugcraft:giant_pumpkin_seeds,recipe_chain_reachable,,src/main/resources/data/jugcraft/villager_trade/halloween_peddler/emerald_giant_pumpkin_seeds.json,,src/main/resources/data/jugcraft/loot_table/gameplay/chop_giant_pumpkin.json | src/main/resources/data/jugcraft/loot_table/gameplay/hollow_giant_pumpkin.json | src/main/resources/data/jugcraft/loot_table/gameplay/scoop_pumpkin.json
+jugcraft:giant_turnip,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/giant_turnip.json,,
+jugcraft:giant_warty_gourd,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/giant_warty_gourd.json,,
 jugcraft:giants_draught,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/BubblingCauldronBlock.java,,
 jugcraft:gilded_halberd,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/gilded_halberd.json,,
 jugcraft:gilded_longsword,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/gilded_longsword.json,,
@@ -2537,7 +2594,7 @@ jugcraft:glimmerbloom,natural_or_interaction_source,,,,src/main/resources/data/j
 jugcraft:gloamcap,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/gloamcap.json,,
 jugcraft:glow_berry_custard,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pot_cooking/glow_berry_custard.json,,
 jugcraft:glow_berry_jelly,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pot_cooking/glow_berry_jelly.json,,
-jugcraft:glow_gum,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pot_cooking/glow_gum.json | src/main/resources/data/jugcraft/villager_trade/halloween_peddler/emerald_glow_gum.json,,src/main/resources/data/jugcraft/loot_table/entities/costumed_mob_candy.json
+jugcraft:glow_gum,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pot_cooking/glow_gum.json | src/main/resources/data/jugcraft/villager_trade/halloween_peddler/emerald_glow_gum.json,,src/main/resources/data/jugcraft/loot_table/entities/costumed_mob_candy.json | src/main/resources/data/jugcraft/loot_table/gameplay/graveyard_rising.json
 jugcraft:glow_paint,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/glow_paint.json,,
 jugcraft:glowcap,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/glowcap.json | src/main/resources/data/jugcraft/worldgen/feature/grotto_mud.json | src/main/resources/data/jugcraft/worldgen/feature/ground_ashfall_wastes.json | src/main/resources/data/jugcraft/worldgen/feature/ground_chorus_reef.json | src/main/resources/data/jugcraft/worldgen/feature/ground_ender_wilds.json | src/main/resources/data/jugcraft/worldgen/feature/ground_frost_rift.json | src/main/resources/data/jugcraft/worldgen/feature/ground_fungal_thicket.json | src/main/resources/data/jugcraft/worldgen/feature/ground_magma_fields.json | src/main/resources/data/jugcraft/worldgen/feature/ground_marrow_heap.json | src/main/resources/data/jugcraft/worldgen/feature/ground_outer_flats.json | src/main/resources/data/jugcraft/worldgen/feature/ground_quartz_rift.json | src/main/resources/data/jugcraft/worldgen/feature/ground_rotted_expanse.json | src/main/resources/data/jugcraft/worldgen/feature/ground_withered_hollow.json
 jugcraft:glowcap_block,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/FungalGrowthFeature.java
@@ -2546,9 +2603,12 @@ jugcraft:glucose_syrup,chain_with_acquisition_evidence,,src/main/resources/data/
 jugcraft:gold_dust,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/jimtafacts_industry/centrifuge_gold.json | src/main/resources/data/jugcraft/recipe/jimtafacts_industry/centrifuge_iron.json | src/main/resources/data/jugcraft/recipe/jimtafacts_industry/combine_gold_dust.json | src/main/resources/data/jugcraft/recipe/pulverizing/copper_ore.json | src/main/resources/data/jugcraft/recipe/pulverizing/deepslate_copper_ore.json | src/main/resources/data/jugcraft/recipe/pulverizing/deepslate_gold_ore.json | src/main/resources/data/jugcraft/recipe/pulverizing/gold_ingot.json | src/main/resources/data/jugcraft/recipe/pulverizing/gold_ore.json | src/main/resources/data/jugcraft/recipe/pulverizing/raw_gold.json | src/main/resources/data/jugcraft/recipe/pulverizing/washed_copper_ore.json | src/main/resources/data/jugcraft/recipe/pulverizing/washed_gold_ore.json,,
 jugcraft:gold_paxel,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/gold_paxel.json,,
 jugcraft:goldbristle_carbine,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/goldbristle_carbine.json,,
+jugcraft:golden_apple_crate,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/golden_apple_crate.json,,
 jugcraft:golden_knife,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/golden_knife.json,,
 jugcraft:golden_thimble,loot_only,,,,src/main/resources/data/jugcraft/loot_table/entities/tatterlace.json
 jugcraft:goldenrod,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/goldenrod.json
+jugcraft:goodie_bag,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/goodie_bag.json,,
+jugcraft:goodie_bag_tree,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/goodie_bag_tree.json,,
 jugcraft:gorse_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/gorse.json
 jugcraft:gorse_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/gorse_sapling.json,,
 jugcraft:goshawk_revolver,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/goshawk_revolver.json,,
@@ -2557,6 +2617,7 @@ jugcraft:gothic_headstone,recipe_chain_reachable,,src/main/resources/data/jugcra
 jugcraft:gourd_birdhouse,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/gourd_birdhouse.json,,
 jugcraft:gourd_canteen,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/gourd_canteen.json,,
 jugcraft:grain_mash_bucket,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/chemistry/PetroFluids.java,,
+jugcraft:grain_sack,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/grain_sack.json,,
 jugcraft:grand_mortar,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/grand_mortar.json,,
 jugcraft:grand_obelisk,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/grand_obelisk.json,,
 jugcraft:grandfather_clock,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/grandfather_clock.json,,
@@ -2574,6 +2635,7 @@ jugcraft:gray_alchemical_bag,recipe_chain_reachable,,src/main/resources/data/jug
 jugcraft:gray_plastic,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/gray_plastic.json,,
 jugcraft:great_shell,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/great_shell.json,,
 jugcraft:green_alchemical_bag,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/green_alchemical_bag.json,,
+jugcraft:green_apple_crate,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/green_apple_crate.json,,
 jugcraft:green_plastic,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/green_plastic.json,,
 jugcraft:green_salad,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/green_salad.json,,
 jugcraft:grenade,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/grenade.json | src/main/resources/data/jugcraft/recipe/grenade_from_ammonium_nitrate.json,,src/main/resources/data/jugcraft/loot_table/chests/raider_camp.json
@@ -2649,8 +2711,10 @@ jugcraft:hagmoss,loot_only,,,,src/main/resources/data/jugcraft/loot_table/entiti
 jugcraft:hags_eye,loot_only,,,,src/main/resources/data/jugcraft/loot_table/entities/mire_hag.json
 jugcraft:hags_shawl,loot_only,,,,src/main/resources/data/jugcraft/loot_table/entities/mire_hag.json
 jugcraft:hagthorn,loot_only,,,,src/main/resources/data/jugcraft/loot_table/bosses/mire_hag.json | src/main/resources/data/jugcraft/loot_table/entities/mire_hag.json
+jugcraft:half_barrel_planter,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/half_barrel_planter.json,,
 jugcraft:half_crown_revolver,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/half_crown_revolver.json,,
 jugcraft:half_tatami_mat,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/half_tatami_mat.json,,
+jugcraft:halibut_gun,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/halibut_gun.json,,
 jugcraft:halloween_bonfire,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/halloween_bonfire.json,,
 jugcraft:hallowreap,loot_only,,,,src/main/resources/data/jugcraft/loot_table/bosses/pumpkin_king.json | src/main/resources/data/jugcraft/loot_table/entities/pumpkin_king.json
 jugcraft:ham,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/ham.json,,
@@ -2671,6 +2735,8 @@ jugcraft:hanging_witchlight,recipe_chain_reachable,,src/main/resources/data/jugc
 jugcraft:hard_candy,recipe_chain_reachable,,tools/agriculture.py:CANDY/syrup,,
 jugcraft:harrow,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/harrow.json,,
 jugcraft:harvest_balloon,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/harvest_balloon.json,,
+jugcraft:harvest_bell,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/harvest_bell.json,,
+jugcraft:harvest_bunting,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/harvest_bunting.json,,
 jugcraft:harvest_crown,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/harvest_crown.json,,
 jugcraft:harvest_effigy,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/harvest_effigy.json,,
 jugcraft:harvest_goddess_band,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/harvest_goddess_band.json,,
@@ -2679,15 +2745,20 @@ jugcraft:harvest_moon_lamp,recipe_chain_reachable,,src/main/resources/data/jugcr
 jugcraft:harvest_scale,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/harvest_scale.json,,
 jugcraft:harvest_stew,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/harvest_stew.json,,
 jugcraft:haunted_archway,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/haunted_archway.json,,
+jugcraft:haunted_carousel,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/haunted_carousel.json,,
 jugcraft:haunted_chandelier,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/haunted_chandelier.json,,
 jugcraft:haunted_dining_chair,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/haunted_dining_chair.json,,
 jugcraft:haunted_hayride,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/haunted_hayride.json,,
+jugcraft:haunted_mailbox,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/haunted_mailbox.json,,
 jugcraft:haunted_portrait,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/haunted_portrait.json,,
 jugcraft:haw_jelly,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/haw_jelly.json,,
+jugcraft:hawker_rifle,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hawker_rifle.json,,
 jugcraft:haws,chain_with_acquisition_evidence,,tools/agriculture.py:TREES/hawthorn,,
 jugcraft:hawthorn_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/hawthorn.json | src/main/resources/data/jugcraft/worldgen/feature/hawthorn_bush.json
 jugcraft:hawthorn_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/hawthorn_sapling.json,,
 jugcraft:hay_bale_seat,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/hay_bale_seat.json,,
+jugcraft:hay_pulley,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/hay_pulley.json,,
+jugcraft:hay_wagon,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/hay_wagon.json,,
 jugcraft:haymaker,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/haymaker.json,,
 jugcraft:hazard_plating,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hazard_plating.json,,
 jugcraft:hazard_plating_slab,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hazard_plating_slab.json,,
@@ -2747,6 +2818,10 @@ jugcraft:herbal_witch_pants,recipe_chain_reachable,,src/main/resources/data/jugc
 jugcraft:herbal_witch_robe,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/herbal_witch_robe.json,,
 jugcraft:herbal_yellow_cloth,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/herbal_yellow_cloth.json,,
 jugcraft:hermit_rifle,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/hermit_rifle.json,,
+jugcraft:hessian_sabre,loot_only,,,,src/main/resources/data/jugcraft/loot_table/bosses/hessian_horseman.json | src/main/resources/data/jugcraft/loot_table/entities/hessian_horseman.json
+jugcraft:hessians_bridle,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/hessians_bridle.json,,
+jugcraft:hessians_spur,loot_only,,,,src/main/resources/data/jugcraft/loot_table/entities/hessian_horseman.json
+jugcraft:hessians_tricorn,loot_only,,,,src/main/resources/data/jugcraft/loot_table/entities/hessian_horseman.json
 jugcraft:hibiscus,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/hibiscus.json
 jugcraft:high_bay_light,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/high_bay_light.json,,
 jugcraft:high_covalence_dust,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/high_covalence_dust.json,,
@@ -2754,11 +2829,13 @@ jugcraft:high_pressure_extractor,chain_with_acquisition_evidence,,src/main/resou
 jugcraft:high_purity_boule,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/arc_smelting/electronics_pull_boule.json,,
 jugcraft:high_purity_silicon,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/electronics_purify_silicon.json,,
 jugcraft:high_striker,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/high_striker.json,,
+jugcraft:highball_repeater,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/highball_repeater.json,,
 jugcraft:highball_rifle,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/highball_rifle.json,,
 jugcraft:highwayman,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/highwayman.json,,
 jugcraft:hinterland_rifle,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hinterland_rifle.json,,
 jugcraft:holler_carbine,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/holler_carbine.json,,
 jugcraft:holler_pistol,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/holler_pistol.json,,
+jugcraft:hollowflail,loot_only,,,,src/main/resources/data/jugcraft/loot_table/bosses/hessian_horseman.json | src/main/resources/data/jugcraft/loot_table/entities/hessian_horseman.json
 jugcraft:holly_fence,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/holly_fence.json,,
 jugcraft:holly_fence_gate,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/holly_fence_gate.json,,
 jugcraft:holly_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/holly.json
@@ -2777,7 +2854,7 @@ jugcraft:honey_glazed_ham,recipe_chain_reachable,,src/main/resources/data/jugcra
 jugcraft:horned_skull_cauldron,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/horned_skull_cauldron.json | src/main/resources/data/jugcraft/recipe/horned_skull_cauldron_from_bones.json,,
 jugcraft:horse_feed,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/horse_feed.json,,
 jugcraft:horseman_cloak,loot_only,,,,src/main/resources/data/jugcraft/loot_table/entities/headless_horseman.json
-jugcraft:horseman_lantern,loot_only,,,,src/main/resources/data/jugcraft/loot_table/entities/headless_horseman.json
+jugcraft:horseman_lantern,loot_only,,,,src/main/resources/data/jugcraft/loot_table/entities/headless_horseman.json | src/main/resources/data/jugcraft/loot_table/entities/hessian_horseman.json
 jugcraft:hose_extrusion_die,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/ceramics_hose_extrusion_die.json | src/main/resources/data/jugcraft/recipe/hose_extrusion_die.json,,
 jugcraft:hose_mold,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/ceramics_hose_mold.json | src/main/resources/data/jugcraft/recipe/hose_mold.json,,
 jugcraft:hot_cocoa,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pot_cooking/hot_cocoa.json,,
@@ -3276,6 +3353,8 @@ jugcraft:housing_mold,chain_with_acquisition_evidence,,src/main/resources/data/j
 jugcraft:howitzer_walker,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/alloys_howitzer_walker.json | src/main/resources/data/jugcraft/recipe/howitzer_walker.json,,
 jugcraft:howler,loot_only,,,,src/main/resources/data/jugcraft/loot_table/bosses/werewolf_alpha.json | src/main/resources/data/jugcraft/loot_table/entities/alpha_werewolf.json
 jugcraft:howling_totem,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/howling_totem.json,,
+jugcraft:hurricane_lamp,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/hurricane_lamp.json,,
+jugcraft:hush_pistol,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/hush_pistol.json,,
 jugcraft:hv_chem_feeder,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hv_chem_feeder.json,,
 jugcraft:hv_chw_elbow,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/hv_chw_elbow.json,,
 jugcraft:hv_chw_elbow_down,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/hv_chw_elbow_down.json,,
@@ -3345,6 +3424,7 @@ jugcraft:ignition_ring,recipe_chain_reachable,,src/main/resources/data/jugcraft/
 jugcraft:illumination_flare,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/rocket_assembly/illumination_flare.json,,
 jugcraft:imperial_crest,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/imperial_crest.json,,
 jugcraft:imperial_gas_lamp,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/imperial_gas_lamp.json,,
+jugcraft:impetus_shotgun,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/impetus_shotgun.json,,
 jugcraft:industrial_fermenter,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/expanded_industrial_fermenter.json | src/main/resources/data/jugcraft/recipe/industrial_fermenter.json,,
 jugcraft:infernal_claws,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/infernal_claws.json,,
 jugcraft:inflatable_cat,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/inflatable_cat.json,,
@@ -4848,6 +4928,7 @@ jugcraft:klein_star_5,recipe_chain_reachable,,src/main/resources/data/jugcraft/r
 jugcraft:klein_star_6,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/klein_star_6.json,,
 jugcraft:knit_beanie,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/knit_beanie_dyed.json | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/KnittingNeedlesItem.java,,
 jugcraft:knit_sweater,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/knit_sweater_dyed.json | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/KnittingNeedlesItem.java,,
+jugcraft:knitting_basket,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/knitting_basket.json,,
 jugcraft:knitting_needles,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/knitting_needles.json,,
 jugcraft:kraken_shell,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/kraken_shell.json,,
 jugcraft:kreuzer_pistol,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/kreuzer_pistol.json,,
@@ -5509,6 +5590,8 @@ jugcraft:locker_security,recipe_chain_reachable,,src/main/resources/data/jugcraf
 jugcraft:locomotive,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/locomotive.json,,
 jugcraft:logic_controller,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/logic_controller.json,,
 jugcraft:lollipop,recipe_chain_reachable,,tools/agriculture.py:CANDY/lollipop,,
+jugcraft:long_island_cheese_pumpkin,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/long_island_cheese_pumpkin_seeds.json,,src/main/resources/data/jugcraft/worldgen/feature/long_island_cheese_pumpkin.json
+jugcraft:long_island_cheese_pumpkin_seeds,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/long_island_cheese_pumpkin_seeds.json | src/main/resources/data/jugcraft/recipe/long_island_cheese_pumpkin_seeds.json,,
 jugcraft:long_scope,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/long_scope.json,,
 jugcraft:longhorn_rifle,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/longhorn_rifle.json,,
 jugcraft:lookout_rifle,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/lookout_rifle.json,,
@@ -5524,6 +5607,7 @@ jugcraft:lurking_eyes,recipe_chain_reachable,,src/main/resources/data/jugcraft/r
 jugcraft:lych_gate,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/lych_gate.json,,
 jugcraft:lye_bucket,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/chemistry/PetroFluids.java,,
 jugcraft:machine_casing,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/housing_casing.json | src/main/resources/data/jugcraft/recipe/jimtafacts_industry/cased_machine.json | src/main/resources/data/jugcraft/recipe/machine_casing.json,,
+jugcraft:maelstrom_gun,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/maelstrom_gun.json,,
 jugcraft:magenta_alchemical_bag,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/magenta_alchemical_bag.json,,
 jugcraft:magenta_plastic,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/magenta_plastic.json,,
 jugcraft:magmaw,loot_only,,,,src/main/resources/data/jugcraft/loot_table/bosses/cinder_tyrant.json | src/main/resources/data/jugcraft/loot_table/entities/cinder_tyrant.json
@@ -5568,6 +5652,7 @@ jugcraft:mango_slab,chain_with_acquisition_evidence,,src/main/resources/data/jug
 jugcraft:mango_stairs,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/mango_stairs.json,,
 jugcraft:mango_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/mango_wood.json,,
 jugcraft:mangrove_cabinet,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/mangrove_cabinet.json,,
+jugcraft:mantel_garland,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/mantel_garland.json,,
 jugcraft:map_table,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/map_table.json,,
 jugcraft:maple_fence,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/maple_fence.json,,
 jugcraft:maple_fence_gate,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/maple_fence_gate.json,,
@@ -5587,6 +5672,7 @@ jugcraft:marshmallow,recipe_chain_reachable,,src/main/resources/data/jugcraft/re
 jugcraft:marshmallow_on_a_stick,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/marshmallow_on_a_stick.json,,
 jugcraft:mashing_station,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/mashing_station.json,,
 jugcraft:mason_jar,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/mason_jar.json,,
+jugcraft:mason_jar_candle,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/mason_jar_candle.json,,
 jugcraft:mcc_lineup,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/mcc_lineup.json,,
 jugcraft:mecha_workbench,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/mecha_workbench.json,,
 jugcraft:medicine_cabinet,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/medicine_cabinet.json,,
@@ -5603,8 +5689,11 @@ jugcraft:methalox_motor,chain_with_acquisition_evidence,,src/main/resources/data
 jugcraft:methane_cooling_module,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/cryo_methane_cooling_module.json,,
 jugcraft:methane_tank,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/cryo_methane_tank.json,,
 jugcraft:microchip,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/lithography/microchip.json | src/main/resources/data/jugcraft/recipe/lithography/microchip_nitric.json,,
+jugcraft:microjet,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/microjet.json,,
 jugcraft:microwave_counter,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/microwave_counter.json,,
+jugcraft:midway_ticket,recipe_chain_reachable,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/TicketBoothBlock.java,,
 jugcraft:milk_bottle,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/milk_bottle.json,,
+jugcraft:milk_can,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/milk_can.json,,
 jugcraft:millstone_rifle,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/millstone_rifle.json,,
 jugcraft:minced_beef,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/cutting/minced_beef.json,,
 jugcraft:mind_stone,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/mind_stone.json,,
@@ -5660,7 +5749,9 @@ jugcraft:mule,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/
 jugcraft:mulled_cider,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pot_cooking/mulled_cider.json,,
 jugcraft:mulling_spices,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/mulling_spices.json | src/main/resources/data/jugcraft/recipe/mulling_spices_from_cinnamon.json | src/main/resources/data/jugcraft/recipe/mulling_spices_from_juniper.json,,
 jugcraft:mummy_sarcophagus,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/mummy_sarcophagus.json,,
-jugcraft:mummy_wraps,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/mummy_wraps.json,,
+jugcraft:mummy_sausage,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/mummy_sausage.json,,
+jugcraft:mummy_sausage_tray,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/mummy_sausage_tray.json,,
+jugcraft:mummy_wraps,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/mummy_wraps.json,,src/main/resources/data/jugcraft/loot_table/gameplay/graveyard_rising.json
 jugcraft:murmur_smg,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/murmur_smg.json,,
 jugcraft:mushroom_barley_soup,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/mushroom_barley_soup.json,,
 jugcraft:mushroom_rice,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/mushroom_rice.json,,
@@ -5694,10 +5785,12 @@ jugcraft:muzzle_brake,chain_with_acquisition_evidence,,src/main/resources/data/j
 jugcraft:n2o4_tank,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/cryo_n2o4_tank.json,,
 jugcraft:nachos,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/nachos.json,,
 jugcraft:naphtha_bucket,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/chemistry/PetroFluids.java,,
+jugcraft:narwhal_lance,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/narwhal_lance.json,,
 jugcraft:navvy_shotgun,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/navvy_shotgun.json,,
 jugcraft:needle_rapier,loot_only,,,,src/main/resources/data/jugcraft/loot_table/bosses/tatterlace.json | src/main/resources/data/jugcraft/loot_table/entities/tatterlace.json
 jugcraft:neodymium_drone_motor,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/neodymium_drone_motor.json,,
-jugcraft:neodymium_magnet,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/alloying/neodymium_magnet.json | src/main/resources/data/jugcraft/recipe/alloying/neodymium_magnet_from_ferroboron.json,,
+jugcraft:neodymium_magnet,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/alloying/neodymium_magnet.json | src/main/resources/data/jugcraft/recipe/alloying/neodymium_magnet_from_ferroboron.json | src/main/resources/data/jugcraft/recipe/alloying/sands_neodymium_magnet.json,,
+jugcraft:neodymium_oxide,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/sands_rare_earth_separation.json,,
 jugcraft:nereids_hood,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/nereids_hood.json,,
 jugcraft:nereids_pants,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/nereids_pants.json,,
 jugcraft:nereids_shoes,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/nereids_shoes.json,,
@@ -6187,13 +6280,18 @@ jugcraft:orange_marmalade,chain_with_acquisition_evidence,,src/main/resources/da
 jugcraft:orange_mum,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/mums.json
 jugcraft:orange_plastic,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/orange_plastic.json,,
 jugcraft:orange_seeds,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/orange_seeds.json,,
+jugcraft:orchard_handcart,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/orchard_handcart.json,,
+jugcraft:orchard_ladder,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/orchard_ladder.json,,
 jugcraft:ore_drill,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/ore_drill.json,,
 jugcraft:ore_washer,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/jimtafacts_industry/jimta_ore_washing_plant_restore.json | src/main/resources/data/jugcraft/recipe/ore_washer.json,,
+jugcraft:organ_grinder_skeleton,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/organ_grinder_skeleton.json,,
 jugcraft:organic_compost,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/organic_compost.json,,
 jugcraft:organic_fertilizer_carrier,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/phosphate_compost_carrier.json | src/main/resources/data/jugcraft/recipe/chemical_reaction/phosphate_fiber_carrier.json,,
+jugcraft:ornamental_cabbage,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/ornamental_cabbage.json,,src/main/resources/data/jugcraft/worldgen/feature/ornamental_cabbage.json
 jugcraft:ornamental_corn,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/ornamental_corn_kernels.json | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/TallCropBlock.java,,
 jugcraft:ornamental_corn_bundle,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/ornamental_corn_bundle.json,,
 jugcraft:ornamental_corn_kernels,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/ornamental_corn_kernels.json | src/main/resources/data/jugcraft/recipe/ornamental_corn_kernels.json,,
+jugcraft:ornamental_kale,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/ornamental_kale.json,,src/main/resources/data/jugcraft/worldgen/feature/ornamental_kale.json
 jugcraft:osmanthus_flowers,chain_with_acquisition_evidence,,tools/agriculture.py:TREES/osmanthus,,
 jugcraft:osmanthus_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/osmanthus.json
 jugcraft:osmanthus_mooncake,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/osmanthus_mooncake.json,,
@@ -6225,13 +6323,15 @@ jugcraft:palm_sapling,chain_with_acquisition_evidence,,src/main/resources/data/j
 jugcraft:palm_slab,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/palm_slab.json,,
 jugcraft:palm_stairs,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/palm_stairs.json,,
 jugcraft:palm_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/palm_wood.json,,
+jugcraft:pampas_grass,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/pampas_grass.json
 jugcraft:pan_de_muerto,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pan_de_muerto.json | src/main/resources/data/jugcraft/recipe/pan_de_muerto_from_campfire_cooking.json | src/main/resources/data/jugcraft/recipe/pan_de_muerto_from_smoking.json,,
 jugcraft:pan_de_muerto_dough,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pan_de_muerto_dough.json,,
+jugcraft:pancakes,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pancakes.json,,
 jugcraft:panel_mold,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/ceramics_panel_mold.json | src/main/resources/data/jugcraft/recipe/panel_mold.json,,
 jugcraft:pantry_shelf,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pantry_shelf.json,,
 jugcraft:papel_picado,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/papel_picado.json,,
 jugcraft:paper_cartridge,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/paper_cartridge.json,,
-jugcraft:paprika,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/SpiceGrinding.java,,
+jugcraft:paprika,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/SpiceGrinding.java | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/QuernBlock.java,,
 jugcraft:parley_revolver,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/parley_revolver.json,,
 jugcraft:parsley,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/parsley.json | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/TallCropBlock.java,,
 jugcraft:parsley_bundle,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/parsley_bundle.json,,
@@ -6289,6 +6389,7 @@ jugcraft:phosphate_slurry_bucket,chain_with_acquisition_evidence,,src/main/java/
 jugcraft:phosphoric_acid_bucket,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/chemistry/PetroFluids.java,,
 jugcraft:pibal,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pibal.json,,
 jugcraft:picket_rifle,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/picket_rifle.json,,
+jugcraft:picking_bag,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/picking_bag.json,,
 jugcraft:pickled_beets,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pot_cooking/pickled_beets.json,,
 jugcraft:pickled_olives,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/pickled_olives.json,,
 jugcraft:pickled_peppers,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/pickled_peppers.json,,
@@ -6445,7 +6546,7 @@ jugcraft:polished_brass_plate,chain_with_acquisition_evidence,,src/main/resource
 jugcraft:polished_brass_plate_slab,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/polished_brass_plate_slab.json,,
 jugcraft:polished_brass_plate_stairs,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/polished_brass_plate_stairs.json,,
 jugcraft:polished_circuitstone,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/polished_circuitstone.json | src/main/resources/data/jugcraft/recipe/polished_circuitstone_from_circuitstone_stonecutting.json,,
-jugcraft:polished_lens,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/finish_polished_lens.json,,
+jugcraft:polished_lens,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/finish_polished_lens.json | src/main/resources/data/jugcraft/recipe/chemical_reaction/sands_finish_lens_cerium.json,,
 jugcraft:polished_marble,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/polished_marble.json,,
 jugcraft:polished_marble_slab,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/polished_marble_slab.json,,
 jugcraft:polished_marble_stairs,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/polished_marble_stairs.json,,
@@ -6460,12 +6561,14 @@ jugcraft:polymer_vehicle_panel,chain_with_acquisition_evidence,,src/main/resourc
 jugcraft:polymerization_kettle,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/polymerization_kettle.json,,
 jugcraft:polymerization_reactor,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/polymerization_reactor.json,,
 jugcraft:pop_up_skeleton,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pop_up_skeleton.json,,
-jugcraft:popcorn,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/popcorn.json | src/main/resources/data/jugcraft/recipe/popcorn_from_campfire_cooking.json | src/main/resources/data/jugcraft/recipe/popcorn_from_smoking.json,,
-jugcraft:popcorn_ball,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/popcorn_ball.json,,src/main/resources/data/jugcraft/loot_table/gameplay/trick_or_treat.json
+jugcraft:popcorn,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/popcorn.json | src/main/resources/data/jugcraft/recipe/popcorn_from_campfire_cooking.json | src/main/resources/data/jugcraft/recipe/popcorn_from_smoking.json | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/PopcornWagonBlock.java,,
+jugcraft:popcorn_ball,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/popcorn_ball.json,,src/main/resources/data/jugcraft/loot_table/gameplay/trick_or_treat.json
+jugcraft:popcorn_wagon,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/popcorn_wagon.json,,
 jugcraft:porcelain_batch,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/ceramics_porcelain_batch.json,,
 jugcraft:porcelain_blank,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pressing/ceramics_porcelain_blank.json,,
 jugcraft:porcelain_charge,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/prepare_porcelain.json,,
 jugcraft:porcelain_insulator,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/finish_porcelain_insulator.json,,
+jugcraft:porch_swing,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/porch_swing.json,,
 jugcraft:porch_witch,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/porch_witch.json,,
 jugcraft:porcini,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/porcini.json
 jugcraft:pork_pie,recipe_chain_reachable,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java,,
@@ -6478,12 +6581,13 @@ jugcraft:power_bow,chain_with_acquisition_evidence,,src/main/resources/data/jugc
 jugcraft:power_katana,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/power_katana.json | src/main/resources/data/jugcraft/recipe/power_katana_from_ronin_katana.json,,
 jugcraft:precision_bearing,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/ceramics_precision_bearing.json,,
 jugcraft:precision_finisher,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/precision_finisher.json,,
-jugcraft:precision_shaft,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/finish_precision_shaft.json,,
+jugcraft:precision_shaft,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/finish_precision_shaft.json | src/main/resources/data/jugcraft/recipe/chemical_reaction/sands_finish_shaft_garnet.json,,
 jugcraft:precision_stainless_valve,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/finish_stainless_valve.json,,
 jugcraft:premium_diesel_bucket,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/chemistry/PetroFluids.java,,
 jugcraft:premium_gasoline_bucket,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/chemistry/PetroFluids.java,,
 jugcraft:pressurizer,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pressurizer.json,,
 jugcraft:printer,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/printer.json,,
+jugcraft:prize_ribbon_board,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/prize_ribbon_board.json,,
 jugcraft:prize_wheel,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/prize_wheel.json,,
 jugcraft:processor,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/circuit_assembly/ceramics_processor_on_alumina.json | src/main/resources/data/jugcraft/recipe/circuit_assembly/processor.json | src/main/resources/data/jugcraft/recipe/circuit_assembly/processor_with_fibre.json | src/main/resources/data/jugcraft/recipe/jimtafacts_industry/chipset_diamond_processor.json,,
 jugcraft:profile_extrusion_die,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/ceramics_profile_extrusion_die.json | src/main/resources/data/jugcraft/recipe/profile_extrusion_die.json,,
@@ -6513,21 +6617,29 @@ jugcraft:pumpkin_butter,recipe_chain_reachable,,src/main/resources/data/jugcraft
 jugcraft:pumpkin_crate,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pumpkin_crate.json,,
 jugcraft:pumpkin_cream_pie,recipe_chain_reachable,,tools/agriculture.py:PIES/pumpkin_cream | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java,,
 jugcraft:pumpkin_cream_pie_slice,recipe_chain_reachable,,tools/agriculture.py:PIES/pumpkin_cream | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/PieBlock.java,,
+jugcraft:pumpkin_drummer,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pumpkin_drummer.json,,
 jugcraft:pumpkin_firework,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pumpkin_firework_1.json | src/main/resources/data/jugcraft/recipe/pumpkin_firework_1_twinkle.json | src/main/resources/data/jugcraft/recipe/pumpkin_firework_2.json | src/main/resources/data/jugcraft/recipe/pumpkin_firework_2_twinkle.json | src/main/resources/data/jugcraft/recipe/pumpkin_firework_3.json | src/main/resources/data/jugcraft/recipe/pumpkin_firework_3_twinkle.json,,
 jugcraft:pumpkin_guts,loot_only,,,,src/main/resources/data/jugcraft/loot_table/gameplay/hollow_giant_pumpkin.json | src/main/resources/data/jugcraft/loot_table/gameplay/hollow_giant_pumpkin.json | src/main/resources/data/jugcraft/loot_table/gameplay/scoop_pumpkin.json
 jugcraft:pumpkin_kings_crown,loot_only,,,,src/main/resources/data/jugcraft/loot_table/entities/pumpkin_king.json
+jugcraft:pumpkin_layer_cake,recipe_chain_reachable,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java,,
+jugcraft:pumpkin_layer_cake_slice,recipe_chain_reachable,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/PieBlock.java,,
 jugcraft:pumpkin_milkshake,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pumpkin_milkshake.json,,
 jugcraft:pumpkin_mooncake,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pot_cooking/pumpkin_mooncake.json,,
+jugcraft:pumpkin_path_light,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pumpkin_path_light.json,,
 jugcraft:pumpkin_pie_slice,recipe_chain_reachable,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/PlacedPieBlock.java,,
 jugcraft:pumpkin_pinata,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pumpkin_pinata.json,,
 jugcraft:pumpkin_plush,loot_only,,,,src/main/resources/data/jugcraft/loot_table/gameplay/midway_prize.json
+jugcraft:pumpkin_pyramid,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pumpkin_pyramid.json,,
 jugcraft:pumpkin_racer,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/PumpkinBoat.java
 jugcraft:pumpkin_slice,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/cutting/pumpkin_slice.json,,
 jugcraft:pumpkin_soup,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/pumpkin_soup.json,,
 jugcraft:pumpkin_spice_latte,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pumpkin_spice_latte.json,,
 jugcraft:pumpkin_stencil,recipe_chain_reachable,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/BlankStencilItem.java,,
 jugcraft:pumpkin_sweater,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pumpkin_sweater_dyed.json | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/KnittingNeedlesItem.java,,
+jugcraft:pumpkin_vine_cover,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pumpkin_vine_cover.json,,
 jugcraft:pumpkin_vine_garland,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pumpkin_vine_garland.json,,
+jugcraft:pumpkin_wagon,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pumpkin_wagon.json,,
+jugcraft:pumpkin_wheelbarrow,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pumpkin_wheelbarrow.json,,
 jugcraft:purified_titanium_chloride_bucket,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/chemistry/PetroFluids.java,,
 jugcraft:purple_alchemical_bag,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/purple_alchemical_bag.json,,
 jugcraft:purple_mum,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/mums.json
@@ -6546,6 +6658,9 @@ jugcraft:pyromaniacs_shoes,recipe_chain_reachable,,src/main/resources/data/jugcr
 jugcraft:pyromaniacs_tunic,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pyromaniacs_tunic.json,,
 jugcraft:quarrel_carbine,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/quarrel_carbine.json,,
 jugcraft:quartz_ore,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/ore_quartz.json | src/main/resources/data/jugcraft/worldgen/feature/ore_quartz_secondary.json
+jugcraft:quern,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/quern.json,,
+jugcraft:quill_rifle,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/quill_rifle.json,,
+jugcraft:quilt_rail,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/quilt_rail.json,,
 jugcraft:radiation_control_board,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/radiation_control_board.json,,
 jugcraft:radish,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/radish.json | tools/agriculture.py:CROPS/radish,,
 jugcraft:raid_horn,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/raid_horn.json,,
@@ -6555,7 +6670,7 @@ jugcraft:railing_gate,recipe_chain_reachable,,src/main/resources/data/jugcraft/r
 jugcraft:range_finder,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/ceramics_range_finder.json | src/main/resources/data/jugcraft/recipe/range_finder.json,,
 jugcraft:range_module,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/range_module.json,,
 jugcraft:ranger_rifle,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/ranger_rifle.json,,
-jugcraft:rare_earth_oxide,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/arc_smelting/monazite.json | src/main/resources/data/jugcraft/recipe/chemical_reaction/rare_earth_oxide.json | src/main/resources/data/jugcraft/recipe/crushing/cydonian_shard.json | src/main/resources/data/jugcraft/recipe/rare_earth_oxide.json,,
+jugcraft:rare_earth_oxide,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/arc_smelting/monazite.json | src/main/resources/data/jugcraft/recipe/chemical_reaction/rare_earth_oxide.json | src/main/resources/data/jugcraft/recipe/chemical_reaction/sands_mixed_rare_earth_oxide.json | src/main/resources/data/jugcraft/recipe/crushing/cydonian_shard.json | src/main/resources/data/jugcraft/recipe/rare_earth_oxide.json,,
 jugcraft:rare_earth_sand,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/ore_rare_earth_sand.json
 jugcraft:ratatouille,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/ratatouille.json,,
 jugcraft:rattler_pistol,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/rattler_pistol.json,,
@@ -6586,6 +6701,7 @@ jugcraft:raw_persimmon_pie,chain_with_acquisition_evidence,,src/main/resources/d
 jugcraft:raw_plum_pie,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/raw_plum_pie.json,,
 jugcraft:raw_pork_pie,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/raw_pork_pie.json,,
 jugcraft:raw_pumpkin_cream_pie,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/raw_pumpkin_cream_pie.json,,
+jugcraft:raw_pumpkin_layer_cake,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/raw_pumpkin_layer_cake.json,,
 jugcraft:raw_red_velvet_cake,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/raw_red_velvet_cake.json,,
 jugcraft:raw_silver,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/crushing/deepslate_silver_ore.json | src/main/resources/data/jugcraft/recipe/crushing/silver_ore.json | src/main/resources/data/jugcraft/recipe/raw_silver_from_raw_silver_block.json,,
 jugcraft:raw_silver_block,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/raw_silver_block.json,,
@@ -6598,7 +6714,7 @@ jugcraft:raw_thallite,chain_with_acquisition_evidence,,src/main/resources/data/j
 jugcraft:raw_thallite_block,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/raw_thallite_block.json,,
 jugcraft:raw_tin,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/crushing/deepslate_tin_ore.json | src/main/resources/data/jugcraft/recipe/crushing/tin_ore.json | src/main/resources/data/jugcraft/recipe/raw_tin_from_raw_tin_block.json,,
 jugcraft:raw_tin_block,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/raw_tin_block.json,,
-jugcraft:raw_titanium,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/crushing/deepslate_titanium_ore.json | src/main/resources/data/jugcraft/recipe/crushing/titanium_ore.json | src/main/resources/data/jugcraft/recipe/raw_titanium_from_raw_titanium_block.json,,
+jugcraft:raw_titanium,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/sands_titanium_feed.json | src/main/resources/data/jugcraft/recipe/crushing/deepslate_titanium_ore.json | src/main/resources/data/jugcraft/recipe/crushing/titanium_ore.json | src/main/resources/data/jugcraft/recipe/raw_titanium_from_raw_titanium_block.json,,
 jugcraft:raw_titanium_block,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/raw_titanium_block.json,,
 jugcraft:raw_tungsten,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/crushing/deepslate_tungsten_ore.json | src/main/resources/data/jugcraft/recipe/crushing/tungsten_ore.json | src/main/resources/data/jugcraft/recipe/raw_tungsten_from_raw_tungsten_block.json,,
 jugcraft:raw_tungsten_block,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/raw_tungsten_block.json,,
@@ -6629,6 +6745,7 @@ jugcraft:reception_desk,recipe_chain_reachable,,src/main/resources/data/jugcraft
 jugcraft:reconductored_lattice_tower,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/reconductored_lattice_tower.json,,
 jugcraft:recovery_concentrate_bucket,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/chemistry/PetroFluids.java,,
 jugcraft:red_alchemical_bag,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/red_alchemical_bag.json,,
+jugcraft:red_apple_crate,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/red_apple_crate.json,,
 jugcraft:red_bean_mooncake,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/red_bean_mooncake.json,,
 jugcraft:red_iron_plate,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/red_iron_plate.json,,
 jugcraft:red_iron_plate_slab,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/red_iron_plate_slab.json,,
@@ -6705,6 +6822,7 @@ jugcraft:rich_soil,chain_with_acquisition_evidence,,src/main/java/io/github/jimb
 jugcraft:rifle_round,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/rifle_round.json,,src/main/resources/data/jugcraft/loot_table/entities/raider_gunner.json
 jugcraft:rimeclaw,loot_only,,,,src/main/resources/data/jugcraft/loot_table/bosses/yeti_king.json | src/main/resources/data/jugcraft/loot_table/entities/yeti_king.json
 jugcraft:ring_toss,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/ring_toss.json,,
+jugcraft:rising_zombie,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/rising_zombie.json,,
 jugcraft:riveted_band_block,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/riveted_band_block.json,,
 jugcraft:riveted_black_plate,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/riveted_black_plate.json,,
 jugcraft:riveted_black_plate_slab,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/riveted_black_plate_slab.json,,
@@ -6717,7 +6835,7 @@ jugcraft:roast_chicken,chain_with_acquisition_evidence,,src/main/resources/data/
 jugcraft:roast_turkey,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/roast_turkey.json | src/main/resources/data/jugcraft/recipe/roast_turkey_from_campfire_cooking.json | src/main/resources/data/jugcraft/recipe/roast_turkey_from_smoking.json,,
 jugcraft:roasted_acorns,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/roasted_acorns.json | src/main/resources/data/jugcraft/recipe/roasted_acorns_from_campfire_cooking.json | src/main/resources/data/jugcraft/recipe/roasted_acorns_from_smoking.json,,
 jugcraft:roasted_chestnuts,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/roasted_chestnuts.json | src/main/resources/data/jugcraft/recipe/roasted_chestnuts_from_campfire_cooking.json | src/main/resources/data/jugcraft/recipe/roasted_chestnuts_from_smoking.json,,
-jugcraft:roasted_corn,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/roasted_corn.json | src/main/resources/data/jugcraft/recipe/roasted_corn_from_campfire_cooking.json | src/main/resources/data/jugcraft/recipe/roasted_corn_from_smoking.json,,
+jugcraft:roasted_corn,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/roasted_corn.json | src/main/resources/data/jugcraft/recipe/roasted_corn_from_campfire_cooking.json | src/main/resources/data/jugcraft/recipe/roasted_corn_from_smoking.json,,
 jugcraft:roasted_eggplant,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/roasted_eggplant.json | src/main/resources/data/jugcraft/recipe/roasted_eggplant_from_campfire_cooking.json | src/main/resources/data/jugcraft/recipe/roasted_eggplant_from_smoking.json,,
 jugcraft:roasted_mutton_chops,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/roasted_mutton_chops.json,,
 jugcraft:roasted_pine_nuts,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/roasted_pine_nuts.json | src/main/resources/data/jugcraft/recipe/roasted_pine_nuts_from_campfire_cooking.json | src/main/resources/data/jugcraft/recipe/roasted_pine_nuts_from_smoking.json,,
@@ -6792,6 +6910,7 @@ jugcraft:rust_plate_stairs,recipe_chain_reachable,,src/main/resources/data/jugcr
 jugcraft:rustic_scroll_headstone,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/rustic_scroll_headstone_from_stonecutting.json,,
 jugcraft:ruthenium_catalyst_bed,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/ruthenium_catalyst_bed.json,,
 jugcraft:ruthenium_powder,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/bulk_ruthenium_powder.json,,
+jugcraft:sack_race_sack,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/sack_race_sack.json,,
 jugcraft:safety_shower,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/safety_shower.json,,
 jugcraft:safety_shower_head,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/safety_shower_head.json,,
 jugcraft:saffron,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/crocus_bulb.json | tools/agriculture.py:CROPS/saffron,,
@@ -6811,6 +6930,7 @@ jugcraft:salt_ore,natural_or_interaction_source,,,,src/main/resources/data/jugcr
 jugcraft:salt_water_taffy,recipe_chain_reachable,,tools/agriculture.py:CANDY/syrup,,
 jugcraft:salvaged_coil,loot_only,,,,src/main/resources/data/jugcraft/loot_table/entities/iron_dreadnought.json
 jugcraft:salve,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/concordance/Alchemy.java
+jugcraft:salvo_rifle,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/salvo_rifle.json,,
 jugcraft:sampling_spoon,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/sampling_spoon.json,,
 jugcraft:sandbags,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/sandbags.json,,
 jugcraft:sandbags_slab,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/sandbags_slab.json,,
@@ -6841,9 +6961,11 @@ jugcraft:sealed_orders,chain_with_acquisition_evidence,,src/main/resources/data/
 jugcraft:seam_cutter,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/seam_cutter.json,,
 jugcraft:searchlight,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/searchlight.json,,
 jugcraft:seawater_bucket,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/chemistry/PetroFluids.java,,
-jugcraft:second_prize_ribbon,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HarvestScaleBlockEntity.java
+jugcraft:second_prize_ribbon,recipe_chain_reachable,,,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HarvestScaleBlockEntity.java
 jugcraft:secondary_control_board,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/secondary_control_board.json,,
 jugcraft:security_jacket,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/security_jacket.json,,
+jugcraft:sedum,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/sedum.json
+jugcraft:seed_pouch,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/seed_pouch.json,,
 jugcraft:self_propelled_howitzer,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/self_propelled_howitzer.json,,
 jugcraft:semiconductor_photoresist_bucket,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/chemistry/PetroFluids.java,,
 jugcraft:sensor,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/sensor.json,,
@@ -6866,6 +6988,8 @@ jugcraft:shepherds_pie,chain_with_acquisition_evidence,,src/main/resources/data/
 jugcraft:shielding_concrete,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/shielding_concrete.json,,
 jugcraft:shimmer_birch_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/shimmer_birch.json | src/main/resources/data/jugcraft/worldgen/feature/tall_shimmer_birch.json
 jugcraft:shimmer_birch_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/shimmer_birch_sapling.json,,
+jugcraft:shooting_gallery,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/shooting_gallery.json,,
+jugcraft:show_controller,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/show_controller.json,,
 jugcraft:show_launcher,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/show_launcher.json,,
 jugcraft:shrinking_draught,recipe_chain_reachable,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/BubblingCauldronBlock.java,,
 jugcraft:shroud_moss,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/bald_cypress.json | src/main/resources/data/jugcraft/worldgen/feature/live_oak.json | src/main/resources/data/jugcraft/worldgen/feature/shroud_moss.json
@@ -6902,18 +7026,23 @@ jugcraft:silver_iodide,chain_with_acquisition_evidence,,src/main/resources/data/
 jugcraft:silver_nugget,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/silver_nugget.json | src/main/java/io/github/jimbozoomer/jugcraft/jimtafacts/industry/IndustrialCrops.java,,
 jugcraft:silver_ore,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/ore_silver.json
 jugcraft:silver_wire,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/wire_drawing/silver_ingot.json,,
+jugcraft:simmer_pot,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/simmer_pot.json,,
 jugcraft:singing_pumpkin_alto,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/singing_pumpkin_alto.json,,
 jugcraft:singing_pumpkin_bass,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/singing_pumpkin_bass.json,,
 jugcraft:singing_pumpkin_soprano,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/singing_pumpkin_soprano.json,,
 jugcraft:singing_pumpkin_tenor,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/singing_pumpkin_tenor.json,,
+jugcraft:skeleton_cat,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/skeleton_cat.json,,
+jugcraft:skeleton_crow,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/skeleton_crow.json,,
+jugcraft:skeleton_dog,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/skeleton_dog.json,,
 jugcraft:skeleton_hand_sconce,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/skeleton_hand_sconce.json,,
 jugcraft:skeleton_key,recipe_chain_reachable,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/IronBoundCoffinBlock.java,,
 jugcraft:skeleton_pin,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/skeleton_pin.json,,
-jugcraft:skeleton_suit,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/skeleton_suit.json,,
+jugcraft:skeleton_suit,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/skeleton_suit.json,,src/main/resources/data/jugcraft/loot_table/gameplay/graveyard_rising.json
 jugcraft:skid_iron_block,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/skid_iron_block.json,,
 jugcraft:skillet,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/skillet.json,,
 jugcraft:skull_firework,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/skull_firework_1.json | src/main/resources/data/jugcraft/recipe/skull_firework_1_twinkle.json | src/main/resources/data/jugcraft/recipe/skull_firework_2.json | src/main/resources/data/jugcraft/recipe/skull_firework_2_twinkle.json | src/main/resources/data/jugcraft/recipe/skull_firework_3.json | src/main/resources/data/jugcraft/recipe/skull_firework_3_twinkle.json,,
 jugcraft:skull_footstool,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/skull_footstool.json,,
+jugcraft:skull_goblets,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/skull_goblets.json,,
 jugcraft:sky_lantern,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/sky_lantern.json | src/main/resources/data/jugcraft/recipe/sky_lantern_dyed.json,,
 jugcraft:skylark_rifle,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/skylark_rifle.json,,
 jugcraft:sledge,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/sledge.json,,
@@ -6973,6 +7102,7 @@ jugcraft:spent_fuel_rack,chain_with_acquisition_evidence,,src/main/resources/dat
 jugcraft:spent_mineral_wash_bucket,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/chemistry/PetroFluids.java,,
 jugcraft:spent_wafer_mixture_bucket,chain_with_acquisition_evidence,,src/main/java/io/github/jimbozoomer/jugcraft/chemistry/PetroFluids.java,,
 jugcraft:spice_rack,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/spice_rack.json,,
+jugcraft:spider_cupcake_tower,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/spider_cupcake_tower.json,,
 jugcraft:spider_lily,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/spider_lily.json
 jugcraft:spider_web,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/spider_web.json,,
 jugcraft:spiderweb_cupcake,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/spiderweb_cupcake.json,,
@@ -6990,6 +7120,8 @@ jugcraft:spodumene,chain_with_acquisition_evidence,,src/main/resources/data/jugc
 jugcraft:spodumene_block,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/spodumene_block.json,,
 jugcraft:spodumene_ore,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/ore_spodumene.json
 jugcraft:spooky_sign,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/spooky_sign.json,,
+jugcraft:spoon_gourd,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/spoon_gourd_seeds.json,,src/main/resources/data/jugcraft/worldgen/feature/spoon_gourd.json
+jugcraft:spoon_gourd_seeds,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/spoon_gourd_seeds.json | src/main/resources/data/jugcraft/recipe/spoon_gourd_seeds.json,,
 jugcraft:sprinkler,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/sprinkler.json,,
 jugcraft:sprocket_gun,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/sprocket_gun.json,,
 jugcraft:spruce_cabinet,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/spruce_cabinet.json,,
@@ -7021,6 +7153,7 @@ jugcraft:status_screen,chain_with_acquisition_evidence,,src/main/resources/data/
 jugcraft:steak_and_potatoes,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/steak_and_potatoes.json,,
 jugcraft:steam_engine,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/steam_engine.json,,
 jugcraft:steam_generator,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/steam_generator.json,,
+jugcraft:steam_traction_engine,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/steam_traction_engine.json,,
 jugcraft:steampunk_boots,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/steampunk_boots.json,,
 jugcraft:steampunk_chestplate,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/steampunk_chestplate.json,,
 jugcraft:steampunk_helmet,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/steampunk_helmet.json,,
@@ -7089,6 +7222,7 @@ jugcraft:steel_sabre,recipe_chain_reachable,,src/main/resources/data/jugcraft/re
 jugcraft:steel_scythe,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/steel_scythe.json,,
 jugcraft:steel_shaft_blank,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/ceramics_shaft_blanks.json,,
 jugcraft:steel_shovel,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/steel_shovel.json,,
+jugcraft:steel_sickle,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/steel_sickle.json,,
 jugcraft:steel_spear,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/steel_spear.json,,
 jugcraft:steel_storage_crate_upgrade,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/storage_crates/steel_crate_kit.json,,
 jugcraft:steel_sword,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/steel_sword.json,,
@@ -7106,6 +7240,7 @@ jugcraft:stirring_rod,recipe_chain_reachable,,src/main/resources/data/jugcraft/r
 jugcraft:stoker,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/stoker.json,,
 jugcraft:stolas_starflower,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/styx/Styxhexenhammer.java
 jugcraft:stone_brick_sarcophagus,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/stone_brick_sarcophagus.json,,
+jugcraft:stone_fireplace,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/stone_fireplace.json,,
 jugcraft:stone_paxel,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/stone_paxel.json,,
 jugcraft:stone_pine_needles,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/pinyon.json | src/main/resources/data/jugcraft/worldgen/feature/stone_pine.json | src/main/resources/data/jugcraft/worldgen/feature/umbrella_pine.json
 jugcraft:stone_pine_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/stone_pine_sapling.json,,
@@ -7220,6 +7355,8 @@ jugcraft:superconducting_tape,chain_with_acquisition_evidence,,src/main/resource
 jugcraft:supply_pickup,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/supply_pickup.json,,
 jugcraft:survey_rocket,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/rocket_assembly/survey_rocket.json,,
 jugcraft:survey_stake,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/survey_stake.json,,
+jugcraft:swan_gourd,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/swan_gourd_seeds.json,,src/main/resources/data/jugcraft/worldgen/feature/swan_gourd.json
+jugcraft:swan_gourd_seeds,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/swan_gourd_seeds.json | src/main/resources/data/jugcraft/recipe/swan_gourd_seeds.json,,
 jugcraft:sweet_berry_cheesecake,recipe_chain_reachable,,tools/agriculture.py:PIES/sweet_berry | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java,,
 jugcraft:sweet_berry_cheesecake_slice,recipe_chain_reachable,,tools/agriculture.py:PIES/sweet_berry | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/PieBlock.java,,
 jugcraft:sweet_berry_cookie,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/sweet_berry_cookie.json,,
@@ -7227,6 +7364,8 @@ jugcraft:sweet_berry_jam,recipe_chain_reachable,,src/main/resources/data/jugcraf
 jugcraft:sweet_berry_tart,recipe_chain_reachable,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java,,
 jugcraft:sweet_berry_tart_slice,recipe_chain_reachable,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/PieBlock.java,,
 jugcraft:sweet_cider,recipe_chain_reachable,,tools/agriculture.py:CIDER,,
+jugcraft:sweet_dumpling_squash,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/sweet_dumpling_squash_seeds.json,,src/main/resources/data/jugcraft/worldgen/feature/sweet_dumpling_squash.json
+jugcraft:sweet_dumpling_squash_seeds,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/sweet_dumpling_squash_seeds.json | src/main/resources/data/jugcraft/recipe/sweet_dumpling_squash_seeds.json,,
 jugcraft:sweet_potato,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/sweet_potato.json | tools/agriculture.py:CROPS/sweet_potato,,
 jugcraft:sweet_potato_pie,chain_with_acquisition_evidence,,tools/agriculture.py:PIES/sweet_potato | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java,,
 jugcraft:sweet_potato_pie_slice,chain_with_acquisition_evidence,,tools/agriculture.py:PIES/sweet_potato | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/PieBlock.java,,
@@ -7275,6 +7414,7 @@ jugcraft:tank_workbench,chain_with_acquisition_evidence,,src/main/resources/data
 jugcraft:tatami,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tatami.json,,
 jugcraft:tattered_curtains,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/tattered_curtains.json,,
 jugcraft:tatterlace_headdress,loot_only,,,,src/main/resources/data/jugcraft/loot_table/entities/tatterlace.json
+jugcraft:tea_kettle,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/tea_kettle.json,,
 jugcraft:templar_boots,deferred_acquisition_design,Deferred acquisition design: owner requested preview armor only on October 6; tools/gear.py ARMOR_TIERS records the still-unassigned recipe/drop choice.,,,
 jugcraft:templar_chestplate,deferred_acquisition_design,Deferred acquisition design: owner requested preview armor only on October 6; tools/gear.py ARMOR_TIERS records the still-unassigned recipe/drop choice.,,,
 jugcraft:templar_helmet,deferred_acquisition_design,Deferred acquisition design: owner requested preview armor only on October 6; tools/gear.py ARMOR_TIERS records the still-unassigned recipe/drop choice.,,,
@@ -7298,7 +7438,7 @@ jugcraft:thallite_sword,chain_with_acquisition_evidence,,src/main/resources/data
 jugcraft:theremin,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/theremin.json,,
 jugcraft:thermite,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/thermite.json,,
 jugcraft:thermite_grenade,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/thermite_grenade.json,,
-jugcraft:third_prize_ribbon,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HarvestScaleBlockEntity.java
+jugcraft:third_prize_ribbon,recipe_chain_reachable,,,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HarvestScaleBlockEntity.java
 jugcraft:thornheart_blade,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/thornheart_blade.json,,
 jugcraft:three_sisters_stew,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/three_sisters_stew.json,,
 jugcraft:thresher,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/thresher.json,,
@@ -7307,6 +7447,7 @@ jugcraft:thunder_vane,recipe_chain_reachable,,src/main/resources/data/jugcraft/r
 jugcraft:thunderpipe,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/thunderpipe.json,,
 jugcraft:thyme,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/thyme.json | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/TallCropBlock.java,,
 jugcraft:thyme_bundle,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/thyme_bundle.json,,
+jugcraft:ticket_booth,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/ticket_booth.json,,
 jugcraft:tidebreaker,loot_only,,,,src/main/resources/data/jugcraft/loot_table/bosses/abyssal_leviathan.json
 jugcraft:tilt_rotor_nacelle,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tilt_rotor_nacelle.json,,
 jugcraft:timber_revetment,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/timber_revetment.json,,
@@ -7352,10 +7493,12 @@ jugcraft:tomato_crate,chain_with_acquisition_evidence,,src/main/resources/data/j
 jugcraft:tomato_sauce,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/tomato_sauce.json,,
 jugcraft:tomato_seeds,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/tomato_seeds.json | src/main/resources/data/jugcraft/recipe/tomato_seeds.json,,
 jugcraft:tomato_soup,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pot_cooking/tomato_soup.json,,
-jugcraft:tortilla,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tortilla.json | src/main/resources/data/jugcraft/recipe/tortilla_from_campfire_cooking.json | src/main/resources/data/jugcraft/recipe/tortilla_from_smoking.json,,
-jugcraft:tortilla_chip,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/cutting/tortilla_chip.json,,
-jugcraft:tortilla_raw,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tortilla_raw.json,,
+jugcraft:tool_rack,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/tool_rack.json,,
+jugcraft:tortilla,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/tortilla.json | src/main/resources/data/jugcraft/recipe/tortilla_from_campfire_cooking.json | src/main/resources/data/jugcraft/recipe/tortilla_from_smoking.json,,
+jugcraft:tortilla_chip,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/cutting/tortilla_chip.json,,
+jugcraft:tortilla_raw,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/tortilla_raw.json,,
 jugcraft:toss_ring,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/toss_ring.json,,
+jugcraft:town_commission_board,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/town_commission_board.json,,
 jugcraft:training_screen,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/training_screen.json,,
 jugcraft:transformer_casing,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/transformer_casing.json,,
 jugcraft:transmutation_table,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/transmutation_table.json,,
@@ -7386,6 +7529,7 @@ jugcraft:tsc_plan_file,recipe_chain_reachable,,src/main/resources/data/jugcraft/
 jugcraft:tsc_procedure_shelf,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/tsc_procedure_shelf.json,,
 jugcraft:tsc_status_board,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/tsc_status_board.json,,
 jugcraft:tsc_video_wall,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tsc_video_wall.json,,
+jugcraft:tumbler_rifle,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tumbler_rifle.json,,
 jugcraft:tungsten_block,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tungsten_block.json,,
 jugcraft:tungsten_crate,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/storage_crates/tungsten_crate_direct.json | src/main/resources/data/jugcraft/recipe/storage_crates/tungsten_crate_upgrade.json,,
 jugcraft:tungsten_dust,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pulverizing/deepslate_tin_ore.json | src/main/resources/data/jugcraft/recipe/pulverizing/deepslate_tungsten_ore.json | src/main/resources/data/jugcraft/recipe/pulverizing/raw_tungsten.json | src/main/resources/data/jugcraft/recipe/pulverizing/tin_ore.json | src/main/resources/data/jugcraft/recipe/pulverizing/tungsten_ingot.json | src/main/resources/data/jugcraft/recipe/pulverizing/tungsten_ore.json | src/main/resources/data/jugcraft/recipe/pulverizing/washed_tin_ore.json | src/main/resources/data/jugcraft/recipe/pulverizing/washed_tungsten_ore.json,,
@@ -7398,6 +7542,8 @@ jugcraft:tungsten_steel_frame_slab,chain_with_acquisition_evidence,,src/main/res
 jugcraft:tungsten_steel_frame_stairs,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tungsten_steel_frame_stairs.json,,
 jugcraft:tungsten_storage_crate_upgrade,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/storage_crates/tungsten_crate_kit.json,,
 jugcraft:tuppence_pistol,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/tuppence_pistol.json,,
+jugcraft:turban_squash,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/turban_squash_seeds.json,,src/main/resources/data/jugcraft/worldgen/feature/turban_squash.json
+jugcraft:turban_squash_seeds,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/turban_squash_seeds.json | src/main/resources/data/jugcraft/recipe/turban_squash_seeds.json,,
 jugcraft:turbine_control_board,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/turbine_control_board.json,,
 jugcraft:turbine_generator,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/turbine_generator.json,,
 jugcraft:turbocharger,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/turbocharger.json,,
@@ -7497,6 +7643,7 @@ jugcraft:water_cooler,recipe_chain_reachable,,src/main/resources/data/jugcraft/r
 jugcraft:water_focus,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/water_focus.json,,
 jugcraft:water_wheel,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/water_wheel.json,,
 jugcraft:watergrass,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/watergrass.json
+jugcraft:watering_can,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/watering_can.json,,
 jugcraft:wattle_leaves,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/wattle.json | src/main/resources/data/jugcraft/worldgen/feature/wattle_bush.json
 jugcraft:wattle_sapling,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/wattle_sapling.json,,
 jugcraft:wax_melting_pot,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/wax_melting_pot.json,,
@@ -7513,7 +7660,9 @@ jugcraft:werewolf_plush,loot_only,,,,src/main/resources/data/jugcraft/loot_table
 jugcraft:werewolf_rug,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/werewolf_rug.json,,
 jugcraft:wet_processing_bench,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/wet_processing_bench.json,,
 jugcraft:wet_superphosphate,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/phosphate_wet_superphosphate.json,,
-jugcraft:wheat_dough,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/wheat_dough.json,,
+jugcraft:whack_a_zombie,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/whack_a_zombie.json,,
+jugcraft:wheat_dough,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/wheat_dough.json | src/main/resources/data/jugcraft/recipe/wheat_dough_from_flour.json,,
+jugcraft:wheat_stook,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/wheat_stook.json,,
 jugcraft:whipped_pumpkin_pie,recipe_chain_reachable,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/HearthOvenBlockEntity.java,,
 jugcraft:whipped_pumpkin_pie_slice,recipe_chain_reachable,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/PieBlock.java,,
 jugcraft:white_alchemical_bag,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/white_alchemical_bag.json,,
@@ -7729,7 +7878,9 @@ jugcraft:willow_stairs,chain_with_acquisition_evidence,,src/main/resources/data/
 jugcraft:willow_urn_headstone,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/willow_urn_headstone_from_stonecutting.json,,
 jugcraft:willow_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/willow_wood.json,,
 jugcraft:wind_turbine,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/wind_turbine.json,,
+jugcraft:windfall_apples,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/windfall_apples.json,,
 jugcraft:windlass_musket,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/windlass_musket.json,,
+jugcraft:window_box,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/window_box.json,,
 jugcraft:winged_skull_headstone,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/winged_skull_headstone_from_stonecutting.json,,
 jugcraft:winterguards_boots,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/winterguards_boots.json,,
 jugcraft:winterguards_chestplate,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/winterguards_chestplate.json,,
@@ -7738,6 +7889,8 @@ jugcraft:winterguards_leggings,recipe_chain_reachable,,src/main/resources/data/j
 jugcraft:wire_cutters,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/starter_workshop/wire_cutters.json,,
 jugcraft:wire_drawer,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/jimtafacts_industry/jimta_metal_former_extruding_restore.json | src/main/resources/data/jugcraft/recipe/wire_drawer.json,,
 jugcraft:wisp_in_a_jar,natural_or_interaction_source,,,,src/main/java/io/github/jimbozoomer/jugcraft/agriculture/WillOWisp.java
+jugcraft:witch_finger,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/witch_finger.json,,
+jugcraft:witch_finger_cauldron,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/witch_finger_cauldron.json,,
 jugcraft:witch_fire_brazier,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/witch_fire_brazier.json,,
 jugcraft:witch_hat,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/witch_hat.json | src/main/resources/data/jugcraft/villager_trade/halloween_peddler/emerald_witch_hat.json,,
 jugcraft:witch_weathervane,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/witch_weathervane.json,,
@@ -7748,7 +7901,7 @@ jugcraft:witchs_brew_punch,recipe_chain_reachable,,src/main/java/io/github/jimbo
 jugcraft:witchs_brew_punch_bowl,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/witchs_brew_punch_bowl.json,,
 jugcraft:witchs_broom,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/witchs_broom.json,,
 jugcraft:witchs_lantern,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/witchs_lantern.json,,
-jugcraft:witchs_licorice,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pot_cooking/witchs_licorice.json | src/main/resources/data/jugcraft/villager_trade/halloween_peddler/emerald_witchs_licorice.json,,src/main/resources/data/jugcraft/loot_table/entities/costumed_mob_candy.json
+jugcraft:witchs_licorice,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/pot_cooking/witchs_licorice.json | src/main/resources/data/jugcraft/villager_trade/halloween_peddler/emerald_witchs_licorice.json,,src/main/resources/data/jugcraft/loot_table/entities/costumed_mob_candy.json | src/main/resources/data/jugcraft/loot_table/gameplay/graveyard_rising.json
 jugcraft:withered_grass,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/withered_grass.json
 jugcraft:wolfsbane,natural_or_interaction_source,,,,src/main/resources/data/jugcraft/worldgen/feature/wolfsbane.json
 jugcraft:wood_paxel,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/wood_paxel.json,,
@@ -7756,6 +7909,7 @@ jugcraft:wooden_basket,recipe_chain_reachable,,src/main/resources/data/jugcraft/
 jugcraft:wooden_pole,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/wooden_pole.json,,
 jugcraft:wooden_propeller_set,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/wooden_propeller_set.json,,
 jugcraft:wooden_stock,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/wooden_stock.json,,
+jugcraft:woodstove,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/woodstove.json,,
 jugcraft:wool_socks,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/wool_socks_dyed.json | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/KnittingNeedlesItem.java,,
 jugcraft:workshop_bench,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/starter_workshop/workshop_bench.json,,
 jugcraft:workshop_hammer,recipe_chain_reachable,,src/main/resources/data/jugcraft/recipe/starter_workshop/workshop_hammer.json,,
@@ -7780,6 +7934,7 @@ jugcraft:yew_sapling,chain_with_acquisition_evidence,,src/main/resources/data/ju
 jugcraft:yew_slab,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/yew_slab.json,,
 jugcraft:yew_stairs,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/yew_stairs.json,,
 jugcraft:yew_wood,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/yew_wood.json,,
+jugcraft:yttrium_oxide,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/sands_rare_earth_separation.json,,
 jugcraft:yucca_fence,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/yucca_fence.json,,
 jugcraft:yucca_fence_gate,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/yucca_fence_gate.json,,
 jugcraft:yucca_log,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/tree_growing/joshua_tree_sapling.json,,src/main/resources/data/jugcraft/worldgen/feature/joshua_tree.json
@@ -7801,7 +7956,7 @@ jugcraft:zircon_sand,natural_or_interaction_source,,,,src/main/resources/data/ju
 jugcraft:zirconia_blank,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/pressing/ceramics_zirconia_blank.json,,
 jugcraft:zirconia_charge,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/prepare_zirconia.json,,
 jugcraft:zirconia_insert,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/finish_zirconia_insert.json,,
-jugcraft:zirconia_powder,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/calcine_zirconia.json,,
+jugcraft:zirconia_powder,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/calcine_zirconia.json | src/main/resources/data/jugcraft/recipe/chemical_reaction/sands_zirconia_from_concentrate.json | src/main/resources/data/jugcraft/recipe/chemical_reaction/sands_zirconia_powder.json,,
 jugcraft:zirconia_precursor,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/chemical_reaction/prepare_zirconia_precursor.json,,
 jugcraft:zucchini,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/zucchini_seeds.json | src/main/java/io/github/jimbozoomer/jugcraft/agriculture/TallCropBlock.java,,
 jugcraft:zucchini_seeds,chain_with_acquisition_evidence,,src/main/resources/data/jugcraft/recipe/hydroponics/zucchini_seeds.json | src/main/resources/data/jugcraft/recipe/zucchini_seeds.json,,

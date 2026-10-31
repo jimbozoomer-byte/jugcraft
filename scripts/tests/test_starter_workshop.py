@@ -16,8 +16,14 @@ class StarterWorkshopTests(unittest.TestCase):
 
     def test_approved_recipes_only_and_equal_material_yields(self):
         rows=dict(workshop.processes())
-        self.assertEqual(16,len(rows))
-        self.assertEqual(9,sum(r['station']==0 for r in rows.values()))
+        original={f'{metal}_plate' for metal in ['iron','copper','tin','zinc','lead','bronze','brass']} | {
+            'copper_wire','basic_circuit','bronze_ingot','brass_ingot','solder_ingot',
+            'fire_lining','fire_crucible','fire_insulators','silicon'}
+        sanding={'sands_smooth_sandstone','sands_smooth_red_sandstone'}
+        self.assertEqual(original | sanding,set(rows))
+        self.assertEqual(16,len(original))
+        self.assertEqual(9,sum(rows[name]['station']==0 for name in original))
+        self.assertEqual(11,sum(r['station']==0 for r in rows.values()))
         self.assertEqual((200,4),(rows['bronze_ingot']['time'],rows['bronze_ingot']['result']['count']))
         self.assertEqual((120,2),(rows['solder_ingot']['time'],rows['solder_ingot']['result']['count']))
         self.assertEqual(100,rows['copper_wire']['time'])
@@ -30,6 +36,27 @@ class StarterWorkshopTests(unittest.TestCase):
         self.assertTrue(silicon['high_heat'])
         self.assertEqual((2,200,1),(silicon['station'],silicon['time'],silicon['result']['count']))
         self.assertEqual([{'ingredient':'minecraft:quartz','count':1},{'ingredient':'minecraft:charcoal','count':1}],silicon['ingredients'])
+
+    def test_approved_sanding_is_one_for_one_with_a_retained_tool(self):
+        rows=dict(workshop.processes())
+        for name,feed,output in [
+            ('sands_smooth_sandstone','cut_sandstone','smooth_sandstone'),
+            ('sands_smooth_red_sandstone','cut_red_sandstone','smooth_red_sandstone'),
+        ]:
+            with self.subTest(recipe=name):
+                recipe=rows[name]
+                self.assertEqual('jugcraft:starter_working',recipe['type'])
+                self.assertEqual((0,200,False),(recipe['station'],recipe['time'],recipe['heated']))
+                self.assertFalse(recipe.get('high_heat',False))
+                self.assertEqual([{'ingredient':'minecraft:'+feed,'count':1}],recipe['ingredients'])
+                self.assertEqual({'id':'minecraft:'+output,'count':1},recipe['result'])
+                # The separate tool field is retained by WorkshopRecipe/WorkLane;
+                # it must never become an ingredient consumed with every block.
+                self.assertEqual({'id':'jugcraft:garnet_sanding_block'},recipe['tool'])
+                self.assertNotIn('jugcraft:garnet_sanding_block',
+                    [part['ingredient'] for part in recipe['ingredients']])
+                self.assertEqual({'machines','mineral_sands'},
+                    {condition['feature'] for condition in recipe['fabric:load_conditions']})
 
     def test_bootstrap_excludes_powered_stations_and_requires_installed_parts(self):
         report=build()

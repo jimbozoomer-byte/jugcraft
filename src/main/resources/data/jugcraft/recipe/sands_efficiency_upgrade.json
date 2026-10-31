@@ -1,0 +1,28 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "rare_earths"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "WYW",
+    "PCP"
+  ],
+  "key": {
+    "W": "#c:wires/copper",
+    "Y": "jugcraft:yttrium_oxide",
+    "P": "#c:plates/steel",
+    "C": "jugcraft:basic_circuit"
+  },
+  "result": {
+    "id": "jugcraft:efficiency_upgrade",
+    "count": 1
+  }
+}

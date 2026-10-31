@@ -160,6 +160,10 @@ public final class PetroItems {
 	public static Item ABRASIVE_HEAD;
 	public static Item POLISHING_HEAD;
 
+	// Simplified regional mineral-sand processing; no extra machines or fluids.
+	public static Item NEODYMIUM_OXIDE, CERIUM_OXIDE, YTTRIUM_OXIDE, GARNET_GRIT;
+	public static Item CERIUM_POLISHING_HEAD, GARNET_ABRASIVE_HEAD, GARNET_SANDING_BLOCK;
+
 	// Chemical and structural alloy components, owner package 2.
 	public static Item CHROMITE_CONCENTRATE;
 	public static Item STAINLESS_FITTING;
@@ -355,6 +359,13 @@ public final class PetroItems {
 		POLISHED_LENS = JugcraftRegistry.item("polished_lens");
 		ABRASIVE_HEAD = JugcraftRegistry.item("abrasive_head", properties -> new Item(properties.stacksTo(1)));
 		POLISHING_HEAD = JugcraftRegistry.item("polishing_head", properties -> new Item(properties.stacksTo(1)));
+		NEODYMIUM_OXIDE = JugcraftRegistry.item("neodymium_oxide");
+		CERIUM_OXIDE = JugcraftRegistry.item("cerium_oxide");
+		YTTRIUM_OXIDE = JugcraftRegistry.item("yttrium_oxide");
+		GARNET_GRIT = JugcraftRegistry.item("garnet_grit");
+		CERIUM_POLISHING_HEAD = JugcraftRegistry.item("cerium_polishing_head", properties -> new Item(properties.stacksTo(1)));
+		GARNET_ABRASIVE_HEAD = JugcraftRegistry.item("garnet_abrasive_head", properties -> new Item(properties.stacksTo(1)));
+		GARNET_SANDING_BLOCK = JugcraftRegistry.item("garnet_sanding_block", properties -> new Item(properties.stacksTo(1)));
 
 		CHROMITE_CONCENTRATE = JugcraftRegistry.item("chromite_concentrate");
 		STAINLESS_FITTING = JugcraftRegistry.item("stainless_fitting");
@@ -518,6 +529,13 @@ public final class PetroItems {
 			output.accept(POLISHED_LENS);
 			output.accept(ABRASIVE_HEAD);
 			output.accept(POLISHING_HEAD);
+			output.accept(NEODYMIUM_OXIDE);
+			output.accept(CERIUM_OXIDE);
+			output.accept(YTTRIUM_OXIDE);
+			output.accept(GARNET_GRIT);
+			output.accept(CERIUM_POLISHING_HEAD);
+			output.accept(GARNET_ABRASIVE_HEAD);
+			output.accept(GARNET_SANDING_BLOCK);
 
 			output.accept(FLUORITE_CONCENTRATE);
 			output.accept(CALCIUM_SULFATE);

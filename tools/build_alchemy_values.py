@@ -118,6 +118,18 @@ def build(jar):
         pending=local_items-set(values)
         root=min(pending,key=lambda s:(0 if s.endswith(('_ingot','_gem','_dust','_planks')) else 1 if not s.endswith(('_block','_nugget','_slab')) else 2,s))
         values[root]=Fraction(1);origins[root]='fallback (balance pending)';locked.add(root);propagate()
+    # Independent rare-earth outputs must fit the input budget even when all
+    # three rolls succeed. Allocate one quarter of the mixed feed to each
+    # named unit: one Nd + two Ce + one Y spends the whole mixed-oxide value.
+    # Do not price only the average drop: lucky batches must not mint essence.
+    mixed_oxide = values.get('jugcraft:rare_earth_oxide', Fraction(1))
+    for material in ('neodymium_oxide', 'cerium_oxide', 'yttrium_oxide'):
+        item = 'jugcraft:' + material
+        if item in local_items:
+            values[item] = mixed_oxide / 4
+            origins[item] = 'local rare-earth maximum coproduct allocation'
+            locked.add(item)
+    propagate()
     # Every local item definition has a value, including uncraftable decorative assets.
     for key in local_items:
         if key not in values:values[key]=Fraction(1);origins[key]='fallback (balance pending)'

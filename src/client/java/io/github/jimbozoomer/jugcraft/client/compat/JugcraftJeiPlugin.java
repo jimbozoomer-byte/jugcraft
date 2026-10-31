@@ -59,7 +59,10 @@ public class JugcraftJeiPlugin implements IModPlugin {
 
 	/** A fluid machine's recipe (FLUID_RECIPES in tools/petro.py): items and fluids in, fluids and items out, in mB. */
 	public record FluidViewRecipe(List<List<ItemStack>> items, List<FluidAmount> fluids, List<FluidAmount> fluidResults,
-			List<ItemStack> results, int ticks, List<ItemStack> tool, int energyPerTick, List<Integer> retainedInputs) {
+			List<ItemStack> results, int ticks, List<ItemStack> tool, int energyPerTick, List<Integer> retainedInputs,
+			List<Float> resultChances) {
+		public float resultChance(int index) { return index < resultChances.size() ? resultChances.get(index) : 1.0F; }
+		public boolean independentResults() { return resultChances.stream().anyMatch(chance -> chance < 1.0F); }
 	}
 
 	public record FluidAmount(Fluid fluid, int mb) {
@@ -220,7 +223,8 @@ public class JugcraftJeiPlugin implements IModPlugin {
 							fluids(recipe.getAsJsonArray("fluid_results")), results, recipe.get("ticks").getAsInt(),
 							recipe.has("tool") && !recipe.get("tool").getAsString().isEmpty() ? stacks(recipe.get("tool").getAsString(), 1) : List.of(),
 							recipe.has("energy_per_tick") ? recipe.get("energy_per_tick").getAsInt() : 0,
-                                recipe.has("retained_inputs") ? java.util.stream.StreamSupport.stream(recipe.getAsJsonArray("retained_inputs").spliterator(),false).map(JsonElement::getAsInt).toList() : List.of()));
+                                recipe.has("retained_inputs") ? java.util.stream.StreamSupport.stream(recipe.getAsJsonArray("retained_inputs").spliterator(),false).map(JsonElement::getAsInt).toList() : List.of(),
+                                recipe.has("result_chances") ? java.util.stream.StreamSupport.stream(recipe.getAsJsonArray("result_chances").spliterator(),false).map(JsonElement::getAsFloat).toList() : List.of()));
 				}
 				result.add(new FluidMachine(block, type, recipes));
 			}
@@ -587,7 +591,9 @@ public class JugcraftJeiPlugin implements IModPlugin {
 
 		@Override
 		public int getHeight() {
-			return machine.recipes().stream().anyMatch(r -> !r.tool().isEmpty()) ? 58 : 38;
+			boolean tool = machine.recipes().stream().anyMatch(r -> !r.tool().isEmpty());
+			boolean chance = machine.recipes().stream().anyMatch(FluidViewRecipe::independentResults);
+			return chance ? tool ? 88 : 68 : tool ? 58 : 38;
 		}
 
 		@Override
@@ -629,10 +635,19 @@ public class JugcraftJeiPlugin implements IModPlugin {
 		@Override
 		public void draw(FluidViewRecipe recipe, IRecipeSlotsView slots, GuiGraphicsExtractor graphics, double mouseX, double mouseY) {
 			var font = Minecraft.getInstance().font;
+			boolean chance = recipe.independentResults();
+			if (chance) {
+				for (int i = 0; i < recipe.results().size(); i++) {
+					String label = Math.round(recipe.resultChance(i) * 100) + "%";
+					int center = 100 + (recipe.fluidResults().size() + i) * 18;
+					graphics.text(font, label, center - font.width(label) / 2, 28, TEXT, false);
+				}
+				graphics.text(font, "Independent rolls", 0, 54, TEXT, false);
+			}
 			graphics.text(font, String.format(Locale.ROOT, "%.1f s", recipe.ticks() / 20.0)
-					+ (recipe.energyPerTick() > 0 ? " / " + recipe.energyPerTick() + " JE/t" : ""), 0, 28, TEXT, false);
-			if (!recipe.tool().isEmpty()) graphics.text(font, "Reusable catalyst", 22, 43, TEXT, false);
-            if (!recipe.retainedInputs().isEmpty()) graphics.text(font, "Acid charge retained (top)", 0, 43, TEXT, false);
+					+ (recipe.energyPerTick() > 0 ? " / " + recipe.energyPerTick() + " JE/t" : ""), 0, chance ? 43 : 28, TEXT, false);
+			if (!recipe.tool().isEmpty()) graphics.text(font, "Reusable catalyst", 22, chance ? 65 : 43, TEXT, false);
+            if (!recipe.retainedInputs().isEmpty()) graphics.text(font, "Acid charge retained (top)", 0, chance ? 65 : 43, TEXT, false);
 		}
 	}
 }

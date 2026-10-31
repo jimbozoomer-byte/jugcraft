@@ -1259,6 +1259,9 @@ def build():
     import ceramics
     chapters.append({"title": "Ceramics and Precision", "icon": "jugcraft:porcelain_insulator",
                      "pages": ceramics.GUIDE_PAGES + [form_page('precision_finisher')]})
+    import mineral_sand_processing
+    chapters.append({'title': 'Mineral Sand Processing', 'icon': 'jugcraft:rare_earth_sand',
+                     'pages': mineral_sand_processing.GUIDE_PAGES})
     import structural_alloys
     chapters.append({"title": "Stainless and Structural Alloys", "icon": "jugcraft:stainless_steel_ingot",
                      "pages": structural_alloys.GUIDE_PAGES})

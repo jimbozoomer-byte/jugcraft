@@ -220,7 +220,7 @@ public class FormMachineScreen extends AbstractContainerScreen<FormMachineMenu> 
 			MachineSkin.slot(graphics, theme, x + MachineMenu.fluidItemInputX(spec, slot), y + MachineMenu.SLOT_Y);
 		}
 		for (int slot = 0; slot < form.itemOutputs(); slot++) {
-			MachineSkin.slot(graphics, theme, x + MachineMenu.fluidItemOutputX(spec, slot), y + MachineMenu.SLOT_Y);
+			MachineSkin.slot(graphics, theme, x + MachineMenu.fluidItemOutputX(spec, slot), y + MachineMenu.fluidItemOutputY(spec, slot));
 		}
 		int tools = form.sockets().size() + form.upgradeSlots();
 		for (int index = 0; index < tools; index++) {
