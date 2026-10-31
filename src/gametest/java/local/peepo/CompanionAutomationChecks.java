@@ -197,8 +197,11 @@ final class CompanionAutomationChecks {
         var plan=m.companionPort.selection();check(plan.parts().size()>=2,"multi-input recipe fixture");
         for(var part:plan.parts()){
             var stack=new ItemStack(part.ingredient().items().findFirst().orElseThrow(),64);
-            check(insert(m.companionPort.inputs(),stack,false)>0,"planned ingredient probe");
-            check(insert(m.companionPort.inputs(),stack,true)==part.count(),"stock exactly one recipe batch");
+            int expected=part.count()*8,before=count(m,stack.getItem());
+            check(expected<=stack.getMaxStackSize(),"eight-recipe fixture fits its native ingredient stack");
+            check(insert(m.companionPort.inputs(),stack,false)==expected && count(m,stack.getItem())==before,"eight-recipe ingredient probe rolls back exactly");
+            check(insert(m.companionPort.inputs(),stack,true)==expected && count(m,stack.getItem())==before+expected,"stock exactly eight balanced recipe sets");
+            check(insert(m.companionPort.inputs(),stack,true)==0,"loaded ingredient cap rejects an extra recipe");
         }
         check(insert(m.companionPort.inputs(),new ItemStack(Items.DIAMOND),true)==0,"reject unrelated ingredient");
         check(extract(m.companionPort.outputs(),m.getItem(0),true)==0,"never collect inputs as output");
@@ -436,13 +439,13 @@ final class CompanionAutomationChecks {
     private void supplyOff(TestServerContext server){
         final PeepoEntity[] helper={null};final Container[] source={null};final MachineBlockEntity[] processor={null};
         server.runOnServer(s->{var l=s.overworld();reset(l);var p=npc(l,s.getPlayerList().getPlayers().getFirst(),false);helper[0]=p;
-            var m=machine(l,MachineKind.ELECTRIC_FURNACE,false);processor[0]=m;ironRecipe(m);source[0]=chest(l,base.west(4));source[0].setItem(0,new ItemStack(Items.IRON_ORE,2));
+            var m=machine(l,MachineKind.ELECTRIC_FURNACE,false);processor[0]=m;ironRecipe(m);source[0]=chest(l,base.west(4));source[0].setItem(0,new ItemStack(Items.IRON_ORE,10));
             p.assignments.assign(l,m.getBlockPos());p.assignments.assignContainer(l,base.west(4),Direction.UP,false);walking(p);
         });
         server.waitFor(s->helper[0].transport.reserved(0),500);
-        server.runOnServer(s->{check(count(source[0],Items.IRON_ORE)==1,"one batch ingredient physically picked up");helper[0].assignments.cycleTransport(1,true);helper[0].assignments.cycleTransport(1,true);});
-        server.waitFor(s->count(source[0],Items.IRON_ORE)==2,500);
-        server.runOnServer(s->{check(processor[0].getItem(0).isEmpty() && count(helper[0].belongings,Items.IRON_ORE)==0,"Off returned ingredient without insertion or duplication");cleanup();});
+        server.runOnServer(s->{check(count(source[0],Items.IRON_ORE)==2 && count(helper[0].belongings,Items.IRON_ORE)==8 && processor[0].isEmpty(),"bounded eight-recipe batch is real cargo before machine insertion");helper[0].assignments.cycleTransport(1,true);helper[0].assignments.cycleTransport(1,true);});
+        server.waitFor(s->count(source[0],Items.IRON_ORE)==10,500);
+        server.runOnServer(s->{check(processor[0].isEmpty() && count(helper[0].belongings,Items.IRON_ORE)==0 && count(helper[0].belongings,Items.IRON_INGOT)==0,"Supply Off returns all eight ingredients once without insertion, processing or duplication");cleanup();});
     }
     private static final String THREE_GLOW="water 3; add minecraft:glowstone_dust jugcraft:raw; add minecraft:glowstone_dust jugcraft:raw; add minecraft:glowstone_dust jugcraft:raw; stir hot; stir hot";
     /** Concordance Chunk C, C-06: a crucible full of something else takes none of a companion's cargo, which goes back, none lost or doubled. No water is poured, so the crucible waits at its first step and consumes nothing that arrives. */

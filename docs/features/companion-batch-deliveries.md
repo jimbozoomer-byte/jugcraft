@@ -70,6 +70,12 @@ The final processor revision, including persisted partial-delivery guidance and 
 
 All runs used `build-local.ps1`, `runClientGameTest`, explicit `-PclientTests` selections, the isolated `build/peepo-handoff-gradle-cache` and `build/peepo-handoff-isolated.init.gradle`, and disposable worlds under `build/peepo-handoff-validation/run/batchJobsClientGameTest`. `processResources` was excluded because the isolated resources were already prepared and this change adds no companion assets; `deleteGameTestRunDir` was excluded to protect the concurrent build's run directory. Repository/documentation-link and scoped whitespace checks passed. No full-pack suite, dedicated two-client/load benchmark, distribution update, push or live-server restart was performed.
 
+### CI expectation follow-up — 31 October 2026
+
+Implemented with **OpenAI Codex (GPT-6)**. PR #593's companion client check exposed two older single-recipe expectations after the eight-recipe processor batching change. The automation regression now checks the exact eight-set ingredient limit, rollback during insertion probes, refusal of extra ingredients, and return of all eight real carried ingredients when Supply is disabled. Runtime behavior is unchanged.
+
+Validation using `9aff1a79c` plus this test correction: `PeepoCompanionClientTests` passed **46 groups / 755 assertions / zero failures**, including physical transport, chunk unload/reload, and disposable dedicated-server menus/reconnect. The focused `runClientGameTest -PclientTests=PeepoCompanionClientTests` run used the same isolated build/cache and prepared resources described above, with `-x deleteGameTestRunDir -x processResources`, on Minecraft 26.3 / Fabric Loader 0.19.5 / Java 25. Build succeeded; evidence is in `build/peepo-ci-batch-fixtures-tests.log`. All other checks on the preceding PR commit passed. No full-pack suite, distribution update or live-server restart was performed locally for this correction.
+
 ## Energy and server bounds
 
 While moving, transport spends `2 + max(0, stacks - 1) + max(0, ceil(items / 32) - 1)` JE per tick, based on the remaining delivery load. Empty trips and a single stack of up to 32 cost 2 JE/tick; a pie plus coal normally costs 3; two stacks totaling 128 cost 6; eight full 64-item stacks cost 24. Station work, rest, meals and regeneration retain their existing rules. Existing hearth loading/collection costs remain unchanged.
