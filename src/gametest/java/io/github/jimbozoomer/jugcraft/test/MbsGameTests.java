@@ -308,11 +308,16 @@ public class MbsGameTests {
 	@GameTest(structure = ARENA, maxTicks = 40)
 	public void chemicalReactorDropsFromEveryPartWithAPickaxe(GameTestHelper helper) {
 		MachineBlock reactor = JugcraftMachines.MACHINES.get(MachineKind.CHEMICAL_REACTOR);
-		for (Direction facing : List.of(Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST)) {
-			BlockState state = ((LargeMachineBlock) reactor).formed(reactor.defaultBlockState()).setValue(MachineBlock.FACING, facing);
-			for (int part = 0; part < reactor.footprint(state).size(); part++) {
-				mineMachine(helper, reactor, state, part);
+		ServerPlayer player = player(helper, helper.absolutePos(new BlockPos(20, 1, 20)), GameType.SURVIVAL);
+		try {
+			for (Direction facing : List.of(Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST)) {
+				BlockState state = ((LargeMachineBlock) reactor).formed(reactor.defaultBlockState()).setValue(MachineBlock.FACING, facing);
+				for (int part = 0; part < reactor.footprint(state).size(); part++) {
+					mineMachine(helper, player, reactor, state, part);
+				}
 			}
+		} finally {
+			helper.getLevel().getServer().getPlayerList().remove(player);
 		}
 		helper.succeed();
 	}
@@ -320,26 +325,31 @@ public class MbsGameTests {
 	@GameTest(structure = ARENA, maxTicks = 40)
 	public void allMachinesCanBeHarvestedWithAPickaxe(GameTestHelper helper) {
 		int checked = 0;
-		for (Block block : BuiltInRegistries.BLOCK) {
-			if (!(block instanceof MachineBlock machine) || !BuiltInRegistries.BLOCK.getKey(block).getNamespace().equals("jugcraft")) {
-				continue;
+		ServerPlayer player = player(helper, helper.absolutePos(new BlockPos(20, 1, 20)), GameType.SURVIVAL);
+		try {
+			for (Block block : BuiltInRegistries.BLOCK) {
+				if (!(block instanceof MachineBlock machine) || !BuiltInRegistries.BLOCK.getKey(block).getNamespace().equals("jugcraft")) {
+					continue;
+				}
+				BlockState state = machine.defaultBlockState();
+				if (machine instanceof LargeMachineBlock large) {
+					state = large.formed(state);
+				}
+				int size = machine.footprint(state).size();
+				for (int part : java.util.stream.IntStream.of(0, Math.min(1, size - 1), size - 1).distinct().toArray()) {
+					mineMachine(helper, player, machine, state, part);
+				}
+				checked++;
 			}
-			BlockState state = machine.defaultBlockState();
-			if (machine instanceof LargeMachineBlock large) {
-				state = large.formed(state);
-			}
-			int size = machine.footprint(state).size();
-			for (int part : java.util.stream.IntStream.of(0, Math.min(1, size - 1), size - 1).distinct().toArray()) {
-				mineMachine(helper, machine, state, part);
-			}
-			checked++;
+		} finally {
+			helper.getLevel().getServer().getPlayerList().remove(player);
 		}
 		Jugcraft.LOGGER.info("[machine-pickaxe-audit] harvested {} machines through controller, next and last parts", checked);
 		helper.assertTrue(checked > 90, "registered machine roster checked");
 		helper.succeed();
 	}
 
-	private static void mineMachine(GameTestHelper helper, MachineBlock machine, BlockState state, int brokenPart) {
+	private static void mineMachine(GameTestHelper helper, ServerPlayer player, MachineBlock machine, BlockState state, int brokenPart) {
 		BlockPos origin = helper.absolutePos(new BlockPos(20, 1, 20));
 		clearItems(helper, origin);
 		var footprint = machine.footprint(state);
@@ -349,7 +359,6 @@ public class MbsGameTests {
 					: state.hasProperty(LargeMachineBlock.PART) ? state.setValue(LargeMachineBlock.PART, part) : state;
 			helper.getLevel().setBlock(footprint.partPos(origin, state.getValue(MachineBlock.FACING), part), cell, Block.UPDATE_ALL);
 		}
-		ServerPlayer player = player(helper, origin, GameType.SURVIVAL);
 		boolean reactor = machine == JugcraftMachines.MACHINES.get(MachineKind.CHEMICAL_REACTOR);
 		if (reactor) {
 			((MachineBlockEntity) helper.getLevel().getBlockEntity(origin))

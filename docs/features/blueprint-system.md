@@ -269,3 +269,18 @@ syntax, industrial-form tag coverage and diff checks passed. The full data audit
 and generator import could not run because the local asset tooling lacks
 DejaVuSansCondensed-Bold.ttf. No human client, multiplayer or full-suite run was
 performed for this fix.
+
+
+### PR 597 CI follow-up
+
+The generated pickaxe tag must use the generator's sorted order. The first CI
+resource freshness check found only that ordering mismatch; entries are unchanged.
+The two harvesting tests now reuse one mock player each and remove them in
+`finally`, rather than retaining hundreds of connected players after the tests.
+The optional-integration full-suite job had exhausted its 4 GiB Java heap.
+No assertions, test coverage, heap limits or workflows were relaxed.
+
+Both harvesting regressions passed again with 137 machines and all 32 reactor
+part/orientation combinations. That local run used the existing built resources
+after verifying that the source tag and built tag have identical entries; only
+their ordering differs. CI independently regenerates resources.
