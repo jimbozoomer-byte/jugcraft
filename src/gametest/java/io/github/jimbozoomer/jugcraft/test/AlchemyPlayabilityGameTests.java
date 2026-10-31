@@ -203,7 +203,7 @@ public class AlchemyPlayabilityGameTests {
         var p=player(h);
         for(var stack:List.of(new ItemStack(Items.STONE_BRICK_WALL),new ItemStack(Items.QUARTZ_PILLAR),vanilla("oxidized_cut_copper"),new ItemStack(Items.OAK_SHELF),
                 new ItemStack(Items.SEA_LANTERN),vanilla("white_concrete"),item("maple_planks"),item("household_oak_chair"),
-                vanilla("oak_sapling"),vanilla("oak_boat"),vanilla("chest"),item("landscape_maple_boat"),item("household_oak_drawer"),item("household_light_fridge"),vanilla("smithing_table"),item("lampwright_bench"),item("blackjack_table"))){
+                vanilla("oak_sapling"),vanilla("oak_boat"),vanilla("chest"),item("landscape_maple_boat"),item("household_oak_drawer"),item("household_light_fridge"),vanilla("smithing_table"),item("lampwright_bench"),item("blackjack_table"),item("jimta_charging_table"),item("black_iron_column"))){
             h.assertTrue(TabletOutputs.allowed(stack),"A decorative block is a tablet output: "+stack);
             var material=AlchemicalWorkshopBlockEntity.material(stack);
             h.assertTrue(material!=null&&!AlchemyValues.source(BuiltInRegistries.ITEM.getKey(stack.getItem()).toString()).startsWith("fallback"),

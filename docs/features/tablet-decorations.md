@@ -10,7 +10,7 @@ Primary specialty and supported player role: builders and decorators
 
 ## Player experience
 
-The tablet's list of what it may make (`jugcraft:tablet_outputs`) grows from 394 items to 2,556. They are made the way the old ones are: dissolve one to learn it, then make more for its essence price. Nothing about dissolving changes.
+The tablet's list of what it may make (`jugcraft:tablet_outputs`) grows from 394 items to 2,569. They are made the way the old ones are: dissolve one to learn it, then make more for its essence price. Nothing about dissolving changes.
 
 **Vanilla:**
 - every stone wall (26, with mud brick and resin brick), the nether brick fence;
@@ -27,15 +27,15 @@ The tablet's list of what it may make (`jugcraft:tablet_outputs`) grows from 394
 
 **Jugcraft:** every piece of all 56 woods (logs, wood, planks, slabs, stairs, fences, gates, doors, trapdoors, buttons, plates, signs and leaves where they exist), stone and brick families, glass, columns, lamps, pots and planters, decorations, and household and crafted furniture (chairs, tables, desks, sofas, stools, benches, beds, cabinets, baths, basins, sinks, toilets, hedges, lattice fences, trims, tableware and trophies). Machines, food, tools and boss, quest or ritual items stay out.
 
-**Also on the tablet, as the contributor asked on 30 October 2026:** every sapling (vanilla and Jugcraft, 79), every boat, chest boat and raft (67), containers (chests, trapped chests, barrels, and the household and crafted crates, coolers, drawers, cupboards, nightstands, shelves, storage cabinets and jars, mail and post boxes and recycling bins: 174), work tables (the vanilla crafting, cartography, fletching and smithing tables, loom, stonecutter and grindstone, and Jugcraft's artificer's, lampwright's and workshop benches, workbench, drafting, map, blueprint, spelunkery, fortune teller's and inscription tables, apothecary shelf, lab bench and lab table: 20) and the game tables (baccarat, blackjack, craps, roulette and derby tables, the arcade cabinet and lottery kiosk: 7). A container is made empty, and a filled one is never dissolved, as before. Of the household appliances, the grills and trampolines (16 colours each), the cutting boards (11 woods), the light and dark fridges, freezers, stoves, microwaves, toasters, range hoods and light switches, the doorbell and the oven (59) are made; the electricity generators, computer, television, remote and the coffee and microwave counters, and the scribe's, alteration, judges' and hologram tables, lab sink and Beast transmutation table, stay off, as the contributor chose; so do potted saplings (a pot placed with a sapling, not something to make) and the Jimta carbon and electric boats (made of carbon plate and steel parts, still unpriced: see Metals).
+**Also on the tablet, as the contributor asked on 30 October 2026:** every sapling (vanilla and Jugcraft, 79), every boat, chest boat and raft (67), containers (chests, trapped chests, barrels, and the household and crafted crates, coolers, drawers, cupboards, nightstands, shelves, storage cabinets and jars, mail and post boxes and recycling bins: 174), work tables (the vanilla crafting, cartography, fletching and smithing tables, loom, stonecutter and grindstone, and Jugcraft's artificer's, lampwright's and workshop benches, workbench, drafting, map, blueprint, spelunkery, fortune teller's and inscription tables, apothecary shelf, lab bench and lab table: 20) and the game tables (baccarat, blackjack, craps, roulette and derby tables, the arcade cabinet and lottery kiosk: 7). A container is made empty, and a filled one is never dissolved, as before. Of the household appliances, the grills and trampolines (16 colours each), the cutting boards (11 woods), the light and dark fridges, freezers, stoves, microwaves, toasters, range hoods and light switches, the doorbell and the oven (59) are made; the electricity generators, computer, television, remote and the coffee and microwave counters, and the scribe's, alteration, judges' and hologram tables, lab sink and Beast transmutation table, stay off, as the contributor chose; so do potted saplings (a pot placed with a sapling, not something to make).
 
-**Only items with a real price are made.** Six are not yet, because they are made of steel or other metal parts whose prices are still the one-essence fallback (`access_floor_tile`, `black_iron_column`, `concrete_column`, `fluted_marble_column`, `imperial_gas_lamp`, `jimta_alloy_glass`): see Prices.
+**Only items with a real price are made.** The six steel and metal decorations (`access_floor_tile`, `black_iron_column`, `concrete_column`, `fluted_marble_column`, `imperial_gas_lamp`, `jimta_alloy_glass`), the five Jimta industrial tables (advanced crafting, assembly, charging, integration and programming) and the carbon and electric boats joined once the metal chain was priced (see Metals).
 
 ## Prices
 
 New prices, in `tools/build_alchemy_values.py` and `data/jugcraft/alchemy/values.json` (marked "local decorative accounting"):
 - weathered copper is worth the copper it grew from; concrete is its powder; pale moss is moss; mushroom blocks and stems are a mushroom; the warped wart block is a nether wart block; wildflowers are a yellow dye; rooted dirt is dirt; a stripped bamboo block is a bamboo block;
-- mud is 1 (dirt and water), packed mud 25 (mud and wheat), mud bricks 25, a mud brick slab 12½; resin clumps 16 and resin bricks 16 a block; glow ink sacs 64, so a glow item frame is 96¼;
+- mud is 64, the four clay balls water treatment dries it into (at 1 it was a loop: tablet mud into clay worth 64), packed mud 88 (mud and wheat), mud bricks 88, a mud brick slab 44; resin clumps 16 and resin bricks 16 a block; glow ink sacs 64, so a glow item frame is 96¼;
 - **provisional, for the owner:** froglights 64, shroomlights 64, the bell 8,192, resin clumps 16, glow ink sacs 64.
 
 The builder needs the game's jar, which was not available, so these records were written as it computes them; where a vanilla recipe's yield was uncertain (mud bricks, resin bricks) the lower reading was used, so a block can never be dissolved for more than it costs to craft. The owner's next run of the builder replaces them with its own exact figures.
@@ -50,7 +50,19 @@ Many Jugcraft materials had no price and fell to the one-essence fallback, so wh
 - Jugcraft saplings are 32 like vanilla's, except, as the contributor asked on 30 October 2026, Magic saplings (64) and the four Ars Nouveau archwood saplings (128), with their wood to match: Magic logs 64 (planks 16) and archwood logs and wood 128 (planks 32), set directly because the shared log and plank tags otherwise fix them at vanilla's 32 and 8. Everything made from them was recomputed: the woods' slabs, stairs, doors, signs, boats and the rest, the archwood chest, grate and sconce, the Ars Nouveau rituals and scrolls made with archwood (the Ritual of Awakening, made with all four saplings, is 1,152), the imbuement chamber, dowsing rod, spell prism and ghost train; **provisional:** Thornwood branches 4, a broken rubber boat 5 (and, priced while work tables were considered, the scribe's table 128, magebloom 16 and the Farseer arm 64);
 - **sulfur dust is 96**: two and a gravel craft gunpowder (192), and at one essence that was 186 essence a craft.
 
-Only Jugcraft prices that rested on an unpriced material changed (about 930); vanilla prices are untouched, because the game's own recipes, which the builder reads from the jar, may make them cheaper. Steel, zinc, brass and coke were left unpriced: machines make their plates, blocks and dust from forms that are themselves still at the fallback, so a price for the ingot alone opened loops through those machines (a molding press makes a gasket from 3/4 of an essence of silicone; at a steel plate of 384, a crafted gasket was worth 96). They need the whole metal chain priced at once.
+Only Jugcraft prices that rested on an unpriced material changed (about 930); vanilla prices are untouched, because the game's own recipes, which the builder reads from the jar, may make them cheaper.
+
+### Metals
+
+Priced on 30 October 2026, as the contributor asked, the way the game already prices iron, copper and tin: by the ingot, with ores, raw ore and dust left as mined (so smelting what you mine still earns, as it does for iron). Every item whose price rested on an unpriced metal or part was recomputed from its cheapest real route, **machine recipes included** (a copy of the builder that also reads pressing, sawing, cutting, compressing, alloying, wire drawing, coking, steelmaking, chemical reactions and cooking, with fluids free and byproducts counted; growing machines are left out, since farms earn by design). About 1,110 prices changed; the 196 that only a machine recipe sets are written into `tools/data/alchemy_decorative_roots.json`, because the builder reads no machine recipe.
+- coke 128 (a coal in the coke oven); **steel 384** (an iron ingot and a coke), its plate 384 (pressed), block 3,456, dense plate 3,456 (nine plates), casing 192;
+- **zinc 128**, like copper (provisional), so **brass 128** (three copper and a zinc make four); invar plate 512; silver wire 170⅔ (three drawn from a silver ingot); precision shaft 384; porcelain insulator about 65;
+- plastics as the owner's plastic sheet: LDPE pellets and PVC resin 1, their offcuts ¼ (four reclaim into a pellet), film and profile 1¼;
+- **provisional:** bauxite 32, borax 16, aluminum hydroxide 16 (a bauxite makes two);
+- the molding press still makes a gasket from ¾ of an essence of silicone, so the gasket stays ¾, not the 96 a steel plate would make it;
+- titanium was left alone: its sponge is made from magnesium that is still unpriced, and a price for the sponge alone opened a loop through electrolysis.
+
+A local audit of every crafting and machine recipe found no recipe made more profitable by these prices except smelting mined ore and dust into ingots, which the game already does for every metal. It also found that mud at 1 dried into clay worth 64 through water treatment (mud is now 64) and that cinder block walls and stairs cost half an essence more than the block they are cut from (now the same).
 
 ### A loop closed
 
@@ -96,7 +108,7 @@ Eight tablet-made tuff (32 essence) and one Manipulation Essence (an uncommon lo
 | Yew (`yew`) | door, trapdoor, button, pressure plate, sign, hanging sign, shelf, boat |
 | Yucca (`yucca`) | door, trapdoor, button, pressure plate, sign, hanging sign, shelf, boat |
 
-**Metals.** Steel, zinc, brass and coke are still at the one-essence fallback, with every machine-made form of them. Pricing them needs the whole chain at once (ore, raw, dust, ingot, nugget, plate, block, and every machine recipe between them); until then the six steel and metal decorations above stay off the tablet.
+**Metals.** Priced (see Metals above). Still unpriced: magnesium and the titanium sponge made from it (the brine and magnesium chloride chain), which only titanium needs.
 
 ## Connections
 

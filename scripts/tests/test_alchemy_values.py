@@ -115,3 +115,16 @@ class AlchemyValueTests(unittest.TestCase):
         self.assertEqual(value('jugcraft:nouveau_archwood_planks'),32)
         # Manipulation essence turns one archwood sapling into the next: it must not make essence.
         self.assertLessEqual(value('jugcraft:nouveau_blue_archwood_sapling'),value('jugcraft:nouveau_manipulation_essence')+value('jugcraft:nouveau_red_archwood_sapling'))
+
+    def test_metal_chain_is_priced(self):
+        """Steel is iron and coke, plates are pressed from ingots and brass is three copper and a zinc (docs/features/tablet-decorations.md)."""
+        self.assertEqual(value('jugcraft:coke'),value('minecraft:coal'))
+        self.assertEqual(value('jugcraft:steel_ingot'),value('minecraft:iron_ingot')+value('jugcraft:coke'))
+        self.assertEqual(value('jugcraft:steel_plate'),value('jugcraft:steel_ingot'))
+        self.assertEqual(value('jugcraft:zinc_ingot'),value('minecraft:copper_ingot'))
+        self.assertEqual(4*value('jugcraft:brass_ingot'),3*value('minecraft:copper_ingot')+value('jugcraft:zinc_ingot'))
+        self.assertEqual(9*value('jugcraft:steel_plate'),value('jugcraft:jimta_dense_steel_plate'))
+        self.assertEqual(3*value('jugcraft:silver_wire'),value('jugcraft:silver_ingot'))
+
+    def test_mud_is_worth_the_clay_it_dries_into(self):
+        self.assertGreaterEqual(value('minecraft:mud'),4*value('minecraft:clay_ball'))

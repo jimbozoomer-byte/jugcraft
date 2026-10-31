@@ -2778,6 +2778,19 @@
     "jugcraft:jimta_spellbooks_inscription_table",
     "jugcraft:apothecary_shelf",
     "jugcraft:lab_bench",
-    "jugcraft:lab_table"
+    "jugcraft:lab_table",
+    "jugcraft:access_floor_tile",
+    "jugcraft:black_iron_column",
+    "jugcraft:concrete_column",
+    "jugcraft:fluted_marble_column",
+    "jugcraft:imperial_gas_lamp",
+    "jugcraft:jimta_alloy_glass",
+    "jugcraft:jimta_advanced_crafting_table",
+    "jugcraft:jimta_assembly_table",
+    "jugcraft:jimta_charging_table",
+    "jugcraft:jimta_integration_table",
+    "jugcraft:jimta_programming_table",
+    "jugcraft:jimta_carbon_boat",
+    "jugcraft:jimta_electric_boat"
   ]
 }

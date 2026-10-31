@@ -75,16 +75,16 @@ def build(jar):
         values['jugcraft:'+ore] = 4 * values['minecraft:quartz']
         origins['jugcraft:'+ore] = 'local quartz mining/Fortune accounting'
     # Roots of decorative families the tablet makes (docs/features/tablet-decorations.md) that nothing crafts: mud is
-    # dirt and water; resin clumps and glow ink sacs are mob/creaking drops (provisional, for the owner). Their
+    # worth the four clay balls water treatment dries it into (64); resin clumps and glow ink sacs are mob/creaking drops (provisional, for the owner). Their
     # crafted forms (packed mud, mud bricks, resin bricks, glow item frames) then come from the game's recipes.
-    for item, price in {'mud': 1, 'resin_clump': 16, 'glow_ink_sac': 64}.items():
+    for item, price in {'mud': 64, 'resin_clump': 16, 'glow_ink_sac': 64}.items():
         values['minecraft:'+item] = Fraction(price); origins['minecraft:'+item] = 'local decorative accounting'
     # Manipulation essence is uncommon loot; at one essence, eight tablet-made tuff and one essence became eight
     # calcite worth 224 more. This is the least price that makes that recipe (and deepslate to tuff) gain nothing.
     values['jugcraft:nouveau_manipulation_essence'] = 8 * Fraction(32) - 8 * Fraction(4)
     origins['jugcraft:nouveau_manipulation_essence'] = 'local tuff/calcite conversion accounting'
-    # Materials no recipe makes under the tablet's decorations (and the metals and sulfur beside them): without these
-    # they fell to the one-essence fallback, and a Landscapes plank was worth a quarter.
+    # Materials no recipe makes under the tablet's decorations, and values only a machine recipe sets (the builder reads
+    # none): without these they fell to the one-essence fallback, a Landscapes plank was worth a quarter and steel one.
     for item, price in json.loads((ROOT / 'tools/data/alchemy_decorative_roots.json').read_text())['items'].items():
         values[item] = Fraction(price); origins[item] = 'local decorative accounting'
     locked=set(values)
