@@ -282,6 +282,8 @@ public final class JugcraftAgriculture {
 			"bamboo", "crimson", "warped");
 	/** The food displays' block entity (plates, platters and serving trays: {@link FoodDisplayBlock}). */
 	public static BlockEntityType<ShowcaseBlockEntity> FOOD_DISPLAY_ENTITY;
+	/** Persistent companion filters for the native blockstate-counted serving displays. */
+	public static BlockEntityType<ServingDisplayBlockEntity> SERVING_DISPLAY_ENTITY;
 	/** The use-block event phase that sets a vanilla pie down as a pie: after the default phase, as {@link #KNIFE_PHASE}. */
 	private static final Identifier SET_DOWN_PHASE = Jugcraft.id("set_down_pie");
 	public static BlockEntityType<CarvedPumpkinBlockEntity> CARVED_PUMPKIN_ENTITY;
@@ -3166,6 +3168,8 @@ public final class JugcraftAgriculture {
 		Block goblets = registerBlock("skull_goblets", SkullGobletsBlock::new, BlockBehaviour.Properties.of()
 				.mapColor(MapColor.SAND).strength(0.5F).sound(SoundType.DECORATED_POT).noOcclusion().lightLevel(SkullGobletsBlock::light)
 				.pushReaction(PushReaction.POPPED));
+		SERVING_DISPLAY_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("serving_display"),
+				FabricBlockEntityTypeBuilder.create(ServingDisplayBlockEntity::new, tower, platter, tray, cauldron, goblets, mould, tree).build());
 		for (Block block : List.of(dispenser, tower, platter, tray, cauldron, mould, tree, goblets)) {
 			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
 					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);

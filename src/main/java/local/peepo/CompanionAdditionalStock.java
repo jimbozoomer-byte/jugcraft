@@ -12,9 +12,11 @@ import net.minecraft.world.level.block.entity.*;
 final class CompanionAdditionalStock {
     static boolean supports(BlockEntity b){return b instanceof CiderPressBlockEntity || b instanceof CiderBarrelBlockEntity
         || b instanceof CanningKettleBlockEntity || b instanceof CandyKettleBlockEntity || b instanceof SpinningWheelBlockEntity
-        || b instanceof PunchBowlBlockEntity || b instanceof BrewingStandBlockEntity || b instanceof CrucibleBlockEntity || HandFarmCompanion.of(b)!=null;}
+        || b instanceof PunchBowlBlockEntity || b instanceof BrewingStandBlockEntity || b instanceof CrucibleBlockEntity || HandFarmCompanion.of(b)!=null
+        || DryingRackCompanion.of(b)!=null || ConfectionCompanion.of(b)!=null;}
     private static ItemStack item(String id){return new ItemStack(JugcraftAgriculture.item(id));}
     static ItemStack product(BlockEntity b){
+        var confection=ConfectionCompanion.of(b);if(confection!=null)return confection.product();
         if(b instanceof CiderPressBlockEntity)return item("sweet_cider");
         if(b instanceof CiderBarrelBlockEntity c)return item(CiderBarrelBlockEntity.STAGES.get(c.companionStage()));
         if(b instanceof PunchBowlBlockEntity)return item("witchs_brew_punch");
@@ -24,6 +26,8 @@ final class CompanionAdditionalStock {
         return ItemStack.EMPTY;
     }
     static List<ItemStack> results(BlockEntity b,ItemStack raw){
+        var rack=DryingRackCompanion.of(b);if(rack!=null){var result=rack.result(raw);return result.isEmpty()?List.of():List.of(result);}
+        var confection=ConfectionCompanion.of(b);if(confection!=null)return confection.results(raw);
         var handFarm=HandFarmCompanion.of(b);if(handFarm!=null){var result=handFarm.result(raw);return result.isEmpty()?List.of():List.of(result);}
         if(b instanceof SpinningWheelBlockEntity){var color=Knitting.woolColor(raw);return color==null?List.of():List.of(Knitting.yarn(color.getTextureDiffuseColor(),Knitting.YARN_PER_WOOL));}
         if(b instanceof CanningKettleBlockEntity){if(!(raw.getItem() instanceof PreserveJarItem))return List.of();var out=raw.copyWithCount(1);PreserveJarItem.seal(out);return List.of(out);}
@@ -31,6 +35,8 @@ final class CompanionAdditionalStock {
     }
     private static int matching(List<ItemStack> stacks,java.util.function.Predicate<ItemStack> predicate){return stacks.stream().filter(predicate).mapToInt(ItemStack::getCount).sum();}
     static boolean busy(BlockEntity b){
+        var rack=DryingRackCompanion.of(b);if(rack!=null)return rack.busy();
+        var confection=ConfectionCompanion.of(b);if(confection!=null)return confection.busy();
         var handFarm=HandFarmCompanion.of(b);if(handFarm!=null)return handFarm.busy();
         if(b instanceof CiderPressBlockEntity c)return c.pendingCider()>0;
         if(b instanceof CiderBarrelBlockEntity c)return c.servings()>0;
@@ -42,6 +48,8 @@ final class CompanionAdditionalStock {
         return b instanceof CrucibleBlockEntity c && c.companion.stockBusy();
     }
     private static Storage<ItemVariant> outputs(BlockEntity b){
+        var rack=DryingRackCompanion.of(b);if(rack!=null)return rack.outputs();
+        var confection=ConfectionCompanion.of(b);if(confection!=null)return confection.outputs();
         var handFarm=HandFarmCompanion.of(b);if(handFarm!=null)return handFarm.outputs();
         if(b instanceof CiderPressBlockEntity c)return c.companionOutputs();
         if(b instanceof CiderBarrelBlockEntity c)return c.companionOutputs();
@@ -57,6 +65,8 @@ final class CompanionAdditionalStock {
         int n=0;for(var view:outputs(b))if(!view.isResourceBlank() && stock.matches(icon,view.getResource().toStack(1)))n+=(int)view.getAmount();return n;
     }
     static int pending(BlockEntity b,ItemStack icon,List<ItemStack> incoming,CompanionProductionStock stock){
+        var rack=DryingRackCompanion.of(b);if(rack!=null)return rack.pending(icon,incoming);
+        var confection=ConfectionCompanion.of(b);if(confection!=null)return confection.pending(icon,incoming);
         var handFarm=HandFarmCompanion.of(b);if(handFarm!=null)return handFarm.pending(icon,incoming);
         if(b instanceof SpinningWheelBlockEntity c){
             int n=c.wool()!=null && stock.matches(icon,Knitting.yarn(c.wool().getTextureDiffuseColor(),1))?Knitting.YARN_PER_WOOL:0;
@@ -81,7 +91,8 @@ final class CompanionAdditionalStock {
     private static int cap(int nativeNeed,int missing,int yield){return missing==Integer.MAX_VALUE?nativeNeed:Math.min(nativeNeed,(missing+yield-1)/yield);}
     static int limit(PeepoEntity npc,BlockEntity b,ItemStack raw,int nativeNeed,CompanionProductionStock stock){
         if(nativeNeed<=0)return 0;var incoming=stock.incoming();int reserved=matching(incoming,s->ItemStack.isSameItemSameComponents(s,raw));
-        if(HandFarmCompanion.of(b)!=null || b instanceof SpinningWheelBlockEntity || b instanceof CanningKettleBlockEntity && raw.getItem() instanceof PreserveJarItem){
+        var confection=ConfectionCompanion.of(b);if(confection!=null)return confection.limit(raw,nativeNeed,incoming,out->deficit(npc,b,out,stock));
+        if(DryingRackCompanion.of(b)!=null || HandFarmCompanion.of(b)!=null || b instanceof SpinningWheelBlockEntity || b instanceof CanningKettleBlockEntity && raw.getItem() instanceof PreserveJarItem){
             var results=results(b,raw);if(results.isEmpty())return 0;var out=results.getFirst();return cap(nativeNeed,deficit(npc,b,out,stock),out.getCount());
         }
         if(b instanceof CanningKettleBlockEntity){
@@ -99,6 +110,11 @@ final class CompanionAdditionalStock {
         return committed || deficit(npc,b,product(b),stock)>0?Math.max(0,nativeNeed-reserved):0;
     }
     static void prepare(PeepoEntity npc,BlockEntity b,Storage<ItemVariant> source,CompanionLogistics.Port base,CompanionProductionStock stock){
+        var confection=ConfectionCompanion.of(b);
+        if(confection!=null){
+            if(stock.incoming().isEmpty())confection.prepare(source,s->stock.inputGoal(npc,b,s),s->stock.priority(npc,b,s));
+            return;
+        }
         if(b instanceof BrewingStandBlockEntity){
             var brewing=VanillaCompanionPort.of(b).brewingStock();
             if(!stock.incoming().isEmpty())base.prepare(source);

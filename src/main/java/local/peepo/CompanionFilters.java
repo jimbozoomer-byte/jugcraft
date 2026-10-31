@@ -9,6 +9,9 @@ import net.minecraft.server.level.ServerLevel;
 /** Shared server validation for the inventory's output filter editor. */
 public final class CompanionFilters {
     public static CompanionRecipeFilter get(BlockEntity block){
+        var rack=DryingRackCompanion.of(block);if(rack!=null)return rack.filter;
+        var confection=ConfectionCompanion.of(block);if(confection!=null)return confection.filter;
+        var display=DisplayCompanion.of(block);if(display!=null)return display.filter;
         var handFarm=HandFarmCompanion.of(block);if(handFarm!=null)return handFarm.filter;
         if(block instanceof CraftingTableCompanionBlockEntity table)return table.filter;
         var serving=ServingCompanion.of(block);if(serving!=null)return serving.filter;
@@ -31,7 +34,13 @@ public final class CompanionFilters {
     public static boolean set(BlockEntity block,int slot,ItemStack icon){
         if(slot<0 || slot>=9 || !(block.getLevel() instanceof ServerLevel level))return false;
         ItemStack value=icon;
-        if(HandFarmCompanion.of(block) instanceof HandFarmCompanion handFarm){
+        if(DryingRackCompanion.of(block) instanceof DryingRackCompanion rack){
+            if(!rack.acceptsFilter(icon))return false;
+        }else if(ConfectionCompanion.of(block) instanceof ConfectionCompanion confection){
+            if(!confection.acceptsFilter(icon))return false;
+        }else if(DisplayCompanion.of(block) instanceof DisplayCompanion display){
+            if(!display.acceptsFilter(icon))return false;
+        }else if(HandFarmCompanion.of(block) instanceof HandFarmCompanion handFarm){
             if(!handFarm.acceptsFilter(icon))return false;
         }else if(block instanceof CraftingTableCompanionBlockEntity table){
             if(!table.acceptsFilter(icon))return false;

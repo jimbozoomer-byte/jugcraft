@@ -62,6 +62,9 @@ public final class CompanionLogistics {
         if(be instanceof io.github.jimbozoomer.jugcraft.machine.form.FormMachineBlockEntity form)return form.companionPort.accessible(npc)?form.companionPort.forCompanion(npc):null;
         if(be instanceof io.github.jimbozoomer.jugcraft.workshop.WorkshopBlockEntity workshop)return workshop.companion.accessible(npc)?workshop.companion.forCompanion(npc):null;
         if(be instanceof io.github.jimbozoomer.jugcraft.farming.SprinklerBlockEntity sprinkler)return sprinkler.companion.forCompanion(npc);
+        var display=DisplayCompanion.of(be);if(display!=null)return display.forCompanion(npc);
+        var rack=io.github.jimbozoomer.jugcraft.agriculture.DryingRackCompanion.of(be);if(rack!=null)return rack.port(npc);
+        var confection=io.github.jimbozoomer.jugcraft.agriculture.ConfectionCompanion.of(be);if(confection!=null)return confection.port(npc);
         var serving=ServingCompanion.of(be);if(serving!=null)return serving.forCompanion(npc);
         var magic=MagicGardenCompanion.of(npc,be);if(magic!=null)return magic;
         if(be instanceof io.github.jimbozoomer.jugcraft.agriculture.FarmStandBlockEntity stand)return stand.companion.forCompanion(npc);

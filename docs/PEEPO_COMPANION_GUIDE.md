@@ -180,6 +180,10 @@ Normal right-click still opens the player's vanilla crafting menu. **Shift-right
 | Farmland zone | Harvest mature supported crops, replant, and plant empty farmland/planter boxes inside the selected corners with available seeds. A hoe improves speed and energy efficiency. See garden setup below. |
 | Squash/gourd garden | Select the fruit or its seeds in the garden's crop filter and provide real seeds through Supply. Leave soil beside stems for fruit growth. Peepo picks attached fruit inside the zone and preserves the mature stem; standalone decorative gourds are left alone. Includes all new Turban/Blue Hubbard/Sweet Dumpling squashes, Long Island Cheese pumpkins, and Spoon/Swan gourds. |
 | Quern / Butter Churn | Assign with the Planner, use Filter and optional stock targets, and link Supply/Output. Quern: Wheat to Flour or Dried Chili to Paprika. Churn: Milk Bucket to two Butter plus the returned Bucket. |
+| Drying Rack | Supply fresh herbs/peppers; collect only dried goods after native drying. Product Filter and stock targets are supported. |
+| Caramel Apple Stand | Supply Apples, Caramel and Sticks; collect set apples after native cooling. |
+| Cotton Candy Cart / Caramel Corn Wagon | Supply native ingredients to a manually switched-on/lit cart. Filter finished candy/popcorn and optionally maintain stock in Output. |
+| Serving displays | Refill party trays, towers, goblets, dispenser, plates and produce displays from Supply. Display stock stays available for players. |
 | Sheep area | Give shears in Hand or through a Tools supply. Peepo shears eligible adult woolly sheep within **8 blocks** of the anchor. Output receives wool. |
 | Cow area | Give empty buckets in cargo or Supply. Peepo milks eligible adult cows within **8 blocks** of the anchor. Output receives milk buckets. Companion milking has a **60-second cooldown per cow**. |
 | Chicken area | Peepo picks up dropped eggs within **8 blocks** of the anchor and delivers them to linked Output. No tools or Supply are needed. White, brown and blue eggs are supported. |
@@ -361,6 +365,21 @@ Leave safe standing room in front of or beside the house. Peepo can reach a hous
 Collection does not release or summon bats, speed up production, or apply fertilizer. The existing agriculture feature switch, town protection, work priorities, rest and settings-menu pause apply. See the [Bat House feature record](features/companion-bat-house.md).
 
 ### Serving stations
+
+**New serving displays:** assign party-food towers, trays, goblets, the Eyeball Jelly Mould, Goodie Bag Tree or Candy Corn Dispenser and link Supply. Peepo refills their native serving capacity using the matching finished item. The Filter limits restocking. Plates, platters and serving trays remember the exact items you place in each spot; stock them once before assigning replenishment. Pumpkin Wheelbarrows, Wagons and Pyramids accept their native produce types, restricted by the Filter if desired. These display jobs have no Output extraction and do not use production stock targets: food stays on display for players.
+
+### Drying and confection stations
+
+Assign these stations with the Planner, including by clicking their upper or other occupied parts. Use the existing Filter, optional production stock targets and linked Supply/Output. They retain their native processing times and need only delivery visits, with ordinary hauling energy costs.
+
+- **Drying Rack:** Supply fresh herbs or peppers; select Dried Herbs or Dried Chili in the Filter. Four hooks hold up to four items each. Drying takes the native two minutes; Peepo collects only dried bunches, then delivers them to Output.
+- **Caramel Apple Stand:** Supply Apples, Caramel and Sticks. Peepo stocks the pot/jar, dips apples into available tray spots, waits for their native cooling time, then takes only set apples to Output.
+- **Cotton Candy Cart:** switch the cart on manually, then Supply Sugar and Paper. Sugar makes floss and paper makes the finished Cotton Candy for Output. Peepo respects the cart's switch.
+- **Caramel Corn Wagon:** light the wagon manually and Supply Corn Kernels. Select Popcorn or Caramel Popcorn in the Filter; caramel popcorn also needs Caramel and uses two portions of popped corn per finished item. Native popping time remains unchanged. Finished goods go to Output; Peepo respects the wagon's lit state.
+
+Cotton Candy and coated Caramel Popcorn wait in a saved tray holding up to 64 total finished items. Shift-right-click the cart with an empty hand to collect that tray manually; breaking it drops the tray contents. The apple stand keeps its native six cooling spots, and plain popcorn stays in the wagon's native case.
+
+### Feast tables and bowls
 
 Assign each **Harvest Feast Table** length with the Planner, then link Supply. Stock its two dishes once with the foods you want; Peepo remembers them and refills each to eight servings, even after diners empty them. Its **Filter** limits which remembered foods may be restocked. Turn Supply Off before clearing a dish you no longer want replenished.
 

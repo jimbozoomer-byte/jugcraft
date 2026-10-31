@@ -186,6 +186,9 @@ public final class CompanionMenu extends AbstractContainerMenu {
     private net.minecraft.world.level.block.entity.BlockEntity recipeStation(int row){
         var target=recipeTarget(row);if(target==null || target.fishing() || target.livestock() || target.garden())return null;
         var be=npc.level().getBlockEntity(target.at().pos());
+        var rack=io.github.jimbozoomer.jugcraft.agriculture.DryingRackCompanion.of(be);if(rack!=null)return rack.allowed(npc)?be:null;
+        var confection=io.github.jimbozoomer.jugcraft.agriculture.ConfectionCompanion.of(be);if(confection!=null)return confection.allowed(npc)?be:null;
+        var display=DisplayCompanion.of(be);if(display!=null)return display.allowed(npc)?be:null;
         if(io.github.jimbozoomer.jugcraft.agriculture.HandFarmCompanion.of(be)!=null)return be;
         if(be instanceof CraftingTableCompanionBlockEntity table)return table.accessible(npc)?be:null;
         if(be instanceof io.github.jimbozoomer.jugcraft.machine.form.FormMachineBlockEntity form)return form.companionPort.accessible(npc) && form.companionPort.playerMayEdit(playerInventory.player) && form.companionPort.selectable()?be:null;

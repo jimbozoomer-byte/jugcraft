@@ -29,6 +29,17 @@ public final class CompanionClipChecks {
                 }
             }
             check.accept(bodies.size()==5,"whole-body wind-up and strike on every rig/costume");
+            float previousY=Float.NEGATIVE_INFINITY,contactPitch=Float.NaN;
+            for(int tick=24;tick<=40;tick++){
+                state.toolPose.harvest(tick*net.minecraft.util.Mth.TWO_PI/40,25,-16);var p=state.toolPose;
+                check.accept(p.xRot<=2.10F,"hoe stops before excessive end-of-stroke rotation");
+                check.accept(p.y>=previousY-.001F,"grip lowers into contact without a late upward reversal");
+                previousY=p.y;
+                if(tick>=37){
+                    if(Float.isNaN(contactPitch))contactPitch=p.xRot;
+                    check.accept(Math.abs(p.xRot-contactPitch)<.001F,"planted hoe stays steady while the body settles");
+                }
+            }
             state.work=WorkAnimation.NONE;model.setupAnim(state);check.accept(root.getChild("left_arm").yScale==1,"hoe pose resets after work");
         }
     }

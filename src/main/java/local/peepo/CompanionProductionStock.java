@@ -26,6 +26,7 @@ public final class CompanionProductionStock {
     private long nextCount;
     private int revision;
     private boolean cacheValid;
+    private int planningDepth;
     public CompanionProductionStock(CompanionRecipeFilter filter){this.filter=filter;}
     public static boolean supports(BlockEntity block){return block instanceof CookingPotBlockEntity || block instanceof HearthOvenBlockEntity || block instanceof CuttingBoardBlockEntity || CompanionStockRecipes.supports(block) || CompanionAdditionalStock.supports(block);}
     public static CompanionProductionStock of(BlockEntity block){return supports(block)?CompanionFilters.get(block).stock:null;}
@@ -170,7 +171,9 @@ public final class CompanionProductionStock {
         if(!refresh(npc,block) || !canRegister(npc.getUUID()))return 0;
         int stock=cached.getOrDefault(filter.stockKey(output),0)+finished(block,output)+moving(block,output);
         boolean filling=rule.filling;if(stock>=rule.target)filling=false;else if(stock<=rule.restock)filling=true;
-        if(filling!=rule.filling){rules.put(filter.stockKey(output),new Rule(rule.target,rule.restock,filling));block.setChanged();}
+        // Supply probes may temporarily create finished goods (for example, winding cotton candy).
+        // Their rolled-back output must not end the real replenishment cycle.
+        if(planningDepth==0 && filling!=rule.filling){rules.put(filter.stockKey(output),new Rule(rule.target,rule.restock,filling));block.setChanged();}
         return filling?Math.max(0,rule.target-stock):0;
     }
     public boolean wants(PeepoEntity npc,BlockEntity block,ItemStack output){return inputGoal(npc,block,output)>pending(npc,block,output);}
@@ -273,7 +276,9 @@ public final class CompanionProductionStock {
                 if(block instanceof CuttingBoardBlockEntity board && board.companionKitchen.cuttingBatchActive())return List.of();
                 invalidate();if(!refresh(npc,block) || !canRegister(npc.getUUID()))return List.of();
                 if(block instanceof CookingPotBlockEntity pot)return CookingPotSupplies.create(pot,source,npc.assignments.supplies.combined(work,false),slots,npc);
-                return CompanionDeliveryPlan.create(source,inputs(),slots,this::needed,null,this::supplyPriority);
+                planningDepth++;
+                try{return CompanionDeliveryPlan.create(source,inputs(),slots,this::needed,null,this::supplyPriority);}
+                finally{planningDepth--;}
             }
             public CompanionStatus status(){var state=base.status();return (CompanionStockRecipes.supports(block) || CompanionAdditionalStock.supports(block))?idleStatus(npc,block,state):state==CompanionStatus.NO_INPUT?idleStatus(npc,block):state;}
         };
