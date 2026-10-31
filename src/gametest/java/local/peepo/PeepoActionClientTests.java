@@ -40,6 +40,7 @@ public final class PeepoActionClientTests implements FabricClientGameTest {
             world.getConnection().waitForChunksRender();var server=world.getServer();base=context.computeOnClient(c->c.player.blockPosition().above(4));
             server.runCommand("time set noon");server.runCommand("weather clear");server.runCommand("gamemode spectator @a");
             server.runCommand("gamerule minecraft:random_tick_speed 0");
+            server.runCommand("gamerule minecraft:mob_griefing false");
             for(boolean jughead:new boolean[]{false,true})work(server,jughead);
             context.getInput().pressKey(o->o.keyToggleGui);
             for(boolean jughead:new boolean[]{false,true})for(int sample=0;sample<9;sample++)visual(context,server,jughead,sample);

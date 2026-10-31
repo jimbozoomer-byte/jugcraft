@@ -19,6 +19,7 @@ import net.minecraft.world.level.storage.ValueOutput;
 public class DryingRackBlockEntity extends BlockEntity {
 	private final ItemStack[] bunches = new ItemStack[DryingRackBlock.SLOTS];
 	private final long[] hungAt = new long[DryingRackBlock.SLOTS];
+	public final DryingRackCompanion companion = new DryingRackCompanion(this);
 
 	public DryingRackBlockEntity(BlockPos pos, BlockState state) {
 		super(JugcraftAgriculture.DRYING_RACK_ENTITY, pos, state);
@@ -28,6 +29,9 @@ public class DryingRackBlockEntity extends BlockEntity {
 	public ItemStack bunch(int slot) {
 		return bunches[slot];
 	}
+	long hungAt(int slot) { return hungAt[slot]; }
+	/** Restore native contents without publishing a speculative transfer to the world. */
+	void restoreBunch(int slot, ItemStack bunch, long hung) { bunches[slot] = bunch; hungAt[slot] = hung; }
 
 	/** Whether the bunch on {@code slot} has dried by {@code now}. */
 	public boolean dried(int slot, long now) {
@@ -117,11 +121,13 @@ public class DryingRackBlockEntity extends BlockEntity {
 			bunches[slot] = DryingRackBlock.hangs(bunch) ? bunch : ItemStack.EMPTY;
 			hungAt[slot] = input.getLongOr("hung_" + slot, 0L);
 		}
+		companion.filter.load(input);
 	}
 
 	@Override
 	protected void saveAdditional(ValueOutput output) {
 		super.saveAdditional(output);
+		companion.filter.save(output);
 		for (int slot = 0; slot < bunches.length; slot++) {
 			if (!bunches[slot].isEmpty()) {
 				output.store("bunch_" + slot, ItemStack.CODEC, bunches[slot]);

@@ -37,7 +37,7 @@ import org.jspecify.annotations.Nullable;
  * On a Feast Table, whose top is lower than a block, it is set down {@value #TABLE_DROP} pixels onto it
  * ({@link #ON_TABLE}: its models' {@code _table} copies, and its shape).
  */
-public abstract class PartyServingBlock extends FacingDecorationBlock {
+public abstract class PartyServingBlock extends FacingDecorationBlock implements net.minecraft.world.level.block.EntityBlock {
 	public static final BooleanProperty ON_TABLE = BooleanProperty.create("on_table");
 	/** How far below its block a Feast Table's top is (pixels): tools/party_table.py TABLE. */
 	public static final float TABLE_DROP = 3.0F;
@@ -64,6 +64,11 @@ public abstract class PartyServingBlock extends FacingDecorationBlock {
 	/** The food it holds. */
 	public Item serves() {
 		return JugcraftAgriculture.item(serves);
+	}
+
+	@Override
+	public net.minecraft.world.level.block.entity.BlockEntity newBlockEntity(BlockPos pos, BlockState state) {
+		return new ServingDisplayBlockEntity(pos, state);
 	}
 
 	/** Whether {@code below} is a Feast Table, to be set down onto. */

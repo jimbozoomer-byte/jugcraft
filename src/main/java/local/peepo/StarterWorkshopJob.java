@@ -10,6 +10,8 @@ import net.minecraft.world.phys.*;
 
 /** One leased bench operator; the native station tick owns progress, fuel and output. */
 public final class StarterWorkshopJob implements CompanionJob {
+    public boolean finishLoadedBatch(PeepoEntity npc){return planningStatus(npc)==CompanionStatus.READY;}
+    public boolean collectAfterWork(){return true;}
     public static final int EFFORT=4;
     private final WorkshopBlockEntity station;
     private final WorkshopCompanion port;

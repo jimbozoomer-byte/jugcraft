@@ -91,6 +91,7 @@ public final class PeepoWorkshopClientTests implements FabricClientGameTest {
                 server.runOnServer(s->{check(count(output,recipe.result().create().getItem())==recipe.result().create().getCount(),"Supply to production to Output conserves exact yield");
                     check(ItemStack.matches(station.getItem(WorkshopBlockEntity.TOOL),recipe.toolStack()),"reusable tool retained");});
             }
+            batchHandoff(server,false);batchHandoff(server,true);
             server.runOnServer(s->{npc.transport.stop();npc.resetCompanionRoutine();npc.discard();});
         }
         phase("PASS "+assertions+" assertions");
@@ -98,6 +99,34 @@ public final class PeepoWorkshopClientTests implements FabricClientGameTest {
     private void awaitOutput(TestServerContext server,boolean delivered,int ticks){
         try{server.waitFor(s->count(delivered?output:station,recipe.result().create().getItem())>=recipe.result().create().getCount(),ticks);}
         catch(AssertionError e){throw new AssertionError(server.computeOnServer(s->"Workshop stalled: kind="+station.station()+", position="+npc.position()+", routine="+npc.routineStatus()+", transport="+npc.transport.activity()+", native="+station.status()+", progress="+station.progress()),e);}
+    }
+    private void batchHandoff(TestServerContext server,boolean jughead){
+        phase("eight-craft bench batch and immediate handoff jughead="+jughead);
+        server.runOnServer(s->{setup(s.overworld(),0,Direction.NORTH,jughead);
+            var choice=station.catalog().entries().stream().filter(e->!e.recipe().heated() && e.recipe().time()>=60 && e.recipe().time()<=300
+                && e.recipe().result().create().getCount()<=8 && e.recipe().parts().stream().allMatch(p->p.count()<=4)).findFirst().orElseThrow();
+            recipe=choice.recipe();station.select(choice.id());station.companion.filter.set(0,recipe.result().create());
+            npc.assignments.assignContainer(s.overworld(),base.west(6),Direction.UP,false);npc.assignments.assignContainer(s.overworld(),base.east(6),Direction.UP,true);
+            if(jughead){var stock=station.companion.filter.stock;stock.useOutputs(npc,npc.assignments.get(1));stock.set(recipe.result().create(),recipe.result().create().getCount()*8,0);}
+            int slot=0;for(var part:recipe.parts())source.setItem(slot++,new ItemStack(part.ingredient().items().findFirst().orElseThrow(),part.count()*16));
+            if(!recipe.toolStack().isEmpty())source.setItem(slot,recipe.toolStack());npc.setNoAi(false);
+        });
+        var item=recipe.result().create().getItem();int target=recipe.result().create().getCount()*8;long[] completed={-1};
+        try{server.waitFor(s->{int made=count(station,item)+count(output,item)+count(npc.belongings,item);
+            if(made>0 && made<target){
+                check(count(output,item)==0 && count(npc.belongings,item)==0,"bench finishes loaded batch before collecting earlier results");
+                var port=CompanionLogistics.resolve(npc,npc.assignments.get(1));check(!port.acceptsSupplyBatch(),"active bench batch cannot be topped up");
+            }
+            if(made>=target){long now=s.overworld().getGameTime();if(completed[0]<0)completed[0]=now;
+                var state=npc.transport.activity();boolean picked=count(npc.belongings,item)>0 || count(output,item)>0;
+                check(now-completed[0]<=10 || picked || state==CompanionStatus.COLLECTING_OUTPUT || state==CompanionStatus.DELIVERING,"bench schedules collection within ten ticks");
+                check(now-completed[0]<=40 || picked,"bench collects without a later search delay");
+            }
+            return count(output,item)==target;
+        },4000);}catch(AssertionError e){throw new AssertionError(server.computeOnServer(s->"Bench batch: "+npc.routineStatus()+" / "+npc.transport.activity()+" / native="+station.status()+" / made="+count(station,item)),e);}
+        server.runOnServer(s->{npc.setNoAi(true);check(count(station,item)==0,"bench delivers the whole completed batch");
+            for(var part:recipe.parts()){var ingredient=part.ingredient().items().findFirst().orElseThrow().value();check(count(source,ingredient)==part.count()*8,"bench conserves eight unused recipes in Supply");}
+            check(ItemStack.matches(station.getItem(WorkshopBlockEntity.TOOL),recipe.toolStack()),"batch retains the installed workshop tool");});
     }
     private void navigation(){
         var entrances=StarterWorkshopJob.frontEntrances(npc,station);check(entrances.size()==2,"two safe front entrances in every orientation");

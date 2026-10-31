@@ -10,7 +10,6 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.entity.EntityTypeTest;
-import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.phys.*;
 
 /** Fixed pen jobs collect real dropped eggs, using the shared routine and produce ledger. */
@@ -32,7 +31,7 @@ final class CompanionEggCollection {
         return old;
     }
     private long now(){return npc.level().getGameTime();}
-    private boolean enabled(){return npc.level() instanceof ServerLevel level && level.getGameRules().get(GameRules.MOB_GRIEFING);}
+    private boolean enabled(){return npc.level() instanceof ServerLevel;}
 
     private final class Job implements CompanionJob {
         private final CompanionAssignments.Target target;

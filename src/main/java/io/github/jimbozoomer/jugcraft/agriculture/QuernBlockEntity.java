@@ -15,6 +15,8 @@ import net.minecraft.world.level.storage.ValueOutput;
 public class QuernBlockEntity extends HandWorkedBlockEntity {
 	private ItemStack grain = ItemStack.EMPTY;
 	private int turns;
+	public final HandFarmCompanion companion = new HandFarmCompanion(this);
+	void restoreInput(ItemStack stack, int progress) { grain = stack.copy(); turns = progress; }
 
 	public QuernBlockEntity(BlockPos pos, BlockState state) {
 		super(JugcraftAgriculture.QUERN_ENTITY, pos, state);
@@ -66,6 +68,13 @@ public class QuernBlockEntity extends HandWorkedBlockEntity {
 	 * with grain in grind one piece, returning what it gives; otherwise nothing.
 	 */
 	public ItemStack turn(long now) {
+		ItemStack out = advance(now);
+		changed();
+		return out;
+	}
+
+	/** Native stroke without notification; the companion publishes it after its transaction commits. */
+	ItemStack advance(long now) {
 		stroke(now);
 		ItemStack out = ItemStack.EMPTY;
 		if (!grain.isEmpty() && ++turns >= QuernBlock.TURNS) {
@@ -76,12 +85,12 @@ public class QuernBlockEntity extends HandWorkedBlockEntity {
 			}
 			turns = 0;
 		}
-		changed();
 		return out;
 	}
 
 	@Override
 	public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+		companion.drop();
 		super.preRemoveSideEffects(pos, state);
 		if (level != null && !level.isClientSide() && !grain.isEmpty()) {
 			Containers.dropItemStack(level, pos.getX(), pos.getY(), pos.getZ(), grain);
@@ -97,6 +106,7 @@ public class QuernBlockEntity extends HandWorkedBlockEntity {
 			grain.setCount(QuernBlock.CAPACITY);
 		}
 		turns = Math.clamp(input.getIntOr("turns", 0), 0, QuernBlock.TURNS - 1);
+		companion.load(input);
 	}
 
 	@Override
@@ -106,5 +116,7 @@ public class QuernBlockEntity extends HandWorkedBlockEntity {
 			output.store("grain", ItemStack.CODEC, grain);
 		}
 		output.putInt("turns", turns);
+		companion.save(output);
 	}
+	@Override public void setRemoved() { companion.job.removed(); super.setRemoved(); }
 }

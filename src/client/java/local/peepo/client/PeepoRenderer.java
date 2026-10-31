@@ -79,6 +79,12 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         state.work=state.eating || state.sleeping || state.sitting || state.wheelRunning || !entity.isAlive()?WorkAnimation.NONE:entity.workAnimation();
         state.social=state.eating || state.sleeping || state.sitting || state.wheelRunning || state.work!=WorkAnimation.NONE || !entity.isAlive()?CompanionSocial.NONE:entity.socialPose();
         state.socialTime=(float)Math.clamp(entity.level().getGameTime()-entity.socialStarted()+partialTick,0,120);
+        state.socialTarget.set(entity.socialTarget());
+        state.dancePhase=Math.floorMod(entity.level().getGameTime()-entity.danceSongStart(),160)+partialTick;
+        state.danceRelease=entity.danceEnd()<0?-1:Math.max(0,entity.level().getGameTime()-entity.danceEnd()+partialTick);
+        state.danceMirror=(entity.getUUID().hashCode()&1)==0?1:-1;
+        state.danceStyle=Math.floorMod(entity.getUUID().hashCode(),3);
+        if(state.social>=CompanionSocial.HIGH_FIVE_LEFT){state.bodyRot=entity.getYRot();state.yRot=state.xRot=0;}
         state.workPhase=(float)WorkAnimation.stirPhase(entity.level().getGameTime(),partialTick);
         var shownPie=net.minecraft.world.item.ItemStack.EMPTY;
         state.rawBake=null;state.cake=false;
@@ -188,7 +194,9 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
                 || !entity.getMainHandItem().is(io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture.KNIVES))state.work=WorkAnimation.NONE;
             else{
                 state.bodyRot=entity.getYRot();state.yRot=0;state.xRot=0;
-                state.workPhase=(float)((entity.level().getGameTime()-entity.workStarted()+partialTick)*net.minecraft.util.Mth.TWO_PI/entity.uniforms.duration(CompanionUniforms.Type.CHEF,40));
+                int chopTicks=entity.uniforms.duration(CompanionUniforms.Type.CHEF,40);
+                // A batch keeps the same action start; repeat the lift instead of holding the first impact.
+                state.workPhase=(Math.floorMod(entity.level().getGameTime()-entity.workStarted(),chopTicks)+partialTick)*net.minecraft.util.Mth.TWO_PI/chopTicks;
                 var delta=net.minecraft.world.phys.Vec3.atBottomCenterOf(target).add(0,1.05/16,0).subtract(entity.getPosition(partialTick));
                 double a=Math.toRadians(entity.getYRot());
                 state.toolPose.chop(state.workPhase,(float)(24-delta.y*16),(float)((delta.x*Math.sin(a)-delta.z*Math.cos(a))*16));

@@ -24,13 +24,13 @@ final class CompanionRoutine extends Goal {
         && npc.preferences.canWork() && npc.orders.station(station) && station.availableTo(npc)
         && CompanionJobs.permitted(npc,station.stationPosition());}
     boolean atJob(BlockPos pos){return station instanceof CompanionJob && station.stationPosition().equals(pos);}
-    /** Ordinary sessions last 20 seconds; a stocked pot finishes cooking before ordinary hauling. */
+    /** Ordinary sessions last 20 seconds; opted-in stations finish their loaded batch before hauling. */
     boolean deferTransport(BlockPos pos){
         if(!active || !(station instanceof CompanionJob job)
             || !npc.preferences.canWork() || !npc.orders.station(station))return false;
         if(station instanceof CompanionFishing.Job && npc.fishing.deferOutput(npc.assignments.get(npc.assignments.workPriority(station.stationPosition()))))
             return npc.assignments.workPriority(pos)>=npc.assignments.workPriority(station.stationPosition());
-        if((station instanceof CookingPotJob || station instanceof CuttingBoardJob) && job.planningStatus(npc)==CompanionStatus.READY)
+        if(job.finishLoadedBatch(npc))
             return npc.assignments.workPriority(pos)>=npc.assignments.workPriority(station.stationPosition());
         if(npc.level().getGameTime()>=sessionUntil)return false;
         if(state!=CompanionStatus.WORKING && state!=CompanionStatus.TRAVELLING && state!=CompanionStatus.IDLE && state!=CompanionStatus.WAITING)return false;
@@ -131,6 +131,15 @@ final class CompanionRoutine extends Goal {
         station=null;block=null;npc.setWheelRunning(false);npc.setWorkAnimation(WorkAnimation.NONE,npc.blockPosition());npc.setRestMode(CompanionEnergy.Rest.NONE);npc.getNavigation().stop();state=CompanionStatus.IDLE;
     }
     @Override public void stop(){release();active=false;}
+    private boolean handoffOutput(CompanionStatus status,boolean wasWorking){
+        if(!(station instanceof CompanionJob job) || !job.collectAfterWork())return false;
+        if(wasWorking)npc.transport.workFinished(station.stationPosition());
+        if(!npc.transport.awaitingWorkOutput(station.stationPosition()))return false;
+        // Keep MOVE ownership until transport gets its existing search grant. In particular,
+        // STOCKED/FULL must not release into leisure/another job before output is considered.
+        state=status;npc.getNavigation().stop();npc.setWorkAnimation(WorkAnimation.NONE,npc.blockPosition());
+        return true;
+    }
     /** Keep movement ownership across a short recipe/budget handoff, never across a real failure. */
     private boolean hold(CompanionStatus status,long now){
         if(status!=CompanionStatus.IDLE && status!=CompanionStatus.WAITING && status!=CompanionStatus.NO_INPUT
@@ -183,6 +192,7 @@ final class CompanionRoutine extends Goal {
             else {
                 var readiness=job.planningStatus(npc);
                 if(readiness!=CompanionStatus.READY){
+                    if(handoffOutput(readiness,state==CompanionStatus.WORKING))return;
                     if(hold(readiness,now)){reconsiderWork();return;}
                     npc.transport.workChanged();release();nextSearch=now;
                 }else if(handoffUntil!=0){handoffUntil=0;deadline=now+600;repath=0;travel.reset();}
@@ -231,8 +241,9 @@ final class CompanionRoutine extends Goal {
         if(!CompanionHazards.safeAt(npc,target)){var old=station;rejected(old,now);release();state=CompanionStatus.BLOCKED;return;}
         npc.getNavigation().stop();if(!station.occupy(npc)){release();return;}
         if(station instanceof CompanionJob job){
+            boolean wasWorking=state==CompanionStatus.WORKING;
             npc.setRestMode(CompanionEnergy.Rest.NONE);state=job.work(npc);
-            if(state!=CompanionStatus.WORKING){if(!hold(state,now)){npc.transport.workChanged();release();nextSearch=now;}}
+            if(state!=CompanionStatus.WORKING){if(!handoffOutput(state,wasWorking) && !hold(state,now)){npc.transport.workChanged();release();nextSearch=now;}}
             else npc.setWorkAnimation(job.animation(),job.animationTarget());
         }else{
             npc.setRestMode(station.kind()==CompanionStation.Kind.BED?CompanionEnergy.Rest.SLEEPING:CompanionEnergy.Rest.SITTING);state=CompanionStatus.RESTING;

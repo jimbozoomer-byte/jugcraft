@@ -17,6 +17,15 @@ public final class CompanionJobDetails {
         String delivery=npc.transport.jobDetail(target);
         if(!delivery.isEmpty())return delivery;
         var block=npc.level().getBlockEntity(target.at().pos());var stock=CompanionProductionStock.of(block);
+        if(DisplayCompanion.of(block)!=null && status==CompanionStatus.FULL)return "Display stocked; Supply refills it after players take items.";
+        if(block instanceof io.github.jimbozoomer.jugcraft.agriculture.DryingRackBlockEntity && status==CompanionStatus.DRYING)
+            return "Herbs or peppers are drying; only dried bunches go to Output after the native two-minute wait.";
+        if(block!=null && status==CompanionStatus.NO_HEAT){
+            if(block.getBlockState().getBlock() instanceof io.github.jimbozoomer.jugcraft.agriculture.CottonCandyCartBlock)
+                return "Switch the cart on with an empty hand; Supply provides Sugar and Paper.";
+            if(block.getBlockState().getBlock() instanceof io.github.jimbozoomer.jugcraft.agriculture.PopcornWagonBlock)
+                return "Light the wagon with flint and steel or a fire charge; it needs no fuel supply.";
+        }
         if(stock!=null && stock.enabled() && (status==CompanionStatus.NO_INPUT || status==CompanionStatus.READY || status==CompanionStatus.STOCKED || status==CompanionStatus.STOCK_UNAVAILABLE)){String detail=stock.detail(npc,block);if(!detail.isEmpty())return detail;}
         if(target.fishing() && status==CompanionStatus.WORKING)return npc.fishing.detail(target);
         String source=containers(npc,target,false),output=containers(npc,target,true);

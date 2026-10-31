@@ -24,6 +24,9 @@ public final class PeepoState extends LivingEntityRenderState { public final Ite
     float pieX,pieY,pieZ,pieReach;
     public int social;
     public float socialTime;
+    public final org.joml.Vector3f socialTarget=new org.joml.Vector3f();
+    public float dancePhase,danceRelease=-1;
+    public int danceMirror=1,danceStyle;
     public local.peepo.CompanionFeedbackRules.Reaction reaction=local.peepo.CompanionFeedbackRules.Reaction.NONE;
     public float reactionTime,thoughtTime;
     public local.peepo.CompanionFeedbackRules.Kind thought=local.peepo.CompanionFeedbackRules.Kind.NONE;

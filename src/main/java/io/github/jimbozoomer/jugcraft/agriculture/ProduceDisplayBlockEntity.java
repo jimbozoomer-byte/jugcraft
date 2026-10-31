@@ -22,6 +22,7 @@ import net.minecraft.world.level.storage.ValueOutput;
  */
 public class ProduceDisplayBlockEntity extends BlockEntity {
 	private final List<ItemStack> produce = new ArrayList<>();
+	public final local.peepo.DisplayCompanion companion = new local.peepo.DisplayCompanion(this);
 
 	public ProduceDisplayBlockEntity(BlockPos pos, BlockState state) {
 		super(JugcraftAgriculture.PRODUCE_DISPLAY_ENTITY, pos, state);
@@ -66,10 +67,21 @@ public class ProduceDisplayBlockEntity extends BlockEntity {
 
 	private void sync() {
 		setChanged();
+		local.peepo.CompanionReadiness.invalidate(this);
 		if (level != null) {
 			BlockState state = getBlockState();
 			level.sendBlockUpdated(worldPosition, state, state, Block.UPDATE_CLIENTS);
 		}
+	}
+
+	/** Native inventory rollback/commit writes; synchronization follows only the outer commit. */
+	public void restoreCompanionStock(List<ItemStack> stock) {
+		produce.clear();
+		stock.stream().limit(capacity()).filter(s -> !s.isEmpty()).forEach(s -> produce.add(s.copyWithCount(1)));
+	}
+
+	public void companionChanged() {
+		sync();
 	}
 
 	/** Breaking the display spills what is on it. */
@@ -101,11 +113,13 @@ public class ProduceDisplayBlockEntity extends BlockEntity {
 		int capacity = capacity();
 		input.read("produce", ItemStack.CODEC.listOf()).ifPresent(list -> list.stream().filter(stack -> !stack.isEmpty())
 				.limit(capacity > 0 ? capacity : list.size()).forEach(stack -> produce.add(stack.copyWithCount(1))));
+		companion.load(input);
 	}
 
 	@Override
 	protected void saveAdditional(ValueOutput output) {
 		super.saveAdditional(output);
 		output.store("produce", ItemStack.CODEC.listOf(), List.copyOf(produce));
+		companion.save(output);
 	}
 }

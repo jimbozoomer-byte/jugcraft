@@ -18,6 +18,7 @@ public final class PeepoPopulationClientTests implements FabricClientGameTest {
         }).create()){
             world.getConnection().waitForChunksRender();var server=world.getServer();var base=context.computeOnClient(c->c.player.blockPosition().above(4));
             server.runCommand("time set noon");server.runCommand("weather clear");server.runCommand("gamerule minecraft:random_tick_speed 0");
+            server.runCommand("gamerule minecraft:mob_griefing false");
             new CompanionPopulationChecks(this::check,base).run(context,server);
         }
         org.slf4j.LoggerFactory.getLogger("peepo-population-test").info("PASS: {} livestock population assertions",checks);

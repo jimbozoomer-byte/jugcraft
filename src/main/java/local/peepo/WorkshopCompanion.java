@@ -53,7 +53,7 @@ public final class WorkshopCompanion {
         prepare(source,s->0);
     }
     public void prepare(Storage<ItemVariant> source,java.util.function.ToDoubleFunction<ItemStack> priority){
-        if(station.busy() || station.playerWorking())return;
+        if(station.busy() || station.playerWorking() || station.station()==0 && filter.stock.hasIncoming(station))return;
         var supplies=RecipeSupplies.available(source);
         var current=choice();
         var entries=new ArrayList<>(station.catalog().entries());
@@ -133,6 +133,8 @@ public final class WorkshopCompanion {
         public void prepare(Storage<ItemVariant> source){if(accessible(npc))WorkshopCompanion.this.prepare(source);}
         public Identifier plan(){var c=choice();return c==null?null:c.id();}
         public int needed(ItemStack stack){return accessible(npc)?Arrays.stream(needs(stack)).sum():0;}
+        public boolean acceptsSupplyBatch(){return station.station()!=0 || !station.busy() && station.status()!=6 && station.getItem(WorkshopBlockEntity.OUTPUT).isEmpty() && !filter.stock.hasIncoming(station);}
+        public int pickupNeeded(ItemStack stack){return acceptsSupplyBatch()?needed(stack):0;}
         public int stockAuxiliaryNeed(ItemStack stack){
             if(!accessible(npc))return 0;var n=needs(stack);
             var recipe=choice();int fuel=n[WorkshopBlockEntity.FUEL];

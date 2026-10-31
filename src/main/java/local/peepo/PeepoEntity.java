@@ -112,6 +112,9 @@ public final class PeepoEntity extends PathfinderMob {
     }
     private static final EntityDataAccessor<Integer> SOCIAL_POSE=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.INT);
     private static final EntityDataAccessor<Long> SOCIAL_STARTED=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.LONG);
+    private static final EntityDataAccessor<org.joml.Vector3fc> SOCIAL_TARGET=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.VECTOR3);
+    private static final EntityDataAccessor<Long> DANCE_SONG_START=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.LONG);
+    private static final EntityDataAccessor<Long> DANCE_END=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.LONG);
     private static final EntityDataAccessor<Integer> FEEDBACK_REACTION=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.INT);
     private static final EntityDataAccessor<Long> FEEDBACK_STARTED=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.LONG);
     private static final EntityDataAccessor<Integer> FEEDBACK_ITEM=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.INT);
@@ -139,9 +142,17 @@ public final class PeepoEntity extends PathfinderMob {
     }
     public int socialPose(){return entityData.get(SOCIAL_POSE);}
     public long socialStarted(){return entityData.get(SOCIAL_STARTED);}
-    void setSocialPose(int pose){if(!level().isClientSide() && socialPose()!=pose){entityData.set(SOCIAL_STARTED,level().getGameTime());entityData.set(SOCIAL_POSE,pose);}}
+    public long danceSongStart(){return entityData.get(DANCE_SONG_START);}
+    public long danceEnd(){return entityData.get(DANCE_END);}
+    void beginDance(long songStart){entityData.set(DANCE_SONG_START,songStart);entityData.set(DANCE_END,-1L);setSocialPose(CompanionSocial.DANCE);}
+    void endDance(){if(danceEnd()<0)entityData.set(DANCE_END,level().getGameTime());}
+    public org.joml.Vector3fc socialTarget(){return entityData.get(SOCIAL_TARGET);}
+    void setSocialTarget(org.joml.Vector3fc target){if(!level().isClientSide())entityData.set(SOCIAL_TARGET,target);}
+    void setSocialPose(int pose){setSocialPose(pose,level().getGameTime());}
+    void setSocialPose(int pose,long started){if(!level().isClientSide() && socialPose()!=pose){entityData.set(SOCIAL_STARTED,started);entityData.set(SOCIAL_POSE,pose);}}
     boolean socialIdle(){return isAlive() && !isRemoved() && !editingSettings() && !isEating() && !needsAutomaticFood()
         && !isRecovering() && getRestMode()==CompanionEnergy.Rest.NONE && !isWheelRunning() && workAnimation()==WorkAnimation.NONE
+        && gesture()==CompanionGesture.NONE && !restMotion.holdingExit() && feedbackReaction()==CompanionFeedbackRules.Reaction.NONE
         && (routine==null || !routine.isActive()) && transport.activity()==CompanionStatus.IDLE && !transport.hasPendingDelivery();}
     private int workAnimationTicks;
     public WorkAnimation workAnimation(){return WorkAnimation.values()[Math.clamp(entityData.get(WORK_ANIMATION),0,WorkAnimation.values().length-1)];}
@@ -380,7 +391,8 @@ public final class PeepoEntity extends PathfinderMob {
     @Override protected void defineSynchedData(SynchedEntityData.Builder builder) {
         super.defineSynchedData(builder);builder.define(ASSIGNMENTS,"[]"); builder.define(BLUSHING, false); builder.define(PUMPKIN, false); builder.define(UNIFORM,0); builder.define(EATING_END,0L);
         builder.define(ENERGY,CompanionEnergy.CAPACITY);builder.define(FOOD_BONUS,0);builder.define(FOOD_END,0L);builder.define(REST,0);
-        builder.define(WHEEL_RUNNING,false);builder.define(SOCIAL_POSE,0);builder.define(SOCIAL_STARTED,0L);
+        builder.define(WHEEL_RUNNING,false);builder.define(SOCIAL_POSE,0);builder.define(SOCIAL_STARTED,0L);builder.define(SOCIAL_TARGET,new org.joml.Vector3f());
+        builder.define(DANCE_SONG_START,0L);builder.define(DANCE_END,-1L);
         builder.define(FEEDBACK_REACTION,0);builder.define(FEEDBACK_STARTED,0L);builder.define(FEEDBACK_ITEM,0);
         builder.define(GESTURE_AUX,ItemStack.EMPTY);
         builder.define(GESTURE_LEAD,0F);builder.define(GESTURE_LOAD,0);
