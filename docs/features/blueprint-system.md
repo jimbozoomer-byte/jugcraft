@@ -284,3 +284,13 @@ Both harvesting regressions passed again with 137 machines and all 32 reactor
 part/orientation combinations. That local run used the existing built resources
 after verifying that the source tag and built tag have identical entries; only
 their ordering differs. CI independently regenerates resources.
+
+### Tag validator registry coverage
+
+CI regeneration and the full server suite without optional integrations passed
+on 62d507d72. The main build then reached the data validator, which did not include
+industrial forms in its known block/item IDs. `check_tags` now includes the actual
+`industrial_forms.blocks()` registry, consistent with the asset and recipe audits.
+A targeted run accepts the committed tags and rejects an injected nonexistent
+machine ID. The required DejaVu fonts were configured in local build tools to
+allow the full audit to run; no fonts or third-party artifacts are committed.

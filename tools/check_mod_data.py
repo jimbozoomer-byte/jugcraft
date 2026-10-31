@@ -792,7 +792,8 @@ def check_tags():
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
                                                     + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + aged_wood.blocks() + fire_control.blocks() + fire_control.items() + list(raiders.ITEMS) + list(raiders.BLOCKS) + list(armoured_walker.ITEMS) + list(howitzer_walker.ITEMS) + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(unmasking.ITEMS) + list(trains.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
                                                     + ag.all_blocks() + ag.all_items() + (town_assets.blocks() + styx.blocks())
-                                                    + guns.items() + guns.blocks() + concordance.items() + concordance.blocks() + concordance.itemless_blocks())
+                                                    + guns.items() + guns.blocks() + industrial_forms.blocks()
+                                                    + concordance.items() + concordance.blocks() + concordance.itemless_blocks())
         import nouveau_content
         known = set(known)
         if registry == 'block': known.update(starter_workshop.BLOCKS)
