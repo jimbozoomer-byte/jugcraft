@@ -75,9 +75,9 @@ def build(jar):
         values['jugcraft:'+ore] = 4 * values['minecraft:quartz']
         origins['jugcraft:'+ore] = 'local quartz mining/Fortune accounting'
     # Roots of decorative families the tablet makes (docs/features/tablet-decorations.md) that nothing crafts: mud is
-    # worth the four clay balls water treatment dries it into (64); resin clumps and glow ink sacs are mob/creaking drops (provisional, for the owner). Their
+    # 5, the contributor's price (a water bottle makes it from dirt, so water treatment drying it into clay is a farm); resin clumps and glow ink sacs are mob/creaking drops (provisional, for the owner). Their
     # crafted forms (packed mud, mud bricks, resin bricks, glow item frames) then come from the game's recipes.
-    for item, price in {'mud': 64, 'resin_clump': 16, 'glow_ink_sac': 64}.items():
+    for item, price in {'mud': 5, 'resin_clump': 16, 'glow_ink_sac': 64}.items():
         values['minecraft:'+item] = Fraction(price); origins['minecraft:'+item] = 'local decorative accounting'
     # Manipulation essence is uncommon loot; at one essence, eight tablet-made tuff and one essence became eight
     # calcite worth 224 more. This is the least price that makes that recipe (and deepslate to tuff) gain nothing.

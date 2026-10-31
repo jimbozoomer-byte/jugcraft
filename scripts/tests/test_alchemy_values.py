@@ -126,5 +126,6 @@ class AlchemyValueTests(unittest.TestCase):
         self.assertEqual(9*value('jugcraft:steel_plate'),value('jugcraft:jimta_dense_steel_plate'))
         self.assertEqual(3*value('jugcraft:silver_wire'),value('jugcraft:silver_ingot'))
 
-    def test_mud_is_worth_the_clay_it_dries_into(self):
-        self.assertGreaterEqual(value('minecraft:mud'),4*value('minecraft:clay_ball'))
+    def test_mud_bricks_follow_mud(self):
+        self.assertEqual(value('minecraft:mud'),5)
+        self.assertEqual(value('minecraft:packed_mud'),value('minecraft:mud')+value('minecraft:wheat'))

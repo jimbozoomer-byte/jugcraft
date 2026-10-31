@@ -43347,27 +43347,27 @@
       "source": "reference tag minecraft:decorated_pot_sherds"
     },
     "minecraft:mud": {
-      "numerator": 64,
+      "numerator": 5,
       "denominator": 1,
       "source": "local decorative accounting"
     },
     "minecraft:mud_brick_slab": {
-      "numerator": 44,
-      "denominator": 1,
+      "numerator": 29,
+      "denominator": 2,
       "source": "recipe minecraft:mud_brick_slab_from_mud_bricks_stonecutting"
     },
     "minecraft:mud_brick_stairs": {
-      "numerator": 88,
+      "numerator": 29,
       "denominator": 1,
       "source": "recipe minecraft:mud_brick_stairs_from_mud_bricks_stonecutting"
     },
     "minecraft:mud_brick_wall": {
-      "numerator": 88,
+      "numerator": 29,
       "denominator": 1,
       "source": "recipe minecraft:mud_brick_wall_from_mud_bricks_stonecutting"
     },
     "minecraft:mud_bricks": {
-      "numerator": 88,
+      "numerator": 29,
       "denominator": 1,
       "source": "recipe minecraft:mud_bricks"
     },
@@ -43887,7 +43887,7 @@
       "source": "recipe minecraft:packed_ice"
     },
     "minecraft:packed_mud": {
-      "numerator": 88,
+      "numerator": 29,
       "denominator": 1,
       "source": "recipe minecraft:packed_mud"
     },

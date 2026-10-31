@@ -35,7 +35,7 @@ The tablet's list of what it may make (`jugcraft:tablet_outputs`) grows from 394
 
 New prices, in `tools/build_alchemy_values.py` and `data/jugcraft/alchemy/values.json` (marked "local decorative accounting"):
 - weathered copper is worth the copper it grew from; concrete is its powder; pale moss is moss; mushroom blocks and stems are a mushroom; the warped wart block is a nether wart block; wildflowers are a yellow dye; rooted dirt is dirt; a stripped bamboo block is a bamboo block;
-- mud is 64, the four clay balls water treatment dries it into (at 1 it was a loop: tablet mud into clay worth 64), packed mud 88 (mud and wheat), mud bricks 88, a mud brick slab 44; resin clumps 16 and resin bricks 16 a block; glow ink sacs 64, so a glow item frame is 96¼;
+- mud is 5, the contributor's price, packed mud 29 (mud and wheat), mud bricks 29, a mud brick slab 14½. Water treatment dries a mud into four clay balls (64): that stays a farm, like vanilla's dripstone, since a water bottle makes mud from dirt whatever mud is priced at; resin clumps 16 and resin bricks 16 a block; glow ink sacs 64, so a glow item frame is 96¼;
 - **provisional, for the owner:** froglights 64, shroomlights 64, the bell 8,192, resin clumps 16, glow ink sacs 64.
 
 The builder needs the game's jar, which was not available, so these records were written as it computes them; where a vanilla recipe's yield was uncertain (mud bricks, resin bricks) the lower reading was used, so a block can never be dissolved for more than it costs to craft. The owner's next run of the builder replaces them with its own exact figures.
@@ -62,7 +62,7 @@ Priced on 30 October 2026, as the contributor asked, the way the game already pr
 - the molding press still makes a gasket from ¾ of an essence of silicone, so the gasket stays ¾, not the 96 a steel plate would make it;
 - titanium was left alone: its sponge is made from magnesium that is still unpriced, and a price for the sponge alone opened a loop through electrolysis.
 
-A local audit of every crafting and machine recipe found no recipe made more profitable by these prices except smelting mined ore and dust into ingots, which the game already does for every metal. It also found that mud at 1 dried into clay worth 64 through water treatment (mud is now 64) and that cinder block walls and stairs cost half an essence more than the block they are cut from (now the same).
+A local audit of every crafting and machine recipe found no recipe made more profitable by these prices except smelting mined ore and dust into ingots, which the game already does for every metal. It also found that cinder block walls and stairs cost half an essence more than the block they are cut from (now the same).
 
 ### A loop closed
 
