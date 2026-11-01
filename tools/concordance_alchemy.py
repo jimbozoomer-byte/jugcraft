@@ -527,7 +527,10 @@ PRODUCT_REWARD_ROUTES = {rid("tyrant_scale"): {"minecraft:magma_cream"},  # two 
                          # bone meal (Mendvetch) and a stink bottle into spray and its bottle (glucose syrup, then sugar)
                          # and is kept, but the graph (check_mod_data.py _made_from) counts a recipe's tool as an input.
                          rid("gossamer_silk"): {rid("mendvetch"), "minecraft:sugar"},
-                         rid("salvaged_coil"): {rid("mendvetch"), "minecraft:sugar"}}
+                           rid("salvaged_coil"): {rid("mendvetch"), "minecraft:sugar"},
+                           # Shard -> rare-earth oxide -> neodymium magnet -> prepared electric motors -> tools.
+                           # As above, the recipe graph counts retained cutting tools as inputs to these products.
+                           rid("cydonian_shard"): {rid("mendvetch"), "minecraft:sugar"}}
 ROMAN = ["I", "II", "III", "IV", "V"]
 
 
