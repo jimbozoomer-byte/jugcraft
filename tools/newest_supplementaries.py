@@ -59,6 +59,61 @@ def hourglass_data(p):
  if 'texture' in original:value['texture']=asset(original['texture'])
  return value
 
+def native_recipe(original):
+ """Evaluate supported source flags before removing loader-only metadata.
+
+ The native base families and Lumisene are enabled; external loader mods are
+ absent. Unknown conditions remain unsupported, including inside negation.
+ Ingredient tags are tags, never item registrations named after their tag.
+ """
+ available=ACTIVE|MATERIALS|{'lumisene_bottle','lumisene_bucket'}
+ flags=available|{'flag','lumisene','bamboo_spikes_tipped'}
+ disabled={'rich_soil_planter'}
+ def condition(c):
+  kind=c.get('condition',c.get('type',''))
+  if kind=='supplementaries:flag':
+   name=c.get('flag');return True if name in flags else False if name in disabled else None
+  if kind=='fabric:mod_loaded':return c.get('modid') in {'minecraft','jugcraft','fabricloader'}
+  if kind=='fabric:not':
+   value=condition(c.get('value',{}));return None if value is None else not value
+  if kind in {'fabric:or','fabric:and'}:
+   values=[condition(v) for v in c.get('values',[])]
+   if kind=='fabric:or':return True if True in values else None if None in values else False
+   return False if False in values else None if None in values else True
+  return None
+ conditions=original.get('fabric:load_conditions',[])
+ if any(condition(c) is not True for c in conditions):return None
+ # No implicit approval of a NeoForge-only condition that has no Fabric twin.
+ if not conditions and any(original.get(k) for k in ('neoforge:conditions','neoforge:load_conditions')):return None
+ value=reg({k:v for k,v in original.items() if k not in ('fabric:load_conditions','neoforge:conditions','neoforge:load_conditions')})
+ if not value.get('type','').startswith('minecraft:'):return None
+ value=recipe(value)
+ used=refs(value)
+ if not used or any(x.removeprefix('jugcraft:supps_') not in available for x in used):return None
+ # Source integrations may name items belonging to absent mods. Do not publish
+ # those recipes merely because their result is an implemented native item.
+ def valid(v):
+  if isinstance(v,str):
+   if v.startswith('#'):return True  # Runtime item-tag audit validates membership.
+   return ':' not in v or v.startswith(('minecraft:','jugcraft:'))
+  if isinstance(v,list):return all(valid(x) for x in v)
+  if isinstance(v,dict):return all(valid(x) for x in v.values())
+  return True
+ if not all(valid(value.get(k,{})) for k in ('key','ingredient','ingredients','result','base','addition','template')):return None
+ return value
+
+def write_native_recipes(writer=write):
+ """Bounded recipe-only generation, also used by the full native resource pass."""
+ written=[]
+ for p in sorted((S/'data/supplementaries/recipe').rglob('*.json')):
+  # main() deliberately supplies a native, component-compatible replacement.
+  if p.relative_to(S/'data/supplementaries/recipe').as_posix()=='pancake.json':continue
+  value=native_recipe(read(p))
+  if value is None:continue
+  path=RES/'data/jugcraft/recipe'/('supps_'+p.relative_to(S/'data/supplementaries/recipe').as_posix())
+  writer(path,value);written.append(path)
+ return written
+
 def main():
  for folder in ['textures','models']:
   for p in (A/folder).rglob('*'):
@@ -160,11 +215,7 @@ def main():
  write(arrows,data)
  write(RES/'data/jugcraft/recipe/supps_flag_patterns.json',{'type':'jugcraft:supps_flag_patterns'})
  write(RES/'data/jugcraft/recipe/supps_confetti_popper_dye.json',{'type':'jugcraft:supps_confetti_dye'})
- for p in (S/'data/supplementaries/recipe').rglob('*.json'):
-  v=reg(read(p));conditions=v.pop('fabric:load_conditions',[]);v.pop('neoforge:conditions',None)
-  if any(c.get('condition')!='jugcraft:supps_flag' for c in conditions):continue
-  used=refs(v)
-  if used and all(x.removeprefix('jugcraft:supps_') in ACTIVE|MATERIALS for x in used) and v.get('type','').startswith('minecraft:'):write(RES/'data/jugcraft/recipe'/('supps_'+p.relative_to(S/'data/supplementaries/recipe').as_posix()),recipe(v))
+ write_native_recipes(write)
  lang=read(O/'lang/en_us.json')
  for k,v in read(A/'lang/en_us.json').items():
   if k.startswith(('block.supplementaries.','item.supplementaries.')) and k.split('.',2)[2] in ACTIVE|MATERIALS:lang[k.replace('.supplementaries.','.jugcraft.supps_')]=v
@@ -215,15 +266,13 @@ def main():
  heads()
  from newest_lumisene import main as lumisene
  lumisene()
-if __name__=='__main__':main()
-
-import newest_household_tools
-newest_household_tools.main()
-
-import newest_field_tools
-newest_field_tools.main()
+ from newest_household_tools import main as household_tools
+ household_tools()
+ from newest_field_tools import main as field_tools
+ field_tools()
 
 # Original pirate ships and encounter markers.
 if __name__ == "__main__":
+ main()
  import newest_galleons
  newest_galleons.main()

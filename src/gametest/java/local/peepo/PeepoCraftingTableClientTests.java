@@ -14,6 +14,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.item.*;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.levelgen.presets.WorldPresets;
 import net.minecraft.world.level.storage.*;
@@ -89,8 +90,17 @@ public final class PeepoCraftingTableClientTests implements FabricClientGameTest
         try(var tx=Transaction.openOuter()){check(table.outputStorage().extract(ItemVariant.of(Items.WHEAT),3,tx)==3,"obsolete recipe ingredients can be unloaded through existing Output");tx.commit();}
         check(table.installed().stream().allMatch(ItemStack::isEmpty),"obsolete recipe recovery leaves no duplicated inputs");
         setup(level,false);source.setItem(0,new ItemStack(Items.OAK_LOG));List<ItemStack> automatic=List.of();
-        for(int attempt=0;attempt<32 && automatic.isEmpty();attempt++)automatic=batch();
-        check(!automatic.isEmpty() && port().plan()!=null,"empty Filter finds an available ordinary recipe through bounded planning pages");
+        var catalog=CraftingTableRecipes.of(level.getServer().getRecipeManager());
+        // The pack and data packs can grow beyond any fixed number of bounded planning pages.
+        int pageSize=CraftingTableCompanionBlockEntity.PLANNING_PAGE_SIZE;
+        int pages=Math.max(1,(catalog.all.size()+pageSize-1)/pageSize),attempts=0;
+        for(;attempts<pages && automatic.isEmpty();attempts++)automatic=batch();
+        var automaticPlan=table.plan();
+        check(!automatic.isEmpty() && automaticPlan!=null && port().plan()!=null,"empty Filter finds an available ordinary recipe through bounded planning pages; catalog="+catalog.all.size()+", pages="+attempts+"/"+pages+", page size="+pageSize+", selected="+port().plan());
+        var nativeRecipe=catalog.ids.get(automaticPlan.id());var grid=CraftingInput.of(3,3,automaticPlan.pattern());
+        check(nativeRecipe!=null && nativeRecipe.recipe().matches(grid,level) && ItemStack.matches(nativeRecipe.recipe().assemble(grid),automaticPlan.result()),"automatic plan matches and assembles its selected native recipe: "+automaticPlan.id());
+        check(count(automatic,Items.OAK_LOG)==1 && count(automaticPlan.pattern(),Items.OAK_LOG)==1 && automaticPlan.pattern().stream().allMatch(s->s.isEmpty() || s.is(Items.OAK_LOG)),"automatic recipe uses the actual single supplied log");
+        check(count(source,Items.OAK_LOG)==1 && table.installed().stream().allMatch(ItemStack::isEmpty),"automatic planning preserves source and table inventories");
     }
     private CompanionJob stand(){
         var job=CompanionJobs.resolve(npc,base);check(job!=null && job.animation()==WorkAnimation.CRAFT,"regular table uses crafting-bench animation");

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "group": "mossy_oak_planks",
+  "ingredients": [
+    "minecraft:oak_planks",
+    "minecraft:vine"
+  ],
+  "result": {
+    "id": "jugcraft:ribbits_mossy_oak_planks",
+    "count": 1
+  }
+}

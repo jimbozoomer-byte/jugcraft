@@ -13,6 +13,8 @@
       "io.github.jimbozoomer.jugcraft.test.StorageCrateMultiplayerHarness"
     ],
     "fabric-gametest": [
+      "io.github.jimbozoomer.jugcraft.test.TestPlayersGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PeerClientStartupGameTests",
       "io.github.jimbozoomer.jugcraft.test.EquipmentAccessGameTests",
       "io.github.jimbozoomer.jugcraft.test.CraftingChoicesGameTests",
       "io.github.jimbozoomer.jugcraft.test.RaidApproachGameTests",
@@ -407,6 +409,7 @@
       "io.github.jimbozoomer.jugcraft.town.LivingCityCommissionGameTests",
       "io.github.jimbozoomer.jugcraft.test.StarterGuidanceGameTests",
       "io.github.jimbozoomer.jugcraft.menagerie.NewestHouseholdGameTests",
+      "io.github.jimbozoomer.jugcraft.building.OwnerTwigsWorldGameTests",
       "io.github.jimbozoomer.jugcraft.test.NewestManaGameTests",
       "io.github.jimbozoomer.jugcraft.test.NewestBackpackGameTests",
       "io.github.jimbozoomer.jugcraft.menagerie.NewestLumiseneGameTests"
@@ -732,6 +735,7 @@
     "jugcraft": "*"
   },
   "mixins": [
+    "jugcraft-test.mixins.json",
     "jugcraft-test.client.mixins.json"
   ]
 }

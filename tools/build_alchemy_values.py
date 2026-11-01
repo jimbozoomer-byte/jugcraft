@@ -74,6 +74,15 @@ def build(jar):
     for ore in ('quartz_ore', 'deepslate_quartz_ore'):
         values['jugcraft:'+ore] = 4 * values['minecraft:quartz']
         origins['jugcraft:'+ore] = 'local quartz mining/Fortune accounting'
+    # Fishing loot can be reclaimed into historical metals: one discarded tin
+    # smelts/blasts into seven iron nuggets, and one goldfish crafts into a gold
+    # nugget. Price these otherwise uncraftable roots at their recoverable metal,
+    # rather than letting a one-essence fallback devalue nuggets below their
+    # reversible nine-nuggets-per-ingot conversion. The recipe-count regression
+    # requires this accounting to be reviewed if either salvage yield changes.
+    for item, metal, nuggets in (('aquatic_tin_can', 'iron', 7), ('aquatic_goldfish', 'gold', 1)):
+        values['jugcraft:'+item] = nuggets * values['minecraft:'+metal+'_ingot'] / 9
+        origins['jugcraft:'+item] = f'local aquatic salvage accounting ({nuggets} {metal} nugget yield)'
     locked=set(values)
     edges=[]
     for rid,r in recipes.items():

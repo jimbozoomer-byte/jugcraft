@@ -1,0 +1,41 @@
+# Remaining upstream Survival acquisition gaps
+
+The merged Peepo CI checkout still has **146 unresolved acquisition entries: 127 without a documented route and 19 with a blocked recipe chain**. The combined audit covers 15,091 registered Jugcraft items and reports **zero invalid ingredients and zero invalid template loot links**. These counts were refreshed after canonical generation completed, using the native recipe/interaction audit additions and the recovery of eight existing Supplementaries recipes.
+
+**The strict Survival acquisition assertion still rejects these entries.** It must remain failing until these routes are implemented or existing native acquisition is verified and represented in the audit. No suppression, blanket exclusion, or invented recipe was added for these 146 entries. An unresolved audit entry is not, by itself, proof that the item is unobtainable in game.
+
+| Family | Missing documented route | Blocked chain | Total |
+| --- | ---: | ---: | ---: |
+| Supplementaries (`supps`) | 43 | 0 | 43 |
+| Forbidden Arcane (`forbidden`) | 34 | 6 | 40 |
+| Jugtania (`jugtania`) | 13 | 12 | 25 |
+| Homeworks (`homeworks`) | 19 | 1 | 20 |
+| Holidayworks (`holidayworks`) | 8 | 0 | 8 |
+| Ars Additions (`ars_additions`) | 4 | 0 | 4 |
+| Twigworks (`twigworks`) | 3 | 0 | 3 |
+| Wilds (`wilds`) | 2 | 0 | 2 |
+| Aquatic (`aquatic`) | 1 | 0 | 1 |
+| **Total** | **127** | **19** | **146** |
+
+## Verified existing Supplementaries routes
+
+The [Supplementaries acquisition adapter](../../tools/survival_supps_routes.py) removes 30 false missing/blocked entries without changing gameplay. [Natural wild flax](../../src/main/java/io/github/jimbozoomer/jugcraft/menagerie/OwnerSupplementFlora.java) provides seeds, and [planted flax](../../src/main/java/io/github/jimbozoomer/jugcraft/menagerie/OwnerSupplementFlax.java) grows to the mature lower-half harvest that produces fiber. This resolves the flax/block conversion loop and all 20 blocked awning/fodder entries. The adapter also records native barnacle generation, charged-creeper heads, treasure injections, globe purchases/conversions, paid rope-arrow and hidden-item crafting, and Silk Touch recovery of raked gravel.
+
+The 43 remaining Supplementaries entries have these specific causes:
+
+- **32 colored presents and trapped presents:** the supplied [present-dye recipe](../../art/owner-library/originals/Edited-2026-10-29/SUPPS/data/supplementaries/recipe/present_dye.json) and [trapped-present conversion](../../art/owner-library/originals/Edited-2026-10-29/SUPPS/data/supplementaries/recipe/trapped_present.json) use custom serializers with no native implementation. Ordinary uncolored presents remain craftable.
+- **Eight candle/sconce compatibility variants:** their source recipes require items from absent external mods; the [native importer](../../tools/newest_supplementaries.py) correctly rejects those conditions rather than substituting materials. These are the Cupric, Ender, Soul and Spectacle candle holders, and Ender, Glow, Green and Nether Brass sconces.
+- **Two compatibility rods:** `supps_edelwood_stick` and `supps_propelplant_cane` are registered decorative rods without a verified native acquisition conversion.
+- **One formed block state:** [falling ash converts basalt to Ashen Basalt](../../src/main/java/io/github/jimbozoomer/jugcraft/menagerie/OwnerSupplementTerrain.java), but its [actual loot](../../src/main/resources/data/jugcraft/loot_table/blocks/supps_ashen_basalt.json) returns basalt. That transformation does not establish acquisition of the registered Ashen Basalt item. It remains visible for explicit review rather than receiving a guessed recipe or new exclusion.
+
+## Confirmed causes and examples
+
+- **Unsupported original recipe types:** the supplied [Terrasteel Helmet recipe](../../art/owner-library/originals/Edited-2026-10-29/Jugtania/data/botania/recipes/terrasteel_helmet.json) uses `botania:armor_upgrade`; the [Water Rod recipe](../../art/owner-library/originals/Edited-2026-10-29/Jugtania/data/botania/recipes/water_rod.json) uses `botania:water_bottle_matching_shaped`. The [native Jugtania importer](../../tools/newest_jugtania.py) does not import those serializers. They need proper native recipe support, including their original matching/component behavior.
+- **Missing roots propagate into valid derived recipes:** `jugcraft:jugtania_stripped_livingwood_log` and `jugcraft:jugtania_stripped_dreamwood_log` block stripped and glimmering wood variants. Their initial acquisition remains unresolved; downstream crafting recipes do not establish a source. The native log-stripping registration is missing. The supplied Gaia-head beheading reward is also absent from [native Elementium Axe rewards](../../src/main/java/io/github/jimbozoomer/jugcraft/botany/BotanicalAdvancedTools.java).
+- **Remaining Arcane progression roots:** the audit now includes the actual [forge rituals](../../src/main/java/io/github/jimbozoomer/jugcraft/arcane/ArcaneRituals.java), forge formation/upgrades, and Clibano processing through the [Arcane acquisition adapter](../../tools/survival_arcane_routes.py). It still lacks a supported route for `jugcraft:forbidden_divine_pact`, which blocks the Soul Binding Crystal, and for several tools/decorative entries. Source-backed imports or explicit acquisition design are still required; item registration alone is insufficient.
+
+The smaller families also remain visible for follow-up: glass/iron Homeworks furniture, Holidayworks stockings and awake bat, Ars codex entries and Memory Crystal, Twigworks novelty/terrain entries, Wilds blessing/staff entries, and the Aquatic Largemouth Bass Bucket. Their exact IDs and blockers are retained in the [native acquisition audit](../audits/survival-recipes.json); this report does not classify them as intentionally unavailable.
+
+## Evidence and scope
+
+The measurement comes from `python tools/audit_survival_recipes.py --registry build/ci-survival-item-registry.json --write` after canonical resource generation; the output is retained in `build/ci-survival-audit-supps.log` and the compact review snapshot in `build/ci-native-routes-review.json`. The committed [registered-item snapshot](../audits/survival-item-registry.json), [audit implementation](../../tools/audit_survival_recipes.py), [botanical acquisition adapter](../../tools/survival_newest_routes.py), [native interaction adapter](../../tools/survival_newest_interactions.py), and [Supplementaries adapter](../../tools/survival_supps_routes.py) provide the reproducible inputs. Eighteen focused acquisition-graph regressions passed; the full Foundation run owns the strict all-items assertion. Source recipes and runtime handlers take precedence over item names, self-drops, or conversion loops. These are upstream content/acquisition issues exposed by the merged checkout, separate from the Staff Post behavior.

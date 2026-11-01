@@ -91,3 +91,10 @@ def variants(assets, namespace, state, properties=None):
             if matches(part.get('when', {}), values): boxes.extend(boxes_for(assets, namespace, part['apply']))
         result[','.join(key + '=' + values[key] for key in keys)] = boxes
     return result
+
+
+def order_shape_keys(blocks):
+    """Stabilize serialized state order without changing geometry or registry order."""
+    for spec in blocks.values():
+        if 'shapes' in spec:
+            spec['shapes'] = dict(sorted(spec['shapes'].items()))
