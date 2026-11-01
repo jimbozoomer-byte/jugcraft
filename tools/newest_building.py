@@ -41,8 +41,25 @@ def repair_unused_faces(data):
 
 
 def native_model(path, data):
-    """Adapt the two authored lantern linings without inverted native cuboids."""
+    """Preserve authored geometry with bounded, deterministic native adaptations."""
     model_path = str(path).replace('\\', '/')
+    if model_path.endswith('/models/newest/fenceworks/block/parent/grass_topped_wall_triple.json'):
+        # Crossed, zero-thickness grass planes have equal-area coplanar faces.
+        # Platform trig rounding can make the generic finishing pass choose
+        # opposite faces to separate. Pin the already-reviewed 0.1px offsets
+        # before that pass; keep UVs, rotations and the preserved source intact.
+        source = map_value(read(SOURCE / 'fences/assets/mcwfences/models/block/parent/grass_topped_wall_triple.json'),
+                           'mcwfences', 'fenceworks', True)
+        data = deepcopy(data)
+        for index, axis in ((5, 0), (23, 2)):
+            original = source['elements'][index]
+            fixed = deepcopy(original)
+            if original['from'][axis] != 8 or original['to'][axis] != 8:
+                raise ValueError('Changed supplied grass-wall plane: ' + str(index))
+            fixed['from'][axis] = 7.9
+            if data['elements'][index] not in (original, fixed):
+                raise ValueError('Changed native grass-wall plane: ' + str(index))
+            data['elements'][index] = fixed
     lantern = next((name for name in ('template_paper_lantern', 'template_paper_lantern_hanging')
                     if model_path.endswith('/models/newest/twigworks/block/' + name + '.json')), None)
     if lantern and any(any(a > b for a, b in zip(e['from'], e['to'])) for e in data.get('elements', [])):

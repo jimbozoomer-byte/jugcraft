@@ -276,6 +276,14 @@ jobs:
       - name: Run client game tests (shard ${{ matrix.shard }} of 16)
         if: env.CLASSES != ''
         run: |
+          # Two rendered clients plus Gradle and Mesa can exceed physical RAM.
+          # Keep bounded JVM heaps; give the disposable runner spillover instead
+          # of letting host memory pressure kill its control process.
+          sudo fallocate -l 8G /mnt/jugcraft-client.swap
+          sudo chmod 600 /mnt/jugcraft-client.swap
+          sudo mkswap /mnt/jugcraft-client.swap
+          sudo swapon /mnt/jugcraft-client.swap
+          free -h
           ./gradlew runClientGameTest --no-daemon "-PclientTests=$CLASSES" &
           client_build_pid=$!
           # A world-close hang previously exhausted the job limit without a Java stack.
@@ -284,6 +292,8 @@ jobs:
             while kill -0 "$client_build_pid" 2>/dev/null; do
               sleep 600
               kill -0 "$client_build_pid" 2>/dev/null || break
+                free -h
+                ps -eo pid,comm,rss --sort=-rss | head -n 12 || true
               jcmd -l | awk '$2 == "net.fabricmc.devlaunchinjector.Main" {print $1}' | while read -r client_jvm_pid; do
                 jcmd "$client_jvm_pid" Thread.print || true
               done
