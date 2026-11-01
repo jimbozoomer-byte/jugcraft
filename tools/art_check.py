@@ -86,7 +86,7 @@ O1_ALLOW = {
     "black_pillar_candle": _DECOR, "ivory_pillar_candle": _DECOR, "bowling_pumpkin": _DECOR, "corn_maze": _DECOR,
     "corn_plush": _DECOR, "hedgehog_plush": _DECOR, "owl_plush": _DECOR, "costume_trunk_open": _DECOR,
     "dead_hollow_tree": _DECOR, "flying_eyeball": _DECOR, "fog_machine": _DECOR,
-    "judging_stand": _DECOR, "monster_head": _DECOR, "phantom_pipe_organ": _DECOR, "spirit_mirror": _DECOR,
+    "monster_head": _DECOR, "phantom_pipe_organ": _DECOR, "spirit_mirror": _DECOR,
     "asphodel": _FLORA, "black_rose": _FLORA, "bleeding_heart": _FLORA, "deadly_nightshade": _FLORA, "ghost_pipe": _FLORA,
     "snowdrop": _FLORA, "spider_lily": _FLORA, "potted_bleeding_heart": _FLORA, "potted_deadly_nightshade": _FLORA,
     "potted_ghost_pipe": _FLORA, "potted_snowdrop": _FLORA, "potted_spider_lily": _FLORA,
