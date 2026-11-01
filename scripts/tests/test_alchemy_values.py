@@ -138,3 +138,59 @@ class AlchemyValueTests(unittest.TestCase):
         # Electrolysing magnesium chloride gives back the magnesium it holds, no more.
         self.assertGreaterEqual(value('jugcraft:dry_magnesium_chloride'),value('jugcraft:magnesium_ingot'))
         self.assertGreater(value('jugcraft:titanium_pickaxe'),3*value('jugcraft:titanium_ingot'))
+
+    def test_ore_processing_makes_no_essence(self):
+        # Each ore, raw ore, washed ore and dust is worth what its best processing makes (fluids taken as free), so no
+        # crushing, washing, leaching, centrifuging or smelting step returns more than went in.
+        import re
+        ore=re.compile(r'(_ore$|^raw_|_dust$|^washed_|^crushed_)')
+        types={'crushing','pulverizing','ore_washing','arc_smelting','jimta_thermal_centrifuging','jimta_extracting','chemical_reaction'}
+        def item(x):
+            if isinstance(x,dict): x=x.get('ingredient',x); x=x.get('item',x.get('id')) if isinstance(x,dict) else x
+            return x if isinstance(x,str) and not x.startswith('#') else None
+        checked=0
+        for path in (ROOT/'src/main/resources/data/jugcraft/recipe').rglob('*.json'):
+            r=json.loads(path.read_text(encoding='utf-8'));t=r.get('type','')
+            if t.split(':')[-1] not in types and t not in ('minecraft:smelting','minecraft:blasting'):continue
+            if 'ingredient' in r: ins=[(item(r['ingredient']),int(r.get('input_count',1)))]
+            elif isinstance(r.get('items'),list): ins=[(item(e),e.get('count',1) if isinstance(e,dict) else 1) for e in r['items']]
+            else: continue
+            if len(ins)!=1 or ins[0][0] not in VALUES or not ore.search(ins[0][0].split(':')[1]):continue
+            outs=[]
+            for o in ([r['result']] if isinstance(r.get('result'),dict) else [])+[o for o in r.get('results',[]) or [] if isinstance(o,dict)]:
+                outs.append((o.get('id'),Fraction(o.get('count',1))))
+            for b in r.get('byproducts',[]) or []:
+                res=b.get('result',b);outs.append((res.get('id'),Fraction(str(b.get('chance',1)))*res.get('count',1)))
+            if not outs or any(o not in VALUES for o,_ in outs):continue
+            got=sum(value(o)*n for o,n in outs);cost=value(ins[0][0])*ins[0][1]
+            self.assertLessEqual(got,cost,path.relative_to(ROOT).as_posix());checked+=1
+        self.assertGreater(checked,150)
+        for metal,ingot in (('iron',256),('gold',2048),('copper',128)):
+            self.assertGreaterEqual(value('minecraft:raw_'+metal),ingot)
+            for ore_block in (metal+'_ore','deepslate_'+metal+'_ore'):
+                self.assertGreaterEqual(value('minecraft:'+ore_block),value('minecraft:raw_'+metal))
+        self.assertGreaterEqual(value('minecraft:ancient_debris'),value('minecraft:netherite_scrap'))
+        self.assertGreaterEqual(value('minecraft:diamond_ore'),value('minecraft:diamond'))
+
+    def test_pyrium_and_spent_fuel_give_back_no_more(self):
+        # Arcane debris drops pyrium, which blasts into five ancient debris; a reactor's depleted rods break into spent
+        # assemblies, nine of which centrifuge into four uranium dust and a plutonium pellet.
+        self.assertGreaterEqual(value('jugcraft:jimta_spellbooks_pyrium_ingot'),5*value('minecraft:ancient_debris'))
+        spent=value('jugcraft:spent_fuel_assembly')
+        self.assertGreaterEqual(9*spent,4*value('jugcraft:uranium_dust')+value('jugcraft:jimta_plutonium_pellet'))
+        for fuel in ('uranium','mox'):
+            for name,n in (('simple',1),('dual',2),('quad',4)):
+                self.assertGreaterEqual(value('jugcraft:jimta_'+fuel+'_rod_'+name+'_depleted'),n*spent)
+                self.assertLess(value('jugcraft:jimta_'+fuel+'_rod_'+name+'_depleted'),value('jugcraft:jimta_uranium_rod_'+name))
+
+    def test_fluid_buckets_hold_the_bucket_and_their_fluid(self):
+        buckets=[k for k,v in VALUES.items() if v['source']=='local fluid accounting']
+        self.assertGreater(len(buckets),50)
+        for bucket in buckets:
+            self.assertGreaterEqual(value(bucket),value('minecraft:bucket'),bucket)
+        # A free fluid is just the bucket; one made from mined sulfur costs more.
+        self.assertEqual(value('jugcraft:seawater_bucket'),value('minecraft:bucket'))
+        self.assertGreater(value('jugcraft:sulfuric_acid_bucket'),value('minecraft:bucket'))
+        self.assertEqual(value('jugcraft:jimta_pahoehoe_lava_bucket'),value('minecraft:lava_bucket'))
+        # Oil sand washes into half a bucket of crude oil (eight oil globs a bucket) and its sand.
+        self.assertGreaterEqual(value('jugcraft:oil_sand'),value('minecraft:sand')+(value('jugcraft:crude_oil_bucket')-value('minecraft:bucket'))/2)
