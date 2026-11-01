@@ -129,3 +129,12 @@ class AlchemyValueTests(unittest.TestCase):
     def test_mud_bricks_follow_mud(self):
         self.assertEqual(value('minecraft:mud'),5)
         self.assertEqual(value('minecraft:packed_mud'),value('minecraft:mud')+value('minecraft:wheat'))
+
+    def test_titanium_and_magnesium_are_priced(self):
+        self.assertEqual(value('jugcraft:titanium_ingot'),768)
+        self.assertEqual(value('jugcraft:titanium_sponge'),value('jugcraft:titanium_ingot'))
+        self.assertEqual(value('jugcraft:titanium_plate'),value('jugcraft:titanium_ingot'))
+        self.assertEqual(value('jugcraft:magnesium_ingot'),128)
+        # Electrolysing magnesium chloride gives back the magnesium it holds, no more.
+        self.assertGreaterEqual(value('jugcraft:dry_magnesium_chloride'),value('jugcraft:magnesium_ingot'))
+        self.assertGreater(value('jugcraft:titanium_pickaxe'),3*value('jugcraft:titanium_ingot'))

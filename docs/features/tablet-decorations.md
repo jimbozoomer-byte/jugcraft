@@ -60,7 +60,7 @@ Priced on 30 October 2026, as the contributor asked, the way the game already pr
 - plastics as the owner's plastic sheet: LDPE pellets and PVC resin 1, their offcuts ¼ (four reclaim into a pellet), film and profile 1¼;
 - **provisional:** bauxite 32, borax 16, aluminum hydroxide 16 (a bauxite makes two);
 - the molding press still makes a gasket from ¾ of an essence of silicone, so the gasket stays ¾, not the 96 a steel plate would make it;
-- titanium was left alone: its sponge is made from magnesium that is still unpriced, and a price for the sponge alone opened a loop through electrolysis.
+- **titanium and magnesium** (31 October 2026, as the contributor asked): titanium ingot 768, twice steel (provisional), and its sponge 768 (one arc-smelts into one ingot), plate 768, nugget 85⅓, block 6,912, and its tools, armour and crates from those (a pickaxe 2,312, a chestplate 6,144; they had been 4 to 31); magnesium 128 like aluminum, and the dry magnesium chloride and magnesium hydroxide that each make one at 128. Raw titanium stays mined. Reducing titanium chloride with magnesium makes a sponge worth more than the magnesium: the titanium came in as a fluid chlorinated from mined raw titanium, which the catalogue cannot price, as smelting mined ore earns.
 
 A local audit of every crafting and machine recipe found no recipe made more profitable by these prices except smelting mined ore and dust into ingots, which the game already does for every metal. It also found that cinder block walls and stairs cost half an essence more than the block they are cut from (now the same).
 
@@ -108,7 +108,7 @@ Eight tablet-made tuff (32 essence) and one Manipulation Essence (an uncommon lo
 | Yew (`yew`) | door, trapdoor, button, pressure plate, sign, hanging sign, shelf, boat |
 | Yucca (`yucca`) | door, trapdoor, button, pressure plate, sign, hanging sign, shelf, boat |
 
-**Metals.** Priced (see Metals above). Still unpriced: magnesium and the titanium sponge made from it (the brine and magnesium chloride chain), which only titanium needs.
+**Metals.** Priced (see Metals above), titanium and magnesium included. Fluids carry no price, so a recipe that turns a fluid made from a mined resource into an item (titanium chloride into sponge, brine into magnesium hydroxide) earns, as smelting mined ore does.
 
 ## Connections
 
