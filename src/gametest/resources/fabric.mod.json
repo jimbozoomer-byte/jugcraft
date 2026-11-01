@@ -729,7 +729,8 @@
       "io.github.jimbozoomer.jugcraft.test.HerobrineNetworkTests",
       "io.github.jimbozoomer.jugcraft.test.LivingCityClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.StarterGuidanceClientGameTests",
-      "io.github.jimbozoomer.jugcraft.test.NewestCollectionClientTests"
+      "io.github.jimbozoomer.jugcraft.test.NewestCollectionClientTests",
+      "io.github.jimbozoomer.jugcraft.test.OwnerTooltipClientGameTests"
     ]
   },
   "depends": {
