@@ -1,6 +1,6 @@
 # Companion PR integration with the expanded collection
 
-Implemented with OpenAI Codex (GPT-6), at the owner's request to repair PR #593 checks. This integrates main commit `a4febfea58066d1fe23aa53898882854cc6b5190` without including the separate unfinished mineral-sand work.
+Implemented with OpenAI Codex (GPT-6), at the owner's request to repair PR #593 checks. This integrates main through `dcf6b249fae20c3244cd7f98613edc03d6ec8a5e`, including its Twigworks waterlogging hotfix, without including the separate unfinished mineral-sand work.
 
 ## Corrections
 
