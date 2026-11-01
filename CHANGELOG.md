@@ -8,6 +8,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: Beardshy
+- **Beardshy**, the shy side of Beardson (the Retro Trader): a villager-bodied NPC in a pink hoodie, round glasses and a ginger beard. Walk up and he hurries off with an apology; crouch and he stays to talk (18 lines about stolen land, Denali, internet sayings and over-explaining). Hit, he apologises and runs; he never fights back. He trades and drops nothing and doesn't spawn on his own yet (`/summon jugcraft:beardshy`).
+- The Harvest Feast story that would make him the Thanksgiving event's antagonist (he wants the feast cancelled) is laid out for the owner's approval, not built. Record: [beardshy.md](docs/features/beardshy.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Harvest Festival Grounds, part 4 (Harvest Bunting and the Sack-Race Sack)
 - **Harvest Bunting**: a new strand for the String Light Hooks, a twine cord hung with leaf-shaped pennants, a red maple leaf, a gold aspen leaf and a hessian pennant in turn.
 - **Sack-Race Sack**: a hessian sack worn on the legs. In it you walk at two fifths of your speed, can't step up a block without hopping, and jump a little higher, though not over a fence.

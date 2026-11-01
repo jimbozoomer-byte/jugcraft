@@ -328,7 +328,7 @@ def assets():
 
 
 def seasons_assets(lang):
-    """Seasonal snow: vanilla snow layers' models (layers 1-7, then a full block), its name and its drops."""
+    """Seasonal snow: vanilla snow layers' models (layers 1-7, then a full block), its name and its drops; Beardshy's lines."""
     import seasons
     block = seasons.SNOW_BLOCK
     models = {layers: f"minecraft:block/snow_height{layers * 2}" for layers in range(1, 8)}
@@ -336,6 +336,9 @@ def seasons_assets(lang):
     write(ASSETS / "blockstates" / f"{block}.json",
           {"variants": {f"layers={layers}": {"model": model} for layers, model in models.items()}})
     lang[f"block.{MOD}.{block}"] = seasons.SNOW_DISPLAY
+    # Beardshy, the Harvest Feast's shy antagonist (tools/beardshy.py, Beardshy.java).
+    import beardshy
+    beardshy.lang(lang)
     # Broken by a player or mob, a snowball per layer, like vanilla snow layers (never the block itself).
     write(DATA / MOD / "loot_table" / "blocks" / f"{block}.json", {"type": "minecraft:block", "pools": [{
         "condition": {"type": "minecraft:entity_properties", "entity": "this", "predicate": {}},
