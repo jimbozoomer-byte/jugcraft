@@ -129,6 +129,13 @@ public final class PeepoEntity extends PathfinderMob {
     static final EntityDataAccessor<Float> REST_YAW=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.FLOAT);
     static final EntityDataAccessor<Integer> REST_COLOR=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.INT);
     static final EntityDataAccessor<Integer> REST_CLIMB=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.INT);
+    static final EntityDataAccessor<Integer> STAFF_POSE=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.INT);
+    static final EntityDataAccessor<Integer> STAFF_PREVIOUS=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.INT);
+    static final EntityDataAccessor<Long> STAFF_STARTED=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.LONG);
+    static final EntityDataAccessor<org.joml.Vector3fc> STAFF_OFFSET=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.VECTOR3);
+    static final EntityDataAccessor<net.minecraft.core.BlockPos> STAFF_ANCHOR=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.BLOCK_POS);
+    static final EntityDataAccessor<org.joml.Vector3fc> STAFF_POINT=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.VECTOR3);
+    static final EntityDataAccessor<Long> STAFF_GREETING=SynchedEntityData.defineId(PeepoEntity.class,EntityDataSerializers.LONG);
     public CompanionFeedbackRules.Reaction feedbackReaction(){return CompanionFeedbackRules.Reaction.from(entityData.get(FEEDBACK_REACTION));}
     public Item feedbackItem(){var item=BuiltInRegistries.ITEM.byId(entityData.get(FEEDBACK_ITEM));return item==null?Items.AIR:item;}
     public long feedbackStarted(){return entityData.get(FEEDBACK_STARTED);}
@@ -152,7 +159,7 @@ public final class PeepoEntity extends PathfinderMob {
     void setSocialPose(int pose,long started){if(!level().isClientSide() && socialPose()!=pose){entityData.set(SOCIAL_STARTED,started);entityData.set(SOCIAL_POSE,pose);}}
     boolean socialIdle(){return isAlive() && !isRemoved() && !editingSettings() && !isEating() && !needsAutomaticFood()
         && !isRecovering() && getRestMode()==CompanionEnergy.Rest.NONE && !isWheelRunning() && workAnimation()==WorkAnimation.NONE
-        && gesture()==CompanionGesture.NONE && !restMotion.holdingExit() && feedbackReaction()==CompanionFeedbackRules.Reaction.NONE
+        && gesture()==CompanionGesture.NONE && !restMotion.holdingExit() && !staffPost.active() && !staffPost.exiting() && feedbackReaction()==CompanionFeedbackRules.Reaction.NONE
         && (routine==null || !routine.isActive()) && transport.activity()==CompanionStatus.IDLE && !transport.hasPendingDelivery();}
     private int workAnimationTicks;
     public WorkAnimation workAnimation(){return WorkAnimation.values()[Math.clamp(entityData.get(WORK_ANIMATION),0,WorkAnimation.values().length-1)];}
@@ -241,6 +248,7 @@ public final class PeepoEntity extends PathfinderMob {
     public final CompanionLivestock livestock=new CompanionLivestock(this);
     public final CompanionSocial social=new CompanionSocial(this);
     public final CompanionRestMotion restMotion=new CompanionRestMotion(this);
+    public final CompanionStaffPost staffPost=new CompanionStaffPost(this);
     public final CompanionOrders orders=new CompanionOrders(this);
     // Runtime menu identities, never saved. Multiple allowed viewers share the same pause.
     private final java.util.Set<CompanionMenu> settingsMenus=new java.util.HashSet<>();
@@ -261,7 +269,7 @@ public final class PeepoEntity extends PathfinderMob {
     /** Tracking callbacks cannot move an entity between sections while its old section is being removed. */
     void unloadCompanionRoutine(){
         companionUnloading=true;
-        try{social.cancel();feedback.clear();resetCompanionRoutine();}finally{settingsMenus.clear();navigationMemory.clear();companionUnloading=false;}
+        try{social.cancel();feedback.clear();resetCompanionRoutine();}finally{staffPost.unload();settingsMenus.clear();navigationMemory.clear();companionUnloading=false;}
     }
     boolean isUsingJobAt(net.minecraft.core.BlockPos pos){return routine!=null && routine.atJob(pos);}
     boolean tendingCriticalJob(){return routine!=null && routine.timeCritical();}
@@ -397,6 +405,7 @@ public final class PeepoEntity extends PathfinderMob {
         builder.define(GESTURE_AUX,ItemStack.EMPTY);
         builder.define(GESTURE_LEAD,0F);builder.define(GESTURE_LOAD,0);
         CompanionRestMotion.define(builder);
+        CompanionStaffPost.define(builder);
         builder.define(RECOVERING,false);
         builder.define(WORK_ANIMATION,0);builder.define(WORK_TARGET,net.minecraft.core.BlockPos.ZERO);
         builder.define(WORK_STARTED,0L);builder.define(WORK_PIE,ItemStack.EMPTY);builder.define(WORK_ANIMAL,-1);
@@ -426,6 +435,7 @@ public final class PeepoEntity extends PathfinderMob {
         // Furniture must re-establish a valid seat/bed after loading, never leave a phantom rest state.
         entityData.set(REST,0);
         restMotion.cancel();
+        staffPost.loaded();
         bedExit = input.read("CompanionBedExit", net.minecraft.core.BlockPos.CODEC).orElse(null);
         if (bedExit != null) setNoGravity(false);
         lunchOrigin=input.read("LunchOrigin",net.minecraft.core.GlobalPos.CODEC).orElse(null);
@@ -445,19 +455,19 @@ public final class PeepoEntity extends PathfinderMob {
     public boolean isBlushing() { return entityData.get(BLUSHING); }
     @Override protected net.minecraft.world.entity.ai.navigation.PathNavigation createNavigation(Level level){return new CompanionGroundNavigation(this,level);}
     @Override public void tick() {
-        if(!level().isClientSide())restMotion.tick();
+        if(!level().isClientSide()){restMotion.tick();staffPost.tick();}
         if(!level().isClientSide())CompanionGates.beforeMove(this);
         if(!level().isClientSide() && editingSettings()){
             settingsMenus.removeIf(menu->!menu.editing(this));
             if(editingSettings())holdForSettings();
         }
-        if (!level().isClientSide() && bedExit != null && getRestMode() == CompanionEnergy.Rest.NONE
+        if (!level().isClientSide() && bedExit != null && !staffPost.active() && getRestMode() == CompanionEnergy.Rest.NONE
                 && workAnimation()!=WorkAnimation.STIR && workAnimation()!=WorkAnimation.CHOP && workAnimation()!=WorkAnimation.CRAFT) leaveCompanionBed();
         super.tick();
         if(!level().isClientSide()) {
             if(editingSettings())holdForSettings();
             if(carryVisualTicks>0)--carryVisualTicks;
-            if(editingSettings() || !isAlive() || isEating() || getRestMode()!=CompanionEnergy.Rest.NONE || restMotion.holdingExit() || isWheelRunning()){
+            if(editingSettings() || !isAlive() || isEating() || getRestMode()!=CompanionEnergy.Rest.NONE || restMotion.holdingExit() || staffPost.active() || staffPost.exiting() || isWheelRunning()){
                 if(gesture()!=CompanionGesture.NONE)showGesture(CompanionGesture.NONE,ItemStack.EMPTY,blockPosition());
             }else{
                 if(transport!=null && workAnimation()==WorkAnimation.NONE)transport.refreshCarryGesture();
@@ -615,7 +625,7 @@ public final class PeepoEntity extends PathfinderMob {
         private long nextCheck;
         BudgetedStroll(){super(PeepoEntity.this,.8);setInterval(1);}
         @Override public boolean canUse(){
-            long now=level().getGameTime();if(now<nextCheck || !CompanionBudget.search(PeepoEntity.this))return false;
+            long now=level().getGameTime();if(staffPost.active() || staffPost.exiting() || now<nextCheck || !CompanionBudget.search(PeepoEntity.this))return false;
             nextCheck=now+80+Math.floorMod(getId(),20);
             return super.canUse() && CompanionBudget.path(PeepoEntity.this);
         }
@@ -623,7 +633,8 @@ public final class PeepoEntity extends PathfinderMob {
     private final class RestGoal extends Goal {
         RestGoal() { setFlags(EnumSet.of(Flag.MOVE,Flag.JUMP,Flag.LOOK)); }
         @Override public boolean canUse() { return (routine==null || !routine.isActive())
-            && (restMotion.holdingExit() || getRestMode()!=CompanionEnergy.Rest.NONE || isWheelRunning()); }
+            && (transport==null || !transport.holdingStaffExit())
+            && (restMotion.holdingExit() || staffPost.exiting() || getRestMode()!=CompanionEnergy.Rest.NONE || isWheelRunning()); }
         @Override public void tick() { getNavigation().stop(); }
     }
     private final class FindFoodGoal extends Goal {

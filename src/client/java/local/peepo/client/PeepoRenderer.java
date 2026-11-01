@@ -40,10 +40,11 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         super.submit(state,pose,collector,camera);ThoughtBubble.submit(state,pose,collector,camera);
     }
     @Override public net.minecraft.world.phys.Vec3 getRenderOffset(PeepoState state){
-        return super.getRenderOffset(state).add(state.pressOffset).add(state.rest.offset);
+        return super.getRenderOffset(state).add(state.pressOffset).add(state.rest.offset).add(state.staff.offset);
     }
     @Override protected net.minecraft.world.phys.AABB getBoundingBoxForCulling(PeepoEntity npc,float partial){
         var box=super.getBoundingBoxForCulling(npc,partial);
+        if(npc.staffPost.pose()!=0)box=box.minmax(box.move(npc.staffPost.offset())).inflate(.1);
         if(npc.restMotion.clip()!=CompanionRestMotion.Clip.NONE)
             return box.minmax(new net.minecraft.world.phys.AABB(npc.restMotion.entry(),npc.restMotion.mount()).inflate(1));
         return box;
@@ -76,6 +77,7 @@ public final class PeepoRenderer extends MobRenderer<PeepoEntity,PeepoState,Peep
         state.sitting=entity.getRestMode()==CompanionEnergy.Rest.SITTING;
         RestPose.extract(entity,state,partialTick);
         if(state.rest.active){state.bodyRot=state.rest.yaw;state.yRot=state.xRot=0;}
+        StaffPostPose.extract(entity,state,partialTick);
         state.work=state.eating || state.sleeping || state.sitting || state.wheelRunning || !entity.isAlive()?WorkAnimation.NONE:entity.workAnimation();
         state.social=state.eating || state.sleeping || state.sitting || state.wheelRunning || state.work!=WorkAnimation.NONE || !entity.isAlive()?CompanionSocial.NONE:entity.socialPose();
         state.socialTime=(float)Math.clamp(entity.level().getGameTime()-entity.socialStarted()+partialTick,0,120);

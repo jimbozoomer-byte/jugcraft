@@ -14,6 +14,12 @@ public final class CompanionJobDetails {
         if(!npc.level().hasChunkAt(target.at().pos()))return "Area unloaded; work resumes when it is loaded.";
         if(!target.present(npc.level()))return "Assigned target missing or replaced; reassign with the Planner.";
         if(!CompanionJobs.permitted(npc,target.at().pos()) || status==CompanionStatus.FORBIDDEN)return "Access denied; check ownership, party access and protection.";
+        if(target.staffPost()){
+            if(status==CompanionStatus.OCCUPIED)return "Post occupied; waiting for the seat or platform to become free.";
+            if(status==CompanionStatus.BLOCKED)return "Clear a safe approach, the standing surface and headroom.";
+            return (npc.staffPost.active()?npc.staffPost.sitting()?"Seated at post. ":"Standing at post. ":"Staff Post. ")
+                +"Facing "+target.face().getName()+"; "+(target.staffPose()==0?"automatic standing/sitting":target.staffPose()==1?"standing":"sitting")+". Jobs above this post take priority.";
+        }
         String delivery=npc.transport.jobDetail(target);
         if(!delivery.isEmpty())return delivery;
         var block=npc.level().getBlockEntity(target.at().pos());var stock=CompanionProductionStock.of(block);

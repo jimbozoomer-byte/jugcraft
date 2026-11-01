@@ -42,6 +42,7 @@ public final class CompanionLogistics {
     private static final List<Adapter> ADAPTERS=new ArrayList<>();
     public static void register(Adapter adapter){ADAPTERS.add(Objects.requireNonNull(adapter));}
     public static Port resolve(PeepoEntity npc,CompanionAssignments.Target target){
+        if(target!=null && target.staffPost())return null;
         var base=resolveBase(npc,target);if(base==null || !target.present(npc.level()))return base;
         var block=npc.level().getBlockEntity(target.at().pos());var stock=CompanionProductionStock.of(block);
         return stock==null?base:stock.wrap(npc,block,target,base);

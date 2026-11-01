@@ -106,6 +106,11 @@ public final class CompanionMenu extends AbstractContainerMenu {
         if(npc==null || player.containerMenu!=this || edit.menu()!=containerId || !stillValid(player) || filterRow>=0 || npc.level().getGameTime()<nextNameEdit || edit.row()<0 || edit.row()>4)return false;
         var target=edit.row()==0?null:npc.assignments.get(edit.row());
         if(edit.row()>0 && (target==null || !target.at().pos().equals(edit.anchor()) || recipeTarget(edit.row()-1)==null))return false;
+        if(edit.action()>=128 && edit.action()<=130){
+            if(edit.row()==0 || !target.staffPost())return false;
+            nextNameEdit=npc.level().getGameTime()+4;
+            return edit.action()==128?npc.assignments.cycleStaffPose(edit.row()):npc.assignments.rotateStaffPost(edit.row(),edit.action()==130);
+        }
         if((edit.action()==CompanionAssignments.REPAIR || edit.action()==CompanionAssignments.FERTILIZE) && edit.row()>0){nextNameEdit=npc.level().getGameTime()+4;return npc.assignments.toggleGardenMaintenance(edit.row(),edit.action());}
         if(edit.action()!=0 && (edit.row()==0 || !target.care() || edit.action()!=1 && edit.action()!=2 && edit.action()!=4 && edit.action()!=8 && edit.action()!=16))return false;
         nextNameEdit=npc.level().getGameTime()+4;
@@ -184,7 +189,7 @@ public final class CompanionMenu extends AbstractContainerMenu {
         return target;
     }
     private net.minecraft.world.level.block.entity.BlockEntity recipeStation(int row){
-        var target=recipeTarget(row);if(target==null || target.fishing() || target.livestock() || target.garden())return null;
+        var target=recipeTarget(row);if(target==null || target.staffPost() || target.fishing() || target.livestock() || target.garden())return null;
         var be=npc.level().getBlockEntity(target.at().pos());
         var rack=io.github.jimbozoomer.jugcraft.agriculture.DryingRackCompanion.of(be);if(rack!=null)return rack.allowed(npc)?be:null;
         var confection=io.github.jimbozoomer.jugcraft.agriculture.ConfectionCompanion.of(be);if(confection!=null)return confection.allowed(npc)?be:null;

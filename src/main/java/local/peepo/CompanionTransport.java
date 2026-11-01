@@ -62,6 +62,7 @@ public final class CompanionTransport extends Goal {
         return finishedWork!=null && finishedWork.at().pos().equals(pos) && npc.level().getGameTime()<finishedWorkUntil;
     }
     boolean hasPendingDelivery(){return !manifest.isEmpty() || tending!=null || handoffUntil!=0;}
+    boolean holdingStaffExit(){return active && npc.staffPost.exiting();}
     public boolean reserved(int slot){
         if(cargoSlot==slot && (tending!=null || !manifest.isEmpty()))return true;
         for(var cargo:pending)if(cargo.slot==slot)return true;
@@ -390,7 +391,7 @@ public final class CompanionTransport extends Goal {
             if(readyRoute(work,false) || readyRoute(work,true))return true;
         }
         // Generic routes yield to productive work, but do not consume a workstation assignment.
-        if(npc.assignments.workApproach()==null && emptySlot()>=0)for(int i=0;i<CompanionSupplies.ROUTES;i++){
+        if(npc.assignments.productiveWorkApproach()==null && emptySlot()>=0)for(int i=0;i<CompanionSupplies.ROUTES;i++){
             int index=(routeCursor+i)%CompanionSupplies.ROUTES;
             if(readyPorter(index)){routeCursor=(index+1)%CompanionSupplies.ROUTES;return true;}
         }
@@ -469,6 +470,11 @@ public final class CompanionTransport extends Goal {
         npc.getNavigation().moveTo(path,1);travel.started(npc,approach);
     }
     @Override public void tick(){
+        if(holdingStaffExit()){
+            // Keep the selected route while the attendant steps down, before any travel or transfer.
+            npc.getNavigation().stop();npc.setDeltaMovement(net.minecraft.world.phys.Vec3.ZERO);
+            status=CompanionStatus.WAITING;lastPosition=npc.position();return;
+        }
         if(handoffUntil!=0){
             long now=npc.level().getGameTime();
             npc.getNavigation().stop();
@@ -694,6 +700,7 @@ public final class CompanionTransport extends Goal {
         return work.task(AnimalCareZone.SHEAR)?stack.is(net.minecraft.world.item.Items.SHEARS):work.garden()?CompanionGarden.toolFits(work,stack):work.block().equals(io.github.jimbozoomer.jugcraft.Jugcraft.id("cutting_board")) && stack.is(io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture.KNIVES);
     }
     private boolean needsTool(CompanionAssignments.Target work){
+        if(work.staffPost())return false;
         return (!work.fishing() || npc.assignments.transportAllowed(work,true)) && !npc.assignments.supplies.handLocked() && work.present(npc.level()) && CompanionJobs.permitted(npc,work.at().pos())
             && (work.fishing() || HiveCompanionJob.needsShears(npc,work) || work.garden() && !work.orchard() && !CompanionGarden.hanging(work) || work.task(AnimalCareZone.SHEAR) || work.task(AnimalCareZone.SLAUGHTER) || work.block().equals(io.github.jimbozoomer.jugcraft.Jugcraft.id("cutting_board"))) && !toolFits(work,npc.belongings.getItem(9));
     }

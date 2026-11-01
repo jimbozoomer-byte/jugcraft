@@ -20,6 +20,7 @@ final class CompanionRoutine extends Goal {
     CompanionRoutine(PeepoEntity npc){this.npc=npc;nextSearch=npc.level().getGameTime()+Math.floorMod(npc.getId(),80);setFlags(EnumSet.of(Flag.MOVE,Flag.LOOK));}
     void resetOrders(){release();active=false;nextSearch=0;}
     boolean isActive(){return active;}
+    private boolean departing(){return npc.restMotion.holdingExit() || npc.staffPost.exiting();}
     boolean timeCritical(){return active && station instanceof CompanionJob job && job.timeCritical()
         && npc.preferences.canWork() && npc.orders.station(station) && station.availableTo(npc)
         && CompanionJobs.permitted(npc,station.stationPosition());}
@@ -28,6 +29,8 @@ final class CompanionRoutine extends Goal {
     boolean deferTransport(BlockPos pos){
         if(!active || !(station instanceof CompanionJob job)
             || !npc.preferences.canWork() || !npc.orders.station(station))return false;
+        // A decorative post must not hold up real carried supplies or completed goods.
+        if(job instanceof CompanionStaffPost.Job)return false;
         if(station instanceof CompanionFishing.Job && npc.fishing.deferOutput(npc.assignments.get(npc.assignments.workPriority(station.stationPosition()))))
             return npc.assignments.workPriority(pos)>=npc.assignments.workPriority(station.stationPosition());
         if(job.finishLoadedBatch(npc))
@@ -116,11 +119,11 @@ final class CompanionRoutine extends Goal {
         }
     }
     @Override public boolean canUse(){
-        if(!npc.orders.routineAllowed() || npc.isEating() || npc.isWheelRunning() || npc.restMotion.holdingExit() || npc.getRestMode()!=CompanionEnergy.Rest.NONE)return false;
+        if(!npc.orders.routineAllowed() || npc.isEating() || npc.isWheelRunning() || departing() || npc.getRestMode()!=CompanionEnergy.Rest.NONE)return false;
         search();return station!=null || npc.isRecovering() || !npc.preferences.onShift();
     }
     @Override public boolean canContinueToUse(){return npc.orders.routineAllowed() && !npc.isEating()
-        && (station!=null || npc.isRecovering() || !npc.preferences.onShift() || npc.restMotion.holdingExit()
+        && (station!=null || npc.isRecovering() || !npc.preferences.onShift() || departing()
             || resumeUntil>npc.level().getGameTime() && npc.preferences.canWork());}
     @Override public void start(){active=true;}
     private void release(){
@@ -179,7 +182,7 @@ final class CompanionRoutine extends Goal {
     }
     @Override public void tick(){
         long now=npc.level().getGameTime();
-        if(npc.restMotion.holdingExit()){
+        if(departing()){
             // Keep the ready-job handoff across standing up and longer bunk descents.
             // Its short landing/search budget starts after the departure, not during it.
             if(resumeUntil!=0)resumeUntil=now+40;
@@ -202,7 +205,7 @@ final class CompanionRoutine extends Goal {
             if(now>=resumeUntil || !npc.preferences.canWork()){release();return;}
             if(!npc.onGround()){npc.getNavigation().stop();state=CompanionStatus.WAITING;return;}
         }
-        if(npc.restMotion.holdingExit()){npc.getNavigation().stop();state=CompanionStatus.RESTING;return;}
+        if(departing()){npc.getNavigation().stop();state=CompanionStatus.RESTING;return;}
         if(station==null)search();
         reconsiderWork();
         if(station==null){npc.getNavigation().stop();return;}
@@ -242,7 +245,8 @@ final class CompanionRoutine extends Goal {
         npc.getNavigation().stop();if(!station.occupy(npc)){release();return;}
         if(station instanceof CompanionJob job){
             boolean wasWorking=state==CompanionStatus.WORKING;
-            npc.setRestMode(CompanionEnergy.Rest.NONE);state=job.work(npc);
+            if(!(job instanceof CompanionStaffPost.Job))npc.setRestMode(CompanionEnergy.Rest.NONE);
+            state=job.work(npc);
             if(state!=CompanionStatus.WORKING){if(!handoffOutput(state,wasWorking) && !hold(state,now)){npc.transport.workChanged();release();nextSearch=now;}}
             else npc.setWorkAnimation(job.animation(),job.animationTarget());
         }else{

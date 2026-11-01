@@ -15,6 +15,7 @@ public final class CompanionJobs {
     }
     static CompanionJob resolveFresh(PeepoEntity npc,BlockPos pos){
         if(!npc.level().hasChunkAt(pos))return null;
+        var staff=npc.staffPost.job(pos);if(staff!=null)return staff;
         var fishing=npc.fishing.job(pos);if(fishing!=null)return fishing;
         var tap=npc.treeTaps.job(pos);if(tap!=null)return tap;
         var water=npc.water.job(pos);if(water!=null)return water;
@@ -54,7 +55,7 @@ public final class CompanionJobs {
         var job=resolve(npc,target.at().pos());if(job!=null){
             var state=npc.readiness.status(job);var block=npc.level().getBlockEntity(target.at().pos());
             var stock=CompanionProductionStock.of(block);
-            return stock!=null && (CompanionStockRecipes.supports(block) || CompanionAdditionalStock.supports(block))?stock.idleStatus(npc,block,state):state;
+            return !target.staffPost() && stock!=null && (CompanionStockRecipes.supports(block) || CompanionAdditionalStock.supports(block))?stock.idleStatus(npc,block,state):state;
         }
         var port=CompanionLogistics.resolve(npc,target);return port==null?CompanionStatus.UNSUPPORTED:port.status();
     }

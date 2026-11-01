@@ -129,5 +129,6 @@ public final class PeepoModel extends EntityModel<PeepoState> {
             leftArm.zRot=-.08F;rightArm.zRot=.08F;
         }
         RestPose.apply(s,head,leftArm,rightArm,leftLeg,rightLeg,workTorso);
+        StaffPostPose.apply(s,head,leftArm,rightArm,leftLeg,rightLeg,workTorso);
     }
 }

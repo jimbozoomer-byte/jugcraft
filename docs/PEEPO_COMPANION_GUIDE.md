@@ -1,6 +1,6 @@
 # Peepo and Jughead player guide
 
-Current controls and behavior on the `peepo-companion` branch, updated 25 October 2026. Peepo and Jughead share the same commands and jobs. Older feature records describe how individual features developed; use this guide for the current setup.
+Current controls and behavior on the `peepo-companion` branch, updated 31 October 2026. Peepo and Jughead share the same commands and jobs. Older feature records describe how individual features developed; use this guide for the current setup.
 
 ## Quick start
 
@@ -57,7 +57,7 @@ Each companion can have **one home, four work assignments, one lunch source, fou
 | Right-click a new ordinary container | Adds the next Supply, or an Output once all four Supplies are assigned. |
 | Right-click an assigned ordinary container | Switches that container between Supply and Output if the new role has space. |
 | Left-click an assigned block | Removes the assignment without mining the block. For animal jobs, click the marked ground anchor. |
-| Shift-right-click with the Planner | Opens its mode menu: normal assignments, Livestock Management corners, cancel corners, or clear the selected companion. |
+| Shift-right-click with the Planner | Opens its mode menu for normal assignments, Livestock Management, Farmland, Orchard, Fishing and Staff Post, or cancel/clear the selection. |
 | Right-click two ground blocks in Livestock Management mode | Creates one combined Livestock Management job covering the rectangle, up to 16 by 16 blocks including both corners. |
 
 The selected companion, home, jobs and lunch source have **green** frames; Supply is **blue**, Output **yellow**, and missing/replaced targets **orange**. Garden frames show the saved soil cells. Livestock Management zones show their exact rectangular bounds. The first corner is yellow while selecting; the preview turns red if the second corner exceeds the limit. Older animal assignments retain their anchor and 8-block-radius bounding square.
@@ -67,6 +67,16 @@ Use the Jobs page's **up/down arrows** to order work: the top job has highest pr
 Use the **pencil icon** beside the companion's name at the top of the menu, or the pencil to the left of a job row, to edit that name. Hover for the Rename tooltip. Enter a name and press **Save** (or Enter); leave it blank to restore the default. **< Jobs** returns to assignments. Assigned job rows show the job name and location without a Work 1/2/3/4 prefix. Empty rows keep their numbered placeholders. Job names follow the assignment when its priority changes. Livestock Management jobs have a **gear icon** on the right (hover: **Zone options**), in the same position as other jobs' Filter button. This opens independent **Shearing**, **Milking**, **Eggs**, **Breeding** and **Slaughter** On/Off buttons, plus **Population...** settings.
 
 New assignments must be within 64 blocks of the companion. Planner editing requires the companion to be loaded, in your dimension and within 128 blocks of you, and you still need to reach the block or animal you click. Companions do not load chunks or teleport supplies between dimensions. Leave reachable standing space beside machines; elevated stations need an accessible approach. Jughead also needs clearance for his jug.
+
+## Staff Post
+
+Select Peepo or Jughead with the **Companion Planner**, shift-right-click it, choose **Staff Post: choose furniture or a block**, then right-click the surface he should stand on. Each companion can have **one Staff Post**, using one of the four job slots. Remove the old post before assigning another. He initially faces toward you; the Planner shows his facing arrow.
+
+Use the post's **gear** in Jobs to choose **Automatic**, **Standing**, or **Sitting**, and rotate his facing. Ordinary solid blocks and slabs support standing. Suitable stools, seats and chairs support both poses when their actual seat and headroom are clear; Automatic changes between them at random intervals of **30–90 seconds**. This includes the Small Wooden Stool, Hay Bale Seat, household stools and suitable household chairs. He steps onto the support, shifts his weight while standing, and kicks his legs when seated. Social-enabled attendants may greet their nearby owner without leaving the post.
+
+New posts are added after existing jobs. Keep the post last to staff a counter between other jobs; moving it up makes staffing take priority over productive jobs below it. Actual deliveries and porter routes can interrupt staffing. Food, recovery, shift schedules, owner commands and settings editing still apply, and the companion can return afterward. Standing costs no work energy and keeps ordinary passive recovery; sitting receives the existing seated recovery bonus. The post has no Filter, Supply or Output operation of its own and does not change nearby sales or machines.
+
+Provide an adjacent full-block floor for approaching the post and enough room above the surface, including Jughead's jug. Chair backs, occupied seats, unsafe blocks and blocked spaces cannot be used as standing spots. The small companion stool only raises his face to about counter height; a Hay Bale Seat or suitable chair gives a little more height. Rename the job with its pencil to label a cashier, receptionist or food-stand attendant. See [Staff Post behavior and validation](features/companion-staff-post.md).
 
 ## Supplies, tools and delivery routes
 

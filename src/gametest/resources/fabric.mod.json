@@ -460,6 +460,7 @@
       "local.peepo.PeepoTaskDetailClientTests",
       "local.peepo.PeepoHandlingClientTests",
       "local.peepo.PeepoRestClientTests",
+      "local.peepo.PeepoStaffPostClientTests",
       "local.peepo.PeepoWorkshopClientTests",
       "local.peepo.PeepoIndustrialClientTests",
       "local.peepo.PeepoTreeTapClientTests",

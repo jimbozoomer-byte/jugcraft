@@ -4,6 +4,7 @@ import net.minecraft.client.renderer.item.ItemStackRenderState;
 public final class PeepoState extends LivingEntityRenderState { public final ItemStackRenderState held = new ItemStackRenderState(); public final ItemStackRenderState food = new ItemStackRenderState(); public boolean holdingLight; public boolean sitting; public boolean sleeping; public boolean eating; public boolean wheelRunning; public float eatingTime; public boolean blushing; public boolean pumpkin; public boolean jughead;
     public local.peepo.WorkAnimation work=local.peepo.WorkAnimation.NONE;
     public final RestPose rest=new RestPose();
+    public final StaffPostPose staff=new StaffPostPose();
     public local.peepo.CompanionUniforms.Type uniform=local.peepo.CompanionUniforms.Type.NONE;
     public float heldLightScale=.35F;
     public float workPhase;

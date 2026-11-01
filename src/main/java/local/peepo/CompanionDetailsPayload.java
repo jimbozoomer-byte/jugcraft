@@ -15,5 +15,5 @@ public record CompanionDetailsPayload(int menu,List<Row> rows) implements Custom
     public static final StreamCodec<RegistryFriendlyByteBuf,CompanionDetailsPayload> CODEC=StreamCodec.composite(
         ByteBufCodecs.VAR_INT,CompanionDetailsPayload::menu,Row.CODEC.apply(ByteBufCodecs.list(4)),CompanionDetailsPayload::rows,CompanionDetailsPayload::new);
     public Type<? extends CustomPacketPayload> type(){return TYPE;}
-    public static String key(CompanionAssignments.Target target){return target==null?"":target.at().dimension().identifier()+"|"+target.at().pos().asLong()+"|"+target.block();}
+    public static String key(CompanionAssignments.Target target){return target==null?"":target.at().dimension().identifier()+"|"+target.at().pos().asLong()+"|"+target.block()+(target.staffPost()?"|staff:"+target.staffPose()+":"+target.face().getName():"");}
 }
