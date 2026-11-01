@@ -36,6 +36,10 @@ jobs:
           cache: gradle
       - name: Install data-generation dependencies
         run: python3 -m pip install --quiet pillow numpy
+      - name: Prepare pinned Minecraft shape references
+        # Architectural generation reads vanilla model geometry from Loom's pinned game JAR.
+        # A fresh checkout has no such cache until Gradle prepares the platform.
+        run: ./gradlew compileJava --no-daemon
       - name: Check generated JSON is up to date
         run: |
           python3 tools/generate_material_data.py

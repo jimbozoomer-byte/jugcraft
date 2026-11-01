@@ -102,6 +102,16 @@ WEIGHTS = {
     "PeepoIntegrationClientTests": 300,
     "TransportCrateClientTests": 60,
     "TikiTorchClientTests": 30,
+    # Expanded-catalog CI run 41279398482: physical processor batches took five
+    # minutes, mineral-sand reopen checks thirteen, and independent clients need
+    # about three minutes just to initialize. Source length hid this workload.
+    "PeepoProcessorBatchClientTests": 420,
+    "MineralSandClientGameTests": 900,
+    "UndergroundDepositClientGameTests": 600,
+    "OwnerCollectionsNetworkTests": 360,
+    "HerobrineNetworkTests": 360,
+    "AlphaWerewolfClientGameTests": 300,
+    "CinderTyrantClientGameTests": 240,
 }
 # Classes a client test shows without naming them (registered by another class, or reached through an optional
 # integration), by the classes that show them: Stolas's renderer (his glowmask layer, scale, culling and departure) and

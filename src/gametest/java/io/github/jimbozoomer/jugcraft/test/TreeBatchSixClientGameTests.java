@@ -48,8 +48,12 @@ public class TreeBatchSixClientGameTests extends TreeBatchTwoClientGameTests {
 			Jugcraft.LOGGER.info("[tree 6 natural sample] {} at {}: {}",biome.identifier(),at,counts);
 			if (hasTarget(biome.identifier().getPath(),counts)) return at;
 		}
-		for (int[] offset : new int[][] {{4096,0},{-4096,0},{0,4096},{0,-4096}}) {
-			var nearest=level.findClosestBiome3d(holder -> holder.is(biome),first.offset(offset[0],0,offset[1]),4096,64,64);
+		// Cold Desert has only a 1-in-6 chunk attempt, restricted to coarse-dirt
+		// patches. Nearby biome lookups can collapse to the same tiny fragment.
+		// Inspect bounded, distinct regional samples; never plant the target tree.
+		for (BlockPos anchor : surveyAnchors(biome.identifier().getPath())) {
+			if (anchor.equals(BlockPos.ZERO)) continue;
+			var nearest=level.findClosestBiome3d(holder -> holder.is(biome),first.offset(anchor),4096,64,64);
 			BlockPos at=nearest==null?null:BiomeClientGameTests.surfaceSpot(level,nearest.getFirst(),biome);
 			if(at==null || !checked.add(at)) continue;
 			var counts=survey(level,at,biome,true);
