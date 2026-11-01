@@ -180,7 +180,7 @@ def build(registry_path=None):
     for rid, (p, d) in recipes.items():
         typ = d['type']; types[typ] += 1
         ins = []
-        if typ == 'minecraft:crafting_shaped':
+        if typ in ('minecraft:crafting_shaped', 'jugcraft:botanical_armor_upgrade', 'jugcraft:botanical_water_crafting'):
             ins = [d['key'][s] for s in ''.join(d['pattern']) if s != ' ']
         elif typ == 'minecraft:crafting_shapeless':
             ins = d['ingredients']

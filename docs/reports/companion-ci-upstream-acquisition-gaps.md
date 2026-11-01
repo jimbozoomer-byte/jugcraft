@@ -1,5 +1,11 @@
 # Remaining upstream Survival acquisition gaps
 
+## November 1 native acquisition follow-up
+
+The owner-authorized [native acquisition repairs](../features/native-acquisition-repairs.md) reduced the refreshed audit to **84 unresolved entries: 78 without a documented route and 6 blocked chains**, with **zero invalid ingredients**. This resolves 62 entries through present conversions, botanical upgrades and stripping, native compatibility decorations, Silk Touch Ashen Basalt and the approved Divine Pact recipe. The strict all-items assertion still fails on the remaining content; no exclusions were added. The counts and examples below are the historical 146-entry baseline and describe the state before those repairs.
+
+## Previous baseline
+
 The merged Peepo CI checkout still has **146 unresolved acquisition entries: 127 without a documented route and 19 with a blocked recipe chain**. The combined audit covers 15,091 registered Jugcraft items and reports **zero invalid ingredients and zero invalid template loot links**. These counts were refreshed after canonical generation completed, using the native recipe/interaction audit additions and the recovery of eight existing Supplementaries recipes.
 
 **The strict Survival acquisition assertion still rejects these entries.** It must remain failing until these routes are implemented or existing native acquisition is verified and represented in the audit. No suppression, blanket exclusion, or invented recipe was added for these 146 entries. An unresolved audit entry is not, by itself, proof that the item is unobtainable in game.

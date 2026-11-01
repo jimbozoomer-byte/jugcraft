@@ -413,7 +413,8 @@
       "io.github.jimbozoomer.jugcraft.building.OwnerTwigsWorldGameTests",
       "io.github.jimbozoomer.jugcraft.test.NewestManaGameTests",
       "io.github.jimbozoomer.jugcraft.test.NewestBackpackGameTests",
-      "io.github.jimbozoomer.jugcraft.menagerie.NewestLumiseneGameTests"
+      "io.github.jimbozoomer.jugcraft.menagerie.NewestLumiseneGameTests",
+      "io.github.jimbozoomer.jugcraft.test.AcquisitionRepairGameTests"
     ],
     "jei_mod_plugin": [
       "io.github.jimbozoomer.jugcraft.test.JeiStationClientGameTests$WithJei$Probe"

@@ -27,6 +27,8 @@ public final class Jugtania {
     public static Item item(String name){return ITEMS.getOrDefault(name,Items.AIR);}
     public static void register(){
         BotanicalFlowerMemory.register();
+        Registry.register(BuiltInRegistries.RECIPE_SERIALIZER,Jugcraft.id("botanical_armor_upgrade"),BotanicalAcquisitionRecipe.ARMOR);
+        Registry.register(BuiltInRegistries.RECIPE_SERIALIZER,Jugcraft.id("botanical_water_crafting"),BotanicalAcquisitionRecipe.WATER);
         LUMINIZER_WISP=Registry.register(BuiltInRegistries.PARTICLE_TYPE,Jugcraft.id("botanical_luminizer_wisp"),net.fabricmc.fabric.api.particle.v1.FabricParticleTypes.simple());
         BotanicalManaStorm.register();BotanicalTransport.register();BotanicalLaputa.register();BotanicalGaia.register();BotanicalRelics.register();BotanicalRoyalWeapon.register();BotanicalPinkWither.register();BotanicalHalos.register();BotanicalThrownTools.register();BotanicalIvy.register();BotanicalBuilding.register();BotanicalBags.register();BotanicalEquestrian.register();BotanicalEnderAir.register();BotanicalConsumables.register();BotanicalSpawnerMover.register();BotanicalBlackHole.register();BotanicalUtilityItems.register();BotanicalBlaster.register();BotanicalLenses.register();BotanicalCacophonium.register();BotanicalLightRide.register();BotanicalCosmetics.register();BotanicalInspection.register();BotanicalMovement.register();BotanicalAccessories.register();BotanicalDiva.register();CorporeaSpark.register();BotanicalTools.register();BotanicalAdvancedTools.register();BotanicalManaItems.register();BotanicalArmor.register();BotanicalRods.register();BotanicalTerrainRods.register();BotanicalCombatRods.register();BotanicalDiviner.register();BotanicalSounds.register();BotanicalBrewing.register();
         var descriptor=OwnerBackpacks.source("newest_jugtania.json");var workshops=new ArrayList<Block>();
@@ -54,7 +56,7 @@ public final class Jugtania {
                 case "wall"->new WallBlock(properties);
                 case "fence"->new FenceBlock(properties);
                 case "fence_gate"->new FenceGateBlock(WoodType.OAK,properties);
-                case "pillar"->new RotatedPillarBlock(properties);
+                case "pillar"->(name.equals("livingwood_log")||name.equals("dreamwood_log"))?new io.github.jimbozoomer.jugcraft.agriculture.StrippableLogBlock(properties,"stripped_"+name){@Override public Block stripped(){return block("stripped_"+name);}}:new RotatedPillarBlock(properties);
                 case "facing_decor"->new io.github.jimbozoomer.jugcraft.menagerie.OwnerDecorVariants.Facing(properties);
                 case "bifrost"->new BotanicalTerrainRods.Bifrost(properties.noOcclusion());
                 case "pot"->new FlowerPotBlock(block(name.substring(7)),BlockBehaviour.Properties.ofFullCopy(Blocks.FLOWER_POT).setId(key));

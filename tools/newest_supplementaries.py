@@ -270,6 +270,8 @@ def main():
  household_tools()
  from newest_field_tools import main as field_tools
  field_tools()
+ from acquisition_repairs import generate
+ generate()
 
 # Original pirate ships and encounter markers.
 if __name__ == "__main__":

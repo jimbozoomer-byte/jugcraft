@@ -20,7 +20,11 @@ def extend(root, edge, evidence, items):
     def route(source, kind, needs, output):
         edge(JAVA + source, kind, needs, [item(output)])
 
-    found('wild_flax', 'OwnerSupplementFlora.java',
+    for color in 'white orange magenta light_blue yellow lime pink gray light_gray cyan purple blue brown green red black'.split():
+        route('OwnerPresentRecipe.java', 'dye_present', [item('present'), 'minecraft:' + color + '_dye'], 'present_' + color)
+        route('OwnerPresentRecipe.java', 'trap_present', [item('present_' + color), 'minecraft:tripwire_hook'], 'trapped_present_' + color)
+    route('OwnerSupplementTerrain.java', 'ash_basalt_silk_touch', ['minecraft:basalt', item('ash'), '#minecraft:pickaxes', 'minecraft:enchanted_book'], 'ashen_basalt')
+    found('wild_flax' , 'OwnerSupplementFlora.java',
           'The registered wild-flax feature places plants on sandy riverbanks in its biome tag; Silk Touch retains the wild plant. OwnerWildFlax also permits bounded bonemeal spreading.')
     found('flax_seeds', 'OwnerSupplementFlora.java',
           'Breaking naturally generated wild flax without a preserving tool drops flax seeds through blocks/supps_wild_flax; these seeds plant OwnerSupplementFlax.')
@@ -56,7 +60,5 @@ def extend(root, edge, evidence, items):
     route('OwnerSupplementaries.java', 'hoe_gravel_then_collect_with_silk_touch',
           ['minecraft:gravel', '#minecraft:hoes', 'minecraft:enchanted_book'], 'raked_gravel')
 
-    # Compatibility candles/rods, colored presents and ashen basalt deliberately
-    # receive no guessed route. Ash can transform placed basalt, but the native
-    # ashen-basalt loot returns basalt instead of an ashen-basalt item.
+    # Compatibility rods still have no implemented conversion.
     return {}

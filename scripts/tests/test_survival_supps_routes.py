@@ -64,10 +64,9 @@ class SupplementariesRoutesTests(unittest.TestCase):
             self.assertTrue(inputs)
             self.assertTrue(set(outputs).issubset(self.items))
 
-    def test_missing_compatibility_items_are_not_invented_or_excluded(self):
+    def test_unimplemented_rods_are_not_invented_or_excluded(self):
         offered = set(self.evidence) | {o for r in self.rows for o in r[3]}
-        for name in ('present_red', 'trapped_present_blue', 'candle_holder_soul',
-                     'propelplant_cane', 'edelwood_stick', 'ashen_basalt'):
+        for name in ('propelplant_cane', 'edelwood_stick'):
             self.assertNotIn('jugcraft:supps_' + name, offered)
         self.assertEqual({}, self.exclusions)
 
