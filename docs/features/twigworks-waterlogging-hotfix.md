@@ -32,6 +32,21 @@ the dynamically constructed household property. No second instance of this
 specific defect was found. This is a targeted review, not proof that every
 possible world-generation defect is absent.
 
-Validation and deployment results will be recorded after completion. The
-unrelated eight October 31 Python audit failures and 708 static geometry
-diagnostics remain priority follow-ups; this repair does not clear them.
+## Validation
+
+October 31, 23:32 local: **all 34 focused server game tests passed**, with optional
+integrations absent. The selection included the four new Twigworks regressions,
+`BiomeGameTests` and `NewestHouseholdGameTests`; common, client and test code
+compiled. The disposable test world saved and shut down successfully. No personal
+launcher profile or owner playtest was controlled.
+
+All ten release-packaging/server-patch Python tests and the 26-library platform
+lock check passed. Evidence: `build/worldgen-hotfix-tests.log` and
+`build/worldgen-hotfix-pack-tests.log`. The local Gradle selector changes only the
+generated test manifest and restores it afterward; ordinary CI retains the full
+test registry. This is focused validation, not a full-suite green claim.
+
+PR #599's Foundation audit reproduced the eight already documented October 31
+Python failures. Those and the 708 static geometry diagnostics remain priority
+follow-ups; this repair does not clear them. Deployment status is recorded
+separately once the release gates are resolved and the hosted server is verified.
