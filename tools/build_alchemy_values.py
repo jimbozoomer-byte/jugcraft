@@ -3,6 +3,8 @@
 No upstream code is used. Unknown items remain accepted at the explicitly labelled
 one-essence fallback; they are never presented as historical EE values. Run after
 recipe generation. Runtime adds the same fallback for optional registered items.
+Use --affected-item for a recipe-yield edit: only lower existing component/consumer
+prices, keeping unrelated ingredient prices and catalogue membership unchanged.
 """
 import argparse
 from collections import Counter
@@ -13,7 +15,29 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 
-def build(jar):
+def recipe_consumers(edges, roots):
+    affected=set(roots)
+    while True:
+        consumers={out for _,inputs,out,_ in edges if any(options & affected for options in inputs)}
+        added=consumers-affected
+        if not added:break
+        affected.update(added)
+    return affected
+
+
+def limit_recalculation(existing, records, edges, roots):
+    """Lower existing prices affected by a recipe edit without enabling unrelated catalogue items."""
+    if set(roots)-set(existing):raise ValueError('Affected items must already be catalogued')
+    affected=recipe_consumers(edges,roots)
+    result=dict(existing)
+    for item in affected & existing.keys() & records.keys():
+        before,after=existing[item],records[item]
+        if Fraction(after['numerator'],after['denominator']) <= Fraction(before['numerator'],before['denominator']):
+            result[item]=after
+    return result
+
+
+def build(jar, affected_items=None):
     seeds = json.loads((ROOT / 'tools/data/alchemy_value_seeds.json').read_text())
     tags, recipes = {}, {}
     def take(name, data):
@@ -96,6 +120,17 @@ def build(jar):
         if any(any(s.endswith('_bucket') or s=='minecraft:honey_bottle' for s in opts) for opts in ingredients):continue
         edges.append((rid,ingredients,out['id'],out.get('count',r.get('count',1))))
     local_items={'jugcraft:'+p.stem for p in (ROOT/'src/main/resources/assets/jugcraft/items').glob('*.json')}
+    target=ROOT/'src/main/resources/data/jugcraft/alchemy/values.json'
+    if affected_items:
+        existing=json.loads(target.read_text(encoding='utf-8'))['items']
+        if set(affected_items)-set(existing):raise ValueError('Affected items must already be catalogued')
+        affected=recipe_consumers(edges,affected_items)
+        # Keep the current prices of all unrelated ingredients and do not enable uncatalogued items.
+        values={k:Fraction(v['numerator'],v['denominator']) for k,v in existing.items()}
+        origins={k:v['source'] for k,v in existing.items()}
+        locked=set(values)-affected
+        edges=[edge for edge in edges if edge[2] in affected and edge[2] in existing]
+        local_items=set(values)
     # Root materials without a known historical value receive an explicit local base
     # assignment. Craftable products inherit actual ingredient costs, not that fallback.
     outputs={edge[2] for edge in edges}
@@ -122,12 +157,16 @@ def build(jar):
     for key in local_items:
         if key not in values:values[key]=Fraction(1);origins[key]='fallback (balance pending)'
     records={k:{'numerator':v.numerator,'denominator':v.denominator,'source':origins[k]} for k,v in sorted(values.items())}
-    target=ROOT/'src/main/resources/data/jugcraft/alchemy/values.json'
+    if affected_items:
+        records=limit_recalculation(existing,records,edges,affected_items)
+        print(f'Scoped recalculation: {sum(records[k] != existing[k] for k in existing)} existing records updated; catalogue membership unchanged')
     target.parent.mkdir(parents=True,exist_ok=True)
     target.write_text(json.dumps({'schema':1,'fallback':1,'items':records},indent=2)+'\n')
-    print(f'{len(records)} values: {Counter("fallback" if s.startswith("fallback") else "recipe" if s.startswith("recipe") else "reference" for s in origins.values())}')
+    print(f'{len(records)} values: {Counter("fallback" if r["source"].startswith("fallback") else "recipe" if r["source"].startswith("recipe") else "reference" for r in records.values())}')
     return records
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser();parser.add_argument('--minecraft-jar',required=True)
-    build(parser.parse_args().minecraft_jar)
+    parser.add_argument('--affected-item',action='append',help='Limit reductions to this existing item and its recipe consumers; repeat for multiple items')
+    args=parser.parse_args()
+    build(args.minecraft_jar,args.affected_item)

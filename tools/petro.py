@@ -567,9 +567,9 @@ FLUID_RECIPES = {
         {"name": "microchip", "items": [("jugcraft:silicon_wafer", 1), ("jugcraft:copper_wire", 2)],
          "fluids": [("jugcraft:sulfuric_acid", 100)], "results": [("jugcraft:microchip", 4)], "ticks": 200,
          "features": ["silicon", "sulfur"]},
-        # Nitric acid etches as well, and twice as far (batch 12).
+        # Prepared nitric etchant doubles the wafer yield and retains its lower acid cost.
         {"name": "microchip_nitric", "items": [("jugcraft:silicon_wafer", 1), ("jugcraft:copper_wire", 2)],
-         "fluids": [("jugcraft:nitric_acid", 50)], "results": [("jugcraft:microchip", 4)], "ticks": 200,
+         "fluids": [("jugcraft:nitric_acid", 50)], "results": [("jugcraft:microchip", 8)], "ticks": 200,
          "features": ["silicon", "machines"]},
     ],
     # Nitrogen chemistry (batch 12). Fluid volumes shrink: 400 mB of gas in gives 200 of ammonia, so no recipe

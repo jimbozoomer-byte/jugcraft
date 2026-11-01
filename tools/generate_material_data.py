@@ -1323,6 +1323,10 @@ def recipes():
         recipe = shaped(MACHINE_FEATURE, pattern, key, result, count)
         recipe["fabric:load_conditions"] = condition(MACHINE_FEATURE) + condition("crude_oil")
         write(out / f"{name}.json", recipe)
+    # The unprepared starter circuit is also craftable before building an assembler.
+    starter_circuit = shapeless(MACHINE_FEATURE, [rid("silicon"), "#c:ingots/copper", "#c:ingots/tin"], "basic_circuit", 1)
+    starter_circuit["fabric:load_conditions"] = condition(MACHINE_FEATURE) + condition("silicon") + condition("tin")
+    write(out / "basic_circuit.json", starter_circuit)
     machine_recipe_files(out)
     import petro
     for kind, name, data in petro.fluid_recipe_files(condition):
