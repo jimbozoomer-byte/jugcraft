@@ -73,6 +73,28 @@ class AlchemyValueTests(unittest.TestCase):
             self.assertEqual(value('minecraft:'+metal+'_block'),9*unit)
             if 'minecraft:'+metal+'_nugget' in VALUES:self.assertEqual(9*value('minecraft:'+metal+'_nugget'),unit)
 
+    def test_aquatic_salvage_cannot_mint_historical_metals_from_fallbacks(self):
+        routes = (
+            ('tin_can_to_iron_nugget', 'aquatic_tin_can', 'iron'),
+            ('tin_can_to_iron_nugget_from_blasting', 'aquatic_tin_can', 'iron'),
+            ('gold_nugget_from_gold_fish', 'aquatic_goldfish', 'gold'),
+        )
+        for recipe, item, metal in routes:
+            with self.subTest(recipe=recipe):
+                data = json.loads((ROOT / 'src/main/resources/data/jugcraft/recipe/newest/aquatic'
+                                   / (recipe + '.json')).read_text(encoding='utf-8'))
+                source = 'jugcraft:' + item
+                inputs = data.get('ingredients', [data.get('ingredient')])
+                self.assertEqual(inputs, [source], 'Salvage consumes exactly one loot item')
+                output = data['result']
+                self.assertEqual(output['id'], 'minecraft:' + metal + '_nugget')
+                # Compare against the locked ingot root, not merely the nugget's
+                # possibly corrupted derived price: both sides used to be cheap.
+                recovered = output.get('count', 1) * value('minecraft:' + metal + '_ingot') / 9
+                self.assertEqual(value(source), recovered)
+                self.assertGreaterEqual(value(source), output.get('count', 1) * value(output['id']))
+                self.assertIn('salvage accounting', VALUES[source]['source'])
+
     def test_filled_buckets_cannot_create_a_cheaper_empty_shell(self):
         for item in ('water_bucket','lava_bucket','milk_bucket','cod_bucket','powder_snow_bucket'):
             self.assertGreaterEqual(value('minecraft:'+item),value('minecraft:bucket'))

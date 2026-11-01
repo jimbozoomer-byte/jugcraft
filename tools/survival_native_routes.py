@@ -23,6 +23,8 @@ def extend(root, edge, evidence, items):
 
     # Only wood families actually registered as strippable logs; not arbitrary
     # item names containing "stripped" (candy cane geometry is different).
+    for wood in ("livingwood", "dreamwood"):
+        route(java + "botany/Jugtania.java", ["jugtania_" + wood + "_log", "#minecraft:axes"], ["jugtania_stripped_" + wood + "_log"])
     import agriculture as ag
     for wood in ag.WOOD_SETS:
         for suffix in ('log',):
@@ -212,4 +214,12 @@ def extend(root, edge, evidence, items):
               ['artisan_furniture'], 'design_at_workstation_and_pay_server_computed_material_cost')
     from survival_jimtafacts_routes import extend as collection_routes
     exclusions.update(collection_routes(root, edge, evidence, items))
+    from survival_newest_routes import extend as newest_routes
+    exclusions.update(newest_routes(root, edge, evidence, items))
+    from survival_newest_storage_routes import extend as newest_storage_routes
+    exclusions.update(newest_storage_routes(root, edge, evidence, items))
+    from survival_newest_interactions import extend as newest_interactions
+    exclusions.update(newest_interactions(root, edge, evidence, items))
+    from survival_supps_routes import extend as supps_routes
+    exclusions.update(supps_routes(root, edge, evidence, items))
     return exclusions

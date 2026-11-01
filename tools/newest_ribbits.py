@@ -3,6 +3,7 @@ from pathlib import Path
 import json, shutil
 from newest_building import ROOT, RES, SOURCE, read, write, map_value
 from newest_twigs import recipe
+from menagerie_data import loot as native_loot
 import nouveau_nbt
 BASE=SOURCE/'frogs'
 A=BASE/'assets/ribbits'
@@ -27,6 +28,65 @@ def data(v):
  if not isinstance(v,dict):return v
  if 'Name' in v:return {'id':mapped(v['Name']),**({'properties':v['Properties']} if 'Properties' in v else {})}
  return {k:data(x) for k,x in v.items()}
+def loot_id(identifier):
+ """Keep village chest links stable; block drops use their registered block IDs."""
+ if identifier.startswith('ribbits:blocks/'):
+  return 'jugcraft:blocks/ribbits_'+identifier.removeprefix('ribbits:blocks/')
+ return mapped(identifier)
+
+def loot_value(value):
+ if isinstance(value,list):return [loot_value(x) for x in value]
+ if not isinstance(value,dict):return mapped(value)
+ result={k:loot_value(x) for k,x in value.items()}
+ if value.get('type') in ('minecraft:item','item') and value.get('name')=='minecraft:air':
+  # Older packs represented a weighted no-drop outcome as an air item. Native
+  # 26.3 rejects air stacks; an empty entry keeps the exact weight and conditions.
+  result['type']='minecraft:empty';result.pop('name',None)
+ if value.get('type') in ('minecraft:loot_table','loot_table'):
+  for field in ('name','value'):
+   if isinstance(value.get(field),str):result[field]=loot_id(value[field])
+ return result
+
+def advancement_value(value):
+ """Native 26.3 recipe-unlocked predicates accept a recipes holder set."""
+ result=mapped(value)
+ for criterion in result.get('criteria',{}).values():
+  if criterion.get('trigger')!='minecraft:recipe_unlocked':continue
+  conditions=criterion.get('conditions',{})
+  if 'recipe' in conditions:
+   if 'recipes' in conditions:raise ValueError('Conflicting Ribbits recipe-unlocked predicates')
+   conditions['recipes']=conditions.pop('recipe')
+ return result
+
+def import_data_resources(data_root=None,resources=None,writer=None):
+ """Import supported JSON data only, accepting historical/current authored folders."""
+ data_root=D if data_root is None else Path(data_root)
+ resources=RES if resources is None else Path(resources)
+ writer=write if writer is None else writer
+ tables={}
+ for category,folders in [('loot_table',('loot_tables','loot_table')),('recipe',('recipes','recipe')),
+                          ('advancement',('advancements','advancement'))]:
+  for folder in folders:
+   for source in sorted((data_root/folder).rglob('*.json')):
+    relative=source.relative_to(data_root/folder).as_posix()[:-5]
+    original=read(source)
+    identifier=(loot_id if category=='loot_table' else mapped)('ribbits:'+relative)
+    target=resources/'data/jugcraft'/category/(identifier.split(':',1)[1]+'.json')
+    if category=='loot_table':value=native_loot(loot_value(original))
+    elif category=='recipe':
+     if original.get('type') not in ('minecraft:crafting_shaped','minecraft:crafting_shapeless'):
+      raise ValueError('Unsupported Ribbits recipe type: '+str(source))
+     value=recipe(mapped(original))
+    else:
+     if any(not c.get('trigger','').startswith('minecraft:') for c in original.get('criteria',{}).values()):
+      raise ValueError('Unsupported Ribbits advancement trigger: '+str(source))
+     value=advancement_value(original)
+    if target in tables and tables[target]!=value:
+     raise ValueError('Conflicting Ribbits '+category+' definitions: '+relative)
+    tables[target]=value
+ for target,value in sorted(tables.items()):writer(target,value)
+ return sorted(tables)
+
 def main():
  for folder in ('textures','sounds'):
   for p in (A/folder).rglob('*'):
@@ -58,10 +118,7 @@ def main():
   lang[k]=v
  for role in ['nitwit','gardener','sorcerer','fisherman','merchant']:lang['entity.jugcraft.ribbit_'+role]='Ribbit '+role.title()
  lang['entity.jugcraft.ribbit']='Ribbit';write(OUT/'lang/en_us.json',lang)
- for old,new in [('recipes','recipe'),('loot_tables','loot_table'),('advancements','advancement')]:
-  for p in (D/old).rglob('*.json'):
-   v=mapped(read(p));v=recipe(v) if old=='recipes' else v
-   write(RES/'data/jugcraft'/new/('ribbits_'+p.relative_to(D/old).as_posix()),v)
+ import_data_resources()
  # Entity breathing is native behavior; biome tags are written below with stable prefix paths.
  for ns in ['minecraft','c']:
   for p in (BASE/'data'/ns/'tags').rglob('*.json'):

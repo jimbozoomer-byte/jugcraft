@@ -41,8 +41,7 @@
           "texture": "#wall",
           "tintindex": 0
         }
-      },
-      "__comment": "Center post"
+      }
     }
   ]
 }

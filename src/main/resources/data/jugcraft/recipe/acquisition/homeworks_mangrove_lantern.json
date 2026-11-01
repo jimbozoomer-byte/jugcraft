@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:lantern",
+    "minecraft:mangrove_planks",
+    "minecraft:mangrove_planks"
+  ],
+  "result": {
+    "id": "jugcraft:homeworks_mangrove_lantern",
+    "count": 1
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:sugar_cane",
+    "minecraft:slime_ball"
+  ],
+  "result": {
+    "id": "jugcraft:supps_propelplant_cane",
+    "count": 1
+  }
+}

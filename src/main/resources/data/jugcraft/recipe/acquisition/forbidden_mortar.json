@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "jugcraft:forbidden_polished_darkstone",
+    "jugcraft:forbidden_polished_darkstone",
+    "jugcraft:forbidden_polished_darkstone",
+    "minecraft:flint"
+  ],
+  "result": {
+    "id": "jugcraft:forbidden_mortar",
+    "count": 1
+  }
+}

@@ -1,0 +1,31 @@
+{
+  "forge_tier": 2,
+  "main_ingredient": {
+    "item": "minecraft:gold_ingot"
+  },
+  "inputs": [
+    {
+      "amount": 1,
+      "ingredient": {
+        "item": "jugcraft:forbidden_enchanted_soul"
+      }
+    },
+    {
+      "amount": 2,
+      "ingredient": {
+        "item": "minecraft:ender_pearl"
+      }
+    }
+  ],
+  "essences": {
+    "aureal": 800,
+    "blood": 400,
+    "experience": 400,
+    "souls": 6
+  },
+  "magic_circle": "jugcraft:forbidden_create_item",
+  "result": {
+    "type": "jugcraft:forbidden_create_item",
+    "result_item": "jugcraft:forbidden_crescent_moon"
+  }
+}

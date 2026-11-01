@@ -102,7 +102,25 @@ WEIGHTS = {
     "PeepoIntegrationClientTests": 300,
     "TransportCrateClientTests": 60,
     "TikiTorchClientTests": 30,
+    # Expanded-catalog CI run 41279398482: physical processor batches took five
+    # minutes, mineral-sand reopen checks thirteen, and independent clients need
+    # about three minutes just to initialize. Source length hid this workload.
+    "PeepoProcessorBatchClientTests": 420,
+    "MineralSandClientGameTests": 900,
+    "UndergroundDepositClientGameTests": 600,
+    "OwnerCollectionsNetworkTests": 360,
+    "HerobrineNetworkTests": 360,
+    "AlphaWerewolfClientGameTests": 300,
+    "CinderTyrantClientGameTests": 240,
+    # Run 41308506140 exhausted its hour while reaching the expanded gallery
+    # and regional tree survey. Source length understated both workloads.
+    "OwnerCollectionsClientGameTests": 900,
+    "TreeBatchSixClientGameTests": 600,
 }
+
+# A second rendered JVM needs its own host budget, without retained worlds
+# from unrelated suites. Small local shard counts still retain every class.
+ISOLATED_CLIENTS = {"OwnerCollectionsNetworkTests", "HerobrineNetworkTests", "ConcordancePactNetworkTests"}
 # Classes a client test shows without naming them (registered by another class, or reached through an optional
 # integration), by the classes that show them: Stolas's renderer (his glowmask layer, scale, culling and departure) and
 # his perch's and anchor's Jade provider (the unit review, D2).
@@ -322,8 +340,10 @@ def share(classes, tests, shards):
         path = tests[name]["source"]
         return 8 + (len(path.read_text(encoding="utf-8").splitlines()) // 15 if path.is_file() else 0)
 
-    jobs = [[0, []] for _ in range(shards)]
-    for name in sorted(classes, key=lambda n: (-weight(n), n)):
+    isolated = sorted(set(classes) & ISOLATED_CLIENTS) if shards > len(ISOLATED_CLIENTS) else []
+    reserved = [[weight(name), [name]] for name in isolated]
+    jobs = [[0, []] for _ in range(shards - len(reserved))]
+    for name in sorted(set(classes) - set(isolated), key=lambda n: (-weight(n), n)):
         job = min(jobs, key=lambda j: j[0])
         job[0] += weight(name)
         job[1].append(name)
@@ -343,7 +363,7 @@ def share(classes, tests, shards):
         heavy[1][heavy[1].index(a)], light[1][light[1].index(b)] = b, a
         heavy[0] -= delta
         light[0] += delta
-    return jobs
+    return jobs + reserved
 
 
 def listed_at(rev):

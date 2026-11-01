@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "jugcraft:homeworks_oak_grandfather_clock",
+    "minecraft:bone",
+    "minecraft:bone"
+  ],
+  "result": {
+    "id": "jugcraft:homeworks_undead_grandfather_clock",
+    "count": 1
+  }
+}

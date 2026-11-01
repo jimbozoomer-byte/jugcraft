@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "jugcraft:homeworks_oak_grandfather_clock",
+    "minecraft:echo_shard",
+    "minecraft:echo_shard"
+  ],
+  "result": {
+    "id": "jugcraft:homeworks_ominous_grandfather_clock",
+    "count": 1
+  }
+}

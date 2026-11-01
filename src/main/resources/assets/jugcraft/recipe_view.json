@@ -33200,6 +33200,43 @@
       ],
       "recipes": [
         {
+          "id": "nouveau/memory_crystal",
+          "inputs": [
+            {
+              "ingredient": "minecraft:amethyst_shard",
+              "count": 1
+            },
+            {
+              "ingredient": "jugcraft:nouveau_source_gem",
+              "count": 1
+            },
+            {
+              "ingredient": "jugcraft:nouveau_source_gem",
+              "count": 1
+            },
+            {
+              "ingredient": "minecraft:gold_ingot",
+              "count": 1
+            },
+            {
+              "ingredient": "minecraft:gold_ingot",
+              "count": 1
+            }
+          ],
+          "outputs": [
+            {
+              "id": "jugcraft:ars_additions_memory_crystal",
+              "count": 1
+            }
+          ],
+          "tools": [],
+          "ticks": 0,
+          "notes": [
+            "10 Ley; 0 experience points.",
+            "Requires an Arcane Core below the apparatus."
+          ]
+        },
+        {
           "id": "nouveau/advanced_dominion_wand",
           "inputs": [
             {

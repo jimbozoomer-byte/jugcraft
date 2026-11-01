@@ -1,0 +1,31 @@
+{
+  "forge_tier": 4,
+  "main_ingredient": {
+    "item": "jugcraft:forbidden_deorum_ingot"
+  },
+  "inputs": [
+    {
+      "amount": 1,
+      "ingredient": {
+        "item": "jugcraft:forbidden_dark_nether_star"
+      }
+    },
+    {
+      "amount": 4,
+      "ingredient": {
+        "item": "jugcraft:forbidden_stellarite_piece"
+      }
+    }
+  ],
+  "essences": {
+    "aureal": 1600,
+    "blood": 800,
+    "experience": 800,
+    "souls": 12
+  },
+  "magic_circle": "jugcraft:forbidden_create_item",
+  "result": {
+    "type": "jugcraft:forbidden_create_item",
+    "result_item": "jugcraft:forbidden_omega_arcoin"
+  }
+}

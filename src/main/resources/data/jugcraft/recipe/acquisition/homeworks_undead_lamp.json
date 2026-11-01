@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "jugcraft:homeworks_oak_lamp",
+    "minecraft:bone",
+    "minecraft:bone"
+  ],
+  "result": {
+    "id": "jugcraft:homeworks_undead_lamp",
+    "count": 1
+  }
+}

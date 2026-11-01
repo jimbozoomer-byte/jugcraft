@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "jugcraft:homeworks_oak_wall_clock",
+    "minecraft:echo_shard",
+    "minecraft:echo_shard"
+  ],
+  "result": {
+    "id": "jugcraft:homeworks_ominous_wall_clock",
+    "count": 1
+  }
+}

@@ -35,12 +35,18 @@ def strings(value):
             yield from strings(child)
 
 
-def expand(value, tags, seen=frozenset()):
+def expand(value, tags, seen=frozenset(), known_items=None):
     if isinstance(value, dict):
+        optional = value.get('required') is False
         value = value.get('ingredient', value.get('item', value.get('id',
                 '#' + value['tag'] if 'tag' in value else '')))
+        # Native tag loading ignores an absent optional compatibility item. Keep
+        # required unknown IDs so they still produce ingredient diagnostics.
+        if (optional and known_items is not None and isinstance(value, str)
+                and not value.startswith('#') and value not in known_items):
+            return set()
     if isinstance(value, list):
-        return set().union(*(expand(v, tags, seen) for v in value))
+        return set().union(*(expand(v, tags, seen, known_items) for v in value))
     if not isinstance(value, str) or not value:
         return set()
     if not value.startswith('#'):
@@ -48,7 +54,7 @@ def expand(value, tags, seen=frozenset()):
     key = value[1:]
     if key in seen:
         return set()
-    return set().union(*(expand(v, tags, seen | {key}) for v in tags.get(key, [])))
+    return set().union(*(expand(v, tags, seen | {key}, known_items) for v in tags.get(key, [])))
 
 
 def outputs(value):
@@ -118,6 +124,11 @@ def build(registry_path=None):
         raise ValueError('Acquisition reference must match the pinned platform')
     tags = reference['tags']
     vanilla_items = set(reference['items'])
+    model_items = {'jugcraft:' + p.stem for p in (RES / 'assets/jugcraft/items').glob('*.json')}
+    registry_path = registry_path or ROOT / 'docs/audits/survival-item-registry.json'
+    registry_items = set(read(registry_path)) if registry_path.exists() else None
+    items = {i for i in registry_items if i.startswith('jugcraft:')} if registry_items is not None else model_items
+    known_items = registry_items if registry_items is not None else vanilla_items | model_items
     recipes = {}
     for base in (RES, ROOT / 'src/main/generated'):
         for p in sorted((base / 'data').rglob('*.json')):
@@ -159,7 +170,7 @@ def build(registry_path=None):
     types = Counter()
 
     def edge(source, kind, ingredients, result, extra=()):
-        ins = [expand(v, tags) for v in ingredients] + [set(v) for v in extra]
+        ins = [expand(v, tags, known_items=known_items) for v in ingredients] + [set(v) for v in extra]
         for original, slot in zip(ingredients, ins):
             if not slot:
                 invalid.append({'source': source, 'ingredient': original, 'problem': 'empty ingredient/tag'})
@@ -169,7 +180,7 @@ def build(registry_path=None):
     for rid, (p, d) in recipes.items():
         typ = d['type']; types[typ] += 1
         ins = []
-        if typ == 'minecraft:crafting_shaped':
+        if typ in ('minecraft:crafting_shaped', 'jugcraft:botanical_armor_upgrade', 'jugcraft:botanical_water_crafting'):
             ins = [d['key'][s] for s in ''.join(d['pattern']) if s != ' ']
         elif typ == 'minecraft:crafting_shapeless':
             ins = d['ingredients']
@@ -274,10 +285,6 @@ def build(registry_path=None):
     rules = read(rules_path) if rules_path.exists() else {'sources': {}, 'routes': [], 'exclusions': {}}
     for row in rules.get('routes', []):
         edge(row['source'], row['kind'], row['inputs'], row['outputs'])
-    model_items = {'jugcraft:' + p.stem for p in (RES / 'assets/jugcraft/items').glob('*.json')}
-    registry_path = registry_path or ROOT / 'docs/audits/survival-item-registry.json'
-    registry_items = set(read(registry_path)) if registry_path.exists() else None
-    items = {i for i in registry_items if i.startswith('jugcraft:')} if registry_items is not None else model_items
     from survival_native_routes import extend
     native_exclusions = extend(ROOT, edge, evidence, items)
     forbidden = {'minecraft:air', 'minecraft:barrier', 'minecraft:bedrock', 'minecraft:structure_void',

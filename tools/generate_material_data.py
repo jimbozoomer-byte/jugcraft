@@ -1930,9 +1930,22 @@ def main():
     walnut_data.reconcile(write)
     import newest_building
     newest_building.generate(write)
+    # The supplied Ribbits pack uses both singular and legacy data directories.
+    # Import its native recipes/loot before pruning and building the JEI catalog.
+    import newest_ribbits
+    newest_ribbits.import_data_resources(writer=write)
+    import newest_supplementaries
+    newest_supplementaries.write_native_recipes(write)
+    import acquisition_repairs
+    acquisition_repairs.generate(write)
     diagonal_connections.write_all(write, ASSETS, RES / "assets/minecraft")
+    import newest_model_finishing
+    newest_model_finishing.generate(write)
     import model_atlas
     model_atlas.generate(write)
+    # Separately authored importers also contribute to these shared resources;
+    # preserve their enumerated additions after the final tag and atlas writers.
+    owner_resource_patches.apply(phase='final')
     from generated_resource_cleanup import prune
     prune(RES, previous, WRITTEN_RESOURCES)
     # Include finished server recipes after removing obsolete generated recipes.

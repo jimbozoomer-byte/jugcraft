@@ -86,7 +86,7 @@ O1_ALLOW = {
     "black_pillar_candle": _DECOR, "ivory_pillar_candle": _DECOR, "bowling_pumpkin": _DECOR, "corn_maze": _DECOR,
     "corn_plush": _DECOR, "hedgehog_plush": _DECOR, "owl_plush": _DECOR, "costume_trunk_open": _DECOR,
     "dead_hollow_tree": _DECOR, "flying_eyeball": _DECOR, "fog_machine": _DECOR,
-    "judging_stand": _DECOR, "monster_head": _DECOR, "phantom_pipe_organ": _DECOR, "spirit_mirror": _DECOR,
+    "monster_head": _DECOR, "phantom_pipe_organ": _DECOR, "spirit_mirror": _DECOR,
     "asphodel": _FLORA, "black_rose": _FLORA, "bleeding_heart": _FLORA, "deadly_nightshade": _FLORA, "ghost_pipe": _FLORA,
     "snowdrop": _FLORA, "spider_lily": _FLORA, "potted_bleeding_heart": _FLORA, "potted_deadly_nightshade": _FLORA,
     "potted_ghost_pipe": _FLORA, "potted_snowdrop": _FLORA, "potted_spider_lily": _FLORA,
@@ -465,6 +465,20 @@ def _open_faces(elements, faces):
             if abs(plane) < 1e-6 or abs(plane - 16) < 1e-6 or (plane < 0 if sign < 0 else plane > 16):
                 continue  # a seam of a model cut into blocks, or a face out against the block below or beside
             others = [k for k in range(3) if k != axis]
+            # A separate, opaque cap can close this surface exactly. The solid
+            # probe below steps beyond such a zero-thickness cap (or the outer
+            # face of a surrounding box), falsely declaring a hole. Require a
+            # real same-facing quad that covers the entire omitted rectangle;
+            # transparent, reversed, offset and partial covers do not qualify.
+            rectangle = _ccw([(f[others[0]], f[others[1]]), (t[others[0]], f[others[1]]),
+                              (t[others[0]], t[others[1]]), (f[others[0]], t[others[1]])])
+            area = abs(_area(rectangle))
+            if any(surface.label[0] != i
+                   and _dot(surface.normal, _NORMAL[face]) > 1 - 1e-9
+                   and all(abs(point[axis] - plane) < 1e-6 for point in surface.pts)
+                   and abs(_area(_clip(rectangle, _ccw([(p[others[0]], p[others[1]]) for p in surface.pts])))) >= area - 1e-6
+                   and _opaque([surface]) for surface in faces):
+                continue
             free = 0
             for a in range(4):
                 for b in range(4):
@@ -549,6 +563,10 @@ def check_block_models(machines):
                               f"element {a.label[0]} {a.label[1]} / element {b.label[0]} {b.label[1]}, {area:.2f} px2"
                               f"{f', gap {gap:.3f}' if gap else ''}: model_writer.separate_coplanar pulls them apart")
         open_faces = _open_faces(elements, faces)
+        if open_faces:
+            import newest_multipart_art
+            covered = newest_multipart_art.intentional_open_faces(path, elements, open_faces)
+            open_faces = [face for face in open_faces if face not in covered]
         if open_faces:
             stem = path.stem
             key = None if _family(stem) in machines else _allowed(O1_ALLOW, stem)

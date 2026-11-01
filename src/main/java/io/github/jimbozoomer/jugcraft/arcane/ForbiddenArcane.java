@@ -110,7 +110,7 @@ public final class ForbiddenArcane {
                 case "slab"->new SlabBlock(p);case "stairs"->new StairBlock(base.defaultBlockState(),p);case "wall"->new WallBlock(p);
                 case "plate"->new PressurePlateBlock(wood?BlockSetType.OAK:BlockSetType.STONE,p.noCollision());
                 case "button"->new ButtonBlock(wood?BlockSetType.OAK:BlockSetType.STONE,wood?30:20,p.noCollision());
-                case "pillar"->name.equals("arcane_polished_darkstone_pillar")?new io.github.jimbozoomer.jugcraft.menagerie.OwnerDecorVariants.JoinedPillar(p):new RotatedPillarBlock(p);case "mystery_log"->new MysteryLog(p);
+                case "pillar"->name.equals("arcane_polished_darkstone_pillar")?new io.github.jimbozoomer.jugcraft.menagerie.OwnerDecorVariants.JoinedPillar(p):new RotatedPillarBlock(p);case "mystery_log"->new MysteryLog(name,p);
                 case "ore"->new DropExperienceBlock(UniformInt.of(name.startsWith("runic_")?4:2,name.startsWith("runic_")?8:5),p);
                 case "glass"->new TransparentBlock(p);case "pane"->new IronBarsBlock(p);case "lantern"->new LanternBlock(p);
                 case "door"->new DoorBlock(wood?BlockSetType.OAK:BlockSetType.GOLD,p);case "trapdoor"->new TrapDoorBlock(wood?BlockSetType.OAK:BlockSetType.GOLD,p);
@@ -174,8 +174,15 @@ public final class ForbiddenArcane {
         else p.humanoidArmor(material,type);
         return new Item(p);
     }
-    private static final class MysteryLog extends RotatedPillarBlock {
-        MysteryLog(Properties p){super(p);}
+    private static final class MysteryLog extends io.github.jimbozoomer.jugcraft.agriculture.StrippableLogBlock {
+        private final String name;
+        MysteryLog(String name,Properties p){super(p,"forbidden_stripped_"+name);this.name=name;}
+        @Override public Block stripped(){return ForbiddenArcane.block("stripped_"+name);}
+        @Override protected InteractionResult useItemOn(ItemStack stack,BlockState state,Level level,BlockPos pos,Player player,InteractionHand hand,BlockHitResult hit){
+            if(name.startsWith("stripped_"))return InteractionResult.PASS;
+            if(player instanceof ServerPlayer actor&&!Authority.mayChange(actor.level(),actor,pos))return InteractionResult.FAIL;
+            return super.useItemOn(stack,state,level,pos,player,hand,hit);
+        }
         @Override public void animateTick(BlockState s,Level l,BlockPos p,RandomSource r){if(r.nextInt(3)==0)l.addParticle(ParticleTypes.END_ROD,p.getX()+r.nextDouble(),p.getY()+r.nextDouble(),p.getZ()+r.nextDouble(),0,.01,0);}
     }
     private static final class SoullessSand extends SoulSandBlock {
