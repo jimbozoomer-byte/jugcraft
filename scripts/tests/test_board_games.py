@@ -26,5 +26,6 @@ class BoardResourcesTest(unittest.TestCase):
             loot=json.loads((RES/f"data/jugcraft/loot_table/blocks/{name}.json").read_text(encoding="utf-8"))
             self.assertEqual(len(loot["pools"]),1)
             self.assertEqual(loot["pools"][0]["entries"],[{"type":"minecraft:item","name":f"jugcraft:{name}"}])
-            self.assertEqual(loot["pools"][0]["conditions"],[{"condition":"minecraft:survives_explosion"}])
+            self.assertEqual(loot["pools"][0]["condition"],{"type":"minecraft:survives_explosion"})
+            self.assertNotIn("conditions",loot["pools"][0])
 if __name__ == "__main__": unittest.main()
