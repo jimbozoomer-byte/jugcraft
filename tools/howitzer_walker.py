@@ -65,8 +65,11 @@ STOMP_COOLDOWN = 40
 HEALTH = 80
 WIDTH = 2.75
 HEIGHT = 5.4
-# The roof hatch the pilot sits in, in pixels: the hatch ring's middle, a little over a block under the roof.
-HATCH = (-8, 60.8, -7)
+# The commander's seat, in pixels: their eye, 16.32 pixels over it (88), is over the roof and to the right of the gun
+# cradle, so the pilot sees ahead past the barrel at every elevation (docs/features/walker-cockpit.md). The pilot is not
+# drawn, so nothing shows above the roof.
+SEAT = (5, 71.68, -5)
+CAMERA_DISTANCE = 9.0
 
 ITEMS = {"howitzer_walker": "Howitzer Walker"}
 TOOLTIPS = {"howitzer_walker": "A tall artillery walker with a howitzer. Walk with the movement keys; look to aim "

@@ -72,6 +72,14 @@ public class DieselWalker extends Entity {
 	private static final Vec3 SEAT = new Vec3(0, 1.9, 0);
 	private static final EntityDataAccessor<Boolean> DRILLING = SynchedEntityData.defineId(DieselWalker.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Integer> PUNCHED_AT = SynchedEntityData.defineId(DieselWalker.class, EntityDataSerializers.INT);
+	/** For the pilot's gauges (docs/features/walker-cockpit.md): the fuel in the tank, and how worn the hull is (0 to 1). */
+	private static final EntityDataAccessor<Integer> FUEL_GAUGE = SynchedEntityData.defineId(DieselWalker.class, EntityDataSerializers.INT);
+	private static final EntityDataAccessor<Float> WEAR = SynchedEntityData.defineId(DieselWalker.class, EntityDataSerializers.FLOAT);
+	/** The punch's reach: the middle of its box this far ahead of the walker, the box this far out on each side. */
+	public static final double PUNCH_REACH = 2.2;
+	public static final double PUNCH_SPREAD = 1.6;
+	/** How far back the third-person camera sits from the pilot (vanilla's is 4, inside a walker's hull). */
+	public static final float CAMERA_DISTANCE = 7.0F;
 
 	private int fuel;
 	public io.github.jimbozoomer.jugcraft.vehiclebay.VehicleFitout fitout = io.github.jimbozoomer.jugcraft.vehiclebay.VehicleFitout.STANDARD;
@@ -105,6 +113,43 @@ public class DieselWalker extends Entity {
 
 	public boolean drilling() {
 		return entityData.get(DRILLING);
+	}
+
+	/** The fuel left, 0 to 1, as the pilot's gauge shows it (synced). */
+	public float fuelGauge() {
+		return entityData.get(FUEL_GAUGE) / (float) FUEL_TANK;
+	}
+
+	/** How worn the hull is, 0 (sound) to 1 (knocked down), as the pilot's gauge shows it (synced). */
+	public float wear() {
+		return entityData.get(WEAR);
+	}
+
+	/** Which way it faces, flat. */
+	public Vec3 heading() {
+		double yaw = Math.toRadians(getYRot());
+		return new Vec3(-Math.sin(yaw), 0, Math.cos(yaw));
+	}
+
+	/** The box its attack hurts everything in, facing {@code heading} (the pilot's telegraph draws the same box). */
+	public AABB attackArea(Vec3 heading) {
+		Vec3 centre = position().add(heading.scale(PUNCH_REACH)).add(0, 1.6, 0);
+		return new AABB(centre, centre).inflate(PUNCH_SPREAD);
+	}
+
+	/** Whether its attack, now, would reach {@code target} (the server's test, and the telegraph's). */
+	public boolean attackReaches(LivingEntity target) {
+		return attackArea(heading()).intersects(target.getBoundingBox());
+	}
+
+	/** Whether the attack can be pressed again: its cooldown has passed (client side, from the synced swing). */
+	public boolean attackReady() {
+		return sinceSwing() >= attackCooldown();
+	}
+
+	/** How far the third-person camera sits back from the pilot. */
+	public float cameraDistance() {
+		return CAMERA_DISTANCE;
 	}
 
 	/** Client side: blocks walked so far, which the renderer turns into the legs' swing. */
@@ -250,12 +295,12 @@ public class DieselWalker extends Entity {
 		if (speed != 0 && tickCount % 10 == 0) {
 			level.playSound(null, getX(), getY(), getZ(), SoundEvents.IRON_GOLEM_STEP, SoundSource.NEUTRAL, 1.0F, 0.6F);
 		}
-		if (pilot instanceof Player player && tickCount % 40 == 0) {
-			player.sendOverlayMessage(Component.translatable("message.jugcraft.walker.fuel", fuel * 100 / FUEL_TANK));
-		}
+		// The fuel and the hull's wear are on the pilot's gauges (WalkerCockpitClient), no longer told in the message line.
 		if (damage > 0 && tickCount % 10 == 0) {
 			damage = Math.max(0, damage - 1);
 		}
+		entityData.set(FUEL_GAUGE, fuel);
+		entityData.set(WEAR, Mth.clamp(damage / (float) (health() * fitout.toughness()), 0.0F, 1.0F));
 	}
 
 	/**
@@ -290,7 +335,7 @@ public class DieselWalker extends Entity {
 	}
 
 	/** Ticks between attacks. */
-	protected int attackCooldown() {
+	public int attackCooldown() {
 		return PUNCH_COOLDOWN;
 	}
 
@@ -355,8 +400,8 @@ public class DieselWalker extends Entity {
 
 	/** The fist: hits every living thing in a box just in front, for the pilot. */
 	private void punch(ServerLevel level, ServerPlayer pilot, Vec3 heading) {
-		Vec3 centre = position().add(heading.scale(2.2)).add(0, 1.6, 0);
-		AABB reach = new AABB(centre, centre).inflate(1.6);
+		AABB reach = attackArea(heading);
+		Vec3 centre = reach.getCenter();
 		for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, reach, e -> e != pilot && e.isAlive())) {
 			if (target.hurtServer(level, level.damageSources().playerAttack(pilot), PUNCH_DAMAGE)) {
 				// Thrown along the walker's heading; a player's client is told, since a player moves themselves.
@@ -415,6 +460,8 @@ public class DieselWalker extends Entity {
 	protected void defineSynchedData(SynchedEntityData.Builder builder) {
 		builder.define(DRILLING, false);
 		builder.define(PUNCHED_AT, -100);
+		builder.define(FUEL_GAUGE, 0);
+		builder.define(WEAR, 0.0F);
 	}
 
 	@Override
