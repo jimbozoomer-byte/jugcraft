@@ -6,8 +6,8 @@ Status: **contract (GC-00); unit 1 (GC-01 to GC-04) and unit 2 (GC-05, Bathin) b
 [unit 3 as built and its evidence](#unit-3-as-built-and-its-evidence)), and unit 4 (GC-07, Foras) built from unit 3's
 shared prefix, recorded and merged after unit 3's line (see
 [unit 4 as built and its evidence](#unit-4-as-built-and-its-evidence)): on the cohort line's head `5e93bb0a7` (units 1
-to 4) both server jobs passed and 15 of 16 client shards passed in run 40852556175 (the 16th,
-`PeepoPopulationClientTests`, is being re-run as not this pull request's); unit 5 (GC-08, Bifrons) built on its own line
+to 4) both server jobs and all 16 client shards passed in run 40852556175 (the 16th, holding main's
+`PeepoPopulationClientTests`, on its re-run); unit 5 (GC-08, Bifrons) built on its own line
 from unit 3's head, recorded and merged after unit 4, not yet compiled or run in CI (see
 [unit 5 as built and its evidence](#unit-5-as-built-and-its-evidence)); units 1 to 5 merged on this line, in the order 1
 to 5; units 6 and 7 not built here; nothing of the cohort is merged into main.** The contract was written read-only from
@@ -141,8 +141,8 @@ unchanged. Every Java compile and game test runs only in CI (GC-S24; [Checks](#c
 | 0 | GC-00 | This contract | `docs/features/concordance-garden-cohort.md` | Contract |
 | 1 | GC-01, GC-02, GC-03, GC-04 | A compile-only first push (SG1 to SG3, Stolas a thin subclass); one perch for many spirits (Stolas unchanged); a spirit faces whoever speaks; the groundwork Buer uses (the bed index for beds, the beneficiary rule, the read-only `mayTendAt` and `cachedHabitat`, obligations with `TEND`, The Garden's Regard reachable to understood); **Buer complete**: strain tending, the overworked bed, his body from the owner's Decor Blossom | this contract; new `buer-pact.md`; `stolas-pact.md`; `arcane-concordance-workers.md`; `arcane-concordance-ecology.md` | Built (`62b0095fa` to `4ca363d38`) and recorded; in CI run 40605564166 every unit-1 server and client test passed (its one remaining failure, after a re-run, is main's `HerobrineClientGameTests`); not merged (draft #526); [evidence](#unit-1-as-built-and-its-evidence) |
 | 2 | GC-05 | **Bathin**: Verdance carrying, two roads from one Heart; with him, the shared accord machinery (`resolve`, the perch's `accord`, the payload's matter and answers, the roster's "awaiting your answer") and the bed index's Hearts, Gleaners and pylons | new `bathin-pact.md` | Built (`28a963b63` to `85eb1a0ba`, and `d7185041b` since) and recorded; in CI run 40777920181 every unit-2 server test passed with and without the optional integrations, and the garden client class passed; not merged (draft #526); [evidence](#unit-2-as-built-and-its-evidence) |
-| 3 | GC-06 | **Marax**: one-correction reading by his familiar, the proud familiar; the synced work target and its renderer hook; The Garden's Regard mastery reachable from here (three spirits) | new `marax-pact.md` | Built (`736d94541` to `1473e99f1`) and recorded; the shared prefix (GC-06a, GC-06b and its review's fixes) was in the head of CI run 40777920181, which passed in full; Marax himself (`bed9f73b4` on): on the cohort line's head `5e93bb0a7` both server jobs passed and 15 of 16 client shards passed in run 40852556175; not merged; [evidence](#unit-3-as-built-and-its-evidence) |
-| 4 | GC-07 | **Foras**: graft keeping from a store beside the perch, the logician's objection; the bed index's containers; the owner library's second edited part in `tools/owner_art.py` | new `foras-pact.md` | Built (`e3194d0be` to `8a50bbd33`) from unit 3's shared prefix and recorded, then merged after unit 3's line; on the cohort line's head `5e93bb0a7` both server jobs passed and 15 of 16 client shards passed in run 40852556175; not merged; [evidence](#unit-4-as-built-and-its-evidence) |
+| 3 | GC-06 | **Marax**: one-correction reading by his familiar, the proud familiar; the synced work target and its renderer hook; The Garden's Regard mastery reachable from here (three spirits) | new `marax-pact.md` | Built (`736d94541` to `1473e99f1`) and recorded; the shared prefix (GC-06a, GC-06b and its review's fixes) was in the head of CI run 40777920181, which passed in full; Marax himself (`bed9f73b4` on): on the cohort line's head `5e93bb0a7` run 40852556175 passed in full; not merged; [evidence](#unit-3-as-built-and-its-evidence) |
+| 4 | GC-07 | **Foras**: graft keeping from a store beside the perch, the logician's objection; the bed index's containers; the owner library's second edited part in `tools/owner_art.py` | new `foras-pact.md` | Built (`e3194d0be` to `8a50bbd33`) from unit 3's shared prefix and recorded, then merged after unit 3's line; on the cohort line's head `5e93bb0a7` run 40852556175 passed in full; not merged; [evidence](#unit-4-as-built-and-its-evidence) |
 | 5 | GC-08 | **Bifrons**: root-running with half lost, which beds are reserves | new `bifrons-pact.md`; `tools/concordance_economy.py` | Built (`1c57700dd` to `7b08d26a0`) on its own line from unit 3's head (`3c2d36b0f`) and recorded (`d6f63f32b`), then merged after unit 4's line; not yet compiled or run in CI; not merged; [evidence](#unit-5-as-built-and-its-evidence) |
 | 6 | GC-09 | **Amdusias**: the bending canopy (a one-factor disturbance shelter: the pure rule in `ecology`, the registry in `garden`), the stir a Gloamcap wants | new `amdusias-pact.md`; `arcane-concordance-ecology.md` | Not started |
 | 7 | GC-10 | Combined fixes, the cohort's whole path, its load card, client evidence (the line-up), the two-client test, records, the checkpoint and handoff | this page; the six records; `arcane-concordance-journey.md`; `docs/TESTING.md` | Not started |
@@ -2137,8 +2137,8 @@ written; not merged into main):
 4, the newest CI results this line descends from are the cohort line's: run
 [40840353835](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40840353835), green in full on `3bfd63a97` (the magic interfaces'
 polish), and run [40852556175](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40852556175) on `5e93bb0a7`, in
-which both server jobs passed and 15 of 16 client shards passed (the 16th, `PeepoPopulationClientTests`, is being re-run
-as not this pull request's); none of it holds him. Still to run, on the merged head: the `mod` and `optional
+which both server jobs and all 16 client shards passed (the 16th, holding main's `PeepoPopulationClientTests`, on its
+re-run); none of it holds him. Still to run, on the merged head: the `mod` and `optional
 integrations absent` jobs; the client classes `tools/select_client_tests.py` picks (the garden class among them, its
 weight 1280 since the merge: 560 + 260 + 220 + 240; 1060 on his line); then one workflow_dispatch of every client class
 (unit 2's practice).
@@ -2240,8 +2240,8 @@ records, a union with unit 4's lines first: this page's status, units table, GE 
 [unit 4](#unit-4-as-built-and-its-evidence) then [unit 5 as built](#unit-5-as-built-and-its-evidence), each rebuilt
 from its own side's text; the CHANGELOG and INTEGRATION_STATUS headers (units 1 to 5) and lines, WHAT_EXISTS; the workers,
 ecology, economy, journey, Stolas, Buer, Bathin and magic interfaces records ("Since GC-07" before "Since GC-08"). Where
-those lines speak of the cohort line's CI, they cite run 40852556175 on `5e93bb0a7` (both server jobs passed, 15 of 16
-client shards passed, the 16th, `PeepoPopulationClientTests`, being re-run as not this pull request's) and run
+those lines speak of the cohort line's CI, they cite run 40852556175 on `5e93bb0a7` (both server jobs and all 16
+client shards passed, the 16th, holding main's `PeepoPopulationClientTests`, on its re-run) and run
 40840353835, green in full on `3bfd63a97`; none has run on Bifrons. Merged without a conflict but changed after it
 (decided by the session): TESTING's Bifrons bullet moved after Foras's; the Bifrons notes in Marax's, Buer's, Bathin's
 and Stolas's records count six chooser entries and Foras among the first obligations; [his record](bifrons-pact.md)
@@ -2492,8 +2492,8 @@ roster's "awaiting your answer") passed, and `ConcordancePactClientGameTests`, `
 `ConcordanceRosterClientGameTests` and `ScreenFitClientGameTests` passed with the restyled screens. The row's local
 checks were run on each commit by the unit's builders and reported passing in the commit messages that list them.
 
-**Unit 4 as written** (row 4 above against the build; in run 40852556175 on `5e93bb0a7` both server jobs passed and 15
-of its 16 client shards passed, the 16th, `PeepoPopulationClientTests`, being re-run as not this pull request's): Worker
+**Unit 4 as written** (row 4 above against the build; in run 40852556175 on `5e93bb0a7` both server jobs and all 16
+client shards passed, the 16th, holding main's `PeepoPopulationClientTests`, on its re-run): Worker
 (Foras's graft-keeping, character and accord tests, `GRAFT`, SG12 through his fixture), the existing graft tests
 unchanged (Chunk C's nine, and `theGraftGestureBehavesAsBefore` with GC-07b's two others in Garden), Persistence
 (`aForasReloadedKeepsHisStoreAndAnswer`: his store and his answer across a restart) and the Journey's recipes; Economy
@@ -2720,7 +2720,7 @@ every citation resolves; none is the owner's.
 Units 1 (GC-01 to GC-04) and 2 (GC-05) are built, their CI evidence and records are in this page and their records, and
 they wait in draft pull request #526 for the owner's review. Unit 3 (GC-06, Marax) and unit 4 (GC-07, Foras, built on
 its own line from unit 3's shared prefix and merged after unit 3's line) are built and recorded; on the cohort line's
-head `5e93bb0a7` both server jobs passed and 15 of 16 client shards passed in run 40852556175 (item 5). Unit 5 (GC-08,
+head `5e93bb0a7` run 40852556175 passed in full (item 5). Unit 5 (GC-08,
 Bifrons) is built and recorded on its own line from unit 3's head and merged after unit 4
 ([the merge](#unit-5s-merge-after-unit-4)), not yet compiled or run in CI. Next:
 
@@ -2747,8 +2747,8 @@ Bifrons) is built and recorded on its own line from unit 3's head and merged aft
    habitat (re-running the advice harness and `habitatAdviceHoldsForEveryOrganism`).
 5. Unit 4 (GC-07, Foras) is merged after unit 3's line ([the merge](#unit-4s-merge-after-unit-3)): his journey steps
    are 14 to 16, his codex pages follow Marax's, and the garden class's weight was 1040 (1280 since unit 5). On the
-   cohort line's head `5e93bb0a7`, in run 40852556175, both server jobs passed and 15 of 16 client shards passed (the
-   16th, `PeepoPopulationClientTests`, is being re-run as not this pull request's); run 40840353835 passed in full on
+   cohort line's head `5e93bb0a7`, in run 40852556175, both server jobs and all 16 client shards passed (the
+   16th, holding main's `PeepoPopulationClientTests`, on its re-run); run 40840353835 passed in full on
    `3bfd63a97` (the magic interfaces' polish), before unit 4. Look at his 33 pictures and give
    [his Verification](foras-pact.md#verification) its results and its "Seen" column.
 6. Unit 5 (GC-08, Bifrons) is merged after unit 4, from his own line (built from unit 3's head, `3c2d36b0f`)

@@ -3555,6 +3555,11 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		BlockPos source = perch.offset(2, 0, 2);
 		BlockPos destination = perch.offset(-3, 0, 2);
 		server.runOnServer(minecraft -> {
+			// Foras's chest (perch.north()) still holds the Dewmoss his graft left; emptied first, or the yard clearing it would
+			// drop that Dewmoss beside the perch, in his pictures.
+			if (minecraft.overworld().getBlockEntity(perch.north()) instanceof ChestBlockEntity forasStore) {
+				forasStore.clearContent();
+			}
 			yard(minecraft, perch);
 			// Buer's bed (perch.west(3), awake and the player's; yard keeps it) would be a second bed of theirs in his area, so it
 			// leaves the yard: his refusal, his chooser and his thinks see only the beds set here. Its cell is left empty (the yard's

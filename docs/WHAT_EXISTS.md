@@ -328,7 +328,7 @@ Its unit 2 (Bathin, Verdance carrying, the accord machinery and the bed index's 
 [record](features/bathin-pact.md)) is not merged either; its tests passed in CI run 40777920181. Its unit 3 (Marax,
 habitat reading, a standing station and a synced work target; [record](features/marax-pact.md)) and its unit 4 (Foras,
 graft keeping, the graft in one place and the bed index's stores; [record](features/foras-pact.md)) are built and not
-merged; on the cohort line's head `5e93bb0a7`, which holds units 1 to 4, both server jobs passed in CI run 40852556175.
+merged; on the cohort line's head `5e93bb0a7`, which holds units 1 to 4, CI run 40852556175 passed in full.
 Its unit 5 (Bifrons, who by night runs roots from your full Verdant Beds to your hungry ones, two nutrients taken for one
 given, and asks before drawing from beds with crops growing on them; [record](features/bifrons-pact.md)) is built and
 merged into the cohort after unit 4, not merged into main, and not yet compiled or run in CI. Contract and

@@ -14,8 +14,7 @@ garden cohort, unit 5: brief `1c57700dd`; the feeding act and SG12 at each spiri
 `5e93bb0a7`, units 3 and 4 first, in the order 3, 4, 5). His line was built from `3c2d36b0f` (Marax and the roster).
 The newest CI results the merged line descends from are the cohort line's: run 40840353835, green in full on `3bfd63a97`
 (the magic interfaces' polish), and run 40852556175 on `5e93bb0a7` (Marax, Foras and the polish), in which both server
-jobs passed and 15 of 16 client shards passed (the 16th, `PeepoPopulationClientTests`, is being re-run as not this pull
-request's). Nothing of Bifrons has been compiled or has run in CI: none of his server tests or client shots has run
+jobs and all 16 client shards passed (the 16th, holding main's `PeepoPopulationClientTests`, on its re-run). Nothing of Bifrons has been compiled or has run in CI: none of his server tests or client shots has run
 ([Verification](#verification)). Every Java file of his was parse-checked only; the
 repository's Python checks and audits ran on his files. No person has played him. This page began as his brief (GC-08a),
 committed before any of his body files as the contract's per-spirit template asks (D-D5); his character, his words and

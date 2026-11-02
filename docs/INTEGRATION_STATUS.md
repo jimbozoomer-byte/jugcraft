@@ -42,8 +42,8 @@ Unit 4 (GC-07) is built and recorded (on its own line from unit 3's shared prefi
 garden spirit who keeps grafts, with the graft in one place and the bed index's stores. Run
 [40840353835](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40840353835) passed in full on `3bfd63a97` (the magic interfaces'
 polish, before unit 4); in run [40852556175](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40852556175) on
-`5e93bb0a7` (unit 4 merged, his reload test thinking first and the server suite given 6G) both server jobs passed and 15
-of its 16 client shards passed (the 16th, `PeepoPopulationClientTests`, is being re-run as not this pull request's).
+`5e93bb0a7` (unit 4 merged, his reload test thinking first and the server suite given 6G) both server jobs and all 16
+client shards passed (the 16th, holding main's `PeepoPopulationClientTests`, on its re-run).
 Checked locally by the repository's Python checks and audits
 ([the contract's evidence](features/concordance-garden-cohort.md#unit-4-as-built-and-its-evidence)).
 Unit 5 (GC-08) is built and recorded on its own line from unit 3's head and merged after unit 4, **not yet compiled or
