@@ -65,9 +65,9 @@ STOMP_COOLDOWN = 40
 HEALTH = 80
 WIDTH = 2.75
 HEIGHT = 5.4
-# The commander's seat, in pixels: their eye, 16.32 pixels over it (88), is over the roof and to the right of the gun
-# cradle, so the pilot sees ahead past the barrel at every elevation (docs/features/walker-cockpit.md). The pilot is not
-# drawn, so nothing shows above the roof.
+# The commander's seat, in pixels: their eye, 16.32 pixels over it (88), is over the roof by the hoops, beside the gun
+# cradle (the gun on the pilot's right), so the pilot sees ahead past the barrel at every elevation
+# (docs/features/walker-cockpit.md). The pilot is not drawn, so nothing shows above the roof.
 SEAT = (5, 71.68, -5)
 CAMERA_DISTANCE = 9.0
 

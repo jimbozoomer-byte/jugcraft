@@ -31,7 +31,7 @@ While the pilot sits in it, their own hands do nothing: use and attack go to the
 - **Walking:** 0.2 blocks a tick (4 a second). It turns 4° a tick.
 - **Drill:** it cuts one block at a time. Each block takes 5 ticks per point of hardness, at least 3 ticks: stone takes 8 ticks and obsidian 250. It will not cut bedrock or other unbreakable blocks. The block breaks as if the pilot broke it by hand: it drops its items, and claimed or protected land and other mods' break checks still apply. It does not dig areas, tunnels or chains of blocks.
 - **Fist:** 12 damage with strong knockback, once every 16 ticks, counted as the pilot's attack.
-- **Fuel:** walking, turning and drilling burn 4 mB a second, so a full tank lasts about 16 minutes of work. Standing still burns nothing. With an empty tank it only stands. The pilot sees the fuel left on the cockpit's gauges above the hotbar ([walker-cockpit.md](walker-cockpit.md)), with the fist's reach and the drill's block drawn in the world.
+- **Fuel:** walking, turning and drilling burn 4 mB a second, so a full tank lasts about 16 minutes of work. Standing still burns nothing. With an empty tank it only stands. The pilot sees the fuel left on the cockpit's gauges ([walker-cockpit.md](walker-cockpit.md)), with the fist's reach and the drill's block drawn in the world.
 
 ## Connections
 - Input producers: the diesel engine, the mining drill (powered tools), riveted steel plate (giants), steel plates, an anvil and pistons. Fuel comes from the refinery.

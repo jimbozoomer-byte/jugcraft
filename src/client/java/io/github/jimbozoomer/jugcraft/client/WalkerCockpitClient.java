@@ -213,7 +213,7 @@ public final class WalkerCockpitClient {
 		if (view.walker() instanceof HowitzerWalker) {
 			ring(pose, consumer, view.walker().position().add(0, 0.05, 0), HowitzerWalker.STOMP_RADIUS, 36, 0.05F, reach);
 		} else {
-			edges(pose, consumer, view.reach(), 0.025F, reach);
+			footprint(pose, consumer, view.reach(), 0.03F, reach);
 		}
 		for (AABB box : view.struck()) {
 			edges(pose, consumer, box.inflate(0.05), 0.03F, STRUCK);
@@ -234,6 +234,19 @@ public final class WalkerCockpitClient {
 			double angle = i * Mth.TWO_PI / beads;
 			bead(pose, consumer, centre.add(Math.cos(angle) * radius, 0.1, Math.sin(angle) * radius), size, colour);
 		}
+	}
+
+	/**
+	 * Where a box meets the ground: its four bottom edges, a little over the floor. The fist's and ram's boxes reach
+	 * up past the pilot's eye, so their upright edges would cross the view; the footprint shows the reach plainly.
+	 */
+	private static void footprint(PoseStack.Pose pose, VertexConsumer consumer, AABB box, float t, int colour) {
+		float x0 = (float) box.minX, z0 = (float) box.minZ, x1 = (float) box.maxX, z1 = (float) box.maxZ;
+		float y = (float) box.minY + 0.06F;
+		LinePreview.cube(pose, consumer, x0, y - t, z0 - t, x1, y + t, z0 + t, colour);
+		LinePreview.cube(pose, consumer, x0, y - t, z1 - t, x1, y + t, z1 + t, colour);
+		LinePreview.cube(pose, consumer, x0 - t, y - t, z0, x0 + t, y + t, z1, colour);
+		LinePreview.cube(pose, consumer, x1 - t, y - t, z0, x1 + t, y + t, z1, colour);
 	}
 
 	/** The twelve edges of a box, as thin bars. */
@@ -265,8 +278,12 @@ public final class WalkerCockpitClient {
 		}
 		DieselWalker walker = shown.walker();
 		Font font = client.font;
+		// Top left, as the aircraft's instruments are: clear of the chat, the hotbar and the status effects.
 		int x = 8;
-		int y = graphics.guiHeight() - 62;
+		int y = 30;
+		String attackLine = Component.translatable(attackKey(walker) + (shown.attackReady() ? "_ready" : "_cooling")).getString();
+		int width = Math.max(132, Math.max(font.width(shown.weapon()), font.width(attackLine)) + 6);
+		graphics.fill(x - 3, y - 3, x + width, y + 51, 0xB0101418);
 		graphics.text(font, walker.getDisplayName().getString().toUpperCase(Locale.ROOT), x, y, TEXT);
 		y += 11;
 		float fuel = walker.fuelGauge();
@@ -279,8 +296,7 @@ public final class WalkerCockpitClient {
 		y += 11;
 		graphics.text(font, shown.weapon(), x, y, shown.weaponColour());
 		y += 10;
-		String attack = Component.translatable(attackKey(walker) + (shown.attackReady() ? "_ready" : "_cooling")).getString();
-		graphics.text(font, attack, x, y, shown.attackReady() ? TEXT_GOOD : TEXT_DIM);
+		graphics.text(font, attackLine, x, y, shown.attackReady() ? TEXT_GOOD : TEXT_DIM);
 	}
 
 	private static String attackKey(DieselWalker walker) {

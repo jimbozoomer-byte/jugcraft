@@ -42,7 +42,7 @@ import org.jspecify.annotations.Nullable;
  * landing hurts and throws everything within {@value #STOMP_RADIUS} blocks: {@value #STOMP_DAMAGE} damage, counted as
  * the pilot's attack. It never breaks a block.</li>
  * </ul>
- * The pilot's model is hidden; the pilot looks out from a commander's seat on the roof's right, clear of the gun
+ * The pilot's model is hidden; the pilot looks out from a commander's seat by the roof hoops, clear of the gun
  * (docs/features/walker-cockpit.md), and sees the shell's arc and landing before firing. The client draws its walk,
  * shot and jump from the curves in tools/howitzer_walker.py, the same curves its Blockbench clips are sampled from.
  */
@@ -69,8 +69,8 @@ public class HowitzerWalker extends DieselWalker {
 	/** From the trunnion to the muzzle along the barrel, in blocks. */
 	public static final double BARREL = 2.25;
 	/**
-	 * The pilot's seat (SEAT in tools/howitzer_walker.py, over 16): the commander's place on the roof's right, so their
-	 * eye (1.02 blocks over it) looks out over the roof and past the gun on the left, never from inside the hull or
+	 * The pilot's seat (SEAT in tools/howitzer_walker.py, over 16): the commander's place by the roof hoops, so their
+	 * eye (1.02 blocks over it) looks out over the roof with the gun on their right, never from inside the hull or
 	 * along the barrel. The pilot's model stays hidden there, as in the enclosed cockpit.
 	 */
 	private static final Vec3 SEAT = new Vec3(0.3125, 4.48, -0.3125);

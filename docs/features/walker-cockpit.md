@@ -16,7 +16,7 @@ Before this pass, two of the three pilots looked out from inside their own hulls
 | --- | --- | --- |
 | Diesel Walker | The eye sat clear in its open cockpit. | Unchanged. |
 | Armoured Walker | The eye sat at 69 px, under the 72 px roof, so the first-person view was the inside of the hull. | The pilot stands up in the roof hatch (`SEAT`, tools/armoured_walker.py). The eye is at 78 px, a third of a block over the roof, clear in every direction. |
-| Howitzer Walker | The eye sat at 77 px, inside the cab under the hatch ring (80 to 81.5 px). | The pilot sits in a commander's seat over the roof, right of the gun cradle (`SEAT`, tools/howitzer_walker.py). The eye is at 88 px and sees ahead past the barrel at every elevation; the gun is about 20 degrees to the left of the view. As before, the pilot is not drawn in third person. |
+| Howitzer Walker | The eye sat at 77 px, inside the cab under the hatch ring (80 to 81.5 px). | The pilot sits in a commander's seat over the roof by the roof hoops, beside the gun cradle (`SEAT`, tools/howitzer_walker.py). The eye is at 88 px and sees ahead past the barrel at every elevation, with the gun on the pilot's right. As before, the pilot is not drawn in third person. |
 
 Ray traces through each model's exported quads checked these eyes. The script was a scratch analysis and is not kept.
 
@@ -39,14 +39,14 @@ The telegraphs are drawn in the world on the pilot's own client and show through
   - As the gun lays, the arc swings onto the cross.
   - The colour shows its state: green when it is on target, amber while laying or reloading, red with no shells or no fuel.
 - **Fist, ram and stomp.**
-  - The Diesel Walker's fist and the Armoured Walker's ram show their strike box in front of the walker. The Howitzer's stomp shows a ring round its feet.
+  - The Diesel Walker's fist and the Armoured Walker's ram show their strike box's footprint on the ground in front of the walker. The box reaches up past the pilot's eye, so its upright edges are left out. The Howitzer's stomp shows a ring round its feet.
   - Every creature the strike would hit now is outlined in red.
   - The box or ring is bright when the attack is ready and dim while it swings back.
   - The box is the server's own (`DieselWalker.attackArea`), and the outlines are its own test (`attackReaches`).
 - **The drill.** The block the Diesel Walker's drill would cut is edged in amber. A block too hard for it gets no edge.
 
 ### Gauges
-Gauges sit above the hotbar, on the left:
+Gauges sit at the top left, on a dark panel, where the aircraft's instruments are, clear of the chat:
 - the walker's name;
 - fuel and hull bars with percentages, turning amber, then red;
 - the weapon line: "Reloading 40%", "Laying the gun", "On target", "Cannon ready" or "No heavy shells", with the shells carried (not in creative); for the Diesel Walker, whether the drill has a block in reach;
@@ -96,12 +96,22 @@ They replace the "Fuel: n%" message that was sent every two seconds and pushed t
   - `howitzerArcComesDownOnTheCrosshairOnceLaid`: once laid, the arc drawn from the barrel comes down within 2.5 blocks of the crosshair;
   - `theDrawnReachIsWhatIsStruck`: the fist's box takes in the pig in front and not the one behind, and strikes only the one in front; the stomp's ring takes in the pig beside it and not one six blocks off;
   - `theGaugesReadTheWalker`: the fuel gauge reads a quarter tank, and a hit shows as wear.
-- Planned in CI, client game test `WalkerCockpitClientGameTests`, for each walker:
+- Client game test `WalkerCockpitClientGameTests`, for each walker:
   - the view from the seat, with the telegraphs and gauges, and an arc landing for the two guns;
   - holding left turns the hull and the view together;
   - the third-person camera sits back past the hull;
   - the Howitzer's view stays put while the gun lays itself.
   - It takes screenshots of each.
+- **What CI showed (`0a9968b`, client shard 6):**
+  - The client test passed every assertion and took all nine screenshots. The shard then stopped at main's own failing `PeepoCraftingTableClientTests`.
+  - In the screenshots:
+    - the Armoured pilot looks out over the roof, with the ram's reach in front;
+    - the Howitzer pilot sees ahead past the gun and reads "On target";
+    - the Diesel drill's block is edged in amber, with a pig in reach outlined.
+  - Two fixes followed from them:
+    - the gauges moved from above the hotbar, where chat covered them, to the top left;
+    - the fist's and ram's boxes are drawn as footprints, since their upright edges crossed the view.
+- **Server tests:** main's server game tests run out of memory (`OutOfMemoryError`) before reporting, on main as here. So `WalkerCockpitGameTests` has not yet reported a result.
 - Existing walker tests (walking, drilling, punching, the cannon firing twice in 60 ticks, ramming, the Howitzer's aim, firing, mark, reload, leap and stomp) still cover their behaviour.
 - Done locally: the walker audits in `check_mod_data.py` (the seats, the new constants and the eye over the Armoured roof); see the PR for the full list. Gradle cannot run here, so the compile and tests are left to CI.
 - Not done: piloting by hand, two players, a dedicated server.
@@ -111,5 +121,5 @@ Not applicable: walkers are crafted and placed by players.
 
 ## Rollout and open questions
 - The telegraphs show through walls, which is the point for an artillery pilot, but the owner may prefer them hidden behind blocks.
-- The Howitzer pilot's view is from the commander's seat, right of the gun. A gunner's sight on the barrel itself could come later.
+- The Howitzer pilot's view is from the commander's seat beside the gun, framed by the roof hoops. A gunner's sight on the barrel itself could come later.
 - No key toggles the telegraphs; F1 hides the gauges with the rest of the HUD.

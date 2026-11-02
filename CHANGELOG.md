@@ -19,7 +19,7 @@ No numbered release yet. Entries on feature branches remain proposed until their
   - the fist's, ram's and stomp's reach, with what they would hit outlined;
   - the drill's block.
 - **The Armoured Walker's cannon** now lands on what the crosshair is on (raised for its fall, up to 96 blocks), with no spread.
-- **Gauges** above the hotbar: fuel, hull wear, reload and shells, and whether the attack is ready. They replace the fuel message every two seconds.
+- **Gauges** at the top left: fuel, hull wear, reload and shells, and whether the attack is ready. They replace the fuel message every two seconds.
 - Record: [walker-cockpit.md](docs/features/walker-cockpit.md).
 - **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
 
