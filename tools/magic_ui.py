@@ -879,8 +879,8 @@ GLANCES = {
     # GC-07 unit 4
     # GC-08 unit 5
     # GC-08: Bifrons's ("feed a Verdant Bed, or the crop growing on one, with bone meal"; the whole act stays the row's tip):
-    # the row reads "First task: feed a Verdant Bed bone meal by hand here" (11 words; 18 with the whole act).
-    "garden_pact.act.feed": [("", "feed a Verdant Bed bone meal", (), "feed a Verdant Bed bone meal", "act")],
+    # the row reads "First task: bone meal a bed by hand here" (9 words; 18 with the whole act), one line at 320x180.
+    "garden_pact.act.feed": [("", "bone meal a bed", (), "bone meal a bed", "act")],
     # GC-09 unit 6
     # Blockers (every one drawn above the terms as a lock line, keeping its action).
     "pact.missing.owner": [("", "Only the perch's owner may invite %1$s", ("Bathin",),
@@ -1020,8 +1020,8 @@ WORK_GLANCES = {
         "row.asleep": [("", "Asleep until %1$s", ("19:00", "05:00"), "Asleep until 19:00", "row")],
         "row.last": [("", "Last: %2$s → %4$s", (2, "102, 64, -18", 1, "98, 64, -18", 1), "Last: 102, 64, -18 → 98, 64, -18", "row")],
         "row.reserved": [("", "Reserves kept: %1$s", (2,), "Reserves kept: 2", "row")],
-        "matter.reserves": [("", "Bed %1$s is growing: draw from growing beds?", ("102, 64, -18", 32),
-                             "Bed 102, 64, -18 is growing: draw from growing beds?", "row")],
+        "matter.reserves": [("", "Bed %1$s: draw from growing beds?", ("102, 64, -18", 32),
+                             "Bed 102, 64, -18: draw from growing beds?", "row")],
         # His matter in general, drawn where none is raised now and an answer is kept (PactAccords: <work>.question).
         "question": [("", "Which beds are reserves?", (), "Which beds are reserves?", "row")],
         "missing": [("", "Needs two awake Verdant Beds of yours within %1$s blocks", (8,),

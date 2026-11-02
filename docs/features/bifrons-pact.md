@@ -55,7 +55,7 @@ As built; none of it has yet been seen in a game.
   one you could not change by hand.
 - **Which beds are reserves.** A full bed with an organism crop growing on it is a reserve: until you answer he draws
   only from fallow beds. When no fallow bed can give (none rich enough, or each that is refused him) and a growing bed
-  could, he turns to it and weighs it, once while he stays; his kept page asks "Bed x, y, z is growing: draw from growing
+  could, he turns to it and weighs it, once while he stays; his kept page asks "Bed x, y, z: draw from growing
   beds?", **Fallow beds only** (the safe course, first) or **Any full bed**, and the roster says he awaits your answer.
   "Fallow beds only" keeps them (his page shows "Reserves kept: n"); "Any full bed" lets him draw from them. You may
   change the answer whenever you like; once answered and with no reserve standing, his page asks "Which beds are
@@ -140,13 +140,13 @@ code paths, to the restyled screens: his work's row in `tools/magic_ui.py` `WORK
 | Asleep (`row.asleep`) | "Asleep until %1$s" ("Asleep until 19:00") | 12 words |
 | Last run (`row.last`) | "Last: %2$s → %4$s" ("Last: 102, 64, -18 → 98, 64, -18", 7 words); the amounts in its tip | 12 words |
 | Reserves kept (`row.reserved`) | "Reserves kept: %1$s" ("Reserves kept: 2") | 12 words |
-| His matter (`matter.reserves`) | "Bed %1$s is growing: draw from growing beds?" ("Bed 102, 64, -18 is growing: draw from growing beds?", 10 words; it keeps its bed, as Bathin's keeps his Heart) | 12 words |
+| His matter (`matter.reserves`) | "Bed %1$s: draw from growing beds?" ("Bed 102, 64, -18: draw from growing beds?", 8 words, one line at 320x180; it keeps its bed, as Bathin's keeps his Heart) | 12 words |
 | His question in general (`question`: an answer kept, no reserve standing) | "Which beds are reserves?" (4 words) | 12 words |
 | Answers | "Fallow beds only" (`fallow`, the safe course), "Any full bed" (`full`) | 3 words each |
 | Blocker (`missing`) | "Needs two awake Verdant Beds of yours within %1$s blocks" (10 words) | 14 words |
 | Chooser card | "Needs two beds near" | 4 words |
 | His offering's tip (the upkeep chip; shared) | "Any of: %1$s and %2$s more", the first three logs and how many more (his tag holds dozens) | 20 words |
-| First task (`garden_pact.act.feed`) | "feed a Verdant Bed bone meal", so the row reads "First task: feed a Verdant Bed bone meal by hand here" (11 words; with the whole act, 18) | 12 words |
+| First task (`garden_pact.act.feed`) | "bone meal a bed", so the row reads "First task: bone meal a bed by hand here" (9 words, one line at 320x180; with the whole act, 18) | 12 words |
 | Jade (note or matter, and its mark) | reserves "Growing full beds: %1$s" (ask); asleep "Asleep until night" (moon); nothing full "Nothing to run" (moon); nowhere with room "Nowhere to run it" (hourglass); his matter "Full beds all growing" (ask) | 4 words a line |
 
 Each page is held to the client shots' budgets (a beat page 30 words, the terms 50, the kept page 45, the roster 70, the
@@ -398,7 +398,7 @@ His review's fixes (one commit after `a3e672ba8`): refused beds skipped until th
 (`aRefusedFallowBedLeavesHisReservesAsked`); the party-leave case run through his second beat
 (`aRootRunnerNeverTouchesAStrangersBed`: a fallow member's bed measured, then refused at the change); the offering tip
 of a large tag (`PactScreen.offering`); his question in general, short ("Which beds are reserves?"); his matter's glance
-keeping its bed ("Bed x, y, z is growing: draw from growing beds?") and "Reserves kept: n"; the chooser's cards and his
+keeping its bed ("Bed x, y, z: draw from growing beds?") and "Reserves kept: n"; the chooser's cards and his
 first beat's portrait checked as the cohort's other spirits' are (`cardsWhole`, `portraitWhole`: the cohort's helpers,
 which this line gained at its merge). Not applied here: the review's finding 11 (each kind of log carried
 draws its own Offer plate), which it directs to the cohort's line, where the shared kept page's Offer plates are drawn
