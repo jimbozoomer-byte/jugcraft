@@ -2229,8 +2229,8 @@ Twenty-two new server tests: the contract's eleven, nine the specification added
 **Client test written** (not run): `ConcordanceGardenPactClientGameTests`, his flow after Foras's (since the merge;
 after Marax's on his line) at the same perch, by night (the clock paused at midnight, night vision given), 36 shots: 26
 of `GARDEN_CLIENT_SHOTS` and his 10 body poses ([his record's Verification](bifrons-pact.md#verification) names them),
-each pact screen held to its word budget; his two choosers' cards (six since the merge) held wholly in view and his
-first beat's portrait whole, as every spirit's are.
+each pact screen held to its word budget; his two choosers' cards (seven since unit 6's merge; six after unit 5's
+merge after unit 4) held wholly in view and his first beat's portrait whole, as every spirit's are.
 
 **Completion evidence for Bifrons** (the codes above; **none of these tests has run**):
 
