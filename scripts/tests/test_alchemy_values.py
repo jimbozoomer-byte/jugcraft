@@ -194,3 +194,16 @@ class AlchemyValueTests(unittest.TestCase):
         self.assertEqual(value('jugcraft:jimta_pahoehoe_lava_bucket'),value('minecraft:lava_bucket'))
         # Oil sand washes into half a bucket of crude oil (eight oil globs a bucket) and its sand.
         self.assertGreaterEqual(value('jugcraft:oil_sand'),value('minecraft:sand')+(value('jugcraft:crude_oil_bucket')-value('minecraft:bucket'))/2)
+
+    def test_leftover_metals_are_priced(self):
+        # Provisional prices (2 November 2026), with the minerals that make them worth what they make.
+        for item, price in {'tungsten_ingot': 1024, 'thallite_ingot': 256, 'ferrochromium_ingot': 512, 'cobalt_ingot': 512,
+                            'lithium_carbonate': 128, 'rare_earth_oxide': 512, 'vanadium_pentoxide': 256}.items():
+            self.assertEqual(value('jugcraft:' + item), price, item)
+        self.assertGreaterEqual(value('jugcraft:lepidolite'), 2 * value('jugcraft:lithium_carbonate'))
+        self.assertGreaterEqual(value('jugcraft:monazite'), 2 * value('jugcraft:rare_earth_oxide'))
+        self.assertGreaterEqual(value('jugcraft:cydonian_shard'), value('jugcraft:rare_earth_oxide'))
+        for mineral, metal in (('chromite_concentrate', 'ferrochromium_ingot'), ('cobalt_concentrate', 'cobalt_ingot')):
+            self.assertGreaterEqual(2 * value('jugcraft:' + mineral) + value('jugcraft:coke'), 2 * value('jugcraft:' + metal))
+        self.assertGreater(value('jugcraft:thallite_pickaxe'), 3 * value('jugcraft:thallite_ingot'))
+        self.assertEqual(value('jugcraft:tungsten_block'), 9 * value('jugcraft:tungsten_ingot'))
