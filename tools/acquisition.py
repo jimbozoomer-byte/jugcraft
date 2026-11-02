@@ -151,6 +151,8 @@ CHUNK_D_ITEMS = ["pact_perch"]
 # fixture; GC-06 and GC-07: Dewmoss, Marax's and Foras's compacts). The cohort registers no item (GC-S22).
 # check_acquisition ties them to the files on disk and to the server test that loads their recipes
 # (ConcordanceJourneyGameTests.GARDEN_RECIPES).
+# GC-10 unit 7: the whole path (ConcordanceJourneyGameTests.theGardenPactsFromCodexToDeparture) crafts Mendvetch, Dewmoss
+# and Sunpetal by these rows.
 GARDEN_PACTS = {"sunpetal": "recipe", "verdant_bed": "recipe", "bonding_charm": "recipe", "pact_perch": "recipe",
                 "mendvetch": "recipe", "verdant_heart": "recipe", "gleaner": "recipe", "dewmoss": "recipe"}
 

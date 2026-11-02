@@ -322,8 +322,9 @@ PACT = {
 # Overworld alone, with no structure loot, nothing mastered and nothing past the Practitioner stage, reaches each step with
 # the research it names (each step needing it) and makes every Concordance thing it names (tools/acquisition.py
 # GARDEN_PACTS, made under the Concordance's switch alone, every row named). The Regard is mastered only through three
-# different garden spirits' first obligations (GB26), so while fewer ship the route reaches no mastery of it. Unit 7's
-# GARDEN_TEST will walk every step; until then each step names the tests that exercise it.
+# different garden spirits' first obligations (GB26), so while fewer ship the route reaches no mastery of it.
+# GC-10 unit 7: GARDEN_TEST walks every step on one survival player.
+GARDEN_TEST = "theGardenPactsFromCodexToDeparture"
 GARDEN = {
     "name": "The garden pacts",
     "steps": [
@@ -332,18 +333,18 @@ GARDEN = {
                  "Dewmoss, Gloamcap, Mendvetch or Verdant Chaff) and examine it, sneaking and using it in the air; its tooltip "
                  "and the codex's Binding category say what it teaches",
          "reaches": [f"research:{rid('garden_regard')}@encountered"],
-         "tests": ["theGardensRegardSpecimensSayWhatTheyTeach", "theGardensRegardIsReachable"]},
+         "tests": ["theGardensRegardSpecimensSayWhatTheyTeach", "theGardensRegardIsReachable", GARDEN_TEST]},
         {"research": [], "things": ["verdant_bed"],
          "text": "Lay a Verdant Bed, grow a Sunpetal (or any organism crop) on it and harvest it ripe by hand",
          "reaches": [f"research:{rid('garden_regard')}@observed"],
-         "tests": ["theGardensRegardAdvancesByHandAndByAWorker", "theGardensRegardIsReachable"]},
+         "tests": ["theGardensRegardAdvancesByHandAndByAWorker", "theGardensRegardIsReachable", GARDEN_TEST]},
         {"research": [], "things": ["bonding_charm"],
          "text": "Keep a bound worker at its work: a familiar's mending, a spirit's delivery or a construct's trip (a Hearthling "
                  "bound with a Bonding Charm is one). The Garden's Regard is understood, and no research notes stand in for any "
                  "of its evidence",
          "reaches": [f"research:{rid('garden_regard')}@understood"],
          "tests": ["theGardensRegardAdvancesByHandAndByAWorker", "notesNeverStandInForTheGardensRegard",
-                   "theGardensRegardIsReachable"]},
+                   "theGardensRegardIsReachable", GARDEN_TEST]},
         # GC-04: Buer, from his perch to his departure (Dossier 1). buerFromTheCodexToDeparture walks steps 1 to 6 on one
         # survival player.
         {"research": [], "things": ["pact_perch", "mendvetch"],
@@ -352,7 +353,8 @@ GARDEN = {
                  "not come: \"There is nothing here I could mend\"); accept, and his compact (4 Mendvetch, 4 bone meal) "
                  "is spent once",
          "reaches": [f"pact:{rid('buer')}"],
-         "tests": ["buerRefusesWithoutABedToMend", "everySpiritSealsOnceAndSpendsOnce", "buerFromTheCodexToDeparture"]},
+         "tests": ["buerRefusesWithoutABedToMend", "everySpiritSealsOnceAndSpendsOnce", "buerFromTheCodexToDeparture",
+                   GARDEN_TEST]},
         {"research": [], "things": [],
          "text": "By daylight, while you are near, Buer eases one harvest strain from one of your beds at a time, each by "
                  "its own tending rule; a bed he mended that is worked back to its worst is overworked until it is fed or "
@@ -360,16 +362,16 @@ GARDEN = {
          "reaches": [f"practice:{rid('garden_pact_service')}"],
          "tests": ["buerEasesOneStrainAtTheBedsOwnRate", "anOverworkedBedWaitsForCompost",
                    "buersFirstObligationIsATendingByHand", "anObligationIsRecordedOncePerPlayerAndSpirit",
-                   "buerFromTheCodexToDeparture"]},
+                   "buerFromTheCodexToDeparture", GARDEN_TEST]},
         {"research": [], "things": [],
          "text": "Keep the pact with one Mendvetch a week (a missed one is warned and worked through a day's grace, then "
                  "the service is suspended with nothing taken; an offering resumes it). End it at the perch: what was "
                  "paid ahead comes back once, and Buer closes and sinks into the perch",
          "reaches": [],
          "tests": ["buerTendsThroughHisGrace", "everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes",
-                   "endingAnySpiritsPactReturnsTheEscrowOnce", "buerFromTheCodexToDeparture"]},
+                   "endingAnySpiritsPactReturnsTheEscrowOnce", "buerFromTheCodexToDeparture", GARDEN_TEST]},
         # GC-05: Bathin, from his perch to his departure (Dossier 2). No whole-path test of his own (the contract's GC-05);
-        # unit 7's theGardenPactsFromCodexToDeparture walks these steps.
+        # GARDEN_TEST walks every step on one survival player.
         {"research": [], "things": ["verdant_heart", "gleaner"],
          "text": "Set a Verdant Heart on an awake Verdant Bed of yours and a Gleaner of yours, both within 10 blocks of your "
                  "Pact Perch, the Gleaner more than 4 blocks from the Heart; use the perch and choose Bathin: he is suddenly "
@@ -378,7 +380,7 @@ GARDEN = {
                  "8 Verdant Chaff) is spent once",
          "reaches": [f"pact:{rid('bathin')}"],
          "tests": ["bathinRefusesWithNothingToCarry", "everySpiritSealsOnceAndSpendsOnce",
-                   "bathinArrivesAndDepartsAtOnceInARingOfDust"]},
+                   "bathinArrivesAndDepartsAtOnceInARingOfDust", GARDEN_TEST]},
         {"research": [], "things": [],
          "text": "At any hour, while you are near, Bathin moves Verdance at once from your Heart into the far Gleaner (or, "
                  "with Circle Lore's Ley Pylon, 3 for 2 into a pylon away from the Heart): both ends shimmer and nothing is "
@@ -386,17 +388,18 @@ GARDEN = {
                  "device in his area with an empty hand: his first obligation",
          "reaches": [f"practice:{rid('garden_pact_service')}"],
          "tests": ["bathinMovesVerdanceExactly", "bathinsCarryShimmersBothEndsAtOnce",
-                   "bathinLeavesAHeartWithItsOwnPylonUntilAnswered", "bathinsFirstObligationIsADeviceReadByHand"]},
+                   "bathinLeavesAHeartWithItsOwnPylonUntilAnswered", "bathinsFirstObligationIsADeviceReadByHand",
+                   GARDEN_TEST]},
         {"research": [], "things": [],
          "text": "Keep the pact with four Verdant Chaff a week (a missed week is warned and carried through a day's grace, "
                  "then the service is suspended with nothing taken; an offering resumes it). End it at the perch: what was "
                  "paid ahead comes back once, and his coil tightens and he is gone in a ring of dust",
          "reaches": [],
          "tests": ["everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes", "endingAnySpiritsPactReturnsTheEscrowOnce",
-                   "bathinArrivesAndDepartsAtOnceInARingOfDust"]},
+                   "bathinArrivesAndDepartsAtOnceInARingOfDust", GARDEN_TEST]},
         # GC-06 unit 3
-        # GC-06: Marax, from his perch to his departure (Dossier 3), and The Garden's Regard mastered (GB26). Unit 7's
-        # theGardenPactsFromCodexToDeparture walks these steps.
+        # GC-06: Marax, from his perch to his departure (Dossier 3), and The Garden's Regard mastered (GB26). GARDEN_TEST
+        # walks every step on one survival player.
         {"research": [], "things": ["dewmoss"],
          "text": "Plant an organism crop on an awake Verdant Bed of yours within 8 blocks of your Pact Perch; use the perch "
                  "and choose Marax: a great bull with a calm man's face treads up beside it and names every term before "
@@ -404,7 +407,7 @@ GARDEN = {
                  "here.\"); accept, and his compact (a book, 2 Sunpetal and 2 Dewmoss) is spent once",
          "reaches": [f"pact:{rid('marax')}"],
          "tests": ["maraxRefusesWhereNothingGrows", "everySpiritSealsOnceAndSpendsOnce",
-                   "maraxStandsBesideThePerchFacingHisInviter"]},
+                   "maraxStandsBesideThePerchFacingHisInviter", GARDEN_TEST]},
         {"research": [], "things": [],
          "text": "Ask Marax for a reading on his page (twice a day, at any hour): his familiar flies to the worst of your "
                  "planted beds and names the one change that would raise it a step, or the first of its faults, and changes "
@@ -413,52 +416,54 @@ GARDEN = {
                  "first obligation",
          "reaches": [f"practice:{rid('garden_pact_service')}"],
          "tests": ["aReadingNamesOneCorrectionAndChangesNothing", "aReadingWithTwoFaultsNamesTheFirst",
-                   "theProudFamiliarSkipsABedNamedThreeTimes", "maraxsFirstObligationIsABedReadByHand"]},
+                   "theProudFamiliarSkipsABedNamedThreeTimes", "maraxsFirstObligationIsABedReadByHand", GARDEN_TEST]},
         {"research": [], "things": [],
          "text": "Keep the first obligations of three garden spirits' pacts (Buer's, Bathin's and Marax's): The Garden's "
                  "Regard is mastered",
          "reaches": [f"research:{rid('garden_regard')}@mastered"],
-         "tests": ["theGardensRegardIsMasteredThroughThreeSpirits"]},
+         "tests": ["theGardensRegardIsMasteredThroughThreeSpirits", GARDEN_TEST]},
         {"research": [], "things": [],
          "text": "Keep the pact with two sheets of paper a week (a missed week is warned and carried through a day's grace, "
                  "then the service is suspended with nothing taken; an offering resumes it). End it at the perch: what was "
                  "paid ahead comes back once; his familiar settles between his horns, and he turns, walks two steps and fades",
          "reaches": [],
          "tests": ["everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes", "endingAnySpiritsPactReturnsTheEscrowOnce",
-                   "maraxAnswersEachActionWithHisGesture"]},
+                   "maraxAnswersEachActionWithHisGesture", GARDEN_TEST]},
         # GC-07 unit 4
-        # GC-07: Foras, from his perch to his departure (Dossier 4). No whole-path test of his own (CT GC-07); unit 7's
-        # theGardenPactsFromCodexToDeparture walks these steps.
+        # GC-07: Foras, from his perch to his departure (Dossier 4). No whole-path test of his own (CT GC-07); GARDEN_TEST
+        # walks every step on one survival player.
         {"research": [], "things": ["dewmoss"],
          "text": "Set a chest touching your Pact Perch and grow a Sunpetal on an awake Verdant Bed of yours within 8 blocks; "
                  "use the perch and choose Foras: he stands beside it, tips his acorn cap and names every term before "
                  "anything is spent (without a store he does not come: \"Where shall I keep the cuttings?\"); accept, and "
                  "his compact (4 Dewmoss, a honeycomb) is spent once",
          "reaches": [f"pact:{rid('foras')}"],
-         "tests": ["forasRefusesWithoutAStore", "everySpiritSealsOnceAndSpendsOnce", "forasStandsBesideThePerchFacingHisInviter"]},
+         "tests": ["forasRefusesWithoutAStore", "everySpiritSealsOnceAndSpendsOnce", "forasStandsBesideThePerchFacingHisInviter",
+                   GARDEN_TEST]},
         {"research": [], "things": [],
          "text": "Leave Dewmoss in the chest: at any hour, while you are near, Foras grafts Dewlit onto your Sunpetals that "
                  "would gain by it, one Dewmoss each, and counts his grafts aloud; hosts it would not help he names, and "
                  "waits for your answer at the perch. Graft a Sunpetal by hand in his area: his first obligation",
          "reaches": [f"practice:{rid('garden_pact_service')}"],
          "tests": ["forasSpendsOneDonorAGraftAndNeverTwo", "aPrudentForasSkipsAUselessGraft", "aPrudentForasGraftsWhereItHelps",
-                   "forassFirstObligationIsAGraftByHand"]},
+                   "forassFirstObligationIsAGraftByHand", GARDEN_TEST]},
         {"research": [], "things": [],
          "text": "Keep the pact with a honeycomb a week (a missed week is warned and carried through a day's grace, then the "
                  "service is suspended with nothing taken; an offering resumes it). End it at the perch: what was paid ahead "
                  "comes back once, and he bows, folds his satchel and fades",
          "reaches": [],
          "tests": ["everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes", "endingAnySpiritsPactReturnsTheEscrowOnce",
-                   "forasAnswersEachActionWithHisGesture"]},
+                   "forasAnswersEachActionWithHisGesture", GARDEN_TEST]},
         # GC-08 unit 5
-        # GC-08: Bifrons, from his perch to his departure (Dossier 5). No whole-path test of his own; unit 7's walk covers it.
+        # GC-08: Bifrons, from his perch to his departure (Dossier 5). No whole-path test of his own; GARDEN_TEST walks every
+        # step on one survival player.
         {"research": [], "things": [],
          "text": "Keep two awake Verdant Beds of yours within 8 blocks of your Pact Perch; use the perch and choose Bifrons: "
                  "roots push up beside it into a low mound that rises into a lean man of roots while you speak, and he names "
                  "every term before anything is spent (with fewer than two beds he does not come: \"A root runs between two "
                  "places. Show me two.\"); accept, and his compact (4 oak logs, 1 emerald) is spent once",
          "reaches": [f"pact:{rid('bifrons')}"],
-         "tests": ["bifronsRefusesWithFewerThanTwoBeds", "everySpiritSealsOnceAndSpendsOnce"]},
+         "tests": ["bifronsRefusesWithFewerThanTwoBeds", "everySpiritSealsOnceAndSpendsOnce", GARDEN_TEST]},
         {"research": [], "things": [],
          "text": "By night, while you are near, Bifrons runs a root from a full bed of yours (24 nutrients or more) to the "
                  "hungriest with room: he measures both, a sign rising at each, then 2 nutrients leave the full bed and 1 "
@@ -466,29 +471,33 @@ GARDEN = {
                  "Verdant Bed in his area with bone meal by hand, or the crop growing on one: his first obligation",
          "reaches": [f"practice:{rid('garden_pact_service')}"],
          "tests": ["aRootRunnerLosesHalfAndMintsNone", "aRootRunnerMeasuresBeforeEachRun",
-                   "aRootRunnerTakesOnlyFromFallowBedsUntilAnswered", "bifronssFirstObligationIsAFeedingByHand"]},
+                   "aRootRunnerTakesOnlyFromFallowBedsUntilAnswered", "bifronssFirstObligationIsAFeedingByHand",
+                   GARDEN_TEST]},
         {"research": [], "things": [],
          "text": "Keep the pact with two logs a week, any wood (a missed week is warned and carried through a day's grace, "
                  "then the service is suspended with nothing taken; an offering resumes it). End it at the perch: what was "
                  "paid ahead comes back once, and he sinks back into the ground",
          "reaches": [],
-         "tests": ["everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes", "endingAnySpiritsPactReturnsTheEscrowOnce"]},
+         "tests": ["everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes", "endingAnySpiritsPactReturnsTheEscrowOnce",
+                   GARDEN_TEST]},
         # GC-09 unit 6
-        # GC-09: Amdusias, from his perch to his departure (Dossier 6). Unit 7's theGardenPactsFromCodexToDeparture walks these.
+        # GC-09: Amdusias, from his perch to his departure (Dossier 6). GARDEN_TEST walks every step on one survival player.
         {"research": [], "things": [],
          "text": "Set your Pact Perch within 2 blocks of a log, with an awake Verdant Bed of yours within 6; use the perch "
                  "and choose Amdusias: a white unicorn steps up beside it and names every term before anything is spent "
                  "(without a tree he does not come: \"I bend trees. There is no tree here.\"); accept, and his compact (a "
                  "note block, 2 oak saplings) is spent once",
          "reaches": [f"pact:{rid('amdusias')}"],
-         "tests": ["amdusiasRefusesWithoutATree", "everySpiritSealsOnceAndSpendsOnce", "amdusiasStandsBesideHisPerch"]},
+         "tests": ["amdusiasRefusesWithoutATree", "everySpiritSealsOnceAndSpendsOnce", "amdusiasStandsBesideHisPerch",
+                   GARDEN_TEST]},
         {"research": [], "things": [],
          "text": "While you are near, his tree's shelter bends over the crops on your beds in his area: each reads the stir up "
                  "to 2 lower (the Inspect page, a Habitat Gauge and Jade say so); a Gloamcap he spares until you answer at "
                  "the perch. Harvest a ripe crop by hand in his area: his first obligation",
          "reaches": [f"practice:{rid('garden_pact_service')}"],
          "tests": ["aCanopyLowersOnlyDisturbanceForCropsInItsArea", "aCanopySparesAGloamcapUntilAnswered",
-                   "theInspectPageAndTheGaugeReadTheShelteredValue", "amdusiassFirstObligationIsAHarvestUnderHisCanopy"]},
+                   "theInspectPageAndTheGaugeReadTheShelteredValue", "amdusiassFirstObligationIsAHarvestUnderHisCanopy",
+                   GARDEN_TEST]},
         {"research": [], "things": [],
          "text": "Keep the pact with a sapling a week (a missed week is warned and carried through a day's grace, then the "
                  "service is suspended and his canopy lapses, nothing taken; an offering resumes it). End it at the perch: "
@@ -496,7 +505,7 @@ GARDEN = {
          "reaches": [],
          "tests": ["everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes", "endingAnySpiritsPactReturnsTheEscrowOnce",
                    "aCanopyLapsesWithin40TicksOfSuspension", "aCanopyLapsesWhenItsHolderLeaves",
-                   "amdusiasAnswersEachActionWithHisGesture"]},
+                   "amdusiasAnswersEachActionWithHisGesture", GARDEN_TEST]},
     ],
 }
 
@@ -855,6 +864,9 @@ def garden_problems(pg, research, invocations, rituals, at_hand):
     for number, step in enumerate(steps, 1):
         if not step["tests"]:
             found.append(f"journey garden step {number}: name the server tests that exercise it")
+        # GC-10 unit 7
+        if GARDEN_TEST not in step["tests"]:
+            found.append(f"journey garden step {number}: {GARDEN_TEST} walks every step, so the step names it")
         for key in step["research"]:
             if key not in research:
                 found.append(f"journey garden step {number}: {key} is not a research entry")
@@ -1056,7 +1068,9 @@ def table():
               "The Garden's Regard found without Styx or Stolas, then each garden spirit's pact as its unit adds it (the garden "
               "cohort). No stage route: one player alone does each step in the Overworld, with the research understood so far, "
               "nothing mastered and no structure loot. Its mastery needs three garden spirits' first obligations, so no step "
-              "reaches it until three ship.", "",
+              "reaches it until three ship. "
+              # GC-10 unit 7
+              f"`{GARDEN_TEST}` walks every step on one survival player.", "",
               "| Step | Understands | Makes or places | Server game tests |", "|---|---|---|---|"]
     for number, step in enumerate(GARDEN["steps"], 1):
         made = ", ".join(thing(item) for item in step["things"]) or "nothing new"
