@@ -43,6 +43,10 @@ The next CI run's shard 14 lost its runner during startup: GitHub's annotation r
 
 ## Verification
 
+On `98934e575f`, all sixteen client shards and the aggregate client check pass, including the fixed biome tour and crafting table. Foundation passes all 387 Python and fourteen installer contract tests, and the optional-absent server suite passes all 3,294 tests. The main server run exposed a separate lighting race: the garden-colony test read both light levels as 15 at its fixed tick-40 check. A local 200-tick poll reproduced the stale values. The fixture now waits for Minecraft's actual pending light work in the enclosure/control chunks, pumping server tasks with a ten-second deadline, before requiring both light thresholds. The sequence remains bounded at 200 ticks and executes every growth and bone-meal assertion once. A delayed-roof case exercises lighting changes after the old cutoff; worker/growth errors are terminal and no game behavior or test is skipped.
+
+The final lighting repair compiles and passes all eleven `GardenGameTests` locally, including the roof added at tick 60. The focused run uses compiled classes and verified prepared resources in a disposable server; production mushroom behavior and the complete committed test list remain unchanged. Repository/documentation links and whitespace checks pass.
+
 Pinned platform: Minecraft 26.3, Fabric Loader 0.19.5, Fabric API 0.161.0+26.3, Java 25. Common, client and game-test compilation passes. Pack pins, repository structure and documentation links pass. The source writers produce the paid recipes from the same inputs consumed by the game.
 
 Local verification on November 1, 2026:
