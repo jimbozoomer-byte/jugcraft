@@ -417,6 +417,7 @@
       "io.github.jimbozoomer.jugcraft.test.JeiStationClientGameTests$WithJei$Probe"
     ],
     "fabric-client-gametest": [
+      "io.github.jimbozoomer.jugcraft.test.WalkerCockpitClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.EquipmentAccessClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.CraftingChoicesClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.ImportedModelAtlasClientTests",
@@ -714,8 +715,7 @@
       "io.github.jimbozoomer.jugcraft.test.HerobrineNetworkTests",
       "io.github.jimbozoomer.jugcraft.test.LivingCityClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.StarterGuidanceClientGameTests",
-      "io.github.jimbozoomer.jugcraft.test.NewestCollectionClientTests",
-      "io.github.jimbozoomer.jugcraft.test.WalkerCockpitClientGameTests"
+      "io.github.jimbozoomer.jugcraft.test.NewestCollectionClientTests"
     ]
   },
   "depends": {
