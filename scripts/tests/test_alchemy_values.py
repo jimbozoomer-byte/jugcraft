@@ -207,3 +207,13 @@ class AlchemyValueTests(unittest.TestCase):
             self.assertGreaterEqual(2 * value('jugcraft:' + mineral) + value('jugcraft:coke'), 2 * value('jugcraft:' + metal))
         self.assertGreater(value('jugcraft:thallite_pickaxe'), 3 * value('jugcraft:thallite_ingot'))
         self.assertEqual(value('jugcraft:tungsten_block'), 9 * value('jugcraft:tungsten_ingot'))
+
+    def test_fluorite_phosphate_and_salt_are_priced(self):
+        # Provisional (2 November 2026); salt stays cheap, since seawater and waste water make it for nothing.
+        self.assertEqual(value('jugcraft:fluorite'), 32)
+        self.assertEqual(value('jugcraft:phosphate'), 8)
+        self.assertEqual(value('jugcraft:salt'), 1)
+        self.assertGreaterEqual(4 * value('jugcraft:bat_guano'), value('jugcraft:phosphate'))
+        self.assertEqual(value('jugcraft:fluorite_block'), 9 * value('jugcraft:fluorite'))
+        for ore, mineral, n in (('fluorite_ore', 'fluorite', 2), ('phosphate_ore', 'phosphate', 4), ('salt_ore', 'salt', 5)):
+            self.assertGreaterEqual(value('jugcraft:' + ore), n * value('jugcraft:' + mineral), ore)
