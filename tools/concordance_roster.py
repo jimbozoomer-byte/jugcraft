@@ -39,6 +39,7 @@ SERVICES = {
     "graft_keeping": "Graft keeping: a host grafted with a donor from the store beside his perch",
     # GC-08 unit 5
     # GC-09 unit 6
+    "canopy_shelter": "Canopy shelter: crops in his area sheltered from the workshop's stir",
 }
 # Ars Nouveau's helpers on the roster (G13; Java: nouveau/NouveauHelper.kind is "nouveau_" + its species,
 # NouveauHelpers.register lists them).

@@ -115,6 +115,13 @@ WEIGHTS = {
                                              + 220
                                              # GC-08 unit 5
                                              # GC-09 unit 6
+                                             # GC-09: Amdusias at the same perch: the chooser twice, his conversation by
+                                             # keyboard at three sizes, a refused and a sealed acceptance, his late horn, the
+                                             # Inspect page and two Jade readings sheltered, his tree's sway, his matter asked
+                                             # and answered at three sizes, Jade on him, ten poses, four bearings and the
+                                             # ending: 35 shots and their waits, about 240 s more (an estimate, not a
+                                             # measurement).
+                                             + 240
                                              ),
     "JugcraftServerClientGameTests": 90,
     # Companion suites exercise timed AI, inventory trips and cooking, not just

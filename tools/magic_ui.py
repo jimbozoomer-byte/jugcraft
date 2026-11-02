@@ -879,6 +879,9 @@ GLANCES = {
     # GC-07 unit 4
     # GC-08 unit 5
     # GC-09 unit 6
+    # GC-09 (GC-P126): Amdusias's quota is a cap, beds sheltered at once (tools/concordance_pacts.py QUOTA_TERMS): its chip says
+    # so, never by the day, and draws his work's item (PactScreen.chip).
+    "pact.term.quota.canopy_shelter": [("", "%1$s at once", (16,), "16 at once", "chip")],
     # Blockers (every one drawn above the terms as a lock line, keeping its action).
     "pact.missing.owner": [("", "Only the perch's owner may invite %1$s", ("Bathin",),
                             "Only the perch's owner may invite Bathin", "blocker")],
@@ -914,7 +917,8 @@ STEP_GLANCES = {
 # glance of the same sentence, screen.jugcraft.pact.glance.term.service.<work>.name), its icon (the item its service line
 # and its own rows draw; one line in client/PactGlance.WORK_ICONS too), its kept-page rows, its blockers and its chooser
 # card's reason. Row keys are under message.jugcraft.concordance.pact.<work>. (SERVICE_WORDS' messages); a work's
-# "row.service" is today's gauge, "%1$s/%2$s today" (done, then the day's quota), and nothing else.
+# "row.service" is today's gauge, "%1$s/%2$s today" (done, then the day's quota), and nothing else; a work whose quota
+# caps what it holds at once (GC-09: tools/concordance_pacts.py QUOTA_TERMS) words it "%1$s/%2$s now" (held, then the cap).
 WORK_GLANCES = {
     "star_reckoning": {"card": None, "icon": "jugcraft:astrolabe", "name": "Star-reckoning",
                        "line": "Recalls a star you have seen"},
@@ -1009,6 +1013,25 @@ WORK_GLANCES = {
     },
     # GC-08 unit 5
     # GC-09 unit 6
+    # GC-09 (Amdusias; docs/features/amdusias-pact.md): the canopy shelter. Two refusals, each its own blocker and card; his
+    # gauge is the beds he shelters now of his cap ("now": a cap, never a day's count, GC-P126); his matter asks whether to
+    # spare the crops that want the stir, naming the nearest (as Foras's names his host).
+    "canopy_shelter": {
+        "icon": "minecraft:oak_leaves", "name": "Canopy shelter", "line": "Shelters your crops from the stir",
+        "row.service": [("", "%1$s/%2$s now", (3, 16, 2), "3/16 now", "chip")],
+        "row.no_tree": [("", "No tree: set a log within %1$s blocks", (2,), "No tree: set a log within 2 blocks", "row")],
+        "row.spared": [("", "Spared: %1$s crops that want the stir", (2,), "Spared: 2 crops that want the stir", "row")],
+        "matter.wants_stir": [("", "Want the stir: %1$s, nearest %2$s. Spare them?", (2, "12, 64, -30"),
+                               "Want the stir: 2, nearest 12, 64, -30. Spare them?", "row")],
+        # His matter in general, drawn where none is raised now and an answer is kept (PactAccords: <work>.question).
+        "question": [("", "Shelter crops that want the stir?", (), "Shelter crops that want the stir?", "row")],
+        "missing.tree": [("", "Needs a log within %1$s blocks of the perch", (2,), "Needs a log within 2 blocks of the perch",
+                          "blocker")],
+        "missing.bed": [("", "Needs your awake Verdant Bed within %1$s blocks", (6,), "Needs your awake Verdant Bed within 6 blocks",
+                         "blocker")],
+        # Two words each, within a card's four (LIMITS["card"]; the chooser's budget is 7 words a card, chooserWords).
+        "card": {"missing.tree": ("Tree needed", (2,), "Tree needed"), "missing.bed": ("Bed needed", (6,), "Bed needed")},
+    },
 }
 # A work's fields that are not its rows' glances: its chooser reason, its icon, its name and its service line.
 WORK_FIELDS = ("card", "icon", "name", "line")
@@ -1095,6 +1118,9 @@ MARK_RULES = (
     ("contains", ".matter.", "ask"),
     # GC-07: the row that waits on the player (a donor to put in his store) among the rows that need them.
     ("exact", "pact.graft_keeping.row.no_donor", "hourglass"),
+    # GC-09: Amdusias's rows that wait on the player: a tree to set, and his question.
+    ("exact", "pact.canopy_shelter.row.no_tree", "hourglass"),
+    ("exact", "pact.canopy_shelter.row.spared", "ask"),
 )
 
 
@@ -1128,6 +1154,9 @@ ICON_RULES = (
     ("suffix", "obligation", "glyph:pin"),
     ("exact", "pact.ended_here", "glyph:pin"),
     ("exact", "pact.departed", "glyph:spiral"),
+    # GC-09: Amdusias's own rows: the log he waits for, and the Gloamcap (a crop that wants the stir) he spares.
+    ("exact", "pact.canopy_shelter.row.no_tree", "item:minecraft:oak_log"),
+    ("exact", "pact.canopy_shelter.row.spared", "item:jugcraft:gloamcap"),
 )
 
 
@@ -1223,6 +1252,12 @@ SENTENCES = {
     _JADE + "pact.note.graft_keeping.no_host": ("Nothing to graft", (), "Nothing to graft", "jade"),
     # GC-08 unit 5
     # GC-09 unit 6
+    _JADE + "pact.matter.canopy_shelter.wants_stir": ("Crops want the stir", (), "Crops want the stir", "jade"),
+    _JADE + "pact.note.canopy_shelter.covered": ("Sheltering %1$s beds", (3,), "Sheltering 3 beds", "jade"),
+    _JADE + "pact.note.canopy_shelter.spared": ("Spared: %1$s", (2,), "Spared: 2", "jade"),
+    _JADE + "pact.note.canopy_shelter.no_tree": ("No tree", (), "No tree", "jade"),
+    _JADE + "pact.note.canopy_shelter.elsewhere": ("Canopy elsewhere", (), "Canopy elsewhere", "jade"),
+    _JADE + "pact.note.canopy_shelter.nothing": ("Nothing to shelter", (), "Nothing to shelter", "jade"),
     # GC-09: what a canopy takes from the stir: Jade's line on a bed and a Gauge (the server's live value), and the Inspect
     # page's and the reports' sentence.
     _JADE + "sheltered": ("Sheltered by Amdusias: -%1$s", (2,), "Sheltered by Amdusias: -2", "jade"),
@@ -1292,6 +1327,9 @@ SENTENCE_MARKS = {
     _JADE + "pact.note.graft_keeping.no_host": "moon",
     # GC-08 unit 5
     # GC-09 unit 6
+    _JADE + "pact.matter.canopy_shelter.wants_stir": "ask", _JADE + "pact.note.canopy_shelter.covered": "tick",
+    _JADE + "pact.note.canopy_shelter.spared": "ask", _JADE + "pact.note.canopy_shelter.no_tree": "hourglass",
+    _JADE + "pact.note.canopy_shelter.elsewhere": "moon", _JADE + "pact.note.canopy_shelter.nothing": "moon",
     _JADE + "sheltered": "tick", _ECOLOGY + "sheltered": "tick",
 }
 SENTENCE_PREFIX = "screen.jugcraft.glance."
@@ -1622,15 +1660,19 @@ def problems(lang=None, load=None, read=read_library):
             out.append(f"{work}: no icon (an item id) in WORK_GLANCES (its service line's and its own rows' item)")
         if not rows.get("name") or not rows.get("line"):
             out.append(f"{work}: no name or line in WORK_GLANCES (the beats' header and the service line)")
-        # Today's gauge reads its first two arguments as done of quota (PactScreen.work), so its row says exactly that.
+        # Today's gauge reads its first two arguments as done of quota (PactScreen.work), so its row says exactly that. GC-09
+        # (GC-P126): a work whose quota caps what it holds at once (tools/concordance_pacts.py QUOTA_TERMS) reads them as held
+        # now of its cap, so its gauge says "now", never "today" (decided by the session: Amdusias's 16 beds at once).
+        gauge = "%1$s/%2$s now" if work in pacts.QUOTA_TERMS else "%1$s/%2$s today"
         for suffix, pattern, *_ in rows.get("row.service", ()):
-            if suffix == "" and pattern != "%1$s/%2$s today":
-                out.append(f"pact.{work}.row.service: {pattern!r}, but the gauge draws \"%1$s/%2$s today\" (done, then the "
-                           "day's quota) and nothing else")
+            if suffix == "" and pattern != gauge:
+                out.append(f"pact.{work}.row.service: {pattern!r}, but the gauge draws {gauge!r} (done or held, then the "
+                           "quota) and nothing else")
     # GC-09 (GC-P126): a quota that caps what a work holds at once is never worded as a day's count, in its term
     # (tools/concordance_pacts.py QUOTA_TERMS) or its chip's glance.
     for work, words in pacts.QUOTA_TERMS.items():
-        said = [words] + [expected for *_, expected, _ in GLANCES.get(f"pact.term.quota.{work}", ())]
+        said = [words] + [expected for *_, expected, _ in GLANCES.get(f"pact.term.quota.{work}", ())] \
+            + [expected for *_, expected, _ in GLANCES.get(f"pact.{work}.row.service", ())]
         if any(re.search(r"\b(?:to)?days?\b", text, re.I) for text in said):
             out.append(f"pact.term.quota.{work}: a quota that caps what it holds at once never counts by the day: {said}")
     for kind, text, name in ICON_RULES:

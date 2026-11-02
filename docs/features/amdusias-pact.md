@@ -11,9 +11,9 @@ in memory that lapses when he stops.
 Status: brief (GC-09a), committed before any of his body files (D-D5), as the contract's per-spirit template asks, then
 the canopy's pure rule and the garden's memory of canopies (GC-09b, [below](#the-canopys-shelter-gc-09b)) and a cue a
 beat late and a quota worded as a cap (GC-09d, [below](#a-cue-a-beat-late-and-a-quota-worded-as-a-cap-gc-09d)), each
-with no user yet: nothing a player sees changes while no canopy exists and no spirit holds a cue or words its quota. Nothing of Amdusias himself is built yet: no entity, pact
-definition, service, sound event, body file, or audit or test of his own. This page holds his character (the contract's Dossier 6), the short words the magic screens are to draw for him
-and the owner files his body and cues are to use; the runtime files and builders it names are what GC-09 is to build.
+with no user yet; then Amdusias himself (GC-09, [as built](#gc-09-amdusias-as-built)): his entity, pact, service, words,
+body, cues, audits, server tests and client flow. This page holds his character (the contract's Dossier 6), the short
+words the magic screens draw for him and the owner files his body and cues use.
 Where it goes beyond Dossier 6 (the amended greeting and its stage direction, the canopy's rule and registry, how his
 body is built, which cue plays which file at what pitch, the short words the screens draw) it is unit 6's proposal
 (GC-P120 to GC-P139, added to the contract's Decisions when the unit lands), and the palette files may change only here,
@@ -171,8 +171,8 @@ Two of these depart from the unit's design and one from the shared rule; GC-09 s
 - **The gauge's word.** `check_magic_ui` holds every work's `row.service` glance to "%1$s/%2$s today", the day's
   quota. His counts beds sheltered now, and "3/16 today" would say the daily count his terms deny (the contract: "never
   as a daily count"). Proposed: "%1$s/%2$s now", with that rule taking "now" for a work whose quota is a cap
-  (`QUOTA_TERMS`, a table, so still data). If the rule is kept as it stands, the gauge reads "3/16 today" and this
-  page records the contradiction.
+  (`QUOTA_TERMS`, a table, so still data). Settled in GC-09: "now", decided by the session
+  ([as built](#gc-09-amdusias-as-built)).
 - **The service beat** is Dossier 6's line shortened from 23 words to 18; the greeting and price are Dossier 6's (the
   greeting amended as above); the stage direction is 8 words in place of the design's 29.
 
@@ -389,13 +389,101 @@ Decided by the session (none is the owner's):
   calendar, a service overriding `quotaTerm` in any other way is refused, `QUOTA_TERMS` names only works this version
   serves, each of its sentences takes one `%s` and is generated with its chip's glance, and neither the sentence nor
   the glance counts by the day (`tools/magic_ui.py`).
-- **The gauge's word is still open.** `check_magic_ui` holds every work's `row.service` gauge to "%1$s/%2$s today";
-  whether his reads "now" ([above](#his-words-on-the-magic-interfaces-gc-s26)) is settled with his words in his unit.
+- **The gauge's word** was left open here (`check_magic_ui` held every work's `row.service` gauge to "%1$s/%2$s
+  today") and is settled with his words in GC-09: "now" for a cap ([as built](#gc-09-amdusias-as-built)).
+
+## GC-09: Amdusias as built
+
+What a player meets first: with The Garden's Regard understood, a Pact Perch with a log within 2 blocks of it and an awake
+Verdant Bed of theirs within 6 lists Amdusias on its chooser; without the log his card says "Tree needed" and his words
+"I bend trees. There is no tree here." Chosen, a garlanded white unicorn steps up beside the perch (two blocks west of it,
+facing whoever speaks) and his horn is heard a beat later. His terms name a note block and 2 oak saplings once, then a
+sapling a week, and his quota as a cap ("16 at once"). Sealed, while his holder is near he bends his tree's shelter over
+the crops of up to 16 of their and their party's awake beds in his area, the nearest first: each reads the stir up to 2
+lower, never below nothing, and the Inspect page, the crop's and the bed's reports, a Habitat Gauge set on a bed and
+Jade say "Sheltered by Amdusias". A Gloamcap, which wants the stir, he spares and asks about ("Spare them" or "Shelter
+all"). Every 10 s while he shelters, and once as he bows and leaves, his tree sways (the shared sign at the log's top).
+
+### Record fields (as built)
+
+- **Tier:** Practitioner, Spiritbinders; The Garden's Regard understood (`garden_regard`), nothing more.
+- **Input producer:** a log (any `#minecraft:logs` block) within 2 of the perch on every axis; an awake Verdant Bed of
+  the inviter's within 6; his compact (`minecraft:note_block`, 2 `minecraft:oak_sapling`) and offerings (oak, birch or
+  spruce sapling, `#jugcraft:amdusias_offerings`), each a `VANILLA_SOURCES` row (renewable saplings, a crafted note block).
+- **Output consumer:** the disturbance a covered crop's growth, the Inspect page, the reports, the Gauge and Jade read
+  (`VerdantBedBlockEntity.cachedHabitat`, the one place); nothing else.
+- **Costs:** the compact once; 1 sapling every 7 days, a day's grace, at most 4 ahead. Resonance 0.
+- **Unlocks:** none; his first obligation (`PactObligations.Act.HARVEST`: a ripe crop harvested by hand in his area while
+  the pact is active, its one hook after the hand harvest's cultivation record in `OrganismCropBlock.useWithoutItem`)
+  counts toward The Garden's Regard's mastery as each garden spirit's does.
+- **Failure behaviour:** no tree: `WAITING_FOR_RESOURCES`, canopy lifted, spared crops forgotten, Jade "No tree";
+  outside his hours (he has none: 0 to 24,000), suspended, held, the holder away or offline: the canopy lifted at his
+  think or lapsing within 40 ticks; his holder's canopy at another perch: `IDLE`, Jade "Canopy elsewhere"; nothing to
+  shelter: `IDLE`, "Nothing to shelter"; a bed refused for itself (not a beneficiary's, the holder's hands refused) is
+  skipped; a Heart, a device or bare soil is never covered.
+- **Saved data:** the base's perch and record only; `jugcraft:amdusias`, `canopy_shelter`, `no_tree`, `no_bed`,
+  `wants_stir`, `spare` and `all` are stable, append only. His canopy, memory, sway count, late horn and the Gauge's
+  `sheltered` are memory only; nothing he does is counted on his record (`taskDone` is never called).
+
+### What he adds (data on the shared systems)
+
+- **Java:** `PactObligations.Act.HARVEST`; `spirits/CanopyShelter` (his service: his step, tree, rows, refusal, matter
+  and Jade note); `spirits/AmdusiasEntity` (his tables: `Station.BESIDE`, his gestures, `cueBeat` for his horn,
+  `gestured` for the departing sway); `PactParser.WORK`/`REQUIRED`, `Workers` (entity 1.6 x 2.4, eyes 1.9, sounds,
+  service), `PactSpiritRenderers` (his row), `PactGlance` (his work's icon and two rows' marks and icons) and
+  `MagicGlance.MARKS` (his notes).
+- **Tables:** his `SPIRITS` row, `SERVICE_WORDS`, `SERVICE_CLASSES`, `SERVICE_NAMES`, `ART_SOUNDS`,
+  `GARDEN_CLIENT_SHOTS`, `QUOTA_TERMS`, the perch tooltip's clause (`tools/concordance_pacts.py`); his body
+  (`tools/garden_bodies.py`); `ACTS`, `HOOKS`, `OBLIGATIONS`, `CONSTANTS`, `DISTINCT`, the act's words and four codex
+  pages (`tools/concordance_garden_pacts.py`); the roster line; `VANILLA_SOURCES`; three journey steps; his
+  `WORK_GLANCES` row, quota chip glance, marks, icons and Jade short forms (`tools/magic_ui.py`); `WEIGHTS` +240.
+- **Interfaces changed beyond the contract's list** (the unit critique's item 15): `PactSpiritEntity.cueBeat`,
+  `soundedAt` and the held cue (GC-09d); `PactService.quotaTerm`, `PactMenu.service`, `PactScreen.chip` (GC-09d);
+  `Verdict.reasons`, `HabitatInspection.sheltered` and its strained row, `Niche.wantsStir`,
+  `HabitatGaugeBlockEntity.sheltered`, `VerdantBedBlockEntity.canopyPlant`, `OrganismCropBlock.report`, `HabitatAdvice`
+  and Jade's `sheltered` keys (GC-09b).
+
+### Decided by the session (none is the owner's)
+
+- **The gauge reads "now".** His kept page's gauge is "%1$s/%2$s now" (beds sheltered now of his cap), and
+  `check_magic_ui` takes "now" in place of "today" for a work in `QUOTA_TERMS` (still data, no code path). The task
+  this unit was built from lists the shared "%1$s/%2$s today"; "3/16 today" would present his cap as the daily count
+  his terms and the contract deny, so the brief's proposal is taken. Reviewable at the checkpoint.
+- **His sway is the shared sign.** No spirit sends particles of its own (`check_signs`), so his tree's sway is
+  `Signs.show` with `Sign.MEND` (green motes) at the log's top (`AmdusiasEntity.SWAY`; his row's `"sway": {"sign":
+  "mend", "ticks": 200}`), where the design sent tinted leaves; each client draws it as its settings allow. Whether it
+  reads as falling leaves is for the owner to see in game.
+- **SG12's fixture puts his log north-west of the perch's cell** (`perch.offset(-1, 0, -1)`), not east: on this line
+  he is the sixth cell, `(7, 1, 4)`, whose east is outside the 8-wide structure; north-west stays inside there and in the
+  merged line's seventh cell `(1, 1, 7)`, clear of every fixture and of the second perch the shared cases place north.
+- **His "no tree" row and note wait for his first look** (`Memory.looked`), so a kept page before his first think does
+  not say there is no tree.
+- **Jade's notes are third person** ("His holder's canopy stands at another perch"), as every Jade pact line, since
+  Jade's reader may be anyone; his `row.service` words name the Gauge (a Gauge's bed counts toward his 16, the
+  critique's item 16).
+- **His body's builder** is the unit's harness verbatim but one name: its `PETALS` is `WHITE_PETALS`, since Buer's petal
+  bones already use `PETALS` in `tools/garden_bodies.py`.
+- **His `HARVEST` entry carries a Javadoc**, as the cross-unit resolution words it, in place of the design's comment.
+- **His codex pages** come after Foras's and before "Mastered" (pages 20 to 23 here; Mastered moves to 24), each at most
+  60 words, his numbers read from the tables that hold the Java's.
+- **The server tests** follow the cohort's built practice where the design differs: beds stand on the empty structure
+  at y 1 (a stone floor only for his station's test), positions chosen inside each structure; reading tests sample
+  through the shared `afterSampling` and seal and think at the level's own time inside it (the critique's item 3); each
+  asserts only its own holders and beds, and none forgets the level's canopies (item 5: `Canopies.forget` and `live`
+  are not built), so the restart test lifts its own; the 16-bed test reads no habitat; the quota test reads the quota's
+  sentence (no label); the horn test invites him through the shared `offerOf`; the Heart test does not compare the
+  Heart's own beat; the stranger's test drops the design's "a stranger's crop on the holder's bed" (a crop has no
+  keeper of its own); the economy test answers "shelter all" so a Gloamcap is covered too.
+- **The client flow follows Foras's restyled flow**, with his own steps: his refusal shown on the chooser (as every
+  garden spirit's now), his quota checked as its sentence and its chip ("16 at once"), his three beds left bare until
+  the horn's step (so his canopy forms with the test's own think and its gesture, not with one of his), the Inspect
+  page opened with the encyclopedia's key looking at the bed, his sway shown by a call after his tree is read, and no
+  end-confirmation shot (his list has none). The horn's subtitle is staged on the HUD's own overlay where no sound
+  device plays (CI), logged as staged; the server's time of the horn is checked either way.
 
 ## Verification
 
-Nothing of Amdusias himself is built yet, so no build, game test, client shot or audit exercises him, and nothing of
-unit 6 has run in CI. The line this brief starts from (`4201217b3`, with Foras) is in CI with no result recorded here;
+Nothing of unit 6 has run in CI, and no Minecraft jar is here: no build, game test or client shot has exercised him. The line this brief starts from (`4201217b3`, with Foras) is in CI with no result recorded here;
 the newest result it descends from is run 40840353835, green in full on `3bfd63a97`.
 
 GC-09b: no Minecraft jar here, so its Java was parse-checked only (the `ecology` package, all but its JSON parser,
@@ -435,4 +523,12 @@ For this brief only:
   window matches his row, and his extent is 0.75 x 2.41 x 1.56 blocks. The colour counts drawn ("9 drawn", "2 drawn")
   are the harness's.
 
-The tests, shots and runs that verify him are listed here when GC-09 lands.
+GC-09 ([as built](#gc-09-amdusias-as-built)): its Java (main, client and the three test classes) was parse-checked
+only; none of it has compiled, and none of its 25 server tests (2 from GC-09b, 22 in the worker class, 1 in the economy
+class), the SG12 cases through his fixture or his client flow (25 flow shots and 10 body shots) has run. Run and passed
+locally: the generators (one at a time; the generated difference is his lang, sounds, codex pages, pact, offering tag and
+built body files), `owner_art.py --check`, `tools/check_mod_data.py` (with the GC-09 blocks of `check_pacts`,
+`check_garden_pacts` and `check_spirit_bodies`, and his rows in `check_magic_ui`), `scripts/check_repository.py`,
+`concordance_journey.py --check`, `concordance_economy.py` (gaining cycles: none), `check_icon_maps.py`,
+`tools/magic_ui.py`, the world designer's model tests, `scripts/tests` and `git diff --check`. The commit's audit
+mutations, each on a scratch copy, are reported with the commit.

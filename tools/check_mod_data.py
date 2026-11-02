@@ -19849,6 +19849,7 @@ GC05_ACCORDS = {"verdance_carrying": ["yield", "claim"],
                 "graft_keeping": ["prudent", "always"],
                 # GC-08 unit 5
                 # GC-09 unit 6
+                "canopy_shelter": ["spare", "all"],
                 }
 # The accord machinery's game tests (check_pacts).
 GC05_ACCORD_TESTS = {
@@ -21338,6 +21339,45 @@ def check_pacts(co, root, lang, registered, research):
                 or mu.glance_key(key) not in lang:
             err(f"tools/concordance_pacts.py QUOTA_TERMS[{work!r}]: one %s (the quota), generated with its chip's glance "
                 f"{mu.glance_key(key)} (GC-P126)")
+    # --- GC-09: Amdusias (Dossier 6). His horn a beat after its gesture and before his departure ends; he stands beside his
+    # perch (unit 3's GC-06 loop above holds his station); his quota a cap, worded as one; his gestures paired with words;
+    # his tooltip, his four codex pages in order, his offer and his game tests. ---
+    amdusias = uncommented(java("spirits/AmdusiasEntity.java"))
+    beat = re.search(r"int HORN_BEAT = (\d+);", amdusias)
+    depart = re.search(r'DEPART\("depart", (\d+),', amdusias)
+    if not beat or not depart or not 0 < int(beat.group(1)) < int(depart.group(1)) \
+            or 'Set.of("arrive", "work", "depart")' not in amdusias \
+            or "return HORNS.contains(id) ? HORN_BEAT : 0;" not in _java_body(amdusias, "protected int cueBeat(String id)") \
+            or 'new Body("amdusias", SOUND_IDS, List.of(Gesture.values()), Gesture.ARRIVE, Gesture.DEPART, Station.BESIDE)' not in amdusias \
+            or pa.SPIRITS["amdusias"].get("station") != "beside":
+        err("AmdusiasEntity: his horn (arrive, work, depart) a beat after its gesture and before his departure ends; he stands "
+            "beside his perch (Dossier 6 item 7; GC-P127, GC-P132)")
+    if "canopy_shelter" not in pa.QUOTA_TERMS or pa.SPIRITS["amdusias"]["pact"]["service"]["quota"] > 16 \
+            or "sheltered at once" not in pa.QUOTA_TERMS.get("canopy_shelter", ""):
+        err("SPIRITS['amdusias']: his quota is a cap of at most Canopies.MAX_BEDS beds, worded as one (GC-P126)")
+    reacts = _java_body(amdusias, "public static @Nullable Gesture reaction(")
+    if "case PactRequestPayload.RESOLVE -> done ? Gesture.ASSENT : null;" not in reacts \
+            or "case PactRequestPayload.ACCEPT -> done ? Gesture.ASSENT : Gesture.REFUSE;" not in reacts:
+        err("spirits/AmdusiasEntity.java: he assents to a seal and to his matter answered, and refuses with a refusal (every "
+            "gesture paired with words)")
+    if "sendParticles(" in amdusias or "WAITING_FOR_RESOURCES -> Loop.WAITING;" not in _java_body(amdusias, "public static Loop loop("):
+        err("spirits/AmdusiasEntity.java: no particle of his own; with no tree he waits (never a claim of work he is not doing)")
+    if "Amdusias" not in pa.PERCH_TOOLTIP or "a log within 2 blocks of the perch" not in pa.PERCH_TOOLTIP:
+        err("tools/concordance_pacts.py PERCH_TOOLTIP: names what Amdusias wants at the perch")
+    pages = [page[1] for page in co.garden_pacts.PAGES] if hasattr(co, "garden_pacts") else []
+    want = ["Amdusias", "His Service", "The Stir a Gloamcap Wants", "His Price"]
+    if not any(pages[i:i + len(want)] == want for i in range(len(pages))):
+        err("tools/concordance_garden_pacts.py PAGES: Amdusias's codex pages, all four in order (Dossier 6)")
+    offer = pa.SPIRITS["amdusias"]["pact"]
+    if offer["upkeep"]["count"] != 1 or offer["service"]["radius"] != 6 or offer["service"]["from"] != 0 \
+            or offer["service"]["to"] != 24000 or offer["beneficiaries"] != "party" \
+            or pa.SPIRITS["amdusias"]["offerings"]["items"] != ["minecraft:oak_sapling", "minecraft:birch_sapling", "minecraft:spruce_sapling"]:
+        err("SPIRITS['amdusias']: radius 6, any hour, a sapling a week (three named), his party (GC-P121)")
+    for cls, names in GC09_AMDUSIAS_TESTS.items():
+        source = (tests / f"{cls}.java").read_text(encoding="utf-8") if (tests / f"{cls}.java").is_file() else ""
+        for name in names:
+            if not re.search(rf"public void {name}\(GameTestHelper \w+\)", source):
+                err(f"{cls}: missing the garden cohort's GC-09 game test {name}")
 
 
 def check_stolas_regard(co, root, lang, research):
@@ -22007,6 +22047,51 @@ def check_garden_pacts(co, root, lang, registered, research):
         err("Grafting.gains: no factor's fit worse, one better (GC-P84)")
     # GC-08 unit 5
     # GC-09 unit 6
+    # --- GC-09: Amdusias's canopy shelter (GC-P128 to GC-P130). Read without comments, so a required line commented out is
+    # missing. ---
+    canopy_java = re.sub(r"//[^\n]*|/\*.*?\*/", " ", text(spirits / "CanopyShelter.java"), flags=re.S)
+    step = _java_body(canopy_java, "static Status shelter(")
+    order = [step.find(n) for n in (
+        "Pacts.inHours(service, time)", "memory.tree(level, perch, now)", "ALL.equals(answer(level, amdusias))",
+        "Math.min(service.quota(), Canopies.MAX_BEDS)", "memory.reach(record).beds(level, now)", "bed.canopyPlant(level)",
+        "bed.niche(plant).wantsStir() && !all", "GardenPacts.target(level, record, bed.getBlockPos(), bed.keeper(), time, now)",
+        "Canopies.cover(level, owner, perch, DAMPING, all, covered, now)", "amdusias.gesture(AmdusiasEntity.Gesture.WORK)",
+        "memory.swayDue(now)", "return Status.WORKING;")]
+    if -1 in order or order != sorted(order) or "asked >= MAX_ASKED" not in step or step.count("Canopies.lift(level, owner, perch)") < 4 \
+            or step.count("memory.spared(List.of());") != 3 \
+            or "refused != Status.IDLE && refused != Status.BLOCKED_BY_ACCESS" not in step:
+        err("CanopyShelter.shelter: hours, his tree, the answer, his cap, the index nearest first, the plant above, the stir "
+            "spared, whose land, one cover, his gesture, the sway; every stop lifts the canopy and forgets the crops spared, "
+            "so a stopped Amdusias says why he stopped (GC-P128)")
+    find = _java_body(canopy_java, "static @Nullable BlockPos find(ServerLevel level, BlockPos perch)")
+    if not all(n in find for n in ("dy = -TREE_REACH", "dx = -TREE_REACH", "dz = -TREE_REACH", "level.isLoaded(at)", "is(BlockTags.LOGS)")) \
+            or "now - lookedAt < TREE_TICKS" not in canopy_java:
+        err("CanopyShelter: his tree is a log within TREE_REACH (125 reads, loaded only), looked for again at most every TREE_TICKS (GC-P129)")
+    for banned in (".habitat(", "cachedHabitat(", "Garden.sample(", "forgetSample(", "betweenClosed(", "taskDone(", "Courier",
+                   "ItemStack", "setBlock(", ".extract(", ".insert(", "ValueOutput", "addAdditionalSaveData", "Signs."):
+        if banned in canopy_java:
+            err(f"spirits/CanopyShelter.java: never {banned} (he makes, moves, spends, samples, shows and saves nothing himself; GC-P128)")
+    noted = _java_body(canopy_java, "public PactService.@Nullable Note note(")
+    order = [noted.find(n) for n in ('"no_tree"', '"spared"', '"covered"', '"elsewhere"', '"nothing"')]
+    if -1 in order or order != sorted(order) or "!Pacts.serving(record)" not in noted:
+        err("CanopyShelter.note: no tree, then the crops spared while unanswered, then the beds sheltered, then why he idled; "
+            "none while his pact is held (GC-P128)")
+    if co.pacts.SPIRITS["amdusias"]["pact"]["service"]["radius"] != 6 \
+            or co.pacts.SPIRITS["amdusias"]["body"].get("sway") != {"sign": "mend", "ticks": gp.CONSTANTS["canopy_shelter"]["spirits/CanopyShelter.java"]["SWAY_TICKS"]}:
+        err("SPIRITS['amdusias']: radius 6 and his sway as CanopyShelter's and AmdusiasEntity's constants (GC-P121, GC-P134)")
+    entity = re.sub(r"//[^\n]*|/\*.*?\*/", " ", text(spirits / "AmdusiasEntity.java"), flags=re.S)
+    sway = _java_body(entity, "public void sway(ServerLevel level, BlockPos tree)")
+    sign = co.pacts.SPIRITS["amdusias"]["body"]["sway"]["sign"]
+    if sign not in co.signs.SIGNS or f"public static final Sign SWAY = Sign.{sign.upper()};" not in entity \
+            or "Signs.show(level, tree, SWAY);" not in sway or entity.count("Signs.show(") != 1 or "Canopies." in entity \
+            or "clip == Gesture.DEPART" not in _java_body(entity, "protected void gestured(ServerLevel level, Clip clip)"):
+        err("AmdusiasEntity: his tree's sway is the shared sign at the log's top, while he shelters and once as he departs, and "
+            "nothing else; he never touches the canopies himself (GC-P134)")
+    for cls, names in GC09_TESTS.items():
+        source = text(tests / f"{cls}.java")
+        for name in names:
+            if not re.search(rf"public void {name}\(GameTestHelper \w+\)", source):
+                err(f"{cls}: missing the garden cohort's GC-09 game test {name}")
 
 
 def check_pact_screen(co, lang):
@@ -22977,6 +23062,123 @@ def check_spirit_bodies(co):
             err(f"ConcordanceGardenPactClientGameTests: checks his {key} loop ({name})")
     # GC-08 unit 5
     # GC-09 unit 6
+    # --- GC-09: Amdusias's body, built, with the owner's flower crown as his garland (GC-S12, GC-P133) ---
+    body = pa.SPIRITS["amdusias"]["body"]
+    built = {"geckolib/models/entity/amdusias.geo.json": ((pa.CROWN_GEO, pa.CROWN_TEXTURE), "garden_bodies.amdusias_model"),
+             "geckolib/animations/entity/amdusias.animation.json": ((), "garden_bodies.amdusias_animations"),
+             "textures/entity/amdusias.png": ((pa.PETALS, pa.ORIGIN_OAK, pa.ORIGIN_LEAVES, pa.CROWN_TEXTURE), "garden_bodies.amdusias_skin")}
+    if body.get("built") != built or body.get("owner_files") or body.get("adapted") \
+            or {t: v for t, v in pa.BUILT.items() if "/amdusias" in t} != built \
+            or not set(built) <= {target for target, _, _ in owner_art.builds()}:
+        err("SPIRITS['amdusias']: his body is built by tools/garden_bodies.py from the white petals, the origin oak log and "
+            "leaves and the owner's flower crown; nothing of his is copied or adapted by path (GC-P133)")
+    originals = ROOT / "art" / "owner-library" / "originals"
+    read = lambda path: (originals / path if path.partition("/")[0] == owner_art.PART2_NAME else originals / "Blocks" / path).read_bytes()
+    part2 = (load(ROOT / "art" / "owner-library" / "catalog" / "edited-2026-10-18-part2" / "files.json") or {}).get("files", [])
+    for path, (index, digest) in pa.CROWN_PINS.items():
+        entry = part2[index] if index < len(part2) else {}
+        if entry.get("path") != path.partition("/")[2] or entry.get("sha256") != digest or hashlib.sha256(read(path)).hexdigest() != digest:
+            err(f"{path}: the owner's flower crown as catalogued (files[{index}], {digest}), the original unedited (GC-09)")
+    rows = (ROOT / "art" / "owner-library" / "catalog" / "files.csv").read_text(encoding="utf-8").splitlines()
+    for path, (line, digest) in pa.AMDUSIAS_PAINTING_PINS.items():
+        if not (0 < line <= len(rows) and f",originals/Blocks/{path}," in rows[line - 1] and rows[line - 1].endswith(digest)) \
+                or hashlib.sha256(read(path)).hexdigest() != digest:
+            err(f"{path}: the owner's painting as catalogued (files.csv row {line}, {digest}), unedited (GC-09)")
+    geo = load(ASSETS / "geckolib" / "models" / "entity" / "amdusias.geo.json") or {}
+    clips = (load(ASSETS / "geckolib" / "animations" / "entity" / "amdusias.animation.json") or {}).get("animations", {})
+    if geo != garden_bodies.amdusias_model(read) or clips != garden_bodies.amdusias_animations(read)["animations"]:
+        err("amdusias.geo.json and amdusias.animation.json: tools/garden_bodies.py's, unedited (run tools/owner_art.py)")
+    bones = (geo.get("minecraft:geometry") or [{}])[0].get("bones", [])
+    by = {bone["name"]: bone for bone in bones}
+    own = [cube for bone in bones if bone["name"] != "garland" for cube in bone.get("cubes", [])]
+    if not own or garden_bodies.coplanar(geo) or any(0 in cube["size"] for cube in own) \
+            or any("rotation" in bone for bone in bones) or any("rotation" in cube for bone in bones for cube in bone.get("cubes", [])):
+        err(f"amdusias.geo.json: none of his own cubes flat, nothing turned at rest, no two faces on one plane facing one way: "
+            f"{garden_bodies.coplanar(geo) if own else 'no cubes'}")
+    wanted = garden_bodies.flower_ring(read)
+    for key, face in body["dropped"].items():
+        index = int(key.partition("#")[2])
+        if index < len(wanted):
+            wanted[index]["uv"].pop(face, None)
+    if by.get("garland", {}).get("parent") != "neck" or by["garland"].get("cubes") != wanted or len(wanted) != 12:
+        err("amdusias.geo.json: the garland bone holds the owner's twelve crown cubes moved to his neck, their sizes and per-face "
+            "UVs the owner's, only the row's dropped faces removed (GC-P133)")
+    try:
+        colours = set(garden_bodies.palette(read, pa.PETALS, 12)) | set(garden_bodies.palette(read, pa.ORIGIN_OAK, 5)) \
+            | set(garden_bodies.palette(read, pa.ORIGIN_LEAVES, 5))
+    except SystemExit as stopped:
+        colours = set()
+        err(str(stopped))
+    skin_path = ASSETS / "textures" / "entity" / "amdusias.png"
+    if not skin_path.is_file():
+        err("textures/entity/amdusias.png: missing (run tools/owner_art.py)")
+    else:
+        with Image.open(skin_path) as a, Image.open(originals / pa.CROWN_TEXTURE) as b:
+            skin, crown = a.convert("RGBA"), b.convert("RGBA")
+        x0, y0, w0, h0 = garden_bodies.CROWN_REGION
+        box = crown.getchannel("A").getbbox()
+        wrong = sum(1 for y in range(skin.height) for x in range(skin.width)
+                    if (skin.getpixel((x, y)) != crown.getpixel((x, y)) if x0 <= x < x0 + w0 and y0 <= y < y0 + h0
+                        else skin.getpixel((x, y))[3] not in (0, 255) or (skin.getpixel((x, y))[3] and skin.getpixel((x, y))[:3] not in colours)))
+        if skin.size != garden_bodies.AMDUSIAS_TEXTURE or wrong or not box or not (box[0] >= x0 and box[1] >= y0 and box[2] <= x0 + w0 and box[3] <= y0 + h0):
+            err(f"textures/entity/amdusias.png: the owner's flower crown texel for texel in its region, everything else opaque or "
+                f"clear in the three paintings' colours ({wrong} texels wrong)")
+    if (ASSETS / "textures" / "entity" / "amdusias_glowmask.png").exists() or body["render"]["glow"]:
+        err("Amdusias has no glowmask (nothing of his glows)")
+    entity_java = text(JAVA_ROOT / "concordance" / "spirits" / "AmdusiasEntity.java")
+    for key, name in body["loops"].items():
+        if clips.get(name, {}).get("loop") is not True or clips[name].get("animation_length") != body["loop_lengths"][key] \
+                or f'RawAnimation.begin().thenLoop("{name}")' not in entity_java:
+            err(f"amdusias.animation.json / AmdusiasEntity.Loop: his {key} loop {name} loops, {body['loop_lengths'][key]} s, and plays")
+    for gesture, (length, (start, end)) in body["gesture_times"].items():
+        clip = clips.get(body["gestures"][gesture], {})
+        ticks = round(length * 20)
+        play = "thenPlayAndHold" if gesture == "depart" else "thenPlay"
+        held = "hold_on_last_frame" if gesture == "depart" else False
+        if abs(float(clip.get("animation_length", -1)) - length) > 1e-9 or clip.get("loop") != held or not 0 <= start < end <= length \
+                or not re.search(rf'{gesture.upper()}\("{gesture}", {ticks}, RawAnimation\.begin\(\)\.{play}\("animation\.amdusias\.{gesture}"\)\)',
+                                 entity_java):
+            err(f"amdusias.animation.json / AmdusiasEntity.Gesture: {gesture} lasts {length} s ({ticks} ticks), its telling window inside it")
+    # Dossier 6 item 6: he bows and is gone by his horn's beat, so the horn follows him (each key a vector, or an object when
+    # eased: stolas_body._keys).
+    gone = clips.get("animation.amdusias.depart", {}).get("bones", {}).get("root", {}).get("scale", {})
+    beat = re.search(r"int HORN_BEAT = (\d+);", entity_java)
+    vector = lambda key: key["vector"] if isinstance(key, dict) else key
+    if not beat or not any(float(at) <= int(beat.group(1)) / 20 and vector(v) == [0.0, 0.0, 0.0] for at, v in gone.items()):
+        err("animation.amdusias.depart: he bows and is gone by his horn's beat, so the horn follows him (Dossier 6 item 6)")
+    swung = sorted(name for name, clip in clips.items() if "garland" in clip.get("bones", {}))
+    if swung != ["animation.amdusias.work"]:
+        err("amdusias.animation.json: his garland swings as he bends his tree, and only then")
+    if not {"jugcraft_garden_amdusias_horn", "jugcraft_garden_amdusias_sway", "jugcraft_garden_amdusias_inspect_page",
+            "jugcraft_garden_amdusias_terms", "jugcraft_garden_amdusias_bed_jade", "jugcraft_garden_amdusias_matter"} <= set(pa.GARDEN_CLIENT_SHOTS):
+        err("GARDEN_CLIENT_SHOTS: Amdusias's flow photographs the late horn's subtitle, the swaying tree, the Inspect page and a "
+            "bed's Jade saying Sheltered by Amdusias, his terms with the quota as a cap, and his matter (GC-09 client shots)")
+    check_geckolib("amdusias", entity_java, None, None, kind="entity")
+    # His box holds his height and length; his culling box his muzzle and tail (GC-P132).
+    cubes = [cube for bone in bones for cube in bone.get("cubes", [])]
+    if cubes:
+        low = [min(c["origin"][a] for c in cubes) for a in range(3)]
+        high = [max(c["origin"][a] + c["size"][a] for c in cubes) for a in range(3)]
+        across = max(high[0] - low[0], high[2] - low[2]) / 16 * body["scale"]
+        tall = (high[1] - low[1]) / 16 * body["scale"]
+        size, r = pa.SPIRITS["amdusias"]["entity"], body["render"]
+        if abs(size["height"] - tall) > 0.1 * tall or across > size["width"] + 2 * r["wide"] or tall > size["height"] + r["above"]:
+            err(f"Amdusias's box {size['width']} x {size['height']} holds his height ({tall:.2f}); his culling box his length ({across:.2f})")
+    # His poses and shots, from his front, each gesture frozen inside its window (the client read without comments).
+    posed = {key.lower(): (float(a), float(b)) for key, a, b in re.findall(
+        r'clipPose\(context, server, perch, AMDUSIAS, AmdusiasEntity\.Gesture\.([A-Z]+), ([0-9.]+), ([0-9.]+), "jugcraft_garden_amdusias_[a-z]+"\);',
+        garden_client)}
+    if posed != {key: window for key, (_, window) in body["gesture_times"].items()}:
+        err(f"ConcordanceGardenPactClientGameTests: each of Amdusias's gestures frozen inside its telling pose: {posed}")
+    for name in body["shots"]:
+        if f'"{name}"' not in garden_client:
+            err(f"ConcordanceGardenPactClientGameTests: takes {name}")
+    for key, name in body["loops"].items():
+        if key != "astir" and not re.search(rf'loopPoseOf\(context, server, perch, AMDUSIAS, AMDUSIAS_{key.upper()}, '
+                                            rf'"jugcraft_garden_amdusias_{key}", (true|false)\);', garden_client):
+            err(f"ConcordanceGardenPactClientGameTests: his {key} loop is photographed through loopPoseOf (no gesture over it)")
+        if key != "astir" and f'"{name}"' not in garden_client:
+            err(f"ConcordanceGardenPactClientGameTests: checks his {key} loop ({name})")
 
 
 def check_pact_network(co):
@@ -26219,6 +26421,24 @@ GC07_FORAS_TESTS = {
 }
 # GC-08 unit 5
 # GC-09 unit 6
+# Concordance garden cohort, GC-09 (check_garden_pacts): the canopy, pure and in memory, and Amdusias's service.
+GC09_TESTS = {
+    "ConcordanceGardenGameTests": ["aShelteredHabitatKeepsItsStrainedValue", "theCanopyRegistryTakesTheLargestNeverTheSumAndLapses"],
+    "ConcordanceWorkerGameTests": [
+        "aCanopyLowersOnlyDisturbanceForCropsInItsArea", "aCanopyNeverSuppliesDisturbance", "aCanopyNeverHelpsAHeart",
+        "aCanopyNeverEasesStrain", "twoCanopiesNeverStack", "aCanopySparesAGloamcapUntilAnswered",
+        "aCanopyLapsesWithin40TicksOfSuspension", "aCanopyLapsesWhenItsHolderLeaves", "aCanopyCoversAtMost16Beds",
+        "aStrangersCropIsNeverSheltered", "amdusiassFirstObligationIsAHarvestUnderHisCanopy",
+        "theInspectPageAndTheGaugeReadTheShelteredValue", "theCanopysQuotaIsWordedAsACap",
+        "aCanopyReturnsAfterARestartWithinOneThink", "hisTreeSwaysWhileHeShelters", "aHolderKeepsOneCanopy",
+        "amdusiassReadingSaysItsNoteAndNamesNoPlayer"],
+    "ConcordanceEconomyGameTests": ["theEconomyStillHasNoGainingCycle"],
+}
+# The garden cohort, GC-09's game tests of Amdusias as a character and of his standing station (check_pacts).
+GC09_AMDUSIAS_TESTS = {
+    "ConcordanceWorkerGameTests": ["amdusiasStandsBesideHisPerch", "amdusiasRefusesWithoutATree", "amdusiasHornsABeatLate",
+                                   "amdusiasAnswersEachActionWithHisGesture", "aDuplicateAmdusiasSheltersNothing"],
+}
 # GC-04 (GB24): Stolas's Flashjack draws these six zero-thickness box-UV cubes on both faces, as the owner made them (D-D3
 # keeps his geometry byte for byte); the twin rule allows exactly these, so a seventh, in any spirit, fails. Recorded as a
 # question for the cohort checkpoint, not changed here.

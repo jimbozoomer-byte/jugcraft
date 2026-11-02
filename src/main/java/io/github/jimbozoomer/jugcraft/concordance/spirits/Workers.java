@@ -85,6 +85,8 @@ public final class Workers {
 	public static EntityType<ForasEntity> FORAS;
 	// GC-08 unit 5
 	// GC-09 unit 6
+	/** Concordance garden cohort, GC-09 (Dossier 6): Amdusias, standing beside his perch (the bending canopy). */
+	public static EntityType<AmdusiasEntity> AMDUSIAS;
 	public static Block PACT_PERCH;
 	public static BlockEntityType<PactPerchBlockEntity> PERCH_ENTITY;
 	public static Item PACT_PERCH_ITEM;
@@ -151,6 +153,11 @@ public final class Workers {
 		PactSpirits.register(ForasEntity.COUNTERPART, FORAS, ForasEntity.SIGN);
 		// GC-08 unit 5
 		// GC-09 unit 6
+		// GC-09: Amdusias, MISC as every worker is (a transport crate refuses him), standing beside his perch (SPIRITS["amdusias"]).
+		AMDUSIAS = entity("amdusias", EntityType.Builder.<AmdusiasEntity>of(AmdusiasEntity::new, MobCategory.MISC).sized(1.6F, 2.4F).eyeHeight(1.9F)
+				.fireImmune().clientTrackingRange(8));
+		FabricDefaultAttributeRegistry.register(AMDUSIAS, AmdusiasEntity.createAttributes());
+		PactSpirits.register(AmdusiasEntity.COUNTERPART, AMDUSIAS, AmdusiasEntity.SIGN);
 		ResourceKey<Block> perchKey = ResourceKey.create(Registries.BLOCK, Jugcraft.id("pact_perch"));
 		PACT_PERCH = Registry.register(BuiltInRegistries.BLOCK, perchKey, new PactPerchBlock(BlockBehaviour.Properties.of()
 				.mapColor(MapColor.WOOD).strength(1.5F, 3.0F).sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.IMMOVEABLE).setId(perchKey)));
@@ -171,6 +178,8 @@ public final class Workers {
 		PactServices.register(GraftKeeping.SERVICE);
 		// GC-08 unit 5
 		// GC-09 unit 6
+		// GC-09: Amdusias's canopy shelter.
+		PactServices.register(CanopyShelter.SERVICE);
 		PactServices.verify();
 		PactMenu.register();
 		// Concordance Chunk D, D-06: Stolas's cues (jugcraft:stolas.*; sounds.json and subtitles are the generator's).
@@ -187,6 +196,8 @@ public final class Workers {
 		ForasEntity.registerSounds();
 		// GC-08 unit 5
 		// GC-09 unit 6
+		// GC-09: Amdusias's cues (jugcraft:amdusias.*).
+		AmdusiasEntity.registerSounds();
 		// The unit review: every pact spirit's departure ends on time, its chunk ticking it or not (one sweep, GC-01).
 		PactSpiritEntity.registerSweep();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> command(dispatcher));

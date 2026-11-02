@@ -75,6 +75,12 @@ public final class MagicGlance {
 			Map.entry(JADE + "pact.note.graft_keeping.no_host", MagicArt.Mark.MOON),
 			// GC-08 unit 5
 			// GC-09 unit 6
+			Map.entry(JADE + "pact.matter.canopy_shelter.wants_stir", MagicArt.Mark.ASK),
+			Map.entry(JADE + "pact.note.canopy_shelter.covered", MagicArt.Mark.TICK),
+			Map.entry(JADE + "pact.note.canopy_shelter.spared", MagicArt.Mark.ASK),
+			Map.entry(JADE + "pact.note.canopy_shelter.no_tree", MagicArt.Mark.HOURGLASS),
+			Map.entry(JADE + "pact.note.canopy_shelter.elsewhere", MagicArt.Mark.MOON),
+			Map.entry(JADE + "pact.note.canopy_shelter.nothing", MagicArt.Mark.MOON),
 			Map.entry(JADE + "sheltered", MagicArt.Mark.TICK),
 			Map.entry(ECOLOGY + "sheltered", MagicArt.Mark.TICK),
 			Map.entry("message.jugcraft.concordance.disabled", MagicArt.Mark.LOCK),

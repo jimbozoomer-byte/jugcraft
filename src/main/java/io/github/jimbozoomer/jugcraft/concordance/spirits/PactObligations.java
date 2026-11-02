@@ -42,6 +42,8 @@ public final class PactObligations {
 		GRAFT("graft"),
 		// GC-08 unit 5
 		// GC-09 unit 6
+		/** GC-09 (Amdusias): a ripe crop harvested by hand inside his area while his pact is active. */
+		HARVEST("harvest"),
 		;
 
 		public final String id;

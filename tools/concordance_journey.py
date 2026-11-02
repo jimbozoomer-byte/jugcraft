@@ -452,6 +452,29 @@ GARDEN = {
                    "forasAnswersEachActionWithHisGesture"]},
         # GC-08 unit 5
         # GC-09 unit 6
+        # GC-09: Amdusias, from his perch to his departure (Dossier 6). Unit 7's theGardenPactsFromCodexToDeparture walks these.
+        {"research": [], "things": [],
+         "text": "Set your Pact Perch within 2 blocks of a log, with an awake Verdant Bed of yours within 6; use the perch "
+                 "and choose Amdusias: a white unicorn steps up beside it and names every term before anything is spent "
+                 "(without a tree he does not come: \"I bend trees. There is no tree here.\"); accept, and his compact (a "
+                 "note block, 2 oak saplings) is spent once",
+         "reaches": [f"pact:{rid('amdusias')}"],
+         "tests": ["amdusiasRefusesWithoutATree", "everySpiritSealsOnceAndSpendsOnce", "amdusiasStandsBesideHisPerch"]},
+        {"research": [], "things": [],
+         "text": "While you are near, his tree's shelter bends over the crops on your beds in his area: each reads the stir up "
+                 "to 2 lower (the Inspect page, a Habitat Gauge and Jade say so); a Gloamcap he spares until you answer at "
+                 "the perch. Harvest a ripe crop by hand in his area: his first obligation",
+         "reaches": [f"practice:{rid('garden_pact_service')}"],
+         "tests": ["aCanopyLowersOnlyDisturbanceForCropsInItsArea", "aCanopySparesAGloamcapUntilAnswered",
+                   "theInspectPageAndTheGaugeReadTheShelteredValue", "amdusiassFirstObligationIsAHarvestUnderHisCanopy"]},
+        {"research": [], "things": [],
+         "text": "Keep the pact with a sapling a week (a missed week is warned and carried through a day's grace, then the "
+                 "service is suspended and his canopy lapses, nothing taken; an offering resumes it). End it at the perch: "
+                 "what was paid ahead comes back once, his tree sways, he is gone, and a distant horn follows",
+         "reaches": [],
+         "tests": ["everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes", "endingAnySpiritsPactReturnsTheEscrowOnce",
+                   "aCanopyLapsesWithin40TicksOfSuspension", "aCanopyLapsesWhenItsHolderLeaves",
+                   "amdusiasAnswersEachActionWithHisGesture"]},
     ],
 }
 

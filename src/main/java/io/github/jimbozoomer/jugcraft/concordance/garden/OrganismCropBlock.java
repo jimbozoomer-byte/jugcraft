@@ -348,6 +348,8 @@ public class OrganismCropBlock extends CropBlock {
 			if (!crop.isEmpty()) {
 				// Mastery is practice: each crop harvested by one's own hand counts once.
 				ConcordanceProgress.record(server, new Evidence.Practiced(Garden.ACTIVITY, organismId()));
+				// GC-09 (GC-P131): Amdusias's first obligation, a crop harvested by hand in his area (its one hook).
+				PactObligations.performed(serverLevel, server, PactObligations.Act.HARVEST, pos);
 			}
 			return InteractionResult.SUCCESS;
 		}

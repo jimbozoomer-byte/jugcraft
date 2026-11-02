@@ -273,6 +273,11 @@ VANILLA_SOURCES = {
     "minecraft:barrel": ("craftable", "planks and wooden slabs", "", ""),
     "minecraft:writable_book": ("craftable", "a book, an ink sac and a feather", "", ""),
     "minecraft:bowl": ("craftable", "planks", "", ""),
+    # Concordance garden cohort, GC-09: Amdusias's compact and offerings (his tag names the saplings directly).
+    "minecraft:oak_sapling": ("renewable", "oak leaves drop them; a sapling grows a tree that drops more", "", ""),
+    "minecraft:birch_sapling": ("renewable", "birch leaves drop them; a sapling grows a tree that drops more", "", ""),
+    "minecraft:spruce_sapling": ("renewable", "spruce leaves drop them; a sapling grows a tree that drops more", "", ""),
+    "minecraft:note_block": ("craftable", "planks and redstone", "", ""),
 }
 
 # Jugcraft things the world grows rather than a recipe makes, by the same rules as VANILLA_SOURCES.

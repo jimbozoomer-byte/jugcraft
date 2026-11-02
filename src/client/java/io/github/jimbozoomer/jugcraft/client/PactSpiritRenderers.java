@@ -78,6 +78,9 @@ public final class PactSpiritRenderers {
 		register(Workers.FORAS, new Row(1.0F, 0.6F, 0.2, 0.1, 0.3, false));
 		// GC-08 unit 5
 		// GC-09 unit 6
+		// Amdusias (GC-09): his built model drawn at its own size; his culling box reaches 0.25 sideways for his muzzle and his
+		// tail past his 1.6 along his length, 0.1 below, 0.1 above for his horn's top leaf; nothing of his glows.
+		register(Workers.AMDUSIAS, new Row(1.0F, 0.6F, 0.25, 0.1, 0.1, false));
 	}
 
 	static <T extends PactSpiritEntity<T>> void register(EntityType<T> type, Row row) {
