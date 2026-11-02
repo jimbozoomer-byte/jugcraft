@@ -36,6 +36,10 @@ jobs:
           cache: gradle
       - name: Install data-generation dependencies
         run: python3 -m pip install --quiet pillow numpy
+      # tools/newest_shapes.py reads vanilla block models from Loom's pinned Minecraft jar as shape references (never
+      # copied into the mod); a fresh checkout has no jar until Gradle has set Minecraft up.
+      - name: Set up Minecraft for the generators
+        run: ./gradlew help --no-daemon
       - name: Check generated JSON is up to date
         run: |
           python3 tools/generate_material_data.py
