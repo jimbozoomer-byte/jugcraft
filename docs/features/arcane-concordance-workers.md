@@ -24,7 +24,9 @@ machinery and the bed index's devices), not merged either; its tests passed in C
 cohort's unit 3 (GC-06: [Marax](marax-pact.md), a body's station beside its perch and a synced work target), built and
 not merged, and not yet compiled or run in CI. Extended by the cohort's unit 4 (GC-07: [Foras](foras-pact.md), graft
 keeping and the bed index's stores), built on its own line from unit 3's shared prefix and merged after unit 3, not
-merged to main, and not yet compiled or run in CI.
+merged to main, and not yet compiled or run in CI. Extended by the cohort's unit 6 (GC-09: [Amdusias](amdusias-pact.md),
+the bending canopy, a cue a beat late and a quota worded as a cap), built on its own line beside unit 5's, not merged, and
+not yet compiled or run in CI.
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 17) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 9, Practitioner stage (Jugcraft Workshops). Roadmap step 17.
@@ -171,7 +173,11 @@ kind: his offer is the Concordance's `pact` data, `concordance/pact/stolas.json`
   while a conversation is open at its perch, cleared after it, never saved), which a renderer row's named bone flies to
   (`PactSpiritRenderers.Row.reach`). Since GC-07 (not yet run in CI) Foras joins them, standing on the ground beside his
   perch through the shared prefix's `PactSpiritEntity.Station.BESIDE` (GC-06b), the first garden service to spend an
-  item: one donor a graft, taken from a store touching the perch in one transaction.
+  item: one donor a graft, taken from a store touching the perch in one transaction. Since GC-09 (not yet run in CI)
+  Amdusias stands beside his perch too; a pact spirit may hold a cue's sound for a beat after its gesture
+  (`PactSpiritEntity.cueBeat`, 0 by default; noted, subtitled and gestured at once, sounded from its own tick where it
+  then stands; `soundedAt` kept for tests; nothing saved), and a service may word its quota as a cap
+  (`PactService.quotaTerm`, `term.quota.<work>` from `QUOTA_TERMS`; the shared daily count by default).
 
 ## Connections
 
@@ -616,6 +622,18 @@ answers are `prudent` and `always`. His first obligation is `GRAFT` (a crop graf
 ground beside the perch (`Station.BESIDE`). **Verification:** his 25 server tests (`GC07_GRAFT_TESTS`,
 `GC07_FORAS_TESTS`) and his flow in `ConcordanceGardenPactClientGameTests` are written and **not yet run**: no CI run has
 compiled him ([his Verification](foras-pact.md#verification)). Not played by a person; no second client.
+
+The sixth garden spirit is Amdusias (GC-09, [record](amdusias-pact.md)): the bending canopy, at any hour while his holder
+is near. With a log within 2 of the perch (his tree), he covers the crops on up to 16 of his beneficiaries' awake beds in
+his area (radius 6), nearest first, each asked as the holder's before it is covered: the garden's memory of canopies
+(`garden/Canopies`, per level, one a holder, lapsing 40 ticks after its last refresh, never saved) lowers the stir those
+crops read by up to 2, never below nothing, the largest canopy over a bed and never a sum. Nothing is made, moved or
+spent; his record counts nothing (his quota is a cap: "At most 16 beds sheltered at once"). His matter (the accord) is a
+crop that wants the stir (a Gloamcap), spared until his holder answers `all`; `spare` is the safe course. His first
+obligation is `HARVEST` (a ripe crop harvested by hand in his area). His horn sounds a beat after his gestures, his tree
+sways with the shared work sign. **Verification:** his 26 server tests (`GC09_TESTS`, `GC09_AMDUSIAS_TESTS`) and his flow
+in `ConcordanceGardenPactClientGameTests` are written and **not yet run**: no CI run has compiled him
+([his Verification](amdusias-pact.md#verification)). Not played by a person; no second client.
 
 ## World and event applicability
 

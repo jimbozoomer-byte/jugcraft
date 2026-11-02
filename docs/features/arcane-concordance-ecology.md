@@ -12,7 +12,9 @@ CI run 40605564166. Its unit 2 (GC-05: the Gleaner's and the Heart's named roads
 Verdance carrying; [record](bathin-pact.md)) is not merged either; its tests passed in CI run 40777920181. Its unit 3
 (GC-06: `HabitatAdvice` and Marax's habitat reading; [record](marax-pact.md)) is built and not merged, and not yet
 compiled or run in CI. Its unit 4 (GC-07b and GC-07: the graft in one place and Foras's graft keeping;
-[record](foras-pact.md)) is built and not merged, and not yet compiled or run in CI.
+[record](foras-pact.md)) is built and not merged, and not yet compiled or run in CI. Its unit 6 (GC-09b and GC-09: a
+canopy's shelter in the pure rule, the garden's memory of canopies and Amdusias's canopy; [record](amdusias-pact.md)) is
+built on its own line and not merged, and not yet compiled or run in CI.
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 14) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 6, Practitioner stage (Jugcraft Workshops). Roadmap step 14.
@@ -106,6 +108,25 @@ Foras's graft keeping ([record](foras-pact.md)) ends in after his: `check_graft`
 clears a graft. `Grafting.gains` is his "would gain": by the bed's cached reading, the grafted niche no worse on any
 factor and better on one (Dewlit helps a Sunpetal in light 9 to 12 on a bed of moisture 5 or more; on moisture 4 or less
 its moisture would fit worse).
+
+**A canopy's shelter** (the garden cohort's GC-09b and GC-09; not merged; not yet run in CI). A reading may carry a
+canopy's shelter: `Habitat` gains a seventh component, `shelter`, 0 through every earlier constructor, so a reading
+without a canopy is record-equal to what it was and every verdict, growth, fit and reason line is unchanged.
+`sheltered(damping)` lowers the area's disturbance by up to the damping, never below 0, and keeps what it took; sheltered
+again it takes the larger damping, never the sum. Harvest strain is still counted against the unsheltered area
+(`strained()`), so a canopy never eases strain; `Verdict.reasons`' strained lines and the Inspect page's strained row show
+that unsheltered value. `Niche.wantsStir` marks a niche whose ideal disturbance starts above 0 (today only Gloamcap's).
+The canopies are held in memory only (`garden/Canopies`: per level, one a holder, at most 16 beds, damping 0 to 2,
+lapsing 40 ticks after the last refresh, never saved or sent), and one place applies them: a bed's `cachedHabitat`
+shelters the reading for the plant above (a crop, or the organism a Habitat Gauge on it is attuned to; never a Verdant
+Heart, a device or bare soil) by the largest live canopy over it, and for a plant that wants the stir only from a canopy
+answered "shelter all". So growth, the Inspect page, the Gauge, Marax's reading and Jade read one value; the Inspect page
+and the bed's and crop's reports add "Sheltered by Amdusias: the stir here reads 2 lower (4 unsheltered); harvest strain
+still counts against the unsheltered stir", and the bed's and Gauge's Jade show it short, while the bed's saved note
+never carries it (it would outlive the canopy). `HabitatAdvice` keeps a canopy's shelter when it eases a strain
+(`habitat.withStrain`), and on a sheltered reading names the disturbance the plant reads (decided by the session).
+Amdusias ([record](amdusias-pact.md)) forms the canopies; nothing else changes a reading, and no block, item or saved
+value changes.
 
 **Four living devices:**
 
@@ -423,6 +444,20 @@ and not yet run. Not run: any of them in CI; any person.
 `forasGraftsAgainAfterAReplanting` and `aPrudentForasGraftsWhereItHelps` (a host it helps grafted, one it would not
 left). Chunk C's nine graft tests are unchanged. `check_ecology` and `check_graft` (the graft's rules in `Grafting`) pass
 locally. Not run: any of them in CI; a long unattended garden with Foras on a real server; any person.
+
+**The garden cohort, unit 6 (GC-09b, GC-09; not merged; not yet run in CI).** Written and not yet run:
+`aShelteredHabitatKeepsItsStrainedValue` (the pure rule's named cases, Marax's advice on a sheltered reading, and a
+Sunpetal on a real bed under a canopy set by hand, with its Inspect page) and
+`theCanopyRegistryTakesTheLargestNeverTheSumAndLapses` (`ConcordanceGardenGameTests`); Amdusias's canopy tests in
+`ConcordanceWorkerGameTests`, among them `aCanopyLowersOnlyDisturbanceForCropsInItsArea`, `aCanopyNeverSuppliesDisturbance`,
+`aCanopyNeverHelpsAHeart`, `aCanopyNeverEasesStrain`, `twoCanopiesNeverStack` and
+`theInspectPageAndTheGaugeReadTheShelteredValue`. With no canopy every existing habitat, garden and Gauge test is to hold
+unchanged. Scratch harnesses outside Git, compiled with JDK 21 against the committed `ecology` classes, ran locally: the
+shelter harness against the classes before GC-09b over every shipped niche (13,221,792 checks, 0 failures: without a
+canopy everything is the old classes'), unit 3's advice harness on the changed classes (30,604,024 checks, 0 failures)
+and the same with a shelter dimension (151,395,025 and 16,516,020 checks, 0 failures)
+([his record](amdusias-pact.md#the-canopys-shelter-gc-09b)). `check_ecology`'s GC-09 block passes locally. Not run: any
+of them in CI; a long unattended garden under his canopy on a real server; any person.
 
 ## World and event applicability
 

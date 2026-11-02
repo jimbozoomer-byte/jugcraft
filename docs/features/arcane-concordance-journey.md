@@ -15,7 +15,9 @@ they name, with no whole-path test of his own; those tests and `buerFromTheCodex
 the chooser, passed in both server jobs of run 40777920181. Its unit 3 adds Marax's steps and The Garden's Regard
 mastered (10 to 13; Dewmoss in `GARDEN_RECIPES`), held by the tests they name, written and not yet run in CI; unit 7's
 `theGardenPactsFromCodexToDeparture` is to walk them. Its unit 4 adds Foras's three steps (14 to 16, after Marax's),
-held by the tests they name, written and not yet run in CI; unit 7's walk is to take them too.
+held by the tests they name, written and not yet run in CI; unit 7's walk is to take them too. Its unit 6 adds
+Amdusias's three steps (17 to 19 on its own line, after Foras's; after Bifrons's once merged), held by the tests they
+name, written and not yet run in CI.
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 31) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 23, every stage. Roadmap step 31.

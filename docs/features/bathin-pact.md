@@ -425,6 +425,10 @@ since `check_magic_ui` now asks a glance of every work's question; Foras's graft
 (`GardenAsking`, GC-06b). His words, sounds, service, matter and tests are otherwise unchanged. His first obligation
 counts toward The Garden's Regard's mastery as Buer's, Marax's and Foras's do (any three garden spirits').
 
+**Since GC-09** ([Amdusias](amdusias-pact.md); built on its own line, not merged, not yet run in CI): the chooser has
+another entry. A Verdant Heart is never sheltered, so its beat and the Verdance Bathin carries are unchanged; his words,
+sounds, service, matter and tests are unchanged.
+
 **Local** (this record's commit; no Minecraft build here): `python3 tools/owner_art.py --check`, `python3 -B
 tools/check_mod_data.py`, `python3 scripts/check_repository.py`, `python3 tools/concordance_journey.py --check`,
 `python3 tools/concordance_economy.py` ("gaining cycles: none"), `python3 tools/check_icon_maps.py`, `node --test

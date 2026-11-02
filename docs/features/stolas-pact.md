@@ -638,6 +638,10 @@ generators' incidental rewrites were restored: [the contract's corrections](conc
 - **Since GC-07 (Foras, [record](foras-pact.md); not merged; not yet run in CI):** the chooser has another entry for an
   owner who understands both Regards. GC-07 changed none of Stolas's ids, keys, words, body or tests: his body stays on
   the perch, Star-reckoning raises no matter and asks no question, and the graft Foras makes is a garden service's alone.
+- **Since GC-09 (Amdusias, [record](amdusias-pact.md); built on its own line, not merged; not yet run in CI):** the
+  chooser has another entry. A pact spirit may now hold a cue's sound for a beat (`cueBeat`, 0 by default) and a service
+  may word its quota as a cap (`quotaTerm`, the shared daily count by default); Stolas uses neither, so his cues sound
+  with their gestures and his terms page reads as before. GC-09 changed none of his ids, keys, words, body or tests.
 
 ## World and event applicability
 

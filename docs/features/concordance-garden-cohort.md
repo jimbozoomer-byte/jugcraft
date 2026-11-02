@@ -5,7 +5,9 @@ Status: **contract (GC-00); unit 1 (GC-01 to GC-04) and unit 2 (GC-05, Bathin) b
 [unit 2 as built and its evidence](#unit-2-as-built-and-its-evidence)); unit 3 (GC-06, Marax) built and recorded, not
 yet compiled or run in CI (see [unit 3 as built and its evidence](#unit-3-as-built-and-its-evidence)); unit 4 (GC-07,
 Foras) built from unit 3's shared prefix, recorded and merged after unit 3's line, not yet compiled or run in CI (see
-[unit 4 as built and its evidence](#unit-4-as-built-and-its-evidence)); units 5 to 7 not built here; nothing of the
+[unit 4 as built and its evidence](#unit-4-as-built-and-its-evidence)); unit 6 (GC-09, Amdusias) built on its own line
+from unit 4's merged head `4201217b3` beside unit 5's, recorded, not yet compiled or run in CI (see
+[unit 6 as built and its evidence](#unit-6-as-built-and-its-evidence)); units 5 and 7 not built here; nothing of the
 cohort is merged.** The contract was written read-only from
 the worktree of `claude/chunk-d-pact-hall` at `5eba71ced` (main's
 `78f9353a7` + Chunk B #465 + Chunk C #466 + Chunk D #474, all then open and unmerged), from the five survey reports
@@ -140,7 +142,7 @@ unchanged. Every Java compile and game test runs only in CI (GC-S24; [Checks](#c
 | 3 | GC-06 | **Marax**: one-correction reading by his familiar, the proud familiar; the synced work target and its renderer hook; The Garden's Regard mastery reachable from here (three spirits) | new `marax-pact.md` | Built (`736d94541` to `1473e99f1`) and recorded; the shared prefix (GC-06a, GC-06b and its review's fixes) was in the head of CI run 40777920181, which passed in full; Marax himself (`bed9f73b4` on) not yet compiled or run in CI; not merged; [evidence](#unit-3-as-built-and-its-evidence) |
 | 4 | GC-07 | **Foras**: graft keeping from a store beside the perch, the logician's objection; the bed index's containers; the owner library's second edited part in `tools/owner_art.py` | new `foras-pact.md` | Built (`e3194d0be` to `8a50bbd33`) from unit 3's shared prefix and recorded, then merged after unit 3's line; not yet compiled or run in CI; not merged; [evidence](#unit-4-as-built-and-its-evidence) |
 | 5 | GC-08 | **Bifrons**: root-running with half lost, which beds are reserves | new `bifrons-pact.md`; `tools/concordance_economy.py` | Not started |
-| 6 | GC-09 | **Amdusias**: the bending canopy (a one-factor disturbance shelter: the pure rule in `ecology`, the registry in `garden`), the stir a Gloamcap wants | new `amdusias-pact.md`; `arcane-concordance-ecology.md` | Not started |
+| 6 | GC-09 | **Amdusias**: the bending canopy (a one-factor disturbance shelter: the pure rule in `ecology`, the registry in `garden`), the stir a Gloamcap wants | new `amdusias-pact.md`; `arcane-concordance-ecology.md` | Built (`23236575e` to `28953d21b`) on its own line from `4201217b3` (units 1 to 4) and recorded; not yet compiled or run in CI; not merged; [evidence](#unit-6-as-built-and-its-evidence) |
 | 7 | GC-10 | Combined fixes, the cohort's whole path, its load card, client evidence (the line-up), the two-client test, records, the checkpoint and handoff | this page; the six records; `arcane-concordance-journey.md`; `docs/TESTING.md` | Not started |
 
 Order of the spirits after Buer goes from least to most invasive: Bathin moves an existing essence through existing
@@ -228,7 +230,7 @@ how a habitat is read.
 | GB20 | No conflict or complication mechanism exists for any pact | `survey-plans.md` §2.1 | GC-04 (task): closed as built, unit 1 (Buer's overworked bed); GC-05 (choice): closed as built, unit 2 (Bathin's two roads from one Heart, the accord machinery) |
 | GB21 | `LookAtTarget` is registered with SmartBrainLib's default `invalidTarget` (`!pos.isVisibleBy(entity)`, checked as it starts); vanilla `EntityTracker.isVisibleBy` needs the target in `NEAREST_VISIBLE_LIVING_ENTITIES`, which the worker's only sensor (`NearbyPlayersSensor`) never fills, so an entity look target would never start | `S/WorkerEntity.java:187-194`; SmartBrainLib `api/core/behaviour/custom/look/LookAtTarget.java:31, 171`; mc263src `net/minecraft/world/entity/ai/behavior/EntityTracker.java:51`; SmartBrainLib `NearbyPlayersSensor.java:30` | GC-02 (closed as built, unit 1) |
 | GB22 | `PactStatePayload` already has 13 fields in one `StreamCodec.composite`; 26.3's largest overload takes 14, so four new top-level fields would not compile | `S/PactStatePayload.java:81-95`; mc263src `StreamCodec.java:533` | GC-01 (one nested field; closed as built, unit 1) |
-| GB23 | The terms page and the cannot-afford refusal name "Astral Resonance from your astrolabe" whatever the resonance (`d.resonance()`); `term.quota` reads "%s a game day", wrong for a cap | `S/PactMenu.java:301, 489-490, 514`; lang `message.jugcraft.concordance.pact.term.compact`, `.answer.cannot_afford`, `.term.quota` | GC-01 (resonance-free keys): closed as built, unit 1; GC-09 (a per-work quota key): open |
+| GB23 | The terms page and the cannot-afford refusal name "Astral Resonance from your astrolabe" whatever the resonance (`d.resonance()`); `term.quota` reads "%s a game day", wrong for a cap | `S/PactMenu.java:301, 489-490, 514`; lang `message.jugcraft.concordance.pact.term.compact`, `.answer.cannot_afford`, `.term.quota` | GC-01 (resonance-free keys): closed as built, unit 1; GC-09 (a per-work quota key): built on unit 6's line (`PactService.quotaTerm`, `term.quota.canopy_shelter`), not yet run in CI |
 | GB24 | The owner's Decor Blossom has four zero-thickness cubes each drawing two opposite faces on one plane (GeckoLib draws entities with `entityCutout`, which does not cull in 26.3); `tools/art_check.py` reads block, item and quad models only, not `.geo.json` | `Magic/assets/ars_jimbaux/geo/decor_blossom.geo.json`; GeckoLib `renderer/base/GeoRenderer.java:73-75`; `docs/ART_DIRECTION.md:31`; `tools/art_check.py:489-490, 662` | GC-04 (closed as built, unit 1) |
 | GB25 | `tools/owner_art.py` reads only `Blocks/` and `Magic/`, and adapts only through Stolas's table and `stolas_body` | `tools/owner_art.py:75, 78, 130-140` | GC-04 (the cohort's table and adapters): partly closed, unit 1; the second edited part waits for GC-07 or GC-09 *(closed, unit 4: the root landed in the shared prefix, GC-06b, and Foras's body, GC-07, is its first reader)* |
 | GB26 | `tools/concordance_progression.py` honours `distinct` only for `examine`, so a practice needing three spirits would read as reachable with one | `tools/concordance_progression.py:527` | GC-03 (closed as built, unit 1) |
@@ -548,7 +550,8 @@ source's words; where the game goes beyond the text it says "Jugcraft adaptation
      spelling: Amdukias. **The identity rests on "cause Trees to bend and incline"** (the only tree-shaping power among
      the 72 by the surveyor's recollection [U], to be confirmed against a scan; Jugcraft adaptation: a living
      windbreak).
-   - *Silhouette:* a tall, slender unicorn about 2.0 blocks, long neck, a horn that is a living branch with a few leaves,
+   - *Silhouette:* a tall, slender unicorn about 2.0 blocks *(amended unit 6: 2.4 to his horn's top leaf, the tallest of
+     the six; GC-P132, GC-P133)*, long neck, a horn that is a living branch with a few leaves,
      a garland of small blooms at the neck (the owner's flower-crown ring, a non-creature part:
      `Edited-2026-10-18-Part2/cnb/geo/armor/flower_crown.geo.json` with `cnb/textures/armor/flower_crown.png`; art plan),
      long fine legs. Built
@@ -1407,11 +1410,22 @@ breaking, the holder leaving or going 100 blocks away), `aCanopyCoversAtMost16Be
 `amdusiasRefusesWithoutATree`, `amdusiassFirstObligationIsAHarvestUnderHisCanopy`,
 `theInspectPageAndTheGaugeReadTheShelteredValue`, `theCanopysQuotaIsWordedAsACap`, `theEconomyStillHasNoGainingCycle`,
 SG12's cases; the habitat harness's existing cases unchanged with no canopy, and new `Habitat.sheltered` cases (never
-below 0, `strained()` unchanged). **Client:** the late horn cue (subtitle frozen on screen), the swaying tree, his poses.
+below 0, `strained()` unchanged). *As built, twelve more:* `aShelteredHabitatKeepsItsStrainedValue` and
+`theCanopyRegistryTakesTheLargestNeverTheSumAndLapses` (GC-09b, `ConcordanceGardenGameTests`),
+`aCanopyLapsesWhenItsHolderLeaves` (the unit critique's item 14), `aCanopyReturnsAfterARestartWithinOneThink`,
+`hisTreeSwaysWhileHeShelters`, `aHolderKeepsOneCanopy`, `amdusiassReadingSaysItsNoteAndNamesNoPlayer`,
+`amdusiasStandsBesideHisPerch`, `amdusiasHornsABeatLate`, `amdusiasAnswersEachActionWithHisGesture`,
+`aDuplicateAmdusiasSheltersNothing`, and from his review `aCanopySkipsBedsHeMayNotChange`: 26 in all (`GC09_TESTS`,
+`GC09_AMDUSIAS_TESTS`), none yet run. **Client:** the late horn cue (subtitle frozen on screen), the swaying tree, his poses.
 
 **Interfaces changed:** `E/Habitat` (+`shelter`, +`sheltered`; pure), `VerdantBedBlockEntity.habitat` and
 `cachedHabitat` (the canopy), new `G/Canopies`, the harvest hook (`HARVEST`), `PactObligations.Act` (+`HARVEST`),
 `PactParser.WORK` (+`canopy_shelter`); `InspectPage` and the bed's Jade line read the sheltered value and its line.
+Also *(added unit 6)*: `PactSpiritEntity.cueBeat`, `soundedAt` and the held cue in `cueing`; `PactService.quotaTerm`,
+`PactMenu.service`, the quota chip in `PactScreen`; `Verdict.reasons`; `HabitatInspection.sheltered` and its strained
+row; `Niche.wantsStir`; `HabitatGaugeBlockEntity.sheltered`; `VerdantBedBlockEntity.canopyPlant`;
+`OrganismCropBlock.report`; `HabitatAdvice`'s strain branch, GC-P137; Jade's `sheltered` keys; `tools/magic_ui.py`'s
+"now" for a work in `QUOTA_TERMS`.
 **Saved data and ids:** `jugcraft:amdusias`, `jugcraft:amdusias_pact`, `concordance/pact/amdusias.json`,
 `#jugcraft:amdusias_offerings`, `jugcraft:amdusias.*`, accord values `spare`, `all`; nothing saved for a canopy.
 **Client shots:** the Inspect page and a bed's Jade showing "Sheltered by Amdusias"; the swaying tree; the late horn's
@@ -1420,6 +1434,58 @@ bound 2, never below 0, never a Heart, the largest not the sum, the strained val
 `check_baselines` (`ecology` still pure), `check_garden` (habitat rules unchanged without a canopy), `owner_art --check`
 (the flower ring), bodies, `check_acquisition` (note block, saplings). **Acceptance:** Dossier 6's items; with no canopy
 every existing habitat, garden and Gauge test unchanged; a canopy lapses within 40 ticks of the pact ceasing to serve.
+
+**As built (brief `23236575e`; GC-09b `929337b5c`; GC-09d `916b624d4`; Amdusias `6c17ddb30`; his review's fixes
+`28953d21b`; [record](amdusias-pact.md); built on unit 6's own line from `4201217b3`, the cohort with units 1 to 4,
+beside unit 5's line, the two to join in the order 3, 4, 5, 6; none of it yet compiled or run in CI):**
+
+- **Amdusias as a character:** `S/AmdusiasEntity` on the shared base, registered 1.6 x 2.4 (eyes 1.9), standing beside
+  his perch through the shared `Station.BESIDE`, with no station code of his own (the cross-unit notes' item 1: the
+  specification's GC-09c and its station needles are not built); his body built by `tools/garden_bodies.py`
+  (`amdusias_model`, `_animations`, `_skin`: a garlanded white unicorn 0.75 x 2.41 x 1.56 blocks, the owner's flower
+  crown's twelve cubes as his garland, his skin in the white petals', origin oak log's and origin oak leaves' colours
+  around the crown's copied texels) and written and checked by `tools/owner_art.py`; his seven cues on five runtime mono
+  files, his horn (arrive, work, depart) heard 20 ticks after its gesture (`cueBeat`, GC-09d); his sign the oak sapling;
+  his four codex pages of `binding/garden_regard` after Foras's ("Amdusias", "His Service", "The Stir a Gloamcap Wants",
+  "His Price"), before "Mastered"; no glowmask.
+- **The canopy:** the pure rule in `ecology` (`Habitat.shelter`, `sheltered`, `unsheltered`, `strained`, `withStrain`;
+  `Niche.wantsStir`; GC-09b), the registry `G/Canopies` (memory only, per level, one a holder, at most 16 beds, damping
+  0 to 2, the largest never the sum, lapsing 40 ticks after its last refresh), one place every reader reads it
+  (`VerdantBedBlockEntity.cachedHabitat`, for the plant above: a crop or a Gauge's attuned organism, never a Heart);
+  `S/CanopyShelter` (`canopy_shelter`; his tree the nearest log within 2; each bed asked through `GardenPacts.target`
+  before its crop is spared or covered; a Gloamcap spared until "Shelter all"; a refused bed skipped until his index is
+  read again; his memory read only while fresh); `PactObligations.HARVEST` with its one line in
+  `OrganismCropBlock.useWithoutItem`; the accord machinery (GC-05) for his matter `wants_stir`; tests as listed in
+  `check_mod_data.py`'s `GC09_TESTS` and `GC09_AMDUSIAS_TESTS`.
+
+Departures from this ticket and the unit's specification (each recorded, none hidden; the reasons in
+[his record](amdusias-pact.md#decided-by-the-session-none-is-the-owners)):
+
+- **The station is unit 3's** (GC-P132 restated): no station code, needles or mutation of his own.
+- **His height is 2.4**, amending Dossier 6's "about 2.0" and the art plan's line-up (the unit critique's item 13 (a)).
+- **The quota as a cap** has no label (the restyled chips draw none): its sentence "At most %s beds sheltered at once"
+  (`term.quota.canopy_shelter`) is the chip's message and tip, its glance "Max %1$s beds" with his work's own item, not
+  the calendar; his kept page's gauge reads "%1$s/%2$s now", not the shared "today" (decided by the session; the task's
+  word was "today").
+- **The sway** is the shared work sign through `Signs.show` (`check_signs` bans a spirit's own particles), not tinted
+  leaves; it was the mend mark until his review.
+- **The bed's saved note never carries the canopy's line** (the critique's item 4); the crop's report adds it (item 8);
+  Jade's bed and Gauge lines read the server's live value, short ("Sheltered by Amdusias: -2") and whole in details.
+- **`HabitatAdvice`'s strain branch** keeps a canopy's shelter (`habitat.withStrain(value)`, GC-P137) in GC-09b on his
+  own line, since unit 3 is in its base; Marax's disturbance advice names the sheltered value (decided by the session,
+  [Marax's record](marax-pact.md#the-rule-gc-p64)).
+- **"Wants the stir"** is the niche's ideal disturbance starting above 0 (`Niche.wantsStir`), refining "minimum 0"
+  (identical for every shipped crop); the offering tag names three saplings (`#minecraft:saplings` amended, GC-P121).
+- **Server tests** follow the cohort's built practice: sampling through the shared `afterSampling`, each test asserting
+  only its own holders and beds (no `Canopies.forget` or `live`), the holder leaving tested (item 14), a Gauge's bed
+  counted toward his 16.
+- **SG12's fixture** puts his log north-west of the perch's cell (he is the sixth cell here, the seventh once merged).
+- **Interfaces not in this ticket's list** are named above *(added unit 6)*.
+
+Saved: the work `canopy_shelter` and the perch's accord values `spare` and `all`, appended; no new saved key (his entity
+writes only the base's `perch` and `record`; the canopy, the Gauge's shelter, the held cues and his memory are never
+saved or sent); no migration. GB23's quota half closes here (a cap is worded as a cap). Evidence:
+[unit 6 as built and its evidence](#unit-6-as-built-and-its-evidence).
 
 ### GC-10. Evidence, checkpoint and handoff (unit 7)
 
@@ -1468,7 +1534,9 @@ Each spirit ticket also delivers, and is accepted only with:
   glance for its first task's act when that row would run past 12 words, and its icon's line in `PactGlance.WORK_ICONS`;
   since GC-07 also a glance for its question in general where it has accords, a chooser reason for each of its refusals
   and the lock on every blocker (`check_magic_ui` asks for each), and short forms and marks for its Jade notes and matter
-  (`SENTENCES`, `SENTENCE_MARKS`, `MagicGlance.MARKS`), else Jade draws them whole;
+  (`SENTENCES`, `SENTENCE_MARKS`, `MagicGlance.MARKS`), else Jade draws them whole; since GC-09, for a quota that caps
+  what is held at once, its sentence in `QUOTA_TERMS` with a chip glance (`pact.term.quota.<work>`) and its gauge row
+  read "%1$s/%2$s now";
 - SG12's shared cases passing for its definition (including `onePresencePerPact`, `...WaitsForANearHolder` and
   `noGardenTermOrRefusalNamesAnAstrolabe`); its own service, conflict, refusal, obligation, stranger and departure tests;
 - its client shots (beats, terms, kept page with its matter, poses in their telling windows from its front, facing, Jade)
@@ -1537,8 +1605,8 @@ GC-07 or GC-09, whichever lands first, adds that root and the parts' rows.
 Not used (GC-S12): the **Siren** (an unused, unregistered upper body on a long curled tail: a small mermaid with a girl's
 face and hair; the Ember record maps "the mermaid skins" to a later slice) and the **Flarecannon** (a fire golem; no
 garden fit; the open `fire_golem.bbmodel` point and Ember's planned familiar); registered rigs (the moth and nudibranch
-mounts, the weald walkers, the Fable and grove creatures) under don't 15. **Line-up by size:** Foras 2.2, Amdusias 2.0,
-Bathin 1.9, Bifrons 1.8 risen and 0.6 low, Buer 1.7 across, Marax 1.4 high and 2.2 long, Stolas about 1; ways of being
+mounts, the weald walkers, the Fable and grove creatures) under don't 15. **Line-up by size:** Amdusias 2.4 (amended unit 6),
+Foras 2.2, Bathin 1.9, Bifrons 1.8 risen and 0.6 low, Buer 1.7 across, Marax 1.4 high and 2.2 long, Stolas about 1; ways of being
 present: rooted, hovering coiled, lying massive, standing tall, crawling then rising, standing slender. None is a bird.
 
 **Checks once, in unit 1:** `check_geckolib` reads per-face UV (bounds per face rectangle; overlap is not meaningful
@@ -2064,6 +2132,117 @@ Minecraft), each passing: the generators above, `tools/owner_art.py --check`, `t
 `tools/check_icon_maps.py`, the world designer's node tests, `scripts/tests`, `git diff --check`, and the parse check of
 every Java file the merge touched.
 
+### Unit 6 as built and its evidence
+
+Written on 2 November 2026 for unit 6's records commit, from the commits and their messages and from this session's own
+local runs. **No CI run has compiled or run unit 6:** its commits were made where no Minecraft jar was available, every
+Java file of it was parse-checked only, and every server test and client shot of it is still to run. "Passed" below
+means a local Python check, audit or harness passed. Nothing here was run by a person. AI-assisted implementation with
+Claude Code; the model is named in the commit trailers.
+
+**Commits** (unit 6's own line, `wip/garden-u6`, from the cohort's merged head with units 1 to 4, built beside unit 5's
+line and to be merged after it, in the order 3, 4, 5, 6; not pushed to draft pull request
+[#526](https://github.com/jimbozoomer-byte/jugcraft/pull/526) when this was written; not merged):
+
+| Commit | What it holds |
+|---|---|
+| `4201217b3` | the line's base: the cohort with units 1 to 4 (Foras merged after Marax) and the magic interfaces' restyle |
+| `23236575e` | GC-09a: Amdusias's brief, before any body file (D-D5) |
+| `929337b5c` | GC-09b: the canopy's pure rule in `ecology`, the garden's memory of canopies (`G/Canopies`), the one place every reader reads it, `HabitatAdvice`'s strain branch (GC-P137); two garden tests; no canopy forms yet |
+| `916b624d4` | GC-09d: a cue a beat late (`cueBeat`, `soundedAt`) and a quota worded as a cap (`PactService.quotaTerm`, `QUOTA_TERMS` empty); no user yet |
+| `6c17ddb30` | GC-09: Amdusias, the bending canopy and the stir a Gloamcap wants |
+| `28953d21b` | his review's fixes (its 12 confirmed findings, all applied, the eighth with other words; [his record](amdusias-pact.md#verification)) |
+| the records | this page's unit 6 lines, his record and the shared records |
+
+The specification's GC-09c (a standing station of his own) is not built: unit 3's `Station.BESIDE` is in the base
+(the cross-unit notes' item 1).
+
+**CI.** None for unit 6. The CI results this line descends from: run
+[40840353835](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40840353835), green in full on `3bfd63a97` (the
+magic interfaces' polish), and run [40823371480](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40823371480),
+green in full on `5e8e0cba3` (Marax). For `4201217b3` itself, his review reported Build run 40847753203 failed in `mod`
+and `optional integrations absent`, which the cohort's `5e93bb0a7` (on `claude/garden-cohort`, not on this line) fixes;
+this line takes that fix at its merge, and these records have not seen that run's log. Still to run, on the merged head:
+the `mod` and `optional integrations absent` jobs; the client classes `tools/select_client_tests.py` picks (the garden
+class among them, its weight 1280 on this line: 560 + 260 + 220 + 240, and unit 5's 800 more once merged); then one
+workflow_dispatch of every client class.
+
+**Server tests written** (none run):
+
+| Table (`tools/check_mod_data.py`) | Tests |
+|---|---|
+| `GC09_TESTS` (21) | `ConcordanceGardenGameTests` (GC-09b): `aShelteredHabitatKeepsItsStrainedValue`, `theCanopyRegistryTakesTheLargestNeverTheSumAndLapses`; `ConcordanceWorkerGameTests`: `aCanopyLowersOnlyDisturbanceForCropsInItsArea`, `aCanopyNeverSuppliesDisturbance`, `aCanopyNeverHelpsAHeart`, `aCanopyNeverEasesStrain`, `twoCanopiesNeverStack`, `aCanopySparesAGloamcapUntilAnswered`, `aCanopyLapsesWithin40TicksOfSuspension`, `aCanopyLapsesWhenItsHolderLeaves`, `aCanopyCoversAtMost16Beds`, `aStrangersCropIsNeverSheltered`, `amdusiassFirstObligationIsAHarvestUnderHisCanopy`, `theInspectPageAndTheGaugeReadTheShelteredValue`, `theCanopysQuotaIsWordedAsACap`, `aCanopyReturnsAfterARestartWithinOneThink`, `hisTreeSwaysWhileHeShelters`, `aHolderKeepsOneCanopy`, `amdusiassReadingSaysItsNoteAndNamesNoPlayer`, `aCanopySkipsBedsHeMayNotChange`; `ConcordanceEconomyGameTests.theEconomyStillHasNoGainingCycle` |
+| `GC09_AMDUSIAS_TESTS` (5) | `amdusiasStandsBesideHisPerch`, `amdusiasRefusesWithoutATree`, `amdusiasHornsABeatLate`, `amdusiasAnswersEachActionWithHisGesture`, `aDuplicateAmdusiasSheltersNothing` |
+| SG12 and shared | the fifteen SG12 cases through his fixture (his log north-west of the perch's cell, a bed west); `noGardenTermOrRefusalNamesAnAstrolabe` and `talkingTeachesNothing` for every offered spirit |
+| Unchanged | every existing habitat, garden, Gauge and Marax test, which must hold with no canopy (a reading without one is record-equal to before); no forced unit-1 or unit-2 test line (GC-P77) |
+
+Twenty-six new server tests: the contract's fourteen, eleven the specification and the unit's critique added, and one
+from his review (`aCanopySkipsBedsHeMayNotChange`).
+
+**Client test written** (not run): `ConcordanceGardenPactClientGameTests`, his flow after Foras's at the same perch,
+calling the shared yard first, at noon in clear weather; 35 shots ([his record's Verification](amdusias-pact.md#verification)
+names them), each pact screen held to its word budget, his chooser's card held whole, his first beat's portrait whole;
+his horn's subtitle staged on the HUD's overlay where no sound device plays, logged as staged.
+
+**Completion evidence for Amdusias** (the codes above; **none of these tests has run**):
+
+| Code | Amdusias (unit 6), as built |
+|---|---|
+| GE1 | `aStrangersCropIsNeverSheltered`, `aCanopySkipsBedsHeMayNotChange`, `anotherPlayerCannotAcceptForAnySpiritsHolder`, `everySpiritWaitsForANearHolder` |
+| GE2 | `aCanopyLapsesWithin40TicksOfSuspension` (and the tree's felling, the holder 100 blocks away, the perch's breaking), `aCanopyLapsesWhenItsHolderLeaves`; `everySpiritsUpkeepWarnsGivesGraceSuspendsAndResumes` and `aStandInNeverAnswersAnySpiritsUpkeep` (his offering count 1), `everySpiritWaitsForANearHolder` |
+| GE3 | `aDuplicateAmdusiasSheltersNothing`, `aCopiedPerchIsInertForEverySpirit`, `onePresencePerPactForEverySpirit` |
+| GE4 | `aCanopyReturnsAfterARestartWithinOneThink` (nothing saved, nothing held), `endingAnySpiritsPactReturnsTheEscrowOnce`, `everySpiritsKeysSurviveASave` |
+| GE5 | `twoCanopiesNeverStack` (the larger damping, never the sum), `aHolderKeepsOneCanopy`, `twoNegotiationsAtOnePerchSealOnceForEverySpirit`, `everySpiritIsOnePactAHolder` |
+| GE6 | Worker, Garden (GC-09b's two), Economy (`theEconomyStillHasNoGainingCycle`); Persistence, Sharing, Logistics and Journey unchanged; the garden client class |
+| GE7 | no whole-path server test of his (his three journey steps, 17 to 19 on this line, name the tests that hold them; unit 7's `theGardenPactsFromCodexToDeparture` is to walk them); the client class from the chooser to the ended pact |
+| GE8 | `check_garden_pacts`' distinctness table with `canopy_shelter` ("shelter, changing nothing": the stir a bed's crop reads, memory only): one work, one service class, distinct verbs; no item, block or saved value changed by his service |
+| GE9 | Amdusias's checklist: [his Verification](amdusias-pact.md#verification) |
+
+**Local checks and audit mutations, by commit** (each commit's message, and the session's logs): GC-09a, four
+documentation mutations, two caught (a broken link, a trailing space; a broken anchor checked only by hand; a wrong
+SHA-256 in the brief not caught, as no check reads the brief's hashes); GC-09b, 29 caught (A1 to A29) by `check_mod_data`;
+GC-09d, 20 caught (B1 to B14 with B5b, Q1 to Q7 but Q5) and the control Q5 passed; GC-09, 23 caught (D1 to D24 but D19)
+by `check_mod_data` and D19 stopped by `tools/garden_bodies.py`'s own guard; his review's fixes, 13 caught (M1 to M13).
+Each commit's tree passed `tools/owner_art.py --check`, `tools/check_mod_data.py`, `scripts/check_repository.py`,
+`tools/concordance_journey.py --check`, `tools/concordance_economy.py` ("gaining cycles: none"),
+`tools/check_icon_maps.py`, `tools/magic_ui.py`, the world designer's node tests (12), `scripts/tests` (344 at GC-09a,
+345 from GC-09) and `git diff --check`, the generators first, one at a time, their incidental rewrites (line endings only,
+a reordered content map, two textures with identical pixels) restored and not committed; each edited Java file passed the
+parse check; GC-09's first `check_mod_data` run failed on two things (its Inspect-page picture not taken through `shot()`,
+the journey record's block stale), both fixed before the commit; its review's first `scripts/tests` run failed on a
+four-word chip, fixed. The ecology harnesses and unit 3's advice harness with a shelter dimension ran in GC-09b, 0
+failures ([his record](amdusias-pact.md#the-canopys-shelter-gc-09b)); the `ecology` classes are unchanged since. **For
+this records commit:** the same checks on its tree; no generated file changes; its documentation mutations are in its
+message.
+
+**APIs not confirmed against a build** (each checked only by reading): in the 26.3 sources, `Hud.subtitleOverlay` (read
+by reflection by that name), `Gui.hud`, `SubtitleOverlay.onPlaySound`, the 8-argument `SimpleSoundInstance`,
+`Registry.getValue(Identifier)` and `CompoundTag.getIntArray`; from the repository's own uses,
+`BlockEntity.saveWithFullMetadata`, `EncyclopediaClient`'s key, sequence and navigator, `TestPlayers.leave`,
+`PactKeeping.suspend`/`resume`/`end`, `PactAccords.matter`, `GardenReach.refreshes()`, `MAX_BEDS` and `nearest`,
+`TestClaims.block`, `PactReading.presence` and `List.getLast()`; and, unconfirmed at all, that his classes compile, the
+words his terms page draws ("Max 16 beds", "/16 now"), `teleportTo` 100 blocks off in the lapse test, two holders in one
+party covering each other's beds, the work sign as his sway, the encyclopedia's ray on the bed under the crop, and
+budding amethyst's stir in the client yard.
+
+**Not run:** everything of unit 6 in CI (compilation, the server jobs, the garden client class, a dispatch of every
+client class); a second client at his perch; any person, alone or with others; any sound.
+
+#### Corrections to unit 6's commit messages
+
+The commits are not rewritten, so their messages are corrected or completed here:
+
+- **`23236575e`** calls the quota chip "16 at once"; since his review (`28953d21b`) it reads "Max 16 beds" (the review's
+  "16 beds at once" is four words, over the chip's three).
+- **`6c17ddb30`** says his terms word the quota "16 at once" (now "Max 16 beds", as above) and that his sway is
+  `Sign.MEND` (the shared work sign since `28953d21b`); its "23 server tests here plus GC-09b's 2" are 22 in the worker
+  class and 1 in the economy class, and his review added a 23rd worker test: 26 in all.
+- **`28953d21b`** cites Build run 40847753203 on `4201217b3` as failed; that result came to these records only through
+  the review's finding, and its log was not read for them.
+- **The Decisions rows GC-P123 to GC-P139** carry 27 October 2026, the date of the unit's specification; they were added
+  to this page on 2 November, with the amendments his build and review made. They follow GC-P122 in number order; unit
+  5's rows (GC-P103 to GC-P119) join them at the merge.
+
 ## Schema review (the shared schema against eight services)
 
 | Concern | The six garden services | For the shared schema |
@@ -2300,6 +2479,19 @@ flow in `ConcordanceGardenPactClientGameTests`, his graft frozen with the cap ti
 checks (bodies and `owner_art --check`, with the acorn cap from the second edited part) ran on each commit and passed
 ([unit 4's evidence](#unit-4-as-built-and-its-evidence)).
 
+**Unit 6 as written** (row 6 above against the build; **not yet run**: nothing on unit 6's line has run in CI): Worker
+(Amdusias's canopy, character and accord tests, `HARVEST`, strain, stacking, the Heart, the cap's wording, the lapse
+cases, SG12 through his fixture), Garden (GC-09b's `aShelteredHabitatKeepsItsStrainedValue` and
+`theCanopyRegistryTakesTheLargestNeverTheSumAndLapses`; every existing habitat, garden and Gauge test unchanged with no
+canopy), Inspect and Gauge (`theInspectPageAndTheGaugeReadTheShelteredValue`) and Economy
+(`theEconomyStillHasNoGainingCycle`); no persistence test (nothing of his is saved:
+`aCanopyReturnsAfterARestartWithinOneThink` in Worker). The habitat harness and the `Habitat.sheltered` cases ran locally
+as scratch harnesses outside Git (13,221,792 checks; unit 3's advice harness with a shelter dimension, 151,395,025 and
+16,516,020 checks; 0 failures; [his record](amdusias-pact.md#the-canopys-shelter-gc-09b)). The client row is his flow in
+`ConcordanceGardenPactClientGameTests`, the late horn (its subtitle staged on CI) and the tree's sway among its 35 shots.
+The row's local checks (bodies, `owner_art --check` with the flower crown, `check_baselines` holding `ecology` pure) ran
+on each commit and passed ([unit 6's evidence](#unit-6-as-built-and-its-evidence)).
+
 ## Decisions
 
 The owner's (GC-D), the session's under the standing instruction (GC-S, "Decided by the session"), and the units'
@@ -2433,8 +2625,25 @@ proposals (GC-P, numbered in the reserved blocks). Chunk A to D decisions are un
 | GC-P99 | 27 October 2026 | The Garden's Regard's mastery is reachable on unit 4's own line (three garden spirits there); unit 4 adds no mastery page, step or test (unit 3's, GC-P75) | Proposed (unit 4) | GC-07 |
 | GC-P100, GC-P101 | 26 October 2026 | Bifrons's beats; terms (radius 8, 13,000 to 23,000, 24 units, party), offering (2 logs a week), compact (4 oak logs, 1 emerald); source at 24 or more, destination 3 poorer | Proposed (unit 5) | GC-08 |
 | GC-P102 | 26 October 2026 | His measuring as bounded server particles at source, then destination; no client hook | Proposed (unit 5) | GC-08 |
-| GC-P120, GC-P121 | 26 October 2026 | Amdusias's beats; terms (radius 6, any hour, 16 beds covered at once, party), offering (1 sapling a week), compact (1 note block, 2 oak saplings); damping 2; tree within 2, looked at every 200 ticks; lapse 40 ticks | Proposed (unit 6) | GC-09 |
-| GC-P122 | 26 October 2026 | The canopy rules: crops whose disturbance minimum is 0 (all once answered); the largest covering canopy; `strained()` undamped; the quota worded "At most %s beds sheltered at once"; his cue `pocket_horn_fade` | Proposed (unit 6) | GC-09 |
+| GC-P120, GC-P121 | 26 October 2026 | Amdusias's beats; terms (radius 6, any hour, 16 beds covered at once, party), offering (1 sapling a week), compact (1 note block, 2 oak saplings); damping 2; tree within 2, looked at every 200 ticks; lapse 40 ticks *(amended unit 6: the greeting "You see me before you hear me. I am Amdusias.", since his horn sounds a beat late, after the stage direction "A garlanded white unicorn bows his leafy horn." and with the service beat shortened to 18 words, held to GC-S26; the offering tag names `minecraft:oak_sapling`, `birch_sapling` and `spruce_sapling`, in place of `#minecraft:saplings`; grace 1 day, cap 4)* | Proposed (unit 6) | GC-09 |
+| GC-P122 | 26 October 2026 | The canopy rules: crops whose disturbance minimum is 0 (all once answered); the largest covering canopy; `strained()` undamped; the quota worded "At most %s beds sheltered at once"; his cue `pocket_horn_fade` *(amended unit 6: "wants the stir" is the niche's ideal disturbance starting above 0, `Niche.wantsStir`, the same for every shipped crop; applied only to the plant above a covered bed, a crop or a Gauge's attuned organism, a Gauge's bed counting toward the 16; strain judged on the unsheltered area)* | Proposed (unit 6) | GC-09 |
+| GC-P123 | 27 October 2026 | The pure shape: `Habitat`'s seventh component `shelter` (0 through every earlier constructor), `sheltered(int)` (the larger damping from the unsheltered area, never the sum), `unsheltered()`, `strained()` against the unsheltered area, `with` keeping the shelter, `withStrain`; `Verdict.reasons`' strained lines and the Inspect page's strained row on the unsheltered value; `HabitatInspection.sheltered` *(as built, GC-09b)* | Proposed (unit 6) | GC-09 |
+| GC-P124 | 27 October 2026 | `G/Canopies`: per level, one canopy a holder (another perch's refused while one stands), its beds indexed by chunk, at most 16, damping clamped 0 to 2, lapsing 40 ticks after its last refresh (a clock run back lapses it), pruned at most once a tick; memory only *(as built, GC-09b; no `forget` or `live`, which no test then needs)* | Proposed (unit 6) | GC-09 |
+| GC-P125 | 27 October 2026 | What a reading says: the sheltered value everywhere; the line "Sheltered by Amdusias: ..." on the Inspect page and the bed's and crop's reports; Jade's bed and Gauge readings carry `sheltered` *(amended unit 6: the bed's saved note never carries the line, the unit critique's item 4; Jade short as "Sheltered by Amdusias: -2", whole in details)* | Proposed (unit 6) | GC-09 |
+| GC-P126 | 27 October 2026 | The quota as a cap: `PactService.quotaTerm()` (default `term.quota`), his `term.quota.canopy_shelter`; nothing counted on his record *(amended unit 6: no screen label; the chip's glance "Max %1$s beds" with his work's item; his gauge "%1$s/%2$s now", decided by the session)* | Proposed (unit 6) | GC-09 |
+| GC-P127 | 27 October 2026 | The late cue: `PactSpiritEntity.cueBeat` (default 0), a held cue noted and gestured at once and sounded at its beat where the spirit stands; `soundedAt` (memory); his horn 20 ticks for arrive, work and depart *(as built, GC-09d; a held cue dropped while the Concordance is off, but a departure's)* | Proposed (unit 6) | GC-09 |
+| GC-P128 | 27 October 2026 | His step: hours, tree, answer, beds nearest first (each asked through `GardenPacts.target`, a stir-wanting crop spared unless answered `all`), at most 16; no tree: lift, `WAITING_FOR_RESOURCES` *(amended unit 6, his review: a bed asked before its crop is spared; a bed refused for itself skipped until his index is read again; his memory read only within 40 ticks of his last step)* | Proposed (unit 6) | GC-09 |
+| GC-P129 | 27 October 2026 | His tree: the nearest `#minecraft:logs` block within 2 on every axis, remembered, looked for again at once when it falls, otherwise at most every 200 ticks | Proposed (unit 6) | GC-09 |
+| GC-P130 | 27 October 2026 | His matter `wants_stir`; answers `spare` (the safe course and the reading of an unknown value) and `all`, append only | Proposed (unit 6) | GC-09 |
+| GC-P131 | 27 October 2026 | `PactObligations.Act.HARVEST` (`harvest`), after unit 5's `FEED` once merged; its one hook after the hand harvest's cultivation record in `OrganismCropBlock.useWithoutItem` | Proposed (unit 6) | GC-09 |
+| GC-P132 | 27 October 2026 | Station `BESIDE` (unit 3's mechanism, no code of his own); box 1.6 x 2.4, eyes 1.9; sign `minecraft:oak_sapling` *(amends Dossier 6's 2.0 and the line-up: Amdusias 2.4, the tallest)* | Proposed (unit 6) | GC-09 |
+| GC-P133 | 27 October 2026 | His body built by `tools/garden_bodies.py`, 0.75 x 2.41 x 1.56 blocks; the owner's flower crown's twelve cubes as his garland, one face of each two-faced plane dropped; a 128 x 64 skin in three paintings' colours around the crown's texels; no glowmask *(amends the line-up, as GC-P132)* | Proposed (unit 6) | GC-09 |
+| GC-P134 | 27 October 2026 | His clips: five loops and six gestures with their telling windows; the sway every 200 ticks while sheltering and once at his departure *(amended unit 6: the sway is the shared work sign through `Signs.show`, not tinted leaves)* | Proposed (unit 6) | GC-09 |
+| GC-P135 | 27 October 2026 | Cues on runtime mono files already shipped: the far horn (arrive, work, depart at 0.9), the whistle (listen 1.3, assent 1.1, refuse 0.7), the tephra whistles (inspect); each subtitled | Proposed (unit 6) | GC-09 |
+| GC-P136 | 27 October 2026 | His words: `SERVICE_WORDS["canopy_shelter"]`, the roster line, four codex pages, the perch tooltip's clause, Jade notes `covered`, `spared`, `no_tree`, `elsewhere`, `nothing` *(as built on the magic interfaces: his `WORK_GLANCES` row, short forms and marks)* | Proposed (unit 6) | GC-09 |
+| GC-P137 | 27 October 2026 | Unit 3's `HabitatAdvice`: its strain branch `habitat.withStrain(value)`, so advice on a sheltered reading keeps its shelter *(amended unit 6: made in GC-09b on his own line, unit 3 being in its base, not at a merge; the disturbance named is the sheltered value, decided by the session)* | Proposed (unit 6) | GC-09, GC-06 |
+| GC-P138 | 27 October 2026 | Evidence: his server tests, the ecology harnesses, his flow in the garden client class after Foras's (25 shots and 10 body shots; `WEIGHTS` +240), the staged subtitle *(amended unit 6: 26 server tests)* | Proposed (unit 6) | GC-09 |
+| GC-P139 | 27 October 2026 | The merge register: every shared line under its `GC-09 unit 6` marker, resolved in unit order at the merge with unit 5's line | Proposed (unit 6) | GC-09 |
 | GC-P141 | 26 October 2026 | The garden load card's workload and budget (above) | Proposed (unit 7) | GC-10 |
 | GC-P142 | 26 October 2026 | The garden two-client scenario (above) | Proposed (unit 7) | GC-10 |
 
@@ -2490,7 +2699,9 @@ every citation resolves; none is the owner's.
 Units 1 (GC-01 to GC-04) and 2 (GC-05) are built, their CI evidence and records are in this page and their records, and
 they wait in draft pull request #526 for the owner's review. Unit 3 (GC-06, Marax) is built and recorded, not yet
 compiled or run in CI. Unit 4 (GC-07, Foras) is built and recorded on its own line from unit 3's shared prefix and merged
-after unit 3's line, not yet compiled or run in CI. Next:
+after unit 3's line, not yet compiled or run in CI. Unit 6 (GC-09, Amdusias) is built and recorded on its own line
+(`wip/garden-u6`, from `4201217b3`) beside unit 5's, not yet compiled or run in CI; it joins the cohort after unit 5
+(item 7). Next:
 
 1. Look at the pictures of run 40782439981 (green in full on `d7185041b`, which holds Bathin's facing pictures framed
    whole and the magic interfaces' `73464e938`); no record here describes them yet.
@@ -2527,6 +2738,23 @@ after unit 3's line, not yet compiled or run in CI. Next:
    line rather than a voiced one, and a ripe host whose bed holds no reading waiting until it is read
    ([his record](foras-pact.md#rollout-and-open-questions)); GB18 (Gutenberg's record); a dispatch of every client class
    on the cohort's head.
+7. **Unit 6's merge after unit 5.** A trial merge in memory of unit 6's line before its records (`28953d21b`) into the
+   cohort's `claude/garden-cohort` at `be76fd419` (Bifrons merged in `7e616ca16`, then main; `git merge-tree`, no branch
+   or worktree changed) conflicted in five files only: `PactParser.WORK` and `REQUIRED` (take unit 5's list, then
+   `canopy_shelter` and `jugcraft:amdusias`); `en_us.json` and `sounds.json` (regenerated, never hand-merged); the
+   journey record's garden table (regenerated: Bifrons's steps 17 to 19, Amdusias's 20 to 22); and the magic interfaces'
+   rollout list (both lines, Bifrons's first). The records this commit adds conflict too where unit 5's records wrote the
+   same lines: this page's status, units table, Decisions (unit 5's GC-P103 to GC-P119 before GC-P120), the validation
+   plan, the unit evidence sections (unit 5's before unit 6's), Where to resume; `CHANGELOG.md`, `WHAT_EXISTS.md`,
+   `TESTING.md`, `INTEGRATION_STATUS.md` and the workers, ecology and journey records (union, unit 5's lines first).
+   Merged without a conflict, to check: `PactObligations.Act` (`FEED`, then `HARVEST`) and `ACTS`; `GC05_ACCORDS`,
+   `PactGlance.WORK_ICONS` (Star-reckoning's last), `MagicGlance.MARKS` and `tools/magic_ui.py`'s rows under their
+   markers; his client flow after Bifrons's in `runTest`; `WEIGHTS` (+240 after unit 5's +240); his SG12 fixture (his log
+   at `perch.offset(-1, 0, -1)`, Bifrons's second bed at `(-1, -1, -1)`, a level below; every cell's box holds it); the
+   test classes' imports; `VANILLA_SOURCES` (unit 5's `oak_log`, his saplings and note block at the end). Then run
+   `tools/generate_material_data.py`, `tools/owner_art.py` and `tools/concordance_journey.py` (paste its block), and
+   `tools/concordance_economy.py` (paste its table if it moved); his four codex pages follow Bifrons's, before
+   "Mastered"; then every local check, the parse check, and CI on the merged head with a dispatch of every client class.
 
 ## How this contract was checked
 

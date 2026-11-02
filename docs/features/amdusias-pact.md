@@ -8,24 +8,28 @@ to 2 lower, never below nothing. He is the cohort's sixth garden spirit (Bifrons
 service changes no block, item or saved value: a crop under his canopy only reads the stir lower, from a registry held
 in memory that lapses when he stops.
 
-Status: brief (GC-09a), committed before any of his body files (D-D5), as the contract's per-spirit template asks, then
-the canopy's pure rule and the garden's memory of canopies (GC-09b, [below](#the-canopys-shelter-gc-09b)) and a cue a
-beat late and a quota worded as a cap (GC-09d, [below](#a-cue-a-beat-late-and-a-quota-worded-as-a-cap-gc-09d)), each
-with no user yet; then Amdusias himself (GC-09, [as built](#gc-09-amdusias-as-built)): his entity, pact, service, words,
-body, cues, audits, server tests and client flow. This page holds his character (the contract's Dossier 6), the short
-words the magic screens draw for him and the owner files his body and cues use.
+Status: **built and recorded on unit 6's own line, not yet compiled or run in CI, not merged.** His brief `23236575e`
+(GC-09a), committed before any of his body files (D-D5), as the contract's per-spirit template asks; the canopy's pure
+rule and the garden's memory of canopies `929337b5c` (GC-09b, [below](#the-canopys-shelter-gc-09b)) and a cue a beat late
+and a quota worded as a cap `916b624d4` (GC-09d, [below](#a-cue-a-beat-late-and-a-quota-worded-as-a-cap-gc-09d)), each
+with no user yet; Amdusias himself `6c17ddb30` (GC-09, [as built](#gc-09-amdusias-as-built): his entity, pact, service,
+words, body, cues, audits, server tests and client flow); his review's fixes `28953d21b`; these records. The line starts
+from `4201217b3`, the cohort with units 1 to 4 (Foras merged); unit 5 (Bifrons) is built on a line of its own beside it,
+and the two join in the order 3, 4, 5, 6 ([the contract's merge notes](concordance-garden-cohort.md#where-to-resume)).
+No Minecraft jar was available where he was built: every Java file of his was only parse-checked, and none of his 26
+server tests or 35 client shots has run ([Verification](#verification)). No person has played him. This page holds his
+character (the contract's Dossier 6), the short words the magic screens draw for him, the owner files his body and cues
+use, and his record as built.
 Where it goes beyond Dossier 6 (the amended greeting and its stage direction, the canopy's rule and registry, how his
 body is built, which cue plays which file at what pitch, the short words the screens draw) it is unit 6's proposal
-(GC-P120 to GC-P139, added to the contract's Decisions when the unit lands), and the palette files may change only here,
-before any body file (the contract's art plan). Four things came after the unit's design and are followed here
+(GC-P120 to GC-P139, in the contract's Decisions), and the palette files changed only here, before any body file (the
+contract's art plan). Four things came after the unit's design and are followed here
 ([where this brief departs from it](#where-this-brief-departs-from-the-units-design)): his station is unit 3's (GC-P67,
 in the shared prefix GC-06b), with no station code of his own; his words keep to the magic interfaces' limits (GC-S26);
 the owner-art root he reads his garland through is already in the base (GC-06b, first read by Foras's acorn cap); and
 unit 3's `HabitatAdvice` is in the base, so the one-line edit that keeps a canopy's shelter in Marax's advice
 (GC-P137), which the design left to the merge, lands in this unit's own commits. Where these change his specification,
-the choices are the session's; none is the owner's. The rest of the record (player experience, record fields as built,
-connections, the canopy as built, failure behaviour, the pact screen, his matter, saved data, verification) is added
-with the code.
+the choices are the session's; none is the owner's.
 Proposal issue: none; the owner's selected scope ([the cohort's contract](concordance-garden-cohort.md), GC-D1 to GC-D3).
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 
@@ -446,6 +450,11 @@ all"). Every 10 s while he shelters, and once as he bows and leaves, his tree sw
 
 ### Decided by the session (none is the owner's)
 
+- **The design's own words, refined as built** (each in the contract's Decisions): the greeting amended ("You see me
+  before you hear me", GC-P120); the offering tag named (three saplings, not `#minecraft:saplings`, GC-P121); "wants the
+  stir" as the niche's ideal starting above 0 (GC-P122); the origin oak leaves' two colours added to the palette for his
+  horn's leaves (GC-P133); the quota's words as a cap with no label (GC-P126); his canopy lifted at his own think or by its
+  lapse, never by a gesture.
 - **The gauge reads "now".** His kept page's gauge is "%1$s/%2$s now" (beds sheltered now of his cap), and
   `check_magic_ui` takes "now" in place of "today" for a work in `QUOTA_TERMS` (still data, no code path). The task
   this unit was built from lists the shared "%1$s/%2$s today"; "3/16 today" would present his cap as the daily count
@@ -485,12 +494,96 @@ all"). Every 10 s while he shelters, and once as he bows and leaves, his tree sw
   end-confirmation shot (his list has none). The horn's subtitle is staged on the HUD's own overlay where no sound
   device plays (CI), logged as staged; the server's time of the horn is checked either way.
 
+### Saved data and stable ids
+
+| What | Id or key | Saved? |
+|---|---|---|
+| Entity | `jugcraft:amdusias` | as every pact spirit: the base's `perch` and `record` only; nothing of his own |
+| Pact definition | `jugcraft:amdusias_pact`; `data/jugcraft/concordance/pact/amdusias.json` | data |
+| Offering tag | `#jugcraft:amdusias_offerings` (`minecraft:oak_sapling`, `birch_sapling`, `spruce_sapling`) | data |
+| Sound events | `jugcraft:amdusias.{arrive,listen,inspect,assent,refuse,depart,work}` | registry |
+| Work id | `canopy_shelter` (`BoundWill.Service.work`; `PactParser.WORK`, append only) | yes, on the pact record |
+| Accord values | `spare`, `all` (the perch's `accord`; append only, never renamed) | yes, on the perch |
+| Matter and notes | `wants_stir`; Jade notes `covered`, `spared`, `no_tree`, `elsewhere`, `nothing` | sent with a reading, never saved |
+| Obligation | `PactObligations.Act.HARVEST` (`harvest`); its evidence key `practice:` + the garden activity + `:jugcraft:amdusias` (unit 1's form) | the shared obligations' evidence |
+| Canopy | `garden/Canopies` | **never saved or sent**; lapses within 40 ticks; returns within one think after a restart |
+| Habitat shelter | `Habitat.shelter`; the Gauge's `sheltered` | never saved (a reading; the Gauge's in memory); the bed's saved keys and note unchanged |
+| Late cues | `PactSpiritEntity`'s held cues and `soundedAt` | never saved |
+| His memory | `CanopyShelter.Memory` (tree, index, spared and skipped beds, last step, sways) | never saved |
+
+No migration: nothing saved before is renamed or removed. A save holding his pact, loaded by a build without him, keeps
+it with its work unknown (the shared record's rule), and no canopy forms.
+
+### Known limits
+
+- **Not compiled or run.** Every test and shot of his waits for CI; nothing here says he works in game.
+- **No person has played him**, alone or with others; no two-client run at his perch (the cohort's two-client test is
+  unit 7's).
+- **His horn's subtitle on CI is staged:** with no sound device the client's sound engine starts nothing, so his client
+  flow shows the subtitle on the HUD's own overlay and logs it as staged; the server test holds the horn's beat. A
+  machine with sound shows the real one.
+- **One damping where two holders cover a bed:** two holders' canopies over one party bed give the larger damping, never
+  the sum; each holder keeps one canopy (a second perch's waits until the first lapses).
+- **His sway is the shared work sign** at the log's top, not leaves of his own; whether it reads as a tree swaying is for
+  the owner to see.
+- **A Gauge's bed counts toward his 16**, as a crop's does.
+- **His gauge reads "now"** (beds sheltered now of his cap), where the shared rule reads "today"; reviewable at the
+  checkpoint.
+- **The crop's own Jade tooltip does not name the canopy** (it is drawn from the bed's saved note, which never carries
+  it); the bed's and the Gauge's Jade, the Inspect page and both reports do.
+- **His body is built rather than the owner's** (no owner rig is a unicorn; the garland is the owner's flower crown),
+  2.4 blocks tall, amending the contract's 2.0.
+
 ## Verification
 
-Nothing of unit 6 has run in CI, and no Minecraft jar is here: no build, game test or client shot has exercised him. The line this brief starts from is `4201217b3` (with Foras).
+**Not run in CI.** Nothing of unit 6 has run in CI, and no Minecraft jar was available where he was built: no build,
+game test or client shot has exercised him, and every Java file of his was only parse-checked (no syntax errors). Each
+row's evidence below is what will show the item, not a result. Each API his files use was checked against the
+repository's own uses, the 26.3 decompiled source and GeckoLib 5.5.7's source; those resting on reading alone are under
+"Not confirmed" below. The line this brief starts from is `4201217b3` (with Foras).
 4201217b3's Build (run 40847753203) failed in `mod` and `optional integrations absent`. 5e93bb0a77 fixes it (the reload
 test thinks first; 6G heap), and this line takes it at the merge. Do not run CI on this line alone. The newest green
 result it descends from is run 40840353835, green in full on `3bfd63a97`.
+
+Each brief item and the evidence named (the contract's GE9):
+
+| Brief item | Evidence (server game tests in `ConcordanceWorkerGameTests` unless named; shots `jugcraft_garden_amdusias_*` of `ConcordanceGardenPactClientGameTests`) | Result |
+|---|---|---|
+| 1. Identity | his body files from `tools/garden_bodies.py` through `tools/owner_art.py` (`--check`); `check_spirit_bodies` (his bones, the garland's twelve cubes from the owner's crown with their dropped faces, the skin's colours, his box, clips and telling windows, his loops and shots in the client); his poses from his front (`_idle`, `_listen`, `_waiting`, `_suspended`, `_inspect`, `_assent`, `_refuse`, `_work`, `_depart`, `_arrive`) | the audits pass locally; shots not run |
+| 2. Invitation and route | `amdusiasRefusesWithoutATree` (and without a bed), `amdusiasStandsBesideHisPerch`; `tools/concordance_journey.py --check` (the garden pacts' steps 17 to 19 on this line); shots `_no_tree`, `_chooser` | not run; the journey check passes locally |
+| 3. Service | `aCanopyLowersOnlyDisturbanceForCropsInItsArea`, `aCanopyNeverSuppliesDisturbance`, `aCanopyNeverHelpsAHeart`, `aCanopyNeverEasesStrain`, `aCanopyCoversAtMost16Beds`, `aCanopySkipsBedsHeMayNotChange`, `aCanopyReturnsAfterARestartWithinOneThink`, `theInspectPageAndTheGaugeReadTheShelteredValue`; `ConcordanceGardenGameTests`' `aShelteredHabitatKeepsItsStrainedValue`, `theCanopyRegistryTakesTheLargestNeverTheSumAndLapses` (GC-09b); `ConcordanceEconomyGameTests.theEconomyStillHasNoGainingCycle`; shots `_inspect_page`, `_bed_jade`, `_gauge_jade` | not run |
+| 4. Upkeep and suspension | `aCanopyLapsesWithin40TicksOfSuspension` (and of the tree's felling, the holder 100 blocks away, the perch's breaking), `aCanopyLapsesWhenItsHolderLeaves`; SG12's fifteen shared cases through his fixture (his log north-west of the perch); `noGardenTermOrRefusalNamesAnAstrolabe`, `talkingTeachesNothing`; `theCanopysQuotaIsWordedAsACap`; `check_acquisition` (his compact and offerings reachable); shots `_terms` (three sizes), `_refused`, `_kept` | not run; the audit passes locally |
+| 5. Conflict: the stir a Gloamcap wants | `aCanopySparesAGloamcapUntilAnswered`, `amdusiassReadingSaysItsNoteAndNamesNoPlayer`; shots `_matter` (three sizes), `_answered`, `_jade` | not run |
+| 6. Refusal and departure | `amdusiasRefusesWithoutATree`, `amdusiasAnswersEachActionWithHisGesture`, `aDuplicateAmdusiasSheltersNothing`; shots `_conversation` (three sizes), `_depart`, `_ended` | not run |
+| 7. Interaction details | (a) the late horn: `amdusiasHornsABeatLate`, shot `_horn` (staged on CI); (b) the tree's sway: `hisTreeSwaysWhileHeShelters`, shot `_sway`, the ending's sway at his tree in the client; facing: `amdusiasStandsBesideHisPerch`, shots `_faces_east`, `_south`, `_west`, `_north` | not run |
+| 8. Evidence | the client class keyboard-only at GUI 2, GUI 4 and 320 x 180; *ownership:* `aStrangersCropIsNeverSheltered`, `aCanopySkipsBedsHeMayNotChange`, SG12's `everySpiritWaitsForANearHolder`; *no duplication:* `twoCanopiesNeverStack`, `aHolderKeepsOneCanopy`, `aDuplicateAmdusiasSheltersNothing`; *save:* `aCanopyReturnsAfterARestartWithinOneThink` (nothing saved); *first obligation:* `amdusiassFirstObligationIsAHarvestUnderHisCanopy`; *Jade:* `amdusiassReadingSaysItsNoteAndNamesNoPlayer`, shot `_jade` | not run |
+
+**Server tests written for him** (26; `tools/check_mod_data.py` holds their names): `GC09_TESTS`, two in
+`ConcordanceGardenGameTests` from GC-09b (`aShelteredHabitatKeepsItsStrainedValue`,
+`theCanopyRegistryTakesTheLargestNeverTheSumAndLapses`), eighteen in `ConcordanceWorkerGameTests`
+(`aCanopyLowersOnlyDisturbanceForCropsInItsArea`, `aCanopyNeverSuppliesDisturbance`, `aCanopyNeverHelpsAHeart`,
+`aCanopyNeverEasesStrain`, `twoCanopiesNeverStack`, `aCanopySparesAGloamcapUntilAnswered`,
+`aCanopyLapsesWithin40TicksOfSuspension`, `aCanopyLapsesWhenItsHolderLeaves`, `aCanopyCoversAtMost16Beds`,
+`aStrangersCropIsNeverSheltered`, `amdusiassFirstObligationIsAHarvestUnderHisCanopy`,
+`theInspectPageAndTheGaugeReadTheShelteredValue`, `theCanopysQuotaIsWordedAsACap`,
+`aCanopyReturnsAfterARestartWithinOneThink`, `hisTreeSwaysWhileHeShelters`, `aHolderKeepsOneCanopy`,
+`amdusiassReadingSaysItsNoteAndNamesNoPlayer`, and from his review `aCanopySkipsBedsHeMayNotChange`) and
+`ConcordanceEconomyGameTests.theEconomyStillHasNoGainingCycle`; `GC09_AMDUSIAS_TESTS`, five in
+`ConcordanceWorkerGameTests` (`amdusiasStandsBesideHisPerch`, `amdusiasRefusesWithoutATree`, `amdusiasHornsABeatLate`,
+`amdusiasAnswersEachActionWithHisGesture`, `aDuplicateAmdusiasSheltersNothing`). SG12's fifteen shared cases run for him
+through his fixture, and `noGardenTermOrRefusalNamesAnAstrolabe` and `talkingTeachesNothing` for every offered spirit.
+The existing habitat, garden and Gauge tests are unchanged and must hold with no canopy. None of these has run.
+
+**Client** (`./gradlew runClientGameTest -PclientTests=ConcordanceGardenPactClientGameTests`): his flow after Foras's, at
+the same perch, calling the shared yard first, at noon in clear weather; 35 shots, `jugcraft_garden_amdusias_` +
+`no_tree`, `chooser`, `conversation` and `terms` (each at three sizes), `refused`, `kept`, `horn`, `inspect_page`,
+`bed_jade`, `gauge_jade`, `sway`, `matter` (three sizes), `answered`, `jade`, `faces_east`, `_south`, `_west`, `_north` and
+`ended` (25 named in `GARDEN_CLIENT_SHOTS`), and his ten body shots in his `SPIRITS` row (`idle`, `listen`, `waiting`,
+`suspended`, `inspect`, `assent`, `refuse`, `work`, `depart`, `arrive`), each pact screen held to its word budget
+(beats 30, terms 50, kept page 45, roster 70, the chooser's `chooserWords`) and his chooser's card held whole.
+`tools/select_client_tests.py` sends a change to his body, entity or service to this class (its weight `+240`;
+`scripts/tests/test_client_test_selection.py`). Not run; none of its pictures exists yet, so none has been looked at and
+this record has no "Seen" column.
 
 GC-09b: no Minecraft jar here, so its Java was parse-checked only (the `ecology` package, all but its JSON parser,
 also compiled with JDK 21 for the harnesses above); its two server tests have not run. Run and passed locally:
@@ -536,8 +629,8 @@ locally: the generators (one at a time; the generated difference is his lang, so
 built body files), `owner_art.py --check`, `tools/check_mod_data.py` (with the GC-09 blocks of `check_pacts`,
 `check_garden_pacts` and `check_spirit_bodies`, and his rows in `check_magic_ui`), `scripts/check_repository.py`,
 `concordance_journey.py --check`, `concordance_economy.py` (gaining cycles: none), `check_icon_maps.py`,
-`tools/magic_ui.py`, the world designer's model tests, `scripts/tests` and `git diff --check`. The commit's audit
-mutations, each on a scratch copy, are reported with the commit.
+`tools/magic_ui.py`, the world designer's model tests, `scripts/tests` and `git diff --check`. Its audit
+mutations, each on a scratch copy, are in the table below.
 
 Fixes from Amdusias's review (written, not run; parse-checked only, none of it compiled or run in CI):
 
@@ -563,3 +656,68 @@ tests, `scripts/tests` and `git diff --check`. Thirteen audit mutations on a scr
 fresh step in his note, matter and rows, the step's time, the ask before the spare, the skip and its forgetting, the
 mend mark in the entity and in his row, `HabitatAdvice.java` emptied, the four-word chip, the new test renamed) were
 each caught.
+
+**Audit mutations, by commit** (each on a scratch copy of the worktree, deleted after; from the session's logs):
+
+| Commit | Mutations | Outcome |
+|---|---|---|
+| GC-09a `23236575e` | a broken link; a trailing space; a broken heading anchor; a wrong SHA-256 in the asset table | the link caught by `check_repository.py`, the space by `git diff --check`; the anchor caught only by a hand check (no local check reads anchors); the hash **not caught** (no check reads the brief's hashes) |
+| GC-09b `929337b5c` | A1 to A29: `strained()` without the shelter; a damping summed (`sheltered`, `Canopies.damping`); a negative damping let through; `Verdict`'s strained lines and second judgement on the sheltered value; `wantsStir` on the range's minimum; the Inspect page without the line, its strained row on the sheltered value (critique item 7); a 7-argument `Habitat` in `Sampler`; `cachedHabitat` unsheltered; a Heart sheltered; the registry read before `any()`; the note carrying the line (item 4); the stir rule dropped; `LAPSE_TICKS` 400, `MAX_DAMPING` 3, `MAX_BEDS` 32 in `CONSTANTS`; the registry saving; the Heart asking the registry; the Gauge saving or forgetting its shelter; the Jade snapshot and line; the lang key; the crop's and bed's report lines (item 8); `HabitatAdvice`'s strain branch dropping the shelter (GC-P137); `MagicGlance.MARKS` without the mark | 29 caught by `check_mod_data` (A18 first with an ambiguous anchor, fixed and re-run) |
+| GC-09d `916b624d4` | B1 to B14 and B5b (the held cue: its default beat, its place in the step, its sound attached to the entity, saved, the held branch or its time removed, the switch ignored, sounded at once, never sounded; D-06's on-time sound removed); Q1 to Q7 (the quota as a cap: a sentence with no override or glance, an override with no sentence or another way, a glance counting by the day, two arguments, an unserved work), Q5 a consistent cap as the control | 20 caught by `check_mod_data` and `tools/magic_ui.py`; the control passed, as it should |
+| GC-09 `6c17ddb30` | D1 to D24: the felled tree keeping spared crops (item 6); the stir rule dropped; an item handled; `TREE_REACH` 3; the horn's beat as long as his departure; standing on the perch; the sway with no sign, or on his work; quota 32; the perch tooltip without his clause; his price page dropped; a canopy test renamed; a pose outside its window; his gauge worded by the day; `PactGlance.WORK_ICONS` and `MagicGlance.MARKS` without him; `GC05_ACCORDS` reordered; Jade's notes reordered; one garland face fewer dropped; the harvest hook removed; his act out of `ACTS`; his sway's shot not taken; his canopy kept where his pact cannot serve; his loop claiming work with no tree | 23 caught by `check_mod_data` (D11 first with an ambiguous anchor, fixed and re-run); D19 stopped by `tools/garden_bodies.py`'s own guard ("not the faces the brief names: re-brief"), not by an audit message |
+| his review's fixes `28953d21b` | M1 to M13 (above) | 13 caught; M2 (the fresh guard dropped from his matter) only after the audit's reading of `complication()` was narrowed in the same commit |
+| these records | see the commit's message | |
+
+**Local, these records** (no Minecraft build here): `python3 tools/owner_art.py --check`, `python3 -B
+tools/check_mod_data.py`, `python3 scripts/check_repository.py`, `python3 tools/concordance_journey.py --check`,
+`python3 tools/concordance_economy.py` ("gaining cycles: none"), `python3 tools/check_icon_maps.py`, `node --test
+tools/world-designer/model.test.cjs`, `python3 -m unittest discover -s scripts/tests` and `git diff --check`, each run
+on this commit's tree; their results are in the commit's message. This commit changes no generated file and no code.
+The five `ecology` classes the harnesses above ran against are unchanged since GC-09b (each SHA-256 above read again on
+this commit's tree), so those runs stand for it.
+
+His rows of `python3 tools/owner_art.py --provenance pacts`, as printed for this record:
+
+| Runtime file | Source | SHA-256 | How |
+|---|---|---|---|
+| `geckolib/animations/entity/amdusias.animation.json` | built from code alone | | built by `tools/garden_bodies.py` (amdusias_animations) |
+| `geckolib/models/entity/amdusias.geo.json` | `originals/Edited-2026-10-18-Part2/cnb/geo/armor/flower_crown.geo.json` | `c3cfaa055b62910d96e009c510ad50e4c5e4be6e2952258351b7dbeb2dff47fe` | built by `tools/garden_bodies.py` (amdusias_model) |
+| `geckolib/models/entity/amdusias.geo.json` | `originals/Edited-2026-10-18-Part2/cnb/textures/armor/flower_crown.png` | `61b8e6fa10914bddc7f091d7fca62f488230b488b2d4c35648a8ef7e10b1c1c4` | built by `tools/garden_bodies.py` (amdusias_model) |
+| `textures/entity/amdusias.png` | `originals/Blocks/biomes and tree blocks/white_petals.png` | `20b88497e849470631ac740a8e646c365784063d0c74762a85853be9123c3fc0` | built by `tools/garden_bodies.py` (amdusias_skin) |
+| `textures/entity/amdusias.png` | `originals/Blocks/biomes and tree blocks/origin_oak_log.png` | `c147b6cdc087ce197f4dfd422595d8216ba131efef2ed0f3727014cd033b7969` | built by `tools/garden_bodies.py` (amdusias_skin) |
+| `textures/entity/amdusias.png` | `originals/Blocks/biomes and tree blocks/origin_oak_leaves.png` | `43462aeeba55c863de64696194a8ba10c2b5ae75d5c2cbf229a1c8c7c46b1508` | built by `tools/garden_bodies.py` (amdusias_skin) |
+| `textures/entity/amdusias.png` | `originals/Edited-2026-10-18-Part2/cnb/textures/armor/flower_crown.png` | `61b8e6fa10914bddc7f091d7fca62f488230b488b2d4c35648a8ef7e10b1c1c4` | built by `tools/garden_bodies.py` (amdusias_skin) |
+
+**Not confirmed** (no build, no client), that each of these compiles and behaves as read. Read in the 26.3 sources:
+`Hud.subtitleOverlay` (private: the client test reads it by reflection by that name, which holds only where the
+running game keeps it), `Gui.hud`, `SubtitleOverlay.onPlaySound`, the
+8-argument `SimpleSoundInstance`, `Registry.getValue(Identifier)`, `CompoundTag.getIntArray` returning
+`Optional<int[]>`. Taken from the repository's own uses: `BlockEntity.saveWithFullMetadata`,
+`EncyclopediaClient.key`/`sequence`/`navigator`, `TestPlayers.leave`, `PactKeeping.suspend`/`resume`/`end`,
+`PactAccords.matter`, `GardenReach.refreshes()`, `MAX_BEDS` and `nearest(BlockPos)`, `TestClaims.block`,
+`PactReading.presence(level, spirit, now)` and `List.getLast()`. Not confirmed at all: that the three test classes and his
+two new main classes compile; that the drawn words of his terms page hold the chip's "Max 16 beds" and the gauge's
+"/16 now"; that `ServerPlayer.teleportTo` 100 blocks off behaves in the lapse test as read; that two holders in one party
+may each cover the other's bed (Authority with no claims); that `Sign.WORK` reads well as his tree's sway; that the
+encyclopedia's ray hits the bed under the crop in the client yard; and that budding amethyst gives exactly 1 stir each
+there.
+
+**Not covered:** everything that needs a build: compiling, every game test above, the client flow and its pictures;
+people; sound (CI has none: the horn's subtitle is staged there, and the other cues' subtitles are checked as defined and
+fired); two clients at his perch (the garden's two-client test is unit 7's); a player's hardware; a long unattended
+garden under his canopy on a real server; his astir loop (not photographed, as Buer's, Bathin's, Marax's and Foras's).
+
+## World and event applicability
+
+Overworld, Nether and End alike (a perch, its log and the beds in one level; his area never crosses levels; the canopy
+registry is per level). No seasonal gate. No cave, dungeon, boss or loot role.
+
+## Rollout and open questions
+
+Ships with the garden cohort's unit 6 (GC-09), behind the Concordance's switch; built, not yet compiled or run in CI,
+not merged. Open: his line is to be merged with unit 5's (Bifrons) in the order 3, 4, 5, 6 (the contract's
+[Where to resume](concordance-garden-cohort.md#where-to-resume) lists what that merge resolves by hand); then every test
+and shot of his is to run in CI (the server jobs, the garden client class and a dispatch of every client class), his
+pictures to be looked at and this record given their "Seen" column. Questions for the cohort's checkpoint: his gauge's
+"now" (above); his height of 2.4 against the contract's 2.0; his sway as the shared work sign; his body built rather than
+the owner's; his brief, which the owner has not approved. Known limits are [above](#known-limits).

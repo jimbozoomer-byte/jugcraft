@@ -444,6 +444,15 @@ tests as it does in Buer's).
 (the garden's two-client test is unit 7's); the narrator heard; a player's hardware; his astir loop (not photographed,
 as Buer's and Bathin's); the two over-budget page states above.
 
+**Since GC-09** ([Amdusias](amdusias-pact.md); built on its own line, not merged, not yet run in CI): Marax reads a
+bed's cached habitat, which a canopy may shelter, so on a sheltered reading his advice names the disturbance the plant
+reads (decided by the session; [the rule](#the-rule-gc-p64)); his strain advice keeps the canopy's shelter
+(`HabitatAdvice`'s strain branch, `habitat.withStrain`, GC-P137, edited in GC-09b on Amdusias's line). With no canopy
+every reading and advice is as before. Not yet run: `habitatAdviceHoldsForEveryOrganism` and his reading tests are to
+hold unchanged, and `aShelteredHabitatKeepsItsStrainedValue` checks his advice on a sheltered reading. The scratch advice
+harness, run for that edit on the changed classes, ran 30,604,024 checks and, with a shelter dimension, 151,395,025 and
+16,516,020 checks, each with 0 failures ([Amdusias's record](amdusias-pact.md#the-canopys-shelter-gc-09b)).
+
 ## World and event applicability
 
 Overworld, Nether and End alike (a perch and planted beds in one level; his area never crosses levels). His night look
