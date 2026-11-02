@@ -33,6 +33,27 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 /** Seasons: the server's calendar and events, the operator's settings and command, the palette, the biome tags and winter snow. */
 public class SeasonGameTests {
 	@GameTest
+	public void generationTestClockSpansMidnightAndRestoresItsScope(GameTestHelper helper) {
+		var settings = JugcraftSeasons.settings();
+		try (TestSeasonClock beforeMidnight = TestSeasonClock.freeze(Instant.parse("2026-11-01T23:59:59Z"))) {
+			equal(helper, JugcraftSeasons.date(), LocalDate.of(2026, 11, 1), "before UTC midnight");
+			equal(helper, JugcraftSeasons.today(), settings.dayOn(LocalDate.of(2026, 11, 1)), "generation day before midnight");
+			equal(helper, TestSeasonClock.date(ZoneId.of("Pacific/Auckland")), LocalDate.of(2026, 11, 2), "configured zone is retained");
+			try (TestSeasonClock afterMidnight = TestSeasonClock.freeze(Instant.parse("2026-11-02T00:00:01Z"))) {
+				equal(helper, JugcraftSeasons.date(), LocalDate.of(2026, 11, 2), "after UTC midnight");
+				equal(helper, JugcraftSeasons.today(), settings.dayOn(LocalDate.of(2026, 11, 2)), "generation day after midnight");
+			}
+			equal(helper, JugcraftSeasons.date(), LocalDate.of(2026, 11, 1), "closing an inner scope restores the frozen date");
+		}
+		equal(helper, JugcraftSeasons.settings(), settings, "freezing the clock leaves operator settings unchanged");
+		LocalDate realBefore = LocalDate.now(settings.zone());
+		LocalDate restored = JugcraftSeasons.date();
+		LocalDate realAfter = LocalDate.now(settings.zone());
+		helper.assertTrue(restored.equals(realBefore) || restored.equals(realAfter), "Closing the test scope restores the real clock, even across midnight");
+		helper.succeed();
+	}
+
+	@GameTest
 	public void seasonDaysFollowTheCalendar(GameTestHelper helper) {
 		// 20 October is peak autumn in the north and spring (half a year on) in the south.
 		equal(helper, SeasonCalendar.seasonDay(LocalDate.of(2026, 10, 20), false), 293, "20 October, north");

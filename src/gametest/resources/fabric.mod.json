@@ -13,6 +13,7 @@
       "io.github.jimbozoomer.jugcraft.test.StorageCrateMultiplayerHarness"
     ],
     "fabric-gametest": [
+      "local.peepo.CraftingTablePlanningGameTests",
       "io.github.jimbozoomer.jugcraft.test.ComponentYieldGameTests",
       "io.github.jimbozoomer.jugcraft.building.TwigworksWorldGameTests",
       "io.github.jimbozoomer.jugcraft.test.TestPlayersGameTests",

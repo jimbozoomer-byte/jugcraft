@@ -35,6 +35,10 @@ Bound peer-client startup, isolate tests that own separate clients, give disposa
 
 Update the twelve-recipe starter-workshop expectation, validate real encyclopedia page destinations, account for the native custom serializers in JEI coverage, and separate the colliding scaffold/portcullis crafting patterns. Existing CI gates remain enabled.
 
+The first fresh CI run passed Foundation, canonical generation, the full material audit, packaging, both complete 3,291-test server suites (with and without optional integrations), and fourteen of sixteen client shards. A rendering fixture stopped its empty-Filter search after 32 pages (8,192 recipes), before reaching vanilla recipes in the expanded catalogue. It now allows exactly the loaded catalogue's page count, using the unchanged 256-recipe page budget. Two headless regressions check complete discovery without consuming Supply and refusal to invent a plan from empty Supply. The loaded catalogue contains 11,704 recipes; the available plan is on page 44 of 46. Both regressions and the rendered crafting-table test (104 assertions, including physical Peepo/Jughead work and container remainders) pass locally. No crafting or work limit is increased.
+
+The other failing shard's biome tour crossed UTC midnight from November 1 to November 2 with random ticks disabled: leaves generated on season day 305 were compared against day 306. The fixture now freezes the season clock before world creation, including spawn generation, and restores it after the disposable world closes. This test-only mixin is absent from the distributed mod, retains the configured zone, and leaves operator settings unchanged. The zero-stale-leaf assertion remains enabled. A server regression exercises both sides of that midnight, nested scope restoration and return to the real clock.
+
 ## Verification
 
 Pinned platform: Minecraft 26.3, Fabric Loader 0.19.5, Fabric API 0.161.0+26.3, Java 25. Common, client and game-test compilation passes. Pack pins, repository structure and documentation links pass. The source writers produce the paid recipes from the same inputs consumed by the game.
@@ -43,6 +47,7 @@ Local verification on November 1, 2026:
 
 - All 383 Python tests pass. The Windows run used Linux-equivalent UTF-8/LF text output and normal process access for the graphics-setup fixtures.
 - All 36 selected server regressions pass across Component Yield, Starter Workshop, Acquisition Repairs, Test Players, Peer Client Startup, Lua and Survival Recipes. The server saved and shut down successfully. These were focused runs using compiled classes and verified copied resources; the committed metadata retains every server test.
+- The follow-up passes all 34 focused season, biome/tree-generation and crafting-catalogue server tests. The rendered crafting-table fixture passes all 104 assertions. Game-test compilation, repository/documentation links and whitespace checks pass again. The full rendered biome tour remains for fresh upstream CI.
 - All 23 loaded component-preserving equipment rituals match their paid bases and pedestal ingredients, reject a wrong base, preserve names/enchantments, and preserve wear where applicable. Mortem remains indestructible. Source strings and object outputs both work.
 - A fresh game export exactly matches the 16,879-ID registry snapshot, including 15,091 Jugcraft IDs. The acquisition graph has no unresolved active items or invalid ingredients and retains the existing 78 deferred designs.
 - Canonical generation completes. Shared and standalone acquisition writers reproduce all 87 affected resources, including native loot predicates. Source archives are unchanged.

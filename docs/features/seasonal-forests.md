@@ -58,6 +58,8 @@ Nine biomes grow in Jugcraft regions, each in place of the vanilla biome with th
 - The larch's one-off seasonal leaves became a general `SeasonalLeavesBlock`, shared by larch, maple and aspen; the larch's blocks and states are unchanged, and its tree feature now lists the `jugcraft:seasonal_leaves` decorator.
 
 ## Verification
+CI fixture repair (PR 600, OpenAI Codex GPT-6): the real-world biome tour freezes its test-only season clock before creating any terrain. Generation and subsequent leaf checks therefore use the same date even if the long tour crosses UTC midnight while random ticks are disabled. Closing the disposable world restores the real clock. Every sampled leaf must still match its positional schedule; production season behavior is unchanged.
+
 Results are recorded under "Results" below after CI runs.
 - `python3 tools/check_mod_data.py`: every tree, wood set and leaf schedule is registered as the data says; every fixed season mode shows only its own look for every tree, whatever the jitter; every biome's features, tree picks, name, tags and seasons exist; the region rules match; exactly the trees with seasonal leaves list the `jugcraft:seasonal_leaves` decorator, and Java registers it.
 - Server game tests (`BiomeGameTests`): maple, aspen and fir saplings grow (sizes logged), grown in autumn all their leaves in autumn colours (the fir's evergreen); the dead tree grows with no leaves; every seasonal tree's leaves follow every season mode; the new logs strip with an axe and the woods are in vanilla's tags. The larch's tests (`AlpineGameTests`) now run on the shared leaves.
