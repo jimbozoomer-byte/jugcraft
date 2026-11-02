@@ -2249,7 +2249,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		context.waitForScreen(null);
 	}
 
-	/** Jade's readings of his perch and of him (read on the server: no Jade class); with Jade loaded, his overlay. */
+	/** Jade's readings of his perch and of him (read on the server, and only where Jade is loaded: the provider implements Jade's interface); with Jade loaded, his overlay. */
 	private static void bathinJade(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
 		String readings = server.computeOnServer(minecraft -> {
 			ServerLevel level = minecraft.overworld();
@@ -2813,7 +2813,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		context.waitTicks(10);
 	}
 
-	/** Jade's readings of his perch and of him (read on the server: no Jade class); with Jade loaded, his overlay. */
+	/** Jade's readings of his perch and of him (read on the server, and only where Jade is loaded: the provider implements Jade's interface); with Jade loaded, his overlay. */
 	private static void maraxJade(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
 		String readings = server.computeOnServer(minecraft -> {
 			ServerLevel level = minecraft.overworld();
@@ -3378,7 +3378,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 	}
 
 	/**
-	 * Jade's readings of his perch and of him (read on the server: no Jade class): his pact, service and state, and his note
+	 * Jade's readings of his perch and of him (read on the server, and only where Jade is loaded: the provider implements Jade's interface): his pact, service and state, and his note
 	 * that nothing is left to graft (his only host grafted), naming no player; with Jade loaded, his overlay.
 	 */
 	private static void forasJade(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
@@ -4097,7 +4097,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		context.waitForScreen(null);
 	}
 
-	/** Jade's readings of his perch and of him (read on the server: no Jade class): nothing to run; with Jade loaded, his overlay. */
+	/** Jade's readings of his perch and of him (read on the server, and only where Jade is loaded: the provider implements Jade's interface): nothing to run; with Jade loaded, his overlay. */
 	private static void bifronsJade(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
 		// His next think after the answer (the source lowered to 4) finds nothing to run, and his note says so.
 		untilServer(context, server, minecraft -> {
@@ -4712,11 +4712,16 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 	}
 
 	/**
-	 * GC-P125: Jade's readings of the sheltered Sunpetal's bed and of the Gauge (read on the server: no Jade class): each
+	 * GC-P125: Jade's readings of the sheltered Sunpetal's bed and of the Gauge (read on the server, and only where Jade is loaded: the provider implements Jade's interface): each
 	 * carries what the canopy took (2), the Gauge reading the stir 2 lower than its bed's area; with Jade loaded, both
 	 * overlays photographed.
 	 */
 	private static void amdusiasBedJade(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, BlockPos sunpetal, BlockPos gauged) {
+		if (!FabricLoader.getInstance().isModLoaded("jade")) {
+			// The provider implements Jade's own interface: without Jade there is nothing of it to read.
+			Jugcraft.LOGGER.info("[garden-check] Jade's readings of his sheltered bed and Gauge: not read (Jade is not loaded)");
+			return;
+		}
 		String readings = server.computeOnServer(minecraft -> {
 			ServerLevel level = minecraft.overworld();
 			CompoundTag ofBed = ConcordanceDataProvider.bedSnapshot(bed(minecraft, sunpetal), level);
@@ -4873,7 +4878,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 	}
 
 	/**
-	 * Jade's readings of his perch and of him (read on the server: no Jade class): answered "shelter all", one think (run here,
+	 * Jade's readings of his perch and of him (read on the server, and only where Jade is loaded: the provider implements Jade's interface): answered "shelter all", one think (run here,
 	 * so the count is the server's own) covers the Sunpetal, the Gauge's bed and the Gloamcap: his note says 3 beds, naming no
 	 * player; the roster no longer says he awaits an answer; with Jade loaded, his overlay (CR6 item 9).
 	 */
@@ -5036,8 +5041,9 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		check(ended.done() && "ended".equals(ended.reason()) && AmdusiasEntity.Gesture.DEPART.animation.equals(going)
 				&& endedMode == PactStatePayload.CLOSED && after.equals("false departing true") && swaying.startsWith("ok "),
 				"Ending ends the pact once; he bows his horn and his tree sways as he goes: " + after + "; " + swaying);
+		// His posed departure earlier in this flow already sounded a "depart" horn: wait for one at or after this ending.
 		untilServer(context, server, minecraft -> !(minecraft.overworld().getEntity(him) instanceof AmdusiasEntity left)
-				|| left.soundedAt("depart") != Long.MIN_VALUE, "His horn follows his departure");
+				|| left.soundedAt("depart") >= endedAt, "His horn follows his departure");
 		long horn = server.computeOnServer(minecraft -> minecraft.overworld().getEntity(him) instanceof AmdusiasEntity left ? left.soundedAt("depart") : Long.MIN_VALUE);
 		Jugcraft.LOGGER.info("[garden-check] his departing horn sounded {} ticks after his ending", horn - endedAt);
 		// Measured from before the request went (the server test holds the beat to the tick: amdusiasHornsABeatLate).
