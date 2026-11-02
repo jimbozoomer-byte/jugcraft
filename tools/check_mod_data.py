@@ -308,7 +308,7 @@ def check_assets(registered):
     import starter_workshop
     import storage_crates
     import newest_registry
-    native_blocks = newest_registry.entries()["block"]
+    native_blocks = newest_registry.entries()["block"] | {"chess_table", "checkers_table", "giant_turkey_feast"}
     crates = [metal + '_crate' for metal, _ in storage_crates.TIERS]
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for block in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + deposits.all_blocks()
@@ -598,7 +598,12 @@ def check_recipes(registered):
         groups = [sorted([c.get("feature"), *c.get("or", [])]) for c in switches]
         # Owner household families register unconditionally, unlike the older
         # switch-gated industrial recipes; do not require a nonexistent toggle.
-        always_on = name.startswith(('supps_', 'amends_'))
+        # These native festival/table registrars run unconditionally.
+        always_on = name.startswith(('supps_', 'amends_')) or name in {
+            'chess_table', 'checkers_table', 'giant_turkey_feast',
+            'pilgrim_coat_costume', 'pilgrim_dress_costume', 'harvest_dinner_roll',
+            'harvest_mashed_potatoes_and_gravy', 'harvest_harvest_pea_casserole',
+            'harvest_candied_sweet_potatoes'}
         if not features and not always_on:
             err(f"{name}: missing feature switch condition")
         if "result" not in recipe:
@@ -623,6 +628,17 @@ def check_recipes(registered):
             inputs = [recipe["key"][ch] for ch in symbols if ch != " "]
         elif kind == "minecraft:crafting_shapeless":
             inputs = recipe["ingredients"]
+        elif kind == "jugcraft:pot_cooking":
+            inputs = []
+            rows = recipe.get("ingredients", [])
+            if not rows or len(rows) > ag.POT_INPUTS or recipe.get("time", 0) <= 0:
+                err(f"{name}: invalid pot ingredients/time")
+            for row in rows:
+                count = row.get("count", 1)
+                if not isinstance(count, int) or not 1 <= count <= 64 or "ingredient" not in row:
+                    err(f"{name}: invalid counted pot ingredient {row}")
+                    continue
+                inputs.extend([row["ingredient"]] * count)
         elif kind == "minecraft:crafting_dye":
             # 26.3's dyeing (as vanilla's leather_helmet_dyed): the item and a dye give the item back, dyed.
             inputs = [recipe["target"], recipe["dye"]]
@@ -24321,6 +24337,10 @@ def registered_items():
     registered |= {cursed_mirror.BLOCK, cursed_mirror.ITEM}
     import newest_registry
     registered |= newest_registry.entries()["item"]
+    import thanksgiving_data
+    registered |= set(thanksgiving_data.FOODS) | {
+        'pilgrim_coat_costume', 'pilgrim_dress_costume', 'giant_turkey_feast',
+        'chess_table', 'checkers_table'}
     return registered
 
 
