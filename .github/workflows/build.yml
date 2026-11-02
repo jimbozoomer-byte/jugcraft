@@ -255,6 +255,9 @@ jobs:
         if: env.CLASSES != ''
         with:
           persist-credentials: false
+      - name: Reclaim unused hosted-runner SDK space
+        if: env.CLASSES != ''
+        run: bash scripts/prepare_client_disk.sh
       - uses: actions/setup-java@v4
         if: env.CLASSES != ''
         with:

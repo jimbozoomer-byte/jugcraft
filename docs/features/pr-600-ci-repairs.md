@@ -39,6 +39,8 @@ The first fresh CI run passed Foundation, canonical generation, the full materia
 
 The other failing shard's biome tour crossed UTC midnight from November 1 to November 2 with random ticks disabled: leaves generated on season day 305 were compared against day 306. The fixture now freezes the season clock before world creation, including spawn generation, and restores it after the disposable world closes. This test-only mixin is absent from the distributed mod, retains the configured zone, and leaves operator settings unchanged. The zero-stale-leaf assertion remains enabled. A server regression exercises both sides of that midnight, nested scope restoration and return to the real clock.
 
+The next CI run's shard 14 lost its runner during startup: GitHub's annotation reports `No space left on device` in the runner's own diagnostic log, with no test log or artifact uploaded. Before restoring Gradle caches, disposable client jobs now reclaim the image's unused Android, .NET and Haskell SDK directories. The script refuses to clean local or self-hosted machines, uses fixed paths, preserves the game/dependency cache, and propagates cleanup errors. Four mocked shell regressions cover those boundaries without deleting any installed SDK. The 8 GB swap and JVM/test bounds remain unchanged.
+
 ## Verification
 
 Pinned platform: Minecraft 26.3, Fabric Loader 0.19.5, Fabric API 0.161.0+26.3, Java 25. Common, client and game-test compilation passes. Pack pins, repository structure and documentation links pass. The source writers produce the paid recipes from the same inputs consumed by the game.
