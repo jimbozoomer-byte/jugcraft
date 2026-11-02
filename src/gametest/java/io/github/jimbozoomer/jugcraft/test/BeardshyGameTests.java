@@ -19,7 +19,7 @@ public class BeardshyGameTests {
 		helper.succeed();
 	}
 
-	@GameTest
+	@GameTest(maxTicks = 60)
 	public void beardshyTalksWithACooldownAndNeverTrades(GameTestHelper helper) {
 		Beardshy shy = helper.spawnWithNoFreeWill(Beardshy.TYPE, new BlockPos(1, 2, 1));
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
