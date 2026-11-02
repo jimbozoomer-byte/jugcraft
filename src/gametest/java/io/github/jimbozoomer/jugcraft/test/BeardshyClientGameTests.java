@@ -41,17 +41,21 @@ public class BeardshyClientGameTests implements FabricClientGameTest {
 			server.runCommand("summon jugcraft:beardshy %d.5 %d %d.5 {NoAI:1b,Silent:1b,Rotation:[0f,0f]}".formatted(x, y, z));
 			context.waitTicks(10);
 
-			shoot(context, server, singleplayer, "tp @p %d.5 %d %s 180 5".formatted(x, y, (z + 6.5) + ""), "jugcraft_beardshy_look");
+			shoot(context, server, singleplayer, "tp @p %d.5 %d %s 180 8".formatted(x, y, (z + 5.6) + ""), "jugcraft_beardshy_look");
 			shoot(context, server, singleplayer, "tp @p %d.5 %d %s 180 5".formatted(x, y, (z + 3.2) + ""), "jugcraft_beardshy_shy");
-			shoot(context, server, singleplayer, "tp @p %d.5 %s %s 180 30".formatted(x, (y + 0.4) + "", (z + 1.5) + ""), "jugcraft_beardshy_face");
+			// Crouched, as a player comes up to talk to him: low enough to see the face under his bowed head.
+			context.getInput().holdKey(options -> options.keyShift);
+			shoot(context, server, singleplayer, "tp @p %d.5 %d %s 180 -8".formatted(x, y, (z + 1.6) + ""), "jugcraft_beardshy_face");
+			context.getInput().releaseKey(options -> options.keyShift);
 			shoot(context, server, singleplayer, "tp @p %s %d %s 135 8".formatted((x + 2.6) + "", y, (z + 2.9) + ""), "jugcraft_beardshy_three_quarter");
-			shoot(context, server, singleplayer, "tp @p %s %d %s 200 8".formatted((x - 2.4) + "", y, (z - 2.9) + ""), "jugcraft_beardshy_back");
+			// From behind him (north-west of him, facing south-east).
+			shoot(context, server, singleplayer, "tp @p %s %d %s -40 8".formatted((x - 2.4) + "", y, (z - 2.9) + ""), "jugcraft_beardshy_back");
 
 			// Beardson, the Retro Trader, beside him.
 			server.runCommand("summon minecraft:villager %d.5 %d %d.5 {NoAI:1b,Silent:1b,Rotation:[0f,0f]}".formatted(x + 2, y, z));
 			server.runOnServer(minecraft -> makeTrader(minecraft.overworld()));
 			context.waitTicks(10);
-			shoot(context, server, singleplayer, "tp @p %s %d %s 180 5".formatted((x + 1.5) + "", y, (z + 6.5) + ""), "jugcraft_beardshy_and_beardson");
+			shoot(context, server, singleplayer, "tp @p %s %d %s 180 8".formatted((x + 1.5) + "", y, (z + 5.6) + ""), "jugcraft_beardshy_and_beardson");
 		}
 	}
 

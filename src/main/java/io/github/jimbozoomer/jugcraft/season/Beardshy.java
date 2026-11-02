@@ -56,7 +56,8 @@ public class Beardshy extends PathfinderMob {
 
 	public static EntityType<Beardshy> TYPE;
 
-	private long lastSpoke = Long.MIN_VALUE;
+	/** When he last spoke, in game time; far enough back that he can speak at once (never Long.MIN_VALUE: now minus it overflows). */
+	private long lastSpoke = -TALK_COOLDOWN;
 	private int lastLine = -1;
 
 	public Beardshy(EntityType<? extends Beardshy> type, Level level) {
