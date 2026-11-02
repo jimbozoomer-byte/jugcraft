@@ -50,6 +50,14 @@ HURT = [
 def lang(lang):
     """Adds his name and lines to {@code lang}."""
     lang[f"entity.jugcraft.{ENTITY}"] = DISPLAY
+    lang[f"item.jugcraft.{ENTITY}_spawn_egg"] = DISPLAY + " Spawn Egg"
     for kind, lines in (("talk", TALK), ("startled", STARTLED), ("hurt", HURT)):
         for i, line in enumerate(lines):
             lang[f"message.jugcraft.{ENTITY}.{kind}.{i}"] = line
+
+
+def egg_assets(write, assets):
+    """His spawn egg's item definition and model (its icon is drawn by tools/beardshy_look.py)."""
+    egg = f"{ENTITY}_spawn_egg"
+    write(assets / "items" / f"{egg}.json", {"model": {"type": "minecraft:model", "model": f"jugcraft:item/{egg}"}})
+    write(assets / "models" / "item" / f"{egg}.json", {"parent": "minecraft:item/generated", "textures": {"layer0": f"jugcraft:item/{egg}"}})

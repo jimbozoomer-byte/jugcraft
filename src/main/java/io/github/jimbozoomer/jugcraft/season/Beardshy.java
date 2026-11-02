@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.season;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -28,6 +29,9 @@ import net.minecraft.world.entity.ai.goal.PanicGoal;
 import net.minecraft.world.entity.ai.goal.RandomLookAroundGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CreativeModeTabs;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.Level;
 
 /**
@@ -39,7 +43,7 @@ import net.minecraft.world.level.Level;
  * <p>He is shy. A player walking up startles him and he hurries off; a player who crouches can come close and talk to
  * him. Spoken to, he says something soft, hesitant and apologetic (a startled apology when you didn't crouch). Hit, he
  * apologises and runs; he never fights back. He trades nothing, drops nothing and never spawns on his own yet: the
- * Harvest Feast story will bring him (for now {@code /summon jugcraft:beardshy}). Everything he does is on the server;
+ * Harvest Feast story will bring him (for now his spawn egg, or {@code /summon jugcraft:beardshy}). Everything he does is on the server;
  * the client only bows his head when a player is near.
  */
 public class Beardshy extends PathfinderMob {
@@ -55,6 +59,8 @@ public class Beardshy extends PathfinderMob {
 	public static final double SPEED = 0.5;
 
 	public static EntityType<Beardshy> TYPE;
+	/** His spawn egg, in the Spawn Eggs tab (a pink egg with ginger spots: his hoodie and his beard). */
+	public static Item SPAWN_EGG;
 
 	/** When he last spoke, in game time; far enough back that he can speak at once (never Long.MIN_VALUE: now minus it overflows). */
 	private long lastSpoke = -TALK_COOLDOWN;
@@ -65,12 +71,15 @@ public class Beardshy extends PathfinderMob {
 		setPersistenceRequired();
 	}
 
-	/** Registers his entity type and attributes (always, whatever the switches, so a saved Beardshy always loads). */
+	/** Registers his entity type, attributes and spawn egg (always, whatever the switches, so a saved Beardshy always loads). */
 	public static void register() {
 		ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, Jugcraft.id(ID));
 		TYPE = Registry.register(BuiltInRegistries.ENTITY_TYPE, key, EntityType.Builder.<Beardshy>of(Beardshy::new, MobCategory.CREATURE)
 				.sized(0.6F, 1.95F).eyeHeight(1.62F).clientTrackingRange(10).noLootTable().build(key));
 		FabricDefaultAttributeRegistry.register(TYPE, createAttributes());
+		SPAWN_EGG = Registry.register(BuiltInRegistries.ITEM, Jugcraft.id(ID + "_spawn_egg"),
+				new SpawnEggItem(new Item.Properties().setId(ResourceKey.create(Registries.ITEM, Jugcraft.id(ID + "_spawn_egg"))).spawnEgg(TYPE)));
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.SPAWN_EGGS).register(entries -> entries.accept(SPAWN_EGG));
 	}
 
 	public static AttributeSupplier.Builder createAttributes() {

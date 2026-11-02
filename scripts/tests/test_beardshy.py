@@ -51,5 +51,22 @@ class BeardshyTests(unittest.TestCase):
                         self.assertEqual(skin.getpixel((x, y))[3], 255, f"{name} {face} at {x},{y}")
 
 
+
+class BeardshyEggTests(unittest.TestCase):
+    def test_spawn_egg_icon_is_what_the_script_draws(self):
+        on_disk = Image.open(beardshy_look.EGG_OUT).convert("RGBA")
+        self.assertEqual(on_disk.size, (16, 16))
+        self.assertEqual(on_disk.tobytes(), beardshy_look.spawn_egg().tobytes())
+
+    def test_spawn_egg_item_uses_its_icon(self):
+        assets = ROOT / "src/main/resources/assets/jugcraft"
+        item = json.loads((assets / "items/beardshy_spawn_egg.json").read_text(encoding="utf-8"))
+        model = json.loads((assets / "models/item/beardshy_spawn_egg.json").read_text(encoding="utf-8"))
+        self.assertEqual(item["model"]["model"], "jugcraft:item/beardshy_spawn_egg")
+        self.assertEqual(model["textures"]["layer0"], "jugcraft:item/beardshy_spawn_egg")
+        self.assertIn("jugcraft:beardshy_spawn_egg", json.loads(
+            (ROOT / "src/main/resources/data/jugcraft/alchemy/values.json").read_text(encoding="utf-8"))["items"])
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -339,6 +339,7 @@ def seasons_assets(lang):
     # Beardshy, the Harvest Feast's shy antagonist (tools/beardshy.py, Beardshy.java).
     import beardshy
     beardshy.lang(lang)
+    beardshy.egg_assets(write, ASSETS)
     # Broken by a player or mob, a snowball per layer, like vanilla snow layers (never the block itself).
     write(DATA / MOD / "loot_table" / "blocks" / f"{block}.json", {"type": "minecraft:block", "pools": [{
         "condition": {"type": "minecraft:entity_properties", "entity": "this", "predicate": {}},

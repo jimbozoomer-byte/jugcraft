@@ -244,10 +244,44 @@ def skin():
     return img
 
 
+EGG_OUT = ROOT / "src" / "main" / "resources" / "assets" / "jugcraft" / "textures" / "item" / "beardshy_spawn_egg.png"
+
+
+def spawn_egg():
+    """His spawn egg (docs/ITEM_ICONS.md): vanilla's egg form drawn fresh, his hoodie's pink with ginger spots for his
+    beard, lit from the top left, outlined in the pink's own darkest tone."""
+    rows = [
+        "................",
+        "......dddd......",
+        ".....dHPPPd.....",
+        "....dHPoPPPd....",
+        "....dPooPPPd....",
+        "...dPPPPPoPPd...",
+        "...dPPPPooPPd...",
+        "...dPoPPPPPPPd..",
+        "...dooPPPPoPPd..",
+        "...dPPPPPoopPd..",
+        "...dPPPPPPPppd..",
+        "....dPoPPPPpd...",
+        "....dPooPPppd...",
+        ".....dPPPppd....",
+        "......ddddd.....",
+        "................",
+    ]
+    tones = {"d": (128, 70, 86), "P": HOODIE[0], "p": HOODIE[2], "H": HOODIE[3], "o": BEARD[0]}
+    img = Image.new("RGBA", (16, 16), CLEAR)
+    for y, row in enumerate(rows):
+        for x, ch in enumerate(row):
+            if ch in tones:
+                img.putpixel((x, y), tones[ch][:3] + (255,))
+    return img
+
+
 def main():
     OUT.parent.mkdir(parents=True, exist_ok=True)
     skin().save(OUT)
-    print(f"wrote {OUT.relative_to(ROOT)}")
+    spawn_egg().save(EGG_OUT)
+    print(f"wrote {OUT.relative_to(ROOT)} and {EGG_OUT.relative_to(ROOT)}")
 
 
 if __name__ == "__main__":
