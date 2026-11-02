@@ -22,7 +22,7 @@ def generate(writer=None):
   emit('assets/jugcraft/models/block/'+name+'.json',{'textures':tex,'elements':elems,'display':{'gui':{'rotation':[30,225,0],'scale':[.75,.75,.75]},'ground':{'translation':[0,3,0],'scale':[.4,.4,.4]},'fixed':{'rotation':[0,180,0],'scale':[.5,.5,.5]}}})
   emit('assets/jugcraft/blockstates/'+name+'.json',{'variants':{'':{'model':'jugcraft:block/'+name}}})
   emit('assets/jugcraft/items/'+name+'.json',{'model':{'type':'minecraft:model','model':'jugcraft:block/'+name}})
-  emit('data/jugcraft/loot_table/blocks/'+name+'.json',{'type':'minecraft:block','pools':[{'rolls':1,'conditions':[{'condition':'minecraft:survives_explosion'}],'entries':[{'type':'minecraft:item','name':'jugcraft:'+name}]}]})
+  emit('data/jugcraft/loot_table/blocks/'+name+'.json',{'type':'minecraft:block','pools':[{'rolls':1,'condition':{'type':'minecraft:survives_explosion'},'entries':[{'type':'minecraft:item','name':'jugcraft:'+name}]}]})
   emit('data/jugcraft/recipe/'+name+'.json',{'type':'minecraft:crafting_shaped','pattern':['WBW','PPP','S S'],'key':{'W':'minecraft:quartz' if name=='chess_table' else 'minecraft:white_dye','B':'minecraft:ink_sac','P':'#minecraft:planks','S':'minecraft:stick'},'result':{'id':'jugcraft:'+name}})
  lang=json.loads((RES/'assets/jugcraft/lang/en_us.json').read_text(encoding='utf-8'))
  for n in ['checkers_table','chess_table']:lang['block.jugcraft.'+n]=n.replace('_',' ').title()

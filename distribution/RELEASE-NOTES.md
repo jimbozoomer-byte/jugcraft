@@ -20,3 +20,5 @@ Validation: focused server, resource and rendered checks are recorded in docs/fe
 Deployment: update the server first after owner restart confirmation and a full 30-second in-game warning. Verify startup before promoting the client channel. Existing players use JUGCRAFT Updates > Download > Apply update & quit, then relaunch the same Modrinth profile. No public Modrinth listing or new launcher profile is required.
 
 Implementation: OpenAI Codex, with owner-authorized Claude Code assistance on pets and custom NPCs. Supplied originals and notices retained.
+
+Release exception: the owner requested skipping the full GitHub suite. Local package/asset/recipe checks and corrected Foundation groups passed; full CI is not certified. Previously documented visual backlog remains. Deployment still requires the owner's separate restart confirmation and a 30-second player warning.

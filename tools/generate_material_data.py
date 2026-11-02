@@ -1944,6 +1944,8 @@ def main():
         WRITTEN_RESOURCES.add(path.relative_to(RES).as_posix())
         food_servings.write(path, data)
     food_servings.generate(write_food_serving)
+    import authored_resource_reconciliation
+    authored_resource_reconciliation.apply(write)
     import model_atlas
     model_atlas.generate(write)
     from generated_resource_cleanup import prune
