@@ -410,12 +410,14 @@
       "io.github.jimbozoomer.jugcraft.menagerie.NewestHouseholdGameTests",
       "io.github.jimbozoomer.jugcraft.test.NewestManaGameTests",
       "io.github.jimbozoomer.jugcraft.test.NewestBackpackGameTests",
-      "io.github.jimbozoomer.jugcraft.menagerie.NewestLumiseneGameTests"
+      "io.github.jimbozoomer.jugcraft.menagerie.NewestLumiseneGameTests",
+      "io.github.jimbozoomer.jugcraft.test.WalkerCockpitGameTests"
     ],
     "jei_mod_plugin": [
       "io.github.jimbozoomer.jugcraft.test.JeiStationClientGameTests$WithJei$Probe"
     ],
     "fabric-client-gametest": [
+      "io.github.jimbozoomer.jugcraft.test.WalkerCockpitClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.EquipmentAccessClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.CraftingChoicesClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.ImportedModelAtlasClientTests",
