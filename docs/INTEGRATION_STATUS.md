@@ -15,7 +15,7 @@ consolidation and recipe-picker playtest remains outside this batch.
 
 Updated 11 October 2026 for [integration PR #320](https://github.com/jimbozoomer-byte/jugcraft/pull/320) (source PRs #299–308 and #310–319), following [integration PR #277](https://github.com/jimbozoomer-byte/jugcraft/pull/277) and [follow-up PR #298](https://github.com/jimbozoomer-byte/jugcraft/pull/298). This is the owner-facing index: feature records contain the detailed behavior and historical test evidence. The PRs' current GitHub states determine which combined work has reached `main`.
 
-## Not merged: Concordance garden cohort, units 1 to 5 (Buer, Bathin, Marax, Foras, Bifrons)
+## Not merged: Concordance garden cohort, units 1 to 6 (Buer, Bathin, Marax, Foras, Bifrons, Amdusias)
 
 On branch `claude/garden-cohort`; draft pull request [jimbozoomer-byte/jugcraft#526](https://github.com/jimbozoomer-byte/jugcraft/pull/526)
 against main; not merged. Unit 1 (GC-01 to GC-04) of seven is built: one pact spirit base with a perch for many spirits
@@ -51,6 +51,13 @@ run in CI**: Bifrons, a garden spirit who runs roots between beds by night, with
 of him has been compiled; his 22 server tests and 36 client shots wait for their first run, on the merged head. Checked
 locally by the repository's Python checks and audits
 ([the contract's evidence](features/concordance-garden-cohort.md#unit-5-as-built-and-its-evidence)).
+Unit 6 (GC-09) is built and recorded on its own line from the cohort with units 1 to 4, beside unit 5's, and merged
+after unit 5, **not yet compiled or run in CI**: Amdusias, the bending canopy, with a canopy's shelter in the pure ecology
+rule, the garden's memory of canopies, a cue a beat late and a quota worded as a cap. On `be76fd419` (main merged), which
+the merged line descends from, the server suite without the optional integrations passed in runs 41506566691 and
+41506582568, and `ConcordanceGardenPactClientGameTests` passed in both; his 26 server tests and 35 client shots wait for
+their first run. Checked locally by the repository's Python checks and audits and scratch harnesses
+([the contract's evidence](features/concordance-garden-cohort.md#unit-6-as-built-and-its-evidence)).
 
 | Area | Implemented change | Record |
 | --- | --- | --- |
@@ -66,6 +73,8 @@ locally by the repository's Python checks and audits
 | Foras (GC-07) | Beside his perch with a chest touching it, he grafts your Sunpetals and your party's with Dewmoss from the chest where Dewlit helps them, one Dewmoss a graft, 8 a day, and names the hosts it would not help, asking at the perch whether to graft them anyway; a honeycomb a week; a body built for Jugcraft with the owner's acorn cap. Both server jobs passed in run 40852556175 on `5e93bb0a7` | [Foras](features/foras-pact.md) |
 | Feeding by hand (GC-08b) | Bone meal by hand on a Verdant Bed, or on the crop growing on one, is a garden act a pact spirit may ask as its first task; SG12's shared cases think at each spirit's first hour. Not yet run in CI | [Bifrons](features/bifrons-pact.md#what-changed-in-shared-code), [ecology](features/arcane-concordance-ecology.md) |
 | Bifrons (GC-08) | By night, while you are near, he runs one root at a time from a full Verdant Bed of yours or your party's to the hungriest, measuring both first: 2 nutrients taken, 1 given, the other lost; a bed with a crop growing on it is a reserve until you answer at the perch; at most 24 runs a game day; two logs a week; a body built for Jugcraft from the owner's paintings' colours. Not yet run in CI | [Bifrons](features/bifrons-pact.md), [economy](features/arcane-concordance-economy.md) |
+| A canopy's shelter (GC-09b) and a late cue and capped quota (GC-09d) | A crop's reading may carry a canopy's shelter: the stir read lower, never below nothing, harvest strain still counted against the unsheltered stir, the largest canopy never a sum, kept in memory only; a spirit's cue may sound a beat after its gesture; a service may word its quota as a cap. With no canopy every reading is as before. Not yet run in CI | [Amdusias](features/amdusias-pact.md#the-canopys-shelter-gc-09b), [ecology](features/arcane-concordance-ecology.md) |
+| Amdusias (GC-09) | Beside his perch with a log within 2, he bends his tree's shelter over the crops of up to 16 of your and your party's beds within 6, each reading the stir up to 2 lower; a Gloamcap, which wants the stir, he spares until you answer; a sapling a week; a body built for Jugcraft with the owner's flower crown. Not yet run in CI | [Amdusias](features/amdusias-pact.md) |
 
 ## Merged with #494: Concordance Chunk D (pact hall)
 

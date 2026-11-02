@@ -12,6 +12,7 @@ import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Code;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Graft;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Habitat;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.HabitatInspection;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Niche;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Organism;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Verdict;
@@ -349,6 +350,8 @@ public class OrganismCropBlock extends CropBlock {
 			if (!crop.isEmpty()) {
 				// Mastery is practice: each crop harvested by one's own hand counts once.
 				ConcordanceProgress.record(server, new Evidence.Practiced(Garden.ACTIVITY, organismId()));
+				// GC-09 (GC-P131): Amdusias's first obligation, a crop harvested by hand in his area (its one hook).
+				PactObligations.performed(serverLevel, server, PactObligations.Act.HARVEST, pos);
 			}
 			return InteractionResult.SUCCESS;
 		}
@@ -394,6 +397,11 @@ public class OrganismCropBlock extends CropBlock {
 		}
 		player.sendSystemMessage(ComposeText.show(Text.of("ecology.habitat", habitat.moisture(), habitat.light(), habitat.nutrients(),
 				habitat.diversity(), habitat.disturbance())));
+		// GC-09: what a canopy took from the stir, as growth reads it.
+		Text sheltered = HabitatInspection.sheltered(habitat);
+		if (sheltered != null) {
+			player.sendSystemMessage(ComposeText.show(sheltered));
+		}
 		for (Text line : verdict.reasons(niche, habitat)) {
 			player.sendSystemMessage(ComposeText.show(line));
 		}

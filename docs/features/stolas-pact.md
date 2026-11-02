@@ -643,6 +643,11 @@ generators' incidental rewrites were restored: [the contract's corrections](conc
   lupine, mourningbell and the amethyst shard), now lists three and "and 1 more" (Bifrons's review: a tag of more than
   three lists three); no test reads it. SG12's shared cases think at each spirit's first hour, his 0 as before. His ids,
   keys, words, body and tests are otherwise unchanged.
+- **Since GC-09 (Amdusias, [record](amdusias-pact.md); merged into the cohort after Bifrons; not merged into main; not
+  yet run in CI):** the chooser has seven entries for an owner who understands both Regards. A pact spirit may now hold
+  a cue's sound for a beat (`cueBeat`, 0 by default) and a service may word its quota as a cap (`quotaTerm`, the shared
+  daily count by default); Stolas uses neither, so his cues sound with their gestures and his terms page reads as
+  before. GC-09 changed none of his ids, keys, words, body or tests.
 
 ## World and event applicability
 

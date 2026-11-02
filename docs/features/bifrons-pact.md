@@ -461,13 +461,13 @@ fixture (two awake beds of the player's at 4 nutrients each, nothing to run), at
 
 **Client** (`./gradlew runClientGameTest -PclientTests=ConcordanceGardenPactClientGameTests`): his flow after Foras's
 (after Marax's on his line before the merge), at the same perch, by night, its yard cleared first (Foras's chest, host
-bed and Sunpetal among what it clears); his choosers draw six cards (Stolas and the five garden spirits), inside the
-polish's placement for one to seven; 36 shots, `jugcraft_garden_bifrons_` + `no_two_beds`, `chooser`, `conversation` and
-`terms` (each at three sizes), `refused`, `kept`, `by_night`, `rising`, `measure_source`, `measure_destination`,
-`run_row`, `matter` (three sizes), `answered`, `jade`, `idle`, `listen`, `suspended`, `waiting`, `inspect`, `assent`,
-`refuse`, `work`, `depart`, `arrive`, `faces_east`, `_south`, `_west`, `_north`, `end_confirm` and `ended`, each held to
-its word budget; since his review, the ended flow's kept page also checks his question in general and its budget. Not
-run; none of its pictures exists yet.
+bed and Sunpetal among what it clears); his choosers draw seven cards since Amdusias's merge after him (Stolas and the
+six garden spirits; six before it), inside the polish's placement for one to seven; 36 shots,
+`jugcraft_garden_bifrons_` + `no_two_beds`, `chooser`, `conversation` and `terms` (each at three sizes), `refused`, `kept`, `by_night`, `rising`,
+`measure_source`, `measure_destination`, `run_row`, `matter` (three sizes), `answered`, `jade`, `idle`, `listen`,
+`suspended`, `waiting`, `inspect`, `assent`, `refuse`, `work`, `depart`, `arrive`, `faces_east`, `_south`, `_west`,
+`_north`, `end_confirm` and `ended`, each held to its word budget; since his review, the ended flow's kept page also
+checks his question in general and its budget. Not run; none of its pictures exists yet.
 
 **Local** (each commit's tree, these records' included; no Minecraft build here): `python3 tools/owner_art.py --check`,
 `python3 -B tools/check_mod_data.py`, `python3 scripts/check_repository.py`, `python3 tools/concordance_journey.py

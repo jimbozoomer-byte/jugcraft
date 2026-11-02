@@ -432,6 +432,10 @@ unchanged, and SG12's shared cases think at his first hour, 0 as before. Bifrons
 Verdant Heart, though he may feed it. His first obligation counts toward The Garden's Regard's mastery as Buer's,
 Marax's, Foras's and Bifrons's do (any three garden spirits').
 
+**Since GC-09** ([Amdusias](amdusias-pact.md); merged into the cohort after Bifrons, not merged into main, not yet run
+in CI): the chooser has a seventh entry. A Verdant Heart is never sheltered, so its beat and the Verdance Bathin carries
+are unchanged; his words, sounds, service, matter and tests are unchanged.
+
 **Local** (this record's commit; no Minecraft build here): `python3 tools/owner_art.py --check`, `python3 -B
 tools/check_mod_data.py`, `python3 scripts/check_repository.py`, `python3 tools/concordance_journey.py --check`,
 `python3 tools/concordance_economy.py` ("gaining cycles: none"), `python3 tools/check_icon_maps.py`, `node --test

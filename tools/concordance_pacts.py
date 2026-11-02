@@ -105,6 +105,7 @@ WORK = ["star_reckoning", "strain_tending", "verdance_carrying",
         # GC-08 unit 5
         "root_running",
         # GC-09 unit 6
+        "canopy_shelter",
         ]
 # The works that serve only their holder (Java: PactParser.HOLDER_ONLY): a definition with one must be "personal".
 HOLDER_ONLY = ["star_reckoning",
@@ -120,6 +121,7 @@ SERVICE_CLASSES = {"star_reckoning": "StarReckoning", "strain_tending": "StrainT
                    # GC-08 unit 5
                    "root_running": "RootRunning",
                    # GC-09 unit 6
+                   "canopy_shelter": "CanopyShelter",
                    }
 # Java: spirits/PactStatePayload.java (MAX_*), PactSessions.java (TIMEOUT_TICKS), PactMenu.java (RATE_TICKS),
 # PactPerchBlockEntity.java (LOOK_TICKS), PactKeeping.java (MAX_OFFERINGS).
@@ -172,6 +174,24 @@ OWNER_PART2_PINS = {ACORN_GEO: (23467, "913962495527ed87e4bbe2d0e5fa29a79c04200b
 PINE = "biomes and tree blocks/pine_log.png"
 SPHALERITE = "biomes and tree blocks/sphalerite.png"
 # GC-09 unit 6
+# The owner's paintings and flower crown Amdusias's body is built from (the garden cohort, GC-09; art plan). Paintings,
+# under art/owner-library/originals/Blocks/ (catalog files.csv): his coat, mane and tail from the white petals (row 2151),
+# his hooves, branch and eyes from the origin oak log (row 1976), his horn's leaves from the origin oak leaves (row 1975);
+# colours only are read. The flower crown (the second edited part, read through tools/owner_art.py's second root): its
+# twelve cubes and its texels are copied unchanged as his garland (the cubes moved to his neck, one face of each two-faced
+# plane dropped); nothing else of it is used.
+PETALS = "biomes and tree blocks/white_petals.png"
+ORIGIN_OAK = "biomes and tree blocks/origin_oak_log.png"
+ORIGIN_LEAVES = "biomes and tree blocks/origin_oak_leaves.png"
+CROWN = "Edited-2026-10-18-Part2/cnb/"
+CROWN_GEO = CROWN + "geo/armor/flower_crown.geo.json"
+CROWN_TEXTURE = CROWN + "textures/armor/flower_crown.png"
+# Their catalog entries and SHA-256 (check_spirit_bodies holds the library files and the catalogs to them).
+CROWN_PINS = {CROWN_GEO: (19, "c3cfaa055b62910d96e009c510ad50e4c5e4be6e2952258351b7dbeb2dff47fe"),
+              CROWN_TEXTURE: (177, "61b8e6fa10914bddc7f091d7fca62f488230b488b2d4c35648a8ef7e10b1c1c4")}
+AMDUSIAS_PAINTING_PINS = {PETALS: (2151, "20b88497e849470631ac740a8e646c365784063d0c74762a85853be9123c3fc0"),
+                          ORIGIN_OAK: (1976, "c147b6cdc087ce197f4dfd422595d8216ba131efef2ed0f3727014cd033b7969"),
+                          ORIGIN_LEAVES: (1975, "43462aeeba55c863de64696194a8ba10c2b5ae75d5c2cbf229a1c8c7c46b1508")}
 # Concordance garden cohort, GC-01 (SG11; docs/features/concordance-garden-cohort.md): one row a pact spirit. Its offer
 # (data/jugcraft/concordance/pact/<name>.json), offerings tag, three beats, service term, cues and body are written from
 # here; PACTS, ENTITY_NAMES, OFFERINGS, SOUND_EVENTS, SOUND_FILES, OWNER_FILES, ADAPTED and Stolas's body tables below are
@@ -704,6 +724,103 @@ SPIRITS = {
         },
     },
     # GC-09 unit 6
+    # Concordance garden cohort, GC-09 (Dossier 6; docs/features/amdusias-pact.md): Amdusias, the sixty-seventh spirit, the
+    # bending canopy. His body is built (tools/garden_bodies.py) and wears the owner's flower crown as a garland.
+    "amdusias": {
+        "name": "Amdusias",
+        "java": "AmdusiasEntity",
+        # A tall, slender unicorn: 1.6 along his length, 2.4 to his horn's leaves (GC-P132, amending the contract's 2.0: the
+        # tallest of the six; a fifth apart from every other spirit's box on one axis, and from the workshop hand's).
+        "entity": {"width": 1.6, "height": 2.4, "eye": 1.9},
+        # He stands beside his perch: unit 3's PactSpiritEntity.Station.BESIDE (GC-P67), no station code of his own.
+        "station": "beside",
+        # His sign: an oak sapling, the tree he will bend (GC-P132).
+        "sign": "minecraft:oak_sapling",
+        "pact": {
+            "agreement": rid("amdusias_pact"),
+            "research": rid("garden_regard"),
+            # His quota is a cap: at most 16 beds sheltered at once (GC-P126: PactService.quotaTerm), never a daily count.
+            "service": {"work": "canopy_shelter", "radius": 6, "from": 0, "to": 24000, "quota": 16},
+            "upkeep": {"offering": rid("amdusias_offerings"), "count": 1, "period_days": 7, "grace_days": 1, "cap": 4},
+            "beneficiaries": "party",
+            "compact": {"items": [{"item": "minecraft:note_block", "count": 1}, {"item": "minecraft:oak_sapling", "count": 2}],
+                        "resonance": 0},
+        },
+        # His offering (GC-P121): a sapling, so there is always a tree to bend; three named (this line's journey and
+        # acquisition audits read a flat tag; true before unit 5's line, which follows nested tags).
+        "offerings": {"name": "Amdusias's Offerings",
+                      "items": ["minecraft:oak_sapling", "minecraft:birch_sapling", "minecraft:spruce_sapling"]},
+        # His three beats (GC-P120) with the stage direction before the greeting, held to the magic interfaces' limits (spec
+        # 1.5, GC-S26: a line of at most 18 words, a stage direction of at most 8; decided by the session). The greeting is
+        # amended from the contract's "You hear me before you see me": his horn sounds a beat after his gesture. No source
+        # quotation in game (GC-S14).
+        "stage": "A garlanded white unicorn bows his leafy horn.",
+        "beats": {
+            "greeting": "A garlanded white unicorn bows his leafy horn. \"You see me before you hear me. I am Amdusias.\"",
+            "service": "\"A tree beside this perch, and I bend its shelter over your beds; the stir reaches them softer.\"",
+            "price": "\"A sapling each week, so there is always a tree to bend.\"",
+        },
+        # His service's two conditions, the holder near and only what the holder could change by hand, named before anything
+        # is spent (GC-S7, as every garden spirit's); his quota is its own term, a cap (QUOTA_TERMS).
+        "term": f"Canopy shelter: at any hour, while you are within {workers.PACT['REACH']} blocks of the perch and a log stands "
+                "within 2 blocks of it, Amdusias bends its shelter over the crops on your or your party's awake Verdant Beds in "
+                "his area, the nearest first: their crops read the area's disturbance up to 2 lower, never below 0. Never a "
+                "Verdant Heart, never more stir, never harvest strain eased, and never a bed you could not change by hand. "
+                "Until you answer otherwise, he spares crops that want the stir",
+        # His cues, in AmdusiasEntity.SOUND_IDS' order: (subtitle, runtime files). The art plan's mono files; his horn
+        # (arrive, work, depart) sounds a beat after its gesture (AmdusiasEntity.HORN_BEAT).
+        "cues": {
+            "arrive": ("A distant horn", ["menagerie/pocket/horn_fade"]),
+            "listen": ("Amdusias whistles softly", ["menagerie/wildlife/item/whistle/whistle"]),
+            "inspect": ("A long, low whistle", ["menagerie/cavern/misc/tephra/tephra_whistle_0",
+                                                "menagerie/cavern/misc/tephra/tephra_whistle_1",
+                                                "menagerie/cavern/misc/tephra/tephra_whistle_2"]),
+            "assent": ("Amdusias whistles assent", ["menagerie/wildlife/item/whistle/whistle"]),
+            "refuse": ("Amdusias whistles low", ["menagerie/wildlife/item/whistle/whistle"]),
+            "depart": ("A distant horn fades", ["menagerie/pocket/horn_fade"]),
+            "work": ("A distant horn answers", ["menagerie/pocket/horn_fade"]),
+        },
+        # One whistle three ways; his departing horn a little lower (1.07 s at 0.9: 1.18 s, sounded 1.0 s into his 2.0 s
+        # departure).
+        "pitch": {"listen": 1.3, "assent": 1.1, "refuse": 0.7, "depart": 0.9},
+        # His body (GC-S12, GC-P133): every file built by tools/garden_bodies.py ("built": runtime path -> (the owner files it
+        # reads, its builder)), written and checked by tools/owner_art.py (its second root for the flower crown).
+        "body": {
+            "built": {
+                "geckolib/models/entity/amdusias.geo.json": ((CROWN_GEO, CROWN_TEXTURE), "garden_bodies.amdusias_model"),
+                "geckolib/animations/entity/amdusias.animation.json": ((), "garden_bodies.amdusias_animations"),
+                "textures/entity/amdusias.png": ((PETALS, ORIGIN_OAK, ORIGIN_LEAVES, CROWN_TEXTURE), "garden_bodies.amdusias_skin"),
+            },
+            "scale": 1.0,
+            "render": {"shadow": 0.6, "wide": 0.25, "low": 0.1, "above": 0.1, "glow": False},
+            "loops": {"idle": "animation.amdusias.idle", "listen": "animation.amdusias.listen",
+                      "waiting": "animation.amdusias.waiting", "suspended": "animation.amdusias.suspended",
+                      "astir": "animation.amdusias.astir"},
+            "gestures": {"arrive": "animation.amdusias.arrive", "inspect": "animation.amdusias.inspect",
+                         "assent": "animation.amdusias.assent", "refuse": "animation.amdusias.refuse",
+                         "depart": "animation.amdusias.depart", "work": "animation.amdusias.work"},
+            # (seconds, (the telling pose's window)): ConcordanceGardenPactClientGameTests freezes the world inside it.
+            "gesture_times": {"arrive": (2.5, (0.8, 1.6)), "inspect": (2.0, (0.5, 1.3)), "assent": (1.8, (0.4, 1.2)),
+                              "refuse": (2.0, (0.4, 1.3)), "depart": (2.0, (0.1, 0.7)), "work": (3.0, (0.8, 1.6))},
+            "loop_lengths": {"idle": 4.0, "listen": 3.0, "waiting": 6.0, "suspended": 6.0, "astir": 1.5},
+            # His listening pose (degrees): neck raised, head lifted as if to something far off; every screen gesture
+            # starts and ends on it.
+            "attend": {"neck": (-6, 0, 0), "head": (-16, 0, 0)},
+            # The flower ring's faces dropped (garden_bodies.drop_garland_twins): each two-faced plane keeps one quad.
+            "dropped": {"garland#0": "north", "garland#1": "west", "garland#2": "south", "garland#3": "east",
+                        "garland#4": "south", "garland#5": "north", "garland#6": "west", "garland#7": "east",
+                        "garland#8": "west", "garland#9": "west", "garland#10": "south", "garland#11": "north"},
+            # Detail (b): his tree's sway, the shared sign (AmdusiasEntity.SWAY; tools/concordance_signs.py SIGNS) every
+            # CanopyShelter.SWAY_TICKS while he shelters, and once as he departs. No spirit sends particles of its own
+            # (check_signs), so the design's falling leaves are the sign system's (decided by the session): the work
+            # sign (execution), never an effect mark such as "mend", which says an effect was applied (the unit review).
+            "sway": {"sign": "work", "ticks": 200},
+            "shots": ["jugcraft_garden_amdusias_idle", "jugcraft_garden_amdusias_listen", "jugcraft_garden_amdusias_waiting",
+                      "jugcraft_garden_amdusias_suspended", "jugcraft_garden_amdusias_inspect", "jugcraft_garden_amdusias_assent",
+                      "jugcraft_garden_amdusias_refuse", "jugcraft_garden_amdusias_work", "jugcraft_garden_amdusias_depart",
+                      "jugcraft_garden_amdusias_arrive"],
+        },
+    },
 }
 # Derived (keep these names: tools/concordance.py, tools/owner_art.py, tools/stolas_body.py and check_mod_data read them).
 PACTS = {name: dict(spirit["pact"], beats=list(spirit["beats"])) for name, spirit in SPIRITS.items()}
@@ -728,6 +845,8 @@ PERCH_TOOLTIP = ("Use: invite a pact spirit whose Regard you understand (Stolas 
                  # GC-08 unit 5
                  f"; Bifrons two awake Verdant Beds of yours within {SPIRITS['bifrons']['pact']['service']['radius']} blocks"
                  # GC-09 unit 6
+                 "; Amdusias a log within 2 blocks of the perch and an awake Verdant Bed of yours within "
+                 f"{SPIRITS['amdusias']['pact']['service']['radius']} blocks"
                  "); or keep the pact seated here. Break it and the pact stays yours, without its perch.")
 # Polished deepslate, not a slab: the progression graph follows only listed vanilla items (a slab is not in
 # concordance_progression.VANILLA_SOURCES).
@@ -1109,6 +1228,7 @@ SERVICE_NAMES = {"gather": "Gathering", "courier": "Carrying its post's requests
                  # GC-08 unit 5
                  "root_running": "Root-running",
                  # GC-09 unit 6
+                 "canopy_shelter": "Canopy shelter",
                  }
 JADE_PROVIDERS = {"pact_perch": "Pact Perch", "spirit_anchor": "Spirit Anchor"}
 TOOLTIPS.update({
@@ -1396,6 +1516,41 @@ SERVICE_WORDS = {
         "matters": {"reserves": "His matter: the only full beds here are growing"},
     },
     # GC-09 unit 6
+    # GC-09 (Dossier 6 items 2, 3, 5 and 6; GC-P128 to GC-P130): Amdusias's canopy shelter. His row.service is his kept
+    # page's gauge (beds sheltered now of his cap, the damping), never a day's count.
+    "canopy_shelter": {
+        "messages": {
+            "missing.tree": "\"I bend trees. There is no tree here.\" Amdusias comes only where a log stands within %s "
+                            "blocks of the perch",
+            "missing.bed": "\"There is nothing here to shelter.\" Amdusias comes only where an awake Verdant Bed you keep "
+                           "lies within %s blocks of the perch",
+            "row.service": "Canopy: %s of at most %s beds sheltered now (a crop, or a Habitat Gauge set on a bed); their "
+                           "crops read the stir up to %s lower, never below nothing",
+            "row.no_tree": "Waiting for a tree: no log stands within %s blocks of the perch",
+            "row.spared": "Spared: %s crops that want the stir, until you answer at the perch",
+            "matter.wants_stir": "\"This one wants the stir I take away. Shall I spare it?\" (%s crops that want the stir, "
+                                 "the nearest at %s)",
+        },
+        "screen": {
+            "heading": "Canopy shelter",
+            "about": "Amdusias works by himself, at any hour, while you are near: the rows above say how many beds his "
+                     "tree shelters now. Crops that want the stir wait for your answer.",
+        },
+        # Third person, as every Jade pact line (the C3 review's rule): Jade's reader may be anyone.
+        "notes": {
+            "covered": "Beds sheltered: %s",
+            "spared": "Sparing %s crops that want the stir, waiting for his holder's answer at the perch",
+            "no_tree": "No tree: no log stands beside his perch",
+            "elsewhere": "His holder's canopy stands at another perch",
+            "nothing": "Nothing to shelter: no crop of his holder's in his area that he may shelter",
+        },
+        "answers": ["no_tree", "no_bed"],
+        # The accord machinery's words (unit 2): his answers, the safe course first (Java CanopyShelter.ACCORDS, in this
+        # order; append only; each at most ACCORD_MAX characters and three words), his matter in general and his matter now.
+        "accords": {"spare": "Spare them", "all": "Shelter all"},
+        "question": "\"Shall I shelter a crop that wants the stir?\" (a Gloamcap grows slower under my canopy)",
+        "matters": {"wants_stir": "His matter: crops here that want the stir his canopy takes away"},
+    },
 }
 MESSAGES.update({f"pact.{work}.{key}": text for work, words in SERVICE_WORDS.items() for key, text in words["messages"].items()})
 SCREEN.update({f"screen.{MOD}.pact.service.{work}.{key}": text for work, words in SERVICE_WORDS.items()
@@ -1493,3 +1648,28 @@ GARDEN_CLIENT_SHOTS += ["jugcraft_garden_bifrons_no_two_beds", "jugcraft_garden_
                         "jugcraft_garden_bifrons_faces_west", "jugcraft_garden_bifrons_faces_north",
                         "jugcraft_garden_bifrons_end_confirm", "jugcraft_garden_bifrons_ended"]
 # GC-09 unit 6
+# ---------------------------------------------------------------------------------------- garden cohort, GC-09: Amdusias
+ART_SOUNDS["amdusias"] = ["menagerie/pocket/horn_fade", "menagerie/wildlife/item/whistle/whistle",
+                          "menagerie/cavern/misc/tephra/tephra_whistle_0", "menagerie/cavern/misc/tephra/tephra_whistle_1",
+                          "menagerie/cavern/misc/tephra/tephra_whistle_2"]
+# What ConcordanceGardenPactClientGameTests photographs of Amdusias besides his body shots (GC-P138).
+GARDEN_CLIENT_SHOTS += ["jugcraft_garden_amdusias_no_tree", "jugcraft_garden_amdusias_chooser",
+                        "jugcraft_garden_amdusias_conversation", "jugcraft_garden_amdusias_conversation_scale4",
+                        "jugcraft_garden_amdusias_conversation_small", "jugcraft_garden_amdusias_terms",
+                        "jugcraft_garden_amdusias_terms_scale4", "jugcraft_garden_amdusias_terms_small",
+                        "jugcraft_garden_amdusias_refused", "jugcraft_garden_amdusias_kept", "jugcraft_garden_amdusias_horn",
+                        "jugcraft_garden_amdusias_inspect_page", "jugcraft_garden_amdusias_bed_jade",
+                        "jugcraft_garden_amdusias_gauge_jade", "jugcraft_garden_amdusias_sway",
+                        "jugcraft_garden_amdusias_matter", "jugcraft_garden_amdusias_matter_scale4",
+                        "jugcraft_garden_amdusias_matter_small", "jugcraft_garden_amdusias_answered",
+                        "jugcraft_garden_amdusias_jade", "jugcraft_garden_amdusias_faces_east",
+                        "jugcraft_garden_amdusias_faces_south", "jugcraft_garden_amdusias_faces_west",
+                        "jugcraft_garden_amdusias_faces_north", "jugcraft_garden_amdusias_ended"]
+# GC-09 (GC-P126): a work whose quota caps what it holds at once, counting nothing it does, has its own words for it on
+# the terms page (its service's PactService.quotaTerm, "term.quota." + its work): pact.term.quota.<work> under
+# message.jugcraft.concordance., one %s (the quota), never a day's count. Its term chip's glance is tools/magic_ui.py's
+# GLANCES "pact.term.quota.<work>" (the restyled chips draw no label of their own). Every other work keeps the shared
+# "term.quota" ("%s a game day").
+# Amdusias's beds sheltered at once (GC-P126).
+QUOTA_TERMS = {"canopy_shelter": "At most %s beds sheltered at once"}
+MESSAGES.update({f"pact.term.quota.{work}": words for work, words in QUOTA_TERMS.items()})

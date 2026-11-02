@@ -219,6 +219,17 @@ class ClientTestSelectionTests(unittest.TestCase):
                 chosen, _ = selection.select([path], self.tests, set())
                 self.assertIn("ConcordanceGardenPactClientGameTests", chosen)
     # GC-09 unit 6
+    def test_amdusias_body_entity_and_canopy_select_the_garden_client_test(self):
+        # Concordance garden cohort, GC-09: Amdusias's body, entity, canopy shelter and the canopies are shown by the garden's
+        # client class.
+        for path in ("src/main/resources/assets/jugcraft/textures/entity/amdusias.png",
+                     "src/main/resources/assets/jugcraft/geckolib/models/entity/amdusias.geo.json",
+                     "src/main/java/io/github/jimbozoomer/jugcraft/concordance/spirits/AmdusiasEntity.java",
+                     "src/main/java/io/github/jimbozoomer/jugcraft/concordance/spirits/CanopyShelter.java",
+                     "src/main/java/io/github/jimbozoomer/jugcraft/concordance/garden/Canopies.java"):
+            with self.subTest(path=path):
+                chosen, _ = selection.select([path], self.tests, set())
+                self.assertIn("ConcordanceGardenPactClientGameTests", chosen)
 
 
 if __name__ == "__main__":

@@ -215,6 +215,11 @@ prefix (GC-06b). For a crop's niche and one reading of its habitat:
 - The graft clause: the first graft by id whose host is the plant, offered only while the bed carries none, that alone
   would raise it a step on this reading (the Dewlit graft for a Sunpetal at light 9 to 12).
 - Bounded: at most `MOST_VERDICTS` (129) verdicts a call, and one a graft offered.
+- **On a sheltered reading** (since the garden cohort's GC-09b, GC-P137: [Amdusias's canopy](amdusias-pact.md#the-canopys-shelter-gc-09b)).
+  Decided by the session: the disturbance named is the one the plant reads under the canopy, the value growth, the
+  Inspect page, the Gauge and Jade show. An eased strain keeps the canopy's shelter (`Habitat.withStrain`), so it is
+  still counted against the unsheltered area. The harness below was first run before that line changed; re-run on the
+  changed classes it is unchanged, and Amdusias's record gives its run with a shelter dimension.
 
 **Its harness (scratch, not in Git).** A brute-force harness written for the unit's design checks the rule over every
 shipped niche (Dewmoss, Gloamcap, Mendvetch, Sunpetal, the Verdant Heart's) and Sunpetal under Dewlit, 524,288 readings
@@ -445,6 +450,16 @@ changes a bed's nutrients, so a planted bed his familiar passed over as proud is
 answered "any full bed", draws from it): the proud count starts again when the bed changes, by design. His familiar never
 reads a fallow bed, and fallow beds are all Bifrons draws from until he is answered. His first obligation counts toward
 The Garden's Regard's mastery as Buer's, Bathin's, Foras's and Bifrons's do (any three garden spirits').
+
+**Since GC-09** ([Amdusias](amdusias-pact.md); merged into the cohort after Bifrons, not merged into main, not yet run
+in CI): Marax reads a bed's cached habitat, which a canopy may shelter, so on a sheltered reading his advice names the
+disturbance the plant reads (decided by the session; [the rule](#the-rule-gc-p64)); his strain advice keeps the canopy's
+shelter (`HabitatAdvice`'s strain branch, `habitat.withStrain`, GC-P137, edited in GC-09b on Amdusias's line). With no
+canopy every reading and advice is as before. Not yet run: `habitatAdviceHoldsForEveryOrganism` and his reading tests
+are to hold unchanged, and `aShelteredHabitatKeepsItsStrainedValue` checks his advice on a sheltered reading. The
+scratch advice harness, run for that edit on the changed classes, ran 30,604,024 checks and, with a shelter dimension,
+151,395,025 and 16,516,020 checks, each with 0 failures ([Amdusias's
+record](amdusias-pact.md#the-canopys-shelter-gc-09b)).
 
 ## World and event applicability
 

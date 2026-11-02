@@ -448,7 +448,18 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 		switch (term.key()) {
 			case "hours" -> chip.glyph(server.endsWith(".any") ? MagicArt.Glyph.CLOCK : MagicArt.Glyph.SUN);
 			case "area" -> chip.glyph(MagicArt.Glyph.RING);
-			case "quota" -> chip.glyph(MagicArt.Glyph.CALENDAR);
+			case "quota" -> {
+				// GC-09 (GC-P126): the shared daily count draws a calendar; a work's own quota words, a cap it holds at once
+				// (Amdusias's beds), never a day's: its work's own item, as its service line draws it.
+				if (server.equals("pact.term.quota")) {
+					chip.glyph(MagicArt.Glyph.CALENDAR);
+				} else {
+					ItemStack own = PactGlance.workIcon(state.spirit().work(), state.spirit().sign());
+					if (!own.isEmpty()) {
+						chip.items(List.of(own));
+					}
+				}
+			}
 			case "grace" -> chip.glyph(MagicArt.Glyph.HOURGLASS);
 			case "beneficiaries" -> chip.glyph(server.endsWith(".party") ? MagicArt.Glyph.PARTY : MagicArt.Glyph.PERSON);
 			case "upkeep" -> {

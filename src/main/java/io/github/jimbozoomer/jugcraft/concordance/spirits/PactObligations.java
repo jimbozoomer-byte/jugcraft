@@ -44,6 +44,8 @@ public final class PactObligations {
 		/** GC-08 (Bifrons): a Verdant Bed, or the organism crop growing on one, fed with bone meal by hand. */
 		FEED("feed"),
 		// GC-09 unit 6
+		/** GC-09 (Amdusias): a ripe crop harvested by hand inside his area while his pact is active. */
+		HARVEST("harvest"),
 		;
 
 		public final String id;

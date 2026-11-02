@@ -371,6 +371,11 @@ and draws from beds Buer may be tending: a run eases no strain and Buer's tendin
 the other. His first obligation counts toward The Garden's Regard's mastery as Bathin's, Marax's, Foras's and Bifrons's
 do (any three garden spirits').
 
+**Since GC-09** ([Amdusias](amdusias-pact.md); merged into the cohort after Bifrons, not merged into main, not yet run
+in CI): the chooser has a seventh entry. Amdusias's canopy never eases strain (it is counted against the unsheltered
+stir), so Buer's tending, its window and his overworked bed are unchanged; his words, sounds, service and tests are
+unchanged.
+
 **Local** (this record's commit; no Minecraft build here): `python3 scripts/check_repository.py` (structure and links), `python3 tools/concordance_journey.py
 --check`, `python3 -B tools/check_mod_data.py` (its `check_delivery` holding the re-pasted delivery matrix) and
 `git diff --check`, each run on this commit's tree and passed; `python3 tools/owner_art.py --provenance pacts` printed

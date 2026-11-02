@@ -46,6 +46,7 @@ ACTS = ["tend", "device",
         # GC-08 unit 5
         "feed",
         # GC-09 unit 6
+        "harvest",
         ]
 # Each act's one-line hook: (Java file under concordance/, the member it is in, the line, what it follows, what it precedes).
 HOOKS = {"tend": ("garden/VerdantBedBlock.java", "static void tendBy(",
@@ -79,6 +80,12 @@ HOOKS = {"tend": ("garden/VerdantBedBlock.java", "static void tendBy(",
                    'Garden.tell(server, "garden.fed", bed.nutrients(), VerdantBedBlockEntity.CAPACITY);',
                    "}\n\t\t\treturn InteractionResult.SUCCESS;")],
          # GC-09 unit 6
+         # GC-09: a ripe crop harvested by hand (after its cultivation record, inside the harvest's own block, so only a
+         # harvest that gave something counts; the block's close comes next).
+         "harvest": ("garden/OrganismCropBlock.java", "protected InteractionResult useWithoutItem(",
+                     "PactObligations.performed(serverLevel, server, PactObligations.Act.HARVEST, pos);",
+                     "ConcordanceProgress.record(server, new Evidence.Practiced(Garden.ACTIVITY, organismId()));",
+                     "}\n\t\t\treturn InteractionResult.SUCCESS;"),
          }
 
 
@@ -98,6 +105,7 @@ OBLIGATIONS = {"strain_tending": "tend", "verdance_carrying": "device",
                # GC-08 unit 5
                "root_running": "feed",
                # GC-09 unit 6
+               "canopy_shelter": "harvest",
                }
 # work -> {Java file under concordance/: {constant: value}}; each spirit's unit adds its own (check_garden_pacts).
 # GC-04: Buer remembers today's eases of at most 16 beds, and asks GardenPacts.target about at most 8 beds a think.
@@ -120,6 +128,13 @@ CONSTANTS = {"strain_tending": {"spirits/StrainTending.java": {"MEMORY": 16, "MA
                                                            "MAX_ASKED": 8, "MEASURE_TICKS": 20, "MEASURE_LIMIT": 60,
                                                            "MAX_RESERVES": 16}},
              # GC-09 unit 6
+             # GC-09: a canopy lowers the stir a crop reads by at most 2, over at most 16 beds at once, and lapses 40 ticks
+             # after its last refresh (garden/Canopies, held by check_ecology from GC-09b; his service's own come with it).
+             # GC-09: his tree within 2 of the perch, looked for again at most every 200 ticks while none stands; his tree's
+             # sway every 200 ticks; at most 16 beds asked a think; his canopy's damping.
+             "canopy_shelter": {"garden/Canopies.java": {"MAX_DAMPING": 2, "MAX_BEDS": 16, "LAPSE_TICKS": 40},
+                                "spirits/CanopyShelter.java": {"DAMPING": 2, "TREE_REACH": 2, "TREE_TICKS": 200,
+                                                               "SWAY_TICKS": 200, "MAX_ASKED": 16}},
              }
 REACH = {"MAX_BEDS": 64, "REFRESH_TICKS": 200}  # Java: spirits/GardenReach (GC-P2)
 # GE8: mechanically distinct services. Each garden work changes one kind of state through one call that only its service
@@ -147,6 +162,10 @@ DISTINCT = {
     "root_running": {"verb": "move with loss", "state": "two Verdant Beds' nutrients", "call": "source.take(TAKE)",
                      "class": "RootRunning", "also": "destination.give(GIVE)"},
     # GC-09 unit 6
+    # GC-09: Amdusias's: a reading's shelter, changing no block or saved value (the canopy, memory only, read where a bed
+    # builds its reading).
+    "canopy_shelter": {"verb": "shelter, changing nothing", "state": "the stir a bed's crop reads (memory only)",
+                       "call": "Canopies.cover(level, owner, perch, DAMPING, all, covered, now)", "class": "CanopyShelter"},
 }
 CODEX_PLACE = (6, 4)  # the Binding category's map: (0..6, 0..4) holds eleven entries; (6, 4) is free (check_concordance)
 # GC-05 (GC-P45, GC-P54): a device index (GardenReach.devices) holds at most this many Hearts, Gleaners and Ley Pylons, each.
@@ -198,6 +217,7 @@ MESSAGES = {
         # GC-08: Bifrons's (the hook reads neither the bed's keeper nor whether it is awake).
         "feed": "feed a Verdant Bed, or the crop growing on one, with bone meal",
         # GC-09 unit 6
+        "harvest": "harvest a ripe crop",
     }.items()},
 }
 # Under tooltip.jugcraft.concordance. (tools/concordance.py TOOLTIPS).
@@ -372,6 +392,33 @@ PAGES = [
      "with nothing lost. Your first obligation: feed a Verdant Bed in his area, or the crop on one, bone meal by hand while "
      "the pact is active. Ended, he sinks back into the ground.", ("garden_regard", "understood")),
     # GC-09 unit 6
+    # GC-09: Amdusias's (Dossier 6), their numbers read from his offer and the tables that hold the Java's, as Foras's; each
+    # page at most 60 words (the magic interfaces' spec 1.1, as Marax's; decided by the session). No source quotation
+    # (GC-S14); the music line unattributed.
+    ("text", "Amdusias",
+     "Amdusias, a spirit of the old books, bends trees. Build a **Pact Perch** with a **log** within "
+     f"{CONSTANTS['canopy_shelter']['spirits/CanopyShelter.java']['TREE_REACH']} blocks of it and an **awake Verdant Bed** of "
+     f"yours within {pacts.SPIRITS['amdusias']['pact']['service']['radius']}, and use it: a tall white unicorn steps up beside "
+     "the perch. Without a tree he does not come: \"I bend trees. There is no tree here.\"",
+     ("garden_regard", "understood")),
+    ("text", "His Service",
+     f"While you are near, his tree's shelter bends over up to "
+     f"**{pacts.SPIRITS['amdusias']['pact']['service']['quota']}** beds of yours or your party's in his area, nearest first: "
+     f"each crop reads the stir up to **{CONSTANTS['canopy_shelter']['spirits/CanopyShelter.java']['DAMPING']} lower**. "
+     "A Habitat Gauge on a bed reads what its crop would. Never a Verdant Heart, never more stir, never strain eased; "
+     "two canopies never add up.", ("garden_regard", "understood")),
+    ("text", "The Stir a Gloamcap Wants",
+     "A Gloamcap grows best with some stir, which his canopy takes away. So he spares such crops and asks: \"This one wants "
+     "the stir I take away. Shall I spare it?\" Answer at the perch: **"
+     + pacts.SERVICE_WORDS["canopy_shelter"]["accords"]["spare"] + "** or **"
+     + pacts.SERVICE_WORDS["canopy_shelter"]["accords"]["all"] + "**. Until you answer, he keeps to the first.",
+     ("garden_regard", "understood")),
+    ("text", "His Price",
+     "Paid as you accept: **a note block and 2 oak saplings**. Then a sapling (oak, birch or spruce) every "
+     f"{pacts.SPIRITS['amdusias']['pact']['upkeep']['period_days']} days, up to "
+     f"{pacts.SPIRITS['amdusias']['pact']['upkeep']['cap']} ahead; a missed one is warned, then suspends the pact, nothing "
+     "lost. First obligation: harvest a ripe crop by hand in his area. Ended, he bows his horn; a beat later, a distant "
+     "horn.", ("garden_regard", "understood")),
 ]
 # GC-06 (GB26, GC-P75): the mastered page, with the third garden spirit (check_garden_pacts refuses it while fewer ship).
 # Added once, here; later spirits' units add pages to PAGES only.

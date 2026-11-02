@@ -88,7 +88,9 @@ final class PactGlance {
 			new Rule("suffix", "obligation_kept", MagicArt.Mark.TICK),
 			new Rule("suffix", "obligation", MagicArt.Mark.HOURGLASS),
 			new Rule("contains", ".matter.", MagicArt.Mark.ASK),
-			new Rule("exact", "pact.graft_keeping.row.no_donor", MagicArt.Mark.HOURGLASS));
+			new Rule("exact", "pact.graft_keeping.row.no_donor", MagicArt.Mark.HOURGLASS),
+			new Rule("exact", "pact.canopy_shelter.row.no_tree", MagicArt.Mark.HOURGLASS),
+			new Rule("exact", "pact.canopy_shelter.row.spared", MagicArt.Mark.ASK));
 
 	private static final List<IconRule> ICONS = List.of(
 			new IconRule("contains", ".row.overworked", "work"),
@@ -100,7 +102,9 @@ final class PactGlance {
 			new IconRule("exact", "pact.graft_keeping.row.last", "item:jugcraft:sunpetal"),
 			new IconRule("suffix", "obligation", "glyph:pin"),
 			new IconRule("exact", "pact.ended_here", "glyph:pin"),
-			new IconRule("exact", "pact.departed", "glyph:spiral"));
+			new IconRule("exact", "pact.departed", "glyph:spiral"),
+			new IconRule("exact", "pact.canopy_shelter.row.no_tree", "item:minecraft:oak_log"),
+			new IconRule("exact", "pact.canopy_shelter.row.spared", "item:jugcraft:gloamcap"));
 
 	/**
 	 * Each work's own item: its service line's and its "work" rows' icon (tools/magic_ui.py WORK_GLANCES[work]["icon"], one
@@ -117,6 +121,7 @@ final class PactGlance {
 			// GC-08 unit 5
 			Map.entry("root_running", "minecraft:rooted_dirt"),
 			// GC-09 unit 6
+			Map.entry("canopy_shelter", "minecraft:oak_leaves"),
 			Map.entry("star_reckoning", "jugcraft:astrolabe"));
 
 	private PactGlance() {

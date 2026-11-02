@@ -27,6 +27,9 @@ keeping and the bed index's stores), built on its own line from unit 3's shared 
 merged to main, and not yet compiled or run in CI.
 Extended by the cohort's unit 5 (GC-08: [Bifrons](bifrons-pact.md), root-running by night and the feeding act), built
 on its own line from unit 3's head and merged after unit 4, not merged to main, and not yet compiled or run in CI.
+Extended by the cohort's unit 6 (GC-09: [Amdusias](amdusias-pact.md), the bending canopy, a cue a beat late and a
+quota worded as a cap), built on its own line beside unit 5's and merged after unit 5, not merged to main, and not yet
+compiled or run in CI.
 Proposal issue: none; the owner's Arcane Concordance brief (roadmap step 17) is the scope approval.
 Owner: @jimbozoomer-byte. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 Target milestone and tier: Concordance milestone 9, Practitioner stage (Jugcraft Workshops). Roadmap step 17.
@@ -177,6 +180,10 @@ kind: his offer is the Concordance's `pact` data, `concordance/pact/stolas.json`
   Since GC-08 (not yet run in CI) Bifrons serves by night only (a pact's hours need not begin at the world clock's 0,
   06:00; SG12's shared cases think at each spirit's first hour) and works in two beats a think apart, remembering a
   measure under way in his presence only, never saved.
+  Since GC-09 (not yet run in CI) Amdusias stands beside his perch too; a pact spirit may hold a cue's sound for a beat
+  after its gesture (`PactSpiritEntity.cueBeat`, 0 by default; noted, subtitled and gestured at once, sounded from its
+  own tick where it then stands; `soundedAt` kept for tests; nothing saved), and a service may word its quota as a cap
+  (`PactService.quotaTerm`, `term.quota.<work>` from `QUOTA_TERMS`; the shared daily count by default).
 
 ## Connections
 
@@ -632,6 +639,18 @@ Verdant Heart. His first obligation is `FEED` (bone meal on a Verdant Bed, or on
 area). He stands on `Station.BESIDE`. **Verification:** his 22 server tests (`GC08_TESTS`) and his flow in
 `ConcordanceGardenPactClientGameTests` are written and **not yet run**: no CI run has compiled him
 ([his Verification](bifrons-pact.md#verification)). Not played by a person; no second client.
+
+The sixth garden spirit is Amdusias (GC-09, [record](amdusias-pact.md)): the bending canopy, at any hour while his holder
+is near. With a log within 2 of the perch (his tree), he covers the crops on up to 16 of his beneficiaries' awake beds in
+his area (radius 6), nearest first, each asked as the holder's before it is covered: the garden's memory of canopies
+(`garden/Canopies`, per level, one a holder, lapsing 40 ticks after its last refresh, never saved) lowers the stir those
+crops read by up to 2, never below nothing, the largest canopy over a bed and never a sum. Nothing is made, moved or
+spent; his record counts nothing (his quota is a cap: "At most 16 beds sheltered at once"). His matter (the accord) is a
+crop that wants the stir (a Gloamcap), spared until his holder answers `all`; `spare` is the safe course. His first
+obligation is `HARVEST` (a ripe crop harvested by hand in his area). His horn sounds a beat after his gestures, his tree
+sways with the shared work sign. **Verification:** his 26 server tests (`GC09_TESTS`, `GC09_AMDUSIAS_TESTS`) and his flow
+in `ConcordanceGardenPactClientGameTests` are written and **not yet run**: no CI run has compiled him
+([his Verification](amdusias-pact.md#verification)). Not played by a person; no second client.
 
 ## World and event applicability
 

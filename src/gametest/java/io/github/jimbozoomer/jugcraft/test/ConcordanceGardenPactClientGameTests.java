@@ -113,6 +113,19 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.AmdusiasEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.CanopyShelter;
+import io.github.jimbozoomer.jugcraft.concordance.garden.HabitatGaugeBlockEntity;
+import io.github.jimbozoomer.jugcraft.compat.jade.ConcordanceDataProvider;
+import io.github.jimbozoomer.jugcraft.client.EncyclopediaClient;
+import io.github.jimbozoomer.jugcraft.client.EncyclopediaScreen;
+import io.github.jimbozoomer.jugcraft.guide.encyclopedia.EncyclopediaPayload;
+import java.lang.reflect.Field;
+import net.minecraft.client.gui.Hud;
+import net.minecraft.client.gui.components.SubtitleOverlay;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.RandomSource;
 
 /**
  * Concordance garden cohort, GC-04 (GC-P30; GC-P18 for the chooser; docs/features/buer-pact.md): the garden pacts in a real
@@ -265,6 +278,8 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 				// GC-08: Bifrons at the same perch, by night, chosen from the chooser, to his departure.
 				bifrons(context, server, connection, perch);
 				// GC-09 unit 6
+				// GC-09: Amdusias at the same perch, standing beside it, from the chooser to his departure (his yard first).
+				amdusias(context, server, connection, perch);
 				context.runOnClient(client -> {
 					client.options.guiScale().set(scale);
 					client.resizeGui();
@@ -1727,6 +1742,8 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 			// GC-07 unit 4
 			// GC-08 unit 5
 			// GC-09 unit 6
+			// GC-09: amdusias.geo.json's muzzle reaches 16.5 px ahead of him; his head's underside is 27 px up, his eyes at 1.9.
+			case AMDUSIAS -> new double[] {16.5 / 16.0, 0.21};
 			default -> new double[] {spirit.getBbWidth() / 2.0, 0.3};
 		};
 	}
@@ -4261,4 +4278,776 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 	}
 
 	// GC-09 unit 6
+	// ---------------------------------------------------------------- GC-09: Amdusias (Dossier 6)
+
+	// GC-09: Amdusias (tools/concordance_pacts.py SPIRITS["amdusias"]; check_spirit_bodies).
+	private static final String AMDUSIAS = "jugcraft:amdusias";
+	private static final String AMDUSIAS_IDLE = "animation.amdusias.idle";
+	private static final String AMDUSIAS_LISTEN = "animation.amdusias.listen";
+	private static final String AMDUSIAS_WAITING = "animation.amdusias.waiting";
+	private static final String AMDUSIAS_SUSPENDED = "animation.amdusias.suspended";
+	/** His refusal at a perch with no log within 2 (Dossier 6 item 2). */
+	private static final String NO_TREE = "I bend trees. There is no tree here.";
+	/** His compact (data/jugcraft/concordance/pact/amdusias.json): no resonance, so no astrolabe. */
+	private static final List<String> AMDUSIAS_COMPACT = List.of("minecraft:note_block 1", "minecraft:oak_sapling 2");
+	/** His facing shots in standingFacing's order (east, south, west, north), literal so check_pact_screen sees each. */
+	private static final List<String> AMDUSIAS_FACES = List.of("jugcraft_garden_amdusias_faces_east", "jugcraft_garden_amdusias_faces_south",
+			"jugcraft_garden_amdusias_faces_west", "jugcraft_garden_amdusias_faces_north");
+
+	/**
+	 * GC-09: Amdusias at the perch Foras left, standing beside it (unit 3's Station.BESIDE), from the chooser to his
+	 * departure: his horn a beat after his gesture, his canopy read on the Inspect page, a bed's and a Gauge's Jade, his tree's
+	 * sway, his matter asked and answered on the kept page. His yard (yard() first, as every later spirit's): a log east of the
+	 * perch only once his refusal is shown, and three awake beds of the player's, bare until his canopy is to form: a
+	 * Sunpetal's 4 west and 5 south, a Habitat Gauge's 3 east and 4 south (each with four budding amethyst in its sample, a
+	 * stir of 4), and one 3 west and 2 south for the Gloamcap his matter is about. Noon and clear weather first, and noon
+	 * again before his poses: in the merged order he follows Foras and Bifrons (CR6 item 10).
+	 */
+	private static void amdusias(ClientGameTestContext context, TestDedicatedServerContext server, TestDedicatedServerConnection connection,
+			BlockPos perch) {
+		server.runCommand("time set noon");
+		server.runCommand("weather clear");
+		BlockPos log = perch.east();
+		BlockPos sunpetal = perch.offset(-4, 0, 5);
+		BlockPos gauged = perch.offset(3, 0, 4);
+		BlockPos spare = perch.offset(-3, 0, 2);
+		server.runOnServer(minecraft -> {
+			yard(minecraft, perch);
+			for (BlockPos at : List.of(sunpetal, gauged, spare)) {
+				awakeBed(minecraft, at);
+			}
+			// A stir of 4 round each plant, inside its sample (2 round, 1 up), clear of the player, the camera and his station.
+			for (BlockPos at : List.of(sunpetal.offset(-2, 1, -2), sunpetal.offset(-2, 1, 2), sunpetal.offset(-2, 2, 0), sunpetal.offset(2, 1, 2),
+					gauged.offset(1, 1, -2), gauged.offset(1, 1, 2), gauged.offset(1, 2, 0), gauged.offset(-1, 1, 2))) {
+				minecraft.overworld().setBlockAndUpdate(at, Blocks.BUDDING_AMETHYST.defaultBlockState());
+			}
+		});
+		standSouth(context, server, perch);
+		connection.waitForChunksRender();
+		amdusiasNoTree(context, server, perch);
+		amdusiasChooser(context, server, perch, log);
+		amdusiasConversation(context, server);
+		amdusiasSizes(context);
+		Hearing hearing = hear(context);
+		amdusiasAcceptance(context, server, perch);
+		amdusiasHeard(context, server, hearing, perch);
+		standSouth(context, server, perch);
+		amdusiasHorn(context, server, perch, sunpetal, gauged);
+		amdusiasInspectPage(context, server, perch, sunpetal);
+		amdusiasBedJade(context, server, perch, sunpetal, gauged);
+		amdusiasSway(context, server, perch, log);
+		amdusiasMatter(context, server, perch, spare);
+		amdusiasJade(context, server, perch);
+		server.runCommand("time set noon");
+		amdusiasPoses(context, server, perch);
+		standingFacing(context, server, perch, AMDUSIAS, AMDUSIAS_FACES);
+		standSouth(context, server, perch);
+		amdusiasEnding(context, server, perch, log);
+	}
+
+	/** GC-09: an awake, wet Verdant Bed of the player's at {@code at} holding 4 nutrients, nothing on it. */
+	private static void awakeBed(MinecraftServer minecraft, BlockPos at) {
+		minecraft.overworld().setBlockAndUpdate(at, Garden.VERDANT_BED.defaultBlockState().setValue(VerdantBedBlock.MOISTURE, VerdantBedBlock.WET));
+		VerdantBedBlockEntity kept = bed(minecraft, at);
+		kept.awaken(player(minecraft).getUUID());
+		kept.setNutrients(4);
+	}
+
+	/** GC-09: Amdusias's presence at {@code perch}, asserted there (server side). */
+	private static AmdusiasEntity amdusiasAt(MinecraftServer minecraft, BlockPos perch) {
+		ServerLevel level = minecraft.overworld();
+		PactSpiritEntity<?> found = ((PactPerchBlockEntity) level.getBlockEntity(perch)).presence(level);
+		check(found instanceof AmdusiasEntity, "Amdusias stands beside his perch: " + found);
+		return (AmdusiasEntity) found;
+	}
+
+	private static CanopyShelter.Memory canopyOf(AmdusiasEntity amdusias) {
+		return amdusias.serviceMemory(CanopyShelter.Memory.class, CanopyShelter.Memory::new);
+	}
+
+	/** Dossier 6 item 2: awake beds of the player's but no log within 2: the chooser lists Amdusias not ready, his refusal in his words. */
+	private static void amdusiasNoTree(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
+		context.waitTicks(OPEN_GAP);
+		open(context, server, perch);
+		context.waitFor(client -> PactClient.state() != null && PactClient.state().mode() == PactStatePayload.INVITE, WAIT);
+		String entries = context.computeOnClient(client -> entries(PactClient.state()));
+		Jugcraft.LOGGER.info("[garden-check] chooser before his tree: {}", entries);
+		boolean listed = context.computeOnClient(client -> PactClient.state().patterns().stream()
+				.anyMatch(choice -> choice.id().equals(AmdusiasEntity.SIGN) && !choice.ready() && choice.amount() == 1)
+				&& PactClient.state().notes().stream().anyMatch(note -> note.getString().contains(NO_TREE)));
+		check(listed, "Amdusias listed, not ready, his tree alone missing, in his words: " + entries);
+		fits(context, "the chooser without his tree");
+		cardsWhole(context, "the chooser without his tree");
+		named(context);
+		reasons(context);
+		budget(context, chooserWords(context), "the chooser without his tree");
+		shot(context, "jugcraft_garden_amdusias_no_tree");
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(null);
+	}
+
+	/**
+	 * An oak log east of the perch (the side he takes stays clear); the chooser lists him ready; chosen by keyboard, he steps
+	 * in with his gesture and stands on the ground two blocks west of the perch (unit 3's Station.BESIDE, GC-P67), his horn
+	 * held a beat (GC-P127).
+	 */
+	private static void amdusiasChooser(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, BlockPos log) {
+		server.runOnServer(minecraft -> minecraft.overworld().setBlockAndUpdate(log, Blocks.OAK_LOG.defaultBlockState()));
+		context.waitTicks(25);
+		open(context, server, perch);
+		context.waitFor(client -> PactClient.state() != null && PactClient.state().mode() == PactStatePayload.INVITE
+				&& PactClient.state().patterns().stream().anyMatch(choice -> choice.id().equals(AmdusiasEntity.SIGN) && choice.ready()), WAIT);
+		String entries = context.computeOnClient(client -> entries(PactClient.state()));
+		Jugcraft.LOGGER.info("[garden-check] chooser with his tree and beds: {}", entries);
+		context.waitFor(client -> client.gui.screen() instanceof PactScreen, WAIT);
+		fits(context, "the chooser with his tree");
+		cardsWhole(context, "the chooser with his tree");
+		named(context);
+		budget(context, chooserWords(context), "the chooser with his tree");
+		shot(context, "jugcraft_garden_amdusias_chooser");
+		String name = context.computeOnClient(client -> Component.translatable("entity.jugcraft.amdusias").getString());
+		tabToNamed(context, name);
+		context.getInput().pressKey(InputConstants.KEY_RETURN);
+		context.waitFor(client -> PactClient.state() != null && PactClient.state().mode() == PactStatePayload.NEGOTIATE
+				&& AmdusiasEntity.SIGN.equals(PactClient.state().spirit().sign()) && spiritAt(client, perch, AMDUSIAS) != null, WAIT);
+		context.waitFor(client -> AmdusiasEntity.Gesture.ARRIVE.animation.equals(gesturedOf(client, perch, AMDUSIAS)), WAIT);
+		RawAnimation arrived = context.computeOnClient(client -> gesturedOf(client, perch, AMDUSIAS));
+		Vec3 stands = server.computeOnServer(minecraft -> presenceOf(minecraft, perch).position());
+		double off = stands.distanceTo(Vec3.atBottomCenterOf(perch.west(2)));
+		Jugcraft.LOGGER.info("[garden-check] invited amdusias: gesture {}, stands at {} ({} from two blocks west of the perch)", arrived, stands, off);
+		check(AmdusiasEntity.Gesture.ARRIVE.animation.equals(arrived) && off < 1.0E-3,
+				"Chosen, he steps in and stands on the ground two blocks west of the perch, clockwise of the player south of it: " + stands);
+	}
+
+	/**
+	 * His three beats (the greeting amended: "You see me before you hear me"), then every term by keyboard (Enter three
+	 * times): his quota worded as a cap, at most 16 beds at once (GC-P126), never a day's count, no astrolabe or resonance.
+	 */
+	private static void amdusiasConversation(ClientGameTestContext context, TestDedicatedServerContext server) {
+		settle(context);
+		String shown = context.computeOnClient(client -> describe(PactClient.state()));
+		Jugcraft.LOGGER.info("[garden-check] amdusias's offer: {}", shown);
+		boolean whole = context.computeOnClient(client -> PactClient.state().beats().size() == 3 && PactClient.state().notes().isEmpty()
+				&& PactClient.state().offers(PactRequestPayload.ACCEPT)
+				&& PactClient.state().terms().stream().map(PactStatePayload.Term::key).toList().equals(PactStatePayload.TERMS)
+				&& PactClient.state().beats().getFirst().getString().contains("You see me before you hear me. I am Amdusias."));
+		check(whole, "Amdusias speaks three beats, his greeting amended, nothing stands in the way, and his terms name every term: " + shown);
+		fits(context, "his beat at GUI scale 2");
+		named(context);
+		portraitWhole(context, AMDUSIAS);
+		budget(context, BEAT_WORDS, "his first beat");
+		shot(context, "jugcraft_garden_amdusias_conversation");
+		tabTo(context, "next");
+		for (int beat = 0; beat < 3; beat++) {
+			context.getInput().pressKey(InputConstants.KEY_RETURN);
+			context.waitTicks(3);
+		}
+		settle(context);
+		boolean onTerms = context.computeOnClient(client -> screen(client).page() == PactScreen.TERMS_PAGE && "para:0".equals(screen(client).focusedKey()));
+		check(onTerms, "Enter three times reaches his terms, the keyboard on their first line, never on Accept");
+		String quota = context.computeOnClient(client -> PactClient.state().terms().stream().filter(term -> term.key().equals("quota"))
+				.map(term -> term.value().getString()).findFirst().orElse(""));
+		String words = context.computeOnClient(client -> String.join(" ", PactClient.state().terms().stream()
+				.map(term -> term.value().getString()).toList()).toLowerCase(Locale.ROOT));
+		List<String> drawn = context.computeOnClient(client -> screen(client).drawn());
+		Jugcraft.LOGGER.info("[garden-check] his terms: {}; his quota: {}; drawn {}", words, quota, drawn);
+		check("At most 16 beds sheltered at once".equals(quota) && String.join(" ", drawn).contains("Max 16 beds") && !quota.contains("day")
+				&& !words.contains("astrolabe") && !words.contains("resonance") && words.contains("shelter"),
+				"His quota is a cap, its chip Max 16 beds; his terms name his shelter and no astrolabe or resonance: " + quota + " / " + drawn);
+		fits(context, "his terms at GUI scale 2");
+		named(context);
+		budget(context, TERMS_WORDS, "his terms");
+		shot(context, "jugcraft_garden_amdusias_terms");
+		boolean held = server.computeOnServer(minecraft -> holds(minecraft, AMDUSIAS));
+		check(!held, "Hearing his terms records nothing");
+	}
+
+	/** His terms and a beat at GUI scale 4 (1920 x 1080) and in a 320 x 180 window, the mouse off every chip. */
+	private static void amdusiasSizes(ClientGameTestContext context) {
+		int width = context.computeOnClient(client -> client.getWindow().getWidth());
+		int height = context.computeOnClient(client -> client.getWindow().getHeight());
+		context.getInput().resizeWindow(1920, 1080);
+		context.runOnClient(client -> {
+			client.options.guiScale().set(4);
+			client.resizeGui();
+		});
+		context.waitTicks(10);
+		int applied = context.computeOnClient(client -> client.getWindow().getGuiScale());
+		check(applied == 4, "His high-scale shots are at GUI scale 4: " + applied);
+		settle(context);
+		fits(context, "his terms at GUI scale 4");
+		named(context);
+		budget(context, TERMS_WORDS, "his terms at GUI scale 4");
+		shot(context, "jugcraft_garden_amdusias_terms_scale4");
+		press(context, "back");
+		settle(context);
+		fits(context, "his beat at GUI scale 4");
+		named(context);
+		budget(context, BEAT_WORDS, "his last beat at GUI scale 4");
+		shot(context, "jugcraft_garden_amdusias_conversation_scale4");
+		press(context, "next");
+		context.runOnClient(client -> {
+			client.options.guiScale().set(2);
+			client.resizeGui();
+		});
+		context.getInput().resizeWindow(320, 180);
+		context.waitTicks(10);
+		String gui = context.computeOnClient(client -> client.getWindow().getGuiScaledWidth() + "x" + client.getWindow().getGuiScaledHeight());
+		Jugcraft.LOGGER.info("[garden-check] his terms in a 320x180 window: GUI {}", gui);
+		check("320x180".equals(gui), "A 320x180 window draws a 320x180 GUI: " + gui);
+		settle(context);
+		fits(context, "his terms at 320x180");
+		named(context);
+		budget(context, TERMS_WORDS, "his terms at 320x180");
+		shot(context, "jugcraft_garden_amdusias_terms_small");
+		press(context, "back");
+		settle(context);
+		fits(context, "his beat at 320x180");
+		named(context);
+		budget(context, BEAT_WORDS, "his last beat at 320x180");
+		shot(context, "jugcraft_garden_amdusias_conversation_small");
+		press(context, "next");
+		context.getInput().resizeWindow(width, height);
+		context.waitTicks(10);
+		boolean back = context.computeOnClient(client -> screen(client).page() == PactScreen.TERMS_PAGE);
+		check(back, "Back on his terms");
+	}
+
+	/**
+	 * Accept refused without his compact (worded without an astrolabe; he refuses with his refuse gesture), then sealed with
+	 * it: a note block and 2 oak saplings, spent once; the kept page opens, its gauge his beds sheltered now of his cap.
+	 */
+	private static void amdusiasAcceptance(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
+		tabTo(context, "accept");
+		PactStatePayload.Result refused = answer(context);
+		String said = refused.message().getString();
+		int refusedMode = context.computeOnClient(client -> PactClient.state().mode());
+		Jugcraft.LOGGER.info("[garden-check] Accept without his compact: {} ({})", refused.reason(), said);
+		check("cannot_afford".equals(refused.reason()) && !refused.done() && !said.toLowerCase(Locale.ROOT).contains("astrolabe")
+				&& refusedMode == PactStatePayload.NEGOTIATE, "Without his compact Accept is refused, worded without an astrolabe: " + said);
+		context.waitFor(client -> AmdusiasEntity.Gesture.REFUSE.animation.equals(gesturedOf(client, perch, AMDUSIAS)), WAIT);
+		boolean heldAfterRefusal = server.computeOnServer(minecraft -> holds(minecraft, AMDUSIAS));
+		check(!heldAfterRefusal, "A refusal records and spends nothing");
+		context.waitFor(client -> screen(client).control("result") instanceof PactScreen.Verdict verdict && verdict.refused(), WAIT);
+		settle(context);
+		budget(context, TERMS_WORDS, "his refusal");
+		shot(context, "jugcraft_garden_amdusias_refused");
+		List<String> cost = context.computeOnClient(client -> PactClient.state().compact().stream()
+				.map(stack -> BuiltInRegistries.ITEM.getKey(stack.getItem()) + " " + stack.getCount()).toList());
+		int resonance = context.computeOnClient(client -> PactClient.state().resonance());
+		Jugcraft.LOGGER.info("[garden-check] his compact: {} and {} resonance", cost, resonance);
+		check(cost.equals(AMDUSIAS_COMPACT) && resonance == 0, "His compact: a note block and 2 oak saplings, no resonance: " + cost);
+		server.runOnServer(minecraft -> cost.forEach(line -> player(minecraft).getInventory().add(stack(line))));
+		context.waitTicks(5);
+		tabTo(context, "accept");
+		PactStatePayload.Result sealed = answer(context);
+		int sealedMode = context.computeOnClient(client -> PactClient.state().mode());
+		check(sealed.done() && "sealed".equals(sealed.reason()) && sealedMode == PactStatePayload.KEEP, "Accepting with his compact seals the pact: " + sealed.reason());
+		String spent = server.computeOnServer(minecraft -> holds(minecraft, AMDUSIAS) + " "
+				+ cost.stream().mapToInt(line -> player(minecraft).getInventory().countItem(stack(line).getItem())).sum());
+		Jugcraft.LOGGER.info("[garden-check] sealed: held, compact left = {}", spent);
+		check("true 0".equals(spent), "Sealed once, his compact spent once: " + spent);
+		context.waitFor(client -> screen(client).control("result") instanceof PactScreen.Verdict verdict && !verdict.refused(), WAIT);
+		settle(context);
+		List<String> drawn = context.computeOnClient(client -> screen(client).drawn());
+		Jugcraft.LOGGER.info("[garden-check] his kept page: drawn {}", drawn);
+		check(String.join(" ", drawn).contains("/16 now"), "His kept page's gauge: beds sheltered now of his cap, never today's: " + drawn);
+		fits(context, "his kept pact at GUI scale 2");
+		named(context);
+		budget(context, keptWords(context), "his kept pact");
+		shot(context, "jugcraft_garden_amdusias_kept");
+	}
+
+	/** His seven cues have their subtitles; the server fired his refusal, then his assent; heard where sound plays. */
+	private static void amdusiasHeard(ClientGameTestContext context, TestDedicatedServerContext server, Hearing hearing, BlockPos perch) {
+		List<String> missing = new ArrayList<>();
+		for (String cue : AmdusiasEntity.SOUND_IDS) {
+			String words = context.computeOnClient(client -> Component.translatable("subtitles.jugcraft.amdusias." + cue).getString());
+			boolean defined = context.computeOnClient(client -> words.equals(subtitle(client, "amdusias." + cue)));
+			if (words.startsWith("subtitles.") || !defined) {
+				missing.add(cue);
+			}
+		}
+		check(missing.isEmpty(), "His cues have their subtitles in the client's sounds: missing " + missing);
+		String refuse = context.computeOnClient(client -> Component.translatable("subtitles.jugcraft.amdusias.refuse").getString());
+		String assent = context.computeOnClient(client -> Component.translatable("subtitles.jugcraft.amdusias.assent").getString());
+		List<String> cues = server.computeOnServer(minecraft -> presenceOf(minecraft, perch).cues());
+		Jugcraft.LOGGER.info("[garden-check] Amdusias's cues so far: {}", cues);
+		check(cues.contains("refuse") && "assent".equals(cues.getLast()), "The server fired his refusal, then his assent: " + cues);
+		try {
+			if (hearing.sounding()) {
+				context.waitFor(client -> hearing.heard().contains(refuse) && hearing.heard().contains(assent), WAIT);
+				Jugcraft.LOGGER.info("[garden-check] subtitles heard: {}", hearing.heard());
+			} else {
+				Jugcraft.LOGGER.info("[garden-check] no sound device: the sound engine is off, so no subtitle can show; checked as defined and as fired");
+			}
+		} finally {
+			context.runOnClient(client -> {
+				client.getSoundManager().removeListener(hearing.listener());
+				client.options.showSubtitles().set(hearing.subtitles());
+			});
+		}
+	}
+
+	/**
+	 * Dossier 6 items 3 and 7a (GC-P122, GC-P127): a Sunpetal on his first bed and a Habitat Gauge on his second (attuned to
+	 * Sunpetal, reading disturbance), his index forgotten and his think run in the same server step, so his canopy forms with
+	 * that think: his work gesture shows at once, and his horn ("A distant horn answers") sounds a beat later, 20 ticks, never
+	 * with it. Where sound plays its subtitle is heard; where none can (CI), it is staged on the HUD's own overlay for its
+	 * picture (stageSubtitle) and logged as staged. The server's time of the horn is checked either way; no screen open.
+	 */
+	private static void amdusiasHorn(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, BlockPos sunpetal, BlockPos gauged) {
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(null);
+		Hearing hearing = hear(context);
+		String answers = context.computeOnClient(client -> Component.translatable("subtitles.jugcraft.amdusias.work").getString());
+		List<String> formed = server.computeOnServer(minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			level.setBlockAndUpdate(sunpetal.above(), Garden.SUNPETAL_CROP.defaultBlockState().setValue(OrganismCropBlock.AGE, 1));
+			level.setBlockAndUpdate(gauged.above(), Garden.HABITAT_GAUGE.defaultBlockState());
+			HabitatGaugeBlockEntity gauge = (HabitatGaugeBlockEntity) level.getBlockEntity(gauged.above());
+			gauge.awaken(player(minecraft).getUUID());
+			gauge.attune(level, "jugcraft:sunpetal");
+			while (gauge.mode() != HabitatGaugeBlockEntity.Mode.DISTURBANCE) {
+				gauge.cycle(level);
+			}
+			AmdusiasEntity amdusias = amdusiasAt(minecraft, perch);
+			canopyOf(amdusias).forget();
+			Status status = amdusias.think(level, NOON, level.getGameTime());
+			return List.of(status.id, String.valueOf(level.getGameTime()), String.valueOf(canopyOf(amdusias).covered().size()),
+					String.valueOf(amdusias.cues().getLast()), String.valueOf(amdusias.soundedAt("work")));
+		});
+		long bent = Long.parseLong(formed.get(1));
+		Jugcraft.LOGGER.info("[garden-check] his canopy formed: status {}, game time {}, beds {}, last cue {}, horn sounded at {}",
+				formed.get(0), bent, formed.get(2), formed.get(3), formed.get(4));
+		check("working".equals(formed.get(0)) && "2".equals(formed.get(2)) && "work".equals(formed.get(3)) && String.valueOf(Long.MIN_VALUE).equals(formed.get(4)),
+				"His canopy forms over the Sunpetal and the Gauge's bed: his work gesture shows, his horn waits its beat: " + formed);
+		try {
+			untilServer(context, server, minecraft -> amdusiasAt(minecraft, perch).soundedAt("work") != Long.MIN_VALUE, "His horn sounds");
+			long horn = server.computeOnServer(minecraft -> amdusiasAt(minecraft, perch).soundedAt("work"));
+			Jugcraft.LOGGER.info("[garden-check] his horn sounded {} ticks after his work gesture", horn - bent);
+			check(horn - bent >= AmdusiasEntity.HORN_BEAT && horn - bent <= AmdusiasEntity.HORN_BEAT + 1, "His horn, a beat late: " + (horn - bent));
+			if (hearing.sounding()) {
+				context.waitFor(client -> hearing.heard().contains(answers), WAIT);
+				Jugcraft.LOGGER.info("[garden-check] his horn heard: {}", hearing.heard());
+			} else {
+				Vec3 hornAt = server.computeOnServer(minecraft -> amdusiasAt(minecraft, perch).position());
+				context.runOnClient(client -> stageSubtitle(client, "jugcraft:amdusias.work", hornAt));
+				Jugcraft.LOGGER.info("[pact-check] horn subtitle staged (no sound device)");
+			}
+			context.waitTicks(3);
+			shot(context, "jugcraft_garden_amdusias_horn");
+		} finally {
+			context.runOnClient(client -> {
+				client.getSoundManager().removeListener(hearing.listener());
+				client.options.showSubtitles().set(hearing.subtitles());
+			});
+		}
+	}
+
+	/**
+	 * GC-09 (F10): where no sound device plays (CI), SoundEngine.play stops before any listener hears, so the horn's subtitle
+	 * is staged on the HUD's own overlay (Hud.subtitleOverlay, private: read by reflection), at the horn's place, for its
+	 * picture only. The log and the record call it staged; the server's soundedAt holds the beat itself.
+	 */
+	private static void stageSubtitle(Minecraft client, String event, Vec3 at) {
+		try {
+			Field field = Hud.class.getDeclaredField("subtitleOverlay");
+			field.setAccessible(true);
+			SubtitleOverlay overlay = (SubtitleOverlay) field.get(client.gui.hud);
+			Identifier id = Identifier.parse(event);
+			WeighedSoundEvents events = client.getSoundManager().getSoundEvent(id);
+			SoundEvent sound = BuiltInRegistries.SOUND_EVENT.getValue(id);
+			check(events != null && sound != null && events.getSubtitle() != null, "His horn has its sound event and subtitle: " + event);
+			overlay.onPlaySound(new SimpleSoundInstance(sound, SoundSource.NEUTRAL, 1.0F, 1.0F, RandomSource.create(0L), at.x, at.y, at.z), events, 16.0F);
+		} catch (ReflectiveOperationException e) {
+			throw new AssertionError("The HUD's subtitle overlay is readable", e);
+		}
+	}
+
+	/**
+	 * GC-P125: the encyclopedia's Inspect page on the sheltered Sunpetal's bed (opened looking at it): its rows end with the
+	 * canopy's line, "Sheltered by Amdusias" (the stir 2 lower, what it was unsheltered, the strain still counted against
+	 * that); a narrated line, checked as the server's key and rendered.
+	 */
+	private static void amdusiasInspectPage(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, BlockPos sunpetal) {
+		standSouth(context, server, perch);
+		context.getInput().lookAt(sunpetal);
+		context.waitTicks(5);
+		context.getInput().pressKey(EncyclopediaClient.key());
+		context.waitForScreen(EncyclopediaScreen.class);
+		int asked = context.computeOnClient(client -> EncyclopediaClient.sequence());
+		context.waitFor(client -> EncyclopediaClient.navigator().applied() >= asked, WAIT);
+		context.waitTicks(15);
+		String page = context.computeOnClient(client -> ((EncyclopediaScreen) client.gui.screen()).page());
+		List<String> rows = context.computeOnClient(client -> {
+			EncyclopediaPayload.Page current = EncyclopediaClient.navigator().current();
+			return current == null ? List.<String>of() : current.rows().stream().map(row -> row.text().getString()).toList();
+		});
+		Boolean sheltered = context.computeOnClient(client -> {
+			EncyclopediaPayload.Page current = EncyclopediaClient.navigator().current();
+			return current != null && current.rows().stream().anyMatch(row -> keyed(row.text(), "compose.jugcraft.ecology.sheltered"));
+		});
+		Jugcraft.LOGGER.info("[garden-check] the Inspect page on his sheltered bed: page {}, rows {}", page, rows);
+		check("inspect".equals(page) && sheltered && rows.stream().anyMatch(row -> row.startsWith("Sheltered by Amdusias")),
+				"The Inspect page says the canopy's line: " + rows);
+		shot(context, "jugcraft_garden_amdusias_inspect_page");
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(null);
+	}
+
+	/** Whether {@code component} or any component among its arguments is the translation {@code key}. */
+	private static boolean keyed(Component component, String key) {
+		if (component.getContents() instanceof TranslatableContents translatable) {
+			if (translatable.getKey().equals(key)) {
+				return true;
+			}
+			for (Object arg : translatable.getArgs()) {
+				if (arg instanceof Component inner && keyed(inner, key)) {
+					return true;
+				}
+			}
+		}
+		return component.getSiblings().stream().anyMatch(sibling -> keyed(sibling, key));
+	}
+
+	/**
+	 * GC-P125: Jade's readings of the sheltered Sunpetal's bed and of the Gauge (read on the server: no Jade class): each
+	 * carries what the canopy took (2), the Gauge reading the stir 2 lower than its bed's area; with Jade loaded, both
+	 * overlays photographed.
+	 */
+	private static void amdusiasBedJade(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, BlockPos sunpetal, BlockPos gauged) {
+		String readings = server.computeOnServer(minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			CompoundTag ofBed = ConcordanceDataProvider.bedSnapshot(bed(minecraft, sunpetal), level);
+			HabitatGaugeBlockEntity gauge = (HabitatGaugeBlockEntity) level.getBlockEntity(gauged.above());
+			int signal = gauge.read(level);
+			CompoundTag ofGauge = ConcordanceDataProvider.deviceSnapshot(gauge);
+			boolean right = ofBed.getIntOr("sheltered", 0) == 2 && ofGauge.getIntOr("sheltered", 0) == 2 && gauge.sheltered() == 2;
+			return (right ? "ok " : "bad ") + "signal " + signal + " " + ofBed + " " + ofGauge;
+		});
+		Jugcraft.LOGGER.info("[garden-check] Jade's readings of his sheltered bed and Gauge: {}", readings);
+		check(readings.startsWith("ok"), "Jade's bed and Gauge readings carry what the canopy took: " + readings);
+		if (FabricLoader.getInstance().isModLoaded("jade")) {
+			boolean hidden = context.computeOnClient(client -> client.gui.hud.isHidden());
+			context.runOnClient(client -> {
+				if (client.gui.hud.isHidden()) {
+					client.gui.hud.toggle();
+				}
+			});
+			try {
+				standSouth(server, perch);
+				context.waitTicks(10);
+				context.getInput().lookAt(sunpetal);
+				context.waitTicks(20);
+				shot(context, "jugcraft_garden_amdusias_bed_jade");
+				context.getInput().lookAt(gauged.above());
+				context.waitTicks(20);
+				shot(context, "jugcraft_garden_amdusias_gauge_jade");
+			} finally {
+				restoreHud(context, hidden);
+			}
+		} else {
+			Jugcraft.LOGGER.info("[garden-check] Jade is not loaded: no Jade shots of his bed and Gauge");
+		}
+	}
+
+	/**
+	 * Dossier 6 detail (b) (GC-P134): his tree sways (the shared sign at the log's top, as every client draws it), the server
+	 * counting it at his log; two ticks later the world is frozen with the sign shown, the HUD hidden.
+	 */
+	private static void amdusiasSway(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, BlockPos log) {
+		standSouth(context, server, perch);
+		context.getInput().lookAt(log.above());
+		context.waitTicks(5);
+		boolean hidden = hideHud(context);
+		try {
+			String swayed = server.computeOnServer(minecraft -> {
+				AmdusiasEntity amdusias = amdusiasAt(minecraft, perch);
+				int before = amdusias.sways();
+				BlockPos tree = CanopyShelter.tree(minecraft.overworld(), amdusias);
+				if (tree != null) {
+					amdusias.sway(minecraft.overworld(), tree);
+				}
+				return tree + " " + (amdusias.sways() - before) + " " + amdusias.lastSway();
+			});
+			Jugcraft.LOGGER.info("[garden-check] his tree swayed: {}", swayed);
+			check(swayed.startsWith(log + " 1 "), "His tree is the log east of the perch, and it sways once: " + swayed);
+			context.waitTicks(2);
+			server.runCommand("tick freeze");
+			try {
+				context.waitTicks(3);
+				shot(context, "jugcraft_garden_amdusias_sway");
+			} finally {
+				server.runCommand("tick unfreeze");
+			}
+		} finally {
+			restoreHud(context, hidden);
+		}
+	}
+
+	/**
+	 * Dossier 6 item 5 (GC-P130): a Gloamcap (it wants the stir) on his third bed, his index forgotten and his think run in the
+	 * same server step: he spares it and awaits the answer; his matter on his kept page by keyboard, two answers, none kept,
+	 * at GUI 2, GUI 4 and 320x180; Enter on "Shelter all" keeps it at the perch (RESOLVE), marked, and he assents.
+	 */
+	private static void amdusiasMatter(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, BlockPos spare) {
+		List<String> raised = server.computeOnServer(minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			level.setBlockAndUpdate(spare.above(), Garden.GLOAMCAP_CROP.defaultBlockState());
+			AmdusiasEntity amdusias = amdusiasAt(minecraft, perch);
+			canopyOf(amdusias).forget();
+			Status status = amdusias.think(level, NOON, level.getGameTime());
+			return List.of(status.id, canopyOf(amdusias).spared().toString());
+		});
+		Jugcraft.LOGGER.info("[garden-check] a Gloamcap on his bed: status {}, spared {}", raised.get(0), raised.get(1));
+		check("awaiting_answer".equals(raised.get(0)) && raised.get(1).equals(List.of(spare).toString()),
+				"He spares the Gloamcap and awaits the answer: " + raised);
+		context.waitTicks(OPEN_GAP);
+		open(context, server, perch);
+		context.waitFor(client -> PactClient.state() != null && PactClient.state().mode() == PactStatePayload.KEEP
+				&& PactClient.state().spirit().answers().size() == 2 && screen(client).control("answer:1") != null, WAIT);
+		settle(context);
+		String shown = context.computeOnClient(client -> PactClient.state().spirit().matter().getString() + " / "
+				+ PactClient.state().spirit().answers().stream().map(answer -> answer.name().getString() + "=" + answer.amount()).toList() + " / "
+				+ PactClient.state().notes().stream().map(Component::getString).toList());
+		Jugcraft.LOGGER.info("[garden-check] his matter on the kept page: {}", shown);
+		boolean asked = context.computeOnClient(client -> PactClient.state().notes().stream().anyMatch(note -> note.getString().contains("awaits your answer"))
+				&& PactClient.state().spirit().answers().stream().allMatch(answer -> answer.amount() == 0)
+				&& screen(client).control("matter") != null && screen(client).control("answer:0") != null && screen(client).control("answer:1") != null);
+		check(asked, "The page says a matter waits and asks it, two answers, none kept: " + shown);
+		tabTo(context, "matter");
+		String narrated = context.computeOnClient(client -> screen(client).control("matter").getMessage().getString());
+		check(!narrated.isBlank(), "His matter is a focusable, narrated line: " + narrated);
+		fits(context, "his matter at GUI scale 2");
+		named(context);
+		budget(context, keptWords(context) + firstTask(context), "his matter");
+		shot(context, "jugcraft_garden_amdusias_matter");
+		int width = context.computeOnClient(client -> client.getWindow().getWidth());
+		int height = context.computeOnClient(client -> client.getWindow().getHeight());
+		context.getInput().resizeWindow(1920, 1080);
+		context.runOnClient(client -> {
+			client.options.guiScale().set(4);
+			client.resizeGui();
+		});
+		context.waitTicks(10);
+		int applied = context.computeOnClient(client -> client.getWindow().getGuiScale());
+		check(applied == 4, "At GUI scale 4: " + applied);
+		settle(context);
+		fits(context, "his matter at GUI scale 4");
+		named(context);
+		budget(context, keptWords(context) + firstTask(context), "his matter at GUI scale 4");
+		shot(context, "jugcraft_garden_amdusias_matter_scale4");
+		context.runOnClient(client -> {
+			client.options.guiScale().set(2);
+			client.resizeGui();
+		});
+		context.getInput().resizeWindow(320, 180);
+		context.waitTicks(10);
+		String gui = context.computeOnClient(client -> client.getWindow().getGuiScaledWidth() + "x" + client.getWindow().getGuiScaledHeight());
+		Jugcraft.LOGGER.info("[garden-check] his matter in a 320x180 window: GUI {}", gui);
+		check("320x180".equals(gui), "A 320x180 window draws a 320x180 GUI: " + gui);
+		settle(context);
+		fits(context, "his matter at 320x180");
+		named(context);
+		budget(context, keptWords(context) + firstTask(context), "his matter at 320x180");
+		shot(context, "jugcraft_garden_amdusias_matter_small");
+		context.getInput().resizeWindow(width, height);
+		context.waitTicks(10);
+		tabTo(context, "answer:1");
+		PactStatePayload.Result all = answer(context);
+		String kept = server.computeOnServer(minecraft -> String.valueOf(((PactPerchBlockEntity) minecraft.overworld().getBlockEntity(perch)).accord()));
+		boolean marked = context.computeOnClient(client -> PactClient.state().spirit().answers().get(0).amount() == 0
+				&& PactClient.state().spirit().answers().get(1).amount() == 1);
+		check(all.done() && "resolved".equals(all.reason()) && CanopyShelter.ALL.equals(kept) && marked,
+				"Enter on Shelter all keeps it at the perch, marked: " + all.reason() + " " + kept);
+		context.waitFor(client -> AmdusiasEntity.Gesture.ASSENT.animation.equals(gesturedOf(client, perch, AMDUSIAS)), WAIT);
+		context.waitFor(client -> screen(client).control("result") instanceof PactScreen.Verdict verdict && !verdict.refused(), WAIT);
+		settle(context);
+		String focused = context.computeOnClient(client -> screen(client).focusedKey());
+		check("answer:1".equals(focused), "The keyboard stays on the answer it pressed: " + focused);
+		budget(context, keptWords(context) + firstTask(context), "his matter answered");
+		shot(context, "jugcraft_garden_amdusias_answered");
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(null);
+	}
+
+	/**
+	 * Jade's readings of his perch and of him (read on the server: no Jade class): answered "shelter all", one think (run here,
+	 * so the count is the server's own) covers the Sunpetal, the Gauge's bed and the Gloamcap: his note says 3 beds, naming no
+	 * player; the roster no longer says he awaits an answer; with Jade loaded, his overlay (CR6 item 9).
+	 */
+	private static void amdusiasJade(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
+		Integer covered = server.computeOnServer(minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			AmdusiasEntity amdusias = amdusiasAt(minecraft, perch);
+			amdusias.think(level, NOON, level.getGameTime());
+			return canopyOf(amdusias).covered().size();
+		});
+		String readings = server.computeOnServer(minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			CompoundTag ofPerch = PactReading.holder(level, (PactPerchBlockEntity) level.getBlockEntity(perch), level.getGameTime());
+			CompoundTag ofHim = PactReading.presence(level, amdusiasAt(minecraft, perch), level.getGameTime());
+			String both = ofPerch + " " + ofHim;
+			boolean right = "kept".equals(ofPerch.getStringOr("standing", "")) && AMDUSIAS.equals(ofPerch.getStringOr("counterpart", ""))
+					&& CanopyShelter.WORK.equals(ofPerch.getStringOr("service", "")) && "active".equals(ofPerch.getStringOr("state", ""))
+					&& "covered".equals(ofHim.getStringOr("note", "")) && ofHim.getIntOr("note_count", 0) == 3
+					&& CanopyShelter.ALL.equals(ofPerch.getStringOr("accord", "")) && !ofHim.contains("matter")
+					&& PactReading.KEYS.containsAll(ofPerch.keySet()) && PactReading.KEYS.containsAll(ofHim.keySet())
+					&& !both.contains(player(minecraft).getUUID().toString()) && !both.contains(player(minecraft).getName().getString());
+			return (right ? "ok " : "bad ") + both;
+		});
+		String note = context.computeOnClient(client -> Component.translatable("tooltip.jugcraft.concordance.jade.pact.note.canopy_shelter.covered", covered).getString());
+		Jugcraft.LOGGER.info("[garden-check] Jade's readings of his perch and of Amdusias ({} beds, \"{}\"): {}", covered, note, readings);
+		check(covered == 3 && "Beds sheltered: 3".equals(note) && readings.startsWith("ok"),
+				"Answered, his canopy covers three; Jade's readings: his pact, service, state, answer and note, naming no player: " + readings);
+		String roster = server.computeOnServer(minecraft -> {
+			WorkerRoster.Entry entry = WorkerRoster.of(minecraft).workers(player(minecraft).getUUID()).get(amdusiasAt(minecraft, perch).getUUID());
+			return entry == null ? "none" : entry.status();
+		});
+		check(!"awaiting_answer".equals(roster), "The roster no longer says he awaits an answer: " + roster);
+		if (FabricLoader.getInstance().isModLoaded("jade")) {
+			boolean hidden = context.computeOnClient(client -> client.gui.hud.isHidden());
+			context.runOnClient(client -> {
+				if (client.gui.hud.isHidden()) {
+					client.gui.hud.toggle();
+				}
+			});
+			try {
+				standSouth(server, perch);
+				context.waitTicks(10);
+				Vec3 at = server.computeOnServer(minecraft -> amdusiasAt(minecraft, perch).position());
+				context.getInput().lookAt(BlockPos.containing(at.x, at.y + 1.6, at.z));
+				context.waitTicks(20);
+				shot(context, "jugcraft_garden_amdusias_jade");
+			} finally {
+				restoreHud(context, hidden);
+			}
+		} else {
+			Jugcraft.LOGGER.info("[garden-check] Jade is not loaded: no Jade shot of Amdusias");
+		}
+	}
+
+	/**
+	 * His body from his front: the camera 4 blocks south of where he stands (read from the server), facing north at his
+	 * middle; four loops as the server drives them (idle, listen, suspended, waiting; astir not posed: an offering due would
+	 * change the upkeep later steps read) and his six gestures, each frozen inside its telling pose, the HUD hidden. Waiting
+	 * is posed with the Concordance switched off (he serves at any hour).
+	 */
+	private static void amdusiasPoses(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
+		Vec3 at = server.computeOnServer(minecraft -> amdusiasAt(minecraft, perch).position());
+		double middle = server.computeOnServer(minecraft -> {
+			AmdusiasEntity amdusias = amdusiasAt(minecraft, perch);
+			return amdusias.getY() + amdusias.getBbHeight() / 2.0;
+		});
+		float pitch = (float) -Math.toDegrees(Math.atan2(middle - (at.y + 1.62), 4.0));
+		boolean hidden = hideHud(context);
+		try {
+			server.runCommand(String.format(Locale.ROOT, "tp @a %.2f %.2f %.2f 180 %.1f", at.x, at.y, at.z + 4.0, pitch));
+			context.waitTicks(OPEN_GAP);
+			open(context, server, perch);
+			context.waitFor(client -> spiritAt(client, perch, AMDUSIAS) instanceof LivingEntity body
+					&& Mth.degreesDifferenceAbs(body.yBodyRot, 0.0F) <= BATHIN_FACING_TOLERANCE, WAIT);
+			context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+			context.waitForScreen(null);
+			loopPoseOf(context, server, perch, AMDUSIAS, AMDUSIAS_IDLE, "jugcraft_garden_amdusias_idle", false);
+			context.waitTicks(OPEN_GAP);
+			open(context, server, perch);
+			context.waitFor(client -> spiritAt(client, perch, AMDUSIAS) instanceof AmdusiasEntity amdusias && amdusias.listening(), WAIT);
+			loopPoseOf(context, server, perch, AMDUSIAS, AMDUSIAS_LISTEN, "jugcraft_garden_amdusias_listen", true);
+			context.waitFor(client -> AMDUSIAS_IDLE.equals(drawingOf(client, perch, AMDUSIAS, MAIN)), WAIT);
+			AgreementHolder.Toggle suspended = server.computeOnServer(minecraft -> PactKeeping.suspend(minecraft.overworld(), player(minecraft),
+					holder(minecraft, perch), minecraft.overworld().getGameTime()));
+			check(suspended == AgreementHolder.Toggle.SUSPENDED, "Its holder suspends the pact: " + suspended);
+			loopPoseOf(context, server, perch, AMDUSIAS, AMDUSIAS_SUSPENDED, "jugcraft_garden_amdusias_suspended", false);
+			AgreementHolder.Toggle resumed = server.computeOnServer(minecraft -> PactKeeping.resume(minecraft.overworld(), player(minecraft),
+					holder(minecraft, perch), minecraft.overworld().getGameTime()));
+			check(resumed == AgreementHolder.Toggle.RESUMED, "and resumes it: " + resumed);
+			context.waitFor(client -> AMDUSIAS_IDLE.equals(drawingOf(client, perch, AMDUSIAS, MAIN)), WAIT);
+			boolean on = server.computeOnServer(minecraft -> JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE));
+			server.runOnServer(minecraft -> JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, false));
+			try {
+				loopPoseOf(context, server, perch, AMDUSIAS, AMDUSIAS_WAITING, "jugcraft_garden_amdusias_waiting", false);
+			} finally {
+				server.runOnServer(minecraft -> JugcraftConfig.setFeatureEnabled(JugcraftConcordance.FEATURE, on));
+			}
+			context.waitFor(client -> AMDUSIAS_IDLE.equals(drawingOf(client, perch, AMDUSIAS, MAIN)), WAIT);
+			clipPose(context, server, perch, AMDUSIAS, AmdusiasEntity.Gesture.INSPECT, 0.5, 1.3, "jugcraft_garden_amdusias_inspect");
+			clipPose(context, server, perch, AMDUSIAS, AmdusiasEntity.Gesture.ASSENT, 0.4, 1.2, "jugcraft_garden_amdusias_assent");
+			clipPose(context, server, perch, AMDUSIAS, AmdusiasEntity.Gesture.REFUSE, 0.4, 1.3, "jugcraft_garden_amdusias_refuse");
+			clipPose(context, server, perch, AMDUSIAS, AmdusiasEntity.Gesture.WORK, 0.8, 1.6, "jugcraft_garden_amdusias_work");
+			// He bows and is gone (depart holds its last frame) and steps in again (his arrival replaces it).
+			clipPose(context, server, perch, AMDUSIAS, AmdusiasEntity.Gesture.DEPART, 0.1, 0.7, "jugcraft_garden_amdusias_depart");
+			clipPose(context, server, perch, AMDUSIAS, AmdusiasEntity.Gesture.ARRIVE, 0.8, 1.6, "jugcraft_garden_amdusias_arrive");
+			context.waitFor(client -> drawingOf(client, perch, AMDUSIAS, GESTURES).isEmpty()
+					&& AMDUSIAS_IDLE.equals(drawingOf(client, perch, AMDUSIAS, MAIN)), WAIT);
+			boolean kept = server.computeOnServer(minecraft -> holds(minecraft, AMDUSIAS) && amdusiasAt(minecraft, perch).isAlive());
+			check(kept, "His gestures change nothing: the pact is kept and he stands beside his perch");
+		} finally {
+			restoreHud(context, hidden);
+		}
+	}
+
+	/**
+	 * Dossier 6 item 6: his kept page's gauge is the beds he shelters now of his cap; End asks first; then he bows his horn and
+	 * is gone, his tree sways once, and his horn follows a beat later, as he fades (the pact ended once). The canopy lapses
+	 * with him (no think refreshes it).
+	 */
+	private static void amdusiasEnding(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, BlockPos log) {
+		context.waitTicks(OPEN_GAP);
+		open(context, server, perch);
+		context.waitFor(client -> PactClient.state() != null && PactClient.state().mode() == PactStatePayload.KEEP, WAIT);
+		settle(context);
+		List<String> rows = context.computeOnClient(client -> PactClient.state().notes().stream().map(Component::getString).toList());
+		List<String> drawn = context.computeOnClient(client -> screen(client).drawn());
+		Jugcraft.LOGGER.info("[garden-check] his kept page: rows {}, drawn {}", rows, drawn);
+		check(rows.stream().anyMatch(row -> row.contains("of at most 16 beds sheltered now")) && String.join(" ", drawn).contains("/16 now"),
+				"His kept page's gauge: beds sheltered now of his cap, never today's: " + rows + " " + drawn);
+		budget(context, keptWords(context) + firstTask(context), "his kept page answered");
+		List<String> held = server.computeOnServer(minecraft -> {
+			AmdusiasEntity amdusias = amdusiasAt(minecraft, perch);
+			return List.of(amdusias.getUUID().toString(), String.valueOf(amdusias.sways()));
+		});
+		UUID him = UUID.fromString(held.get(0));
+		int swayed = Integer.parseInt(held.get(1));
+		press(context, "end");
+		context.waitForScreen(ConfirmScreen.class);
+		confirmBudget(context);
+		tabToLabel(context, Component.translatable("screen.jugcraft.pact.end.yes").getString());
+		long endedAt = server.computeOnServer(minecraft -> minecraft.overworld().getGameTime());
+		PactStatePayload.Result ended = answer(context);
+		context.waitFor(client -> AmdusiasEntity.Gesture.DEPART.animation.equals(gesturedOf(client, perch, AMDUSIAS)), WAIT);
+		RawAnimation going = context.computeOnClient(client -> gesturedOf(client, perch, AMDUSIAS));
+		String after = server.computeOnServer(minecraft -> holds(minecraft, AMDUSIAS) + " "
+				+ (minecraft.overworld().getEntity(him) instanceof AmdusiasEntity left ? "departing " + left.departing() : "gone"));
+		// His canopy stood until the end, so his tree's own sway (every SWAY_TICKS) may fall inside the window between the
+		// count read above and his departure: one sway more or two, the last his departure's, at his tree, after the request.
+		String swaying = server.computeOnServer(minecraft -> {
+			if (!(minecraft.overworld().getEntity(him) instanceof AmdusiasEntity left)) {
+				return "gone";
+			}
+			AmdusiasEntity.Sway last = left.lastSway();
+			int more = left.sways() - swayed;
+			return ((more == 1 || more == 2) && last != null && last.tree().equals(log) && last.at() >= endedAt ? "ok " : "bad ")
+					+ more + " " + last;
+		});
+		int endedMode = context.computeOnClient(client -> PactClient.state().mode());
+		Jugcraft.LOGGER.info("[garden-check] ended: {}; held, then his presence = {}; his tree's sways since: {}", ended.reason(), after, swaying);
+		check(ended.done() && "ended".equals(ended.reason()) && AmdusiasEntity.Gesture.DEPART.animation.equals(going)
+				&& endedMode == PactStatePayload.CLOSED && after.equals("false departing true") && swaying.startsWith("ok "),
+				"Ending ends the pact once; he bows his horn and his tree sways as he goes: " + after + "; " + swaying);
+		untilServer(context, server, minecraft -> !(minecraft.overworld().getEntity(him) instanceof AmdusiasEntity left)
+				|| left.soundedAt("depart") != Long.MIN_VALUE, "His horn follows his departure");
+		long horn = server.computeOnServer(minecraft -> minecraft.overworld().getEntity(him) instanceof AmdusiasEntity left ? left.soundedAt("depart") : Long.MIN_VALUE);
+		Jugcraft.LOGGER.info("[garden-check] his departing horn sounded {} ticks after his ending", horn - endedAt);
+		// Measured from before the request went (the server test holds the beat to the tick: amdusiasHornsABeatLate).
+		check(horn != Long.MIN_VALUE && horn - endedAt >= AmdusiasEntity.HORN_BEAT && horn - endedAt <= AmdusiasEntity.HORN_BEAT + 10,
+				"His horn follows a beat after his bow: " + (horn - endedAt));
+		context.waitFor(client -> spiritAt(client, perch, AMDUSIAS) == null, WAIT);
+		settle(context);
+		budget(context, ENDED_WORDS, "the ended page");
+		shot(context, "jugcraft_garden_amdusias_ended");
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(null);
+	}
 }

@@ -90,6 +90,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
+import io.github.jimbozoomer.jugcraft.concordance.garden.Canopies;
 
 /**
  * Roadmap step 14, ecological cultivation (docs/features/arcane-concordance-ecology.md), on a real server: a bed
@@ -2523,4 +2524,148 @@ public class ConcordanceGardenGameTests {
 
 	// GC-08 unit 5
 	// GC-09 unit 6
+	// ---------------------------------------------------------------- the garden cohort, GC-09b: a canopy's shelter, pure and in memory
+
+	/**
+	 * GC-09 (GC-P122, GC-P123, GC-P125, GC-P137): a sheltered reading keeps its strained value. Pure: strain 3 near a stir of 2,
+	 * sheltered by 2, reads 0 with the 2 kept as shelter and strained still 5, so a Sunpetal's strained fit and growth are the
+	 * same with and without, and its reasons show the unsheltered value the strain was counted against; sheltered again by 1 it
+	 * is unchanged (the larger, never the sum), by 4 never below 0; a damping of 0 changes nothing; a shelter beyond the area
+	 * and a negative damping are refused; Marax's advice eases the strain to 0, the shelter kept (were it dropped, 2 would
+	 * seem to do). On a bed under a canopy set by hand (this test's own holder, no spirit): its Sunpetal reads its unsheltered
+	 * reading sheltered by 2, with the same strained fit, and the Inspect page's rows are as before but for the canopy's line
+	 * after them; lifted, it reads as before.
+	 */
+	@GameTest(maxTicks = 30)
+	public void aShelteredHabitatKeepsItsStrainedValue(GameTestHelper helper) {
+		Niche sunpetal = organism("jugcraft:sunpetal").niche();
+		Habitat plain = new Habitat(7, 15, 10, 3, 2, 3);
+		Habitat sheltered = plain.sheltered(2);
+		helper.assertTrue(sheltered.moisture() == 7 && sheltered.light() == 15 && sheltered.nutrients() == 10 && sheltered.diversity() == 3
+				&& sheltered.strain() == 3 && sheltered.disturbance() == 0 && sheltered.shelter() == 2 && sheltered.unsheltered() == 2
+				&& sheltered.strained() == plain.strained() && plain.strained() == 5,
+				"Sheltered by 2: only the stir it reads is lower, the 2 kept as shelter, strained still 5: " + sheltered);
+		helper.assertTrue(sheltered.sheltered(1).equals(sheltered) && plain.sheltered(1).sheltered(2).equals(sheltered),
+				"Two canopies: the larger damping, never the sum");
+		helper.assertTrue(plain.sheltered(4).equals(sheltered), "By 4: never below 0 (it takes only the 2 the area holds)");
+		helper.assertTrue(plain.sheltered(0).equals(plain) && plain.shelter() == 0 && plain.unsheltered() == 2
+				&& plain.equals(new Habitat(7, 15, 10, 3, 2, 3, 0)), "A damping of 0 changes nothing, and an earlier reading has no shelter");
+		Verdict before = Verdict.of(sunpetal, plain);
+		Verdict after = Verdict.of(sunpetal, sheltered);
+		helper.assertTrue(before.strained() && after.strained() && before.fit(Factor.DISTURBANCE) == Fit.TOLERABLE
+				&& after.fit(Factor.DISTURBANCE) == Fit.TOLERABLE && after.growth() == before.growth(),
+				"The strained fit and growth are the same with and without: " + before.fits() + " / " + after.fits());
+		helper.assertTrue(after.reasons(sunpetal, sheltered).equals(List.of(Text.of("ecology.strained.tolerable",
+						new Text.Ref("factor", Factor.DISTURBANCE.id), 2, 3, 0, 2))) && after.reasons(sunpetal, sheltered).equals(before.reasons(sunpetal, plain)),
+				"Its reasons show the unsheltered value the strain was counted against: " + after.reasons(sunpetal, sheltered));
+		HabitatAdvice.Advice advice = HabitatAdvice.one(sunpetal, sheltered);
+		helper.assertTrue(advice != null && advice.change() == HabitatAdvice.Change.EASE && advice.value() == 3 && advice.target() == 0
+				&& advice.alone() && Verdict.of(sunpetal, sheltered.withStrain(0)).growth() == Verdict.Growth.THRIVING
+				&& Verdict.of(sunpetal, sheltered.withStrain(2)).growth() == Verdict.Growth.TOLERATING && sheltered.withStrain(0).shelter() == 2,
+				"Marax eases the strain to 0, the shelter kept (at 2 the unsheltered stir still strains it): " + advice);
+		boolean beyond = false;
+		try {
+			new Habitat(0, 0, 0, 1, 14, 0, 2);
+		} catch (IllegalArgumentException refused) {
+			beyond = true;
+		}
+		boolean negative = false;
+		try {
+			plain.sheltered(-1);
+		} catch (IllegalArgumentException refused) {
+			negative = true;
+		}
+		helper.assertTrue(beyond && negative, "A shelter beyond the area and a negative damping are refused");
+		// A real bed: a Sunpetal on it, a stir of 2 (two budding amethyst, 1 each, inside its sample), its strain set to 3 when read.
+		ServerLevel level = level(helper);
+		BlockPos at = new BlockPos(3, 1, 3);
+		VerdantBedBlockEntity bed = bedOf(helper, at, KEEPER);
+		bed.setNutrients(10);
+		helper.setBlock(at.above(), Garden.SUNPETAL_CROP);
+		helper.setBlock(at.offset(2, 1, 2), Blocks.BUDDING_AMETHYST);
+		helper.setBlock(at.offset(-2, 1, 2), Blocks.BUDDING_AMETHYST);
+		UUID holder = new UUID(69L, 0L);
+		BlockPos perch = helper.absolutePos(new BlockPos(6, 1, 6));
+		afterSampling(helper, List.of(bed), () -> {
+			bed.setStrain(Habitat.MAX_STRAIN);
+			Habitat unsheltered = bed.cachedHabitat(level);
+			HabitatInspection.State shown = bed.inspect(level);
+			helper.assertTrue(unsheltered != null && unsheltered.disturbance() == 2 && unsheltered.shelter() == 0 && unsheltered.strain() == Habitat.MAX_STRAIN
+					&& shown != null && shown.habitat().equals(unsheltered), "Without a canopy: a stir of 2, strain 3, nothing sheltered: " + unsheltered);
+			long now = level.getGameTime();
+			helper.assertTrue(Canopies.cover(level, holder, perch, Canopies.MAX_DAMPING, false, List.of(bed.getBlockPos()), now), "A canopy set by hand over the bed");
+			Habitat under = bed.cachedHabitat(level);
+			helper.assertTrue(unsheltered.sheltered(2).equals(under) && under.disturbance() == 0 && under.strained() == unsheltered.strained()
+					&& Verdict.of(sunpetal, under).fit(Factor.DISTURBANCE) == Verdict.of(sunpetal, unsheltered).fit(Factor.DISTURBANCE)
+					&& Verdict.of(sunpetal, under).strained(), "The Sunpetal reads its reading sheltered by 2, the same strained fit: " + under);
+			HabitatInspection.State inspected = bed.inspect(level);
+			List<Text> rows = HabitatInspection.judged(inspected, sunpetal, Verdict.of(sunpetal, under));
+			List<Text> plainRows = HabitatInspection.judged(new HabitatInspection.State(unsheltered, inspected.sky(), inspected.lamps(),
+					inspected.waterReach()), sunpetal, Verdict.of(sunpetal, unsheltered));
+			helper.assertTrue(rows.size() == Factor.values().length + 1 && rows.subList(0, Factor.values().length).equals(plainRows)
+					&& rows.getLast().equals(Text.of("ecology.sheltered", 2, 2)) && HabitatInspection.sheltered(unsheltered) == null,
+					"The Inspect page: the same rows (the strained stir against the unsheltered area), then the canopy's line: " + rows.getLast());
+			Canopies.lift(level, holder, perch);
+			helper.assertTrue(unsheltered.equals(bed.cachedHabitat(level)), "Lifted: it reads as before");
+		});
+	}
+
+	/**
+	 * GC-09 (GC-P124): the canopy registry by hand (no spirit, no bed read; this test's own holders and positions, since every
+	 * test beside it shares the level's canopies). Over a Sunpetal's bed two holders' canopies give the larger damping, never
+	 * the sum; over a Gloamcap's (it wants the stir) only the one answered "shelter all" counts; a holder's second perch is
+	 * refused while the first's stands, and only its own perch lifts it; a damping is clamped to 2; a clock run back reads it
+	 * lapsed; a cover of 20 beds keeps the first 16. Real ticks: unrefreshed, each still stands at tick 30 and has lapsed by
+	 * tick 45, every bed reading 0.
+	 */
+	@GameTest(maxTicks = 60)
+	public void theCanopyRegistryTakesTheLargestNeverTheSumAndLapses(GameTestHelper helper) {
+		ServerLevel level = level(helper);
+		long now = level.getGameTime();
+		UUID first = new UUID(69L, 1L);
+		UUID second = new UUID(69L, 2L);
+		UUID many = new UUID(69L, 3L);
+		BlockPos sunpetal = helper.absolutePos(new BlockPos(1, 1, 1));
+		BlockPos gloamcap = helper.absolutePos(new BlockPos(3, 1, 1));
+		BlockPos firstPerch = helper.absolutePos(new BlockPos(1, 2, 6));
+		BlockPos secondPerch = helper.absolutePos(new BlockPos(3, 2, 6));
+		BlockPos otherPerch = helper.absolutePos(new BlockPos(5, 2, 6));
+		helper.assertTrue(Canopies.cover(level, first, firstPerch, 2, false, List.of(sunpetal, gloamcap), now)
+				&& Canopies.cover(level, second, secondPerch, 1, true, List.of(sunpetal, gloamcap), now), "Two holders' canopies over the same two beds");
+		helper.assertValueEqual(Canopies.damping(level, sunpetal, false, now), 2, "A Sunpetal's damping: the larger, never the sum (3)");
+		helper.assertValueEqual(Canopies.damping(level, gloamcap, true, now), 1, "A Gloamcap's (it wants the stir): only the canopy answered 'shelter all'");
+		Canopies.Canopy kept = Canopies.of(level, first, now);
+		helper.assertTrue(!Canopies.cover(level, first, otherPerch, 2, false, List.of(sunpetal), now) && kept != null
+				&& kept.equals(Canopies.of(level, first, now)) && kept.perch().equals(firstPerch), "A holder's second perch is refused while the first's canopy stands");
+		Canopies.lift(level, first, otherPerch);
+		helper.assertTrue(kept.equals(Canopies.of(level, first, now)), "Another perch cannot lift it");
+		helper.assertTrue(Canopies.cover(level, first, firstPerch, 5, false, List.of(sunpetal, gloamcap), now)
+				&& Canopies.of(level, first, now).damping() == Canopies.MAX_DAMPING, "Its own perch refreshes it, its damping clamped to 2");
+		helper.assertTrue(Canopies.of(level, first, now - 1) == null, "A clock run back reads it lapsed");
+		Canopies.lift(level, second, secondPerch);
+		helper.assertTrue(Canopies.of(level, second, now) == null && Canopies.damping(level, gloamcap, true, now) == 0
+				&& Canopies.damping(level, sunpetal, false, now) == 2, "Its own perch lifts it: the Gloamcap spared again, the Sunpetal under the other");
+		List<BlockPos> twenty = new ArrayList<>();
+		for (int i = 0; i < 20; i++) {
+			twenty.add(helper.absolutePos(new BlockPos(i % 5, 4, 2 + i / 5)));
+		}
+		helper.assertTrue(Canopies.cover(level, many, helper.absolutePos(new BlockPos(6, 4, 6)), 2, false, twenty, now)
+				&& Canopies.of(level, many, now).beds().equals(Set.copyOf(twenty.subList(0, Canopies.MAX_BEDS)))
+				&& Canopies.damping(level, twenty.getFirst(), false, now) == 2
+				&& twenty.subList(Canopies.MAX_BEDS, twenty.size()).stream().allMatch(pos -> Canopies.damping(level, pos, false, now) == 0),
+				"A cover of 20 beds keeps the first 16 (the nearest, as a service lists them)");
+		helper.runAtTickTime(30, () -> {
+			long later = level.getGameTime();
+			helper.assertTrue(Canopies.of(level, first, later) != null && Canopies.of(level, many, later) != null
+					&& Canopies.damping(level, sunpetal, false, later) == 2, "Unrefreshed, each still stands within 40 ticks");
+		});
+		helper.runAtTickTime(45, () -> {
+			long later = level.getGameTime();
+			helper.assertTrue(Canopies.of(level, first, later) == null && Canopies.of(level, second, later) == null
+					&& Canopies.of(level, many, later) == null && Canopies.damping(level, sunpetal, false, later) == 0
+					&& Canopies.damping(level, gloamcap, true, later) == 0 && Canopies.damping(level, twenty.getFirst(), false, later) == 0,
+					"Unrefreshed, every canopy of this test has lapsed within 40 ticks");
+			helper.succeed();
+		});
+	}
 }

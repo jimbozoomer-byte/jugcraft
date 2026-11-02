@@ -42,6 +42,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.AmdusiasEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.CanopyShelter;
+import io.github.jimbozoomer.jugcraft.concordance.garden.Canopies;
+import io.github.jimbozoomer.jugcraft.concordance.garden.Garden;
 
 /**
  * Roadmap step 29, interactions and economic loops (docs/features/arcane-concordance-economy.md), for the light the
@@ -284,4 +288,40 @@ public class ConcordanceEconomyGameTests {
 	}
 
 	// GC-09 unit 6
+	/**
+	 * Concordance garden cohort, GC-09 (Amdusias): a hundred thinks of his canopy over his holder's crops make, move and
+	 * spend nothing: no item appears, his holder carries what they carried after sealing, the perch's escrow is unchanged,
+	 * every bed keeps its nutrients and strain, and his record counts nothing (his quota is a cap). The canopy changes only
+	 * the stir a crop reads, so no gaining cycle runs through him.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 20)
+	public void theEconomyStillHasNoGainingCycle(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = ConcordanceWorkerGameTests.gardenHolder(helper);
+		List<VerdantBedBlockEntity> beds = List.of(
+				ConcordanceWorkerGameTests.shelteredCrop(helper, new BlockPos(4, 1, 4), keeper.getUUID(), Garden.SUNPETAL_CROP),
+				ConcordanceWorkerGameTests.shelteredCrop(helper, new BlockPos(11, 1, 4), keeper.getUUID(), Garden.SUNPETAL_CROP),
+				ConcordanceWorkerGameTests.shelteredCrop(helper, new BlockPos(4, 1, 11), keeper.getUUID(), Garden.GLOAMCAP_CROP));
+		ConcordanceWorkerGameTests.stir(helper, new BlockPos(4, 1, 4), 4);
+		long now = level.getGameTime();
+		PactPerchBlockEntity perch = ConcordanceWorkerGameTests.amdusiasPact(helper, keeper, new BlockPos(8, 1, 8), now);
+		AmdusiasEntity amdusias = ConcordanceWorkerGameTests.amdusias(helper, perch);
+		ConcordanceWorkerGameTests.amdusiasAnswer(helper, keeper, perch, CanopyShelter.ALL, now);
+		int carried = ConcordanceWorkerGameTests.carried(keeper);
+		UUID record = ConcordanceWorkerGameTests.pactOf(level, perch).id();
+		int escrow = ConcordanceWorkerGameTests.escrowed(level, record);
+		int[] nutrients = beds.stream().mapToInt(VerdantBedBlockEntity::nutrients).toArray();
+		int[] strain = beds.stream().mapToInt(VerdantBedBlockEntity::strain).toArray();
+		for (int k = 0; k < 100; k++) {
+			helper.assertValueEqual(amdusias.think(level, 6000L, now), Status.WORKING, "Think " + k + " shelters");
+		}
+		helper.assertTrue(Canopies.of(level, keeper.getUUID(), now).beds().size() == beds.size(), "His canopy covers the three");
+		helper.assertTrue(ConcordanceWorkerGameTests.loose(helper) == 0 && ConcordanceWorkerGameTests.carried(keeper) == carried
+				&& ConcordanceWorkerGameTests.escrowed(level, record) == escrow
+				&& java.util.Arrays.equals(beds.stream().mapToInt(VerdantBedBlockEntity::nutrients).toArray(), nutrients)
+				&& java.util.Arrays.equals(beds.stream().mapToInt(VerdantBedBlockEntity::strain).toArray(), strain)
+				&& Pacts.done(ConcordanceWorkerGameTests.pactOf(level, perch).pact(), now) == 0,
+				"Nothing made, moved or spent; nothing counted");
+		helper.succeed();
+	}
 }

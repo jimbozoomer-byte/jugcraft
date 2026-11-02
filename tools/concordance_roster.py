@@ -40,6 +40,7 @@ SERVICES = {
     # GC-08 unit 5
     "root_running": "Root-running: by night, two nutrients from a full bed for one in a hungry bed",
     # GC-09 unit 6
+    "canopy_shelter": "Canopy shelter: crops in his area sheltered from the workshop's stir",
 }
 # Ars Nouveau's helpers on the roster (G13; Java: nouveau/NouveauHelper.kind is "nouveau_" + its species,
 # NouveauHelpers.register lists them).

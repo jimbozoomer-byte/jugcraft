@@ -237,7 +237,8 @@ public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor
 	/**
 	 * A Verdant Bed: moisture, nutrients, whether it is awake, and its habitat (from its sample: the five factors); since
 	 * Concordance Chunk C also its harvest strain, a harvest not yet counted included (C-08, read and never counted here), and
-	 * the graft it carries when the rules know it (C-09).
+	 * the graft it carries when the rules know it (C-09); since the garden cohort (GC-09) what a canopy takes from the stir its
+	 * habitat reads now.
 	 */
 	public static CompoundTag bedSnapshot(VerdantBedBlockEntity bed, ServerLevel level) {
 		CompoundTag snapshot = new CompoundTag();
@@ -248,6 +249,10 @@ public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor
 		if (habitat != null) {
 			snapshot.putIntArray("habitat", new int[] {habitat.moisture(), habitat.light(), habitat.nutrients(), habitat.diversity(),
 					habitat.disturbance()});
+			// GC-09: what a canopy took from the stir (the five factors stay the habitat's: C-08's audit).
+			if (habitat.shelter() > 0) {
+				snapshot.putInt("sheltered", habitat.shelter());
+			}
 		}
 		snapshot.putString("growth", bed.growth());
 		snapshot.putString("reasons", String.join("\n", bed.reasons()));
@@ -262,7 +267,7 @@ public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor
 		return snapshot;
 	}
 
-	/** A living device: its status, and its Verdance, digestion or reading. */
+	/** A living device: its status, and its Verdance, digestion or reading (GC-09: a Gauge's with what a canopy took from it). */
 	public static CompoundTag deviceSnapshot(LivingDeviceBlockEntity device) {
 		CompoundTag snapshot = new CompoundTag();
 		snapshot.putString("device", device.status());
@@ -278,6 +283,9 @@ public enum ConcordanceDataProvider implements IServerDataProvider<BlockAccessor
 		} else if (device instanceof HabitatGaugeBlockEntity gauge) {
 			snapshot.putString("mode", gauge.mode().id);
 			snapshot.putInt("signal", gauge.signal());
+			if (gauge.sheltered() > 0) {
+				snapshot.putInt("sheltered", gauge.sheltered());
+			}
 		}
 		return snapshot;
 	}

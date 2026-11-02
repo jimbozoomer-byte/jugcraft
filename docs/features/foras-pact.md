@@ -515,6 +515,11 @@ nearly equal, (74, 67, 53) and (74, 67, 56); the Spanish moss's eight opaque aro
 identification headers and last granule positions were read (one channel each, at the rates and lengths above); and the
 words proposed above were counted with `tools/magic_ui.py`'s own `nwords`, `width` and `lines`.
 
+**Since GC-09** ([Amdusias](amdusias-pact.md); merged into the cohort after Bifrons, not merged into main, not yet run
+in CI): the chooser has a seventh entry. Foras's "would gain" reads a bed's cached reading, which a canopy may shelter:
+a host under Amdusias's canopy is judged by the stir it reads there. His words, sounds, service, matter and tests are
+otherwise unchanged.
+
 ## World and event applicability
 
 Overworld, Nether and End alike (a perch, its store and the beds in one level; his area never crosses levels). No

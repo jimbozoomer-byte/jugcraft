@@ -181,6 +181,14 @@ import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.AmdusiasEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.CanopyShelter;
+import io.github.jimbozoomer.jugcraft.concordance.garden.Canopies;
+import io.github.jimbozoomer.jugcraft.concordance.garden.HabitatGaugeBlockEntity;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.Fit;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.HabitatInspection;
+import io.github.jimbozoomer.jugcraft.concordance.compose.Text;
+import io.github.jimbozoomer.jugcraft.compat.jade.ConcordanceDataProvider;
 
 /**
  * Roadmap step 17, spirits, familiars and constructs (docs/features/arcane-concordance-workers.md), on a real server.
@@ -9767,4 +9775,882 @@ public class ConcordanceWorkerGameTests {
 	}
 
 	// GC-09 unit 6
+	// ---------------------------------------------------------------- Concordance garden cohort, GC-09: Amdusias and the canopy
+
+	/** GC-09: his service's words (tools/concordance_pacts.py SERVICE_WORDS["canopy_shelter"]). */
+	static final String CANOPY_KEY = "message.jugcraft.concordance.pact.canopy_shelter.";
+
+	static {
+		// GC-09 (SG12): Amdusias comes where a log stands within 2 of the perch and an awake bed the inviter keeps lies within
+		// 6: an oak log north-west of the perch's grid cell, at its height (inside the box in every cell, this line's sixth and
+		// the merged line's seventh), and a bare kept bed in the floor beside it (perchFor leaves x - 1 free). Nothing grows on
+		// the bed, so no canopy ever forms and every shared case reads him idle with nothing sheltered. SG12's structure has no
+		// floor, so he keeps his perch's top there.
+		FIXTURES.put(AmdusiasEntity.COUNTERPART, (helper, player, perch) -> {
+			BlockPos log = perch.offset(-1, 0, -1);
+			BlockPos bed = perch.offset(-1, -1, 0);
+			helper.setBlock(log, Blocks.OAK_LOG);
+			keptBed(helper, bed, player.getUUID(), 0);
+			return List.of(log, bed);
+		});
+	}
+
+	/** Amdusias's offer as the server loaded it (data/jugcraft/concordance/pact/amdusias.json). */
+	static PactDefinition amdusiasOffer() {
+		PactDefinition offer = PactPerchBlockEntity.definition(AmdusiasEntity.COUNTERPART);
+		if (offer == null) {
+			throw new AssertionError("Amdusias's offer is loaded");
+		}
+		return offer;
+	}
+
+	/**
+	 * Amdusias's pact sealed for {@code holder} at a perch they placed at {@code at}, an oak log east of it, at game time
+	 * {@code now} (the level's own: the canopy registry is read at the level's game time); they stand beside it (2.5 south).
+	 */
+	static PactPerchBlockEntity amdusiasPact(GameTestHelper helper, ServerPlayer holder, BlockPos at, long now) {
+		helper.setBlock(at.east(), Blocks.OAK_LOG);
+		PactPerchBlockEntity perch = perch(helper, at, holder);
+		beside(helper, holder, at);
+		helper.assertValueEqual(perch.holder().seal(helper.getLevel(), holder, PactPerchBlockEntity.sealing(amdusiasOffer(), null, null), now).outcome(),
+				Pacts.Outcome.DONE, "Amdusias's pact is sealed at the perch");
+		return perch;
+	}
+
+	/** The Amdusias kept at {@code perch} (its presence), asserted there. */
+	static AmdusiasEntity amdusias(GameTestHelper helper, PactPerchBlockEntity perch) {
+		PactSpiritEntity<?> found = perch.presence(helper.getLevel());
+		helper.assertTrue(found instanceof AmdusiasEntity, "Amdusias is at his perch: " + found);
+		return (AmdusiasEntity) found;
+	}
+
+	static CanopyShelter.Memory canopy(AmdusiasEntity amdusias) {
+		return amdusias.serviceMemory(CanopyShelter.Memory.class, CanopyShelter.Memory::new);
+	}
+
+	/** A crop of his holder's: an awake, wet Verdant Bed at {@code at} kept by {@code keeper} (keptBed) with {@code crop} on it; no sample taken. */
+	static VerdantBedBlockEntity shelteredCrop(GameTestHelper helper, BlockPos at, UUID keeper, Block crop) {
+		VerdantBedBlockEntity bed = keptBed(helper, at, keeper, 0);
+		helper.setBlock(at.above(), crop);
+		return bed;
+	}
+
+	/** {@code count} (at most 6) budding amethyst, 1 disturbance each, round the plant over the bed at {@code bed}: inside its sample (2 round, 1 up). */
+	static void stir(GameTestHelper helper, BlockPos bed, int count) {
+		BlockPos plant = bed.above();
+		List<BlockPos> spots = List.of(plant.offset(-2, 0, -2), plant.offset(2, 0, -2), plant.offset(-2, 0, 2), plant.offset(2, 0, 2),
+				plant.offset(-2, 1, 0), plant.offset(2, 1, 0));
+		for (int i = 0; i < count; i++) {
+			helper.setBlock(spots.get(i), Blocks.BUDDING_AMETHYST);
+		}
+	}
+
+	static Niche nicheOf(VerdantBedBlockEntity bed, Block crop) {
+		return bed.niche(((OrganismCropBlock) crop).organism());
+	}
+
+	/** The holder answers his matter at {@code perch} with {@code accord} (PactAccords.resolve, the kept page's own call); the perch keeps it. */
+	static void amdusiasAnswer(GameTestHelper helper, ServerPlayer holder, PactPerchBlockEntity perch, String accord, long now) {
+		helper.assertTrue(PactAccords.resolve(helper.getLevel(), holder, perch, CanopyShelter.WORK, accord, now), "The holder answers " + accord);
+		helper.assertValueEqual(perch.accord(), accord, "The perch keeps the answer " + accord);
+	}
+
+	/** His canopy's damping over {@code bed} for its own crop now (0: none), as the bed reads it. */
+	static int dampingOver(ServerLevel level, VerdantBedBlockEntity bed, Block crop) {
+		return Canopies.damping(level, bed.getBlockPos(), nicheOf(bed, crop).wantsStir(), level.getGameTime());
+	}
+
+	/**
+	 * GC-09 (Dossier 6 item 3; GC-P122): one think shelters the crop on a bed of his holder's in his area: it reads the same
+	 * habitat with the disturbance 2 lower and the 2 kept as shelter, so a Sunpetal tolerating 4 is ideal at 2; a crop beyond
+	 * his area and a bed with nothing on it read as before. At midnight too: his hours are every hour (GC-P121).
+	 */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 30)
+	public void aCanopyLowersOnlyDisturbanceForCropsInItsArea(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		BlockPos near = new BlockPos(4, 1, 6);
+		BlockPos far = new BlockPos(13, 1, 6);
+		VerdantBedBlockEntity nearBed = shelteredCrop(helper, near, holder.getUUID(), Garden.SUNPETAL_CROP);
+		VerdantBedBlockEntity farBed = shelteredCrop(helper, far, holder.getUUID(), Garden.SUNPETAL_CROP);
+		VerdantBedBlockEntity bare = keptBed(helper, new BlockPos(8, 1, 13), holder.getUUID(), 0);
+		stir(helper, near, 4);
+		stir(helper, far, 4);
+		Niche sunpetal = nicheOf(nearBed, Garden.SUNPETAL_CROP);
+		ConcordanceGardenGameTests.afterSampling(helper, List.of(nearBed, farBed, bare), () -> {
+			Habitat nearBefore = nearBed.cachedHabitat(level);
+			Habitat farBefore = farBed.cachedHabitat(level);
+			Habitat bareBefore = bare.cachedHabitat(level);
+			helper.assertTrue(nearBefore.disturbance() == 4 && farBefore.disturbance() == 4 && nearBefore.shelter() == 0
+					&& Verdict.of(sunpetal, nearBefore).fit(Factor.DISTURBANCE) == Fit.TOLERABLE, "Four budding amethyst stir both crops: " + nearBefore + " " + farBefore);
+			long now = level.getGameTime();
+			AmdusiasEntity amdusias = amdusias(helper, amdusiasPact(helper, holder, new BlockPos(4, 1, 10), now));
+			helper.assertValueEqual(amdusias.think(level, 6000L, now), Status.WORKING, "His tree's shelter bends over the crop in his area");
+			Habitat nearAfter = nearBed.cachedHabitat(level);
+			helper.assertTrue(nearBefore.sheltered(2).equals(nearAfter) && nearAfter.disturbance() == 2 && nearAfter.unsheltered() == 4
+					&& Verdict.of(sunpetal, nearAfter).fit(Factor.DISTURBANCE) == Fit.IDEAL, "Only the stir it reads is 2 lower, the 2 kept as shelter: " + nearAfter);
+			helper.assertTrue(farBefore.equals(farBed.cachedHabitat(level)) && bareBefore.equals(bare.cachedHabitat(level)),
+					"A crop beyond his area (9 blocks out) and a bed with nothing on it read as before");
+			Canopies.Canopy shelter = Canopies.of(level, holder.getUUID(), now);
+			helper.assertTrue(shelter != null && shelter.beds().equals(Set.of(nearBed.getBlockPos())) && shelter.damping() == 2 && !shelter.all(),
+					"His canopy covers that bed alone, damping 2, sparing what wants the stir: " + shelter);
+			helper.assertTrue(amdusias.sways() == 1 && "work".equals(amdusias.cues().getLast()) && amdusias.soundedAt("work") == Long.MIN_VALUE,
+					"He bends his tree: it sways, his work gesture shows, his horn waits its beat: " + amdusias.cues());
+			helper.assertValueEqual(amdusias.think(level, MIDNIGHT, now), Status.WORKING, "At midnight too: his hours are every hour");
+			helper.assertTrue(nearBefore.sheltered(2).equals(nearBed.cachedHabitat(level)) && amdusias.sways() == 1,
+					"Still sheltered, and no second sway within 200 ticks");
+		});
+	}
+
+	/** GC-09 (CT GC-09 tests; GC-P122): a Gloamcap with no stir near it, answered "shelter all": his canopy covers it and it reads exactly as before. */
+	@GameTest(maxTicks = 30)
+	public void aCanopyNeverSuppliesDisturbance(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		VerdantBedBlockEntity bed = shelteredCrop(helper, new BlockPos(1, 1, 1), holder.getUUID(), Garden.GLOAMCAP_CROP);
+		Niche gloamcap = nicheOf(bed, Garden.GLOAMCAP_CROP);
+		ConcordanceGardenGameTests.afterSampling(helper, List.of(bed), () -> {
+			Habitat plain = bed.cachedHabitat(level);
+			helper.assertTrue(plain.disturbance() == 0 && plain.shelter() == 0 && Verdict.of(gloamcap, plain).fit(Factor.DISTURBANCE) == Fit.SHORT,
+					"No magic near it: a Gloamcap wants for stir: " + plain);
+			long now = level.getGameTime();
+			PactPerchBlockEntity perch = amdusiasPact(helper, holder, new BlockPos(4, 1, 4), now);
+			AmdusiasEntity amdusias = amdusias(helper, perch);
+			amdusiasAnswer(helper, holder, perch, CanopyShelter.ALL, now);
+			helper.assertValueEqual(amdusias.think(level, 6000L, now), Status.WORKING, "Answered: he covers it");
+			Canopies.Canopy shelter = Canopies.of(level, holder.getUUID(), now);
+			Habitat under = bed.cachedHabitat(level);
+			helper.assertTrue(shelter != null && shelter.all() && shelter.beds().contains(bed.getBlockPos()) && under.equals(plain)
+					&& under.shelter() == 0 && Verdict.of(gloamcap, under).fit(Factor.DISTURBANCE) == Fit.SHORT,
+					"Covered, it reads as before: never more stir, never below nothing: " + under);
+		});
+	}
+
+	/**
+	 * GC-09 (CT GC-09 tests; GC-P122): a Verdant Heart on a kept bed and a Sunpetal, both stirred 4, in his area: he covers
+	 * the Sunpetal only; even a canopy laid over the Heart's bed by hand gives the Heart's reading nothing.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 30)
+	public void aCanopyNeverHelpsAHeart(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		BlockPos heartBed = new BlockPos(3, 1, 4);
+		VerdantBedBlockEntity under = keptBed(helper, heartBed, holder.getUUID(), 0);
+		keptHeart(helper, heartBed.above(), holder.getUUID(), 0);
+		BlockPos crop = new BlockPos(10, 1, 4);
+		VerdantBedBlockEntity sunpetal = shelteredCrop(helper, crop, holder.getUUID(), Garden.SUNPETAL_CROP);
+		stir(helper, heartBed, 4);
+		stir(helper, crop, 4);
+		ConcordanceGardenGameTests.afterSampling(helper, List.of(under, sunpetal), () -> {
+			Habitat heartBefore = under.cachedHabitat(level);
+			long now = level.getGameTime();
+			AmdusiasEntity amdusias = amdusias(helper, amdusiasPact(helper, holder, new BlockPos(7, 1, 7), now));
+			helper.assertValueEqual(amdusias.think(level, 6000L, now), Status.WORKING, "He shelters the Sunpetal");
+			Canopies.Canopy shelter = Canopies.of(level, holder.getUUID(), now);
+			helper.assertTrue(shelter != null && shelter.beds().equals(Set.of(sunpetal.getBlockPos())) && under.canopyPlant(level) == null
+					&& heartBefore.equals(under.cachedHabitat(level)), "The Heart's bed is never his: " + shelter);
+			UUID other = new UUID(69L, 9L);
+			helper.assertTrue(Canopies.cover(level, other, helper.absolutePos(new BlockPos(14, 1, 14)), 2, true, List.of(under.getBlockPos()), now),
+					"A canopy laid over the Heart's bed by hand");
+			Habitat heartAfter = under.cachedHabitat(level);
+			helper.assertTrue(heartAfter.equals(heartBefore) && heartAfter.shelter() == 0 && heartAfter.disturbance() == 4,
+					"Even so, the Heart reads its bed unsheltered: " + heartAfter);
+			Canopies.lift(level, other, helper.absolutePos(new BlockPos(14, 1, 14)));
+		});
+	}
+
+	/**
+	 * GC-09 (CT GC-09 tests; GC-P122): strain 3 near a stir of 2: the same strained fit and growth with and without his
+	 * canopy; the crop reads 0 disturbance, strained still to 5, and the bed's strain is untouched.
+	 */
+	@GameTest(maxTicks = 30)
+	public void aCanopyNeverEasesStrain(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		BlockPos at = new BlockPos(3, 1, 2);
+		VerdantBedBlockEntity bed = shelteredCrop(helper, at, holder.getUUID(), Garden.SUNPETAL_CROP);
+		stir(helper, at, 2);
+		Niche niche = nicheOf(bed, Garden.SUNPETAL_CROP);
+		ConcordanceGardenGameTests.afterSampling(helper, List.of(bed), () -> {
+			// Set when read: a random tick before now may have counted a strain.
+			bed.setStrain(Habitat.MAX_STRAIN);
+			Habitat plain = bed.cachedHabitat(level);
+			Verdict before = Verdict.of(niche, plain);
+			helper.assertTrue(plain.disturbance() == 2 && plain.strain() == Habitat.MAX_STRAIN && plain.strained() == 5 && before.strained()
+					&& before.fit(Factor.DISTURBANCE) == Fit.TOLERABLE, "A stir of 2 and a strain of 3: strained to 5, tolerated: " + plain);
+			long now = level.getGameTime();
+			AmdusiasEntity amdusias = amdusias(helper, amdusiasPact(helper, holder, new BlockPos(3, 1, 5), now));
+			helper.assertValueEqual(amdusias.think(level, 6000L, now), Status.WORKING, "He shelters the strained crop");
+			Habitat sheltered = bed.cachedHabitat(level);
+			Verdict after = Verdict.of(niche, sheltered);
+			helper.assertTrue(sheltered.disturbance() == 0 && sheltered.shelter() == 2 && sheltered.strained() == plain.strained() && after.strained()
+					&& after.fit(Factor.DISTURBANCE) == before.fit(Factor.DISTURBANCE) && after.growth() == before.growth(),
+					"The strained judgement keeps the unsheltered value: " + sheltered);
+			helper.assertTrue(bed.strain() == Habitat.MAX_STRAIN && bed.strainNow() == Habitat.MAX_STRAIN, "His canopy eases no strain");
+		});
+	}
+
+	/**
+	 * GC-09 (CT GC-09 tests; GC-P122): two holders in one party, each with an Amdusias at his own perch, both covering one
+	 * party bed stirred 4: it reads 2 lower, never 4; either canopy lifted, still 2.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 30)
+	public void twoCanopiesNeverStack(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer first = gardenHolder(helper);
+		ServerPlayer second = gardenHolder(helper);
+		BlockPos at = new BlockPos(7, 1, 5);
+		VerdantBedBlockEntity bed = shelteredCrop(helper, at, first.getUUID(), Garden.SUNPETAL_CROP);
+		stir(helper, at, 4);
+		ConcordanceGardenGameTests.afterSampling(helper, List.of(bed), () -> {
+			PartyManager parties = JugcraftParties.manager();
+			long ms = System.currentTimeMillis();
+			try {
+				helper.assertTrue(parties.invite(first.getUUID(), second.getUUID(), ms) == PartyManager.Result.OK
+						&& parties.accept(second.getUUID(), ms) == PartyManager.Result.OK, "The two form a party");
+				Habitat plain = bed.cachedHabitat(level);
+				long now = level.getGameTime();
+				BlockPos firstPerch = new BlockPos(3, 1, 9);
+				BlockPos secondPerch = new BlockPos(11, 1, 9);
+				AmdusiasEntity one = amdusias(helper, amdusiasPact(helper, first, firstPerch, now));
+				AmdusiasEntity two = amdusias(helper, amdusiasPact(helper, second, secondPerch, now));
+				helper.assertTrue(one.think(level, 6000L, now) == Status.WORKING && two.think(level, 6000L, now) == Status.WORKING,
+						"Both shelter the party's bed");
+				Canopies.Canopy a = Canopies.of(level, first.getUUID(), now);
+				Canopies.Canopy b = Canopies.of(level, second.getUUID(), now);
+				Habitat both = bed.cachedHabitat(level);
+				helper.assertTrue(a != null && b != null && a.beds().contains(bed.getBlockPos()) && b.beds().contains(bed.getBlockPos())
+						&& both.equals(plain.sheltered(2)) && both.disturbance() == 2 && both.shelter() == 2,
+						"Both canopies cover it; it reads 2 lower, never 4: " + both);
+				Canopies.lift(level, first.getUUID(), helper.absolutePos(firstPerch));
+				helper.assertTrue(bed.cachedHabitat(level).equals(plain.sheltered(2)), "One lifted: still 2 lower, the other's");
+			} finally {
+				parties.adminDisband(first.getUUID());
+			}
+		});
+	}
+
+	/**
+	 * GC-09 (Dossier 6 item 5; GC-P130): a Gloamcap (it wants the stir) beside a Sunpetal: he shelters the Sunpetal, spares the
+	 * Gloamcap and raises his matter once (inspect toward it; awaiting the answer); answered "shelter all", the next think
+	 * shelters the Gloamcap too (4 to 2: ideal to tolerable); answered "spare them", spared again.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 30)
+	public void aCanopySparesAGloamcapUntilAnswered(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		VerdantBedBlockEntity sunpetal = shelteredCrop(helper, new BlockPos(3, 1, 4), holder.getUUID(), Garden.SUNPETAL_CROP);
+		BlockPos gloamAt = new BlockPos(10, 1, 4);
+		VerdantBedBlockEntity gloamcap = shelteredCrop(helper, gloamAt, holder.getUUID(), Garden.GLOAMCAP_CROP);
+		stir(helper, gloamAt, 4);
+		Niche niche = nicheOf(gloamcap, Garden.GLOAMCAP_CROP);
+		ConcordanceGardenGameTests.afterSampling(helper, List.of(sunpetal, gloamcap), () -> {
+			Habitat plain = gloamcap.cachedHabitat(level);
+			long now = level.getGameTime();
+			PactPerchBlockEntity perch = amdusiasPact(helper, holder, new BlockPos(6, 1, 8), now);
+			AmdusiasEntity amdusias = amdusias(helper, perch);
+			helper.assertValueEqual(amdusias.think(level, 6000L, now), Status.AWAITING_ANSWER, "A crop wanting the stir waits for its answer");
+			helper.assertTrue(canopy(amdusias).spared().equals(List.of(gloamcap.getBlockPos())) && canopy(amdusias).covered().equals(List.of(sunpetal.getBlockPos()))
+					&& gloamcap.cachedHabitat(level).equals(plain) && sunpetal.cachedHabitat(level).shelter() == 0
+					&& Canopies.of(level, holder.getUUID(), now).beds().equals(Set.of(sunpetal.getBlockPos())),
+					"The Gloamcap is spared, the Sunpetal sheltered (it has no stir to take)");
+			helper.assertTrue(amdusias.think(level, 6000L, now) == Status.AWAITING_ANSWER && amdusias.cues().stream().filter("inspect"::equals).count() == 1,
+					"His matter is raised once: he weighs the Gloamcap once: " + amdusias.cues());
+			helper.assertTrue(amdusias.think(level, 6000L, now) == Status.AWAITING_ANSWER && amdusias.cues().stream().filter("inspect"::equals).count() == 1,
+					"and not again at the next think (memory, once a presence)");
+			amdusiasAnswer(helper, holder, perch, CanopyShelter.ALL, now);
+			helper.assertValueEqual(amdusias.think(level, 6000L, now), Status.WORKING, "Answered: he works");
+			Habitat all = gloamcap.cachedHabitat(level);
+			helper.assertTrue(all.equals(plain.sheltered(2)) && canopy(amdusias).spared().isEmpty()
+					&& Verdict.of(niche, plain).fit(Factor.DISTURBANCE) == Fit.IDEAL && Verdict.of(niche, all).fit(Factor.DISTURBANCE) == Fit.TOLERABLE,
+					"Shelter all: the Gloamcap reads 2, only tolerable: the stir it wanted taken, as he warned: " + all);
+			amdusiasAnswer(helper, holder, perch, CanopyShelter.SPARE, now);
+			amdusias.think(level, 6000L, now);
+			helper.assertTrue(gloamcap.cachedHabitat(level).equals(plain) && canopy(amdusias).spared().equals(List.of(gloamcap.getBlockPos())),
+					"Spare them: spared again");
+		});
+	}
+
+	/**
+	 * GC-09 (CT acceptance; GC-P124): a canopy lapses within 40 ticks of his pact ceasing to serve, whatever stops it: the
+	 * pact suspended, his tree felled, the holder 100 blocks away, his perch broken. Real ticks: his own thinks run, and each
+	 * stop is undone (but the last) so the next starts from a standing canopy. Only this test's holder and bed are read.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 600)
+	public void aCanopyLapsesWithin40TicksOfSuspension(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		BlockPos at = new BlockPos(8, 1, 8);
+		VerdantBedBlockEntity bed = shelteredCrop(helper, new BlockPos(8, 1, 4), holder.getUUID(), Garden.SUNPETAL_CROP);
+		long start = level.getGameTime();
+		PactPerchBlockEntity perch = amdusiasPact(helper, holder, at, start);
+		AmdusiasEntity amdusias = amdusias(helper, perch);
+		helper.assertValueEqual(amdusias.think(level, 6000L, start), Status.WORKING, "His canopy stands");
+		helper.assertTrue(Canopies.of(level, holder.getUUID(), start) != null, "His canopy stands");
+		// 1. Suspended at tick 1: no think refreshes it; by tick 45 it has lapsed. Resumed, his own thinks bend it again.
+		helper.runAtTickTime(1, () -> helper.assertValueEqual(PactKeeping.suspend(level, holder, perch.holder(), level.getGameTime()),
+				AgreementHolder.Toggle.SUSPENDED, "Suspended by its holder"));
+		helper.runAtTickTime(45, () -> {
+			helper.assertTrue(Canopies.of(level, holder.getUUID(), level.getGameTime()) == null
+					&& Canopies.damping(level, bed.getBlockPos(), false, level.getGameTime()) == 0, "Suspended: lapsed within 40 ticks");
+			helper.assertValueEqual(PactKeeping.resume(level, holder, perch.holder(), level.getGameTime()), AgreementHolder.Toggle.RESUMED, "Resumed");
+		});
+		// 2. His tree felled at tick 90: lifted at his next think. Replanted at 134, it is found at his next look, at most
+		// TREE_TICKS after the look that found none (GC-P129), so his canopy stands again by tick 360.
+		helper.runAtTickTime(90, () -> {
+			helper.assertTrue(Canopies.of(level, holder.getUUID(), level.getGameTime()) != null, "Resumed: his canopy stands again");
+			helper.setBlock(at.east(), Blocks.AIR);
+		});
+		helper.runAtTickTime(134, () -> {
+			helper.assertTrue(Canopies.of(level, holder.getUUID(), level.getGameTime()) == null && amdusias.status() == Status.WAITING_FOR_RESOURCES,
+					"His tree felled: lapsed within 40 ticks; he waits for a tree: " + amdusias.status());
+			helper.setBlock(at.east(), Blocks.OAK_LOG);
+		});
+		// 3. The holder 100 blocks away at tick 360: his decide answers that the holder is not near; lapsed within 40.
+		helper.runAtTickTime(360, () -> {
+			helper.assertTrue(Canopies.of(level, holder.getUUID(), level.getGameTime()) != null, "A tree again, found at his next look: his canopy stands");
+			Vec3 away = helper.absoluteVec(new Vec3(108.5, 1.0, 8.5));
+			holder.teleportTo(away.x, away.y, away.z);
+		});
+		helper.runAtTickTime(405, () -> {
+			helper.assertTrue(Canopies.of(level, holder.getUUID(), level.getGameTime()) == null, "The holder away: lapsed within 40 ticks");
+			beside(helper, holder, at);
+		});
+		// 4. The perch broken at tick 450: he leaves; lapsed within 40.
+		helper.runAtTickTime(450, () -> {
+			helper.assertTrue(Canopies.of(level, holder.getUUID(), level.getGameTime()) != null, "The holder back: his canopy stands");
+			helper.destroyBlock(at);
+		});
+		helper.runAtTickTime(494, () -> {
+			helper.assertTrue(Canopies.of(level, holder.getUUID(), level.getGameTime()) == null
+					&& Canopies.damping(level, bed.getBlockPos(), false, level.getGameTime()) == 0, "The perch broken: lapsed within 40 ticks");
+			helper.succeed();
+		});
+	}
+
+	/** GC-09 (CT GC-09 tests: "the holder leaving"): his holder logs out; his canopy lapses within 40 ticks. Real ticks. */
+	@GameTest(maxTicks = 60)
+	public void aCanopyLapsesWhenItsHolderLeaves(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		VerdantBedBlockEntity bed = shelteredCrop(helper, new BlockPos(1, 1, 1), holder.getUUID(), Garden.SUNPETAL_CROP);
+		long start = level.getGameTime();
+		AmdusiasEntity amdusias = amdusias(helper, amdusiasPact(helper, holder, new BlockPos(4, 1, 4), start));
+		helper.assertValueEqual(amdusias.think(level, 6000L, start), Status.WORKING, "His canopy stands");
+		UUID id = holder.getUUID();
+		helper.runAtTickTime(2, () -> TestPlayers.leave(holder));
+		helper.runAtTickTime(46, () -> {
+			long now = level.getGameTime();
+			helper.assertTrue(Canopies.of(level, id, now) == null && Canopies.damping(level, bed.getBlockPos(), false, now) == 0,
+					"His holder logged out: lapsed within 40 ticks");
+			// No think of his ran since (his holder away), so his memory still holds the bed he covered: Jade reads the live
+			// canopy, never that memory (the unit review).
+			CompoundTag reading = PactReading.presence(level, amdusias, now);
+			helper.assertTrue(!"covered".equals(reading.getStringOr("note", "")) && !canopy(amdusias).fresh(now),
+					"and Jade no longer says he shelters: " + reading);
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * GC-09 (GC-P126): twenty Sunpetals on his holder's beds in his area: his canopy covers the sixteen nearest the perch
+	 * (GardenReach's order) and no more; the four farthest read no canopy; his kept page's gauge reads 16 of 16, and his
+	 * record counts nothing (a cap, never a day's count). No habitat is read (the registry only).
+	 */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 20)
+	public void aCanopyCoversAtMost16Beds(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		BlockPos at = new BlockPos(8, 1, 8);
+		List<VerdantBedBlockEntity> beds = new ArrayList<>();
+		for (int i = 0; i < 20; i++) {
+			// Five rows of four, west and north of the perch, clear of his log (east), his holder (south) and his station.
+			BlockPos pos = new BlockPos(3 + 2 * (i % 5), 1, 2 + (i / 5));
+			beds.add(shelteredCrop(helper, pos, holder.getUUID(), Garden.SUNPETAL_CROP));
+		}
+		long now = level.getGameTime();
+		PactPerchBlockEntity perch = amdusiasPact(helper, holder, at, now);
+		AmdusiasEntity amdusias = amdusias(helper, perch);
+		helper.assertValueEqual(amdusias.think(level, 6000L, now), Status.WORKING, "He shelters his cap");
+		List<BlockPos> order = beds.stream().map(VerdantBedBlockEntity::getBlockPos).sorted(GardenReach.nearest(perch.getBlockPos())).toList();
+		Canopies.Canopy shelter = Canopies.of(level, holder.getUUID(), now);
+		helper.assertTrue(shelter != null && shelter.beds().equals(Set.copyOf(order.subList(0, Canopies.MAX_BEDS)))
+				&& canopy(amdusias).covered().equals(order.subList(0, Canopies.MAX_BEDS)), "The sixteen nearest, and no more: " + shelter);
+		for (int i = 0; i < order.size(); i++) {
+			helper.assertValueEqual(Canopies.damping(level, order.get(i), false, now), i < Canopies.MAX_BEDS ? 2 : 0, "Bed " + i + " by nearness");
+		}
+		List<Component> rows = CanopyShelter.rows(level, pactOf(level, perch), now);
+		helper.assertTrue(key(rows.getFirst()).equals(CANOPY_KEY + "row.service") && Integer.valueOf(16).equals(arg(rows.getFirst(), 0))
+				&& Integer.valueOf(16).equals(arg(rows.getFirst(), 1)) && Integer.valueOf(2).equals(arg(rows.getFirst(), 2)),
+				"His kept page's gauge: 16 of at most 16, 2 lower: " + rows);
+		helper.assertValueEqual(Pacts.done(pactOf(level, perch).pact(), now), 0, "His record counts nothing");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-09 (the unit review; Buer's rule, StrainTending): the sixteen beds nearest his perch, his holder's, stand in a claim
+	 * the holder may not change, and a seventeenth of theirs lies beyond them. His first think asks the sixteen (his
+	 * MAX_ASKED), is refused each and covers nothing; his next, inside the same read of his index, skips them and covers the
+	 * seventeenth. A refused bed is asked once a read of the index, so refused beds never use up his asks.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 20)
+	public void aCanopySkipsBedsHeMayNotChange(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		BlockPos at = new BlockPos(8, 1, 8);
+		List<VerdantBedBlockEntity> beds = new ArrayList<>();
+		for (int i = 0; i < CanopyShelter.MAX_ASKED + 1; i++) {
+			// Rows of five west and north of the perch, as the cap's test lays them, clear of his log, his holder and his station.
+			beds.add(shelteredCrop(helper, new BlockPos(3 + 2 * (i % 5), 1, 2 + (i / 5)), holder.getUUID(), Garden.SUNPETAL_CROP));
+		}
+		long now = level.getGameTime();
+		PactPerchBlockEntity perch = amdusiasPact(helper, holder, at, now);
+		AmdusiasEntity amdusias = amdusias(helper, perch);
+		List<BlockPos> order = beds.stream().map(VerdantBedBlockEntity::getBlockPos).sorted(GardenReach.nearest(perch.getBlockPos())).toList();
+		List<BlockPos> claimed = order.subList(0, CanopyShelter.MAX_ASKED);
+		BlockPos allowed = order.getLast();
+		try (TestClaims claims = TestClaims.open()) {
+			for (BlockPos pos : claimed) {
+				claims.block(pos, STRANGER);
+			}
+			helper.assertValueEqual(amdusias.think(level, 6000L, now), Status.IDLE, "The sixteen nearest asked, each in a claim: refused, nothing covered");
+			helper.assertTrue(claimed.stream().allMatch(pos -> canopy(amdusias).skipped(pos)) && !canopy(amdusias).skipped(allowed)
+					&& Canopies.of(level, holder.getUUID(), now) == null, "Those sixteen are skipped until his index is read again; the last is not");
+			long next = now + WorkerEntity.THINK_TICKS;
+			helper.assertValueEqual(amdusias.think(level, 6000L, next), Status.WORKING, "His next think skips them and shelters the bed beyond them");
+			Canopies.Canopy shelter = Canopies.of(level, holder.getUUID(), next);
+			helper.assertTrue(shelter != null && shelter.beds().equals(Set.of(allowed)) && canopy(amdusias).spared().isEmpty(),
+					"His canopy covers the holder's bed beyond the claim, and no claimed crop: " + shelter);
+			Canopies.lift(level, holder.getUUID(), perch.getBlockPos());
+		}
+		helper.succeed();
+	}
+
+	/** GC-09 (GC-S7): a stranger's crop in his area, stirred as his holder's is, is never his: only the holder's is sheltered. */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 30)
+	public void aStrangersCropIsNeverSheltered(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		BlockPos own = new BlockPos(3, 1, 4);
+		BlockPos theirs = new BlockPos(10, 1, 4);
+		VerdantBedBlockEntity ownBed = shelteredCrop(helper, own, holder.getUUID(), Garden.SUNPETAL_CROP);
+		VerdantBedBlockEntity strangers = shelteredCrop(helper, theirs, STRANGER, Garden.SUNPETAL_CROP);
+		stir(helper, own, 4);
+		stir(helper, theirs, 4);
+		ConcordanceGardenGameTests.afterSampling(helper, List.of(ownBed, strangers), () -> {
+			Habitat ownBefore = ownBed.cachedHabitat(level);
+			Habitat theirsBefore = strangers.cachedHabitat(level);
+			long now = level.getGameTime();
+			AmdusiasEntity amdusias = amdusias(helper, amdusiasPact(helper, holder, new BlockPos(7, 1, 8), now));
+			helper.assertValueEqual(amdusias.think(level, 6000L, now), Status.WORKING, "He shelters his holder's crop");
+			Canopies.Canopy shelter = Canopies.of(level, holder.getUUID(), now);
+			helper.assertTrue(shelter != null && shelter.beds().equals(Set.of(ownBed.getBlockPos())) && ownBed.cachedHabitat(level).equals(ownBefore.sheltered(2))
+					&& strangers.cachedHabitat(level).equals(theirsBefore), "The stranger's crop reads as before, and is not among his beds: " + shelter);
+		});
+	}
+
+	/**
+	 * GC-09 (Dossier 6 item 2; GC-P128): with a bed but no log within 2 he says why in his own words and does not come; with a
+	 * log but no bed of the inviter's within 6, that; with both, nothing is missing. Sealed, his tree felled while a Gloamcap
+	 * waits on his question: he waits for a tree, says no tree, asks nothing, and no canopy stands (CR6 item 6).
+	 */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 20)
+	public void amdusiasRefusesWithoutATree(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		helper.assertTrue(Language.getInstance().has(CANOPY_KEY + "missing.tree"), "the server reads the mod's words (Fabric's language loader)");
+		ServerPlayer keeper = gardenHolder(helper);
+		pocketFor(keeper, amdusiasOffer(), 1);
+		BlockPos at = new BlockPos(8, 1, 8);
+		PactPerchBlockEntity perch = perch(helper, at, keeper);
+		beside(helper, keeper, at);
+		BlockPos bedAt = new BlockPos(4, 1, 8);
+		keptBed(helper, bedAt, keeper.getUUID(), 0);
+		helper.setBlock(at.offset(3, 0, 0), Blocks.OAK_LOG);
+		List<PactService.Missing> missing = CanopyShelter.SERVICE.missing(level, keeper, perch, amdusiasOffer());
+		helper.assertTrue(missing.stream().map(PactService.Missing::reason).toList().equals(List.of(CanopyShelter.NO_TREE))
+				&& missing.getFirst().note().getString().startsWith("\"I bend trees. There is no tree here.\"")
+				&& Integer.valueOf(CanopyShelter.TREE_REACH).equals(arg(missing.getFirst().note(), 0)),
+				"No log within 2 (one 3 off is none): that alone is missing, in his words: " + missing);
+		PactMenu menu = offerOf(helper, keeper, perch, amdusiasOffer());
+		helper.assertTrue(keys(menu.lastSent().notes()).contains(CANOPY_KEY + "missing.tree") && perch.visitor() == null,
+				"He says why and does not come: " + keys(menu.lastSent().notes()));
+		PactStatePayload refused = send(keeper, menu, PactRequestPayload.ACCEPT, 0);
+		helper.assertTrue(answered(refused, CanopyShelter.NO_TREE) && !refused.result().get().done()
+				&& said(refused).equals(CANOPY_KEY + "missing.tree") && pocketed(keeper, 1, amdusiasOffer()) && recordOf(level, keeper) == null,
+				"Accepting is refused with his reason; nothing spent, nothing held");
+		keeper.closeContainer();
+		helper.setBlock(at.east(), Blocks.OAK_LOG);
+		helper.setBlock(bedAt, Blocks.AIR);
+		missing = CanopyShelter.SERVICE.missing(level, keeper, perch, amdusiasOffer());
+		helper.assertTrue(missing.stream().map(PactService.Missing::reason).toList().equals(List.of(CanopyShelter.NO_BED))
+				&& key(missing.getFirst().note()).equals(CANOPY_KEY + "missing.bed") && Integer.valueOf(6).equals(arg(missing.getFirst().note(), 0)),
+				"A log, but no bed of his within 6: that alone is missing: " + missing);
+		VerdantBedBlockEntity sunpetal = shelteredCrop(helper, bedAt, keeper.getUUID(), Garden.SUNPETAL_CROP);
+		helper.assertTrue(CanopyShelter.SERVICE.missing(level, keeper, perch, amdusiasOffer()).isEmpty(), "A log and a bed: nothing is missing");
+		// Sealed, a Gloamcap spared on a second bed (his question raised), then his tree felled.
+		long now = level.getGameTime();
+		perch = amdusiasPact(helper, keeper, at, now);
+		AmdusiasEntity amdusias = amdusias(helper, perch);
+		shelteredCrop(helper, new BlockPos(8, 1, 4), keeper.getUUID(), Garden.GLOAMCAP_CROP);
+		helper.assertValueEqual(amdusias.think(level, 6000L, now), Status.AWAITING_ANSWER, "A Gloamcap spared: his question waits");
+		helper.setBlock(at.east(), Blocks.AIR);
+		BoundWill record = pactOf(level, perch);
+		helper.assertValueEqual(amdusias.think(level, 6000L, now), Status.WAITING_FOR_RESOURCES, "His tree felled: he waits for a tree");
+		PactService.Note note = CanopyShelter.SERVICE.note(level, amdusias, record, 6000L, now);
+		helper.assertTrue(PactAccords.matter(level, perch, record, now) == null && canopy(amdusias).spared().isEmpty() && note != null
+				&& CanopyShelter.NO_TREE.equals(note.id()) && Canopies.of(level, keeper.getUUID(), now) == null && sunpetal.awake(),
+				"No tree: Jade says so, he asks nothing, and no canopy stands: " + note);
+		helper.succeed();
+	}
+
+	/**
+	 * GC-09 (GC-P131): his first obligation is a ripe crop harvested by hand in his area while his pact is active: one 10
+	 * blocks off keeps nothing, suspended nothing, the first in his area keeps it (his page and the chat), a second records
+	 * nothing more.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 20)
+	public void amdusiassFirstObligationIsAHarvestUnderHisCanopy(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		long g0 = level.getGameTime();
+		BlockPos at = new BlockPos(2, 1, 2);
+		PactPerchBlockEntity perch = amdusiasPact(helper, holder, at, g0);
+		BlockPos outside = new BlockPos(12, 1, 2);
+		List<BlockPos> inside = List.of(new BlockPos(5, 1, 2), new BlockPos(2, 1, 6), new BlockPos(5, 1, 6));
+		BlockState ripe = ((OrganismCropBlock) Garden.SUNPETAL_CROP).getStateForAge(OrganismCropBlock.MAX_AGE);
+		List<BlockPos> ripened = new ArrayList<>(inside);
+		ripened.add(outside);
+		for (BlockPos bed : ripened) {
+			keptBed(helper, bed, holder.getUUID(), 0);
+			helper.setBlock(bed.above(), ripe);
+		}
+		helper.assertTrue(CanopyShelter.SERVICE.obligation() == PactObligations.Act.HARVEST
+				&& keys(CanopyShelter.SERVICE.obligationRows(level, holder, pactOf(level, perch), g0))
+						.equals(List.of("message.jugcraft.concordance.garden_pact.obligation")), "His page names the act");
+		int heard = GARDEN_SERVED.getOrDefault(holder.getUUID(), 0);
+		ConcordanceGardenGameTests.handUse(helper, holder, outside.above(), ItemStack.EMPTY, false);
+		helper.assertTrue(!helper.getBlockState(outside.above()).equals(ripe) && !PactObligations.kept(holder, AmdusiasEntity.COUNTERPART)
+				&& GARDEN_SERVED.getOrDefault(holder.getUUID(), 0) == heard, "A harvest by hand 10 blocks off, outside his area, keeps nothing");
+		helper.assertTrue(PactKeeping.suspend(level, holder, perch.holder(), g0) == AgreementHolder.Toggle.SUSPENDED, "Its holder suspends it");
+		ConcordanceGardenGameTests.handUse(helper, holder, inside.get(0).above(), ItemStack.EMPTY, false);
+		helper.assertTrue(!helper.getBlockState(inside.get(0).above()).equals(ripe) && !PactObligations.kept(holder, AmdusiasEntity.COUNTERPART)
+				&& GARDEN_SERVED.getOrDefault(holder.getUUID(), 0) == heard, "Suspended, a harvest by hand in his area keeps nothing");
+		helper.assertTrue(PactKeeping.resume(level, holder, perch.holder(), g0) == AgreementHolder.Toggle.RESUMED, "Resumed");
+		ConcordanceGardenGameTests.handUse(helper, holder, inside.get(1).above(), ItemStack.EMPTY, false);
+		helper.assertTrue(PactObligations.kept(holder, AmdusiasEntity.COUNTERPART) && GARDEN_SERVED.getOrDefault(holder.getUUID(), 0) == heard + 1
+				&& keys(CanopyShelter.SERVICE.obligationRows(level, holder, pactOf(level, perch), g0))
+						.equals(List.of("message.jugcraft.concordance.garden_pact.obligation_kept"))
+				&& PactObligations.key(AmdusiasEntity.COUNTERPART).equals("practice:" + GardenPacts.ACTIVITY + ":" + AmdusiasEntity.COUNTERPART),
+				"A ripe crop harvested by hand in his area while the pact is active keeps it, once");
+		ConcordanceGardenGameTests.handUse(helper, holder, inside.get(2).above(), ItemStack.EMPTY, false);
+		helper.assertTrue(GARDEN_SERVED.getOrDefault(holder.getUUID(), 0) == heard + 1 && !helper.getBlockState(inside.get(2).above()).equals(ripe),
+				"and it is not recorded again (the harvest itself done)");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-09 (GC-P125): a covered Sunpetal stirred 4: the Inspect page ends with the canopy's line (2 lower, 4 unsheltered) and
+	 * Jade's bed reading carries what it took; a Habitat Gauge attuned to Sunpetal on a second covered bed, reading
+	 * disturbance, gives 2 and says what the canopy took; a bed with nothing above has no line and no key.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 30)
+	public void theInspectPageAndTheGaugeReadTheShelteredValue(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		BlockPos cropAt = new BlockPos(3, 1, 4);
+		BlockPos gaugeAt = new BlockPos(10, 1, 4);
+		VerdantBedBlockEntity crop = shelteredCrop(helper, cropAt, holder.getUUID(), Garden.SUNPETAL_CROP);
+		VerdantBedBlockEntity gauged = keptBed(helper, gaugeAt, holder.getUUID(), 0);
+		helper.setBlock(gaugeAt.above(), Garden.HABITAT_GAUGE);
+		HabitatGaugeBlockEntity gauge = helper.getBlockEntity(gaugeAt.above(), HabitatGaugeBlockEntity.class);
+		gauge.awaken(holder.getUUID());
+		VerdantBedBlockEntity bare = keptBed(helper, new BlockPos(7, 1, 12), holder.getUUID(), 0);
+		stir(helper, cropAt, 4);
+		stir(helper, gaugeAt, 4);
+		ConcordanceGardenGameTests.afterSampling(helper, List.of(crop, gauged, bare), () -> {
+			gauge.attune(level, "jugcraft:sunpetal");
+			while (gauge.mode() != HabitatGaugeBlockEntity.Mode.DISTURBANCE) {
+				gauge.cycle(level);
+			}
+			helper.assertTrue(gauge.signal() == 4 && gauge.sheltered() == 0, "Unsheltered, the Gauge reads a stir of 4: " + gauge.signal());
+			long now = level.getGameTime();
+			AmdusiasEntity amdusias = amdusias(helper, amdusiasPact(helper, holder, new BlockPos(7, 1, 8), now));
+			helper.assertValueEqual(amdusias.think(level, 6000L, now), Status.WORKING, "He shelters the crop and the Gauge's bed");
+			helper.assertTrue(Canopies.of(level, holder.getUUID(), now).beds().equals(Set.of(crop.getBlockPos(), gauged.getBlockPos())),
+					"The Gauge's bed is covered for the crop it is attuned to; the bare one is not");
+			Niche sunpetal = nicheOf(crop, Garden.SUNPETAL_CROP);
+			HabitatInspection.State inspected = crop.inspect(level);
+			List<Text> page = HabitatInspection.judged(inspected, sunpetal, Verdict.of(sunpetal, inspected.habitat()));
+			helper.assertTrue(page.getLast().equals(Text.of("ecology.sheltered", 2, 4)), "The Inspect page ends with the canopy's line: " + page.getLast());
+			CompoundTag bedJade = ConcordanceDataProvider.bedSnapshot(crop, level);
+			helper.assertTrue(bedJade.getIntOr("sheltered", 0) == 2 && bedJade.getIntArray("habitat").map(values -> values[4] == 2).orElse(false),
+					"Jade's bed reading: the stir 2, what the canopy took 2: " + bedJade);
+			helper.assertTrue(gauge.read(level) == 2 && gauge.sheltered() == 2
+					&& ConcordanceDataProvider.deviceSnapshot(gauge).getIntOr("sheltered", 0) == 2, "The Gauge reads 2 and says what the canopy took");
+			HabitatInspection.State none = bare.inspect(level);
+			helper.assertTrue(none != null && none.habitat().shelter() == 0 && HabitatInspection.sheltered(none.habitat()) == null
+					&& !HabitatInspection.unjudged(none).getLast().equals(Text.of("ecology.sheltered", 2, 4))
+					&& !ConcordanceDataProvider.bedSnapshot(bare, level).contains("sheltered"), "A bed with nothing above: no line, no key");
+		});
+	}
+
+	/**
+	 * GC-09 (GC-P126): his terms word his quota as a cap, "At most 16 beds sheltered at once", where every other spirit's is a
+	 * day's count; thirty thinks over a covered bed count nothing on his record.
+	 */
+	@GameTest(maxTicks = 20)
+	public void theCanopysQuotaIsWordedAsACap(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer keeper = gardenHolder(helper);
+		BlockPos at = new BlockPos(4, 1, 4);
+		helper.setBlock(at.east(), Blocks.OAK_LOG);
+		PactPerchBlockEntity perch = perch(helper, at, keeper);
+		beside(helper, keeper, at);
+		shelteredCrop(helper, new BlockPos(1, 1, 1), keeper.getUUID(), Garden.SUNPETAL_CROP);
+		PactMenu menu = offerOf(helper, keeper, perch, amdusiasOffer());
+		Component quota = term(menu.lastSent(), "quota");
+		helper.assertTrue(key(quota).equals("message.jugcraft.concordance.pact.term.quota.canopy_shelter") && Integer.valueOf(16).equals(arg(quota, 0))
+				&& Language.getInstance().has(key(quota)) && quota.getString().equals("At most 16 beds sheltered at once"),
+				"His quota is worded as a cap: " + (quota == null ? "none" : quota.getString()));
+		keeper.closeContainer();
+		helper.assertTrue(CanopyShelter.SERVICE.quotaTerm().equals("term.quota.canopy_shelter")
+				&& PactServices.get("star_reckoning").quotaTerm().equals("term.quota") && PactServices.get("verdance_carrying").quotaTerm().equals("term.quota"),
+				"Stolas's and Bathin's quotas stay a day's count");
+		long now = level.getGameTime();
+		// Sealed at a second perch of his (the first keeps its visitor until he leaves), its log east of it.
+		PactPerchBlockEntity sealed = amdusiasPact(helper, keeper, new BlockPos(5, 1, 1), now);
+		AmdusiasEntity amdusias = amdusias(helper, sealed);
+		for (int i = 0; i < 30; i++) {
+			helper.assertValueEqual(amdusias.think(level, 6000L, now), Status.WORKING, "Think " + i + " shelters");
+		}
+		helper.assertValueEqual(Pacts.done(pactOf(level, sealed).pact(), now), 0, "Thirty thinks count nothing");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-09 (GC-P124): what a restart leaves for his holder is no canopy (nothing is saved): the bed reads no damping at once,
+	 * and his next think covers the same beds again; neither his saved entity nor his perch's saved data names a canopy.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aCanopyReturnsAfterARestartWithinOneThink(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		VerdantBedBlockEntity bed = shelteredCrop(helper, new BlockPos(1, 1, 1), holder.getUUID(), Garden.SUNPETAL_CROP);
+		long now = level.getGameTime();
+		PactPerchBlockEntity perch = amdusiasPact(helper, holder, new BlockPos(4, 1, 4), now);
+		AmdusiasEntity amdusias = amdusias(helper, perch);
+		helper.assertValueEqual(amdusias.think(level, 6000L, now), Status.WORKING, "His canopy stands");
+		Set<BlockPos> beds = Canopies.of(level, holder.getUUID(), now).beds();
+		// What a restart leaves for this holder: the registry is memory only (no game test forgets the level's, which others share).
+		Canopies.lift(level, holder.getUUID(), perch.getBlockPos());
+		helper.assertTrue(Canopies.of(level, holder.getUUID(), now) == null && dampingOver(level, bed, Garden.SUNPETAL_CROP) == 0, "No canopy at once");
+		helper.assertValueEqual(amdusias.think(level, 6000L, now), Status.WORKING, "His next think");
+		helper.assertTrue(Canopies.of(level, holder.getUUID(), now).beds().equals(beds) && dampingOver(level, bed, Garden.SUNPETAL_CROP) == 2,
+				"covers the same beds again");
+		TagValueOutput entity = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		amdusias.saveWithoutId(entity);
+		String saved = entity.buildResult() + " " + perch.saveWithFullMetadata(level.registryAccess());
+		helper.assertTrue(!saved.contains("anopy") && !saved.contains("helter") && !saved.contains("spared"), "Nothing of a canopy is saved: " + saved);
+		helper.succeed();
+	}
+
+	/**
+	 * GC-09 (Dossier 6 item 7a; GC-P127): his horn is heard a beat late: arriving, his gesture and cue show at once and his
+	 * horn sounds 20 ticks later; a whistle (his refusal) sounds with its gesture. Real ticks.
+	 */
+	@GameTest(maxTicks = 60)
+	public void amdusiasHornsABeatLate(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer guest = gardenHolder(helper);
+		BlockPos at = new BlockPos(4, 1, 4);
+		helper.setBlock(at.east(), Blocks.OAK_LOG);
+		keptBed(helper, new BlockPos(1, 1, 1), guest.getUUID(), 0);
+		PactPerchBlockEntity perch = perch(helper, at, guest);
+		beside(helper, guest, at);
+		long arrived = level.getGameTime();
+		offerOf(helper, guest, perch, amdusiasOffer());
+		AmdusiasEntity visitor = perch.visitor() != null && level.getEntity(perch.visitor()) instanceof AmdusiasEntity found ? found : null;
+		helper.assertTrue(visitor != null && visitor.cues().contains("arrive") && visitor.soundedAt("arrive") == Long.MIN_VALUE,
+				"He arrives: his gesture and cue show at once, his horn not yet: " + (visitor == null ? "none" : visitor.cues()));
+		visitor.gesture(AmdusiasEntity.Gesture.REFUSE);
+		helper.assertTrue(visitor.soundedAt("refuse") == level.getGameTime(), "A whistle sounds with its gesture");
+		helper.runAfterDelay(AmdusiasEntity.HORN_BEAT - 5, () -> helper.assertTrue(visitor.soundedAt("arrive") == Long.MIN_VALUE, "Not before his beat"));
+		helper.runAfterDelay(AmdusiasEntity.HORN_BEAT + 5, () -> {
+			long horn = visitor.soundedAt("arrive");
+			helper.assertTrue(horn >= arrived + AmdusiasEntity.HORN_BEAT && horn <= arrived + AmdusiasEntity.HORN_BEAT + 1, "His horn, a beat late: " + (horn - arrived));
+			guest.closeContainer();
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * GC-09 (Dossier 6 item 7b; GC-P134): his tree sways as his canopy forms, not again within 200 ticks, again at 200; ended,
+	 * once more with his departing bow, at his log; none before his canopy stood.
+	 */
+	@GameTest(maxTicks = 20)
+	public void hisTreeSwaysWhileHeShelters(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		shelteredCrop(helper, new BlockPos(1, 1, 1), holder.getUUID(), Garden.SUNPETAL_CROP);
+		BlockPos at = new BlockPos(4, 1, 4);
+		long now = level.getGameTime();
+		PactPerchBlockEntity perch = amdusiasPact(helper, holder, at, now);
+		AmdusiasEntity amdusias = amdusias(helper, perch);
+		helper.assertTrue(amdusias.sways() == 0 && amdusias.lastSway() == null, "No sway before his canopy stands");
+		int[] expected = {1, 1, 2};
+		long[] at3 = {now, now + 20, now + 200};
+		for (int i = 0; i < 3; i++) {
+			helper.assertValueEqual(amdusias.think(level, 6000L, at3[i]), Status.WORKING, "Think at +" + (at3[i] - now));
+			helper.assertValueEqual(amdusias.sways(), expected[i], "Sways after the think at +" + (at3[i] - now));
+		}
+		BlockPos log = helper.absolutePos(at.east());
+		helper.assertTrue(amdusias.lastSway() != null && amdusias.lastSway().tree().equals(log), "At his log: " + amdusias.lastSway());
+		PactKeeping.end(level, holder, perch.holder(), AmdusiasEntity.COUNTERPART, now + 200);
+		helper.assertTrue(amdusias.departing() && "depart".equals(amdusias.cues().getLast()) && amdusias.sways() == 3
+				&& amdusias.lastSway().tree().equals(log), "Ended: he bows his horn and his tree sways once more: " + amdusias.cues());
+		helper.succeed();
+	}
+
+	/**
+	 * GC-09 (GC-P124): a holder keeps one canopy: his holder's canopy standing at another perch (laid by hand), his think is
+	 * idle, Jade says it stands elsewhere, and the other is untouched; lifted, his next think shelters.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aHolderKeepsOneCanopy(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		VerdantBedBlockEntity bed = shelteredCrop(helper, new BlockPos(1, 1, 1), holder.getUUID(), Garden.SUNPETAL_CROP);
+		long now = level.getGameTime();
+		BlockPos elsewhere = helper.absolutePos(new BlockPos(7, 1, 7));
+		helper.assertTrue(Canopies.cover(level, holder.getUUID(), elsewhere, 1, false, List.of(bed.getBlockPos()), now), "His holder's canopy at another perch");
+		Canopies.Canopy other = Canopies.of(level, holder.getUUID(), now);
+		PactPerchBlockEntity perch = amdusiasPact(helper, holder, new BlockPos(4, 1, 4), now);
+		AmdusiasEntity amdusias = amdusias(helper, perch);
+		helper.assertValueEqual(amdusias.think(level, 6000L, now), Status.IDLE, "His holder's canopy stands elsewhere: he waits");
+		PactService.Note note = CanopyShelter.SERVICE.note(level, amdusias, pactOf(level, perch), 6000L, now);
+		helper.assertTrue(note != null && "elsewhere".equals(note.id()) && canopy(amdusias).idle() == CanopyShelter.Idle.ELSEWHERE
+				&& other.equals(Canopies.of(level, holder.getUUID(), now)), "Jade says so, and the other canopy is untouched: " + note);
+		Canopies.lift(level, holder.getUUID(), elsewhere);
+		helper.assertValueEqual(amdusias.think(level, 6000L, now), Status.WORKING, "Lifted: his next think shelters");
+		helper.assertTrue(Canopies.of(level, holder.getUUID(), now).perch().equals(perch.getBlockPos()), "from his own perch");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-09 (Jade; GC-P128): the readings of his perch and of him: kept, his work, the beds he shelters (one); with a Gloamcap
+	 * spared, both carry his note (spared, one) and his matter, naming no player.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 20)
+	public void amdusiassReadingSaysItsNoteAndNamesNoPlayer(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		shelteredCrop(helper, new BlockPos(3, 1, 4), holder.getUUID(), Garden.SUNPETAL_CROP);
+		long now = level.getGameTime();
+		PactPerchBlockEntity perch = amdusiasPact(helper, holder, new BlockPos(7, 1, 8), now);
+		AmdusiasEntity amdusias = amdusias(helper, perch);
+		helper.assertValueEqual(amdusias.think(level, 6000L, now), Status.WORKING, "He shelters one bed");
+		CompoundTag covered = PactReading.presence(level, amdusias, now);
+		helper.assertTrue(CanopyShelter.WORK.equals(covered.getStringOr("service", "")) && "covered".equals(covered.getStringOr("note", ""))
+				&& covered.getIntOr("note_count", 0) == 1 && !covered.contains("matter") && PactReading.KEYS.containsAll(covered.keySet()),
+				"Jade: sheltering one bed: " + covered);
+		shelteredCrop(helper, new BlockPos(10, 1, 4), holder.getUUID(), Garden.GLOAMCAP_CROP);
+		// His bed index is read again (it is kept REFRESH_TICKS), as a later think would.
+		canopy(amdusias).forget();
+		helper.assertValueEqual(amdusias.think(level, 6000L, now), Status.AWAITING_ANSWER, "A Gloamcap spared: his matter waits");
+		CompoundTag ofPerch = PactReading.holder(level, perch, now);
+		CompoundTag ofHim = PactReading.presence(level, amdusias, now);
+		for (CompoundTag reading : List.of(ofPerch, ofHim)) {
+			helper.assertTrue("kept".equals(reading.getStringOr("standing", "")) && CanopyShelter.WORK.equals(reading.getStringOr("service", ""))
+					&& "spared".equals(reading.getStringOr("note", "")) && reading.getIntOr("note_count", 0) == 1
+					&& CanopyShelter.WANTS_STIR.equals(reading.getStringOr("matter", "")) && !reading.contains("accord")
+					&& PactReading.KEYS.containsAll(reading.keySet()), "His note and his matter, no answer yet: " + reading);
+		}
+		String all = covered + " " + ofPerch + " " + ofHim;
+		helper.assertTrue(!all.contains(holder.getUUID().toString()) && !all.contains(holder.getName().getString()), "and no player is named: " + all);
+		helper.succeed();
+	}
+
+	/** GC-09: which gesture answers which action, which loop each state shows, his horn's beat and every cue's sound registered. */
+	@GameTest(maxTicks = 20)
+	public void amdusiasAnswersEachActionWithHisGesture(GameTestHelper helper) {
+		helper.assertTrue(AmdusiasEntity.reaction(PactRequestPayload.ACCEPT, PactMenu.SEALED, true) == AmdusiasEntity.Gesture.ASSENT
+				&& AmdusiasEntity.reaction(PactRequestPayload.ACCEPT, CanopyShelter.NO_TREE, false) == AmdusiasEntity.Gesture.REFUSE
+				&& AmdusiasEntity.reaction(PactRequestPayload.ACCEPT, CanopyShelter.NO_BED, false) == AmdusiasEntity.Gesture.REFUSE
+				&& AmdusiasEntity.reaction(PactRequestPayload.DEPOSIT, PactMenu.DEPOSITED, true) == AmdusiasEntity.Gesture.INSPECT
+				&& AmdusiasEntity.reaction(PactRequestPayload.DEPOSIT, PactMenu.NOTHING_DEPOSITED, false) == null
+				&& AmdusiasEntity.reaction(PactRequestPayload.RESUME, "resumed", true) == AmdusiasEntity.Gesture.ASSENT
+				&& AmdusiasEntity.reaction(PactRequestPayload.RESOLVE, "resolved", true) == AmdusiasEntity.Gesture.ASSENT
+				&& AmdusiasEntity.reaction(PactRequestPayload.RESOLVE, "resolved", false) == null
+				&& AmdusiasEntity.reaction(PactRequestPayload.RECALL, "recalled", true) == null
+				&& AmdusiasEntity.reaction(PactRequestPayload.ACCEPT, PactMenu.NOT_OFFERED, false) == null, "His answers");
+		helper.assertTrue(AmdusiasEntity.loop(Status.WORKING, false) == AmdusiasEntity.Loop.IDLE && AmdusiasEntity.loop(Status.IDLE, true) == AmdusiasEntity.Loop.LISTEN
+				&& AmdusiasEntity.loop(Status.WAITING_FOR_RESOURCES, false) == AmdusiasEntity.Loop.WAITING
+				&& AmdusiasEntity.loop(Status.OWNER_OFFLINE, false) == AmdusiasEntity.Loop.WAITING
+				&& AmdusiasEntity.loop(Status.UPKEEP_DUE, false) == AmdusiasEntity.Loop.ASTIR && AmdusiasEntity.loop(Status.UPKEEP_HELD, true) == AmdusiasEntity.Loop.LISTEN
+				&& AmdusiasEntity.loop(Status.SUSPENDED, false) == AmdusiasEntity.Loop.SUSPENDED && AmdusiasEntity.loop(Status.DISABLED, true) == AmdusiasEntity.Loop.WAITING
+				&& AmdusiasEntity.loop(Status.AWAITING_ANSWER, false) == AmdusiasEntity.Loop.IDLE, "His loops");
+		helper.assertTrue(AmdusiasEntity.HORNS.equals(Set.of("arrive", "work", "depart")) && AmdusiasEntity.HORN_BEAT == 20
+				&& AmdusiasEntity.HORN_BEAT < AmdusiasEntity.Gesture.DEPART.ticks, "His horn a beat late, before his departure ends");
+		for (String cue : AmdusiasEntity.SOUND_IDS) {
+			helper.assertTrue(BuiltInRegistries.SOUND_EVENT.containsKey(Jugcraft.id("amdusias." + cue)), "jugcraft:amdusias." + cue + " is registered");
+		}
+		helper.succeed();
+	}
+
+	/** GC-09: a second Amdusias at the perch, or a copy of his save, is no presence: it leaves at once and shelters nothing. */
+	@GameTest(maxTicks = 20)
+	public void aDuplicateAmdusiasSheltersNothing(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		VerdantBedBlockEntity bed = shelteredCrop(helper, new BlockPos(1, 1, 1), holder.getUUID(), Garden.SUNPETAL_CROP);
+		long now = level.getGameTime();
+		PactPerchBlockEntity perch = amdusiasPact(helper, holder, new BlockPos(4, 1, 4), now);
+		AmdusiasEntity amdusias = amdusias(helper, perch);
+		AmdusiasEntity stranger = Workers.AMDUSIAS.create(level, EntitySpawnReason.MOB_SUMMONED);
+		stranger.setOwner(holder.getUUID());
+		stranger.setPerch(perch.getBlockPos());
+		helper.assertValueEqual(stranger.think(level, 6000L, now), Status.FINISHED, "An Amdusias not the perch's presence leaves");
+		TagValueOutput saved = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		amdusias.saveWithoutId(saved);
+		AmdusiasEntity twin = Workers.AMDUSIAS.create(level, EntitySpawnReason.LOAD);
+		twin.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), saved.buildResult()));
+		twin.setUUID(UUID.randomUUID());
+		helper.assertValueEqual(twin.think(level, 6000L, now), Status.FINISHED, "A copy of his save, under another id, leaves");
+		helper.assertTrue(Canopies.of(level, holder.getUUID(), now) == null && dampingOver(level, bed, Garden.SUNPETAL_CROP) == 0
+				&& canopy(stranger).covered().isEmpty() && canopy(twin).covered().isEmpty() && stranger.gone() && twin.gone(),
+				"Neither sheltered anything");
+		helper.assertValueEqual(amdusias.think(level, 6000L, now), Status.WORKING, "The presence shelters");
+		helper.assertTrue(Canopies.of(level, holder.getUUID(), now).perch().equals(perch.getBlockPos()), "By him alone");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-09 (GC-P132; unit 3's Station.BESIDE, GC-P67): summoned for a holder south of his perch, Amdusias stands on the ground
+	 * two blocks west of it, facing them; his side walled, the next clear side clockwise (north); with none clear (his log
+	 * fills the east), the perch's top. Unit 3's shared aStandingSpiritStandsBesideItsPerch covers him with every BESIDE row.
+	 */
+	@GameTest(maxTicks = 20)
+	public void amdusiasStandsBesideHisPerch(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		long now = level.getGameTime();
+		BlockPos at = new BlockPos(3, 1, 3);
+		floor(helper);
+		shelteredCrop(helper, new BlockPos(6, 1, 6), holder.getUUID(), Garden.SUNPETAL_CROP);
+		AmdusiasEntity amdusias = amdusias(helper, amdusiasPact(helper, holder, at, now));
+		Vec3 west = Vec3.atBottomCenterOf(helper.absolutePos(at.west(2)));
+		helper.assertTrue(amdusias.position().distanceTo(west) < 1.0E-3, "He stands on the ground two blocks west of his perch: " + amdusias.position());
+		float facing = PactSpiritEntity.bearing(amdusias.position(), holder.position(), 0.0F);
+		helper.assertTrue(Math.abs(Mth.wrapDegrees(amdusias.getYRot() - facing)) < 1.0F, "and faces his holder: " + amdusias.getYRot() + " for " + facing);
+		helper.setBlock(at.west(), Blocks.STONE);
+		amdusias.think(level, 6000L, now);
+		helper.assertTrue(amdusias.position().distanceTo(Vec3.atBottomCenterOf(helper.absolutePos(at.north(2)))) < 1.0E-3,
+				"His side walled, he takes the next clear side clockwise from it, the north: " + amdusias.position());
+		helper.setBlock(at.north(), Blocks.STONE);
+		helper.setBlock(at.south(), Blocks.STONE);
+		amdusias.think(level, 6000L, now);
+		helper.assertTrue(amdusias.position().distanceTo(Vec3.atBottomCenterOf(helper.absolutePos(at.above()))) < 1.0E-3,
+				"With no side clear (his log fills the east) he stands on the perch's top: " + amdusias.position());
+		helper.succeed();
+	}
 }

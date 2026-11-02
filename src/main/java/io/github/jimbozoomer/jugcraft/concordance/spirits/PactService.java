@@ -116,4 +116,14 @@ public interface PactService {
 	default List<String> accords() {
 		return List.of();
 	}
+
+	/**
+	 * Concordance garden cohort, GC-09 (GC-P126): the words its quota is shown in on the terms page, under
+	 * message.jugcraft.concordance.pact.: the shared daily count, "term.quota" ("%s a game day"), by default; a service whose
+	 * quota caps what it holds at once, counting nothing it does, names its own, "term.quota." + its work (Amdusias's beds:
+	 * tools/concordance_pacts.py QUOTA_TERMS, its chip's glance tools/magic_ui.py's).
+	 */
+	default String quotaTerm() {
+		return "term.quota";
+	}
 }

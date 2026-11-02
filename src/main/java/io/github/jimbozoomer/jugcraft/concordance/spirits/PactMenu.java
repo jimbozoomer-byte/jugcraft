@@ -774,7 +774,13 @@ public class PactMenu extends AbstractContainerMenu {
 	private static List<PactStatePayload.Term> service(String work, int radius, int from, int to, int quota) {
 		return List.of(new PactStatePayload.Term("service", line("term.service." + work)),
 				new PactStatePayload.Term("hours", from == 0 && to == 24000 ? line("term.hours.any") : line("term.hours", Workers.clock(from), Workers.clock(to))),
-				new PactStatePayload.Term("area", line("term.area", radius)), new PactStatePayload.Term("quota", line("term.quota", quota)));
+				new PactStatePayload.Term("area", line("term.area", radius)), new PactStatePayload.Term("quota", line(quotaTerm(work), quota)));
+	}
+
+	/** GC-09 (GC-P126): its quota's words: its service's own (a cap), or the shared daily count for a work this version does not serve. */
+	private static String quotaTerm(String work) {
+		PactService service = PactServices.get(work);
+		return service == null ? "term.quota" : service.quotaTerm();
 	}
 
 	private static List<PactStatePayload.Term> upkeep(String offering, int count, long period, long grace, int cap) {

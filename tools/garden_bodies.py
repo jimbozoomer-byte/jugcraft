@@ -1460,3 +1460,323 @@ def bifrons_animations(read=None):
 
 
 # GC-09 unit 6
+# Amdusias (GC-09, GC-S12, GC-P133; docs/features/amdusias-pact.md): built here, as Bathin is, since no rig of the owner's
+# is a unicorn. amdusias_model reads the owner's flower crown (art/owner-library/originals/Edited-2026-10-18-Part2/cnb/,
+# through tools/owner_art.py's second root: read(path) with the part's folder name first) and copies its twelve cubes as
+# his garland round his neck, one face of each two-faced plane dropped (pinned in his row's "dropped"); amdusias_skin
+# paints only in the colours of the white petals, the origin oak log and the origin oak leaves (Blocks-folder paintings)
+# around the crown's texels, copied unchanged; amdusias_animations reads nothing. No glowmask.
+# ------------------------------------------------------------------------------------------------- Amdusias (GC-09)
+
+# Not PETALS: Buer's petal bones (above) keep that name.
+WHITE_PETALS = pacts.PETALS
+ORIGIN_OAK = pacts.ORIGIN_OAK
+ORIGIN_LEAVES = pacts.ORIGIN_LEAVES
+CROWN_GEO = pacts.CROWN_GEO
+CROWN_TEXTURE = pacts.CROWN_TEXTURE
+_AMDUSIAS = pacts.SPIRITS["amdusias"]["body"]
+AMDUSIAS_TEXTURE = (128, 64)
+# The owner's flower crown draws only inside this rectangle of its 48 x 48 sheet (x, y, width, height): copied texel for
+# texel to the same place in Amdusias's sheet, so its cubes keep the owner's per-face UVs unchanged and none of his own
+# parts uses it.
+CROWN_REGION = (0, 18, 32, 17)
+# The owner's crown rings a biped head: its twelve cubes stand round (0, 30.5, 0). Amdusias wears it as a garland round
+# his neck, its middle at GARLAND (his neck's middle, 2 pixels above his withers): each cube moves by the difference and
+# nothing else of it changes (but the one face of each two-faced plane that the owner drew twice).
+CROWN_MIDDLE = (0, 30.5, 0)
+GARLAND = (0, 24.5, -6.5)
+# Box-UV regions and sizes (pixels; a box (w, h, d) at (u, v) uses 2(w + d) x (d + h) from (u, v)); none overlaps another
+# or the crown's rectangle; the four legs, the four hooves, the two ears and the three leaves each share one region,
+# drawn alike.
+AMDUSIAS_UV = {"leg": (40, 0), "hoof": (50, 0), "tail": (64, 0), "mane": (74, 0), "ear": (82, 0), "stem": (88, 0),
+               "twig": (94, 0), "leaf": (102, 0), "torso": (0, 35), "neck": (44, 35), "head": (62, 35), "muzzle": (88, 35)}
+AMDUSIAS_SIZES = {"leg": (2, 13, 2), "hoof": (3, 2, 3), "tail": (2, 8, 2), "mane": (2, 10, 1), "ear": (1, 2, 1),
+                  "stem": (1, 6, 1), "twig": (2, 1, 1), "leaf": (2, 2, 1), "torso": (6, 8, 15), "neck": (4, 11, 4),
+                  "head": (5, 5, 7), "muzzle": (4, 3, 4)}
+# His legs: (bone, the leg's low corner); each hoof is centred under its leg, a quarter pixel wider on each side of it.
+AMDUSIAS_LEGS = {"leg_front_left": (0.75, 1, -7), "leg_front_right": (-2.75, 1, -7), "leg_hind_left": (0.75, 1, 4),
+                 "leg_hind_right": (-2.75, 1, 4)}
+# The two faces a zero-thickness cube draws on one plane, by its flat axis: the one facing +axis, then -axis (Bedrock's
+# names: east is +x, up +y, south +z).
+PLUS_MINUS = {0: ("east", "west"), 1: ("up", "down"), 2: ("south", "north")}
+# His face's sides (each side of his head, 7 x 5, row 0 its top, column 0 at his muzzle for the right side, at his neck for
+# the left: box UV draws the left side mirrored): E an eye (the oak bark's darkest), G its glint (the petals' palest), C his
+# coat. No nose holes (docs/ART_DIRECTION.md); his mouth is one line on his muzzle's front.
+AMDUSIAS_EYE_RIGHT = ["CCCCCCC", "CGECCCC", "CEECCCC", "CCCCCCC", "CCCCCCC"]
+AMDUSIAS_EYE_LEFT = ["CCCCCCC", "CCCCGEC", "CCCCEEC", "CCCCCCC", "CCCCCCC"]
+
+
+def _amdusias_box(name, origin):
+    u, v = AMDUSIAS_UV[name]
+    return {"origin": [float(c) for c in origin], "size": list(AMDUSIAS_SIZES[name]), "uv": [u, v]}
+
+
+def _face_rows(face):
+    """A per-face UV face's texels as rows, each read along the face's own u (a negative size reads backwards)."""
+    (u, v), (w, h) = face["uv"], face["uv_size"]
+    rows = []
+    for r in range(abs(round(h))):
+        row = []
+        for c in range(abs(round(w))):
+            row.append((int((u + (c + 0.5) * (1 if w > 0 else -1)) // 1), int((v + (r + 0.5) * (1 if h > 0 else -1)) // 1)))
+        rows.append(row)
+    return rows
+
+
+def _blank(sheet, face):
+    """Whether every texel a per-face UV face draws is clear (garden_bodies.clear reads whole-pixel UVs; the crown's are
+    written as decimals: 2.0, -1.0)."""
+    return all(not (0 <= x < sheet.width and 0 <= y < sheet.height) or sheet.getpixel((x, y))[3] == 0
+               for row in _face_rows(face) for x, y in row)
+
+
+def reversed_twins(sheet, a, b):
+    """Whether two faces of one plane are the owner's one picture drawn twice: face b, read backwards along u, is face a texel
+    for texel (so one quad, seen from both sides under entityCutout, shows exactly what the two did)."""
+    ra, rb = _face_rows(a), _face_rows(b)
+    if len(ra) != len(rb) or any(len(x) != len(y) for x, y in zip(ra, rb)):
+        return False
+    pixel = lambda p: sheet.getpixel(p) if 0 <= p[0] < sheet.width and 0 <= p[1] < sheet.height else None
+    return all(pixel(p) == pixel(q) for x, y in zip(ra, rb) for p, q in zip(x, reversed(y)))
+
+
+def drop_garland_twins(geometry, sheet, bone_name="garland"):
+    """Of each zero-thickness per-face cube of {bone_name} drawing both faces of its flat axis (docs/ART_DIRECTION.md, "Two-
+    sided planes": never an exact reversed twin on one plane), drops one, in place, and returns {(bone, cube index): face}:
+    the clear one where one is clear (drop_clear_twins' rule, read by _blank); where both are drawn and are the owner's one picture seen
+    from either side (reversed_twins), the one facing the ring's middle (the bone's pivot), so the face kept looks out and
+    the one quad left shows the same picture from inside. Any other pair stops the generator: which to keep is the owner's."""
+    dropped = {}
+    for bone in geometry["minecraft:geometry"][0]["bones"]:
+        if bone["name"] != bone_name:
+            continue
+        for index, cube in enumerate(bone.get("cubes", [])):
+            axis, faces = flat_axis(cube), cube.get("uv")
+            if axis is None or not isinstance(faces, dict):
+                continue
+            low, high = PLUS_MINUS[axis]
+            if low not in faces or high not in faces:
+                continue
+            clear_low, clear_high = _blank(sheet, faces[low]), _blank(sheet, faces[high])
+            if clear_low != clear_high:
+                gone = low if clear_low else high
+            elif not clear_low and reversed_twins(sheet, faces[low], faces[high]):
+                plane = cube["origin"][axis]
+                gone = low if plane < bone["pivot"][axis] else high
+            else:
+                raise SystemExit(f"tools/garden_bodies.py: {bone['name']} cube {index} draws {low} and {high} on one plane, "
+                                 f"{'both clear' if clear_low else 'two different pictures'}: the owner decides which to keep")
+            del faces[gone]
+            dropped[(bone["name"], index)] = gone
+    return dropped
+
+
+def flower_ring(read):
+    """The owner's flower crown, as Amdusias wears it: the twelve cubes of its one bone (art/owner-library/originals/
+    Edited-2026-10-18-Part2/cnb/geo/armor/flower_crown.geo.json), each moved by GARLAND - CROWN_MIDDLE and otherwise the
+    owner's (size, per-face UV, inflate)."""
+    owner = json.loads(read(CROWN_GEO))
+    ring = owner["minecraft:geometry"][0]["bones"][0]
+    shift = [a - b for a, b in zip(GARLAND, CROWN_MIDDLE)]
+    return [dict(copy.deepcopy(cube), origin=[round(o + s, 4) for o, s in zip(cube["origin"], shift)]) for cube in ring["cubes"]]
+
+
+def amdusias_geometry(read):
+    """Amdusias's geometry, and the faces dropped from his garland ({(bone, cube index): face}; check_spirit_bodies pins
+    them): a tall, slender unicorn, 38.5 pixels (2.41 blocks) to his horn's top leaf at scale 1 (16 pixels a block; y = 0
+    the floor beside his perch; he faces north, -z; his left is +x). root > body (his torso) > neck (and his mane) > head
+    (and his muzzle and ears) > horn (a living branch: its stem, a twig and three leaves); neck > garland (the owner's flower
+    crown); body > tail; root > four long legs, each with its hoof. Built here but the garland (copied, moved, one face of
+    each two-faced plane dropped); no cube turned at rest, none flat but the garland's, and no two faces of different cubes
+    on one plane facing the same way (coplanar is empty)."""
+    width, height = AMDUSIAS_TEXTURE
+    sheet = Image.open(io.BytesIO(read(CROWN_TEXTURE))).convert("RGBA")
+    bones = [{"name": "root", "pivot": [0, 0, 0]}]
+    for name, (x, y, z) in AMDUSIAS_LEGS.items():
+        bones.append({"name": name, "parent": "root", "pivot": [x + 1, 14, z + 1], "cubes": [
+            _amdusias_box("leg", (x, y, z)), _amdusias_box("hoof", (x - 0.5, 0, z - 0.5))]})
+    bones += [
+        {"name": "body", "parent": "root", "pivot": [0, 13, 0], "cubes": [_amdusias_box("torso", (-3, 13, -8))]},
+        {"name": "tail", "parent": "body", "pivot": [0, 20.5, 7], "cubes": [_amdusias_box("tail", (-1, 12.5, 6.5))]},
+        {"name": "neck", "parent": "body", "pivot": [0, 19, -6.5], "cubes": [
+            _amdusias_box("neck", (-2, 18, -8.5)), _amdusias_box("mane", (-1, 18.5, -4.75))]},
+        {"name": "garland", "parent": "neck", "pivot": list(GARLAND), "cubes": flower_ring(read)},
+        {"name": "head", "parent": "neck", "pivot": [0, 28, -6.5], "cubes": [
+            _amdusias_box("head", (-2.5, 27, -13)), _amdusias_box("muzzle", (-2, 27.5, -16.5)),
+            _amdusias_box("ear", (1, 31.5, -8)), _amdusias_box("ear", (-2, 31.5, -8))]},
+        {"name": "horn", "parent": "head", "pivot": [0, 32, -10.5], "cubes": [
+            _amdusias_box("stem", (-0.5, 31.5, -11)), _amdusias_box("twig", (0.4, 35, -10.9)),
+            _amdusias_box("leaf", (2, 35.5, -11.4)), _amdusias_box("leaf", (-2, 36.5, -11.25)),
+            _amdusias_box("leaf", (-2.25, 33.5, -10.8))]},
+    ]
+    out = {"format_version": "1.12.0", "minecraft:geometry": [{
+        "description": {"identifier": "geometry.amdusias", "texture_width": width, "texture_height": height,
+                        "visible_bounds_width": 3, "visible_bounds_height": 3.5, "visible_bounds_offset": [0, 1.75, 0]},
+        "bones": bones}]}
+    return out, drop_garland_twins(out, sheet)
+
+
+def amdusias_model(read):
+    geometry, dropped = amdusias_geometry(read)
+    wanted = {tuple(key.split("#")): face for key, face in _AMDUSIAS["dropped"].items()}
+    if {(bone, str(index)): face for (bone, index), face in dropped.items()} != wanted:
+        raise SystemExit(f"tools/garden_bodies.py: the flower ring drops {dropped}, not the faces the brief names: re-brief")
+    return geometry
+
+
+def amdusias_sheet(read):
+    """His 128 x 64 skin: the owner's flower crown texel for texel in CROWN_REGION, and every other texel opaque or clear,
+    painted only in the colours of three of the owner's paintings (cute and clean: two or three tones a part, light from the
+    top left, regular patterns; docs/ART_DIRECTION.md "Creatures and faces"). The white petals' twelve tones, darkest first,
+    W0 to W11: his coat W9 lit W11 and shaded W6, its undersides W4; his mane and tail W11 in even stripes of W8; his muzzle
+    W7 with one W2 line for his mouth; his ears' fronts W6. The origin oak's bark, O0 to O4: his hooves O1 lit O2 and shaded
+    O0; his branch O3 lit O4 and shaded O1; his eyes O0 with a W11 glint. The origin oak's leaves, L0 to L4: his three leaves
+    L2 lit L3 and shaded L1."""
+    W = palette(read, WHITE_PETALS, 12)
+    O = palette(read, ORIGIN_OAK, 5)
+    L = palette(read, ORIGIN_LEAVES, 5)
+    img = Image.new("RGBA", AMDUSIAS_TEXTURE, (0, 0, 0, 0))
+    crown = Image.open(io.BytesIO(read(CROWN_TEXTURE))).convert("RGBA")
+    x0, y0, w0, h0 = CROWN_REGION
+    img.paste(crown.crop((x0, y0, x0 + w0, y0 + h0)), (x0, y0))
+
+    def part(name):
+        return box_faces(AMDUSIAS_UV[name], AMDUSIAS_SIZES[name])
+
+    coat = _bevel(W[9], W[11], W[6])
+    for name in ("torso", "neck", "head", "leg"):
+        faces = part(name)
+        for side in SIDES:
+            _fill(img, faces[side], coat)
+        _fill(img, faces["up"], lambda x, y, w, h: W[10])
+        _fill(img, faces["down"], lambda x, y, w, h: W[4])
+    faces = part("head")
+    eyes = {"G": W[11], "E": O[0]}
+    _fill(img, faces["right"], lambda x, y, w, h: eyes.get(AMDUSIAS_EYE_RIGHT[y][x]) or coat(x, y, w, h))
+    _fill(img, faces["left"], lambda x, y, w, h: eyes.get(AMDUSIAS_EYE_LEFT[y][x]) or coat(x, y, w, h))
+    faces = part("muzzle")
+    for side in SIDES + ("up",):
+        _fill(img, faces[side], _bevel(W[7], W[9], W[5]))
+    _fill(img, faces["front"], lambda x, y, w, h: W[2] if y == h - 2 and 0 < x < w - 1 else _bevel(W[7], W[9], W[5])(x, y, w, h))
+    _fill(img, faces["down"], lambda x, y, w, h: W[4])
+    for name in ("mane", "tail"):
+        faces = part(name)
+        for side in SIDES + ("up", "down"):
+            _fill(img, faces[side], lambda x, y, w, h: W[8] if x % 2 == 1 and 0 < y < h - 1 else W[11])
+    faces = part("ear")
+    for side in SIDES + ("up", "down"):
+        _fill(img, faces[side], lambda x, y, w, h: W[11] if y == 0 else W[9])
+    _fill(img, faces["front"], lambda x, y, w, h: W[6] if y > 0 else W[9])
+    faces = part("hoof")
+    for side in SIDES + ("up",):
+        _fill(img, faces[side], _bevel(O[1], O[2], O[0]))
+    _fill(img, faces["down"], lambda x, y, w, h: O[0])
+    for name in ("stem", "twig"):
+        faces = part(name)
+        for side in SIDES:
+            _fill(img, faces[side], lambda x, y, w, h: O[4] if y == 0 else O[1] if y == h - 1 and h > 1 else O[3])
+        _fill(img, faces["up"], lambda x, y, w, h: O[4])
+        _fill(img, faces["down"], lambda x, y, w, h: O[1])
+    faces = part("leaf")
+    for side in SIDES + ("up", "down"):
+        _fill(img, faces[side], _bevel(L[2], L[3], L[1]))
+    return img
+
+
+def amdusias_skin(read):
+    return amdusias_sheet(read)
+
+
+def amdusias_clips():
+    """His own clips, keyed on amdusias_geometry's bones (degrees, Bedrock's sense: +x pitches a bone's top forward, so a
+    neck leans and a head bows with +x). His screen gestures start and end on his listening pose (ATTEND: neck raised,
+    head lifted as if to something far off); his work starts and ends at rest, the frame his idle begins on. His horn is a
+    beat late (AmdusiasEntity.HORN_BEAT): it sounds after each gesture's start, never with it, which these clips leave room
+    for (the tree's sway and the horn are the server's)."""
+    attend = {bone: [float(v) for v in angles] for bone, angles in _AMDUSIAS["attend"].items()}
+    lengths = _AMDUSIAS["loop_lengths"]
+    times = {name: length for name, (length, _) in _AMDUSIAS["gesture_times"].items()}
+    loops, gestures = _AMDUSIAS["loops"], _AMDUSIAS["gestures"]
+    zero, whole = [0.0, 0.0, 0.0], [1.0, 1.0, 1.0]
+    lean, level_head = [12.0, 0.0, 0.0], [-10.0, 0.0, 0.0]
+
+    def still(angles):
+        return {"0.0": [round(float(v), 3) + 0.0 for v in angles]}
+
+    def loop(length, bones):
+        return {"loop": True, "animation_length": length, "bones": bones}
+
+    def once(length, bones, hold=False):
+        return {"loop": "hold_on_last_frame" if hold else False, "animation_length": length, "bones": bones}
+
+    def from_attend(bone, *frames, length):
+        return _keys((0, attend[bone]), *frames, (length, attend[bone]), easing=EASE)
+
+    return {
+        # Idle: his neck leaning a little, breathing, his head turning slowly, his tail swaying.
+        loops["idle"]: loop(lengths["idle"], {
+            "neck": {"rotation": _wave(lengths["idle"], 1, lean, (2, 0, 0))},
+            "head": {"rotation": _wave(lengths["idle"], 1, level_head, (0, 6, 0), phase=0.25)},
+            "tail": {"rotation": _wave(lengths["idle"], 1, (8, 0, 0), (0, 0, 6))}}),
+        # Listening: neck raised, head lifted and tilted as if to something far off; very still.
+        loops["listen"]: loop(lengths["listen"], {
+            "neck": {"rotation": still(attend["neck"])},
+            "head": {"rotation": _wave(lengths["listen"], 1, attend["head"], (0, 0, 4))},
+            "tail": {"rotation": still((6, 0, 0))}}),
+        # Waiting (off his service, or switched off): head bowed, swaying a little.
+        loops["waiting"]: loop(lengths["waiting"], {
+            "neck": {"rotation": _wave(lengths["waiting"], 1, (22, 0, 0), (1.5, 0, 0))},
+            "head": {"rotation": still((10, 0, 0))},
+            "tail": {"rotation": _wave(lengths["waiting"], 1, (4, 0, 0), (0, 0, 3))}}),
+        # Suspended: neck low, head low, tail still.
+        loops["suspended"]: loop(lengths["suspended"], {
+            "neck": {"rotation": _wave(lengths["suspended"], 1, (34, 0, 0), (1, 0, 0))},
+            "head": {"rotation": still((20, 0, 0))},
+            "tail": {"rotation": still((2, 0, 0))}}),
+        # Astir (an offering due): pawing with one forehoof, looking about.
+        loops["astir"]: loop(lengths["astir"], {
+            "neck": {"rotation": still((8, 0, 0))},
+            "head": {"rotation": _wave(lengths["astir"], 2, zero, (0, 18, 0))},
+            "leg_front_right": {"rotation": _wave(lengths["astir"], 2, (-25, 0, 0), (12, 0, 0))}}),
+        # Arrive: he grows out of the air beside the perch, one forehoof lifted and set down, then raises his head high (the
+        # telling pose, 0.8 to 1.6 s) and settles listening.
+        gestures["arrive"]: once(times["arrive"], {
+            "root": {"scale": _keys((0, (0.3, 0.3, 0.3)), (0.6, whole), (times["arrive"], whole), easing=EASE)},
+            "leg_front_left": {"rotation": _keys((0, zero), (0.6, (-40, 0, 0)), (0.9, (-40, 0, 0)), (1.1, zero), (times["arrive"], zero),
+                                                 easing=EASE)},
+            "neck": {"rotation": _keys((0, (20, 0, 0)), (0.8, (-4, 0, 0)), (1.6, (-4, 0, 0)), (times["arrive"], attend["neck"]), easing=EASE)},
+            "head": {"rotation": _keys((0, (10, 0, 0)), (0.8, (-20, 0, 0)), (1.6, (-20, 0, 0)), (times["arrive"], attend["head"]), easing=EASE)}}),
+        # Inspect: his head lowered over what is offered, his horn tipped toward it (0.5 to 1.3 s).
+        gestures["inspect"]: once(times["inspect"], {
+            "neck": {"rotation": from_attend("neck", (0.5, (28, 0, 0)), (1.3, (28, 0, 0)), length=times["inspect"])},
+            "head": {"rotation": from_attend("head", (0.5, (18, 0, 0)), (0.8, (18, 10, 0)), (1.05, (18, -10, 0)), (1.3, (18, 0, 0)),
+                                             length=times["inspect"])}}),
+        # Assent: a slow bow of his horn, one forehoof drawn back (0.4 to 1.2 s).
+        gestures["assent"]: once(times["assent"], {
+            "neck": {"rotation": from_attend("neck", (0.4, (30, 0, 0)), (1.2, (30, 0, 0)), length=times["assent"])},
+            "head": {"rotation": from_attend("head", (0.4, (25, 0, 0)), (1.2, (25, 0, 0)), length=times["assent"])},
+            "leg_front_left": {"rotation": _keys((0, zero), (0.4, (12, 0, 0)), (1.2, (12, 0, 0)), (times["assent"], zero), easing=EASE)}}),
+        # Refuse: his head tossed up and turned away, a shake (0.4 to 1.3 s).
+        gestures["refuse"]: once(times["refuse"], {
+            "neck": {"rotation": from_attend("neck", (0.4, (-10, 0, 0)), (1.3, (-10, 0, 0)), length=times["refuse"])},
+            "head": {"rotation": from_attend("head", (0.4, (-30, 35, 0)), (0.7, (-30, 20, 0)), (1.0, (-30, 35, 0)), (1.3, (-30, 35, 0)),
+                                             length=times["refuse"])}}),
+        # Depart: he bows his horn low (the telling pose, 0.1 to 0.7 s) and is gone by 1.0 s, before his horn is heard a beat
+        # later; the last frame holds (nothing drawn) until the server removes him.
+        gestures["depart"]: once(times["depart"], {
+            "neck": {"rotation": _keys((0, attend["neck"]), (0.1, (34, 0, 0)), (0.7, (34, 0, 0)), easing=EASE)},
+            "head": {"rotation": _keys((0, attend["head"]), (0.1, (30, 0, 0)), (0.7, (30, 0, 0)), easing=EASE)},
+            "root": {"scale": _keys((0, whole), (0.7, whole), (1.0, zero), (times["depart"], zero), easing=EASE)}}, hold=True),
+        # Work (his canopy formed): he turns to his tree and dips his branch-horn toward it, bending it over the beds (the
+        # telling pose, 0.8 to 1.6 s); his garland swings; he straightens.
+        gestures["work"]: once(times["work"], {
+            "neck": {"rotation": _keys((0, lean), (0.8, (26, 0, 0)), (1.6, (26, 0, 0)), (2.4, lean), (times["work"], lean), easing=EASE)},
+            "head": {"rotation": _keys((0, level_head), (0.8, (35, 0, 0)), (1.6, (35, 0, 0)), (2.4, level_head), (times["work"], level_head),
+                                       easing=EASE)},
+            "garland": {"rotation": _keys((0, zero), (0.8, (10, 0, 6)), (1.6, (10, 0, -6)), (2.4, zero), (times["work"], zero), easing=EASE)}}),
+    }
+
+
+def amdusias_animations(read=None):
+    """The runtime animation file: his eleven clips, sorted by name."""
+    return {"format_version": "1.8.0", "animations": dict(sorted(amdusias_clips().items()))}
