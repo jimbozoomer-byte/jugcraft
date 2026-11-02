@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jugcraft:block/haunted_carousel"
+    },
+    "facing=east": {
+      "model": "jugcraft:block/haunted_carousel",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jugcraft:block/haunted_carousel",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jugcraft:block/haunted_carousel",
+      "y": 270
+    }
+  }
+}

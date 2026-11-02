@@ -2,6 +2,8 @@
   "replace": false,
   "values": [
     "jugcraft:warty_gourd",
-    "jugcraft:bottle_gourd"
+    "jugcraft:bottle_gourd",
+    "jugcraft:spoon_gourd",
+    "jugcraft:swan_gourd"
   ]
 }

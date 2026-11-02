@@ -1,0 +1,770 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "north",
+        "part": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "right": "herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_right_herbs"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "right": "dried_herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_right_dried_herbs"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "right": "chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_right_chili"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "right": "dried_chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_right_dried_chili"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "left": "herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_left_herbs"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "left": "dried_herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_left_dried_herbs"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "left": "chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_left_chili"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "left": "dried_chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_left_dried_chili"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "right": "herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_right_herbs"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "right": "dried_herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_right_dried_herbs"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "right": "chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_right_chili"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "right": "dried_chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_right_dried_chili"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "left": "herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_left_herbs"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "left": "dried_herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_left_dried_herbs"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "left": "chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_left_chili"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "left": "dried_chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_left_dried_chili"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "right": "herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_right_herbs",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "right": "dried_herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_right_dried_herbs",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "right": "chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_right_chili",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "right": "dried_chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_right_dried_chili",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "left": "herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_left_herbs",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "left": "dried_herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_left_dried_herbs",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "left": "chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_left_chili",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "left": "dried_chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_left_dried_chili",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "right": "herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_right_herbs",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "right": "dried_herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_right_dried_herbs",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "right": "chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_right_chili",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "right": "dried_chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_right_dried_chili",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "left": "herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_left_herbs",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "left": "dried_herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_left_dried_herbs",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "left": "chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_left_chili",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "left": "dried_chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_left_dried_chili",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "right": "herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_right_herbs",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "right": "dried_herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_right_dried_herbs",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "right": "chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_right_chili",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "right": "dried_chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_right_dried_chili",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "left": "herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_left_herbs",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "left": "dried_herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_left_dried_herbs",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "left": "chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_left_chili",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "left": "dried_chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_left_dried_chili",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "right": "herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_right_herbs",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "right": "dried_herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_right_dried_herbs",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "right": "chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_right_chili",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "right": "dried_chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_right_dried_chili",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "left": "herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_left_herbs",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "left": "dried_herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_left_dried_herbs",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "left": "chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_left_chili",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "left": "dried_chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_left_dried_chili",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "right": "herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_right_herbs",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "right": "dried_herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_right_dried_herbs",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "right": "chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_right_chili",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "right": "dried_chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_right_dried_chili",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "left": "herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_left_herbs",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "left": "dried_herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_left_dried_herbs",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "left": "chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_left_chili",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "left": "dried_chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_0_left_dried_chili",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "right": "herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_right_herbs",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "right": "dried_herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_right_dried_herbs",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "right": "chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_right_chili",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "right": "dried_chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_right_dried_chili",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "left": "herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_left_herbs",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "left": "dried_herbs"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_left_dried_herbs",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "left": "chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_left_chili",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "left": "dried_chili"
+      },
+      "apply": {
+        "model": "jugcraft:block/drying_rack_1_left_dried_chili",
+        "y": 270
+      }
+    }
+  ]
+}

@@ -85,10 +85,20 @@ public class TownGameTests {
 				level.setBlockAndUpdate(at, block.defaultBlockState()); var before = level.getBlockState(at);
 				h.assertTrue(click.get().consumesAction() && level.getBlockState(at) != before, "Public control works: " + block);
 			}
-			for (var block : List.of(Blocks.CRAFTING_TABLE, Blocks.STONECUTTER, Blocks.SMITHING_TABLE, Blocks.GRINDSTONE, Blocks.ANVIL, Blocks.ENCHANTING_TABLE, Blocks.ENDER_CHEST, io.github.jimbozoomer.jugcraft.town.JugcraftTown.ATM)) {
+			for (var block : List.of(Blocks.CRAFTING_TABLE, Blocks.STONECUTTER, Blocks.SMITHING_TABLE, Blocks.GRINDSTONE, Blocks.ANVIL, Blocks.ENCHANTING_TABLE, Blocks.ENDER_CHEST, io.github.jimbozoomer.jugcraft.town.JugcraftTown.ATM, io.github.jimbozoomer.jugcraft.town.JugcraftTown.COMMISSION_BOARD)) {
 				level.setBlockAndUpdate(at, block.defaultBlockState()); player.closeContainer();
+                io.github.jimbozoomer.jugcraft.enchanting.OwnerEnchanting.Inventory stored=null;
+                if(block==Blocks.ENCHANTING_TABLE){
+                    stored=((io.github.jimbozoomer.jugcraft.enchanting.OwnerEnchanting.Storage)level.getBlockEntity(at)).jugcraft$enchantingInventory();
+                    stored.setItem(0,new ItemStack(Items.DIAMOND_SWORD));stored.setItem(1,new ItemStack(Items.LAPIS_LAZULI,7));
+                }
 				h.assertTrue(click.get().consumesAction() && player.containerMenu != player.inventoryMenu, "Public workstation/personal ender chest opens: " + block);
+                if(stored!=null){
+                    h.assertTrue(player.containerMenu.getSlot(0).getItem().isEmpty()&&player.containerMenu.getSlot(1).getItem().isEmpty(),"Public enchanting never exposes the town's stored gear/lapis");
+                    player.containerMenu.getSlot(1).set(new ItemStack(Items.LAPIS_LAZULI,3));
+                }
 				player.closeContainer();
+                if(stored!=null){h.assertTrue(stored.getItem(0).is(Items.DIAMOND_SWORD)&&stored.getItem(1).getCount()==7,"Public enchanting leaves the town inventory unchanged");h.assertTrue(player.getInventory().countItem(Items.LAPIS_LAZULI)==3,"Closing public enchanting returns the visitor's own lapis");stored.clearContent();player.getInventory().clearContent();}
 			}
 			for (var block : List.of(Blocks.CHEST, Blocks.BARREL, Blocks.FURNACE, Blocks.HOPPER, Blocks.SHULKER_BOX, Blocks.BREWING_STAND, Blocks.LECTERN, Blocks.JUKEBOX,
 					io.github.jimbozoomer.jugcraft.menagerie.Menagerie.BLOCKS.get("household_oak_storage_cabinet"))) {
@@ -98,8 +108,16 @@ public class TownGameTests {
 				h.assertTrue(click.get() == net.minecraft.world.InteractionResult.FAIL && player.containerMenu == player.inventoryMenu, "Town inventory stays closed: " + block);
 				if (entity instanceof net.minecraft.world.Container container) { h.assertTrue(container.getItem(0).getCount() == 3, "Stored items untouched"); container.clearContent(); }
 			}
-			level.setBlockAndUpdate(at, io.github.jimbozoomer.jugcraft.menagerie.Menagerie.BLOCKS.get("household_oak_chair").defaultBlockState());
-			h.assertTrue(click.get().consumesAction() && player.isPassenger(), "Visitor can sit on town furniture"); player.stopRiding();
+			for (String seat : List.of("household_oak_chair", "crafted_oak_chair", "crafted_oak_bench")) {
+				var block = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getValue(net.minecraft.resources.Identifier.parse("jugcraft:" + seat));
+				h.assertTrue(block != Blocks.AIR, "Town seat is registered: " + seat);
+				level.setBlockAndUpdate(at, block.defaultBlockState());
+				h.assertTrue(click.get().consumesAction() && player.isPassenger(), "Visitor can sit on town furniture: " + seat);
+				var occupiedSeat = player.getVehicle();
+				player.stopRiding();
+				// This loop replaces three chairs in the same tick, before an empty seat normally self-cleans.
+				occupiedSeat.discard();
+			}
 			level.setBlockAndUpdate(at, Blocks.STONE.defaultBlockState());
 			player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.COBBLESTONE,4)); player.setShiftKeyDown(true);
 			player.gameMode.useItemOn(player, level, player.getMainHandItem(), InteractionHand.MAIN_HAND, hit);

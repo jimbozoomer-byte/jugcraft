@@ -1,0 +1,17 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jugcraft:swan_gourd"
+  ],
+  "result": {
+    "id": "jugcraft:swan_gourd_seeds",
+    "count": 4
+  }
+}

@@ -1,10 +1,13 @@
 package io.github.jimbozoomer.jugcraft.client;
 
 import io.github.jimbozoomer.jugcraft.agriculture.BloodMoon;
+import io.github.jimbozoomer.jugcraft.agriculture.ButterChurnBlockEntity;
+import io.github.jimbozoomer.jugcraft.agriculture.HarvestBellBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.HarvestMoon;
 import io.github.jimbozoomer.jugcraft.agriculture.JugcraftAgriculture;
 import io.github.jimbozoomer.jugcraft.agriculture.OpenCarvingPayload;
 import io.github.jimbozoomer.jugcraft.agriculture.OpenEpitaphPayload;
+import io.github.jimbozoomer.jugcraft.agriculture.QuernBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.SpookyBurstPayload;
 import io.github.jimbozoomer.jugcraft.client.arms.ArmsMotion;
 import io.github.jimbozoomer.jugcraft.client.arms.FlailHeads;
@@ -48,6 +51,9 @@ import net.minecraft.client.renderer.entity.ThrownItemRenderer;
 public final class JugcraftClient implements ClientModInitializer {
 	@Override
 	public void onInitializeClient() {
+		if (net.fabricmc.loader.api.FabricLoader.getInstance().isModLoaded("iris")) {
+			io.github.jimbozoomer.jugcraft.client.compat.GeckoIrisCompat.register();
+		}
 		io.github.jimbozoomer.jugcraft.client.update.JugcraftUpdates.register();
 		JimtafactsClient.register();
 		JimtaMimicClient.register();
@@ -96,6 +102,8 @@ public final class JugcraftClient implements ClientModInitializer {
 				net.minecraft.client.renderer.entity.NoopRenderer::new);
 		BlockEntityRenderers.register(io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.ZIPLINE_ANCHOR_ENTITY, ZiplineRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.COMBAT_ROCKET, ThrownItemRenderer::new);
+		// The flying-microjets follow-up: a Microjet in flight shows as the round.
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.guns.JugcraftGuns.MICROJET, ThrownItemRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.lair.JugcraftLairs.MIST_GATE,
 				net.minecraft.client.renderer.entity.NoopRenderer::new);
 		VesperineClient.register();
@@ -177,6 +185,51 @@ public final class JugcraftClient implements ClientModInitializer {
 				io.github.jimbozoomer.jugcraft.client.arms.ThrownArmRenderer::new);
 		PetroFluidsClient.register();
 		RocketPackLayer.register();
+        OwnerBackpackWearable.register();
+        OwnerWingsClient.register();
+        OwnerZoom.register();
+        OwnerRibbitsClient.register();
+        OwnerChatAnimation.register();
+        OwnerThirdPerson.register();
+        OwnerSupplementRenderer.register();OwnerRopeArrowRenderer.register();
+        OwnerAmendmentRenderer.register();
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.botany.BotanicalRoyalWeapon.TYPE,BotanicalRoyalWeaponRenderer::new);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.botany.BotanicalPinkWither.TYPE,BotanicalPinkWitherRenderer::new);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.botany.BotanicalGaia.TYPE,BotanicalGaiaRenderer::new);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.botany.BotanicalTransport.CART,c->new net.minecraft.client.renderer.entity.MinecartRenderer(c,net.minecraft.client.model.geom.ModelLayers.MINECART));
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.botany.BotanicalThrownTools.TYPE,BotanicalThrownRenderer::new);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.botany.BotanicalEnderAir.TYPE,net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.botany.CorporeaSpark.TYPE,net.minecraft.client.renderer.entity.ThrownItemRenderer::new);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.botany.BotanicalLightRide.TYPE,net.minecraft.client.renderer.entity.NoopRenderer::new);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.botany.BotanicalManaStorm.TYPE,net.minecraft.client.renderer.entity.NoopRenderer::new);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.botany.BotanicalBurst.TYPE,net.minecraft.client.renderer.entity.NoopRenderer::new);
+        BotanicalMonocleClient.register();BotanicalWearables.register();BotanicalMovementClient.register();BotanicalWorkshopRenderer.register();BotanicalArmorRenderer.register();ArcaneForgeScreen.register();WildFoliaathRenderer.register();
+        WildGongRenderer.register();
+        WildSmallCreatureRenderer.register();
+        WildDartRenderer.register();
+        WildNagaRenderer.register();
+        WildWroughtRenderer.register();
+        WildFrostRenderer.register();
+        WildBluffRenderer.register();
+        WildElokosaRenderer.register();WildSunRenderer.register();WildEarthRenderer.register();
+        WildParticle.register();
+        io.github.jimbozoomer.jugcraft.wilds.WildGrottol.playTune=e->{if(e.getVehicle()!=null)net.minecraft.client.Minecraft.getInstance().getSoundManager().play(new net.minecraft.client.resources.sounds.EntityBoundSoundInstance(io.github.jimbozoomer.jugcraft.wilds.OwnerWilds.sound("music.black_pink"),net.minecraft.sounds.SoundSource.NEUTRAL,1,1,e.getVehicle(),e.getId()));};
+        WildArmorRenderer.register();
+        WildPlayerAnimations.register();
+        WildFrozenVisuals.register();
+        ArcaneWindRenderer.register();
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.botany.BotanicalRodEffect.TYPE,net.minecraft.client.renderer.entity.NoopRenderer::new);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.botany.BotanicalPixie.TYPE,BotanicalPixieRenderer::new);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.botany.BotanicalBolt.TYPE,net.minecraft.client.renderer.entity.NoopRenderer::new);
+        OwnerSignDisplayRenderer.register();
+        OwnerLecternEditScreen.register();
+        io.github.jimbozoomer.jugcraft.client.aquatic.OwnerAquaticStationRenderer.register();
+        io.github.jimbozoomer.jugcraft.aquatic.OwnerLandTurtles.TYPES.forEach((name,type)->net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(type,c->new io.github.jimbozoomer.jugcraft.client.aquatic.OwnerTurtleRenderer(c,name)));
+        io.github.jimbozoomer.jugcraft.aquatic.OwnerAquaculture.TYPES.forEach((name,type)->net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(type,c->new io.github.jimbozoomer.jugcraft.client.aquatic.OwnerFishRenderer(c,io.github.jimbozoomer.jugcraft.aquatic.OwnerAquaculture.SPECIES.get(name).shape())));
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.aquatic.OwnerFishMount.TYPE,io.github.jimbozoomer.jugcraft.client.aquatic.OwnerFishMountRenderer::new);
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(net.minecraft.world.entity.EntityTypes.FISHING_BOBBER,io.github.jimbozoomer.jugcraft.client.aquatic.OwnerFishingHookRenderer::new);
+        ItemTooltipCallback.EVENT.register((stack,context,flag,lines)->{String weight=io.github.jimbozoomer.jugcraft.aquatic.OwnerFishWeights.description(stack);if(!weight.isEmpty())lines.add(net.minecraft.network.chat.Component.literal(weight).withStyle(net.minecraft.ChatFormatting.AQUA));});
+        net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.menagerie.FloweryMooblooms.TYPE,FloweryMoobloomRenderer::new);
 		HazmatLayer.register();
 		UniformLayer.register();
 		RadiationHud.register();
@@ -226,12 +279,14 @@ public final class JugcraftClient implements ClientModInitializer {
 		SeasonColors.register();
 		WoodColors.register();
 		TreeLeafColors.register();
+		OwnerBuildingColors.register();
 		PartyClient.register();
 		ConcordanceClient.register();
 		GunsClient.register();
 		JugcraftKeyBindings.register();
 		// The Jugcraft Encyclopedia: its key, its inventory button and its screen (Concordance Chunk A, A-04).
 		EncyclopediaClient.register();
+        CraftingChoicesClient.register();
 		ClientPlayNetworking.registerGlobalReceiver(SurveyPayload.TYPE,
 				(payload, context) -> Minecraft.getInstance().gui.setScreen(new ProspectorScreen(payload.readings())));
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.CARVED_PUMPKIN_ENTITY, CarvedPumpkinRenderer::new);
@@ -246,6 +301,36 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.HAUNTED_PORTRAIT_ENTITY, HauntedPortraitRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.FLOATING_CANDLE_ENTITY, FloatingCandleRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.PUMPKIN_CRATE_ENTITY, PumpkinCrateRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.PRODUCE_DISPLAY_ENTITY, ProduceDisplayRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.CHALKBOARD_SIGN_ENTITY, ChalkboardSignRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.QUERN_ENTITY,
+				context -> new HandWorkedRenderer<QuernBlockEntity>(context, HandWorkedRenderer.STATION, HandWorkedRenderer.TURN));
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.BUTTER_CHURN_ENTITY,
+				context -> new HandWorkedRenderer<ButterChurnBlockEntity>(context, HandWorkedRenderer.STATION, HandWorkedRenderer.PLUNGE));
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.HARVEST_BELL_ENTITY,
+				context -> new HandWorkedRenderer<HarvestBellBlockEntity>(context, HandWorkedRenderer.BELL, HandWorkedRenderer.SWING));
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.HAY_PULLEY_ENTITY, HayPulleyRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.PLANTER_ENTITY, PlanterRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.PORCH_SWING_ENTITY, PorchSwingRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.TEA_KETTLE_ENTITY, TeaKettleRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.CHOPPING_BLOCK_ENTITY, ChoppingBlockRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.BLANKET_LADDER_ENTITY, BlanketLadderRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.KNITTING_BASKET_ENTITY, KnittingBasketRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.COTTON_CANDY_CART_ENTITY, CottonCandyCartRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.POPCORN_WAGON_ENTITY, PopcornWagonRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.TICKET_BOOTH_ENTITY, TicketBoothRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.WHACK_A_ZOMBIE_ENTITY, WhackAZombieRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.SHOOTING_GALLERY_ENTITY, ShootingGalleryRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.GHOST_TRAIN_ENTITY, GhostTrainRenderer::new);
+		EntityRendererRegistry.register(JugcraftAgriculture.HAUNTED_CAROUSEL, HauntedCarouselRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.HAUNTED_MAILBOX_ENTITY, HauntedMailboxRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.PUMPKIN_PATH_LIGHT_ENTITY, PumpkinPathLightRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.SKELETON_ANIMAL_ENTITY, SkeletonAnimalRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.RISING_ZOMBIE_ENTITY, RisingZombieRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.GARGOYLE_KNOCKER_ENTITY, GargoyleKnockerRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.CRASHED_WITCH_ENTITY, CrashedWitchRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.CANDY_CHUTE_ENTITY, CandyChuteRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.CANDY_CORN_DISPENSER_ENTITY, CandyCornDispenserRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.ROCKING_CHAIR_ENTITY, RockingChairRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.LURKING_EYES_ENTITY, LurkingEyesRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SILHOUETTE_WINDOW_ENTITY, SilhouetteWindowRenderer::new);
@@ -265,6 +350,13 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.BLACK_CAT_ENTITY, BlackCatRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.INFLATABLE_ENTITY, InflatableRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.PORCH_WITCH_ENTITY, PorchWitchRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.ORGAN_GRINDER_SKELETON_ENTITY, OrganGrinderSkeletonRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.ANIMATRONIC_WEREWOLF_ENTITY, AnimatronicWerewolfRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.FLYING_CRANK_GHOST_ENTITY, FlyingCrankGhostRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.CLOCKWORK_RAVEN_ENTITY, ClockworkRavenRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.PUMPKIN_DRUMMER_ENTITY, PumpkinDrummerRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.SHOW_CONTROLLER_ENTITY, ShowControllerRenderer::new);
+		BlockEntityRendererRegistry.register(JugcraftAgriculture.STEAM_TRACTION_ENGINE_ENTITY, SteamTractionEngineRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.WIND_CHIMES_ENTITY, BoneWindChimesRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.WEATHERVANE_ENTITY, WeathervaneRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SPOOKY_SIGN_ENTITY, SpookySignRenderer::new);
@@ -400,6 +492,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.styx.JugcraftStyx.WIZARD, StyxRenderer::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.town.JugcraftTown.SHOP_MENU, ShopScreen::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.town.JugcraftTown.ATM_MENU, AtmScreen::new);
+        MenuScreens.register(io.github.jimbozoomer.jugcraft.town.JugcraftTown.COMMISSION_MENU, CommissionScreen::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.control.JugcraftControl.CONTROLLER_MENU, LogicControllerScreen::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialGateParameters.TYPE, io.github.jimbozoomer.jugcraft.client.jimtafacts.GateParametersScreen::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.jimtafacts.industry.CompactReactor.MENU, CompactReactorScreen::new);

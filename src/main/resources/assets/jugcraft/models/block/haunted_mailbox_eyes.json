@@ -1,0 +1,150 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "p": "jugcraft:block/haunted_mailbox",
+    "particle": "jugcraft:block/haunted_mailbox"
+  },
+  "elements": [
+    {
+      "from": [
+        6.75,
+        19.0,
+        2.85
+      ],
+      "to": [
+        7.75,
+        20.0,
+        3.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0.875,
+            2.125,
+            1.0,
+            2.25
+          ],
+          "texture": "#p"
+        },
+        "south": {
+          "uv": [
+            0.875,
+            2.125,
+            1.0,
+            2.25
+          ],
+          "texture": "#p"
+        },
+        "east": {
+          "uv": [
+            0.875,
+            2.125,
+            1.0,
+            2.25
+          ],
+          "texture": "#p"
+        },
+        "west": {
+          "uv": [
+            0.875,
+            2.125,
+            1.0,
+            2.25
+          ],
+          "texture": "#p"
+        },
+        "up": {
+          "uv": [
+            0.875,
+            2.125,
+            1.0,
+            2.25
+          ],
+          "texture": "#p"
+        },
+        "down": {
+          "uv": [
+            0.875,
+            2.125,
+            1.0,
+            2.25
+          ],
+          "texture": "#p"
+        }
+      },
+      "light_emission": 15,
+      "shade": false
+    },
+    {
+      "from": [
+        8.25,
+        19.0,
+        2.85
+      ],
+      "to": [
+        9.25,
+        20.0,
+        3.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0.875,
+            2.125,
+            1.0,
+            2.25
+          ],
+          "texture": "#p"
+        },
+        "south": {
+          "uv": [
+            0.875,
+            2.125,
+            1.0,
+            2.25
+          ],
+          "texture": "#p"
+        },
+        "east": {
+          "uv": [
+            0.875,
+            2.125,
+            1.0,
+            2.25
+          ],
+          "texture": "#p"
+        },
+        "west": {
+          "uv": [
+            0.875,
+            2.125,
+            1.0,
+            2.25
+          ],
+          "texture": "#p"
+        },
+        "up": {
+          "uv": [
+            0.875,
+            2.125,
+            1.0,
+            2.25
+          ],
+          "texture": "#p"
+        },
+        "down": {
+          "uv": [
+            0.875,
+            2.125,
+            1.0,
+            2.25
+          ],
+          "texture": "#p"
+        }
+      },
+      "light_emission": 15,
+      "shade": false
+    }
+  ]
+}

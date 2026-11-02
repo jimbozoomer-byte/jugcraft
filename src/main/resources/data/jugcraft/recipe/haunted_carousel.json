@@ -1,0 +1,27 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "WLW",
+    "BNB",
+    "PGP"
+  ],
+  "key": {
+    "W": "minecraft:orange_wool",
+    "L": "minecraft:redstone_lamp",
+    "B": "minecraft:iron_bars",
+    "N": "minecraft:note_block",
+    "P": "#minecraft:planks",
+    "G": "minecraft:gold_ingot"
+  },
+  "result": {
+    "id": "jugcraft:haunted_carousel",
+    "count": 1
+  }
+}

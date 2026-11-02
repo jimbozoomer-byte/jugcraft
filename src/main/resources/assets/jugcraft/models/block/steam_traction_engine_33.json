@@ -1,0 +1,51 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "p": "jugcraft:block/steam_traction_engine",
+    "particle": "jugcraft:block/steam_traction_engine"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        1.0,
+        6.0,
+        2.0
+      ],
+      "faces": {
+        "south": {
+          "uv": [
+            3.375,
+            4.125,
+            3.5,
+            4.875
+          ],
+          "texture": "#p"
+        },
+        "east": {
+          "uv": [
+            13.625,
+            0.0,
+            13.875,
+            0.75
+          ],
+          "texture": "#p"
+        },
+        "up": {
+          "uv": [
+            9.0,
+            7.25,
+            9.125,
+            7.5
+          ],
+          "texture": "#p"
+        }
+      }
+    }
+  ]
+}

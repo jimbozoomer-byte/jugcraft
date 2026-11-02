@@ -4,9 +4,10 @@ the town itself (tools/town.py)."""
 from PIL import Image
 
 import town_lang
+import town_commissions
 
 MOD = "jugcraft"
-BLOCKS = ["atm"]
+BLOCKS = ["atm", "town_commission_board"]
 ITEMS = []
 
 
@@ -125,6 +126,7 @@ def assets(assets_dir, write, lang):
     write(assets_dir / "blockstates" / "atm.json", {"variants": {
         f"facing={facing}": {"model": rid("block/atm"), **rot} for facing, rot in rotations.items()}})
     write(assets_dir / "items" / "atm.json", {"model": {"type": "minecraft:model", "model": rid("block/atm")}})
+    town_commissions.assets(assets_dir, write, lang)
     lang.update(town_lang.lang())
     lang["entity.jugcraft.town_guard_mecha"] = "City Guard Walker"
 

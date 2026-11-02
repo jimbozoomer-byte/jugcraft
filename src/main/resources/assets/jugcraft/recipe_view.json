@@ -6909,6 +6909,126 @@
             ]
           ],
           "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:turban_squash_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:turban_squash",
+            1
+          ],
+          "extra": [
+            [
+              "jugcraft:turban_squash_seeds",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:blue_hubbard_squash_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:blue_hubbard_squash",
+            1
+          ],
+          "extra": [
+            [
+              "jugcraft:blue_hubbard_squash_seeds",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:sweet_dumpling_squash_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:sweet_dumpling_squash",
+            1
+          ],
+          "extra": [
+            [
+              "jugcraft:sweet_dumpling_squash_seeds",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:long_island_cheese_pumpkin_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:long_island_cheese_pumpkin",
+            1
+          ],
+          "extra": [
+            [
+              "jugcraft:long_island_cheese_pumpkin_seeds",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:spoon_gourd_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:spoon_gourd",
+            1
+          ],
+          "extra": [
+            [
+              "jugcraft:spoon_gourd_seeds",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
+        },
+        {
+          "in": [
+            [
+              "jugcraft:swan_gourd_seeds",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:swan_gourd",
+            1
+          ],
+          "extra": [
+            [
+              "jugcraft:swan_gourd_seeds",
+              1,
+              1.0
+            ]
+          ],
+          "ticks": 600
         }
       ]
     },

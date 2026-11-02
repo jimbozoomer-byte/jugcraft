@@ -1,0 +1,25 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "TTT",
+    "PFP",
+    "PSP"
+  ],
+  "key": {
+    "T": "minecraft:torch",
+    "F": "minecraft:rotten_flesh",
+    "S": "minecraft:piston",
+    "P": "#minecraft:planks"
+  },
+  "result": {
+    "id": "jugcraft:whack_a_zombie",
+    "count": 1
+  }
+}

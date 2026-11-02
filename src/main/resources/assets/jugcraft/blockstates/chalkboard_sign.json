@@ -1,0 +1,124 @@
+{
+  "variants": {
+    "facing=north,words=pumpkins": {
+      "model": "jugcraft:block/chalkboard_sign"
+    },
+    "facing=north,words=fresh_picked": {
+      "model": "jugcraft:block/chalkboard_sign"
+    },
+    "facing=north,words=u_pick": {
+      "model": "jugcraft:block/chalkboard_sign"
+    },
+    "facing=north,words=gourds": {
+      "model": "jugcraft:block/chalkboard_sign"
+    },
+    "facing=north,words=squash": {
+      "model": "jugcraft:block/chalkboard_sign"
+    },
+    "facing=north,words=pies": {
+      "model": "jugcraft:block/chalkboard_sign"
+    },
+    "facing=north,words=cider": {
+      "model": "jugcraft:block/chalkboard_sign"
+    },
+    "facing=north,words=open": {
+      "model": "jugcraft:block/chalkboard_sign"
+    },
+    "facing=east,words=pumpkins": {
+      "model": "jugcraft:block/chalkboard_sign",
+      "y": 90
+    },
+    "facing=east,words=fresh_picked": {
+      "model": "jugcraft:block/chalkboard_sign",
+      "y": 90
+    },
+    "facing=east,words=u_pick": {
+      "model": "jugcraft:block/chalkboard_sign",
+      "y": 90
+    },
+    "facing=east,words=gourds": {
+      "model": "jugcraft:block/chalkboard_sign",
+      "y": 90
+    },
+    "facing=east,words=squash": {
+      "model": "jugcraft:block/chalkboard_sign",
+      "y": 90
+    },
+    "facing=east,words=pies": {
+      "model": "jugcraft:block/chalkboard_sign",
+      "y": 90
+    },
+    "facing=east,words=cider": {
+      "model": "jugcraft:block/chalkboard_sign",
+      "y": 90
+    },
+    "facing=east,words=open": {
+      "model": "jugcraft:block/chalkboard_sign",
+      "y": 90
+    },
+    "facing=south,words=pumpkins": {
+      "model": "jugcraft:block/chalkboard_sign",
+      "y": 180
+    },
+    "facing=south,words=fresh_picked": {
+      "model": "jugcraft:block/chalkboard_sign",
+      "y": 180
+    },
+    "facing=south,words=u_pick": {
+      "model": "jugcraft:block/chalkboard_sign",
+      "y": 180
+    },
+    "facing=south,words=gourds": {
+      "model": "jugcraft:block/chalkboard_sign",
+      "y": 180
+    },
+    "facing=south,words=squash": {
+      "model": "jugcraft:block/chalkboard_sign",
+      "y": 180
+    },
+    "facing=south,words=pies": {
+      "model": "jugcraft:block/chalkboard_sign",
+      "y": 180
+    },
+    "facing=south,words=cider": {
+      "model": "jugcraft:block/chalkboard_sign",
+      "y": 180
+    },
+    "facing=south,words=open": {
+      "model": "jugcraft:block/chalkboard_sign",
+      "y": 180
+    },
+    "facing=west,words=pumpkins": {
+      "model": "jugcraft:block/chalkboard_sign",
+      "y": 270
+    },
+    "facing=west,words=fresh_picked": {
+      "model": "jugcraft:block/chalkboard_sign",
+      "y": 270
+    },
+    "facing=west,words=u_pick": {
+      "model": "jugcraft:block/chalkboard_sign",
+      "y": 270
+    },
+    "facing=west,words=gourds": {
+      "model": "jugcraft:block/chalkboard_sign",
+      "y": 270
+    },
+    "facing=west,words=squash": {
+      "model": "jugcraft:block/chalkboard_sign",
+      "y": 270
+    },
+    "facing=west,words=pies": {
+      "model": "jugcraft:block/chalkboard_sign",
+      "y": 270
+    },
+    "facing=west,words=cider": {
+      "model": "jugcraft:block/chalkboard_sign",
+      "y": 270
+    },
+    "facing=west,words=open": {
+      "model": "jugcraft:block/chalkboard_sign",
+      "y": 270
+    }
+  }
+}

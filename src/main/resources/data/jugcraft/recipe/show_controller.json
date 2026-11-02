@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "pattern": [
+    "SGS",
+    "ECE",
+    "SRS"
+  ],
+  "key": {
+    "S": "#c:ingots/steel",
+    "G": "minecraft:glass_pane",
+    "E": "jugcraft:steel_gear",
+    "C": "minecraft:clock",
+    "R": "minecraft:redstone"
+  },
+  "result": {
+    "id": "jugcraft:show_controller",
+    "count": 1
+  }
+}

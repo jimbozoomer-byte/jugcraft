@@ -157,14 +157,31 @@ public class TownClientGameTests implements FabricClientGameTest {
 			setHudHidden(context, true);
 			int[][] views = {{96, 8, 119, 180, -18}, {96, 2, 77, 180, -8},
 					{116, 23, 62, 90, 15}, {96, 19, 30, 0, 10},
-					{98, 13, 107, 270, 5}, {90, 12, 107, 90, 12}, {152, 5, 96, 90, -7}};
+					{98, 13, 107, 270, 5}, {90, 12, 107, 90, 12}, {152, 5, 96, 90, -7}, {109, 2, 108, 42, 5}};
 			String[] names = {"church_front", "church_nave", "church_side", "church_rear",
-					"town_hall", "bank", "houses"};
+					"town_hall", "bank", "houses", "commission_board"};
 			for (int i = 0; i < views.length; i++) {
 				int[] view = views[i];
-				fly(context, server, origin, view[0], view[1], view[2], view[3], view[4]);
-				singleplayer.getConnection().waitForChunksRender();
-				context.takeScreenshot("jugcraft_refined_" + names[i]);
+                // Keep a passing patrol from obscuring this single architecture reference shot.
+                // Only the disposable test world's walkers move; their positions/AI are restored immediately afterward.
+                var parked = new java.util.HashMap<io.github.jimbozoomer.jugcraft.town.TownGuardMecha,net.minecraft.world.phys.Vec3>();
+                var paused = new java.util.HashMap<io.github.jimbozoomer.jugcraft.town.TownGuardMecha,Boolean>();
+                if(names[i].equals("commission_board"))server.runOnServer(minecraft -> {
+                    for(var walker:minecraft.overworld().getEntitiesOfClass(io.github.jimbozoomer.jugcraft.town.TownGuardMecha.class,townBox(origin,TownData.get().size))) {
+                        parked.put(walker,walker.position());paused.put(walker,walker.isNoAi());
+                        walker.setNoAi(true);walker.getNavigation().stop();
+                        walker.teleportTo(origin.getX()+80.5,origin.getY()+1,origin.getZ()+94.5);
+                    }
+                });
+                try {
+                    fly(context, server, origin, view[0], view[1], view[2], view[3], view[4]);
+                    singleplayer.getConnection().waitForChunksRender();
+                    context.takeScreenshot("jugcraft_refined_" + names[i]);
+                } finally {
+                    if(!parked.isEmpty())server.runOnServer(minecraft -> parked.forEach((walker,pos) -> {
+                        walker.teleportTo(pos.x,pos.y,pos.z);walker.setNoAi(paused.get(walker));
+                    }));
+                }
 			}
 			server.runOnServer(minecraft -> {
 				var level = minecraft.overworld();

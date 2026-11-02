@@ -1,0 +1,20 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "equipment",
+  "ingredients": [
+    "jugcraft:flax",
+    "jugcraft:flax",
+    "jugcraft:flax",
+    "minecraft:string"
+  ],
+  "result": {
+    "id": "jugcraft:sack_race_sack",
+    "count": 1
+  }
+}

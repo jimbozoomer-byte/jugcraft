@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jugcraft:block/giant_cabbage"
+    },
+    "facing=east": {
+      "model": "jugcraft:block/giant_cabbage",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jugcraft:block/giant_cabbage",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jugcraft:block/giant_cabbage",
+      "y": 270
+    }
+  }
+}

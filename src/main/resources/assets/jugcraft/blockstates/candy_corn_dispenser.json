@@ -1,0 +1,293 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "north",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/candy_corn_dispenser"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "runner": "0",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/candy_corn_dispenser_fill_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "runner": "0",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/candy_corn_dispenser_fill_2"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "runner": "0",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/candy_corn_dispenser_fill_3"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "runner": "0",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/candy_corn_dispenser_fill_4"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "runner": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/candy_corn_dispenser_crank"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "runner": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/candy_corn_dispenser_flap"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/candy_corn_dispenser",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "runner": "0",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/candy_corn_dispenser_fill_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "runner": "0",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/candy_corn_dispenser_fill_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "runner": "0",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/candy_corn_dispenser_fill_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "runner": "0",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/candy_corn_dispenser_fill_4",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "runner": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/candy_corn_dispenser_crank",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "runner": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/candy_corn_dispenser_flap",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/candy_corn_dispenser",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "runner": "0",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/candy_corn_dispenser_fill_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "runner": "0",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/candy_corn_dispenser_fill_2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "runner": "0",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/candy_corn_dispenser_fill_3",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "runner": "0",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/candy_corn_dispenser_fill_4",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "runner": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/candy_corn_dispenser_crank",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "runner": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/candy_corn_dispenser_flap",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/candy_corn_dispenser",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "runner": "0",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/candy_corn_dispenser_fill_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "runner": "0",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/candy_corn_dispenser_fill_2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "runner": "0",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/candy_corn_dispenser_fill_3",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "runner": "0",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/candy_corn_dispenser_fill_4",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "runner": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/candy_corn_dispenser_crank",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "runner": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/candy_corn_dispenser_flap",
+        "y": 270
+      }
+    }
+  ]
+}

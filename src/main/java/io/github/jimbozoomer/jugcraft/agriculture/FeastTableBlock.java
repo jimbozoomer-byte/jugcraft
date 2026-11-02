@@ -13,6 +13,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -42,10 +43,15 @@ import org.jspecify.annotations.Nullable;
  * feast's blessing ({@link Feasts}), shared with everyone who has eaten at the table lately;</li>
  * <li>sneak and use it with an empty hand to take the dish back.</li>
  * </ul>
+ * A Bat Table Runner (the Halloween Party Table's part 5) used on a length is laid over its orange runner ({@link Runner}),
+ * hanging down over the table's ends; shears take it off again, and it drops with the length.
  */
 public class FeastTableBlock extends BaseEntityBlock {
 	public static final EnumProperty<Direction.Axis> AXIS = BlockStateProperties.HORIZONTAL_AXIS;
 	public static final EnumProperty<Part> PART = EnumProperty.create("part", Part.class);
+	public static final EnumProperty<Runner> RUNNER = EnumProperty.create("runner", Runner.class);
+	/** The Bat Table Runner's ID (tools/party_table.py BAT_RUNNER). */
+	public static final String BAT_RUNNER = "bat_table_runner";
 	private static final String MESSAGES = "message.jugcraft.feast_table.";
 	private static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 13.0, 16.0);
 
@@ -69,9 +75,29 @@ public class FeastTableBlock extends BaseEntityBlock {
 		}
 	}
 
+	/**
+	 * The runner down a length: its own orange harvest runner, or a Bat Table Runner laid over it. Saved by name, so more
+	 * runners can be added after these.
+	 */
+	public enum Runner implements StringRepresentable {
+		HARVEST("harvest"), BATS("bats");
+
+		private final String name;
+
+		Runner(String name) {
+			this.name = name;
+		}
+
+		@Override
+		public String getSerializedName() {
+			return name;
+		}
+	}
+
 	public FeastTableBlock(Properties properties) {
 		super(properties);
-		registerDefaultState(stateDefinition.any().setValue(AXIS, Direction.Axis.X).setValue(PART, Part.SINGLE));
+		registerDefaultState(stateDefinition.any().setValue(AXIS, Direction.Axis.X).setValue(PART, Part.SINGLE)
+				.setValue(RUNNER, Runner.HARVEST));
 	}
 
 	/** Whether a length in {@code other} joins the table {@code state} is part of: a feast table along the same axis. */
@@ -122,6 +148,9 @@ public class FeastTableBlock extends BaseEntityBlock {
 	@Override
 	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
 			BlockHitResult hit) {
+		if (stack.is(JugcraftAgriculture.item(BAT_RUNNER)) || stack.is(Items.SHEARS) && state.getValue(RUNNER) == Runner.BATS) {
+			return dress(stack, state, level, pos, player, hand);
+		}
 		if (!FeastTableBlockEntity.food(stack)) {
 			return InteractionResult.TRY_WITH_EMPTY_HAND;
 		}
@@ -134,6 +163,29 @@ public class FeastTableBlock extends BaseEntityBlock {
 			} else {
 				player.sendOverlayMessage(Component.translatable(MESSAGES + "dish_taken"));
 			}
+		}
+		return InteractionResult.SUCCESS;
+	}
+
+	/** A Bat Table Runner laid over the length's own runner, or taken off with shears into the player's inventory. */
+	private static InteractionResult dress(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand) {
+		boolean laying = !stack.is(Items.SHEARS);
+		if (laying && state.getValue(RUNNER) == Runner.BATS) {
+			return InteractionResult.FAIL;
+		}
+		if (level instanceof ServerLevel server) {
+			server.setBlock(pos, state.setValue(RUNNER, laying ? Runner.BATS : Runner.HARVEST), Block.UPDATE_ALL);
+			if (laying) {
+				stack.consume(1, player);
+			} else {
+				ItemStack runner = new ItemStack(JugcraftAgriculture.item(BAT_RUNNER));
+				if (!player.getInventory().add(runner)) {
+					Block.popResource(server, pos.above(), runner);
+				}
+				stack.hurtAndBreak(1, player, hand);
+			}
+			server.playSound(null, pos, laying ? SoundEvents.WOOL_PLACE : SoundEvents.SHEEP_SHEAR, SoundSource.BLOCKS, 0.8F, 1.0F);
+			server.gameEvent(player, GameEvent.BLOCK_CHANGE, pos);
 		}
 		return InteractionResult.SUCCESS;
 	}
@@ -178,6 +230,6 @@ public class FeastTableBlock extends BaseEntityBlock {
 
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-		builder.add(AXIS, PART);
+		builder.add(AXIS, PART, RUNNER);
 	}
 }

@@ -21,6 +21,20 @@ class TownArchitectureTests(unittest.TestCase):
         cls.church = buildings.church(random.Random(1907))
         cls.town = town.Town().build()
 
+    def test_noticeboard_has_nine_tiles_on_square_edge_and_clear_stalls(self):
+        for row in range(3):
+            for col in range(3):
+                self.assertEqual(self.town.v.get(104+col,1+row,112),
+                    f"jugcraft:town_commission_board[facing=north,part={row*3+col}]")
+                for y in (1,2):
+                    for z in (109,110,111):
+                        self.assertIn(self.town.v.get(104+col,y,z),(None,"minecraft:air"))
+        # The former location obstructed the stall's customer side, despite a clear board approach.
+        for z in range(98,112):
+            for x in range(113,120):
+                self.assertNotIn("town_commission_board",self.town.v.get(x,1,z) or "")
+        self.assertNotIn("town_commission_board",self.town.v.get(110,1,100) or "")
+
     def test_church_has_weather_cover_over_every_interior_column(self):
         v = self.church.v
         # Include the formerly uncovered vestibule and both rear aisles.
@@ -90,7 +104,10 @@ class TownArchitectureTests(unittest.TestCase):
 
     def test_new_defenses_preserve_revision_two_roster_and_have_clear_space(self):
         previous = json.loads(gzip.decompress((ROOT / "src/main/resources/data/jugcraft/town/revisions/2.json.gz").read_bytes()))
-        self.assertEqual(previous['spots'], self.town.spots[:len(previous['spots'])])
+        self.assertGreaterEqual(len(self.town.spots), len(previous['spots']))
+        for old, new in zip(previous['spots'], self.town.spots):
+            # New routine metadata may be added, but every old field and index must survive unchanged.
+            self.assertEqual(old, {key: new.get(key) for key in old})
         self.assertEqual(len(previous['sites']), len(self.town.sites))
         for old,new in zip(previous['sites'],self.town.sites):
             if old['kind']=='tower_flag':

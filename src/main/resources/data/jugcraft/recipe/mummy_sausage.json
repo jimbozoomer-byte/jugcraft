@@ -1,0 +1,18 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:cooked_porkchop",
+    "jugcraft:pastry_dough"
+  ],
+  "result": {
+    "id": "jugcraft:mummy_sausage",
+    "count": 4
+  }
+}

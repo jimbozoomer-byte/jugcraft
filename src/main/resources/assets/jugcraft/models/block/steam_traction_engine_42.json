@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "p": "jugcraft:block/steam_traction_engine",
+    "particle": "jugcraft:block/steam_traction_engine"
+  },
+  "elements": []
+}

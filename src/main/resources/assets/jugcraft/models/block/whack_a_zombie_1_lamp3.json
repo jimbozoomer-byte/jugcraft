@@ -1,0 +1,80 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "p": "jugcraft:block/whack_a_zombie",
+    "particle": "jugcraft:block/whack_a_zombie"
+  },
+  "elements": [
+    {
+      "from": [
+        4.825,
+        10.45,
+        12.35
+      ],
+      "to": [
+        5.925,
+        11.55,
+        12.8
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            10.0,
+            1.875,
+            10.25,
+            2.125
+          ],
+          "texture": "#p"
+        },
+        "east": {
+          "uv": [
+            10.75,
+            1.875,
+            10.875,
+            2.125
+          ],
+          "texture": "#p"
+        },
+        "west": {
+          "uv": [
+            10.75,
+            1.875,
+            10.875,
+            2.125
+          ],
+          "texture": "#p"
+        },
+        "up": {
+          "uv": [
+            3.75,
+            2.5,
+            4.0,
+            2.625
+          ],
+          "texture": "#p"
+        },
+        "down": {
+          "uv": [
+            3.75,
+            2.5,
+            4.0,
+            2.625
+          ],
+          "texture": "#p"
+        },
+        "south": {
+          "uv": [
+            10.0,
+            1.875,
+            10.25,
+            2.125
+          ],
+          "texture": "#p"
+        }
+      },
+      "light_emission": 15,
+      "shade": false
+    }
+  ]
+}

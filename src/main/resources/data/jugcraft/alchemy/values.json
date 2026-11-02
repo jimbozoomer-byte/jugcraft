@@ -1,5 +1,4 @@
 {
-  "schema": 1,
   "fallback": 1,
   "items": {
     "jugcraft:abrasive_head": {
@@ -517,6 +516,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:angelic_feather"
     },
+    "jugcraft:animatronic_werewolf": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:antidote": {
       "numerator": 1,
       "denominator": 1,
@@ -526,6 +530,11 @@
       "numerator": 15,
       "denominator": 1,
       "source": "recipe jugcraft:apothecary_shelf"
+    },
+    "jugcraft:apple_bin": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:apple_butter": {
       "numerator": 10705,
@@ -746,6 +755,11 @@
       "numerator": 4489,
       "denominator": 1,
       "source": "recipe jugcraft:assayers_scale"
+    },
+    "jugcraft:aster": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:astral_verbena": {
       "numerator": 1,
@@ -1062,6 +1076,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:barn_lantern": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:basic_ceramic_lining": {
       "numerator": 64,
       "denominator": 1,
@@ -1172,6 +1191,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:bat_table_runner": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:bat_weathervane": {
       "numerator": 1,
       "denominator": 1,
@@ -1186,6 +1210,11 @@
       "numerator": 19,
       "denominator": 2,
       "source": "recipe jugcraft:bat_wings"
+    },
+    "jugcraft:bat_wreath": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:battery_box": {
       "numerator": 22177,
@@ -2637,6 +2666,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:beware_doormat": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:bio_generator": {
       "numerator": 6057,
       "denominator": 2,
@@ -2663,6 +2697,16 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:birthday_cake_slice": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:bittersweet": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:bittersweet_wreath": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -2752,6 +2796,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:blank_stencil"
     },
+    "jugcraft:blanket_ladder": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:blast_door": {
       "numerator": 97,
       "denominator": 16,
@@ -2821,6 +2870,16 @@
       "numerator": 6515,
       "denominator": 2,
       "source": "recipe jugcraft:blue_alchemical_bag"
+    },
+    "jugcraft:blue_hubbard_squash": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:blue_hubbard_squash_seeds": {
+      "numerator": 1,
+      "denominator": 4,
+      "source": "recipe jugcraft:blue_hubbard_squash_seeds"
     },
     "jugcraft:blue_plastic": {
       "numerator": 5,
@@ -3542,6 +3601,16 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:butter": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:butter_churn": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:butternut_squash": {
       "numerator": 1,
       "denominator": 1,
@@ -3597,6 +3666,11 @@
       "denominator": 9,
       "source": "recipe jugcraft:cafe_chair"
     },
+    "jugcraft:cafe_string_lights": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:cafe_table": {
       "numerator": 1051,
       "denominator": 36,
@@ -3647,7 +3721,17 @@
       "denominator": 1,
       "source": "recipe jugcraft:candy_cache"
     },
+    "jugcraft:candy_chute": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:candy_corn": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:candy_corn_dispenser": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -3696,6 +3780,11 @@
       "numerator": 397,
       "denominator": 3,
       "source": "recipe jugcraft:caramel_apple"
+    },
+    "jugcraft:caramel_apple_stand": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:caramel_popcorn": {
       "numerator": 1,
@@ -6647,6 +6736,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:chainsaw"
     },
+    "jugcraft:chalkboard_sign": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:chanterelle": {
       "numerator": 1,
       "denominator": 1,
@@ -6852,6 +6946,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:chompa_costume"
     },
+    "jugcraft:chopping_block": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:chromite": {
       "numerator": 1,
       "denominator": 1,
@@ -6991,6 +7090,11 @@
       "numerator": 1144,
       "denominator": 1,
       "source": "recipe jugcraft:clockwork_porter"
+    },
+    "jugcraft:clockwork_raven": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:cloud_seeding_rocket": {
       "numerator": 11,
@@ -7211,6 +7315,11 @@
       "numerator": 15662,
       "denominator": 1,
       "source": "recipe jugcraft:combined_cycle_power_plant"
+    },
+    "jugcraft:comet_pistol": {
+      "numerator": 717,
+      "denominator": 1,
+      "source": "recipe jugcraft:comet_pistol"
     },
     "jugcraft:compact_monopole": {
       "numerator": 1,
@@ -7702,10 +7811,20 @@
       "denominator": 1,
       "source": "recipe jugcraft:corn_crate"
     },
+    "jugcraft:corn_crib": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:corn_dog": {
       "numerator": 69,
       "denominator": 1,
       "source": "recipe jugcraft:corn_dog"
+    },
+    "jugcraft:corn_dolly": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:corn_kernel_bag": {
       "numerator": 9,
@@ -7798,6 +7917,16 @@
       "source": "recipe jugcraft:costume_trunk"
     },
     "jugcraft:cotton": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:cotton_candy": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:cotton_candy_cart": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -9297,6 +9426,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:craps_table"
     },
+    "jugcraft:crashed_witch": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:crawling_hand": {
       "numerator": 176,
       "denominator": 1,
@@ -9476,6 +9610,11 @@
       "numerator": 9947,
       "denominator": 36,
       "source": "recipe jugcraft:curiosity_cabinet"
+    },
+    "jugcraft:cursed_mirror": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:cursed_spindle": {
       "numerator": 25273,
@@ -10172,6 +10311,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:dried_sunflower": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:drone_depot_terminal": {
       "numerator": 15727,
       "denominator": 6,
@@ -10258,6 +10402,11 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:dry_storage_cask": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:drying_rack": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -11387,6 +11536,16 @@
       "denominator": 4,
       "source": "recipe jugcraft:extended_magazine"
     },
+    "jugcraft:eyeball_jelly": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:eyeball_jelly_mould": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:eyewash_station": {
       "numerator": 1,
       "denominator": 1,
@@ -11692,6 +11851,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:feast_table"
     },
+    "jugcraft:feed_trough": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:feeder_conduit": {
       "numerator": 3,
       "denominator": 8,
@@ -11927,6 +12091,11 @@
       "denominator": 2,
       "source": "recipe jugcraft:firedrake"
     },
+    "jugcraft:firewood_rack": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:first_aid_kit": {
       "numerator": 1,
       "denominator": 1,
@@ -12047,6 +12216,11 @@
       "denominator": 18,
       "source": "recipe jugcraft:floor_candelabrum"
     },
+    "jugcraft:flour": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:flow_battery": {
       "numerator": 64436,
       "denominator": 3,
@@ -12141,6 +12315,11 @@
       "numerator": 129,
       "denominator": 1,
       "source": "recipe jugcraft:flying_broomstick"
+    },
+    "jugcraft:flying_crank_ghost": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:flying_eyeball": {
       "numerator": 512,
@@ -12397,6 +12576,11 @@
       "denominator": 2,
       "source": "recipe jugcraft:gallant_rifle"
     },
+    "jugcraft:galvanized_tub_planter": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:garden_herb_soup": {
       "numerator": 137,
       "denominator": 1,
@@ -12411,6 +12595,11 @@
       "numerator": 81,
       "denominator": 1,
       "source": "recipe jugcraft:gargoyle"
+    },
+    "jugcraft:gargoyle_knocker": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:gargoyle_rainspout": {
       "numerator": 131,
@@ -12562,6 +12751,16 @@
       "denominator": 3,
       "source": "recipe jugcraft:ghost_firework_1"
     },
+    "jugcraft:ghost_meringue": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:ghost_meringue_platter": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:ghost_pipe": {
       "numerator": 16,
       "denominator": 1,
@@ -12582,6 +12781,11 @@
       "denominator": 6,
       "source": "recipe jugcraft:pot_cooking/ghost_taffy"
     },
+    "jugcraft:ghost_train": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:giant_beating_heart": {
       "numerator": 32747,
       "denominator": 36,
@@ -12592,15 +12796,35 @@
       "denominator": 1,
       "source": "recipe jugcraft:giant_bone_hand"
     },
+    "jugcraft:giant_cabbage": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:giant_candy": {
       "numerator": 11,
       "denominator": 6,
       "source": "recipe jugcraft:giant_candy"
     },
+    "jugcraft:giant_carrot": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:giant_cornucopia": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:giant_fake_spider": {
       "numerator": 272,
       "denominator": 1,
       "source": "recipe jugcraft:giant_fake_spider"
+    },
+    "jugcraft:giant_marrow": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:giant_pumpkin": {
       "numerator": 1,
@@ -12608,6 +12832,16 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:giant_pumpkin_seeds": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:giant_turnip": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:giant_warty_gourd": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -12772,6 +13006,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:golden_apple_crate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:golden_knife": {
       "numerator": 2052,
       "denominator": 1,
@@ -12786,6 +13025,16 @@
       "numerator": 16,
       "denominator": 1,
       "source": "reference tag minecraft:small_flowers"
+    },
+    "jugcraft:goodie_bag": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:goodie_bag_tree": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:gorse_leaves": {
       "numerator": 1,
@@ -12823,6 +13072,11 @@
       "source": "recipe jugcraft:gourd_canteen"
     },
     "jugcraft:grain_mash_bucket": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:grain_sack": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -12911,6 +13165,11 @@
       "numerator": 6515,
       "denominator": 2,
       "source": "recipe jugcraft:green_alchemical_bag"
+    },
+    "jugcraft:green_apple_crate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:green_plastic": {
       "numerator": 5,
@@ -13287,6 +13546,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:half_barrel_planter": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:half_crown_revolver": {
       "numerator": 1421,
       "denominator": 2,
@@ -13296,6 +13560,11 @@
       "numerator": 1,
       "denominator": 2,
       "source": "recipe jugcraft:half_tatami_mat"
+    },
+    "jugcraft:halibut_gun": {
+      "numerator": 4533,
+      "denominator": 4,
+      "source": "recipe jugcraft:halibut_gun"
     },
     "jugcraft:halloween_bonfire": {
       "numerator": 131,
@@ -13397,6 +13666,16 @@
       "denominator": 5,
       "source": "recipe jugcraft:harvest_balloon"
     },
+    "jugcraft:harvest_bell": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:harvest_bunting": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:harvest_crown": {
       "numerator": 4315,
       "denominator": 1,
@@ -13437,6 +13716,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:haunted_carousel": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:haunted_chandelier": {
       "numerator": 1,
       "denominator": 1,
@@ -13452,6 +13736,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:haunted_mailbox": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:haunted_portrait": {
       "numerator": 3920,
       "denominator": 9,
@@ -13461,6 +13750,11 @@
       "numerator": 481,
       "denominator": 27,
       "source": "recipe jugcraft:pot_cooking/haw_jelly"
+    },
+    "jugcraft:hawker_rifle": {
+      "numerator": 8209,
+      "denominator": 1,
+      "source": "recipe jugcraft:hawker_rifle"
     },
     "jugcraft:haws": {
       "numerator": 1,
@@ -13481,6 +13775,16 @@
       "numerator": 114,
       "denominator": 1,
       "source": "recipe jugcraft:hay_bale_seat"
+    },
+    "jugcraft:hay_pulley": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:hay_wagon": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:haymaker": {
       "numerator": 3509,
@@ -13831,6 +14135,11 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:highball_repeater": {
+      "numerator": 1037,
+      "denominator": 1,
+      "source": "recipe jugcraft:highball_repeater"
     },
     "jugcraft:highball_rifle": {
       "numerator": 16,
@@ -16447,6 +16756,16 @@
       "denominator": 1,
       "source": "recipe jugcraft:howling_totem"
     },
+    "jugcraft:hurricane_lamp": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:hush_pistol": {
+      "numerator": 573,
+      "denominator": 1,
+      "source": "recipe jugcraft:hush_pistol"
+    },
     "jugcraft:hv_chem_feeder": {
       "numerator": 2566,
       "denominator": 3,
@@ -16791,6 +17110,11 @@
       "numerator": 70669,
       "denominator": 72,
       "source": "recipe jugcraft:imperial_gas_lamp"
+    },
+    "jugcraft:impetus_shotgun": {
+      "numerator": 8210,
+      "denominator": 1,
+      "source": "recipe jugcraft:impetus_shotgun"
     },
     "jugcraft:industrial_fermenter": {
       "numerator": 6059,
@@ -24307,6 +24631,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:knitting_basket": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:knitting_needles": {
       "numerator": 584,
       "denominator": 9,
@@ -27612,6 +27941,16 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:long_island_cheese_pumpkin": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:long_island_cheese_pumpkin_seeds": {
+      "numerator": 1,
+      "denominator": 4,
+      "source": "recipe jugcraft:long_island_cheese_pumpkin_seeds"
+    },
     "jugcraft:long_scope": {
       "numerator": 899,
       "denominator": 2,
@@ -27912,6 +28251,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:mangrove_cabinet"
     },
+    "jugcraft:mantel_garland": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:map_table": {
       "numerator": 10480,
       "denominator": 9,
@@ -28007,6 +28351,11 @@
       "denominator": 27,
       "source": "recipe jugcraft:mason_jar"
     },
+    "jugcraft:mason_jar_candle": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:mcc_lineup": {
       "numerator": 2399,
       "denominator": 8,
@@ -28097,7 +28446,17 @@
       "denominator": 1,
       "source": "recipe jugcraft:microwave_counter"
     },
+    "jugcraft:midway_ticket": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:milk_bottle": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:milk_can": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -28377,6 +28736,16 @@
       "denominator": 9,
       "source": "recipe jugcraft:mummy_sarcophagus"
     },
+    "jugcraft:mummy_sausage": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:mummy_sausage_tray": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:mummy_wraps": {
       "numerator": 112,
       "denominator": 1,
@@ -28546,6 +28915,11 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:narwhal_lance": {
+      "numerator": 9589,
+      "denominator": 9,
+      "source": "recipe jugcraft:narwhal_lance"
     },
     "jugcraft:navvy_shotgun": {
       "numerator": 399,
@@ -31012,6 +31386,16 @@
       "denominator": 1,
       "source": "recipe jugcraft:orange_seeds"
     },
+    "jugcraft:orchard_handcart": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:orchard_ladder": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:ore_drill": {
       "numerator": 25877,
       "denominator": 1,
@@ -31022,12 +31406,22 @@
       "denominator": 1,
       "source": "recipe jugcraft:ore_washer"
     },
+    "jugcraft:organ_grinder_skeleton": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:organic_compost": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
     "jugcraft:organic_fertilizer_carrier": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:ornamental_cabbage": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -31046,6 +31440,11 @@
       "numerator": 1,
       "denominator": 2,
       "source": "recipe jugcraft:ornamental_corn_kernels"
+    },
+    "jugcraft:ornamental_kale": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:osmanthus_flowers": {
       "numerator": 1,
@@ -31202,6 +31601,11 @@
       "denominator": 1,
       "source": "reference tag minecraft:logs"
     },
+    "jugcraft:pampas_grass": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:pan_de_muerto": {
       "numerator": 313,
       "denominator": 6,
@@ -31211,6 +31615,11 @@
       "numerator": 313,
       "denominator": 6,
       "source": "recipe jugcraft:pan_de_muerto_dough"
+    },
+    "jugcraft:pancakes": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:panel_mold": {
       "numerator": 8,
@@ -31521,6 +31930,11 @@
       "numerator": 421,
       "denominator": 4,
       "source": "recipe jugcraft:picket_rifle"
+    },
+    "jugcraft:picking_bag": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:pickled_beets": {
       "numerator": 7267,
@@ -32387,6 +32801,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:popcorn_ball"
     },
+    "jugcraft:popcorn_wagon": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:porcelain_batch": {
       "numerator": 517,
       "denominator": 4,
@@ -32403,6 +32822,11 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:porcelain_insulator": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:porch_swing": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -32531,6 +32955,11 @@
       "numerator": 8707,
       "denominator": 4,
       "source": "recipe jugcraft:printer"
+    },
+    "jugcraft:prize_ribbon_board": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:prize_wheel": {
       "numerator": 22585,
@@ -32677,6 +33106,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:pumpkin_drummer": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:pumpkin_firework": {
       "numerator": 1,
       "denominator": 1,
@@ -32692,6 +33126,16 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:pumpkin_layer_cake": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:pumpkin_layer_cake_slice": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:pumpkin_milkshake": {
       "numerator": 439,
       "denominator": 3,
@@ -32701,6 +33145,11 @@
       "numerator": 673,
       "denominator": 12,
       "source": "recipe jugcraft:pot_cooking/pumpkin_mooncake"
+    },
+    "jugcraft:pumpkin_path_light": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:pumpkin_pie_slice": {
       "numerator": 1,
@@ -32713,6 +33162,11 @@
       "source": "recipe jugcraft:pumpkin_pinata"
     },
     "jugcraft:pumpkin_plush": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:pumpkin_pyramid": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -32747,10 +33201,25 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:pumpkin_vine_cover": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:pumpkin_vine_garland": {
       "numerator": 164,
       "denominator": 1,
       "source": "recipe jugcraft:pumpkin_vine_garland"
+    },
+    "jugcraft:pumpkin_wagon": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:pumpkin_wheelbarrow": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:purified_titanium_chloride_bucket": {
       "numerator": 1,
@@ -32841,6 +33310,21 @@
       "numerator": 1024,
       "denominator": 1,
       "source": "local quartz mining/Fortune accounting"
+    },
+    "jugcraft:quern": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:quill_rifle": {
+      "numerator": 8520,
+      "denominator": 1,
+      "source": "recipe jugcraft:quill_rifle"
+    },
+    "jugcraft:quilt_rail": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:radiation_control_board": {
       "numerator": 49247,
@@ -33038,6 +33522,11 @@
       "source": "recipe jugcraft:raw_pork_pie"
     },
     "jugcraft:raw_pumpkin_cream_pie": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:raw_pumpkin_layer_cake": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -33256,6 +33745,11 @@
       "numerator": 6515,
       "denominator": 2,
       "source": "recipe jugcraft:red_alchemical_bag"
+    },
+    "jugcraft:red_apple_crate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:red_bean_mooncake": {
       "numerator": 247,
@@ -33636,6 +34130,11 @@
       "numerator": 18,
       "denominator": 1,
       "source": "recipe jugcraft:ring_toss"
+    },
+    "jugcraft:rising_zombie": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:riveted_band_block": {
       "numerator": 2560,
@@ -34072,6 +34571,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:sack_race_sack": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:safety_shower": {
       "numerator": 65,
       "denominator": 16,
@@ -34166,6 +34670,11 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:salvo_rifle": {
+      "numerator": 1101,
+      "denominator": 1,
+      "source": "recipe jugcraft:salvo_rifle"
     },
     "jugcraft:sampling_spoon": {
       "numerator": 132,
@@ -34332,6 +34841,16 @@
       "denominator": 2,
       "source": "recipe jugcraft:security_jacket"
     },
+    "jugcraft:sedum": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:seed_pouch": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:self_propelled_howitzer": {
       "numerator": 523,
       "denominator": 1,
@@ -34441,6 +34960,16 @@
       "numerator": 32,
       "denominator": 1,
       "source": "reference tag minecraft:saplings"
+    },
+    "jugcraft:shooting_gallery": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:show_controller": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:show_launcher": {
       "numerator": 983,
@@ -34622,6 +35151,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:simmer_pot": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:singing_pumpkin_alto": {
       "numerator": 1,
       "denominator": 1,
@@ -34638,6 +35172,21 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:singing_pumpkin_tenor": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:skeleton_cat": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:skeleton_crow": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:skeleton_dog": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -34681,6 +35230,11 @@
       "numerator": 448,
       "denominator": 1,
       "source": "recipe jugcraft:skull_footstool"
+    },
+    "jugcraft:skull_goblets": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:sky_lantern": {
       "numerator": 101,
@@ -34977,6 +35531,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:spice_rack"
     },
+    "jugcraft:spider_cupcake_tower": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:spider_lily": {
       "numerator": 16,
       "denominator": 1,
@@ -35061,6 +35620,16 @@
       "numerator": 45,
       "denominator": 2,
       "source": "recipe jugcraft:spooky_sign"
+    },
+    "jugcraft:spoon_gourd": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:spoon_gourd_seeds": {
+      "numerator": 1,
+      "denominator": 4,
+      "source": "recipe jugcraft:spoon_gourd_seeds"
     },
     "jugcraft:sprinkler": {
       "numerator": 13901,
@@ -35216,6 +35785,11 @@
       "numerator": 5031,
       "denominator": 2,
       "source": "recipe jugcraft:steam_generator"
+    },
+    "jugcraft:steam_traction_engine": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:steampunk_boots": {
       "numerator": 14357,
@@ -35557,6 +36131,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:steel_shovel"
     },
+    "jugcraft:steel_sickle": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:steel_spear": {
       "numerator": 9,
       "denominator": 1,
@@ -35641,6 +36220,11 @@
       "numerator": 358,
       "denominator": 1,
       "source": "recipe jugcraft:stone_brick_sarcophagus"
+    },
+    "jugcraft:stone_fireplace": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:stone_paxel": {
       "numerator": 31,
@@ -36212,6 +36796,16 @@
       "denominator": 1,
       "source": "recipe jugcraft:survey_stake"
     },
+    "jugcraft:swan_gourd": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:swan_gourd_seeds": {
+      "numerator": 1,
+      "denominator": 4,
+      "source": "recipe jugcraft:swan_gourd_seeds"
+    },
     "jugcraft:sweet_berry_cheesecake": {
       "numerator": 1,
       "denominator": 1,
@@ -36246,6 +36840,16 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:sweet_dumpling_squash": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:sweet_dumpling_squash_seeds": {
+      "numerator": 1,
+      "denominator": 4,
+      "source": "recipe jugcraft:sweet_dumpling_squash_seeds"
     },
     "jugcraft:sweet_potato": {
       "numerator": 1,
@@ -36487,6 +37091,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:tea_kettle": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:templar_boots": {
       "numerator": 1,
       "denominator": 1,
@@ -36646,6 +37255,11 @@
       "numerator": 16,
       "denominator": 1,
       "source": "recipe jugcraft:thyme_bundle"
+    },
+    "jugcraft:ticket_booth": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:tidebreaker": {
       "numerator": 1,
@@ -36872,6 +37486,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:pot_cooking/tomato_soup"
     },
+    "jugcraft:tool_rack": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:tortilla": {
       "numerator": 2,
       "denominator": 3,
@@ -36891,6 +37510,11 @@
       "numerator": 5,
       "denominator": 1,
       "source": "recipe jugcraft:toss_ring"
+    },
+    "jugcraft:town_commission_board": {
+      "numerator": 296,
+      "denominator": 3,
+      "source": "recipe jugcraft:town_commission_board"
     },
     "jugcraft:training_screen": {
       "numerator": 83743,
@@ -37106,6 +37730,16 @@
       "numerator": 773,
       "denominator": 1,
       "source": "recipe jugcraft:tuppence_pistol"
+    },
+    "jugcraft:turban_squash": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:turban_squash_seeds": {
+      "numerator": 1,
+      "denominator": 4,
+      "source": "recipe jugcraft:turban_squash_seeds"
     },
     "jugcraft:turbine_control_board": {
       "numerator": 49247,
@@ -37602,6 +38236,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:watering_can": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:wattle_leaves": {
       "numerator": 1,
       "denominator": 1,
@@ -37682,7 +38321,17 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:whack_a_zombie": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:wheat_dough": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:wheat_stook": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -38762,10 +39411,20 @@
       "denominator": 6,
       "source": "recipe jugcraft:wind_turbine"
     },
+    "jugcraft:windfall_apples": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:windlass_musket": {
       "numerator": 2501,
       "denominator": 4,
       "source": "recipe jugcraft:windlass_musket"
+    },
+    "jugcraft:window_box": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:winged_skull_headstone": {
       "numerator": 2,
@@ -38803,6 +39462,16 @@
       "source": "recipe jugcraft:wire_drawer"
     },
     "jugcraft:wisp_in_a_jar": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:witch_finger": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:witch_finger_cauldron": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -38896,6 +39565,11 @@
       "numerator": 65,
       "denominator": 4,
       "source": "recipe jugcraft:wooden_stock"
+    },
+    "jugcraft:woodstove": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:wool_socks": {
       "numerator": 1,
@@ -45151,21 +45825,7 @@
       "numerator": 112,
       "denominator": 1,
       "source": "recipe peepo_companion:yellow_companion_bed"
-    },
-    "jugcraft:hawker_rifle": {
-      "numerator": 8209,
-      "denominator": 1,
-      "source": "recipe jugcraft:hawker_rifle"
-    },
-    "jugcraft:impetus_shotgun": {
-      "numerator": 8210,
-      "denominator": 1,
-      "source": "recipe jugcraft:impetus_shotgun"
-    },
-    "jugcraft:quill_rifle": {
-      "numerator": 8520,
-      "denominator": 1,
-      "source": "recipe jugcraft:quill_rifle"
     }
-  }
+  },
+  "schema": 1
 }

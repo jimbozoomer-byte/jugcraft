@@ -1,0 +1,80 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "p": "jugcraft:block/cotton_candy_cart",
+    "particle": "jugcraft:block/cotton_candy_cart"
+  },
+  "elements": [
+    {
+      "from": [
+        7.0,
+        13.75,
+        7.25
+      ],
+      "to": [
+        9.0,
+        14.0,
+        9.25
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            4.125,
+            4.5,
+            4.375,
+            4.625
+          ],
+          "texture": "#p"
+        },
+        "south": {
+          "uv": [
+            4.125,
+            4.5,
+            4.375,
+            4.625
+          ],
+          "texture": "#p"
+        },
+        "east": {
+          "uv": [
+            4.125,
+            4.5,
+            4.375,
+            4.625
+          ],
+          "texture": "#p"
+        },
+        "west": {
+          "uv": [
+            4.125,
+            4.5,
+            4.375,
+            4.625
+          ],
+          "texture": "#p"
+        },
+        "down": {
+          "texture": "#p",
+          "uv": [
+            4.125,
+            4.5,
+            4.375,
+            4.625
+          ]
+        },
+        "up": {
+          "texture": "#p",
+          "uv": [
+            4.125,
+            4.5,
+            4.375,
+            4.625
+          ]
+        }
+      },
+      "light_emission": 15,
+      "shade": false
+    }
+  ]
+}

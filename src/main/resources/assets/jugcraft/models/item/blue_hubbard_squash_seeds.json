@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "jugcraft:item/blue_hubbard_squash_seeds"
+  }
+}

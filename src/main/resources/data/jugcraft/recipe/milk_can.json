@@ -1,0 +1,27 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "tin"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    " N ",
+    "T T",
+    "TTT"
+  ],
+  "key": {
+    "N": "minecraft:iron_nugget",
+    "T": "#c:ingots/tin"
+  },
+  "result": {
+    "id": "jugcraft:milk_can",
+    "count": 1
+  }
+}

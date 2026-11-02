@@ -29,6 +29,8 @@ public final class JugcraftTown {
 	public static final String FEATURE = "town";
 
 	public static Block ATM;
+    public static Block COMMISSION_BOARD;
+    public static ExtendedMenuType<CommissionMenu, net.minecraft.core.BlockPos> COMMISSION_MENU;
 	public static EntityType<Townsfolk> TOWNSFOLK;
     public static EntityType<TownGuardMecha> GUARD_MECHA;
 	public static ExtendedMenuType<ShopMenu, ShopMenu.Opening> SHOP_MENU;
@@ -59,7 +61,12 @@ public final class JugcraftTown {
 		SHOP_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("town_shop"), new ExtendedMenuType<>(ShopMenu::new, ShopMenu.Opening.STREAM_CODEC));
 		ATM_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("atm"), new ExtendedMenuType<>(AtmMenu::new, AtmMenu.Opening.STREAM_CODEC));
 
-		TownProtection.register();
+		ResourceKey<Block> boardKey=ResourceKey.create(Registries.BLOCK,Jugcraft.id("town_commission_board"));
+        COMMISSION_BOARD=Registry.register(BuiltInRegistries.BLOCK,boardKey,new CommissionBoardBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.OAK_PLANKS).noOcclusion().setId(boardKey)));
+        ResourceKey<Item> boardItem=ResourceKey.create(Registries.ITEM,Jugcraft.id("town_commission_board"));
+        Registry.register(BuiltInRegistries.ITEM,boardItem,new BlockItem(COMMISSION_BOARD,new Item.Properties().setId(boardItem).useBlockDescriptionPrefix()));
+        COMMISSION_MENU=Registry.register(BuiltInRegistries.MENU,Jugcraft.id("town_commissions"),new ExtendedMenuType<>(CommissionMenu::new,net.minecraft.core.BlockPos.STREAM_CODEC));
+        TownProtection.register();
 		TownBuilder.register();
         TownUpgrades.register();
 		TownPlanner.register();
@@ -70,6 +77,6 @@ public final class JugcraftTown {
 			ShopMenu.clear();
 			AtmMenu.clear();
 		});
-		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> output.accept(ATM));
+		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> { output.accept(ATM); output.accept(COMMISSION_BOARD); });
 	}
 }

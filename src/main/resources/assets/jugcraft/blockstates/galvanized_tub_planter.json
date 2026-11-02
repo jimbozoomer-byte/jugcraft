@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jugcraft:block/galvanized_tub_planter"
+    },
+    "facing=east": {
+      "model": "jugcraft:block/galvanized_tub_planter",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jugcraft:block/galvanized_tub_planter",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jugcraft:block/galvanized_tub_planter",
+      "y": 270
+    }
+  }
+}

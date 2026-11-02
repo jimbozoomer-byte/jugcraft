@@ -26,8 +26,9 @@ public class HeavyBulletsGameTests {
 	 * Vesper Rifle's and Onrush SMG's (the MAS 55's and the Prush Gun's) pierce 4.5 and 3, slice 15B's Kreuzer Pistol's
 	 * and Psalm SMG's (the Krauser's and the Soul Drummer's) 1 each; slice 15D's Auger Shotgun's (the Drill Conversion's)
 	 * knock back 0.65 further and the Tumbler Rifle's (the Lockewood's) pierce 3 points; slice 15E's Geode Cutter's beam
-	 * (the Shard Culler's) pierces 4. The older guns follow-up gives 24 of the guns before slice 15 the owner's knockback
-	 * and 27 the owner's armour piercing, the Caisson Pistol's on its arc. The Gallant Rifle's (the Valora's) are plain,
+	 * (the Shard Culler's) pierces 4, slice 16A's Highball Repeater's (the Saketini Ironport's) 2, and slice 16B's Halibut
+	 * Gun's (the Floundergat's) knock back 0.65 further. The older guns follow-up gives 24 of the guns before slice 15 the
+	 * owner's knockback and 27 the owner's armour piercing, the Caisson Pistol's on its arc. The Gallant Rifle's (the Valora's) are plain,
 	 * and so is the Stoker's flame, whose owner's knockback is left out.
 	 */
 	@GameTest
@@ -39,11 +40,11 @@ public class HeavyBulletsGameTests {
 				Map.entry("reverb", 0.65F), Map.entry("tusker", 0.65F), Map.entry("crackling", 0.65F), Map.entry("goshawk_revolver", 3.0F),
 				Map.entry("waystation_shotgun", 0.7F), Map.entry("flatboat_gun", 8.0F), Map.entry("holler_pistol", 0.65F),
 				Map.entry("minuet_pistol", 0.55F), Map.entry("half_crown_revolver", 0.55F), Map.entry("holler_carbine", 0.65F),
-				Map.entry("navvy_shotgun", 0.85F), Map.entry("freeholder_rifle", 0.4F))),
+				Map.entry("navvy_shotgun", 0.85F), Map.entry("freeholder_rifle", 0.4F), Map.entry("halibut_gun", 0.65F))),
 				"The guns that knock back further are not the owner's: " + JugcraftGuns.KNOCKBACK);
 		helper.assertTrue(JugcraftGuns.PIERCING.equals(Map.ofEntries(Map.entry("vesper_rifle", 4.5F), Map.entry("onrush_smg", 3.0F), Map.entry("kreuzer_pistol", 1.0F), Map.entry("psalm_smg", 1.0F),
 				Map.entry("jawbreaker", 4.5F), Map.entry("hawker_rifle", 1.0F), Map.entry("quill_rifle", 1.5F), Map.entry("tumbler_rifle", 3.0F),
-				Map.entry("geode_cutter", 4.0F), Map.entry("patchwork_carbine", 2.0F), Map.entry("warden_pistol", 1.0F),
+				Map.entry("geode_cutter", 4.0F), Map.entry("highball_repeater", 2.0F), Map.entry("patchwork_carbine", 2.0F), Map.entry("warden_pistol", 1.0F),
 				Map.entry("riveter_smg", 1.0F), Map.entry("longhorn_rifle", 3.5F), Map.entry("sapper_revolver", 2.5F),
 				Map.entry("garrison_rifle", 2.0F), Map.entry("thresher", 1.0F), Map.entry("kestrel_rifle", 3.0F), Map.entry("caisson_pistol", 1.0F),
 				Map.entry("highwayman", 2.5F), Map.entry("undertone_rifle", 6.5F), Map.entry("murmur_smg", 7.0F), Map.entry("reverb", 7.0F),

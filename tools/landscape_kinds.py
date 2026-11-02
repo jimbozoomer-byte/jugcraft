@@ -133,7 +133,8 @@ BESIDE = {"IS_FOREST": WOODS_TAG, "IS_TAIGA": WOODS_TAG, "IS_BIRCH_FOREST": WOOD
 # the common tags (wildPatch).
 FALL_PATCHES = ("wild_mandrake", "butternut_squash", "acorn_squash", "warty_gourd", "cranberry_bush", "chestnut_tree",
                 "white_pumpkin", "jarrahdale_pumpkin", "cinderella_pumpkin", "red_kuri_pumpkin", "kabocha_pumpkin",
-                "bottle_gourd", "mums", "chanterelle", "porcini", "puffball", "fly_agaric", "jack_o_lantern_mushroom",
+                "bottle_gourd", "turban_squash", "blue_hubbard_squash", "sweet_dumpling_squash", "long_island_cheese_pumpkin",
+                "spoon_gourd", "swan_gourd", "mums", "chanterelle", "porcini", "puffball", "fly_agaric", "jack_o_lantern_mushroom",
                 "wolfsbane")
 
 

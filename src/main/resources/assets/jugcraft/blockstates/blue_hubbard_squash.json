@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jugcraft:block/blue_hubbard_squash"
+    },
+    "facing=east": {
+      "model": "jugcraft:block/blue_hubbard_squash",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jugcraft:block/blue_hubbard_squash",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jugcraft:block/blue_hubbard_squash",
+      "y": 270
+    }
+  }
+}

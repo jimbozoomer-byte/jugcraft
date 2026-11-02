@@ -1,0 +1,24 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "ADA",
+    "SPS"
+  ],
+  "key": {
+    "A": "minecraft:apple",
+    "D": "minecraft:yellow_dye",
+    "S": "minecraft:stick",
+    "P": "#minecraft:planks"
+  },
+  "result": {
+    "id": "jugcraft:golden_apple_crate",
+    "count": 1
+  }
+}

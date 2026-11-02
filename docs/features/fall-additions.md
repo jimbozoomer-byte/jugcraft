@@ -174,6 +174,7 @@ Each scent is an item tag (`jugcraft:candle_scents/<scent>`), so packs can add i
 
 ### The Harvest Feast Table
 59. **A long trestle table** of honey oak with an orange runner: three wooden slabs over two logs make two lengths. Lengths placed end to end along the same line **join into one table**, with legs only at its ends; a length placed against a table's end carries on along it, and one placed across stands alone.
+    - A **Bat Table Runner** (the [Halloween Party Table](halloween-party-table.md)'s, part 5) used on a length is laid over its orange runner, hanging down over the table's ends; shears take it off again, and a length drops it when broken. Each length keeps its runner in its block state (`runner`: `harvest` or `bats`).
 60. **Serving:** each length holds **two dishes**, one at each half. Use it holding any food or drink to serve it on the dish you point at: **up to eight servings**, one food to a dish. Each dish sits on a cream plate, heaped higher the more servings are left. Sneak and use it with an empty hand to take a dish back; broken, a length spills its dishes.
 61. **Eating:** use it with an empty hand to eat a serving from the dish you point at. It feeds you just as eating it would, and a stew leaves its bowl. You can eat a serving whether or not you are hungry.
 

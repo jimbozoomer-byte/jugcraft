@@ -1,0 +1,60 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "p": "jugcraft:block/corn_crib",
+    "particle": "jugcraft:block/corn_crib"
+  },
+  "elements": [
+    {
+      "from": [
+        3.0,
+        0,
+        3.25
+      ],
+      "to": [
+        16,
+        11.75,
+        12.75
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            1.625,
+            0.0,
+            3.25,
+            1.4849
+          ],
+          "texture": "#p"
+        },
+        "south": {
+          "uv": [
+            0.0,
+            0.0,
+            1.625,
+            1.4849
+          ],
+          "texture": "#p"
+        },
+        "west": {
+          "uv": [
+            3.375,
+            0.0,
+            4.625,
+            1.4849
+          ],
+          "texture": "#p"
+        },
+        "up": {
+          "uv": [
+            8.625,
+            3.0,
+            10.25,
+            4.25
+          ],
+          "texture": "#p"
+        }
+      }
+    }
+  ]
+}

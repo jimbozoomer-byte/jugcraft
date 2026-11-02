@@ -32,7 +32,7 @@ public class DiamondSteelGunsVGameTests {
 	/**
 	 * Each is registered with its numbers and its recipe loads, held in both hands. The Maelstrom Gun fires microjets, a
 	 * new round that leaves a case, as long as the trigger is held, twenty-four loaded three a step, and takes no
-	 * attachment. The Ermine Rifle fires a beam a pull from Energy Cells, fifteen a magazine, reaching short of the Lantern
+	 * attachment; since the flying-microjets follow-up they fly ({@link FlyingMicrojetsGameTests}). The Ermine Rifle fires a beam a pull from Energy Cells, fifteen a magazine, reaching short of the Lantern
 	 * Musket, and takes the owner's stocks, grips, bayonets and scopes. The Geode Cutter fires a beam as long as the
 	 * trigger is held, fifty a magazine, piercing four points of armour, and takes no attachment.
 	 */
@@ -51,9 +51,9 @@ public class DiamondSteelGunsVGameTests {
 		}
 		GunItem maelstrom = JugcraftGuns.GUNS.get("maelstrom_gun");
 		GunSpec maelstromSpec = maelstrom.spec();
-		helper.assertTrue(maelstromSpec.ammo().equals("microjet") && JugcraftGuns.shot(maelstrom).equals("bullet") && maelstromSpec.auto()
+		helper.assertTrue(maelstromSpec.ammo().equals("microjet") && JugcraftGuns.shot(maelstrom).equals(JugcraftGuns.JET) && maelstromSpec.auto()
 				&& maelstromSpec.byShell() && maelstromSpec.capacity() == 24 && JugcraftGuns.loadStep(maelstrom) == 3,
-				"The Maelstrom Gun is not an automatic gun of twenty-four microjets, loaded three a step");
+				"The Maelstrom Gun is not an automatic gun of twenty-four flying microjets, loaded three a step");
 		helper.assertTrue(JugcraftGuns.ROUNDS.get("microjet") != null && JugcraftGuns.CASING_AMMO.contains("microjet")
 				&& helper.getLevel().recipeAccess().byKey(ResourceKey.create(Registries.RECIPE, Jugcraft.id("microjet"))).isPresent(),
 				"The Microjet is not a round with a case and a recipe");
@@ -80,7 +80,8 @@ public class DiamondSteelGunsVGameTests {
 
 	/**
 	 * An empty Maelstrom Gun with seven microjets loads three at its first step's time and not before, six at its second,
-	 * and the last one at its third; the reload then ends, none are left, and a shot lands its damage on the pig.
+	 * and the last one at its third; the reload then ends, none are left, and a shot lands its damage on the pig once its
+	 * microjet has flown the three blocks to it (the flying-microjets follow-up).
 	 */
 	@GameTest(structure = GunsGameTests.ARENA, maxTicks = 120)
 	public void maelstromGunLoadsThreeAStep(GameTestHelper helper) {
@@ -104,9 +105,11 @@ public class DiamondSteelGunsVGameTests {
 			helper.assertTrue(GunShots.count(shooter.getInventory(), microjets) == 0, "The reload left microjets in the inventory");
 			helper.assertFalse(GunShots.reloading(shooter), "The Maelstrom Gun was still reloading with nothing left to load");
 			helper.assertTrue(GunShots.fire(shooter), "The loaded Maelstrom Gun did not fire");
-			helper.assertTrue(Math.abs(200.0F - pig.getHealth() - spec.damage()) < 1.0E-3F,
-					"The microjet took " + (200.0F - pig.getHealth()) + ", not " + spec.damage());
-			helper.succeed();
+			helper.runAfterDelay(6, () -> {
+				helper.assertTrue(Math.abs(200.0F - pig.getHealth() - spec.damage()) < 1.0E-3F,
+						"The microjet took " + (200.0F - pig.getHealth()) + ", not " + spec.damage());
+				helper.succeed();
+			});
 		});
 	}
 

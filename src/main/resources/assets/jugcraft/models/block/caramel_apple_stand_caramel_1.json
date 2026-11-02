@@ -1,0 +1,44 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "p": "jugcraft:block/caramel_apple_stand",
+    "c": "jugcraft:block/caramel_apple_stand_caramel",
+    "f": "jugcraft:block/caramel_apple_stand_flame",
+    "particle": "jugcraft:block/caramel_apple_stand"
+  },
+  "elements": [
+    {
+      "from": [
+        4.0,
+        18.5,
+        5.0
+      ],
+      "to": [
+        9.0,
+        18.5,
+        10.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0,
+            0,
+            5,
+            5
+          ],
+          "texture": "#c"
+        },
+        "down": {
+          "uv": [
+            0,
+            5,
+            5,
+            0
+          ],
+          "texture": "#c"
+        }
+      }
+    }
+  ]
+}

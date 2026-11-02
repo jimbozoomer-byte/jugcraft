@@ -1,0 +1,24 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "P P",
+    "PPP",
+    "SIS"
+  ],
+  "key": {
+    "P": "#minecraft:planks",
+    "S": "minecraft:stick",
+    "I": "minecraft:iron_ingot"
+  },
+  "result": {
+    "id": "jugcraft:pumpkin_wheelbarrow",
+    "count": 1
+  }
+}

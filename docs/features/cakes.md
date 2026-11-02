@@ -24,6 +24,9 @@ Bake the owner's cakes and set them out:
 
 - **Set down whole,** a block wide and nine texels tall, its front to whoever set it down. A hungry player eats a quarter of it; a knife cuts a quarter off as a **slice** to take away. The front right quarter goes first, showing the cake's inside as the owner's INTERIOR drawing does, then the front left, the back left and the back right; the last quarter takes the cake. Only a whole cake can be picked up again.
 - **Inside:** the carrot cake's layers are the owner's own INTERIOR drawing; the layered cakes show their layers, the frosted ones a layer of their cream through the sponge, and the birthday cake a vanilla sponge in pink cream.
+- **An eighth cake, not on the owner's page:** the Halloween Party Table's [Pumpkin Layer Cake](halloween-party-table.md), made, baked, eaten and cut as these are (Cake Batter, a sugar, a pumpkin and candy corn).
+  - It is drawn by code in their manner (`tools/cake_art.py` painted_faces): three layers of spiced pumpkin sponge with cream cheese between, under black chocolate ganache poured over orange buttercream, eight kernels of candy corn round its top and a fondant pumpkin in its middle, cut with the quarters as the cheesecake's jam is.
+  - It comes last in `PieFilling`, after the pies and tarts, so no saved oven's filling moves.
 
 | **The display:** the seven cakes and the Burnt Cake whole on the lower shelf and cut on the upper (right to left: carrot, birthday, ice cream, red velvet, cheesecake, coffee, apple, burnt) | **As the owner drew it:** the carrot cake whole and cut, seen from above its front right |
 | --- | --- |

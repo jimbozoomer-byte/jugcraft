@@ -64,7 +64,10 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.EquipmentSlotGroup;
 import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.food.FoodProperties;
 import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.BlockItem;
@@ -80,6 +83,7 @@ import net.minecraft.world.item.component.Consumable;
 import net.minecraft.world.item.component.BundleContents;
 import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.item.component.Fireworks;
+import net.minecraft.world.item.component.ItemAttributeModifiers;
 import net.minecraft.world.item.consume_effects.ApplyStatusEffectsConsumeEffect;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -144,6 +148,8 @@ public final class JugcraftAgriculture {
 			"butternut_squash_seeds", "acorn_squash_seeds", "warty_gourd_seeds", "turnip", "cranberries", "chestnut",
 			"giant_pumpkin_seeds", "white_pumpkin_seeds", "jarrahdale_pumpkin_seeds", "cinderella_pumpkin_seeds", "red_kuri_pumpkin_seeds",
 			"kabocha_pumpkin_seeds", "bottle_gourd_seeds",
+			"turban_squash_seeds", "blue_hubbard_squash_seeds", "sweet_dumpling_squash_seeds", "long_island_cheese_pumpkin_seeds",
+			"spoon_gourd_seeds", "swan_gourd_seeds",
 			"ornamental_corn_kernels", "mandrake_root", "rice", "strawberry_seeds", "blueberry_seeds", "coffee_seeds",
 			"lettuce_seeds", "spinach_seeds", "radish", "peas", "cucumber_seeds", "eggplant_seeds", "zucchini_seeds");
 	/** The chestnut tree's feature (data/jugcraft/worldgen/feature/chestnut.json), grown by its sapling. */
@@ -285,6 +291,8 @@ public final class JugcraftAgriculture {
 	public static DataComponentType<PumpkinCarving> STENCIL;
 	/** Sips of water in a Gourd Canteen. */
 	public static DataComponentType<Integer> CANTEEN_WATER;
+	/** Pours of water in a Watering Can (Barn & Harvest Tools). */
+	public static DataComponentType<Integer> WATERING_CAN_WATER;
 	public static BlockEntityType<GiantPumpkinBlockEntity> GIANT_PUMPKIN_ENTITY;
 	public static BlockEntityType<ScarecrowBlockEntity> SCARECROW_ENTITY;
 	/** What a scarecrow wears for a head. */
@@ -380,6 +388,51 @@ public final class JugcraftAgriculture {
 	public static BlockEntityType<DecorationBlockEntity> SINGING_PUMPKIN_ENTITY;
 	public static BlockEntityType<HarvestEffigyBlockEntity> HARVEST_EFFIGY_ENTITY;
 	public static BlockEntityType<FarmStandBlockEntity> FARM_STAND_ENTITY;
+	public static BlockEntityType<ProduceDisplayBlockEntity> PRODUCE_DISPLAY_ENTITY;
+	public static BlockEntityType<ChalkboardSignBlockEntity> CHALKBOARD_SIGN_ENTITY;
+	public static BlockEntityType<FruitStoreBlockEntity> FRUIT_STORE_ENTITY;
+	public static BlockEntityType<QuernBlockEntity> QUERN_ENTITY;
+	public static BlockEntityType<ButterChurnBlockEntity> BUTTER_CHURN_ENTITY;
+	public static BlockEntityType<DryingRackBlockEntity> DRYING_RACK_ENTITY;
+	public static BlockEntityType<FruitStoreBlockEntity> CORN_CRIB_ENTITY;
+	public static BlockEntityType<HayPulleyBlockEntity> HAY_PULLEY_ENTITY;
+	public static BlockEntityType<HarvestBellBlockEntity> HARVEST_BELL_ENTITY;
+	public static BlockEntityType<FruitStoreBlockEntity> FEED_TROUGH_ENTITY;
+	public static BlockEntityType<PlanterBlockEntity> PLANTER_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> PORCH_SWING_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> TEA_KETTLE_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> COTTON_CANDY_CART_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> POPCORN_WAGON_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> TICKET_BOOTH_ENTITY;
+	public static BlockEntityType<WhackAZombieBlockEntity> WHACK_A_ZOMBIE_ENTITY;
+	public static BlockEntityType<ShootingGalleryBlockEntity> SHOOTING_GALLERY_ENTITY;
+	public static BlockEntityType<GhostTrainBlockEntity> GHOST_TRAIN_ENTITY;
+	public static BlockEntityType<HauntedCarouselBlockEntity> HAUNTED_CAROUSEL_DRIVE;
+	public static EntityType<HauntedCarousel> HAUNTED_CAROUSEL;
+	public static BlockEntityType<HauntedMailboxBlockEntity> HAUNTED_MAILBOX_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> PUMPKIN_PATH_LIGHT_ENTITY;
+	public static BlockEntityType<SkeletonAnimalBlockEntity> SKELETON_ANIMAL_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> RISING_ZOMBIE_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> GARGOYLE_KNOCKER_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> CRASHED_WITCH_ENTITY;
+	public static BlockEntityType<CandyChuteBlockEntity> CANDY_CHUTE_ENTITY;
+	public static BlockEntityType<CandyCornDispenserBlockEntity> CANDY_CORN_DISPENSER_ENTITY;
+	public static BlockEntityType<OrganGrinderSkeletonBlockEntity> ORGAN_GRINDER_SKELETON_ENTITY;
+	public static BlockEntityType<AnimatronicWerewolfBlockEntity> ANIMATRONIC_WEREWOLF_ENTITY;
+	public static BlockEntityType<FlyingCrankGhostBlockEntity> FLYING_CRANK_GHOST_ENTITY;
+	public static BlockEntityType<ClockworkRavenBlockEntity> CLOCKWORK_RAVEN_ENTITY;
+	public static BlockEntityType<PumpkinDrummerBlockEntity> PUMPKIN_DRUMMER_ENTITY;
+	public static BlockEntityType<ShowControllerBlockEntity> SHOW_CONTROLLER_ENTITY;
+	public static BlockEntityType<SteamTractionEngineBlockEntity> STEAM_TRACTION_ENGINE_ENTITY;
+	/** The Sack-Race Sack's attributes worn (tools/harvest_festival.py SACK): movement speed (multiplied), step height and jump strength (added). */
+	public static final double SACK_SPEED = -0.6;
+	public static final double SACK_STEP = -0.6;
+	public static final double SACK_JUMP = 0.04;
+	public static BlockEntityType<FirewoodRackBlockEntity> FIREWOOD_RACK_ENTITY;
+	public static BlockEntityType<DecorationBlockEntity> CHOPPING_BLOCK_ENTITY;
+	public static BlockEntityType<BlanketLadderBlockEntity> BLANKET_LADDER_ENTITY;
+	public static BlockEntityType<KnittingBasketBlockEntity> KNITTING_BASKET_ENTITY;
+	public static BlockEntityType<CaramelAppleStandBlockEntity> CARAMEL_APPLE_STAND_ENTITY;
 	public static ExtendedMenuType<FarmStandMenu, FarmStandMenu.Opening> FARM_STAND_MENU;
 	/** The Harvest Effigy catching (assets/jugcraft/sounds/effigy, made by tools/choir_sounds.py). */
 	public static SoundEvent EFFIGY_BURN;
@@ -550,6 +603,13 @@ public final class JugcraftAgriculture {
 		gourd("red_kuri_pumpkin", "red_kuri_pumpkin_seeds", 1.0F, MapColor.COLOR_ORANGE);
 		gourd("kabocha_pumpkin", "kabocha_pumpkin_seeds", 1.0F, MapColor.COLOR_GREEN);
 		gourd("bottle_gourd", "bottle_gourd_seeds", 1.0F, MapColor.COLOR_LIGHT_GREEN);
+		// The Pumpkin Patch Market (tools/pumpkin_patch.py): three squashes, a pie pumpkin and two gourds for show.
+		gourd("turban_squash", "turban_squash_seeds", 1.0F, MapColor.COLOR_RED);
+		gourd("blue_hubbard_squash", "blue_hubbard_squash_seeds", 1.25F, MapColor.COLOR_LIGHT_BLUE);
+		gourd("sweet_dumpling_squash", "sweet_dumpling_squash_seeds", 0.85F, MapColor.SAND);
+		gourd("long_island_cheese_pumpkin", "long_island_cheese_pumpkin_seeds", 1.0F, MapColor.TERRACOTTA_WHITE);
+		gourd("spoon_gourd", "spoon_gourd_seeds", 0.85F, MapColor.COLOR_YELLOW);
+		gourd("swan_gourd", "swan_gourd_seeds", 1.0F, MapColor.COLOR_GREEN);
 		registerGiantPumpkin();
 		registerBlock("cranberry_bush", CranberryBushBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.SWEET_BERRY_BUSH)
 				.sound(SoundType.WET_GRASS));
@@ -772,6 +832,13 @@ public final class JugcraftAgriculture {
 		stew("red_kuri_soup", 9, 0.7F);
 		food("kabocha_tempura", 6, 0.8F, COMPOST_MEDIUM_HIGH);
 		seeds("bottle_gourd_seeds", "bottle_gourd_stem", COMPOST_LOW);
+		// The Pumpkin Patch Market's squashes and gourds (tools/pumpkin_patch.py).
+		seeds("turban_squash_seeds", "turban_squash_stem", COMPOST_LOW);
+		seeds("blue_hubbard_squash_seeds", "blue_hubbard_squash_stem", COMPOST_LOW);
+		seeds("sweet_dumpling_squash_seeds", "sweet_dumpling_squash_stem", COMPOST_LOW);
+		seeds("long_island_cheese_pumpkin_seeds", "long_island_cheese_pumpkin_stem", COMPOST_LOW);
+		seeds("spoon_gourd_seeds", "spoon_gourd_stem", COMPOST_LOW);
+		seeds("swan_gourd_seeds", "swan_gourd_stem", COMPOST_LOW);
 		plain("dried_bottle_gourd", COMPOST_MEDIUM);
 		plain("ornamental_corn", COMPOST_MEDIUM);
 		seeds("ornamental_corn_kernels", "ornamental_corn_crop", COMPOST_LOW);
@@ -809,6 +876,7 @@ public final class JugcraftAgriculture {
 		// Farm tools.
 		sickle("flint_sickle", 1, 131);
 		sickle("bronze_sickle", 2, 350);
+		sickle("steel_sickle", 3, 900);
 
 		// Wild plants: natural seed sources.
 		wild("wild_corn");
@@ -2364,6 +2432,17 @@ public final class JugcraftAgriculture {
 		registerCryptAndOssuary();
 		registerLaboratoryLarderDining();
 		registerPumpkinNight();
+		registerPumpkinPatchDisplays();
+		registerPumpkinPatchExtras();
+		registerOrchardHarvest();
+		registerBarnTools();
+		registerFallGarden();
+		registerHearth();
+		registerHauntedMidway();
+		registerFrontYard();
+		registerPartyTable();
+		registerClockwork();
+		registerHarvestFestival();
 	}
 
 	/**
@@ -2696,6 +2775,519 @@ public final class JugcraftAgriculture {
 	private static SoundEvent sound(String id) {
 		Identifier key = Jugcraft.id(id);
 		return Registry.register(BuiltInRegistries.SOUND_EVENT, key, SoundEvent.createVariableRangeEvent(key));
+	}
+
+	/**
+	 * The Pumpkin Patch Market's displays (decor set 1, part 2; tools/pumpkin_patch.py DISPLAYS): the Pumpkin Wheelbarrow,
+	 * the Pumpkin Wagon and the Pumpkin Pyramid, each a prop of several blocks that shows the produce put on it, sharing
+	 * one block entity.
+	 */
+	private static void registerPumpkinPatchDisplays() {
+		Block wheelbarrow = registerBlock("pumpkin_wheelbarrow", PumpkinWheelbarrowBlock::new, displayProperties());
+		Block wagon = registerBlock("pumpkin_wagon", PumpkinWagonBlock::new, displayProperties());
+		Block pyramid = registerBlock("pumpkin_pyramid", PumpkinPyramidBlock::new, displayProperties());
+		PRODUCE_DISPLAY_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("produce_display"),
+				FabricBlockEntityTypeBuilder.create(ProduceDisplayBlockEntity::new, wheelbarrow, wagon, pyramid).build());
+		for (Block display : new Block[] {wheelbarrow, wagon, pyramid}) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(display).getPath(), props -> new BlockItem(display, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+	}
+
+	/**
+	 * The Pumpkin Patch Market's last pieces (decor set 1, part 3; tools/pumpkin_patch.py): the Chalkboard Sign, Pumpkin
+	 * Vine Cover and the Giant Warty Gourd.
+	 */
+	private static void registerPumpkinPatchExtras() {
+		Block chalkboard = registerBlock("chalkboard_sign", ChalkboardSignBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(1.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		CHALKBOARD_SIGN_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("chalkboard_sign"),
+				FabricBlockEntityTypeBuilder.create(ChalkboardSignBlockEntity::new, chalkboard).build());
+		Block cover = registerBlock("pumpkin_vine_cover", PumpkinVineCoverBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.PLANT)
+				.instabreak().sound(SoundType.GRASS).noCollision().noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		Block giant = registerBlock("giant_warty_gourd", GiantWartyGourdBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_YELLOW)
+				.strength(1.0F).sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
+		for (Block block : new Block[] {chalkboard, cover, giant}) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+	}
+
+	/**
+	 * Orchard & Apple Harvest (decor set 2; tools/orchard_harvest.py): part 1's Orchard Ladder, Apple Bin and Picking Bag,
+	 * part 2's Orchard Handcart, apple crates and windfall apples, and part 3's Caramel Apple Stand; the bin, the bag and
+	 * the cart share one block entity for the fruit they hold.
+	 */
+	private static void registerOrchardHarvest() {
+		Block ladder = registerBlock("orchard_ladder", OrchardLadderBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(1.0F).sound(SoundType.LADDER).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		Block bin = registerBlock("apple_bin", AppleBinBlock::new, displayProperties());
+		Block bag = registerBlock("picking_bag", PickingBagBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).strength(0.8F)
+				.sound(SoundType.WOOL).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		Block cart = registerBlock("orchard_handcart", OrchardHandcartBlock::new, displayProperties());
+		FRUIT_STORE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("fruit_store"),
+				FabricBlockEntityTypeBuilder.create(FruitStoreBlockEntity::new, bin, bag, cart).build());
+		List<Block> gear = new ArrayList<>(List.of(ladder, bin, bag, cart));
+		// Part 2: the apple crates and the windfall apples.
+		for (String kind : new String[] {"red", "green", "golden"}) {
+			gear.add(registerBlock(kind + "_apple_crate", AppleCrateBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+					.strength(1.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED)));
+		}
+		gear.add(registerBlock("windfall_apples", WindfallApplesBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED)
+				.instabreak().sound(SoundType.GRASS).noCollision().noOcclusion().pushReaction(PushReaction.POPPED)));
+		// Part 3: the Caramel Apple Stand.
+		Block stand = registerBlock("caramel_apple_stand", CaramelAppleStandBlock::new, displayProperties().lightLevel(CaramelAppleStandBlock::light));
+		CARAMEL_APPLE_STAND_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("caramel_apple_stand"),
+				FabricBlockEntityTypeBuilder.create(CaramelAppleStandBlockEntity::new, stand).build());
+		gear.add(stand);
+		for (Block block : gear) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+	}
+
+	/**
+	 * Barn & Harvest Tools (decor set 3; tools/barn_tools.py), part 1: the planned hand tools, the Watering Can and the Seed
+	 * Pouch (the Steel Sickle is registered with the other sickles); part 2: the Quern and the Butter Churn, and the Flour,
+	 * Butter and Pancakes they lead to; part 3: the Drying Rack and the Corn Crib (whose corn is kept as the Apple Bin keeps
+	 * fruit, by a FruitStoreBlockEntity of its own type); part 4: the Hay-Loft Pulley and the Harvest Bell.
+	 */
+	private static void registerBarnTools() {
+		WATERING_CAN_WATER = Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE, Jugcraft.id("watering_can_water"),
+				DataComponentType.<Integer>builder().persistent(Codec.intRange(0, WateringCanItem.CAPACITY))
+						.networkSynchronized(ByteBufCodecs.VAR_INT).build());
+		registerItem("watering_can", WateringCanItem::new, new Item.Properties().stacksTo(1).component(WATERING_CAN_WATER, 0), TOOL_TAB);
+		registerItem("seed_pouch", SeedPouchItem::new, new Item.Properties().stacksTo(1), TOOL_TAB);
+		// Part 2: the Quern and the Butter Churn, and what they lead to.
+		Block quern = registerBlock("quern", QuernBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.STONE).strength(2.0F)
+				.sound(SoundType.STONE).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
+		QUERN_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("quern"),
+				FabricBlockEntityTypeBuilder.create(QuernBlockEntity::new, quern).build());
+		Block churn = registerBlock("butter_churn", ButterChurnBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.5F)
+				.sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		BUTTER_CHURN_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("butter_churn"),
+				FabricBlockEntityTypeBuilder.create(ButterChurnBlockEntity::new, churn).build());
+		for (Block block : List.of(quern, churn)) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), EQUIPMENT_TAB);
+		}
+		plain("flour", COMPOST_LOW);
+		registerItem("butter", Item::new, new Item.Properties(), INGREDIENT_TAB);
+		food("pancakes", 5, 0.6F, COMPOST_MEDIUM_HIGH);
+		// Part 3: the Drying Rack and the Corn Crib.
+		Block rack = registerBlock("drying_rack", DryingRackBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.0F)
+				.sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		DRYING_RACK_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("drying_rack"),
+				FabricBlockEntityTypeBuilder.create(DryingRackBlockEntity::new, rack).build());
+		Block crib = registerBlock("corn_crib", CornCribBlock::new, displayProperties());
+		CORN_CRIB_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("corn_crib"),
+				FabricBlockEntityTypeBuilder.<FruitStoreBlockEntity>create((pos, state) -> new FruitStoreBlockEntity(CORN_CRIB_ENTITY, pos, state), crib)
+						.build());
+		for (Block block : List.of(rack, crib)) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+		// Part 4: the Hay-Loft Pulley and the Harvest Bell.
+		Block pulley = registerBlock("hay_pulley", HayPulleyBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.0F)
+				.sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		HAY_PULLEY_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("hay_pulley"),
+				FabricBlockEntityTypeBuilder.create(HayPulleyBlockEntity::new, pulley).build());
+		Block bell = registerBlock("harvest_bell", HarvestBellBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(2.0F)
+				.sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
+		HARVEST_BELL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("harvest_bell"),
+				FabricBlockEntityTypeBuilder.create(HarvestBellBlockEntity::new, bell).build());
+		for (Block block : List.of(pulley, bell)) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+		// Part 5: the barn's stores and fittings.
+		Block sack = registerBlock("grain_sack", GrainSackBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOL).strength(0.8F)
+				.sound(SoundType.WOOL).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		Block can = registerBlock("milk_can", props -> new FacingDecorationBlock(props, new double[] {4.5, 0.0, 4.5, 11.5, 11.0, 11.5}),
+				BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(1.0F).sound(SoundType.LANTERN).noOcclusion()
+						.pushReaction(PushReaction.POPPED));
+		Block toolRack = registerBlock("tool_rack", ToolRackBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.0F)
+				.sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		Block trough = registerBlock("feed_trough", FeedTroughBlock::new, displayProperties());
+		FEED_TROUGH_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("feed_trough"),
+				FabricBlockEntityTypeBuilder.<FruitStoreBlockEntity>create((pos, state) -> new FruitStoreBlockEntity(FEED_TROUGH_ENTITY, pos, state),
+						trough).build());
+		Block lantern = registerBlock("barn_lantern", BarnLanternBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(1.0F)
+				.sound(SoundType.LANTERN).noOcclusion().pushReaction(PushReaction.POPPED)
+				.lightLevel(state -> state.getValue(BarnLanternBlock.LIT) ? BarnLanternBlock.LIGHT : 0));
+		for (Block block : List.of(sack, can, toolRack, trough, lantern)) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+	}
+
+	/**
+	 * Fall Garden & Porch, decor set 4 (tools/fall_garden.py; part 1's plants are registered with the other wild plants):
+	 * part 2's planters, which take small flowers; part 3's porch: the Porch Swing, the Wheat Stook, the Corn Dolly, the
+	 * Bittersweet Wreath and the Quilt Rail; part 4's Café String Lights.
+	 */
+	private static void registerFallGarden() {
+		Block box = registerBlock("window_box", props -> new PlanterBlock(props, PlanterBlock.WINDOW_BOX), BlockBehaviour.Properties.of()
+				.mapColor(MapColor.WOOD).strength(1.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		Block barrel = registerBlock("half_barrel_planter", props -> new PlanterBlock(props, PlanterBlock.HALF_BARREL), BlockBehaviour.Properties.of()
+				.mapColor(MapColor.WOOD).strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		Block tub = registerBlock("galvanized_tub_planter", props -> new PlanterBlock(props, PlanterBlock.GALVANIZED_TUB), BlockBehaviour.Properties.of()
+				.mapColor(MapColor.METAL).strength(1.5F).sound(SoundType.LANTERN).noOcclusion().pushReaction(PushReaction.POPPED));
+		PLANTER_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("planter"),
+				FabricBlockEntityTypeBuilder.create(PlanterBlockEntity::new, box, barrel, tub).build());
+		for (Block block : List.of(box, barrel, tub)) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+		// Part 3: the porch.
+		Block swing = registerBlock("porch_swing", PorchSwingBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.5F)
+				.sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		PORCH_SWING_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("porch_swing"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(PORCH_SWING_ENTITY, pos, state), swing)
+						.build());
+		Block stook = registerBlock("wheat_stook", props -> new FacingDecorationBlock(props, new double[] {2.5, 0.0, 2.5, 13.5, 15.0, 13.5}),
+				BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_YELLOW).strength(0.5F).sound(SoundType.GRASS).noOcclusion().ignitedByLava()
+						.pushReaction(PushReaction.POPPED));
+		Block dolly = registerBlock("corn_dolly", props -> new WallDecorationBlock(props, 2.0, 4.0, 12.0), BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_YELLOW).instabreak().sound(SoundType.GRASS).noCollision().noOcclusion().ignitedByLava()
+				.pushReaction(PushReaction.POPPED));
+		Block wreath = registerBlock("bittersweet_wreath", props -> new WallDecorationBlock(props, 2.5, 2.5, 13.5), BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_ORANGE).instabreak().sound(SoundType.GRASS).noCollision().noOcclusion().ignitedByLava()
+				.pushReaction(PushReaction.POPPED));
+		Block quilt = registerBlock("quilt_rail", props -> new FacingDecorationBlock(props, new double[] {0.0, 0.0, 6.0, 16.0, 15.0, 10.0}),
+				BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(1.0F).sound(SoundType.WOOL).noOcclusion().ignitedByLava()
+						.pushReaction(PushReaction.POPPED));
+		for (Block block : List.of(swing, stook, dolly, wreath, quilt)) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+		// Part 4: café lights, strung between String Light Hooks, which light the air along their length.
+		registerItem("cafe_string_lights", props -> new StringLightsItem(props, StringLightHookBlockEntity.Strand.CAFE), new Item.Properties(),
+				BUILDING_TAB);
+	}
+
+	/**
+	 * Cozy Fall Hearth, decor set 5 (tools/hearth.py): part 1's Stone Fireplace and Mantel Garland; part 2's Woodstove (a
+	 * heat source), and the Tea Kettle and Simmer Pot set on it; part 3's Firewood Rack and Chopping Block; part 4's Blanket
+	 * Ladder and Knitting Basket; part 5's Hurricane Lamp and Mason-Jar Candles.
+	 */
+	private static void registerHearth() {
+		Block fireplace = registerBlock("stone_fireplace", StoneFireplaceBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
+				.strength(2.0F, 6.0F).sound(SoundType.STONE).noOcclusion().lightLevel(StoneFireplaceBlock::light).pushReaction(PushReaction.IMMOVEABLE));
+		registerItem("stone_fireplace", props -> new BlockItem(fireplace, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		registerItem("mantel_garland", Item::new, new Item.Properties(), BUILDING_TAB);
+		// Part 2: the stove, and the kettle and the pot set on it.
+		Block stove = registerBlock("woodstove", WoodstoveBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+				.strength(3.0F, 6.0F).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion().lightLevel(WoodstoveBlock::light)
+				.pushReaction(PushReaction.IMMOVEABLE));
+		Block kettle = registerBlock("tea_kettle", TeaKettleBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+				.strength(1.0F).sound(SoundType.COPPER).noOcclusion().pushReaction(PushReaction.POPPED));
+		TEA_KETTLE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("tea_kettle"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(TEA_KETTLE_ENTITY, pos, state), kettle)
+						.build());
+		Block pot = registerBlock("simmer_pot", SimmerPotBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.QUARTZ)
+				.strength(1.0F).sound(SoundType.METAL).noOcclusion().pushReaction(PushReaction.POPPED));
+		// Part 3: the woodpile.
+		Block rack = registerBlock("firewood_rack", FirewoodRackBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+				.strength(2.0F, 6.0F).sound(SoundType.METAL).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
+		FIREWOOD_RACK_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("firewood_rack"),
+				FabricBlockEntityTypeBuilder.create(FirewoodRackBlockEntity::new, rack).build());
+		Block chopping = registerBlock("chopping_block", ChoppingBlockBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(2.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		CHOPPING_BLOCK_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("chopping_block"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(CHOPPING_BLOCK_ENTITY, pos, state),
+						chopping).build());
+		// Part 4: the comforts.
+		Block ladder = registerBlock("blanket_ladder", BlanketLadderBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(1.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		BLANKET_LADDER_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("blanket_ladder"),
+				FabricBlockEntityTypeBuilder.create(BlanketLadderBlockEntity::new, ladder).build());
+		Block basket = registerBlock("knitting_basket", KnittingBasketBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(0.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		KNITTING_BASKET_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("knitting_basket"),
+				FabricBlockEntityTypeBuilder.create(KnittingBasketBlockEntity::new, basket).build());
+		// Part 5: the lights.
+		Block lamp = registerBlock("hurricane_lamp", HurricaneLampBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.GOLD)
+				.strength(0.5F).sound(SoundType.LANTERN).noOcclusion().lightLevel(HurricaneLampBlock::light).pushReaction(PushReaction.POPPED));
+		Block jars = registerBlock("mason_jar_candle", MasonJarCandleBlock::new, BlockBehaviour.Properties.ofFullCopy(Blocks.CANDLE)
+				.mapColor(MapColor.SAND).sound(SoundType.GLASS));
+		for (Block block : List.of(stove, kettle, pot, rack, chopping, ladder, basket, lamp, jars)) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+	}
+
+	/**
+	 * Haunted Midway, decor set 6 (tools/haunted_midway.py): part 1's sweet stalls, the Cotton-Candy Cart (and the Cotton
+	 * Candy it spins) and the Caramel-Corn Wagon; part 2's Ticket Booth, its Midway Ticket and Whack-a-Zombie; part 3's
+	 * Shooting Gallery; part 4's Ghost Train.
+	 */
+	private static void registerHauntedMidway() {
+		Block cart = registerBlock("cotton_candy_cart", CottonCandyCartBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
+				.strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		COTTON_CANDY_CART_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("cotton_candy_cart"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(COTTON_CANDY_CART_ENTITY, pos, state),
+						cart).build());
+		Block wagon = registerBlock("popcorn_wagon", PopcornWagonBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
+				.strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().lightLevel(PopcornWagonBlock::light)
+				.pushReaction(PushReaction.IMMOVEABLE));
+		POPCORN_WAGON_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("popcorn_wagon"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(POPCORN_WAGON_ENTITY, pos, state),
+						wagon).build());
+		for (Block block : List.of(cart, wagon)) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+		food("cotton_candy", 2, 0.1F, COMPOST_LOW);
+		// Part 2: the Ticket Booth and the Midway Ticket it prints, and Whack-a-Zombie, a ticket a round.
+		Block booth = registerBlock("ticket_booth", TicketBoothBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
+				.strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		TICKET_BOOTH_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("ticket_booth"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(TICKET_BOOTH_ENTITY, pos, state),
+						booth).build());
+		Block whack = registerBlock("whack_a_zombie", WhackAZombieBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
+				.strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		WHACK_A_ZOMBIE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("whack_a_zombie"),
+				FabricBlockEntityTypeBuilder.create(WhackAZombieBlockEntity::new, whack).build());
+		for (Block block : List.of(booth, whack)) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+		registerItem("midway_ticket", Item::new, new Item.Properties(), BUILDING_TAB);
+		// Part 3: the Shooting Gallery, a ticket a round.
+		Block gallery = registerBlock("shooting_gallery", ShootingGalleryBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
+				.strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		SHOOTING_GALLERY_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("shooting_gallery"),
+				FabricBlockEntityTypeBuilder.create(ShootingGalleryBlockEntity::new, gallery).build());
+		registerItem("shooting_gallery", props -> new BlockItem(gallery, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		// Part 4: the Ghost Train's front, its doors opening for the carts that come through.
+		Block train = registerBlock("ghost_train", GhostTrainBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_PURPLE)
+				.strength(2.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().lightLevel(GhostTrainBlock::light)
+				.pushReaction(PushReaction.IMMOVEABLE));
+		GHOST_TRAIN_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("ghost_train"),
+				FabricBlockEntityTypeBuilder.create(GhostTrainBlockEntity::new, train).build());
+		registerItem("ghost_train", props -> new BlockItem(train, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		// Part 5: the Haunted Carousel's middle (the block, which sets it turning, boards riders, plays its organ and takes
+		// kinetic power) and the carousel itself.
+		Block carousel = registerBlock(HauntedCarouselBlock.ID, HauntedCarouselBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+				.strength(2.0F, 6.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().lightLevel(HauntedCarouselBlock::light)
+				.pushReaction(PushReaction.IMMOVEABLE));
+		registerItem(HauntedCarouselBlock.ID, props -> new BlockItem(carousel, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		HAUNTED_CAROUSEL_DRIVE = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id(HauntedCarouselBlock.ID),
+				FabricBlockEntityTypeBuilder.create(HauntedCarouselBlockEntity::new, carousel).build());
+		HAUNTED_CAROUSEL = entity("haunted_carousel", EntityType.Builder.<HauntedCarousel>of(HauntedCarousel::new, MobCategory.MISC).noLootTable()
+				.noSummon().sized(1.0F, 1.0F).clientTrackingRange(10).updateInterval(20));
+	}
+
+	/**
+	 * Decor set 7, Front-Yard Haunt Scenes (tools/front_yard.py), part 1: the Haunted Mailbox, whose door falls open on
+	 * whoever comes near, and the Pumpkin Path Light, a jack-o'-lantern swaying on a shepherd's hook.
+	 */
+	private static void registerFrontYard() {
+		Block mailbox = registerBlock("haunted_mailbox", HauntedMailboxBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+				.strength(1.5F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		HAUNTED_MAILBOX_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("haunted_mailbox"),
+				FabricBlockEntityTypeBuilder.create(HauntedMailboxBlockEntity::new, mailbox).build());
+		Block light = registerBlock("pumpkin_path_light", PumpkinPathLightBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+				.strength(1.0F).sound(SoundType.LANTERN).noOcclusion().lightLevel(PumpkinPathLightBlock::light).pushReaction(PushReaction.IMMOVEABLE));
+		PUMPKIN_PATH_LIGHT_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("pumpkin_path_light"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(PUMPKIN_PATH_LIGHT_ENTITY, pos, state),
+						light).build());
+		// Part 2: the skeleton animals (one block entity type for the three) and the Rising Zombie.
+		Block dog = registerBlock("skeleton_dog", props -> new SkeletonAnimalBlock(props, SkeletonAnimalBlock.Kind.DOG), boneProperties());
+		Block cat = registerBlock("skeleton_cat", props -> new SkeletonAnimalBlock(props, SkeletonAnimalBlock.Kind.CAT), boneProperties());
+		Block crow = registerBlock("skeleton_crow", props -> new SkeletonAnimalBlock(props, SkeletonAnimalBlock.Kind.CROW), boneProperties());
+		SKELETON_ANIMAL_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("skeleton_animal"),
+				FabricBlockEntityTypeBuilder.create(SkeletonAnimalBlockEntity::new, dog, cat, crow).build());
+		Block zombie = registerBlock("rising_zombie", RisingZombieBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.DIRT)
+				.strength(1.0F).sound(SoundType.ROOTED_DIRT).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
+		RISING_ZOMBIE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("rising_zombie"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(RISING_ZOMBIE_ENTITY, pos, state),
+						zombie).build());
+		// Part 3: the doorway. The knocker and the bat wreath hang on walls and doors, as the other wreaths do.
+		Block knocker = registerBlock("gargoyle_knocker", GargoyleKnockerBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN)
+				.strength(1.0F).sound(SoundType.METAL).noCollision().noOcclusion().randomTicks().pushReaction(PushReaction.POPPED));
+		GARGOYLE_KNOCKER_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("gargoyle_knocker"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(GARGOYLE_KNOCKER_ENTITY, pos, state),
+						knocker).build());
+		Block batWreath = registerBlock("bat_wreath", BatWreathBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+				.strength(0.2F).sound(SoundType.GRASS).noCollision().noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		Block doormat = registerBlock("beware_doormat", BewareDoormatBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN)
+				.strength(0.2F).sound(SoundType.GRASS).noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		// Part 4: the Crashed Witch, out to her hips in a wall or a tree.
+		Block witch = registerBlock("crashed_witch", CrashedWitchBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLACK)
+				.strength(0.5F).sound(SoundType.WOOL).noCollision().noOcclusion().ignitedByLava().pushReaction(PushReaction.POPPED));
+		CRASHED_WITCH_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("crashed_witch"),
+				FabricBlockEntityTypeBuilder.<DecorationBlockEntity>create((pos, state) -> new DecorationBlockEntity(CRASHED_WITCH_ENTITY, pos, state),
+						witch).build());
+		// Part 5: the Trick-or-Treat Candy Chute, from the porch rail down to the path.
+		Block chute = registerBlock("candy_chute", CandyChuteBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_ORANGE)
+				.strength(0.8F).sound(SoundType.WOOD).noCollision().noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		CANDY_CHUTE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("candy_chute"),
+				FabricBlockEntityTypeBuilder.create(CandyChuteBlockEntity::new, chute).build());
+		for (Block block : List.of(mailbox, light, dog, cat, crow, zombie, knocker, batWreath, doormat, witch, chute)) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(),
+					props -> block instanceof AutumnWreathBlock ? new WreathBlockItem(block, props) : new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+		FlammableBlockRegistry.getDefaultInstance().add(batWreath, 30, 60);
+		FlammableBlockRegistry.getDefaultInstance().add(doormat, 30, 60);
+		FlammableBlockRegistry.getDefaultInstance().add(witch, 30, 60);
+		FlammableBlockRegistry.getDefaultInstance().add(chute, 30, 60);
+	}
+
+	/** The Halloween Party Table (decor set 8, tools/party_table.py; docs/features/halloween-party-table.md). */
+	private static void registerPartyTable() {
+		// Part 1: the Candy Corn Dispenser, a cast-iron and glass gumball machine.
+		Block dispenser = registerBlock("candy_corn_dispenser", CandyCornDispenserBlock::new, BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_BLACK).strength(1.5F).sound(SoundType.METAL).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
+		CANDY_CORN_DISPENSER_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("candy_corn_dispenser"),
+				FabricBlockEntityTypeBuilder.create(CandyCornDispenserBlockEntity::new, dispenser).build());
+		// Part 2: the cake stands, each holding a food, and the Ghost Meringue.
+		Block tower = registerBlock("spider_cupcake_tower", SpiderCupcakeTowerBlock::new, BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_BLACK).strength(0.8F).sound(SoundType.METAL).noOcclusion().pushReaction(PushReaction.POPPED));
+		Block platter = registerBlock("ghost_meringue_platter", GhostMeringuePlatterBlock::new, BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_BLACK).strength(0.5F).sound(SoundType.DECORATED_POT).noOcclusion().pushReaction(PushReaction.POPPED));
+		// Part 3: the trays, and their foods.
+		Block tray = registerBlock("mummy_sausage_tray", MummySausageTrayBlock::new, BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_BLACK).strength(0.8F).sound(SoundType.METAL).noOcclusion().pushReaction(PushReaction.POPPED));
+		Block cauldron = registerBlock("witch_finger_cauldron", WitchFingerCauldronBlock::new, BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_BLACK).strength(1.0F).sound(SoundType.METAL).noOcclusion().pushReaction(PushReaction.POPPED));
+		Block mould = registerBlock("eyeball_jelly_mould", EyeballJellyMouldBlock::new, BlockBehaviour.Properties.of()
+				.mapColor(MapColor.SNOW).strength(0.5F).sound(SoundType.DECORATED_POT).noOcclusion().pushReaction(PushReaction.POPPED));
+		// Part 5: the table: the Goodie Bag Tree and its bags, the Skull Goblets, and the Bat Table Runner (laid on a
+		// Feast Table: FeastTableBlock.RUNNER).
+		Block tree = registerBlock("goodie_bag_tree", GoodieBagTreeBlock::new, BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_ORANGE).strength(0.5F).sound(SoundType.METAL).noOcclusion().pushReaction(PushReaction.POPPED));
+		Block goblets = registerBlock("skull_goblets", SkullGobletsBlock::new, BlockBehaviour.Properties.of()
+				.mapColor(MapColor.SAND).strength(0.5F).sound(SoundType.DECORATED_POT).noOcclusion().lightLevel(SkullGobletsBlock::light)
+				.pushReaction(PushReaction.POPPED));
+		for (Block block : List.of(dispenser, tower, platter, tray, cauldron, mould, tree, goblets)) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+		food("ghost_meringue", 1, 0.1F, COMPOST_MEDIUM_HIGH);
+		meal("mummy_sausage", 3, 0.5F);
+		food("witch_finger", 2, 0.1F, COMPOST_MEDIUM_HIGH);
+		food("eyeball_jelly", 2, 0.2F, COMPOST_MEDIUM_HIGH);
+		registerItem("goodie_bag", GoodieBagItem::new, new Item.Properties().stacksTo(16), FOOD_TAB);
+		registerItem("bat_table_runner", Item::new, new Item.Properties(), BUILDING_TAB);
+	}
+
+	/**
+	 * Decor set 9, the Clockwork Animatronics (tools/clockwork.py): Halloween figures moved by clockwork on kinetic power.
+	 * Part 1: the Organ-Grinder Skeleton; part 2: the Animatronic Werewolf; part 3: the Flying Crank Ghost; part 4: the
+	 * Clockwork Raven; part 5: the Pumpkin-Headed Drummer; each two blocks tall, its clockwork in its lower block. Part 6:
+	 * the Show Controller, a cabinet on the JE network that drives the figures near it in time.
+	 */
+	private static void registerClockwork() {
+		Block grinder = registerBlock("organ_grinder_skeleton", OrganGrinderSkeletonBlock::new, BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_BROWN).strength(1.0F).sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
+		ORGAN_GRINDER_SKELETON_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("organ_grinder_skeleton"),
+				FabricBlockEntityTypeBuilder.create(OrganGrinderSkeletonBlockEntity::new, grinder).build());
+		registerItem("organ_grinder_skeleton", props -> new DoubleHighBlockItem(grinder, props), new Item.Properties().useBlockDescriptionPrefix(),
+				BUILDING_TAB);
+		Block werewolf = registerBlock("animatronic_werewolf", AnimatronicWerewolfBlock::new, BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_BROWN).strength(1.5F).sound(SoundType.METAL).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
+		ANIMATRONIC_WEREWOLF_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("animatronic_werewolf"),
+				FabricBlockEntityTypeBuilder.create(AnimatronicWerewolfBlockEntity::new, werewolf).build());
+		registerItem("animatronic_werewolf", props -> new DoubleHighBlockItem(werewolf, props), new Item.Properties().useBlockDescriptionPrefix(),
+				BUILDING_TAB);
+		Block ghost = registerBlock("flying_crank_ghost", FlyingCrankGhostBlock::new, BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_BLACK).strength(1.5F).sound(SoundType.METAL).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
+		FLYING_CRANK_GHOST_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("flying_crank_ghost"),
+				FabricBlockEntityTypeBuilder.create(FlyingCrankGhostBlockEntity::new, ghost).build());
+		registerItem("flying_crank_ghost", props -> new DoubleHighBlockItem(ghost, props), new Item.Properties().useBlockDescriptionPrefix(),
+				BUILDING_TAB);
+		Block raven = registerBlock("clockwork_raven", ClockworkRavenBlock::new, BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_BLACK).strength(1.5F).sound(SoundType.METAL).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
+		CLOCKWORK_RAVEN_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("clockwork_raven"),
+				FabricBlockEntityTypeBuilder.create(ClockworkRavenBlockEntity::new, raven).build());
+		registerItem("clockwork_raven", props -> new DoubleHighBlockItem(raven, props), new Item.Properties().useBlockDescriptionPrefix(),
+				BUILDING_TAB);
+		Block drummer = registerBlock("pumpkin_drummer", PumpkinDrummerBlock::new, BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_ORANGE).strength(1.0F).sound(SoundType.WOOD).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
+		PUMPKIN_DRUMMER_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("pumpkin_drummer"),
+				FabricBlockEntityTypeBuilder.create(PumpkinDrummerBlockEntity::new, drummer).build());
+		registerItem("pumpkin_drummer", props -> new DoubleHighBlockItem(drummer, props), new Item.Properties().useBlockDescriptionPrefix(),
+				BUILDING_TAB);
+		Block controller = registerBlock("show_controller", ShowControllerBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL)
+				.strength(3.5F).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion().lightLevel(ShowControllerBlock::light));
+		registerItem("show_controller", props -> new BlockItem(controller, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		SHOW_CONTROLLER_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("show_controller"),
+				FabricBlockEntityTypeBuilder.create(ShowControllerBlockEntity::new, controller).build());
+		EnergyStorage.SIDED.registerForBlockEntity((entity, side) -> entity.energy(), SHOW_CONTROLLER_ENTITY);
+	}
+
+	/**
+	 * The Harvest Festival Grounds (decor set 10; tools/harvest_festival.py): part 1's Giant Cornucopia; part 2's Giant
+	 * Vegetable Show (a Giant Cabbage, Marrow, Turnip and Carrot, each with its entry card) and the Prize Ribbon Board;
+	 * part 3's Steam Traction Engine, its firebox a block entity on its first block, and the Hay Wagon; part 4's Harvest
+	 * Bunting, a strand for the String Light Hooks, and the Sack-Race Sack, worn on the legs.
+	 */
+	private static void registerHarvestFestival() {
+		Block cornucopia = registerBlock("giant_cornucopia", GiantCornucopiaBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(1.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		registerItem("giant_cornucopia", props -> new BlockItem(cornucopia, props), new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		// Part 2: the show's vegetables, each its shape facing north (tools/harvest_festival.py SHOW), and the board.
+		Block cabbage = registerBlock("giant_cabbage", props -> new FacingDecorationBlock(props, new double[] {1.0, 0.0, 1.0, 15.0, 7.5, 15.0}),
+				showProperties(MapColor.PLANT, SoundType.GRASS));
+		Block marrow = registerBlock("giant_marrow", props -> new FacingDecorationBlock(props, new double[] {4.0, 0.0, 0.25, 12.0, 6.5, 16.0}),
+				showProperties(MapColor.COLOR_GREEN, SoundType.WOOD));
+		Block turnip = registerBlock("giant_turnip", props -> new FacingDecorationBlock(props, new double[] {4.5, 0.0, 4.5, 11.5, 12.5, 11.5}),
+				showProperties(MapColor.COLOR_PURPLE, SoundType.WOOD));
+		Block carrot = registerBlock("giant_carrot", props -> new FacingDecorationBlock(props, new double[] {6.0, 0.0, 1.0, 10.0, 8.0, 15.0}),
+				showProperties(MapColor.COLOR_ORANGE, SoundType.WOOD));
+		Block board = registerBlock("prize_ribbon_board", PrizeRibbonBoardBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GREEN)
+				.strength(1.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		for (Block block : List.of(cabbage, marrow, turnip, carrot)) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+		registerItem("prize_ribbon_board", props -> new DoubleHighBlockItem(board, props), new Item.Properties().useBlockDescriptionPrefix(),
+				BUILDING_TAB);
+		// Part 3: the engine (iron, mined with a pickaxe) and the wagon.
+		Block engine = registerBlock("steam_traction_engine", SteamTractionEngineBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_GREEN)
+				.strength(3.5F).sound(SoundType.METAL).requiresCorrectToolForDrops().noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
+		STEAM_TRACTION_ENGINE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("steam_traction_engine"),
+				FabricBlockEntityTypeBuilder.create(SteamTractionEngineBlockEntity::new, engine).build());
+		Block wagon = registerBlock("hay_wagon", HayWagonBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_YELLOW)
+				.strength(1.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
+		for (Block block : List.of(engine, wagon)) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+		// Part 4: the bunting, and the sack (tools/harvest_festival.py SACK): worn on the legs, it slows its wearer, takes
+		// away their step so they hop up every block, and lifts their jump a little, short of clearing a fence.
+		registerItem("harvest_bunting", props -> new StringLightsItem(props, StringLightHookBlockEntity.Strand.HARVEST), new Item.Properties(),
+				BUILDING_TAB);
+		registerItem("sack_race_sack", Item::new, new Item.Properties().stacksTo(1)
+				.component(DataComponents.EQUIPPABLE, Equippable.builder(EquipmentSlot.LEGS).setEquipSound(SoundEvents.ARMOR_EQUIP_LEATHER)
+						.setAsset(ResourceKey.create(EquipmentAssets.ROOT_ID, Jugcraft.id("sack_race_sack"))).build())
+				.attributes(ItemAttributeModifiers.builder()
+						.add(Attributes.MOVEMENT_SPEED, new AttributeModifier(Jugcraft.id("sack_race_speed"), SACK_SPEED,
+								AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL), EquipmentSlotGroup.LEGS)
+						.add(Attributes.STEP_HEIGHT, new AttributeModifier(Jugcraft.id("sack_race_step"), SACK_STEP,
+								AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.LEGS)
+						.add(Attributes.JUMP_STRENGTH, new AttributeModifier(Jugcraft.id("sack_race_jump"), SACK_JUMP,
+								AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.LEGS)
+						.build()), BUILDING_TAB);
+	}
+
+	/** A prize show vegetable: soft, and popped off by a piston. */
+	private static BlockBehaviour.Properties showProperties(MapColor color, SoundType sound) {
+		return BlockBehaviour.Properties.of().mapColor(color).strength(0.8F).sound(sound).noOcclusion().pushReaction(PushReaction.POPPED);
+	}
+
+	/** Bleached bones: they come away easily, and a piston pops them off. */
+	private static BlockBehaviour.Properties boneProperties() {
+		return BlockBehaviour.Properties.of().mapColor(MapColor.SAND).strength(0.5F).sound(SoundType.BONE_BLOCK).noOcclusion()
+				.pushReaction(PushReaction.POPPED);
+	}
+
+	private static BlockBehaviour.Properties displayProperties() {
+		return BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava()
+				.pushReaction(PushReaction.IMMOVEABLE);
 	}
 
 	/**
@@ -3463,6 +4055,12 @@ public final class JugcraftAgriculture {
 		fallPatch("red_kuri_pumpkin", ConventionalBiomeTags.IS_TAIGA, ConventionalBiomeTags.IS_SPOOKY);
 		fallPatch("kabocha_pumpkin", ConventionalBiomeTags.IS_FOREST, ConventionalBiomeTags.IS_JUNGLE);
 		fallPatch("bottle_gourd", ConventionalBiomeTags.IS_JUNGLE, ConventionalBiomeTags.IS_SAVANNA);
+		fallPatch("turban_squash", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_FOREST);
+		fallPatch("blue_hubbard_squash", ConventionalBiomeTags.IS_TAIGA, ConventionalBiomeTags.IS_SNOWY);
+		fallPatch("sweet_dumpling_squash", ConventionalBiomeTags.IS_FLORAL, ConventionalBiomeTags.IS_BIRCH_FOREST);
+		fallPatch("long_island_cheese_pumpkin", ConventionalBiomeTags.IS_PLAINS, ConventionalBiomeTags.IS_BEACH);
+		fallPatch("spoon_gourd", ConventionalBiomeTags.IS_SAVANNA, ConventionalBiomeTags.IS_JUNGLE);
+		fallPatch("swan_gourd", ConventionalBiomeTags.IS_SWAMP, ConventionalBiomeTags.IS_JUNGLE);
 		fallPatch("mums", ConventionalBiomeTags.IS_FLORAL, ConventionalBiomeTags.IS_FOREST);
 		// Autumn foraging: wild mushrooms on forest floors.
 		fallPatch("chanterelle", ConventionalBiomeTags.IS_FOREST, ConventionalBiomeTags.IS_BIRCH_FOREST);
@@ -3536,16 +4134,23 @@ public final class JugcraftAgriculture {
 	}
 
 	/** Shapes of each gourd facing north or south, then east or west (models: tools/festival_data.py). */
-	private static final Map<String, VoxelShape[]> GOURD_SHAPES = Map.of(
-			"butternut_squash", new VoxelShape[] {Block.box(4.0, 0.0, 1.0, 12.0, 8.0, 15.0), Block.box(1.0, 0.0, 4.0, 15.0, 8.0, 12.0)},
-			"acorn_squash", new VoxelShape[] {Block.box(3.0, 0.0, 3.0, 13.0, 11.0, 13.0), Block.box(3.0, 0.0, 3.0, 13.0, 11.0, 13.0)},
-			"warty_gourd", new VoxelShape[] {Block.box(4.0, 0.0, 4.0, 12.0, 14.0, 12.0), Block.box(4.0, 0.0, 4.0, 12.0, 14.0, 12.0)},
-			"white_pumpkin", new VoxelShape[] {Shapes.block(), Shapes.block()},
-			"jarrahdale_pumpkin", new VoxelShape[] {Shapes.block(), Shapes.block()},
-			"cinderella_pumpkin", new VoxelShape[] {Shapes.block(), Shapes.block()},
-			"red_kuri_pumpkin", new VoxelShape[] {Shapes.block(), Shapes.block()},
-			"kabocha_pumpkin", new VoxelShape[] {Shapes.block(), Shapes.block()},
-			"bottle_gourd", new VoxelShape[] {Block.box(4.0, 0.0, 4.0, 12.0, 15.0, 12.0), Block.box(4.0, 0.0, 4.0, 12.0, 15.0, 12.0)});
+	private static final Map<String, VoxelShape[]> GOURD_SHAPES = Map.ofEntries(
+			Map.entry("butternut_squash", new VoxelShape[] {Block.box(4.0, 0.0, 1.0, 12.0, 8.0, 15.0), Block.box(1.0, 0.0, 4.0, 15.0, 8.0, 12.0)}),
+			Map.entry("acorn_squash", new VoxelShape[] {Block.box(3.0, 0.0, 3.0, 13.0, 11.0, 13.0), Block.box(3.0, 0.0, 3.0, 13.0, 11.0, 13.0)}),
+			Map.entry("warty_gourd", new VoxelShape[] {Block.box(4.0, 0.0, 4.0, 12.0, 14.0, 12.0), Block.box(4.0, 0.0, 4.0, 12.0, 14.0, 12.0)}),
+			Map.entry("white_pumpkin", new VoxelShape[] {Shapes.block(), Shapes.block()}),
+			Map.entry("jarrahdale_pumpkin", new VoxelShape[] {Shapes.block(), Shapes.block()}),
+			Map.entry("cinderella_pumpkin", new VoxelShape[] {Shapes.block(), Shapes.block()}),
+			Map.entry("red_kuri_pumpkin", new VoxelShape[] {Shapes.block(), Shapes.block()}),
+			Map.entry("kabocha_pumpkin", new VoxelShape[] {Shapes.block(), Shapes.block()}),
+			Map.entry("bottle_gourd", new VoxelShape[] {Block.box(4.0, 0.0, 4.0, 12.0, 15.0, 12.0), Block.box(4.0, 0.0, 4.0, 12.0, 15.0, 12.0)}),
+			// The Pumpkin Patch Market (tools/pumpkin_patch.py SHAPES): each shape holds the model whichever way it lies.
+			Map.entry("turban_squash", new VoxelShape[] {Block.box(2.0, 0.0, 2.0, 14.0, 11.5, 14.0), Block.box(2.0, 0.0, 2.0, 14.0, 11.5, 14.0)}),
+			Map.entry("blue_hubbard_squash", new VoxelShape[] {Block.box(3.0, 0.0, 0.0, 13.0, 9.0, 16.0), Block.box(0.0, 0.0, 3.0, 16.0, 9.0, 13.0)}),
+			Map.entry("sweet_dumpling_squash", new VoxelShape[] {Block.box(4.0, 0.0, 4.0, 12.0, 7.5, 12.0), Block.box(4.0, 0.0, 4.0, 12.0, 7.5, 12.0)}),
+			Map.entry("long_island_cheese_pumpkin", new VoxelShape[] {Block.box(1.0, 0.0, 1.0, 15.0, 9.0, 15.0), Block.box(1.0, 0.0, 1.0, 15.0, 9.0, 15.0)}),
+			Map.entry("spoon_gourd", new VoxelShape[] {Block.box(5.0, 0.0, 0.5, 11.0, 7.0, 15.5), Block.box(0.5, 0.0, 5.0, 15.5, 7.0, 11.0)}),
+			Map.entry("swan_gourd", new VoxelShape[] {Block.box(4.0, 0.0, 1.0, 12.0, 14.0, 15.0), Block.box(1.0, 0.0, 4.0, 15.0, 14.0, 12.0)}));
 
 	/** A squash or gourd block (with its item), its stem and its attached stem. The seeds are registered with the other items. */
 	private static void gourd(String id, String seedId, float growthTime, MapColor color) {

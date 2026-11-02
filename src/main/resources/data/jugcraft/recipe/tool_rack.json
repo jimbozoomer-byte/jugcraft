@@ -1,0 +1,24 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PPP",
+    "N N",
+    "S S"
+  ],
+  "key": {
+    "P": "#minecraft:planks",
+    "N": "minecraft:iron_nugget",
+    "S": "minecraft:stick"
+  },
+  "result": {
+    "id": "jugcraft:tool_rack",
+    "count": 1
+  }
+}

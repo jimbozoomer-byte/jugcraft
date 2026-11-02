@@ -74,6 +74,11 @@ public class MbsPreviewClientGameTests implements FabricClientGameTest {
 			shot(context, singleplayer, x + 2, y + 3, z + 6, x, y - 1, z, "jugcraft_mbs_preview_table");
 			hold(server, "jugcraft:coal_generator");
 			shot(context, singleplayer, x + 3, y + 2, z + 6, x, y - 1, z, "jugcraft_mbs_preview_machine");
+			// Industrial forms have their own part ranges, including more than 64 parts.
+			hold(server, "jugcraft:bio_generator");
+			shot(context, singleplayer, x + 3, y + 2, z + 6, x, y - 1, z, "jugcraft_mbs_preview_bio_generator");
+			hold(server, "jugcraft:large_bio_generator");
+			shot(context, singleplayer, x + 3, y + 2, z + 6, x, y - 1, z, "jugcraft_mbs_preview_large_bio_generator");
 		}
 	}
 

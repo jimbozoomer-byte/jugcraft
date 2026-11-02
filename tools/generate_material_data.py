@@ -108,7 +108,8 @@ def write(path, obj):
         else:
             model_writer.finish_elements(obj["elements"])
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(obj, indent=2) + "\n", encoding="utf-8")
+    options = {"separators": (",", ":")} if path == RES / "jugcraft/newest_building.json" else {"indent": 2}
+    path.write_text(json.dumps(obj, **options) + "\n", encoding="utf-8")
 
 
 def rid(path):
@@ -272,6 +273,7 @@ def assets():
     encyclopedia.lang_entries(lang)
     import encyclopedia_routes
     encyclopedia_routes.lang(lang)
+    lang["screen.jugcraft.crafting.choose"] = "Choose crafting result"
     drone_assets(lang)
     import tower
     tower.write_assets(write, rid, ASSETS, lang)
@@ -316,6 +318,8 @@ def assets():
     unmasking.write_all(write, ASSETS, DATA / MOD, lang)
     import herobrine
     herobrine.write_all(lang)
+    import cursed_mirror
+    cursed_mirror.write_all(write, ASSETS, DATA / MOD, lang, self_drop)
     import chima_data
     chima_data.write_all(write, RES, lang)
     import vanilla_logs
@@ -1284,6 +1288,7 @@ def compaction(recipes, feature, small_tag, small, big, category="building"):
 
 def recipes():
     out = DATA / MOD / "recipe"
+    write(out / "town_commission_board.json", town_assets.town_commissions.RECIPE)
     for metal, info in METALS.items():
         feature = info["feature"]
         ingot, nugget = f"{metal}_ingot", f"{metal}_nugget"
@@ -1469,6 +1474,8 @@ def tags():
     tags = Tags()
     import wall_runs
     wall_runs.write_tags(tags, rid)
+    import cursed_mirror
+    tags.add("block", "minecraft:mineable/pickaxe", rid(cursed_mirror.BLOCK))
     # The Exchange's Market Chest is a wooden counter (tools/exchange_blocks.py).
     tags.add("block", "minecraft:mineable/axe", rid("market_chest"))
     import exchange_poker
@@ -1590,7 +1597,8 @@ def tags():
             tags.add("block", f"minecraft:mineable/{info['tool']}", rid(block))
     tags.add("block", "minecraft:mineable/pickaxe", rid(ph.CLUSTER))
     for block in town_assets.blocks():
-        tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+        tool = "axe" if block == "town_commission_board" else "pickaxe"
+        tags.add("block", f"minecraft:mineable/{tool}", rid(block))
     for value in town_assets.USABLE:
         tags.add("block", "jugcraft:town_usable", value)
     tags.add("block", "minecraft:mineable/axe", rid(ph.CABINET))
@@ -1820,6 +1828,8 @@ def main():
     write(ASSETS / "handbook" / "en_us.json", book)
     import encyclopedia_routes
     write(ASSETS / "encyclopedia" / "en_us.json", encyclopedia_routes.build(book))
+    import starter_guidance
+    starter_guidance.generate(write)
     loot_tables()
     recipes()
     tags()
@@ -1914,6 +1924,11 @@ def main():
     diagonal_connections.write_all(write, ASSETS, RES / 'assets/minecraft')
     import walnut_data
     walnut_data.reconcile(write)
+    import newest_building
+    newest_building.generate(write)
+    diagonal_connections.write_all(write, ASSETS, RES / "assets/minecraft")
+    import model_atlas
+    model_atlas.generate(write)
     from generated_resource_cleanup import prune
     prune(RES, previous, WRITTEN_RESOURCES)
     # Include finished server recipes after removing obsolete generated recipes.

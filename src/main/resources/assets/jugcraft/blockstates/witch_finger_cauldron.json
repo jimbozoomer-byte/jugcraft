@@ -1,0 +1,942 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "false",
+        "servings": "1|2|3|4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "false",
+        "servings": "2|3|4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "false",
+        "servings": "3|4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_2"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "false",
+        "servings": "4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_3"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "false",
+        "servings": "5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_4"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "false",
+        "servings": "6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_5"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "false",
+        "servings": "7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_6"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "false",
+        "servings": "8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_7"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "false",
+        "servings": "9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_8"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "false",
+        "servings": "10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_9"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_table"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "true",
+        "servings": "1|2|3|4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_0_table"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "true",
+        "servings": "2|3|4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_1_table"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "true",
+        "servings": "3|4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_2_table"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "true",
+        "servings": "4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_3_table"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "true",
+        "servings": "5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_4_table"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "true",
+        "servings": "6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_5_table"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "true",
+        "servings": "7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_6_table"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "true",
+        "servings": "8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_7_table"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "true",
+        "servings": "9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_8_table"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "true",
+        "servings": "10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_9_table"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "false",
+        "servings": "1|2|3|4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "false",
+        "servings": "2|3|4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "false",
+        "servings": "3|4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "false",
+        "servings": "4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "false",
+        "servings": "5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_4",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "false",
+        "servings": "6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_5",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "false",
+        "servings": "7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_6",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "false",
+        "servings": "8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_7",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "false",
+        "servings": "9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_8",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "false",
+        "servings": "10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_9",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_table",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "true",
+        "servings": "1|2|3|4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_0_table",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "true",
+        "servings": "2|3|4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_1_table",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "true",
+        "servings": "3|4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_2_table",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "true",
+        "servings": "4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_3_table",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "true",
+        "servings": "5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_4_table",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "true",
+        "servings": "6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_5_table",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "true",
+        "servings": "7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_6_table",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "true",
+        "servings": "8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_7_table",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "true",
+        "servings": "9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_8_table",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "true",
+        "servings": "10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_9_table",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "false",
+        "servings": "1|2|3|4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "false",
+        "servings": "2|3|4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "false",
+        "servings": "3|4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "false",
+        "servings": "4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_3",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "false",
+        "servings": "5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_4",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "false",
+        "servings": "6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_5",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "false",
+        "servings": "7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_6",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "false",
+        "servings": "8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_7",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "false",
+        "servings": "9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_8",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "false",
+        "servings": "10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_9",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_table",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "true",
+        "servings": "1|2|3|4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_0_table",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "true",
+        "servings": "2|3|4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_1_table",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "true",
+        "servings": "3|4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_2_table",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "true",
+        "servings": "4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_3_table",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "true",
+        "servings": "5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_4_table",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "true",
+        "servings": "6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_5_table",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "true",
+        "servings": "7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_6_table",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "true",
+        "servings": "8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_7_table",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "true",
+        "servings": "9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_8_table",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "true",
+        "servings": "10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_9_table",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "false",
+        "servings": "1|2|3|4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "false",
+        "servings": "2|3|4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "false",
+        "servings": "3|4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "false",
+        "servings": "4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_3",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "false",
+        "servings": "5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_4",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "false",
+        "servings": "6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_5",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "false",
+        "servings": "7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_6",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "false",
+        "servings": "8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_7",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "false",
+        "servings": "9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_8",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "false",
+        "servings": "10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_9",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_table",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "true",
+        "servings": "1|2|3|4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_0_table",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "true",
+        "servings": "2|3|4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_1_table",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "true",
+        "servings": "3|4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_2_table",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "true",
+        "servings": "4|5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_3_table",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "true",
+        "servings": "5|6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_4_table",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "true",
+        "servings": "6|7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_5_table",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "true",
+        "servings": "7|8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_6_table",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "true",
+        "servings": "8|9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_7_table",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "true",
+        "servings": "9|10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_8_table",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "true",
+        "servings": "10"
+      },
+      "apply": {
+        "model": "jugcraft:block/witch_finger_cauldron_slot_9_table",
+        "y": 270
+      }
+    }
+  ]
+}

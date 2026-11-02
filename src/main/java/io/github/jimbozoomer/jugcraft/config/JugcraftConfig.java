@@ -36,7 +36,7 @@ public final class JugcraftConfig {
 	 * the blocks they reach, where their shooter may break blocks; false leaves every block whole (guns/GunShots).
 	 */
 	public static final Map<String, Boolean> OPTIONS = Map.of("carving.free_draw", true, "concordance.absent_owner_authority", false, "vanadium.legacy_iron_recipes", false,
-			"guns.beam_mining", true);
+			"guns.beam_mining", true, "backpacks.survival_infinity", false, "aquatic.fish_weights", false, "loot.party_shared", false, "chat.system_delivery", false);
 
 	/**
 	 * Text options, with their defaults.
@@ -51,6 +51,8 @@ public final class JugcraftConfig {
 	 * {@code agriculture/BloodMoon}).</li>
 	 * <li>{@code halloween.graveyard_rising} ({@code on} or {@code off}): whether ringing a bell by a graveyard on a
 	 * night in the Halloween season wakes the dead (see {@code agriculture/GraveyardRising}).</li>
+	 * <li>{@code costumes.disguises} ({@code on} or {@code off}): whether a costume makes the monsters of its kind take
+	 * its wearer for one of their own, all year (see {@code agriculture/Disguises}).</li>
 	 * <li>Seasons (see {@code season/SeasonCalendar.Settings}): the season follows the server's date in
 	 * {@code seasons.timezone} for {@code seasons.hemisphere} ({@code north} or {@code south}); {@code seasons.mode} is
 	 * {@code auto} (follow the date), {@code spring}, {@code summer}, {@code autumn}, {@code winter} (always that
@@ -84,12 +86,14 @@ public final class JugcraftConfig {
 	 * </ul>
 	 */
     public static final Map<String, String> TEXT_OPTIONS = Map.ofEntries(
+            Map.entry("loot.refresh_ticks", "0"), Map.entry("loot.decay_ticks", "0"),
             Map.entry("academy.active", "on"),
             Map.entry("companions.paths_per_tick", "8"), Map.entry("companions.searches_per_tick", "4"),
 			Map.entry("halloween.start", "10-20"), Map.entry("halloween.end", "11-03"), Map.entry("halloween.timezone", "UTC"),
 			Map.entry("halloween.mode", "auto"), Map.entry("halloween.harvest_moon", "10-31"),
 			Map.entry("halloween.horseman_sightings", "on"), Map.entry("halloween.blood_moon", "on"),
 			Map.entry("halloween.graveyard_rising", "on"),
+			Map.entry("costumes.disguises", "on"),
 			Map.entry("seasons.mode", "auto"), Map.entry("seasons.hemisphere", "north"), Map.entry("seasons.timezone", "UTC"),
 			Map.entry("seasons.snow", "off"), Map.entry("seasons.snow_depth", "2"),
 			Map.entry("harvest_feast", "us"), Map.entry("harvest_feast.days", "4"),

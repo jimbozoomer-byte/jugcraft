@@ -1,0 +1,421 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "condition": {
+        "type": "minecraft:all_of",
+        "terms": [
+          {
+            "type": "minecraft:survives_explosion"
+          },
+          {
+            "type": "minecraft:match_block",
+            "blocks": "jugcraft:ticket_booth",
+            "state": {
+              "part": "0"
+            }
+          }
+        ]
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:ticket_booth"
+        }
+      ],
+      "rolls": 1
+    },
+    {
+      "condition": {
+        "type": "minecraft:all_of",
+        "terms": [
+          {
+            "type": "minecraft:match_block",
+            "blocks": "jugcraft:ticket_booth",
+            "state": {
+              "part": "0"
+            }
+          },
+          {
+            "type": "minecraft:inverted",
+            "term": {
+              "type": "minecraft:match_block",
+              "blocks": "jugcraft:ticket_booth",
+              "state": {
+                "roll": "0"
+              }
+            }
+          },
+          {
+            "type": "minecraft:inverted",
+            "term": {
+              "type": "minecraft:match_block",
+              "blocks": "jugcraft:ticket_booth",
+              "state": {
+                "roll": "1"
+              }
+            }
+          }
+        ]
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "minecraft:paper",
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": 2,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:ticket_booth",
+                "state": {
+                  "roll": "4"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 2,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:ticket_booth",
+                "state": {
+                  "roll": "5"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 3,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:ticket_booth",
+                "state": {
+                  "roll": "6"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 3,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:ticket_booth",
+                "state": {
+                  "roll": "7"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 4,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:ticket_booth",
+                "state": {
+                  "roll": "8"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 4,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:ticket_booth",
+                "state": {
+                  "roll": "9"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 5,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:ticket_booth",
+                "state": {
+                  "roll": "10"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 5,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:ticket_booth",
+                "state": {
+                  "roll": "11"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 6,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:ticket_booth",
+                "state": {
+                  "roll": "12"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 6,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:ticket_booth",
+                "state": {
+                  "roll": "13"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 7,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:ticket_booth",
+                "state": {
+                  "roll": "14"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 7,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:ticket_booth",
+                "state": {
+                  "roll": "15"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 8,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:ticket_booth",
+                "state": {
+                  "roll": "16"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 8,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:ticket_booth",
+                "state": {
+                  "roll": "17"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 9,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:ticket_booth",
+                "state": {
+                  "roll": "18"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 9,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:ticket_booth",
+                "state": {
+                  "roll": "19"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 10,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:ticket_booth",
+                "state": {
+                  "roll": "20"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 10,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:ticket_booth",
+                "state": {
+                  "roll": "21"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 11,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:ticket_booth",
+                "state": {
+                  "roll": "22"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 11,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:ticket_booth",
+                "state": {
+                  "roll": "23"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 12,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:ticket_booth",
+                "state": {
+                  "roll": "24"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 12,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:ticket_booth",
+                "state": {
+                  "roll": "25"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 13,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:ticket_booth",
+                "state": {
+                  "roll": "26"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 13,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:ticket_booth",
+                "state": {
+                  "roll": "27"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 14,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:ticket_booth",
+                "state": {
+                  "roll": "28"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 14,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:ticket_booth",
+                "state": {
+                  "roll": "29"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 15,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:ticket_booth",
+                "state": {
+                  "roll": "30"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 15,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:ticket_booth",
+                "state": {
+                  "roll": "31"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 16,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:ticket_booth",
+                "state": {
+                  "roll": "32"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "jugcraft:blocks/ticket_booth"
+}

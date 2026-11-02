@@ -986,6 +986,10 @@ BUILDERS = {
     "shroud_moss": shroud_moss, "creeping_ivy": creeping_ivy, "mandrake": mandrake,
 }
 
+# The fall garden's plants (decor set 4; tools/fall_garden_flora.py), built and painted alike.
+import fall_garden_flora  # noqa: E402  (it reaches back into this module only inside its builders)
+BUILDERS.update(fall_garden_flora.BUILDERS)
+
 _built = {}
 
 

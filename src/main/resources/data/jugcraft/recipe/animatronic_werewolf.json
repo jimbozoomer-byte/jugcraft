@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "BWB",
+    "WCW",
+    "IGI"
+  ],
+  "key": {
+    "B": "minecraft:bone",
+    "W": "minecraft:brown_wool",
+    "C": "minecraft:clock",
+    "I": "minecraft:iron_ingot",
+    "G": "minecraft:gold_ingot"
+  },
+  "result": {
+    "id": "jugcraft:animatronic_werewolf",
+    "count": 1
+  }
+}

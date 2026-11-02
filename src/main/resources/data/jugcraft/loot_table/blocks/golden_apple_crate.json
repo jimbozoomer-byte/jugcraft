@@ -1,0 +1,44 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:golden_apple_crate",
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": 2,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:golden_apple_crate",
+                "state": {
+                  "crates": "2"
+                }
+              }
+            },
+            {
+              "type": "minecraft:set_count",
+              "count": 3,
+              "add": false,
+              "condition": {
+                "type": "minecraft:match_block",
+                "blocks": "jugcraft:golden_apple_crate",
+                "state": {
+                  "crates": "3"
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "rolls": 1
+    }
+  ],
+  "random_sequence": "jugcraft:blocks/golden_apple_crate"
+}

@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "GJG",
+    "GCG",
+    "PIP"
+  ],
+  "key": {
+    "G": "minecraft:glass_pane",
+    "J": "minecraft:jack_o_lantern",
+    "C": "minecraft:cauldron",
+    "P": "#minecraft:planks",
+    "I": "minecraft:iron_ingot"
+  },
+  "result": {
+    "id": "jugcraft:popcorn_wagon",
+    "count": 1
+  }
+}

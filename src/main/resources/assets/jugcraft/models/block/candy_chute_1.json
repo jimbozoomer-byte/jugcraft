@@ -1,0 +1,9 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "p": "jugcraft:block/candy_chute",
+    "particle": "jugcraft:block/candy_chute"
+  },
+  "elements": []
+}

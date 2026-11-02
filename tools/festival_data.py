@@ -7,6 +7,7 @@ textures, and the stem models are rebuilt here without vanilla's biome tint.
 """
 from agriculture import (GOURDS, CRANBERRY, BOG_SOIL_TAG, BOG_SOIL, CHESTNUT, WOOD, WOOD_SETS, WOOD_TAGS, TREE_BLOCKS, DECOR,
                          FOUND_WILD, GOURD_PATCH, CRANBERRY_PATCH, CHESTNUT_TREES, stem, attached_stem)
+import pumpkin_patch
 
 MOD = "jugcraft"
 HORIZONTAL = ("north", "east", "south", "west")
@@ -46,7 +47,18 @@ GOURD_SHAPES = {
 }
 
 
+def patch_gourd_model(gourd):
+    """A Pumpkin Patch Market gourd (tools/pumpkin_patch.py SHAPES): each box takes its part's textures."""
+    textures = {key: rid(path) for key, path in pumpkin_patch.textures(gourd).items()}
+    textures["particle"], textures["stem"] = textures["side"], rid("block/gourd_stalk")
+    faces = {"skin": sides("#side", "#top", "#top"), "cap": sides("#cap", "#cap_top", "#cap_top"), "stalk": sides("#stem")}
+    return {"parent": "minecraft:block/block", "textures": textures,
+            "elements": [box(lo, hi, faces[part]) for lo, hi, part in pumpkin_patch.SHAPES[gourd]]}
+
+
 def gourd_model(gourd):
+    if gourd in pumpkin_patch.SHAPES:
+        return patch_gourd_model(gourd)
     side, top = rid(f"block/{gourd}_side"), rid(f"block/{gourd}_top")
     if GOURDS[gourd].get("cube"):
         # Heirloom pumpkins are whole blocks like vanilla's: vanilla's cube_column shape, our textures.

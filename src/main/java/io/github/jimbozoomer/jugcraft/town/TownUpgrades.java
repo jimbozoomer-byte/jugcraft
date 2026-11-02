@@ -22,7 +22,7 @@ import net.minecraft.world.phys.AABB;
 
 /** Explicit, resumable blueprint migrations. Never call the terrain builder for an existing chunk. */
 public final class TownUpgrades {
-    public static final int CURRENT = 3;
+    public static final int CURRENT = 4;
     private static final Map<Integer, TownData> HISTORY = new HashMap<>();
     private TownUpgrades() {}
     public static void register() {
@@ -60,13 +60,16 @@ public final class TownUpgrades {
             BlockPos.CODEC.optionalFieldOf("origin").forGetter(s -> s.origin),
             Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("revisions", Map.of()).forGetter(s -> s.revisions),
             Codec.INT.optionalFieldOf("requested", 1).forGetter(s -> s.requested),
-            Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("conflicts", Map.of()).forGetter(s -> s.conflicts)
+            Codec.unboundedMap(Codec.STRING, Codec.INT).optionalFieldOf("conflicts", Map.of()).forGetter(s -> s.conflicts),
+            Codec.LONG.listOf().optionalFieldOf("preserved_decor", List.of()).forGetter(s -> List.copyOf(s.preservedDecor))
         ).apply(i, Progress::new));
         private Optional<BlockPos> origin;
         private final Map<String, Integer> revisions, conflicts;
         private int requested;
-        public Progress() { this(Optional.empty(), Map.of(), 1, Map.of()); }
-        private Progress(Optional<BlockPos> origin, Map<String,Integer> revisions, int requested, Map<String,Integer> conflicts) {
+        final Set<Long> preservedDecor = new HashSet<>();
+        public Progress() { this(Optional.empty(), Map.of(), 1, Map.of(), List.of()); }
+        private Progress(Optional<BlockPos> origin, Map<String,Integer> revisions, int requested, Map<String,Integer> conflicts, List<Long> preservedDecor) {
+            this.preservedDecor.addAll(preservedDecor);
             this.origin = origin; this.revisions = new HashMap<>(revisions);
             this.requested = requested; this.conflicts = new HashMap<>(conflicts);
         }
@@ -77,7 +80,7 @@ public final class TownUpgrades {
         Progress p = level.getServer().overworld().getDataStorage().computeIfAbsent(TYPE);
         Optional<BlockPos> origin = Optional.ofNullable(TownState.get(level).origin());
         if (!p.origin.equals(origin)) {
-            p.origin = origin; p.revisions.clear(); p.conflicts.clear(); p.requested = 1; p.setDirty();
+            p.origin = origin; p.revisions.clear(); p.conflicts.clear(); p.preservedDecor.clear(); p.requested = 1; p.setDirty();
         }
         return p;
     }
@@ -202,9 +205,10 @@ public final class TownUpgrades {
     /** Conservative compare-and-set. Containers are never cleared, even when their block type matches. */
     public static boolean replaceAuthored(ServerLevel level, BlockPos pos, BlockState expected, BlockState wanted) {
         if (level.getChunkSource().getChunkNow(pos.getX()>>4,pos.getZ()>>4) == null) return false;
+        if (wanted.getBlock() instanceof CommissionBoardBlock) return placeNoticeboard(level,pos,wanted);
         BlockState actual = level.getBlockState(pos);
         if (actual == wanted) return true;
-        if (actual != expected) return false;
+        if (actual != expected || fixtureNearby(level,pos)) return false;
         if (level.getBlockEntity(pos) != null) {
             if (level.getBlockEntity(pos) instanceof net.minecraft.world.level.block.entity.BannerBlockEntity banner) {
                 // Plain authored tower flags can retire. Player-named or patterned
@@ -227,6 +231,37 @@ public final class TownUpgrades {
         }
         TownBuilder.set(level,pos,wanted);
         return true;
+    }
+    /** Preflight all nine cells before adding any tile. One owner edit preserves the whole footprint. */
+    private static boolean placeNoticeboard(ServerLevel level,BlockPos pos,BlockState wanted) {
+        BlockPos origin=TownState.get(level).origin();
+        if(origin==null)return false;
+        BlockPos root=CommissionBoardBlock.rootPos(pos,wanted);
+        var facing=wanted.getValue(CommissionBoardBlock.FACING);
+        for(int part=0;part<9;part++) {
+            BlockPos at=CommissionBoardBlock.partPos(root,facing,part);
+            if(level.getChunkSource().getChunkNow(at.getX()>>4,at.getZ()>>4)==null)return false;
+            var actual=level.getBlockState(at);
+            var desired=wanted.setValue(CommissionBoardBlock.PART,part);
+            if(actual==desired)continue;
+            int revision=version(level,ChunkPos.containing(at).pack());
+            TownData previous=revision>=CURRENT?TownData.get():historical(revision);
+            BlockPos relative=at.subtract(origin);
+            int index=previous.index(relative.getX(),relative.getY(),relative.getZ());
+            if(index==TownData.KEEP || actual!=previous.state(index) || !actual.isAir()
+                || level.getBlockEntity(at)!=null || fixtureNearby(level,at))return false;
+        }
+        for(int part=0;part<9;part++)TownBuilder.set(level,CommissionBoardBlock.partPos(root,facing,part),wanted.setValue(CommissionBoardBlock.PART,part));
+        return true;
+    }
+    /** Leave working room around owner-placed casino furniture, including its multiblock parts. */
+    public static boolean fixtureNearby(ServerLevel level, BlockPos pos) {
+        for(int dx=-2;dx<=2;dx++)for(int dz=-2;dz<=2;dz++)for(int dy=-1;dy<=1;dy++){
+            BlockPos at=pos.offset(dx,dy,dz);
+            if(level.getChunkSource().getChunkNow(at.getX()>>4,at.getZ()>>4)!=null
+                && level.getBlockState(at).getBlock() instanceof io.github.jimbozoomer.jugcraft.finance.CasinoBlock)return true;
+        }
+        return false;
     }
     private static Map<BlockPos,BlockState> decorations(TownData data,String theme) {
         Map<BlockPos,BlockState> result = new HashMap<>();

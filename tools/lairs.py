@@ -252,10 +252,11 @@ CROWN = {
     "harvest_min": 8,
 }
 # The harvest round the scarecrow: pumpkins, carved or not, lit or not, the heirlooms (carved by hand or not), the squashes
-# and gourds, and giant pumpkins (each of whose blocks counts).
+# and gourds (the Pumpkin Patch Market's too), and giant pumpkins (each of whose blocks counts).
 CROWFIELD_HARVEST = (["minecraft:pumpkin", "minecraft:carved_pumpkin", "minecraft:jack_o_lantern", "jugcraft:hand_carved_pumpkin",
                       "jugcraft:butternut_squash", "jugcraft:acorn_squash", "jugcraft:warty_gourd", "jugcraft:bottle_gourd",
-                      "jugcraft:giant_pumpkin"]
+                      "jugcraft:giant_pumpkin", "jugcraft:turban_squash", "jugcraft:blue_hubbard_squash", "jugcraft:sweet_dumpling_squash",
+                      "jugcraft:long_island_cheese_pumpkin", "jugcraft:spoon_gourd", "jugcraft:swan_gourd"]
                      + [f"jugcraft:{kind}_pumpkin" for kind in ("white", "jarrahdale", "cinderella", "red_kuri", "kabocha")]
                      + [f"jugcraft:hand_carved_{kind}_pumpkin" for kind in ("white", "jarrahdale", "cinderella", "red_kuri", "kabocha")])
 # The King's Gourds (the Crowfield's fixtures): green (0), ripening (1, 2), lit (3) and picked (4), with the light of each.

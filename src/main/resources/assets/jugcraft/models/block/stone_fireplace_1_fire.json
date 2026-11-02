@@ -1,0 +1,110 @@
+{
+  "textures": {
+    "particle": "jugcraft:block/stone_fireplace_fire",
+    "f": "jugcraft:block/stone_fireplace_fire"
+  },
+  "elements": [
+    {
+      "from": [
+        0.0,
+        4.0,
+        10.0
+      ],
+      "to": [
+        16.0,
+        13.0,
+        10.0
+      ],
+      "shade": false,
+      "light_emission": 15,
+      "faces": {
+        "north": {
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ],
+          "texture": "#f"
+        },
+        "south": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#f"
+        }
+      }
+    },
+    {
+      "from": [
+        0.0,
+        4.0,
+        11.75
+      ],
+      "to": [
+        16.0,
+        13.0,
+        11.75
+      ],
+      "shade": false,
+      "light_emission": 15,
+      "faces": {
+        "north": {
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ],
+          "texture": "#f"
+        },
+        "south": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#f"
+        }
+      }
+    },
+    {
+      "from": [
+        0.0,
+        4.0,
+        13.0
+      ],
+      "to": [
+        16.0,
+        13.0,
+        13.0
+      ],
+      "shade": false,
+      "light_emission": 15,
+      "faces": {
+        "north": {
+          "uv": [
+            0.0,
+            0.0,
+            16.0,
+            16.0
+          ],
+          "texture": "#f"
+        },
+        "south": {
+          "uv": [
+            16.0,
+            0.0,
+            0.0,
+            16.0
+          ],
+          "texture": "#f"
+        }
+      }
+    }
+  ]
+}

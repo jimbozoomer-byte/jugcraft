@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "facing=north,half=lower,running=false": {
+      "model": "jugcraft:block/organ_grinder_skeleton"
+    },
+    "facing=north,half=lower,running=true": {
+      "model": "jugcraft:block/organ_grinder_skeleton"
+    },
+    "facing=north,half=upper,running=false": {
+      "model": "jugcraft:block/organ_grinder_skeleton_upper"
+    },
+    "facing=north,half=upper,running=true": {
+      "model": "jugcraft:block/organ_grinder_skeleton_upper"
+    },
+    "facing=east,half=lower,running=false": {
+      "model": "jugcraft:block/organ_grinder_skeleton",
+      "y": 90
+    },
+    "facing=east,half=lower,running=true": {
+      "model": "jugcraft:block/organ_grinder_skeleton",
+      "y": 90
+    },
+    "facing=east,half=upper,running=false": {
+      "model": "jugcraft:block/organ_grinder_skeleton_upper",
+      "y": 90
+    },
+    "facing=east,half=upper,running=true": {
+      "model": "jugcraft:block/organ_grinder_skeleton_upper",
+      "y": 90
+    },
+    "facing=south,half=lower,running=false": {
+      "model": "jugcraft:block/organ_grinder_skeleton",
+      "y": 180
+    },
+    "facing=south,half=lower,running=true": {
+      "model": "jugcraft:block/organ_grinder_skeleton",
+      "y": 180
+    },
+    "facing=south,half=upper,running=false": {
+      "model": "jugcraft:block/organ_grinder_skeleton_upper",
+      "y": 180
+    },
+    "facing=south,half=upper,running=true": {
+      "model": "jugcraft:block/organ_grinder_skeleton_upper",
+      "y": 180
+    },
+    "facing=west,half=lower,running=false": {
+      "model": "jugcraft:block/organ_grinder_skeleton",
+      "y": 270
+    },
+    "facing=west,half=lower,running=true": {
+      "model": "jugcraft:block/organ_grinder_skeleton",
+      "y": 270
+    },
+    "facing=west,half=upper,running=false": {
+      "model": "jugcraft:block/organ_grinder_skeleton_upper",
+      "y": 270
+    },
+    "facing=west,half=upper,running=true": {
+      "model": "jugcraft:block/organ_grinder_skeleton_upper",
+      "y": 270
+    }
+  }
+}

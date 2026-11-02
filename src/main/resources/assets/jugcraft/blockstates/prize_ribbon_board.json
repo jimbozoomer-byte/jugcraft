@@ -1,0 +1,211 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "north",
+        "half": "lower"
+      },
+      "apply": {
+        "model": "jugcraft:block/prize_ribbon_board"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "half": "upper"
+      },
+      "apply": {
+        "model": "jugcraft:block/prize_ribbon_board_upper"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "half": "lower",
+        "first": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/prize_ribbon_board_first"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "half": "lower",
+        "second": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/prize_ribbon_board_second"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "half": "lower",
+        "third": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/prize_ribbon_board_third"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "half": "lower"
+      },
+      "apply": {
+        "model": "jugcraft:block/prize_ribbon_board",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "half": "upper"
+      },
+      "apply": {
+        "model": "jugcraft:block/prize_ribbon_board_upper",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "half": "lower",
+        "first": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/prize_ribbon_board_first",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "half": "lower",
+        "second": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/prize_ribbon_board_second",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "half": "lower",
+        "third": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/prize_ribbon_board_third",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "half": "lower"
+      },
+      "apply": {
+        "model": "jugcraft:block/prize_ribbon_board",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "half": "upper"
+      },
+      "apply": {
+        "model": "jugcraft:block/prize_ribbon_board_upper",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "half": "lower",
+        "first": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/prize_ribbon_board_first",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "half": "lower",
+        "second": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/prize_ribbon_board_second",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "half": "lower",
+        "third": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/prize_ribbon_board_third",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "half": "lower"
+      },
+      "apply": {
+        "model": "jugcraft:block/prize_ribbon_board",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "half": "upper"
+      },
+      "apply": {
+        "model": "jugcraft:block/prize_ribbon_board_upper",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "half": "lower",
+        "first": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/prize_ribbon_board_first",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "half": "lower",
+        "second": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/prize_ribbon_board_second",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "half": "lower",
+        "third": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/prize_ribbon_board_third",
+        "y": 270
+      }
+    }
+  ]
+}

@@ -1,0 +1,168 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/pumpkin_path_light_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/pumpkin_path_light_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "runner": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/pumpkin_path_light_lantern"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "runner": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/pumpkin_path_light_glow"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/pumpkin_path_light_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/pumpkin_path_light_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "runner": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/pumpkin_path_light_lantern",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "runner": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/pumpkin_path_light_glow",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/pumpkin_path_light_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/pumpkin_path_light_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "runner": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/pumpkin_path_light_lantern",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "runner": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/pumpkin_path_light_glow",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/pumpkin_path_light_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/pumpkin_path_light_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "runner": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/pumpkin_path_light_lantern",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "runner": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/pumpkin_path_light_glow",
+        "y": 270
+      }
+    }
+  ]
+}

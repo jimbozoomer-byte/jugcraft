@@ -1,0 +1,22 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "biomes"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jugcraft:cabbage_seeds",
+    "minecraft:purple_dye"
+  ],
+  "result": {
+    "id": "jugcraft:ornamental_kale",
+    "count": 1
+  }
+}

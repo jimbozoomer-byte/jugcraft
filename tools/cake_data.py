@@ -16,6 +16,9 @@ from decor_data import MOD, rid, block_model, self_drop, flat_item, FACING_Y
 # The model's quarters, in the order slices are taken (CakeBlock.QUARTERS, facing north): the front right (north-west),
 # the front left, the back left, the back right.
 QUARTERS = [((0, 0), (8, 8)), ((8, 0), (16, 8)), ((8, 8), (16, 16)), ((0, 8), (8, 16))]
+# Where a cake's jam lies on its toppings texture: at the top left (its top, then its sides on the rows under it, a row a
+# texel of its height), unless the cake has bars there too (the Pumpkin Layer Cake's fondant pumpkin).
+JAM_UV = {"pumpkin_layer_cake": (8, 8)}
 
 
 def quarter_of(lo, hi):
@@ -92,17 +95,19 @@ def toppings(cake, bites):
     if cake in cakes.JAM:
         lo, hi = cakes.turn(*cakes.jam_box(cake))
         jx, jz = lo[0], lo[2]
+        ou, ov = JAM_UV.get(cake, (0, 0))
+        rows = int(cakes.JAM[cake][1])
         for q in range(bites, len(QUARTERS)):
             (x0, z0), (x1, z1) = QUARTERS[q]
             a, b = [max(lo[0], x0), lo[1], max(lo[2], z0)], [min(hi[0], x1), hi[1], min(hi[2], z1)]
             if a[0] >= b[0] or a[2] >= b[2]:
                 continue
-            faces = {"up": {"texture": "#toppings", "uv": [a[0] - jx, a[2] - jz, b[0] - jx, b[2] - jz]}}
+            faces = {"up": {"texture": "#toppings", "uv": [ou + a[0] - jx, ov + a[2] - jz, ou + b[0] - jx, ov + b[2] - jz]}}
             # Its sides on the jam's side row: the outer ones always, the cut ones once the quarter beside is gone.
             for side, edge, outer in (("north", a[2], lo[2]), ("south", b[2], hi[2]), ("west", a[0], lo[0]), ("east", b[0], hi[0])):
                 if edge == outer or quarter_of(*neighbour_point(side, a, b)) in gone(bites):
                     span = (a[0] - jx, b[0] - jx) if side in ("north", "south") else (a[2] - jz, b[2] - jz)
-                    faces[side] = {"texture": "#toppings", "uv": [span[0], 4, span[1], 5]}
+                    faces[side] = {"texture": "#toppings", "uv": [ou + span[0], ov + 4, ou + span[1], ov + 4 + rows]}
             elements.append({"from": a, "to": b, "faces": faces})
     return elements
 

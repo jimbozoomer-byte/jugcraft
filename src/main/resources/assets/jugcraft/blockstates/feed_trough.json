@@ -1,0 +1,426 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "north",
+        "part": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_0_feed_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_0_feed_2"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_0_feed_3"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_0_feed_4"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_1_feed_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_1_feed_2"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_1_feed_3"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_1_feed_4"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_0_feed_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_0_feed_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_0_feed_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_0_feed_4",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_1_feed_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_1_feed_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_1_feed_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_1_feed_4",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_0_feed_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_0_feed_2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_0_feed_3",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_0_feed_4",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_1_feed_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_1_feed_2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_1_feed_3",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_1_feed_4",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_0_feed_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_0_feed_2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_0_feed_3",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_0_feed_4",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "fill": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_1_feed_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "fill": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_1_feed_2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "fill": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_1_feed_3",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "fill": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/feed_trough_1_feed_4",
+        "y": 270
+      }
+    }
+  ]
+}

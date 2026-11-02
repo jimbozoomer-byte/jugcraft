@@ -1,0 +1,24 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "C C",
+    "PSP",
+    "P P"
+  ],
+  "key": {
+    "C": "minecraft:iron_chain",
+    "P": "#minecraft:planks",
+    "S": "#minecraft:wooden_slabs"
+  },
+  "result": {
+    "id": "jugcraft:porch_swing",
+    "count": 1
+  }
+}

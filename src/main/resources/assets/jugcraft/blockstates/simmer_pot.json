@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=north,heated=false": {
+      "model": "jugcraft:block/simmer_pot"
+    },
+    "facing=east,heated=false": {
+      "model": "jugcraft:block/simmer_pot",
+      "y": 90
+    },
+    "facing=south,heated=false": {
+      "model": "jugcraft:block/simmer_pot",
+      "y": 180
+    },
+    "facing=west,heated=false": {
+      "model": "jugcraft:block/simmer_pot",
+      "y": 270
+    },
+    "facing=north,heated=true": {
+      "model": "jugcraft:block/simmer_pot_simmering"
+    },
+    "facing=east,heated=true": {
+      "model": "jugcraft:block/simmer_pot_simmering",
+      "y": 90
+    },
+    "facing=south,heated=true": {
+      "model": "jugcraft:block/simmer_pot_simmering",
+      "y": 180
+    },
+    "facing=west,heated=true": {
+      "model": "jugcraft:block/simmer_pot_simmering",
+      "y": 270
+    }
+  }
+}

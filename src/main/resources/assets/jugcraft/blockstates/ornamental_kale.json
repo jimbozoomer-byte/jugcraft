@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "jugcraft:block/ornamental_kale"
+      },
+      {
+        "model": "jugcraft:block/ornamental_kale",
+        "y": 90
+      },
+      {
+        "model": "jugcraft:block/ornamental_kale",
+        "y": 180
+      },
+      {
+        "model": "jugcraft:block/ornamental_kale",
+        "y": 270
+      }
+    ]
+  }
+}

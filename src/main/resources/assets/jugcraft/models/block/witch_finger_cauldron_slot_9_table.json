@@ -1,0 +1,78 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "p": "jugcraft:block/witch_finger_cauldron",
+    "particle": "jugcraft:block/witch_finger_cauldron"
+  },
+  "elements": [
+    {
+      "from": [
+        8.25,
+        -1.25,
+        8.0
+      ],
+      "to": [
+        8.75,
+        1.0,
+        8.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            2.0,
+            0.0,
+            2.125,
+            0.375
+          ],
+          "texture": "#p"
+        },
+        "south": {
+          "uv": [
+            2.0,
+            0.0,
+            2.125,
+            0.375
+          ],
+          "texture": "#p"
+        },
+        "east": {
+          "uv": [
+            2.0,
+            0.0,
+            2.125,
+            0.375
+          ],
+          "texture": "#p"
+        },
+        "west": {
+          "uv": [
+            2.0,
+            0.0,
+            2.125,
+            0.375
+          ],
+          "texture": "#p"
+        },
+        "up": {
+          "uv": [
+            6.125,
+            0.0,
+            6.25,
+            0.125
+          ],
+          "texture": "#p"
+        },
+        "down": {
+          "uv": [
+            6.375,
+            0.0,
+            6.5,
+            0.125
+          ],
+          "texture": "#p"
+        }
+      }
+    }
+  ]
+}

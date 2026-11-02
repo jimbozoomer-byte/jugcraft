@@ -1,0 +1,105 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "p": "jugcraft:block/popcorn_wagon",
+    "particle": "jugcraft:block/popcorn_wagon"
+  },
+  "elements": [
+    {
+      "from": [
+        4.95,
+        8.05,
+        4.45
+      ],
+      "to": [
+        11.05,
+        8.45,
+        5.55
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            13.5,
+            3.25,
+            14.375,
+            3.375
+          ],
+          "texture": "#p"
+        },
+        "south": {
+          "uv": [
+            13.5,
+            3.25,
+            14.375,
+            3.375
+          ],
+          "texture": "#p"
+        },
+        "east": {
+          "uv": [
+            7.625,
+            3.5,
+            7.875,
+            3.625
+          ],
+          "texture": "#p"
+        },
+        "west": {
+          "uv": [
+            7.625,
+            3.5,
+            7.875,
+            3.625
+          ],
+          "texture": "#p"
+        },
+        "down": {
+          "uv": [
+            3.625,
+            2.75,
+            4.5,
+            3.0
+          ],
+          "texture": "#p"
+        },
+        "up": {
+          "uv": [
+            3.625,
+            2.75,
+            4.5,
+            3.0
+          ],
+          "texture": "#p"
+        }
+      },
+      "light_emission": 15,
+      "shade": false
+    },
+    {
+      "from": [
+        6.75,
+        13.5,
+        1.7
+      ],
+      "to": [
+        9.25,
+        15.5,
+        1.7
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            5.375,
+            2.75,
+            5.75,
+            3.0
+          ],
+          "texture": "#p"
+        }
+      },
+      "light_emission": 15,
+      "shade": false
+    }
+  ]
+}

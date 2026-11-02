@@ -1,0 +1,51 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "p": "jugcraft:block/stone_fireplace",
+    "particle": "jugcraft:block/stone_fireplace"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        8.0
+      ],
+      "to": [
+        16,
+        16.0,
+        16.0
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            1.5,
+            0.0,
+            3.5,
+            2.0426
+          ],
+          "texture": "#p"
+        },
+        "south": {
+          "uv": [
+            1.5,
+            0.0,
+            3.5,
+            2.0426
+          ],
+          "texture": "#p"
+        },
+        "up": {
+          "uv": [
+            1.5,
+            4.875,
+            3.5,
+            5.875
+          ],
+          "texture": "#p"
+        }
+      }
+    }
+  ]
+}

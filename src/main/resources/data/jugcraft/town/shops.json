@@ -82,113 +82,113 @@
       "buys": [
         {
           "item": "minecraft:wheat",
-          "count": 16,
-          "price": 3
+          "count": 64,
+          "price": 1
         },
         {
           "item": "minecraft:carrot",
-          "count": 16,
-          "price": 3
+          "count": 64,
+          "price": 1
         },
         {
           "item": "minecraft:potato",
-          "count": 16,
-          "price": 3
+          "count": 64,
+          "price": 1
         },
         {
           "item": "minecraft:beetroot",
-          "count": 16,
-          "price": 3
+          "count": 64,
+          "price": 1
         },
         {
           "item": "minecraft:pumpkin",
-          "count": 4,
-          "price": 3
-        },
-        {
-          "item": "minecraft:melon_slice",
-          "count": 32,
-          "price": 3
-        },
-        {
-          "item": "minecraft:sugar_cane",
-          "count": 16,
-          "price": 2
-        },
-        {
-          "item": "minecraft:cocoa_beans",
-          "count": 16,
-          "price": 3
-        },
-        {
-          "item": "minecraft:sweet_berries",
-          "count": 16,
-          "price": 2
-        },
-        {
-          "item": "minecraft:apple",
-          "count": 8,
-          "price": 3
-        },
-        {
-          "item": "minecraft:egg",
-          "count": 12,
-          "price": 2
-        },
-        {
-          "item": "minecraft:leather",
-          "count": 4,
-          "price": 3
-        },
-        {
-          "item": "minecraft:white_wool",
-          "count": 8,
-          "price": 3
-        },
-        {
-          "item": "minecraft:feather",
-          "count": 16,
-          "price": 2
-        },
-        {
-          "item": "minecraft:string",
-          "count": 16,
-          "price": 3
-        },
-        {
-          "item": "minecraft:bone",
-          "count": 16,
-          "price": 3
-        },
-        {
-          "item": "minecraft:rotten_flesh",
           "count": 32,
           "price": 1
         },
         {
+          "item": "minecraft:melon_slice",
+          "count": 64,
+          "price": 1
+        },
+        {
+          "item": "minecraft:sugar_cane",
+          "count": 64,
+          "price": 1
+        },
+        {
+          "item": "minecraft:cocoa_beans",
+          "count": 64,
+          "price": 1
+        },
+        {
+          "item": "minecraft:sweet_berries",
+          "count": 64,
+          "price": 1
+        },
+        {
+          "item": "minecraft:apple",
+          "count": 32,
+          "price": 1
+        },
+        {
+          "item": "minecraft:egg",
+          "count": 16,
+          "price": 1
+        },
+        {
+          "item": "minecraft:leather",
+          "count": 16,
+          "price": 1
+        },
+        {
+          "item": "minecraft:white_wool",
+          "count": 32,
+          "price": 1
+        },
+        {
+          "item": "minecraft:feather",
+          "count": 64,
+          "price": 1
+        },
+        {
+          "item": "minecraft:string",
+          "count": 64,
+          "price": 1
+        },
+        {
+          "item": "minecraft:bone",
+          "count": 64,
+          "price": 1
+        },
+        {
+          "item": "minecraft:rotten_flesh",
+          "count": 64,
+          "price": 1
+        },
+        {
           "item": "minecraft:gunpowder",
-          "count": 8,
-          "price": 4
+          "count": 32,
+          "price": 1
         },
         {
           "item": "minecraft:honeycomb",
-          "count": 4,
-          "price": 3
+          "count": 16,
+          "price": 1
         },
         {
           "item": "minecraft:oak_log",
-          "count": 16,
-          "price": 3
+          "count": 64,
+          "price": 1
         },
         {
           "item": "minecraft:spruce_log",
-          "count": 16,
-          "price": 3
+          "count": 64,
+          "price": 1
         },
         {
           "item": "minecraft:birch_log",
-          "count": 16,
-          "price": 3
+          "count": 64,
+          "price": 1
         },
         {
           "item": "minecraft:cobblestone",
@@ -197,54 +197,64 @@
         },
         {
           "item": "minecraft:coal",
-          "count": 16,
-          "price": 4
+          "count": 32,
+          "price": 1
         },
         {
           "item": "minecraft:copper_ingot",
-          "count": 16,
-          "price": 5
+          "count": 32,
+          "price": 1
         },
         {
           "item": "minecraft:iron_ingot",
-          "count": 8,
-          "price": 8
+          "count": 16,
+          "price": 2
         },
         {
           "item": "minecraft:gold_ingot",
           "count": 4,
-          "price": 8
-        },
-        {
-          "item": "minecraft:redstone",
-          "count": 32,
-          "price": 6
-        },
-        {
-          "item": "minecraft:lapis_lazuli",
-          "count": 16,
-          "price": 6
-        },
-        {
-          "item": "minecraft:emerald",
-          "count": 1,
-          "price": 3
-        },
-        {
-          "item": "minecraft:amethyst_shard",
-          "count": 8,
           "price": 4
         },
         {
+          "item": "minecraft:redstone",
+          "count": 64,
+          "price": 1
+        },
+        {
+          "item": "minecraft:lapis_lazuli",
+          "count": 32,
+          "price": 1
+        },
+        {
+          "item": "minecraft:emerald",
+          "count": 4,
+          "price": 1
+        },
+        {
+          "item": "minecraft:amethyst_shard",
+          "count": 32,
+          "price": 1
+        },
+        {
           "item": "minecraft:cod",
-          "count": 8,
-          "price": 3
+          "count": 32,
+          "price": 1
         },
         {
           "item": "minecraft:salmon",
-          "count": 8,
-          "price": 3
+          "count": 32,
+          "price": 1
         }
+      ],
+      "hours": [
+        1000,
+        12000
+      ],
+      "essentials": [
+        "minecraft:torch",
+        "minecraft:bread",
+        "minecraft:cooked_beef",
+        "minecraft:white_bed"
       ]
     },
     "seasonal": {
@@ -527,7 +537,11 @@
           ]
         }
       ],
-      "buys": []
+      "buys": [],
+      "hours": [
+        1000,
+        12000
+      ]
     },
     "curios": {
       "name": "Curiosities",
@@ -643,7 +657,11 @@
           "price": 5
         }
       ],
-      "buys": []
+      "buys": [],
+      "hours": [
+        1000,
+        12000
+      ]
     },
     "florist": {
       "name": "Florist",
@@ -754,7 +772,11 @@
           "price": 3
         }
       ],
-      "buys": []
+      "buys": [],
+      "hours": [
+        1000,
+        12000
+      ]
     }
   },
   "economy": {

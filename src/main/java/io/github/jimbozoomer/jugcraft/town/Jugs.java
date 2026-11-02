@@ -55,16 +55,19 @@ public final class Jugs {
 
 	public static final class Data extends SavedData {
 		public static final Codec<Data> CODEC = RecordCodecBuilder.create(i -> i.group(
-				Codec.unboundedMap(UUIDUtil.STRING_CODEC, Codec.LONG).fieldOf("balances").forGetter(d -> d.balances))
+				Codec.unboundedMap(UUIDUtil.STRING_CODEC, Codec.LONG).fieldOf("balances").forGetter(d -> d.balances),
+                Codec.unboundedMap(Codec.STRING, TownCommissions.Delivery.CODEC).optionalFieldOf("civic", Map.of()).forGetter(d -> d.civic))
 				.apply(i, Data::new));
 		static final SavedDataType<Data> TYPE = new SavedDataType<>(Jugcraft.id("jugs"), Data::new, CODEC, null);
 
 		private final Map<UUID, Long> balances = new HashMap<>();
+        final Map<String, TownCommissions.Delivery> civic = new HashMap<>();
 
 		Data() {
 		}
 
-		Data(Map<UUID, Long> saved) {
+		Data(Map<UUID, Long> saved, Map<String, TownCommissions.Delivery> civic) {
+            this.civic.putAll(civic);
 			saved.forEach((player, balance) -> {
 				if (balance > 0) {
 					balances.put(player, Math.min(balance, TownShops.get().maxBalance));

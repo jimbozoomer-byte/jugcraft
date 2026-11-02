@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jugcraft:block/milk_can"
+    },
+    "facing=east": {
+      "model": "jugcraft:block/milk_can",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jugcraft:block/milk_can",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jugcraft:block/milk_can",
+      "y": 270
+    }
+  }
+}

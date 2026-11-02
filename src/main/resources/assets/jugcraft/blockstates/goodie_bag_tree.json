@@ -1,0 +1,598 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "false",
+        "servings": "1|2|3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "false",
+        "servings": "2|3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "false",
+        "servings": "3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_2"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "false",
+        "servings": "4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_3"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "false",
+        "servings": "5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_4"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "false",
+        "servings": "6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_5"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_table"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "true",
+        "servings": "1|2|3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_0_table"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "true",
+        "servings": "2|3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_1_table"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "true",
+        "servings": "3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_2_table"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "true",
+        "servings": "4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_3_table"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "true",
+        "servings": "5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_4_table"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "true",
+        "servings": "6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_5_table"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "false",
+        "servings": "1|2|3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "false",
+        "servings": "2|3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "false",
+        "servings": "3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "false",
+        "servings": "4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "false",
+        "servings": "5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_4",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "false",
+        "servings": "6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_5",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_table",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "true",
+        "servings": "1|2|3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_0_table",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "true",
+        "servings": "2|3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_1_table",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "true",
+        "servings": "3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_2_table",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "true",
+        "servings": "4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_3_table",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "true",
+        "servings": "5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_4_table",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "true",
+        "servings": "6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_5_table",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "false",
+        "servings": "1|2|3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "false",
+        "servings": "2|3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "false",
+        "servings": "3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "false",
+        "servings": "4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_3",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "false",
+        "servings": "5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_4",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "false",
+        "servings": "6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_5",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_table",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "true",
+        "servings": "1|2|3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_0_table",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "true",
+        "servings": "2|3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_1_table",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "true",
+        "servings": "3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_2_table",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "true",
+        "servings": "4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_3_table",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "true",
+        "servings": "5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_4_table",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "true",
+        "servings": "6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_5_table",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "false",
+        "servings": "1|2|3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "false",
+        "servings": "2|3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "false",
+        "servings": "3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "false",
+        "servings": "4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_3",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "false",
+        "servings": "5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_4",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "false",
+        "servings": "6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_5",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_table",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "true",
+        "servings": "1|2|3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_0_table",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "true",
+        "servings": "2|3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_1_table",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "true",
+        "servings": "3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_2_table",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "true",
+        "servings": "4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_3_table",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "true",
+        "servings": "5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_4_table",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "true",
+        "servings": "6"
+      },
+      "apply": {
+        "model": "jugcraft:block/goodie_bag_tree_slot_5_table",
+        "y": 270
+      }
+    }
+  ]
+}

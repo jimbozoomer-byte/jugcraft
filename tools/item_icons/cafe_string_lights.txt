@@ -1,0 +1,20 @@
+# Cafe String Lights: original Jugcraft pixel map. A swag of black cord sagging between its ends, three warm Edison
+# bulbs hanging on drops below it.
+# materials: main=lacquer second=petal
+# family: compact
+................
+................
+................
+.OO..........OO.
+OMMOO......OOMMO
+.ODMMOOOOOOMMMO.
+.ODOMMMMMMMMDO..
+.ODOOOODOOOODO..
+.ODO..ODO..ODO..
+.gYFg.gYFg.gYFg.
+.gFFg.gFFg.gFFg.
+.gFfg.gFfg.gFfg.
+..gg...gg...gg..
+................
+................
+................

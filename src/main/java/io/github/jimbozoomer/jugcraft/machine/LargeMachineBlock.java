@@ -141,7 +141,7 @@ public class LargeMachineBlock extends MachineBlock implements WorldlyContainerH
 	/** The whole machine where its item would go (client/MbsPreview.java), the cells in the way marked. */
 	@Override
 	public StructureGhost ghost(BlockPlaceContext context) {
-		BlockState state = formed(super.getStateForPlacement(context)).setValue(PART, 0);
+		BlockState state = withPart(formed(super.getStateForPlacement(context)), 0);
 		Level level = context.getLevel();
 		BlockPos pos = context.getClickedPos();
 		Direction facing = state.getValue(FACING);
@@ -150,7 +150,7 @@ public class LargeMachineBlock extends MachineBlock implements WorldlyContainerH
 		List<BlockPos> blocked = new ArrayList<>();
 		for (int part = 0; part < footprint.size(); part++) {
 			BlockPos partPos = footprint.partPos(pos, facing, part);
-			cells.add(new StructureGhost.Cell(partPos, state.setValue(PART, part)));
+			cells.add(new StructureGhost.Cell(partPos, withPart(state, part)));
 			boolean free = part == 0 ? context.canPlace()
 					: level.getBlockState(partPos).canBeReplaced(BlockPlaceContext.at(context, partPos, Direction.UP));
 			if (!free || level.isOutsideBuildHeight(partPos) || !level.getWorldBorder().isWithinBounds(partPos)) {

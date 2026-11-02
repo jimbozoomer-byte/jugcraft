@@ -10,8 +10,9 @@ import org.jspecify.annotations.Nullable;
  * cakes the owner drew (tools/cakes.py), made from Cake Batter the same way and set down as a {@link CakeBlock}: for a cake
  * {@link #pie} is the cake's own ID. Then the owner's square pies and tarts (tools/pies_and_tarts.py), made from pastry as
  * the pies are but set down as a {@link CakeBlock} of their own {@link #height}; their {@link #pie} is their own ID too.
- * {@link #color} is the filling's (a cake's sponge's), for the oven's renderer. The Hearth Oven saves a filling by its
- * place in this list, so new fillings go at the end.
+ * Last, after the persimmon pie, the Halloween Party Table's Pumpkin Layer Cake (tools/cakes.py PAINTED), a cake like the
+ * owner's but drawn by code. {@link #color} is the filling's (a cake's sponge's), for the oven's renderer. The Hearth Oven
+ * saves a filling by its place in this list, so new fillings go at the end.
  */
 public enum PieFilling {
 	APPLE("apple", "apple_pie", 4, 0.6F, 0xC89A48),
@@ -40,7 +41,8 @@ public enum PieFilling {
 	PORK_PIE("pork_pie", 5, 0.8F, 0xE0A848, 7),
 	STRAWBERRY_TART("strawberry_tart", 3, 0.6F, 0xE0607A, 4),
 	COFFEE_TART("coffee_tart", 3, 0.6F, 0xD8B890, 4),
-	PERSIMMON("persimmon", "persimmon_pie", 4, 0.6F, 0xDE7A2A);
+	PERSIMMON("persimmon", "persimmon_pie", 4, 0.6F, 0xDE7A2A),
+	PUMPKIN_LAYER_CAKE("pumpkin_layer_cake", 4, 0.6F, 0xC8782E);
 
 	public final String id;
 	/** The baked pie's ID; the raw pie and the slice are named from it. */

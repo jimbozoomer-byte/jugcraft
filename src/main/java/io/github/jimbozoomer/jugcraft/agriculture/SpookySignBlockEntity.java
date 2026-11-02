@@ -12,6 +12,7 @@ import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -26,7 +27,12 @@ public class SpookySignBlockEntity extends BlockEntity {
 	private String text = "";
 
 	public SpookySignBlockEntity(BlockPos pos, BlockState state) {
-		super(JugcraftAgriculture.SPOOKY_SIGN_ENTITY, pos, state);
+		this(JugcraftAgriculture.SPOOKY_SIGN_ENTITY, pos, state);
+	}
+
+	/** For a board that keeps its own words the same way (the Chalkboard Sign's). */
+	protected SpookySignBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
+		super(type, pos, state);
 	}
 
 	public String text() {

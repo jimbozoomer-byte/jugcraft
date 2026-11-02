@@ -1,0 +1,25 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "NEN",
+    "NRN",
+    " F "
+  ],
+  "key": {
+    "N": "minecraft:iron_nugget",
+    "E": "minecraft:spider_eye",
+    "R": "minecraft:red_dye",
+    "F": "#minecraft:wooden_fences"
+  },
+  "result": {
+    "id": "jugcraft:haunted_mailbox",
+    "count": 1
+  }
+}

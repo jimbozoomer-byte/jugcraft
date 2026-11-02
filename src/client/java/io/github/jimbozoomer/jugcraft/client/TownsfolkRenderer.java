@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.client;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.town.TownRoutine;
 import io.github.jimbozoomer.jugcraft.town.Townsfolk;
 import java.util.HashMap;
 import java.util.Map;
@@ -9,12 +10,19 @@ import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
 import net.minecraft.resources.Identifier;
 
-/** Draws a townsperson with the skin the server names (one of the town's own; anything else gets the default). */
+/**
+ * Draws a townsperson with the skin the server names (one of the town's own; anything else gets the default), posed
+ * for what they are doing at their place.
+ */
 public class TownsfolkRenderer extends HumanoidMobRenderer<Townsfolk, TownsfolkRenderer.State, TownsfolkModel> {
 	private static final Map<String, Identifier> TEXTURES = new HashMap<>();
 
 	public static class State extends HumanoidRenderState {
 		String skin = "townsfolk_1";
+		/** What they are doing at their place (TownRoutine), posed by TownsfolkModel. */
+		TownRoutine.Activity activity = TownRoutine.Activity.NONE;
+		/** Each person's own offset into their gestures, so a crowd does not move in step. */
+		float phase;
 	}
 
 	public TownsfolkRenderer(EntityRendererProvider.Context context) {
@@ -31,6 +39,18 @@ public class TownsfolkRenderer extends HumanoidMobRenderer<Townsfolk, TownsfolkR
 		super.extractRenderState(townsfolk, state, partialTick);
 		String skin = townsfolk.skin();
 		state.skin = skin.matches("[a-z0-9_]{1,40}") ? skin : "townsfolk_1";
+		state.activity = townsfolk.activity();
+		state.phase = Math.floorMod(townsfolk.getId() * 37, 100) * 0.63F;
+		if (townsfolk.isSleeping()) {
+			// Lying in bed: no leg swing left over from the last steps to it.
+			state.walkAnimationPos = 0.0F;
+			state.walkAnimationSpeed = 0.0F;
+			state.activity = TownRoutine.Activity.NONE;
+		}
+		// Gardeners and the florist kneel to their flowers.
+		if (state.activity == TownRoutine.Activity.TEND) {
+			state.isCrouching = true;
+		}
 	}
 
 	@Override

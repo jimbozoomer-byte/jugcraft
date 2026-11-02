@@ -1,0 +1,18 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jugcraft:foraging_basket",
+    "jugcraft:yarn"
+  ],
+  "result": {
+    "id": "jugcraft:knitting_basket",
+    "count": 1
+  }
+}

@@ -38,6 +38,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.npc.villager.Villager;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -113,21 +114,10 @@ public final class TrickOrTreat {
 		HalloweenSeason.load();
 		UseBlockCallback.EVENT.register((player, level, hand, hit) -> {
 			ItemStack held = player.getItemInHand(hand);
-			if (player.isSpectator() || !held.is(JugcraftAgriculture.item("candy_bag")) || !isWoodenDoor(level.getBlockState(hit.getBlockPos()))) {
+			if (player.isSpectator() || !isCandyBag(held) || !isWoodenDoor(level.getBlockState(hit.getBlockPos()))) {
 				return InteractionResult.PASS;
 			}
-			if (player.getCooldowns().isOnCooldown(held)) {
-				return InteractionResult.FAIL;
-			}
-			if (player instanceof ServerPlayer server) {
-				Result result = knock(server, hit.getBlockPos());
-				if (result == Result.KNOCKED) {
-					player.getCooldowns().addCooldown(held, KNOCK_COOLDOWN);
-				} else {
-					message(server, result);
-				}
-			}
-			return InteractionResult.SUCCESS;
+			return knockWith(player, held, hit.getBlockPos());
 		});
 		ServerTickEvents.END_SERVER_TICK.register(TrickOrTreat::tick);
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> KNOCKS.remove(handler.getPlayer().getUUID()));
@@ -135,6 +125,29 @@ public final class TrickOrTreat {
 			KNOCKS.clear();
 			OPEN_DOORS.clear();
 		});
+	}
+
+	public static boolean isCandyBag(ItemStack stack) {
+		return stack.is(JugcraftAgriculture.item("candy_bag"));
+	}
+
+	/**
+	 * {@code player} knocks with the Candy Bag {@code held} on the wooden door at {@code pos}, by hand or with a door
+	 * knocker: once its last knock's cooldown is over, and with the answer's message if the knock wasn't taken.
+	 */
+	public static InteractionResult knockWith(Player player, ItemStack held, BlockPos pos) {
+		if (player.getCooldowns().isOnCooldown(held)) {
+			return InteractionResult.FAIL;
+		}
+		if (player instanceof ServerPlayer server) {
+			Result result = knock(server, pos);
+			if (result == Result.KNOCKED) {
+				player.getCooldowns().addCooldown(held, KNOCK_COOLDOWN);
+			} else {
+				message(server, result);
+			}
+		}
+		return InteractionResult.SUCCESS;
 	}
 
 	static boolean isWoodenDoor(BlockState state) {

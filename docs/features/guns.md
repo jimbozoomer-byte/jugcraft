@@ -3164,7 +3164,7 @@ The owner's last three diamond-steel guns, taken up after slice 15D (on 27 Octob
 - **The Geode Cutter did not mine** in this slice: the owner's data lets the Shard Culler's beam break blocks (`enableMining`), as the Seam Cutter's could not. The [beam-mining follow-up](#follow-up-beams-that-mine) gives both their mining.
 - **No slowness on a hit** in this slice: the owner's data slows what the Shard Culler hits (`impactEffect`). The [hit-effects follow-up](#follow-up-hit-effects) gives it.
 - **Energy Cells, not the owner's cores:** the owner's beam guns load an energy core, which leaves a spent core behind; here they draw charge from Energy Cells as the energy guns before them.
-- **A microjet does not fly:** the owner's microjets are rockets that fly 1.5 blocks a tick; here it strikes at once along the look, as a round does. The Maelstrom does not slow its carrier as the owner's data asks (`speedModifier`).
+- **A microjet did not fly** in this slice: the owner's microjets are rockets that fly 1.5 blocks a tick, and the Maelstrom slows its carrier (`speedModifier`). The [flying-microjets follow-up](#follow-up-flying-microjets-and-heavy-guns-that-slow-their-holder) gives both.
 - **The arms in the reloads and inspections** come large into the view in places, as on the guns before them.
 - **Not played:** none of it has been played yet. The numbers want play to set.
 
@@ -3355,6 +3355,261 @@ The owner's data gives 49 of their guns built before slice 15 armour piercing (`
 - **The three guns left out** above keep pushing nothing.
 - **The Flatboat Gun's throw** is the owner's number, untried in play; it may want lowering.
 - **The numbers** are the owner's; none of this has been played yet.
+
+## Follow-up: guns that push their shooter back
+The owner's data gives 37 of their guns a push on their shooter at each shot (`playerKnockBack`, with its `playerKnockBackStrength`), most of them shotguns; 27 of those guns are built. Offered after the hit effects as shotguns that push their shooter back (the owner's Inertial and Drill Conversion), the owner chose it on 28 October 2026, with four other follow-ups, each its own pull request. Their data gives it to more than those two, so all 27 built take it here.
+
+| Gun | The owner's gun | Push (blocks a tick) |
+|---|---|---|
+| Thunderpipe | Boomstick | 0.45 |
+| Coach Gun | Callwell | 0.25 |
+| Bellmouth | Blunderbuss | 0.3 |
+| Bulldog Pistol | Brawler | 0.8 |
+| Breacher | Combat Shotgun | 0.15 |
+| Trench Lobber | Hammer GL | 0.2 |
+| Stoker | Kiln Gun | 0.7 |
+| Bronco SMG | Jr Wristbreaker | 0.2 |
+| Sledge | Killer 23 | 0.35 |
+| Skylark Rifle | Rocket Rifle | 0.2 |
+| Bullfrog | Blooper | 0.2 |
+| Mule | Super Shotgun | 0.35 |
+| Fowler | Doublet | 0.34 |
+| Culverin | Handcannon | 0.35 |
+| Reverb | Echoes 2 | 0.15 |
+| Tusker | Mangalitsa | 0.15 |
+| Crackling | Ribs Glory | 0.5 |
+| Borer | Weevil | 0.25 |
+| Goshawk Revolver | Ultra Knight Hawk | 2.25 |
+| Waystation Shotgun | Callwell Terminal | 0.35 |
+| Flatboat Gun | Big Bore | 2.5 |
+| Fencepost Thumper | Fencer Thumper | 0.3 |
+| Holler Pistol | Howler | 0.25 |
+| Holler Carbine | Howler Conversion | 0.15 |
+| Navvy Shotgun | Jackhammer | 0.1 |
+| Impetus Shotgun | Inertial | 0.25 |
+| Auger Shotgun | Drill Conversion | 0.1 |
+
+**How it pushes** (`KICK` in `tools/guns.py`, `JugcraftGuns.KICK`, `GunShots.kick`):
+- **Back from the look, level:** each shot pushes its shooter away from where they look, by the gun's strength in blocks a tick times the level share of the look. A shot looking level pushes all of it; one looking halfway down, half; straight up or down, nothing.
+- **No push up or down,** so a shot at the ground does not lift its shooter, and no gun can fly them.
+- **Up to the strength, not on top of it:** the push brings the shooter's speed back up to the strength, and a shooter already moving back that fast is left as they are. A gun held on the trigger keeps them moving back at its strength, never faster.
+- **Knockback resistance** (netherite, a Brace) takes its share off, as from any push.
+- **The server works it out with the shot** and tells the shooter's client, as a player moves themselves; nothing new is sent.
+- **Raider gunners** are not pushed (their Breacher has 0.15 in the owner's data).
+
+**Tooltips:** each of the 27 says each shot pushes its shooter back (the Stoker's, its flame).
+
+**Checked:** `tools/check_mod_data.py` holds `JugcraftGuns.KICK` to `tools/guns.py`: each a gun, each strength above 0 and at most 8. It also checks that `GunShots.fire` pushes by it. Game tests: `RecoilPushGameTests` ([Verification](#verification)).
+
+**Balance:**
+- **Most pushes are small,** 0.1 to 0.5 blocks a tick: a step or two back from a shotgun's blast.
+- **The Bulldog Pistol (0.8) and the Stoker (0.7)** push harder. The Stoker pushes steadily while it burns.
+- **The Goshawk Revolver (2.25) and the Flatboat Gun (2.5),** the owner's Ultra Knight Hawk and Big Bore, throw their shooter several blocks back on the ground, and much further in the air.
+- **Conversions:** none.
+
+**Save compatibility:** nothing saved changes.
+
+**Known limits:**
+- **No rocket jumps:** the owner's guns may push their shooter up when fired at the ground; here there is no push up or down.
+- **The strongest pushes** are the owner's numbers, untried in play; they may want lowering.
+- **Not played:** none of it has been played yet.
+
+## Follow-up: flying microjets and heavy guns that slow their holder
+The owner's Cyclone fires microjets that fly as rockets: 1.5 blocks a tick, untouched by gravity, living 50 ticks (its `projectile` data). Slice 15E's Maelstrom Gun struck at once instead. The owner's data also slows the carrier of eleven heavy guns (`speedModifier`), eight of them built. Offered after the hit effects as the Maelstrom's microjets flying and the gun slowing its carrier, the owner chose it on 28 October 2026, with four other follow-ups, each its own pull request. Their data slows the carrier of the other seven built heavy guns too, so all eight take it here.
+
+**The Microjet in flight** (`jugcraft:microjet`, `Microjet`; the shot `"jet"` and `jet_speed` in `tools/guns.py`, `JugcraftGuns.JET` and `JET_SPEED`, `GunShots.jet`):
+- **Fired** from the eye along the look, at the owner's 1.5 blocks a tick, strayed by the gun's spread, a Microjet a shot. The puff of smoke at the muzzle, the casing and the gun's sound are as before.
+- **It flies straight,** untouched by gravity, and **drives itself:** what the air (or water) takes off its speed in a tick, it makes up, so it keeps the speed it was fired at. The air's share comes off before each tick's move, so it covers a little under 1.5 blocks a tick.
+- **It stops** at the first creature its shooter may strike (the same allies, mounts and marker stands a bullet passes through) or the first block, or once it has flown the gun's range (64 blocks), with a puff of smoke. It flies at most 100 ticks, whatever its range.
+- **Its hit is a bullet's:** the creature takes the gun's damage as `jugcraft:bullet`, if other code (the town's protection) lets its shooter strike it, with the gun's piercing, knockback, burning, bleeding and hit effect (the Maelstrom has none of these). It breaks no block and does not burst.
+- **The server owns it:** it moves the Microjet and decides its hit; the client draws it, as the round, with a trail of smoke and a small flame. A Microjet whose shooter has left the level harms nothing.
+- **Raider gunners** do not fire the Maelstrom (they fire bullets only).
+
+**Heavy guns that slow their holder** (`CARRY_SPEED` in `tools/guns.py`, `JugcraftGuns.CARRY_SPEED`):
+
+| Gun | The owner's gun | Speed kept |
+|---|---|---|
+| Thresher | Gattaler | 0.85 |
+| Stoker | Kiln Gun | 0.8 |
+| Earthmover | Dozier RL | 0.95 |
+| Borer | Weevil | 0.8 |
+| Cloudburst Gun | Thunderhead | 0.8 |
+| Harrow | Scratches | 0.95 |
+| Maelstrom Gun | Cyclone | 0.9 |
+| Geode Cutter | Shard Culler | 0.9 |
+
+- **How:** each gun's item carries a movement-speed modifier (`jugcraft:gun_weight`, multiplied in last) while it is in the main hand, as a shield carries its weight. The game puts it on whoever holds the gun, player or mob, and takes it off when the gun leaves the hand; the tooltip shows it with the item's other attributes.
+- **The other hand:** a heavy gun in the other hand does not slow. None of the eight is held in one hand, so none fires from there.
+- **Tooltips:** each of the eight says it slows whoever holds it; the Maelstrom Gun's also says its microjets fly to their mark.
+
+**Checked:** `tools/guns.py` checks that a jet gun, and only one, fires Microjets, one a shot, at 0.5 to 4 blocks a tick, and that each `CARRY_SPEED` entry is a gun keeping 0.5 to under 1 of its holder's speed. `tools/check_mod_data.py` holds `JugcraftGuns.JET_SPEED` and `CARRY_SPEED` to `tools/guns.py`. It also checks:
+- the items carry the main-hand modifier;
+- the Microjet is registered, named and drawn;
+- `GunShots.fire` fires it for a jet gun;
+- the Microjet lands its hit only on what its shooter may strike.
+
+Game tests: `FlyingMicrojetsGameTests` and the updated `DiamondSteelGunsVGameTests` ([Verification](#verification)).
+
+**Balance:**
+- **The Maelstrom's damage is unchanged** (7.5 a microjet; the owner's is 15.5). Its shots now take time to arrive: about a quarter of a second at 7 blocks, over two seconds at its full 64. A moving creature can step out of the way, and a shot can be dodged as a skeleton's arrow can.
+- **Slowing:** a tenth or a fifth off the holder's speed while a heavy gun is out, a twentieth for the Earthmover and the Harrow. Putting the gun away ends it.
+- **Conversions:** none.
+
+**Save compatibility:**
+- **New entity** `jugcraft:microjet`. A Microjet saved in flight keeps its gun, damage, the range it has left and its speed.
+- **Held guns** take the modifier from the item itself, so guns already made slow their holder with no change to them.
+- Nothing else saved changes.
+
+**Known limits:**
+- **A little under 1.5 blocks a tick:** the game takes the air's share off before each move, and the Microjet makes it up after.
+- **The view narrows** a little while a heavy gun is held, if the game's field-of-view effects are on, as with any slowness.
+- **No trail of the owner's:** the owner's microjet draws a bullet trail (`trailLengthMultiplier`); here it trails smoke and a small flame.
+- **The owner's other microjet guns** (the Gyrojet Pistol, the Bomb Lance and the MK43 Rifle's) are not built as flying guns: the MK43 Rifle's Ranger Rifle fires rifle rounds here. (Slice 16B builds the Gyrojet Pistol and the Bomb Lance as the Comet Pistol and the Narwhal Lance, which fire flying Microjets.)
+- **Not played:** none of it has been played yet.
+
+## Slice 16A: a silenced pistol, a burst rifle and a repeater
+Three of the owner's guns from their upload of 23 October 2026 that were not yet built, taken up after the flying-microjets follow-up (on 28 October 2026, offered five next steps, the owner picked all five, each its own pull request; this is the fifth, "survey the 23 October upload for unbuilt gun models, then build three as in slices 15A–15E"): the Mokova, the Kalaskah and the Saketini Ironport. Each is built from the owner's own GeckoLib model of it, from that upload ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026)), as slices 15A's to 15E's are. The owner's data puts all three among their iron guns (treated iron and the frontier and wrecker blueprints), so they are iron guns here, beside slices 2's and 3's.
+
+| | Hush Pistol | Salvo Rifle | Highball Repeater |
+|---|---|---|---|
+| The owner's gun | Mokova | Kalaskah | Saketini Ironport |
+| What it is | a dark pistol whose thick barrel is a silencer the length of the gun, a wooden grip raked back | a short bullpup rifle: its curved magazine behind the wooden pistol grip, a ring sight on its top | the Saketini (slice 13B's Highball Rifle) made over: a box magazine on the left of its action under a hinged lid, a cap under the magazine and a button behind it, a hammer, and the long barrel on a forend that swings aside |
+| Held | in one hand (the left comes up only to reload and inspect) | in both hands: the right on the grip, the left on the fore-end | in both hands: the right at the wrist of the stock, the left under the forend |
+| What it fires | Light Rounds, a pull a shot | Rifle Rounds, a burst of three to a pull | Rifle Rounds, a pull a shot |
+| Damage | 4 | 3.5 | 12 |
+| Rate | a shot every 5 ticks | three shots 3 ticks apart, then a rest of 5 ticks: a burst every 14 ticks at the quickest | a shot every 33 ticks (the barrel swings aside and back) |
+| Holds | 8 | 18 | 6, loaded a round at a time |
+| Reload | 2.35 s | 2.45 s | 0.55 s to open the lid, 0.6 s a round, 0.8 s to close: 3.95 s for six |
+| Spread, hip / aimed | 2.5° / 0.75° | 3° / 0.75° | 1.6° / 1.6° |
+| Range | 48 blocks | 80 blocks | 120 blocks |
+| The view aimed | 0.9 | 0.85 | 0.75 |
+| Silenced | yes: no muzzle flash, the owner's silenced shot | no | no |
+| Heavy bullets | none | none | pierce 2 points of armour |
+| Takes | the Extended and Speed Magazines only | what the Tumbler Rifle takes: the barrels' four, the magazines, the stocks, the Light and Tactical Grips, the four bayonets, the three scopes and the Laser Sight | the barrels' four, the stocks, the Light and Tactical Grips, the four bayonets, the three scopes and the Laser Sight; no magazine |
+
+**Their numbers** start from the owner's own, in the gun data of the same upload, set beside the iron guns already built: the Mokova is their silenced pistol (5.5 a shot, eight to a magazine, `isSilenced`), the Kalaskah their burst rifle (7 a round, three to a burst every third tick and a rest of 5 ticks, `burstAmount` and `burstCooldown`, eighteen to a magazine), the Saketini Ironport their repeater (14 a shot, six loaded by hand, `armorPen` 2, its spread the same aimed as from the hip, `alwaysSpread`). The Hush Pistol is a pull every 5 ticks, as the Warden Pistol, whose owner's rate is the Mokova's; the Repeater's shot waits out its 33-tick animation, as the lever guns' do. The reloads are the owner's animations'.
+
+**Crafting** (a crafting table; they switch with the guns): iron and a lever, as the iron set's.
+- **Hush Pistol:** two iron ingots and wool over a lever and planks (the owner's recipe takes treated iron, a gun barrel and wool, its silencer).
+- **Salvo Rifle:** three iron ingots over a lever, redstone and planks, over an iron ingot (a rapid firing unit, as for the Bronco SMG's sear, and a wooden part).
+- **Highball Repeater:** three iron ingots over an iron ingot, a lever and planks (two gun barrels, iron and two wooden parts).
+
+**How they fire:** as the guns before them: each round flies along the look, strayed by the spread. The Hush Pistol is the third gun silenced by its build ([the follow-up](#follow-up-no-flash-from-a-gun-silenced-by-its-build)): its shot shows no flash and no barrel attachment fits it. The Salvo Rifle fires its burst as the Tumbler Rifle does ([slice 15D](#slice-15d-two-barrels-and-a-burst)): the client a shot at a time, the server holding each shot to a burst's trigger credit. The Highball Repeater pierces armour through the [heavy-bullets follow-up](#follow-up-heavy-bullets-knockback-and-armour-piercing). The Hush Pistol pairs with another one-handed gun as two guns at once ([slice 10G](#slice-10g-two-guns-at-once)).
+
+**What you see:** the owner's animations. The Hush Pistol's slide kicks back with each shot; to reload, the gun tips up, the old magazine drops and the left hand comes up with a new one (`magazine_2`); it is inspected with both hands. The Salvo Rifle's bolt jumps with each shot; its reload takes the magazine out behind the grip and brings it back. The Highball Repeater's hammer falls, then its barrel and forend swing aside about the action and back, the cap under the magazine flipping open as the button behind it is pressed; to load, the lid on the magazine opens and the left hand brings a round to it for each; its inspection works the lever. Sounds, as the owner's data names for each: the bruiser's silenced shot (the Gallant Rifle's) for the Hush Pistol, the iron rifle's (the Tumbler Rifle's) for the Salvo Rifle, and the black powder shot (the Auger Shotgun's) for the Highball Repeater.
+
+**How the models were built:**
+- **From the owner's GeckoLib models,** as slices 15A's to 15E's (`GEO_PARTS`): each gun's parts are the bones of its model. The Mokova is a body (its sights on it), a slide (the bolt) and its magazines; the bones its barrel attachments would hang on hold nothing, as it is silenced along its barrel. The Kalaskah's body is the bone the owner named `bodyy`, its standard barrel and magazine `standard_barrel` and `default_mag`, with no standard stock; its empty `body` stands in for the no-sights part. The Saketini Ironport's body is its `gun_body`; its magazine, lid, cap and button, its hammer and lever are bones of their own; its `barrel` bone is the forend that swings aside, carrying the barrel, the grips and the bayonets (`"mounts"`). That bone's part is named `forend` here, not `barrel`, so a barrel attachment, which takes the place of the barrel slot's standard parts, leaves the forend in place.
+- **Textures:** the models' own (`Guns/animated/gun/`). The Mokova's and the Kalaskah's match their item-model parts UV for UV; the Saketini Ironport's the owner laid out anew (`GEO_RELAID`).
+- **A turned bone the animation turns again:** the Saketini Ironport's cap is a bone the owner turned 45 degrees about z, and its shot flips it open about x. GeckoLib adds a bone's own turn to the animation's and turns by the sum, so the cap swings about its own tilted hinge. The converter had put a bone's turn onto its cubes, which would swing the cap about the gun's level axis instead, up to 1.7 px off at its widest. A bone named in `GEO_KEPT_TURNS` now keeps the owner's turn on the bone, its cubes square to it (`geo_part()`, `build_geo()`). No other gun's files change.
+- **Checked against the earlier parts:** where a bone keeps its item-model part's shape, the converter must give back that part's elements corner for corner and turn for turn (`GEO_TWINS`): on the Mokova 5 bones (its body, slide and three magazines), on the Kalaskah 18 (its bolt, grips, bayonets, barrels, muzzle attachments, stocks and magazines), on the Saketini Ironport 8 (the Saketini's hammer, bayonets and muzzle attachments; its vertical grip is the Saketini's too, its cubes in another order, so it is not checked). The Kalaskah turns its bolt and barrels about z about points a pixel further back than its parts do, which moves nothing; the check now compares a turn's origin only off the turn's axis (`off_axis()`).
+- **Bones:** the models' own, turning about the models' pivots (checked). On the Hush Pistol: `gun_body2`, `gun_body`, `bolt`, `magazine` and `magazine_2`, which both carry the magazine, as the Warden Pistol's. On the Salvo Rifle: the same, its `magazine_2` empty and never shown; the left arm hangs under the magazine, as the Tumbler Rifle's. On the Highball Repeater: `gun_body2`, `gun_body`, `mag` with `Lid`, `Cap` and `button` under it, `hammer`, `lever`, `barrel`, and the `bolt` its draw moves, which its model lacks, empty.
+- **Hands:** placed from the owner's own arm bones as slices 15A's to 15E's are. The Hush Pistol's left hand is placed where its reload brings it to the new magazine (1.75 s in), as the Warden Pistol's is.
+- **Arms:** each runs from the hand toward the shoulder as a search over the gun's reloads and inspections chose, keeping the sleeves small in the view and out of the eye (the game leaves out an arm within 0.1 block of it). The Hush Pistol's left arm runs further down than the Warden Pistol's: its inspection had brought the sleeve over up to 30% of the view, now at most 17%. Through the middle of that inspection the owner's animation brings the left hand to the eye, and the game leaves that arm out then, as for the guns before it. The Highball Repeater's left runs further back than the Auger Rifle's: through its load the sleeve covers at most a fifth of the view. The others take the ways of the guns they are held like: the right arms the Tumbler Rifle's, the Salvo Rifle's left the Tumbler Rifle's.
+- **Sights:** the owner's: the Hush Pistol's notch and post on its slide, the Salvo Rifle's ring, the Highball Repeater's the Highball Rifle's. Aimed, the Salvo Rifle is held 1 px further out, as the Tumbler Rifle is, and the Highball Repeater 3 px, as the Highball Rifle is (`"eye_relief"`).
+- **Scopes:** on the Salvo Rifle and the Highball Repeater, where their iron sights stand. The Hush Pistol takes none.
+- **Checked** in first-person, aimed and orthographic previews: idle, fired, aimed, through each reload (the Repeater's open, each round and close) and inspection.
+
+**Connections:**
+- **Rounds:** the Light Round and the Rifle Round; nothing new.
+- **Parts:** iron and a lever; wool for the Hush Pistol, redstone for the Salvo Rifle, planks for all three.
+- **Their place:** the iron tier, beside slices 2's and 3's guns; the Highball Repeater an iron cousin of the steel Highball Rifle.
+
+**Balance:** starting numbers, at point blank with every shot landing, over a magazine and its reload.
+- **Hush Pistol:** about 7.8 a second, beside the Penny Pistol's 7.3 and below the Warden Pistol's 9.4: it pays for its silence with eight rounds to the Warden's twelve and a shorter reach (48 blocks to 56), and passes no armour.
+- **Salvo Rifle:** about 10.1 a second, beside the Riveter SMG's 11.4, but with rifle rounds reaching 80 blocks to the Riveter's 48. A burst lands 10.5 in 6 ticks.
+- **Highball Repeater:** about 5.5 a second, between the Longhorn Rifle's 6.3 and the Fencepost Carbine's 4.8, the iron guns loaded a round at a time; 12 a shot, the hardest of the iron rifles, passing 2 points of armour. The steel Highball Rifle still hits harder, 15 a shot.
+- **Rounds:** each shot spends one; nothing converts back.
+
+**Save compatibility:** new items `jugcraft:hush_pistol`, `salvo_rifle` and `highball_repeater`; nothing saved changes. `guns.enabled=false` turns their recipes off; the items stay registered.
+
+**Known limits:**
+- **Names:** "Hush Pistol", "Salvo Rifle" and "Highball Repeater" are proposed.
+- **Copper rounds:** the owner's data fires the three from copper rounds (compact and standard), which the mod does not have; they fire the Light Round and the Rifle Round, as slice 12B's copper guns do.
+- **The owner's critical hits, damage falloff and advantage against bots or illagers** are not modelled, as for every gun here.
+- **The arms in the reloads and inspections** come large into the view in places, as on the guns before them.
+- **Not played:** none of it has been played yet. The numbers want play to set.
+
+## Slice 16B: two microjet guns and a grapeshot gun
+Three more of the owner's guns from their upload of 23 October 2026 that were not yet built, the next batch after slice 16A (the owner asked on 28 October 2026 for the next batch; of five options offered, the recommended one, this: the Gyrojet Pistol and the Bomb Lance, both firing the now flying Microjet, and a third gun, the Floundergat). Each is built from the owner's own GeckoLib model of it, from that upload ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026)), as slice 16A's are. The owner's data puts the Gyrojet Pistol among their iron guns and the Bomb Lance and the Floundergat among their ocean guns, a tier the mod does not have; all three are made of iron here, beside slice 16A's.
+
+| | Comet Pistol | Narwhal Lance | Halibut Gun |
+|---|---|---|---|
+| The owner's gun | Gyrojet Pistol | Bomb Lance | Floundergat |
+| What it is | a dark pistol whose long slide has three vents on either side that jet flame as it fires, its magazine in the grip | a whaler's lance: a long tube on a frame, three blades about its head | a short gun banded in brass, its barrel tipping down at the breech to load |
+| Held | in one hand (the left comes up only to reload) | at the hip in both hands, as the Maelstrom Gun | in both hands: the right on the grip, the left under the barrel |
+| What it fires | Microjets that fly 2.5 blocks a tick, a pull a shot | Microjets that fly 3 blocks a tick, one at a time | Buckshot Shells, eight pellets to a pull |
+| Damage | 4 | 14 | 2.5 a pellet, 20 if all eight land |
+| Rate | a shot every 5 ticks | one shot, then the reload | a shot every 12 ticks |
+| Holds | 6 | 1 | 4, loaded a shell at a time |
+| Reload | 2.4 s | 2.3 s | 0.65 s to open, 0.7 s a shell, 0.45 s to close: 3.9 s for four |
+| Spread, hip / aimed | 3° / 1° | 1° / 0.5° | 10° / 10° |
+| Range | 48 blocks | 80 blocks | 24 blocks |
+| The view aimed | 0.9 | 0.95 (it stays at the hip) | 0.85 |
+| Heavy shot | none | none | knocks back 0.65 further; pushes its shooter back 0.45 |
+| Takes | the Extended and Speed Magazines only | nothing | the stocks, the Light and Vertical Grips and the four bayonets |
+
+**Their numbers** start from the owner's own, in the gun data of the same upload, set beside the guns already built:
+- **Gyrojet Pistol:** the owner's numbers as they are: 4 a microjet, a pull every 5 ticks, six to a magazine, flying 2.5 blocks a tick (`speed`), 3° of spread.
+- **Bomb Lance:** one microjet at a time (`maxAmmo` 1), flying 3 blocks a tick, 1° of spread. The owner's 17.5 a shot is 14 here, below the steel Highball Rifle's 15, as an iron gun's.
+- **Floundergat:** four shells loaded by hand, as wide aimed as from the hip (`alwaysSpread`, 10°), knocking back 0.65 further (`knockbackStrength`) and pushing its shooter back 0.45 (`playerKnockBackStrength`). The owner's 22 pellets of grapeshot at 17.5 are eight of the Buckshot Shell's pellets here, as the other shotguns', at 2.5 each, and a shot every 12 ticks.
+- **The reloads** are the owner's animations'.
+
+**Crafting** (a crafting table; they switch with the guns): iron and a lever, as slice 16A's.
+- **Comet Pistol:** two iron ingots and gunpowder over a lever and planks (the owner's recipe takes treated iron, a heavy gun barrel and a firing unit; the gunpowder is its rockets' drive).
+- **Narwhal Lance:** an Iron Bayonet and two iron ingots over an iron ingot, a lever and planks (iron gun frames, a gun barrel, a firing unit, planks and three iron bayonets, its blades).
+- **Halibut Gun:** four iron ingots, its barrels, beside a brass ingot and a lever, over planks (treated brass and four heavy gun barrels over a wooden grip).
+
+**How they fire:**
+- **The Comet Pistol and the Narwhal Lance** fire Microjets that fly to their mark, as the Maelstrom Gun's do ([the follow-up](#follow-up-flying-microjets-and-heavy-guns-that-slow-their-holder)), each at its own speed (`JET_SPEED`): either reaches a mark 7 blocks off in 3 ticks, and the Comet's one 48 blocks off in about a second. The Narwhal Lance holds one, so it reloads after every shot.
+- **The Halibut Gun** fires its pellets as the other shotguns do. Its hit knocks back further through the [heavy-bullets follow-up](#follow-up-heavy-bullets-knockback-and-armour-piercing), and its shot pushes its shooter back through the [recoil push](#follow-up-guns-that-push-their-shooter-back). It loads a shell at a time, as the Highwayman.
+- **The Comet Pistol** pairs with another one-handed gun as two guns at once ([slice 10G](#slice-10g-two-guns-at-once)).
+
+**What you see:** the owner's animations. The Comet Pistol's shot jets flame from the vents on either side of its slide and rocks the seal on its left side; to reload, the magazine comes out and goes back in, the left hand coming up under it. The Narwhal Lance's shot drives the lance's head back and forth; its reload tips its body. The Halibut Gun's barrel, with the grips and the bayonet under it, tips down about the breech, a shell goes in for each, and it tips back up to close. Sounds, as the owner's data names for each: the gyrojet's shot (the Maelstrom Gun's) for the Comet Pistol and the Narwhal Lance, and the boomstick's (the Thunderpipe's) for the Halibut Gun.
+
+**How the models were built:**
+- **From the owner's GeckoLib models,** as slice 16A's (`GEO_PARTS`): each gun's parts are the bones of its model.
+  - **The Gyrojet Pistol** is a body (its slide and sights on it), its three magazines, and the six flames its shot jets from its vents, three on each side. They rest inside the slide until the shot moves them out. Its stocks are left off: it has no carbine animations to be held by them.
+  - **The Bomb Lance** is a frame, the body under it and the lance's head, the model's `barrel` bone. That part is named `lance` here, so no barrel attachment is taken for it.
+  - **The Floundergat's** body is its `gun_body`. Its `barrel` bone is the barrel the reload tips, carrying the grips and the bayonets (`"mounts"`); it is named `forend` here, as the Highball Repeater's. Its stocks hang under the body.
+- **Textures:** the models' own (`Guns/animated/gun/`); the owner laid out all three anew (`GEO_RELAID`).
+- **The Bomb Lance at its size:** the owner made its GeckoLib model 0.84 the size of its item model, so none of its parts lines up with an item-model part. It is placed with its tube on the item model's axis and its length centred on the item model's (`GEO_OFFSETS`).
+- **Checked against the earlier parts** (`GEO_TWINS`): the Gyrojet Pistol's speed magazine is its item-model part, corner for corner. The Floundergat's light grip is its own, 0.75 px further forward with the rest of the model's barrel. The owner reshaped their other parts in these models.
+- **Bones:** the models' own, turning about the models' pivots (checked).
+  - **Comet Pistol:** `gun_body`, `bolt` and `seal` (both move but hold nothing), the six `Flames` bones, `magazine`, and `magazine_2`, which is never shown.
+  - **Narwhal Lance:** `gun_body2`, `gun_body`, `body` and, under it, `barrel` with the lance's head.
+  - **Halibut Gun:** `gun_body`, `barrel`, and the `bolt` and `shell` its shot and its loading move, which its model lacks: empty, they move nothing.
+- **Hands:** placed from the owner's own arm bones, as slices 15A's to 16A's are. The Comet Pistol's left hand is placed where its reload brings it to the magazine (1.83 s in), as the Hush Pistol's is.
+- **Arms:** each runs from the hand toward the shoulder as a search over the gun's reloads and inspections chose, keeping the sleeves small in the view and out of the eye (the game leaves out an arm within 0.1 block of it).
+  - **Comet Pistol:** its left arm hangs under the magazine; through its reload the sleeve covers at most a tenth of the view, and none of the view through its inspection (the Hush Pistol's way would have covered up to 30% there). Through the middle of its inspection the owner's animation brings the gun and the hand that holds it before the eye, and the right sleeve fills much of the view in the previews there.
+  - **Narwhal Lance:** the right arm runs down from the grip at the hip, and the left back and out from the hand under the tube; neither sleeve covers more than a twentieth of the view.
+  - **Halibut Gun:** the right arm is the Tumbler Rifle's; the left runs back and out from under the barrel, its sleeve covering at most about a fifth of the view as it loads. The search counted its loading a shell at a time, not the plain reload its model also has, which a gun loaded a shell at a time never plays.
+- **Sights:** the owner's: the Comet Pistol's on its slide, the Halibut Gun's on its body. The Narwhal Lance has none: aimed, it stays at the hip, as the Maelstrom Gun. Aimed, the Halibut Gun is held 3 px further out, as the Highball Repeater is (`"eye_relief"`); without it, the back of its body filled the bottom of the view.
+- **Scopes:** none of the three takes one.
+- **Seen from outside:** the Narwhal Lance takes the owner's third-person tilt, the Gattaler's 68.25 degrees (`GunLooks.TILT`): its holder's arms hang at the hip and the lance still points along the look, as the Maelstrom Gun's.
+- **Checked** in first-person and aimed previews: idle, fired, aimed, through each reload (the Halibut's open, each shell and close) and inspection.
+
+**Connections:**
+- **Rounds:** the Microjet (slice 15E) and the Buckshot Shell; nothing new.
+- **Parts:** iron and a lever; gunpowder for the Comet Pistol, an Iron Bayonet for the Narwhal Lance, a brass ingot for the Halibut Gun; planks for all three.
+- **Their place:** the iron tier, beside slices 2's, 3's and 16A's guns. The Comet Pistol and the Narwhal Lance are the iron guns that fire the Microjet, which until now only the diamond-steel Maelstrom Gun fired.
+
+**Balance:** starting numbers, at point blank with every shot landing, over a magazine and its reload.
+- **Comet Pistol:** about 6.6 a second, below the Hush Pistol's 7.8 and the Penny Pistol's 7.3. Its Microjets take time to arrive, and it holds six.
+- **Narwhal Lance:** 14 a shot, once every 2.3 seconds: about 6.1 a second. It is the hardest single shot of the iron guns, and a Microjet reaches 80 blocks off in 27 ticks.
+- **Halibut Gun:** 20 a shot when all eight pellets land, about 14 a second over its four shells and their loading, beside the Highwayman's 13.7. Its 10° of spread and 24 blocks' reach keep it close.
+- **Rounds:** each shot spends one; nothing converts back.
+
+**Save compatibility:** new items `jugcraft:comet_pistol`, `narwhal_lance` and `halibut_gun`; nothing saved changes. `guns.enabled=false` turns their recipes off; the items stay registered.
+
+**Known limits:**
+- **Names:** "Comet Pistol", "Narwhal Lance" and "Halibut Gun" are proposed.
+- **The Bomb Lance's carry:** the owner's quickens its holder (`speedModifier` 1.1); here it does not. The heavy guns' follow-up carries over only the guns that slow.
+- **The Bomb Lance's blades and other rounds:** its own melee (9.5 at 4.5 blocks, with its own animation) and its change of ammunition (`allowAmmoChange`) are not modelled.
+- **Grapeshot:** the owner's Floundergat fires grapeshot, which the mod does not have; it fires the Buckshot Shell.
+- **The owner's critical hits, damage falloff and advantage** are not modelled, as for every gun here.
+- **The arms in the reloads and inspections** come large into the view in places, as on the guns before them.
+- **Not played:** none of it has been played yet. The numbers want play to set.
 
 ## Connections
 - **Existing input producers:** copper, iron and gunpowder (vanilla); lead nuggets (the lead switch's lead); brass nuggets (brass, from zinc); paper and planks.
@@ -6429,13 +6684,86 @@ Slice 9E's files: the guns' tactical grip parts and the Laser Sight's textures m
     - `heavyBulletsAreTheOwners`: the full tables, with the 24 knockbacks and 27 piercings added; the Gallant Rifle plain; the Stoker's flame without knockback.
     - `caissonArcPiercesArmour`: the Caisson Pistol's arc takes more from a pig in 10 points of armour than a plain zap of its damage takes from a second such pig, and no more than that damage.
     - `jawbreakerKnocksBackAndPiercesArmour`: unchanged, and still holds the bullets' knockback and piercing.
+- **Guns that push their shooter back, run locally (28 October 2026):**
+  - `python3 tools/check_mod_data.py`: PASS (8033 material IDs). Its guns check, run alone, reported a copy of `GunShots` whose `fire` does not push, a strength of 9, and the Flatboat Gun's push missing from `tools/guns.py`.
+  - `python3 tools/guns.py --check`: PASS. `python3 scripts/check_repository.py`: PASS. `python3 -m unittest discover -s scripts/tests`: 287 tests passed; `python3 scripts/package_modrinth.py check`: PASS. `git diff --check`: clean.
+  - **Java:** a syntax parse only: 0 errors in the changed and new files.
+  - **The 27 tooltips** in the language file match `tools/guns.py`.
+- **Guns that push their shooter back, game tests (not run yet; CI runs them):**
+  - `RecoilPushGameTests`:
+    - `kicksAreTheOwners`: the table is the owner's 27; the Kreuzer Pistol has none.
+    - `shotsPushTheirShooterBack`: the Impetus Shotgun's shot at a pig three blocks off pushes its shooter back at 0.25 blocks a tick times the level share of their look, and no other way; a Kreuzer Pistol's shot leaves its shooter as they were.
+    - `kickTopsUpAndNeverLifts`: a push of 0.8 from standing moves its shooter 0.8 back; another of 0.8 and one of 0.3 at once add nothing; looking straight down there is no push, and looking 60 degrees down half; half knockback resistance halves it.
+- **Guns that push their shooter back, CI on the first push (run 40620044129, 28 October 2026):** the server game tests ran 2992; one failed, `kickTopsUpAndNeverLifts`. Looking 60 degrees down, the push was 1.0001 blocks a tick back, not 1.0 within a ten-thousandth: the game's look comes from its table of sines, a little off the true half. The push was right; the test now holds it to the look's own level share, and that share to a half within a thousandth.
+- **Flying microjets and heavy guns that slow their holder, run locally (28 October 2026):**
+  - `python3 tools/check_mod_data.py`: PASS (8033 material IDs). Its guns check, run alone, caught each of these deliberate breaks:
+    - a `GunShots.fire` without the jet case;
+    - a `Microjet` that lands its hit without asking whether its shooter may strike;
+    - a modifier on either hand;
+    - the Harrow missing from the Java `CARRY_SPEED`;
+    - a carry speed of 0.4;
+    - a jet speed out of step with the Java.
+  - `python3 tools/guns.py --check`: PASS. `python3 scripts/check_repository.py`: PASS. `python3 -m unittest discover -s scripts/tests`: 287 tests passed; `python3 scripts/package_modrinth.py check`: PASS. `git diff --check`: clean.
+  - **Java:** a syntax parse only: 0 errors in the changed and new files.
+  - **The language file:** the Microjet's name and the eight tooltips match `tools/guns.py`.
+- **Flying microjets and heavy guns that slow their holder, game tests (not run yet; CI runs them):**
+  - `FlyingMicrojetsGameTests`:
+    - `flyingMicrojetsAreTheOwners`: the Maelstrom Gun alone fires flying Microjets, at 1.5 blocks a tick, and the entity is registered. The eight carry speeds are the owner's, and each gun's item carries its main-hand modifier; every other gun carries none.
+    - `microjetFliesToItsMark`: a Maelstrom shot at a pig seven blocks off makes one Microjet, the gun's, with its damage and range, and hurts nothing at once. A tick later it has flown 1.4 to 1.55 blocks and the pig is still unhurt; by the tenth tick it has dealt the gun's damage and is gone.
+    - `microjetStopsAtABlockOrItsRange`: a wall stops a Maelstrom shot before the pig. Of two Microjets set flying along the open arena, the one of 4 blocks' range is gone by the sixth tick; the one of 12 flies on, with what it has flown taken off its range.
+    - `heavyGunSlowsItsHolder`: a pig holding a Maelstrom Gun in its main hand moves at 0.9 of its speed; one holding it in the other hand, and one holding a Kreuzer Pistol, are not slowed.
+  - `DiamondSteelGunsVGameTests`: the Maelstrom Gun fires jets; its loading test reads the pig's damage six ticks after the shot, once the Microjet has flown the three blocks to it.
+- **Slice 16A, run locally (28 October 2026):**
+  - `python3 tools/guns.py`, then `--check`: PASS. It wrote the three guns' models, animations and atlases; every other gun's files came out unchanged. The converter check passes on the three models (`GEO_TWINS`: 31 bones, corner for corner, the Mokova's and the Kalaskah's UV for UV too) and holds every bone the models have to the models' pivots.
+  - **Found and fixed while building:** the Saketini Ironport's cap is a bone the owner turned, which its shot turns about another axis; the converter put the bone's turn on its cubes, which would swing the cap about the wrong hinge. `GEO_KEPT_TURNS` keeps it on the bone. The Kalaskah's bolt, barrels and silencer turn about z about points a pixel further back than its item-model parts; the twin check had compared the turn's origin along the axis too, which moves nothing (`off_axis()`). The Saketini Ironport's vertical grip is the Saketini's with its cubes in another order, so it is left out of the twins. The Repeater's draw moves a bolt its model lacks: an empty bone.
+  - `python3 tools/generate_material_data.py`: wrote the guns' item models, definitions, recipes, names and sounds. (It also reordered `docs/features/jug-nouveau-content-map.json` and rewrote the line ends of the Jimtafacts GeckoLib files, unrelated; those are left as before.)
+  - `python3 tools/check_mod_data.py`: PASS (8036 material IDs).
+  - `python3 scripts/check_repository.py`: PASS. `python3 -m unittest discover -s scripts/tests`: 287 tests passed; `python3 scripts/package_modrinth.py check`: PASS. `git diff --check`: clean.
+  - **Java:** a syntax parse only: 0 errors in the changed and new files.
+  - **Recipes:** every shaped recipe in the mod's data compared, mirrors included: none of the three new grids matches another (the 8 groups of matching grids elsewhere in the mod's data are the same before and after).
+  - **Alchemy values:** the three guns' records, priced from their recipes as `tools/build_alchemy_values.py` prices them (that tool needs a Minecraft jar, which isn't available here): 573 (Hush Pistol), 1101 (Salvo Rifle) and 1037 (Highball Repeater).
+  - **Previews:** first-person, idle, fired, aimed, through each reload (the Repeater's open, each round and close) and inspection; aimed views at several eye reliefs beside the Kreuzer Pistol, the Tumbler Rifle and the Highball Rifle. The arms' ways were searched as above.
+- **Slice 16A game tests (not run yet; CI runs them):**
+  - `IronGunsGameTests`:
+    - `ironGunsAreRegistered`: each is registered with its numbers and its recipe loads, firing plain bullets that knock back no further. The Hush Pistol is eight light rounds, held in one hand (not a carbine), silenced, taking only the two magazines; the Salvo Rifle eighteen rifle rounds every third tick in bursts of three resting 5 ticks (a 14-tick cycle), taking what the Tumbler Rifle takes; the Highball Repeater six rifle rounds loaded a round at a time, as true from the hip as aimed, piercing 2 points, taking the barrel attachments, stocks, grips, bayonets and sights but no magazine.
+    - `hushPistolFiresFromOneHand`: a shot at a pig four blocks off takes exactly the gun's damage and leaves seven rounds; with a Warden Pistol in the other hand the two are two guns at once.
+    - `salvoRifleFiresInBursts`: three shots three ticks apart all fire, a fourth at the next interval is refused, and after the burst's rest three more fire; six rounds are spent.
+    - `highballRepeaterLoadsARoundAtATime`: an empty Repeater with three rounds holds one after its first round's time and all three by its reload's time for three, leaving none, the reload over; it then fires.
+  - `HeavyBulletsGameTests.heavyBulletsAreTheOwners`: the piercing table with the Highball Repeater's 2.
+  - `GunsGameTests` counts 108 guns; `DualGunsGameTests` 25 one-handed guns; `TacticalAttachmentsGameTests` the forty-two guns the Tactical Grip fits, the Salvo Rifle and the Highball Repeater among them.
+  - Held by the earlier tests and expected to pass with the new guns: no pistol hits as hard as the Holler Pistol, no one-handed gun fires a pull at a time as quickly as the Kreuzer Pistol, and none strays as little aimed as the Minuet Pistol (`BrassSidearmsGameTests`, `DiamondSteelGunsIIGameTests`); no gun firing rifle rounds a pull at a time is pulled as often as the Freeholder Rifle, a burst gun counting its whole cycle (`BrassQuickFirersGameTests`). The guns' client test (`GunsClientGameTests`) takes each new gun through its screenshots as every gun's; the Salvo Rifle's pull spends its burst of three.
+- **Slice 16B, run locally (28 October 2026):**
+  - `python3 tools/guns.py`, then `--check`: PASS. It wrote the three guns' models, animations and atlases; every other gun's files came out unchanged. The converter check passes on the three models (`GEO_TWINS`: the Gyrojet Pistol's speed magazine and the Floundergat's light grip, corner for corner) and holds every bone the models have to the models' pivots.
+  - **Found and fixed while building:**
+    - The Bomb Lance's model is 0.84 the size of its item model, so no part of it lines up with one; it is placed by its tube's axis and its length (`GEO_OFFSETS`).
+    - The Floundergat's light grip sits 0.75 px further forward than its item-model part, with the rest of the model's barrel; the twin check carries that shift.
+    - The arm search had counted the Floundergat's plain reload, which a gun loaded a shell at a time never plays; the left arm was searched again over its loading a shell at a time.
+    - The Halibut Gun's first recipe matched the Haymaker's grid; it now takes four iron ingots in a square, its barrels.
+    - The Narwhal Lance's model carries the owner's third-person tilt, which `GunLooks.TILT` now has.
+  - `python3 tools/generate_material_data.py`: wrote the guns' item models, definitions, recipes, names and sounds. (It also reordered `docs/features/jug-nouveau-content-map.json` and rewrote the line ends of the Jimtafacts GeckoLib files, unrelated; those are left as before.)
+  - `python3 tools/check_mod_data.py`: PASS (8044 material IDs).
+  - `python3 scripts/check_repository.py`: PASS. `python3 -m unittest discover -s scripts/tests`: 287 tests passed (a first run alongside the data generator, while it was still writing files, had 5 failures; on the finished files all passed); `python3 scripts/package_modrinth.py check`: PASS. `git diff --check`: clean.
+  - **Java:** a syntax parse only: 0 errors in the changed and new files.
+  - **Recipes:** every shaped recipe in the mod's data compared, mirrors included: none of the three new grids matches another (the 8 groups of matching grids elsewhere in the mod's data are the same as before).
+  - **Alchemy values:** the three guns' records, priced from their recipes as `tools/build_alchemy_values.py` prices them (that tool needs a Minecraft jar, which isn't available here; the same pricing gives the Hush Pistol its recorded 573): 717 (Comet Pistol), 9589/9 (Narwhal Lance, about 1065) and 4533/4 (Halibut Gun, about 1133).
+  - **Previews:** first-person, idle, fired, aimed, through each reload (the Halibut's open, each shell and close) and inspection; aimed views of the Halibut Gun and the Comet Pistol at eye reliefs of 0 to 6 px, and through the aimed shot's kick. The arms' ways were searched as above.
+- **Slice 16B game tests (not run yet; CI runs them):**
+  - `IronGunsIIGameTests`:
+    - `ironGunsIIAreRegistered`: each is registered with its numbers and its recipe loads, a pull at a time, none setting alight, lifting, bleeding or piercing. The Comet Pistol and the Narwhal Lance fire flying Microjets one at a time, at 2.5 and 3 blocks a tick, knocking back no further and pushing no one; the Comet six from a magazine, held in one hand (not a carbine), taking only the two magazines; the Narwhal one, in both hands, taking nothing. The Halibut Gun is four buckshot shells of eight pellets loaded a shell at a time, as wide aimed as from the hip, knocking back 0.65 further and pushing its shooter back 0.45, taking the stocks, the Light and Vertical Grips and the bayonets but no magazine, barrel attachment or scope.
+    - `cometPistolFiresAFlyingMicrojetFromOneHand`: a shot at a pig seven blocks off makes one Microjet, the gun's, with its damage and range, and spends one of six rounds; the pig is unhurt at once. The Microjet flies 2.35 to 2.55 blocks in a tick, and by the eighth tick it has dealt the gun's damage and is gone. With a Warden Pistol in the other hand the two are two guns at once.
+    - `narwhalLanceFiresOneMicrojetAtATime`: a shot at a pig seven blocks off makes one Microjet and empties the Lance; it flies 2.85 to 3.05 blocks in a tick and has dealt the gun's damage by the sixth. The empty Lance does not fire; given two Microjets it holds none three ticks before its reload's time and one after, leaving the other, and fires again.
+    - `halibutGunLoadsAShellAtATimeAndThrowsBack`: an empty Halibut Gun with two shells holds one after its first shell's time and both by its reload's time for two, leaving none, the reload over. Its shot at a pig three blocks off that a hit can push takes a whole number of 2.5-point pellets, up to eight, and knocks the pig away more than 0.2 blocks a tick faster than a Kreuzer Pistol's shot knocks a second pig; the shooter is pushed back 0.45 times the level share of their look.
+  - `FlyingMicrojetsGameTests.flyingMicrojetsAreTheOwners`: the three guns that fire flying Microjets, at 1.5, 2.5 and 3 blocks a tick, and no other.
+  - `RecoilPushGameTests.kicksAreTheOwners` and `HeavyBulletsGameTests.heavyBulletsAreTheOwners`: the push and knockback tables with the Halibut Gun's 0.45 and 0.65.
+  - `GunsGameTests` counts 111 guns; `DualGunsGameTests` 26 one-handed guns.
+  - Held by the earlier tests and expected to pass with the new guns: no pistol hits as hard as the Holler Pistol, no one-handed gun fires a pull at a time as quickly as the Kreuzer Pistol, and none strays as little aimed as the Minuet Pistol (`BrassSidearmsGameTests`, `DiamondSteelGunsIIGameTests`). The guns' client test (`GunsClientGameTests`) takes each new gun through its screenshots as every gun's; the Comet's and the Narwhal's Microjets reach the husk 7 blocks off well inside the 16 ticks it waits.
 - **Not run:** the client by hand, a two-client dedicated server, and play.
 
 ## World and event applicability
 No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell Rack come from crafting (and the creative tab). The one loot is slice 10F's: raider gunners, in raids and raider camps, may drop their service arms (their equipment's drop chance) and rounds (the mob loot table `jugcraft:entities/raider_gunner`).
 
 ## Rollout and open questions
-- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Penny Pistol, Conductor Carbine, Magpie SMG, Tuppence Pistol, Goshawk Revolver, Lament Rifle, Tabby Revolver, Lookout Rifle, Ammonite Carbine, Fencepost Carbine, Waystation Shotgun, Highball Rifle, Flatboat Gun, Windlass Musket, Millstone Rifle, Fencepost Thumper, Parley Revolver, Lantern Musket, Holler Pistol, Minuet Pistol, Half-Crown Revolver, Holler Carbine, Minuet Carbine, Grange Carbine, Sprocket Gun, Navvy Shotgun, Freeholder Rifle, Quarrel Carbine, Hinterland Rifle, Cloudburst Gun, Firedrake, Harrow, Old Grange Carbine, Vesper Rifle, Onrush SMG, Gallant Rifle, Kreuzer Pistol, Psalm SMG, Jawbreaker, Hawker Rifle, Impetus Shotgun, Quill Rifle, Auger Rifle, Auger Shotgun, Tumbler Rifle, Maelstrom Gun, Ermine Rifle, Geode Cutter, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Dart, Microjet, Bleeding, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
+- **Names:** proposed here (Rust Midge, Patchwork Carbine, Thunderpipe, Warden Pistol, Riveter SMG, Haymaker, Longhorn Rifle, Drover Rifle, Coach Gun, Duelling Pistol, Line Musket, Bellmouth, Bulldog Pistol, Marshal Revolver, Sapper Revolver, Sentry Pistol, Garrison Rifle, Breacher, Trench Lobber, Thresher, Stoker, Beam Pistol, Stormlock Rifle, Linesman, Picket Rifle, Ranger Rifle, Kestrel Rifle, Rattler Pistol, Bronco SMG, Squall Rifle, Spikedriver, Seam Cutter, Caisson Pistol, Sledge, Highwayman, Throttle, Earthmover, Skylark Rifle, Bullfrog, Solenoid Rifle, Votive Rifle, Glowmouth, Mule, Fowler, Culverin, Undertone Rifle, Murmur SMG, Reverb, Tusker, Cinder Repeater, Bastion Rifle, Ashfall Pistol, Goldbristle Carbine, Crackling, Chitin SMG, Hermit Rifle, Borer, Penny Pistol, Conductor Carbine, Magpie SMG, Tuppence Pistol, Goshawk Revolver, Lament Rifle, Tabby Revolver, Lookout Rifle, Ammonite Carbine, Fencepost Carbine, Waystation Shotgun, Highball Rifle, Flatboat Gun, Windlass Musket, Millstone Rifle, Fencepost Thumper, Parley Revolver, Lantern Musket, Holler Pistol, Minuet Pistol, Half-Crown Revolver, Holler Carbine, Minuet Carbine, Grange Carbine, Sprocket Gun, Navvy Shotgun, Freeholder Rifle, Quarrel Carbine, Hinterland Rifle, Cloudburst Gun, Firedrake, Harrow, Old Grange Carbine, Vesper Rifle, Onrush SMG, Gallant Rifle, Kreuzer Pistol, Psalm SMG, Jawbreaker, Hawker Rifle, Impetus Shotgun, Quill Rifle, Auger Rifle, Auger Shotgun, Tumbler Rifle, Maelstrom Gun, Ermine Rifle, Geode Cutter, Hush Pistol, Salvo Rifle, Highball Repeater, Comet Pistol, Narwhal Lance, Halibut Gun, Light Round, Rifle Round, Buckshot Shell, Paper Cartridge, Dart, Microjet, Bleeding, Energy Cell, Cell Rack, Raider Gunner; the attachments keep plain names: Silencer, Baffled Silencer, Muzzle Brake, Extended Barrel, Extended Magazine, Speed Magazine, Light Stock, Weighted Stock, Wooden Stock, Light Grip, Vertical Grip, the four bayonets, Long Scope, Medium Scope, Reflex Sight, Tactical Grip, Laser Sight). The owner may rename them before release; IDs are stable only after release.
 - **The arms:** placed from the animations' own evidence, without the models they were made for. The CI screenshots show where they sit; the rest points and arm directions above are the knobs.
 - **The gun sets the owner chose on 8 October 2026** are all built: the revolvers (slice 8), the service arms (slice 8B), the heavy weapons (slice 8C) and the energy weapons (slice 8D).
 - **The gun sets the owner chose on 10 October 2026** are all built, each its own pull request: the marksman rifles (slice 9A), the automatic weapons (slice 9B), the second energy weapons (slice 9C) and the pump shotguns (slice 9D).
@@ -6446,8 +6774,7 @@ No worldgen, structures, bosses or seasonal content. Guns, rounds and the Cell R
   - other mobs with guns: the owner's Scorched Guns 2-style gun mobs, once their models are in the library (slice 10F gives the raider gunners the service arms);
   - the Whizzbanger, which waits for the model its animations were made for ([above](#the-whizzbanger-waits));
   - the guns beyond these sets;
-  - the owner's other GeckoLib gun models from their upload of 23 October 2026: only the Grandle OG's and the fifteen diamond-steel guns' (slices 15A to 15E) are in the library ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026));
+  - the owner's other GeckoLib gun models from their upload of 23 October 2026: only the Grandle OG's, the fifteen diamond-steel guns' (slices 15A to 15E) and slices 16A's and 16B's six are in the library ([the library record](../../art/owner-library/README.md#gun-geometry-23-october-2026));
   - the owner's knockback for three guns whose shots push nothing here: the Stoker's flame, the Glowmouth's arc and the Fencepost Thumper's grenades ([above](#follow-up-armour-piercing-and-knockback-for-the-older-guns));
-  - a shotgun that pushes its shooter back (the owner's Inertial and Drill Conversion);
   - the owner's withering (the Flayed God's) and the other hit effects of guns not built yet ([above](#follow-up-hit-effects)).
 - **Balance:** the numbers are starting points for the owner to set.

@@ -24,6 +24,10 @@ south face to 0.8 of the top, the right, east face to 0.6), and the game shades 
   cornbread batter icon recoloured to a vanilla batter.
 - **Burnt Cake**: the carrot cake's top, sides and inside, charred (each texel's lightness on a burnt ramp).
 
+- **Cakes drawn by code** (cakes.PAINTED, not on the owner's page: the Halloween Party Table's Pumpkin Layer Cake) are
+  painted here in the drawn cakes' manner, their faces in the same rows (painted_faces), their slices recoloured from the
+  owner's Slice of Cake as the drawn cakes' are.
+
 Called from crop_textures.crop_textures(). Nothing here reads a Mojang texture.
 """
 import colorsys
@@ -88,15 +92,17 @@ TOPPING_RAMP = {
     "cheesecake": [(169, 21, 45), (222, 42, 45), (249, 117, 94)],
     "coffee_cake": [(62, 36, 22), (92, 56, 34), (128, 84, 52)],
     "apple_cake": [(142, 174, 59), (189, 211, 85), (212, 227, 110)],
+    "pumpkin_layer_cake": [(214, 112, 36), (236, 124, 28), (250, 196, 54)],
 }
 # What flecks each raw cake's batter, and the batter's own colour.
 FLECKS = {"carrot_cake": [(232, 126, 28), (222, 92, 18)], "birthday_cake": [(99, 186, 211), (222, 129, 195), (222, 214, 133)],
           "ice_cream_cake": [(86, 52, 34), (238, 236, 230)], "red_velvet_cake": [(150, 20, 30), (120, 16, 26)],
           "cheesecake": [(222, 42, 45), (169, 21, 45)], "coffee_cake": [(92, 56, 34), (62, 36, 22)],
-          "apple_cake": [(189, 211, 85), (142, 174, 59)]}
+          "apple_cake": [(189, 211, 85), (142, 174, 59)],
+          "pumpkin_layer_cake": [(246, 238, 220), (236, 124, 28), (250, 196, 54)]}
 BATTER = {"carrot_cake": (214, 150, 92), "birthday_cake": (244, 226, 176), "ice_cream_cake": (150, 96, 62),
           "red_velvet_cake": (196, 52, 58), "cheesecake": (246, 228, 170), "coffee_cake": (214, 170, 118),
-          "apple_cake": (226, 196, 140)}
+          "apple_cake": (226, 196, 140), "pumpkin_layer_cake": (214, 140, 70)}
 TIN = [(78, 80, 86), (110, 112, 118), (150, 152, 158), (184, 186, 192)]
 VANILLA = [(150, 118, 70), (196, 162, 104), (226, 198, 140), (240, 218, 164), (248, 232, 190), (252, 242, 212), (255, 250, 232)]
 BURNT = [(22, 14, 10), (34, 22, 14), (48, 30, 18), (62, 40, 24), (78, 52, 32)]
@@ -453,6 +459,110 @@ def charred(rows):
     return [[BURNT[min(len(BURNT) - 1, int(lightness(c) * len(BURNT)))] for c in row] for row in rows]
 
 
+# ---------------------------------------------------------------- the cakes drawn by code (cakes.PAINTED)
+
+PLC_GANACHE = [(30, 16, 12), (46, 26, 18), (64, 38, 26), (96, 62, 44)]
+PLC_BUTTERCREAM = [(176, 84, 24), (214, 112, 36), (232, 138, 54), (244, 166, 86)]
+PLC_SPONGE = [(150, 82, 34), (176, 104, 46), (196, 124, 62)]
+PLC_CREAM = [(226, 216, 196), (242, 236, 222)]
+PLC_CANDY = {"tip": (246, 238, 220), "middle": (236, 124, 28), "foot": (250, 196, 54)}
+PLC_PUMPKIN_SKIN = [(176, 78, 18), (214, 104, 26), (236, 134, 40)]
+PLC_STEM_GREEN = (84, 112, 34)
+# Where the ganache's top catches the light: a short arc near its back left.
+PLC_GLOSS = {(2, 4), (2, 3), (3, 2), (4, 2)}
+# How far each column of the ganache runs down the buttercream: the front's, and the side's a different run of drips.
+PLC_DRIPS = {"front": (1, 3, 2, 1, 0, 2, 3, 1, 0, 1, 2, 4, 1, 0, 2, 1), "side": (2, 1, 0, 2, 3, 1, 1, 4, 2, 0, 1, 3, 1, 2, 0, 1)}
+
+
+def coat(drips):
+    """An outer side of the Pumpkin Layer Cake, its nine rows from the top: the black ganache's edge along its top and
+    running down in drips (PLC_DRIPS), over orange buttercream smoothed on with a spatula (a lighter stroke every fourth
+    column), lit at its top and shaded to its foot."""
+    rows = []
+    for y in range(cakes.HEIGHT):
+        row = []
+        for x in range(16):
+            if y == 0:
+                row.append(PLC_GANACHE[2])
+            elif y <= drips[x]:
+                row.append(PLC_GANACHE[0] if y == drips[x] else PLC_GANACHE[1])
+            else:
+                k = 3 if y <= 2 else 1 if y == cakes.HEIGHT - 2 else 0 if y == cakes.HEIGHT - 1 else 2
+                if 3 <= y <= 6 and x % 4 == 0:
+                    k = 3
+                row.append(PLC_BUTTERCREAM[k])
+        rows.append(row)
+    return rows
+
+
+def layers():
+    """The Pumpkin Layer Cake cut: the ganache along its top, then three layers of spiced pumpkin sponge with cream cheese
+    between them, the sponge's crumb in a regular weave (a darker crumb every fifth texel along a slant, a lighter one
+    every seventh), the buttercream coat a texel deep at either edge; its bottom row is its underside."""
+    rows = []
+    for y in range(cakes.HEIGHT):
+        row = []
+        for x in range(16):
+            if y == 0:
+                row.append(PLC_GANACHE[2])
+            elif x in (0, 15):
+                row.append(PLC_BUTTERCREAM[2])
+            elif y in (3, 6):
+                row.append(PLC_CREAM[1] if x % 3 else PLC_CREAM[0])
+            elif (x + 2 * y) % 5 == 0:
+                row.append(PLC_SPONGE[0])
+            elif (3 * x + y) % 7 == 0:
+                row.append(PLC_SPONGE[2])
+            else:
+                row.append(PLC_SPONGE[1])
+        rows.append(row)
+    return rows
+
+
+def ganache_top():
+    """The top, poured black ganache: its middle tone, its rim a tone deeper, a short arc of gloss near its back left
+    (PLC_GLOSS, in the drawing's coordinates: x east, z south)."""
+    rows = []
+    for z in range(16):
+        row = []
+        for x in range(16):
+            if x in (0, 15) or z in (0, 15):
+                row.append(PLC_GANACHE[1])
+            elif (x, z) in PLC_GLOSS:
+                row.append(PLC_GANACHE[3])
+            else:
+                row.append(PLC_GANACHE[2])
+        rows.append(row)
+    return rows
+
+
+def painted_faces(cake):
+    """A painted cake's faces, as drawn_faces gives a drawn one's, and its inside."""
+    return {"top": ganache_top(), "front": coat(PLC_DRIPS["front"]), "side": coat(PLC_DRIPS["side"]), "inside": layers()}
+
+
+def painted_toppings(cake):
+    """The Pumpkin Layer Cake's toppings texture, laid out as tools/cake_data.py maps it: each candy corn kernel's top
+    lying along z (u 0, v 0-2) and along x (u 8-10, v 0) from its white tip, its long sides (u 3-5, row 0) and its ends
+    (its yellow foot at u 3, its white tip at u 5, row 2); and the fondant pumpkin (cake_data.JAM_UV: its top at u 8-11,
+    v 8-11, ribbed, its green stem in the middle, and its sides ribbed on rows 12 and 13)."""
+    image = Image.new("RGBA", (16, 16))
+    put = lambda x, y, c: image.putpixel((x, y), tuple(c) + (255,))
+    kernel = [PLC_CANDY["tip"], PLC_CANDY["middle"], PLC_CANDY["foot"]]
+    for i, colour in enumerate(kernel):
+        put(0, i, colour)          # lying along z
+        put(8 + i, 0, colour)      # lying along x
+        put(3 + i, 0, colour)      # the long sides
+    put(3, 2, PLC_CANDY["foot"]), put(5, 2, PLC_CANDY["tip"])
+    for v in range(4):
+        for u in range(4):
+            put(8 + u, 8 + v, PLC_STEM_GREEN if u in (1, 2) and v in (1, 2) else PLC_PUMPKIN_SKIN[2 if u % 2 == 0 else 1])
+    for v in (12, 13):
+        for u in range(4):
+            put(8 + u, v, PLC_PUMPKIN_SKIN[(2 if u % 2 == 0 else 1) if v == 12 else 0])
+    return image
+
+
 # ---------------------------------------------------------------- everything
 
 def cake_textures():
@@ -461,6 +571,19 @@ def cake_textures():
     out = {}
     carrot = None
     for cake in cakes.CAKES:
+        if cake in cakes.PAINTED:
+            faces = painted_faces(cake)
+            top = faces["top"]
+            out[("block", f"{cake}_top")] = square(turned(top))
+            out[("block", f"{cake}_front")] = sheet(faces["front"])
+            out[("block", f"{cake}_side")] = sheet(faces["side"])
+            out[("block", f"{cake}_inside")] = sheet(faces["inside"])
+            out[("block", f"{cake}_toppings")] = painted_toppings(cake)
+            # Its slice's sponge is taken from its sponge alone (not the cream cheese between the layers), under its ganache.
+            sponge = [row[1:15] for y, row in enumerate(faces["inside"]) if y in (1, 2, 4, 5, 7, 8)]
+            out[("item", cakes.slice_item(cake))] = slice_icon(cake, {"front": sponge}, top)
+            out[("item", cakes.raw(cake))] = raw_icon(cake)
+            continue
         faces = drawn_faces(page, cake)
         top = clean_top(cake, faces["top"])
         out[("block", f"{cake}_top")] = square(turned(top))

@@ -1,0 +1,25 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SSS",
+    "PCP",
+    "SFS"
+  ],
+  "key": {
+    "S": "minecraft:cobblestone",
+    "P": "#minecraft:planks",
+    "C": "minecraft:campfire",
+    "F": "minecraft:smooth_stone_slab"
+  },
+  "result": {
+    "id": "jugcraft:stone_fireplace",
+    "count": 1
+  }
+}

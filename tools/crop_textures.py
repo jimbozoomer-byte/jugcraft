@@ -676,6 +676,8 @@ def crop_textures():
     out.update(kitchen_textures())
     from festival_textures import festival_textures  # so do the festival crops
     out.update(festival_textures())
+    from pumpkin_patch_textures import pumpkin_patch_textures  # and the Pumpkin Patch Market's squashes and gourds
+    out.update(pumpkin_patch_textures())
     from larch_textures import larch_textures  # and Alpine Spawn's larch
     out.update(larch_textures())
     from forest_textures import forest_textures  # and the biomes branch's seasonal-forest trees
@@ -792,6 +794,26 @@ def crop_textures():
     out.update(laboratory_textures())
     from decor20_data import textures as pumpkin_night_textures  # and Pumpkin Night
     out.update(pumpkin_night_textures())
+    from pumpkin_patch_data import textures as pumpkin_patch_display_textures  # and the Pumpkin Patch Market's displays
+    out.update(pumpkin_patch_display_textures())
+    from orchard_harvest_data import textures as orchard_harvest_textures  # and Orchard & Apple Harvest's gear
+    out.update(orchard_harvest_textures())
+    from barn_tools_data import textures as barn_tools_textures  # and Barn & Harvest Tools' hand tools
+    out.update(barn_tools_textures())
+    from fall_garden_data import textures as fall_garden_textures  # and Fall Garden & Porch's planters
+    out.update(fall_garden_textures())
+    from hearth_data import textures as hearth_textures  # and Cozy Fall Hearth's
+    out.update(hearth_textures())
+    from haunted_midway_data import textures as haunted_midway_textures  # and Haunted Midway's
+    out.update(haunted_midway_textures())
+    from front_yard_data import textures as front_yard_textures  # and the Front-Yard Haunt Scenes'
+    out.update(front_yard_textures())
+    from party_table_data import textures as party_table_textures  # and the Halloween Party Table's
+    out.update(party_table_textures())
+    from clockwork_data import textures as clockwork_textures  # and the Clockwork Animatronics'
+    out.update(clockwork_textures())
+    from harvest_festival_data import textures as harvest_festival_textures  # and the Harvest Festival Grounds'
+    out.update(harvest_festival_textures())
     from lair_textures import lair_textures  # and the lairs' blocks, the Mourning Wreath and the Death Knell
     out.update(lair_textures())
     from adam_ondi_ahman_textures import adam_ondi_ahman_textures  # and Adam-ondi-Ahman's Ancient Altar

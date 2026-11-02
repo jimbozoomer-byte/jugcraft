@@ -1,0 +1,426 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "false",
+        "servings": "1|2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "false",
+        "servings": "2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "false",
+        "servings": "3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_2"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "false",
+        "servings": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_3"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_table"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "true",
+        "servings": "1|2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_0_table"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "true",
+        "servings": "2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_1_table"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "true",
+        "servings": "3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_2_table"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "on_table": "true",
+        "servings": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_3_table"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "false",
+        "servings": "1|2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "false",
+        "servings": "2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "false",
+        "servings": "3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "false",
+        "servings": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_table",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "true",
+        "servings": "1|2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_0_table",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "true",
+        "servings": "2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_1_table",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "true",
+        "servings": "3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_2_table",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "on_table": "true",
+        "servings": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_3_table",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "false",
+        "servings": "1|2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "false",
+        "servings": "2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "false",
+        "servings": "3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "false",
+        "servings": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_3",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_table",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "true",
+        "servings": "1|2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_0_table",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "true",
+        "servings": "2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_1_table",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "true",
+        "servings": "3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_2_table",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "on_table": "true",
+        "servings": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_3_table",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "false",
+        "servings": "1|2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "false",
+        "servings": "2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "false",
+        "servings": "3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "false",
+        "servings": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_3",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_table",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "true",
+        "servings": "1|2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_0_table",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "true",
+        "servings": "2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_1_table",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "true",
+        "servings": "3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_2_table",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "on_table": "true",
+        "servings": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/skull_goblets_slot_3_table",
+        "y": 270
+      }
+    }
+  ]
+}

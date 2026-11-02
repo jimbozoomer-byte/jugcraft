@@ -1,0 +1,481 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "2",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_2"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "3",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_3"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "3",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_3_bulbs_lit"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "4",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_4"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "4",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_4_bulbs_lit"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "5",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_5"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "5",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_5_bulbs_lit"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "runner": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_bat"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "runner": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_ghost"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "2",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "3",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "3",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_3_bulbs_lit",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "4",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_4",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "4",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_4_bulbs_lit",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "5",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_5",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "5",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_5_bulbs_lit",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "runner": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_bat",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "runner": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_ghost",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "2",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "3",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_3",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "3",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_3_bulbs_lit",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "4",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_4",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "4",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_4_bulbs_lit",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "5",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_5",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "5",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_5_bulbs_lit",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "runner": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_bat",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "runner": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_ghost",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "2",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "3",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_3",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "3",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_3_bulbs_lit",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "4",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_4",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "4",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_4_bulbs_lit",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "5",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_5",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "5",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_5_bulbs_lit",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "runner": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_bat",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "runner": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/shooting_gallery_ghost",
+        "y": 270
+      }
+    }
+  ]
+}

@@ -72,6 +72,8 @@ public final class TownData {
 	public final List<Site> sites;
 	public final List<Spot> spots;
 	public final Map<Integer, BlockPos> beds = new HashMap<>();
+	/** Each resident's job and daily places (revision 4 on; tools/town_living.py), by spot index, town coordinates. */
+	public final Map<Integer, TownRoutine.Places> routines = new HashMap<>();
 	public final List<BlockPos> atms;
 	public final List<String> themes;
 	/** kind -> theme -> slots -> choices (state text with "{facing}" and "{rotation}"). */
@@ -117,6 +119,11 @@ public final class TownData {
                 JsonArray b = o.getAsJsonArray("bed");
                 beds.put(spots.size(), new BlockPos(b.get(0).getAsInt(), b.get(1).getAsInt(), b.get(2).getAsInt()));
             }
+			if (o.has("job")) {
+				routines.put(spots.size(), new TownRoutine.Places(o.get("job").getAsString(),
+						o.has("gathering") ? o.get("gathering").getAsString() : "", optionalPosition(o, "work"),
+						optionalPosition(o, "work_look"), optionalPosition(o, "evening"), optionalPosition(o, "evening_look")));
+			}
 			spots.add(new Spot(spots.size(), o.get("role").getAsString(), o.has("shop") ? o.get("shop").getAsString() : null,
 					o.get("name").getAsString(), o.get("skin").getAsString(),
 					new BlockPos(p.get(0).getAsInt(), p.get(1).getAsInt(), p.get(2).getAsInt())));
@@ -186,6 +193,11 @@ public final class TownData {
 
 	public static TownData revision(int version) {
         return version == TownUpgrades.CURRENT ? get() : load("/data/jugcraft/town/revisions/" + version + ".json.gz");
+    }
+
+    /** A frozen blueprint revision, read from its own file whatever the current revision is (for checks). */
+    public static TownData frozen(int version) {
+        return load("/data/jugcraft/town/revisions/" + version + ".json.gz");
     }
 
     private static TownData load(String path) {
@@ -259,6 +271,14 @@ public final class TownData {
 	private static Direction direction(String name) {
 		Direction d = Direction.byName(name);
 		return d == null ? Direction.NORTH : d;
+	}
+
+	private static @Nullable BlockPos optionalPosition(JsonObject o, String key) {
+		if (!o.has(key)) {
+			return null;
+		}
+		JsonArray a = o.getAsJsonArray(key);
+		return new BlockPos(a.get(0).getAsInt(), a.get(1).getAsInt(), a.get(2).getAsInt());
 	}
 
 	private static BlockPos position(JsonObject o) {

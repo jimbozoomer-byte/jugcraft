@@ -1,19 +1,26 @@
-JUGCRAFT companion, guns and Halloween update — release candidate.
+JUGCRAFT NEWEST collection and progression update — 20261031.1 candidate
 
-- Peepo and Jughead: bounded supplemental wild spawning in existing habitats, clearer work feedback and thought bubbles, improved handling and kitchen animations, smoother seats/beds/bunk transitions, and cutting-board batches with saved inputs and inventory recovery.
-- Guns: the Auger Rifle, Auger Shotgun, Tumbler Rifle, Maelstrom Gun, Ermine Rifle and Geode Cutter; darts and bleeding; armour piercing and knockback for the reviewed gun tables; chance-based End-gun levitation; additional hit effects; and protected-land-aware mining beams for the Seam Cutter and Geode Cutter.
-- Seasonal Headless Horseman sightings: a harmless charge, pumpkin scare and retreat, with the Sleepy Hollow advancement. The scheduler respects the Halloween window and server override.
-- Blood Moons: a red sky and haze every fourth in-game night during Halloween, plus Halloween night, with additional seasonal activity and Bad Moon Rising.
-- Graveyard Rising: ring a graveyard bell twice on a seasonal night to opt into three waves, with bounded concurrent events and per-night rewards.
-- The Church Bridge: an off-season Horseman lair opened by the Hessian's Bridle at a jack-o'-lantern on a fence/wall post under the night sky. Includes the Dark Road brazier mechanic, phantom riders, the Hollowflail and Hessian Sabre, Dread, the Hessian's Spur and Tricorn, and participant rewards. During Halloween, the existing Overworld Horseman summon remains the route to fight him.
-- Reliability: Herobrine groves finish when planned leaves naturally decay, while still preserving player replacements. Codex book-state packets retain a complete snapshot so rapid research updates cannot corrupt their network serialization and disconnect players.
+- Building and decoration collection: supplied stone finishes, paths, doors and garage gates, fences, bridges, windows, stairs, lights, furniture, seasonal decorations and paintings, with native interactions and survival recipes.
+- Household tools and storage: seating, cabinets, sinks, cooking and utility blocks, rope workshops, movable attachments, backpacks and portable tools.
+- Botanical and arcane systems: mana production and transport, functional flowers, crafting and control devices, equipment, brews, rituals, relics and encounters; supplied models, textures and animation data integrated into Jugcraft.
+- Creatures and exploration: aquatic content, Ribbits, Moobloom variants, Naga, Wroughtnaut, Frostmaw, Bluff, Elokosa, Suntribe, Sculptor and monastery/galleon content. Missing originals remain explicitly documented.
+- Equipment: accessory slots accept supported equipment without research. The tested client equipped and removed items in 14 slot groups.
+- Getting started: unified Encyclopedia sections for technology, magic and transmutation, current-inventory ingredient lists, recipe previews and free NPC mentor lessons.
+- Crafting: choose between matching crafting outputs using the small result selector. Six server tests covered all 76 outputs across 38 conflicts; table and inventory client flows were exercised.
+- Repairs: supplied missing models/textures, aircraft banking direction and raid approach/pathing fixes from the accumulated local batch.
 
-No world regeneration is required. Matching updated server and client builds are required for new registrations and packets. Preserve world/player data, configuration and the previous managed files before upgrading; rollback means restoring the matching backup. Recover queued cutting-board goods before downgrading.
+Known priority fixes (docs/TODO.md):
+- 708 static geometry diagnostics still require source-aware visual review; these are findings, not 708 confirmed broken models. The static art check is NOT passing.
+- Missing originals: two monastery dead-end templates, Home saddle/mangrove-zaisu geometry, two trophy skins, four cherry-waffle door variants, and the empty Fast Paintings source folder.
+- Owner/player survival and visual acceptance remains outstanding.
+- Full-suite CI memory reliability: the default 4 GB test run exhausted memory; the local 6 GB sweep completed.
 
-Combined validation and release readiness are recorded in docs/features/ready-pr-batch-oct28.md. Automated checks are distinct from human multiplayer playtesting; no human playtest is claimed.
+Validation: the full local server sweep passed 3,258/3,263 tests; all five old test expectations were corrected and a 58-test follow-up passed without optional integrations, including all 19 NEWEST regressions. Rendered client checks passed, including 837,276 block states and representative content. Data/recipe and native resource-reference checks passed. This is evidence across runs, not one completely green unfiltered run or a human multiplayer playtest.
 
-Existing players: after this release is promoted, open JUGCRAFT Updates at the title screen, download, apply and quit, wait for the updater to finish, then relaunch the same Modrinth profile. Settings, keybinds, saves and extra mods stay in place.
+Preserve worlds, player data, settings and owner configuration. Do not regenerate the world for this update. New world-generation content appears in newly generated areas. Matching server/client versions are required. Keep the previous mod and a matching world backup for rollback after new content is saved.
 
-Preparation does not restart the server or activate client prompts. Obtain owner restart confirmation, warn players and wait the full 30 seconds, install matching server files, verify startup, then promote the client channel.
+Existing players: only after the server is updated and the channel promoted, use JUGCRAFT Updates > Download > Apply update & quit, wait for completion, then relaunch the same Modrinth profile. No new profile or public Modrinth pack listing is needed.
 
-Contributions by their original PR authors, with Claude Code and OpenAI Codex assistance. Combined integration and seasonal correction: OpenAI Codex (GPT-6), directed by the repository owner.
+Implementation and release preparation: OpenAI Codex (GPT-6), directed by the owner. Original supplied assets and notices retained. This candidate is not a claim of completed deployment or clean CI.
+
+Additional pre-publication priority: reconcile new essence values and conversion-cost fixtures, JEI station coverage, duplicate shapeless bills and survival-audit registry coverage. The broader local Python suite did not pass; packaging-specific tests did. These findings are tracked in docs/TODO.md and are not hidden by the passing gameplay tests.

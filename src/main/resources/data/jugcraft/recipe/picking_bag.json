@@ -1,0 +1,24 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "SIS",
+    "W W",
+    " W "
+  ],
+  "key": {
+    "S": "minecraft:string",
+    "I": "minecraft:iron_nugget",
+    "W": "#minecraft:wool"
+  },
+  "result": {
+    "id": "jugcraft:picking_bag",
+    "count": 1
+  }
+}

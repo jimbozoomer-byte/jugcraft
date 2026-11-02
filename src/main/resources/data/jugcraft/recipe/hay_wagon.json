@@ -1,0 +1,25 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "HHH",
+    "PSP",
+    "I I"
+  ],
+  "key": {
+    "H": "minecraft:hay_block",
+    "P": "#minecraft:planks",
+    "S": "minecraft:stick",
+    "I": "minecraft:iron_ingot"
+  },
+  "result": {
+    "id": "jugcraft:hay_wagon",
+    "count": 1
+  }
+}

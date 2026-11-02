@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jugcraft:block/beware_doormat"
+    },
+    "facing=east": {
+      "model": "jugcraft:block/beware_doormat",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jugcraft:block/beware_doormat",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jugcraft:block/beware_doormat",
+      "y": 270
+    }
+  }
+}

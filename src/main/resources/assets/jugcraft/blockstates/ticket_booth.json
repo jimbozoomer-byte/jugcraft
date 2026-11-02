@@ -1,0 +1,223 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/ticket_booth_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/ticket_booth_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "runner": "false",
+        "roll": "1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16"
+      },
+      "apply": {
+        "model": "jugcraft:block/ticket_booth_1_roll1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "runner": "false",
+        "roll": "17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32"
+      },
+      "apply": {
+        "model": "jugcraft:block/ticket_booth_1_roll2"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "runner": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/ticket_booth_crank"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/ticket_booth_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/ticket_booth_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "runner": "false",
+        "roll": "1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16"
+      },
+      "apply": {
+        "model": "jugcraft:block/ticket_booth_1_roll1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "runner": "false",
+        "roll": "17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32"
+      },
+      "apply": {
+        "model": "jugcraft:block/ticket_booth_1_roll2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "runner": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/ticket_booth_crank",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/ticket_booth_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/ticket_booth_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "runner": "false",
+        "roll": "1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16"
+      },
+      "apply": {
+        "model": "jugcraft:block/ticket_booth_1_roll1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "runner": "false",
+        "roll": "17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32"
+      },
+      "apply": {
+        "model": "jugcraft:block/ticket_booth_1_roll2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "runner": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/ticket_booth_crank",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/ticket_booth_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/ticket_booth_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "runner": "false",
+        "roll": "1|2|3|4|5|6|7|8|9|10|11|12|13|14|15|16"
+      },
+      "apply": {
+        "model": "jugcraft:block/ticket_booth_1_roll1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "runner": "false",
+        "roll": "17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32"
+      },
+      "apply": {
+        "model": "jugcraft:block/ticket_booth_1_roll2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "runner": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/ticket_booth_crank",
+        "y": 270
+      }
+    }
+  ]
+}

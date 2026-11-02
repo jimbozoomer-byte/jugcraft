@@ -1,0 +1,505 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "runner": "false",
+        "score": "1|2|3|4|5|6|7|8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "runner": "false",
+        "score": "2|3|4|5|6|7|8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp2"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "runner": "false",
+        "score": "3|4|5|6|7|8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp3"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "runner": "false",
+        "score": "4|5|6|7|8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp4"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "runner": "false",
+        "score": "5|6|7|8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp5"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "runner": "false",
+        "score": "6|7|8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp6"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "runner": "false",
+        "score": "7|8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp7"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "runner": "false",
+        "score": "8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp8"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "runner": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_head"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "runner": "false",
+        "score": "1|2|3|4|5|6|7|8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "runner": "false",
+        "score": "2|3|4|5|6|7|8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "runner": "false",
+        "score": "3|4|5|6|7|8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "runner": "false",
+        "score": "4|5|6|7|8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp4",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "runner": "false",
+        "score": "5|6|7|8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp5",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "runner": "false",
+        "score": "6|7|8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp6",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "runner": "false",
+        "score": "7|8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp7",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "runner": "false",
+        "score": "8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp8",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "runner": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_head",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "runner": "false",
+        "score": "1|2|3|4|5|6|7|8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "runner": "false",
+        "score": "2|3|4|5|6|7|8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "runner": "false",
+        "score": "3|4|5|6|7|8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp3",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "runner": "false",
+        "score": "4|5|6|7|8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp4",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "runner": "false",
+        "score": "5|6|7|8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp5",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "runner": "false",
+        "score": "6|7|8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp6",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "runner": "false",
+        "score": "7|8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp7",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "runner": "false",
+        "score": "8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp8",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "runner": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_head",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "runner": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "runner": "false",
+        "score": "1|2|3|4|5|6|7|8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "runner": "false",
+        "score": "2|3|4|5|6|7|8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "runner": "false",
+        "score": "3|4|5|6|7|8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp3",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "runner": "false",
+        "score": "4|5|6|7|8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp4",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "runner": "false",
+        "score": "5|6|7|8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp5",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "runner": "false",
+        "score": "6|7|8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp6",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "runner": "false",
+        "score": "7|8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp7",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "runner": "false",
+        "score": "8"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_1_lamp8",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "runner": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/whack_a_zombie_head",
+        "y": 270
+      }
+    }
+  ]
+}

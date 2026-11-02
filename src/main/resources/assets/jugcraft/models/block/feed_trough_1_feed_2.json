@@ -1,0 +1,69 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "p": "jugcraft:block/feed_trough",
+    "particle": "jugcraft:block/feed_trough"
+  },
+  "elements": [
+    {
+      "from": [
+        1.75,
+        4.0,
+        4.75
+      ],
+      "to": [
+        16,
+        6.5,
+        11.25
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            3.625,
+            6.75,
+            7.25,
+            7.5
+          ],
+          "texture": "#p"
+        },
+        "south": {
+          "uv": [
+            0.0,
+            6.75,
+            3.625,
+            7.5
+          ],
+          "texture": "#p"
+        },
+        "west": {
+          "uv": [
+            7.5,
+            6.75,
+            9.25,
+            7.5
+          ],
+          "texture": "#p"
+        },
+        "up": {
+          "uv": [
+            7.75,
+            0.0,
+            11.375,
+            1.75
+          ],
+          "texture": "#p"
+        },
+        "down": {
+          "uv": [
+            7.75,
+            0.0,
+            11.375,
+            1.75
+          ],
+          "texture": "#p"
+        }
+      }
+    }
+  ]
+}

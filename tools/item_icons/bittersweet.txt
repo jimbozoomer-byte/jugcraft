@@ -1,0 +1,21 @@
+# Bittersweet: original Jugcraft pixel map. A sprig of American bittersweet: a woody stem twining up from the lower
+# left, two pointed leaves turned butter yellow on it, and two scarlet berries on short twigs, each under its split
+# orange husk.
+# materials: main=red_paint second=petal wood=wood accent=terracotta
+# family: upright
+............w...
+..g........wBw..
+.gYg......wBwOO.
+gYYFg....wbbbEeO
+gYFFfg..wBwwOLMO
+.gFfgwwwBw..OMDO
+..gfbbbbw....OO.
+...gwwBw........
+....wBwwwwwwOO..
+...wbbbbbbbbEeO.
+..wBwgYgwwwOLMO.
+.wBwgYYFg..OMDO.
+wbbbbYFFfg..OO..
+.wwwwgFfg.......
+......gfg.......
+.......g........

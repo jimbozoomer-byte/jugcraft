@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PGP",
+    "DLD",
+    "PRP"
+  ],
+  "key": {
+    "P": "#minecraft:planks",
+    "G": "minecraft:glass_pane",
+    "D": "#minecraft:wooden_doors",
+    "L": "minecraft:jack_o_lantern",
+    "R": "minecraft:rail"
+  },
+  "result": {
+    "id": "jugcraft:ghost_train",
+    "count": 1
+  }
+}

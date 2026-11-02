@@ -1,0 +1,1091 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "north",
+        "part": "0",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "1",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "2",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_2"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "3",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_3"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "4",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_4"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "5",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_5"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "6",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_6"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "6",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_6_windows_lit"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "7",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_7"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "8",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_8"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "8",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_8_windows_lit"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "9",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_9"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "10",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_10"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "10",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_10_windows_lit"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "11",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_11"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "11",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_11_windows_lit"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "12",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_12"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "13",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_13"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "13",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_13_windows_lit"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "14",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_14"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "15",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_15"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "part": "15",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_15_windows_lit"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "runner": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_leaf_left"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "runner": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_leaf_right"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "runner": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_spook"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "0",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "1",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "2",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "3",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "4",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_4",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "5",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_5",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "6",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_6",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "6",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_6_windows_lit",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "7",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_7",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "8",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_8",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "8",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_8_windows_lit",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "9",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_9",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "10",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_10",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "10",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_10_windows_lit",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "11",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_11",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "11",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_11_windows_lit",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "12",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_12",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "13",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_13",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "13",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_13_windows_lit",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "14",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_14",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "15",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_15",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "part": "15",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_15_windows_lit",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "runner": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_leaf_left",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "runner": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_leaf_right",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "runner": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_spook",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "0",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "1",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "2",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "3",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_3",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "4",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_4",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "5",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_5",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "6",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_6",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "6",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_6_windows_lit",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "7",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_7",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "8",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_8",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "8",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_8_windows_lit",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "9",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_9",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "10",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_10",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "10",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_10_windows_lit",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "11",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_11",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "11",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_11_windows_lit",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "12",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_12",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "13",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_13",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "13",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_13_windows_lit",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "14",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_14",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "15",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_15",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "part": "15",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_15_windows_lit",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "runner": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_leaf_left",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "runner": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_leaf_right",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "runner": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_spook",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "0",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "1",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "2",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "3",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_3",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "4",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_4",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "5",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_5",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "6",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_6",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "6",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_6_windows_lit",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "7",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_7",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "8",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_8",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "8",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_8_windows_lit",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "9",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_9",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "10",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_10",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "10",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_10_windows_lit",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "11",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_11",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "11",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_11_windows_lit",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "12",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_12",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "13",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_13",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "13",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_13_windows_lit",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "14",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_14",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "15",
+        "runner": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_15",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "part": "15",
+        "runner": "0",
+        "lit": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_15_windows_lit",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "runner": "1"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_leaf_left",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "runner": "2"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_leaf_right",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "runner": "3"
+      },
+      "apply": {
+        "model": "jugcraft:block/ghost_train_spook",
+        "y": 270
+      }
+    }
+  ]
+}

@@ -35,8 +35,13 @@ public final class DoorWreath extends BlockAttachedEntity {
 	private static final EntityDataAccessor<BlockPos> DOOR = SynchedEntityData.defineId(DoorWreath.class, EntityDataSerializers.BLOCK_POS);
 	private static final EntityDataAccessor<Boolean> FRONT = SynchedEntityData.defineId(DoorWreath.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<BlockState> WREATH = SynchedEntityData.defineId(DoorWreath.class, EntityDataSerializers.BLOCK_STATE);
+	/** How many times its ornament has knocked (a door knocker's rapping), counted so every side sees each knock. */
+	private static final EntityDataAccessor<Integer> KNOCKS = SynchedEntityData.defineId(DoorWreath.class, EntityDataSerializers.INT);
 	public static final double THICKNESS = 4.5 / 16.0;
 	private Direction facing = Direction.NORTH;
+	/** The game time its ornament last knocked, on this side, or {@link Long#MIN_VALUE}; not saved. */
+	private long knockedAt = Long.MIN_VALUE;
+	private int seenKnocks = -1;
 
 	public DoorWreath(EntityType<? extends DoorWreath> type, Level level) {
 		super(type, level, BlockPos.ZERO);
@@ -44,7 +49,7 @@ public final class DoorWreath extends BlockAttachedEntity {
 	}
 
 	@Override protected void defineSynchedData(SynchedEntityData.Builder builder) {
-		builder.define(DOOR, BlockPos.ZERO).define(FRONT, true).define(WREATH, Blocks.AIR.defaultBlockState());
+		builder.define(DOOR, BlockPos.ZERO).define(FRONT, true).define(WREATH, Blocks.AIR.defaultBlockState()).define(KNOCKS, 0);
 	}
 
 	/** Front means the face looking opposite FACING when closed; opening rotates that same material face. */
@@ -57,6 +62,16 @@ public final class DoorWreath extends BlockAttachedEntity {
 	public boolean isFront() { return entityData.get(FRONT); }
 	@Override public BlockPos getPos() { return entityData.get(DOOR); }
 	public BlockState wreathState() { return entityData.get(WREATH); }
+
+	/** Its ornament knocks, now (on the server; every side marks the time as the count reaches it). */
+	public void knock() {
+		entityData.set(KNOCKS, entityData.get(KNOCKS) + 1);
+		knockedAt = level().getGameTime();
+		seenKnocks = entityData.get(KNOCKS);
+	}
+
+	/** The game time its ornament last knocked, or {@link Long#MIN_VALUE}. */
+	public long knockedAt() { return knockedAt; }
 	@Override public Direction getDirection() { return facing; }
 
 	/** No blocks are moved or replaced, and each half/face has room for only one wreath. */
@@ -75,6 +90,12 @@ public final class DoorWreath extends BlockAttachedEntity {
 	@Override public void onSyncedDataUpdated(EntityDataAccessor<?> data) {
 		super.onSyncedDataUpdated(data);
 		if (data == DOOR || data == FRONT || data == WREATH) recalculateBoundingBox();
+		if (data == KNOCKS) {
+			int knocks = entityData.get(KNOCKS);
+			// The first count a client hears is the one it joined at, not a knock.
+			if (seenKnocks >= 0 && knocks != seenKnocks && level() != null) knockedAt = level().getGameTime();
+			seenKnocks = knocks;
+		}
 	}
 
 	/** Position packets contain the ring's centre, not the anchor. Keep the separately synced door position. */
@@ -99,12 +120,12 @@ public final class DoorWreath extends BlockAttachedEntity {
 			case EAST -> x = panel.maxX + THICKNESS / 2;
 			default -> throw new IllegalStateException("Vertical door face");
 		}
-		double halfX = face.getAxis() == Direction.Axis.X ? THICKNESS / 2 : 7.0 / 16.0;
-		double halfZ = face.getAxis() == Direction.Axis.Z ? THICKNESS / 2 : 7.0 / 16.0;
+		double[] box = ((AutumnWreathBlock) wreathState().getBlock()).doorBox();
+		double halfX = face.getAxis() == Direction.Axis.X ? THICKNESS / 2 : box[0] / 16.0;
+		double halfZ = face.getAxis() == Direction.Axis.Z ? THICKNESS / 2 : box[0] / 16.0;
 		setPosRaw(x, pos.getY() + 0.5, z);
-		double bottom = wreathState().getBlock() instanceof HollyWreathBlock ? 1.0 : 0.5;
-		setBoundingBox(new AABB(x - halfX, pos.getY() + bottom / 16.0, z - halfZ,
-				x + halfX, pos.getY() + 15.0 / 16.0, z + halfZ));
+		setBoundingBox(new AABB(x - halfX, pos.getY() + box[1] / 16.0, z - halfZ,
+				x + halfX, pos.getY() + box[2] / 16.0, z + halfZ));
 	}
 
 	@Override public boolean survives() {
@@ -115,15 +136,19 @@ public final class DoorWreath extends BlockAttachedEntity {
 	@Override public void tick() {
 		// Door block updates drive both sides directly, so the wreath snaps with the vanilla door without interpolation.
 		recalculateBoundingBox();
-		if (level() instanceof ServerLevel server && server.hasChunkAt(getPos()) && !isRemoved() && !survives()) {
-			discard();
-			dropItem(server, null);
+		if (level() instanceof ServerLevel server && server.hasChunkAt(getPos()) && !isRemoved()) {
+			if (!survives()) {
+				discard();
+				dropItem(server, null);
+			} else if (wreathState().getBlock() instanceof AutumnWreathBlock ornament) {
+				ornament.doorTick(server, this);
+			}
 		}
 	}
 
 	@Override public ItemStack getPickResult() {
 		ItemStack stack = new ItemStack(wreathState().getBlock());
-		if (wreathState().getBlock() instanceof AutumnWreathBlock && !(wreathState().getBlock() instanceof HollyWreathBlock))
+		if (wreathState().getBlock() instanceof AutumnWreathBlock wreath && wreath.takesMums())
 			stack.set(DataComponents.BLOCK_STATE, BlockItemStateProperties.EMPTY.with(AutumnWreathBlock.FLOWERS, wreathState()));
 		return stack;
 	}
@@ -138,7 +163,8 @@ public final class DoorWreath extends BlockAttachedEntity {
 		if (!level().mayInteract(player, getPos())) return InteractionResult.FAIL;
 		ItemStack stack = player.getItemInHand(hand);
 		var mums = AutumnWreathBlock.Mums.of(stack);
-		if (!(wreathState().getBlock() instanceof HollyWreathBlock) && mums != null) {
+		if (!(wreathState().getBlock() instanceof AutumnWreathBlock ornament)) return InteractionResult.PASS;
+		if (ornament.takesMums() && mums != null) {
 			if (mums == wreathState().getValue(AutumnWreathBlock.FLOWERS)) return InteractionResult.PASS;
 			if (!level().isClientSide()) {
 				entityData.set(WREATH, wreathState().setValue(AutumnWreathBlock.FLOWERS, mums));
@@ -148,6 +174,8 @@ public final class DoorWreath extends BlockAttachedEntity {
 			}
 			return InteractionResult.SUCCESS;
 		}
+		InteractionResult used = ornament.useOnDoor(this, player, hand);
+		if (used != InteractionResult.PASS) return used;
 		// A wreath must not prevent using its door. Sneaking keeps decoration/item placement available.
 		BlockState door = level().getBlockState(getPos());
 		if (!player.isSecondaryUseActive() && door.getBlock() instanceof DoorBlock block && block.type().canOpenByHand()) {

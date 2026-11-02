@@ -4,6 +4,8 @@ import io.github.jimbozoomer.jugcraft.blueprint.Blueprint;
 import io.github.jimbozoomer.jugcraft.machine.EnlargedMachineBlock;
 import io.github.jimbozoomer.jugcraft.machine.JugcraftMachines;
 import io.github.jimbozoomer.jugcraft.machine.MachineBlock;
+import io.github.jimbozoomer.jugcraft.machine.LargeMachineBlock;
+import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.nuclear.MultiFurnitureBlock;
 import io.github.jimbozoomer.jugcraft.nuclear.PlantBuilder;
 import io.github.jimbozoomer.jugcraft.nuclear.PlantInterior;
@@ -21,6 +23,7 @@ import net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariant;
 import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -293,6 +296,46 @@ public class MbsGameTests {
 		helper.getLevel().setBlock(origin.above(), Blocks.STONE.defaultBlockState(), Block.UPDATE_ALL);
 		StructureGhost blocked = screen.ghost(new BlockPlaceContext(player, InteractionHand.MAIN_HAND, stack, hit));
 		helper.assertTrue(!blocked.fits() && blocked.blocked().contains(origin.above()), "the stone in the way is marked: " + blocked.blocked());
+		helper.succeed();
+	}
+
+	@GameTest(structure = ARENA, maxTicks = 40)
+	public void industrialMachinePreviewsUseTheirOwnPartRanges(GameTestHelper helper) {
+		ServerPlayer player = player(helper, helper.absolutePos(new BlockPos(10, 1, 6)), GameType.CREATIVE);
+		BlockPos floor = helper.absolutePos(new BlockPos(10, 0, 10));
+		helper.getLevel().setBlock(floor, Blocks.STONE.defaultBlockState(), Block.UPDATE_ALL);
+		BlockHitResult hit = new BlockHitResult(Vec3.atCenterOf(floor).relative(Direction.UP, 0.5), Direction.UP, floor, false);
+		int checked = 0, formerlyAffected = 0;
+		for (Block block : BuiltInRegistries.BLOCK) {
+			if (!(block instanceof LargeMachineBlock machine)) {
+				continue;
+			}
+			checked++;
+			if (!machine.defaultBlockState().hasProperty(LargeMachineBlock.PART)) {
+				formerlyAffected++;
+				Jugcraft.LOGGER.info("[machine-preview-audit] formerly affected: {}", BuiltInRegistries.BLOCK.getKey(machine));
+			}
+			ItemStack stack = new ItemStack(machine);
+			player.setItemInHand(InteractionHand.MAIN_HAND, stack);
+			for (int rotation = 0; rotation < 4; rotation++) {
+				player.setYRot(rotation * 90);
+				BlockPlaceContext place = new BlockPlaceContext(player, InteractionHand.MAIN_HAND, stack, hit);
+				StructureGhost ghost = machine.ghost(place);
+				BlockState placed = machine.getStateForPlacement(place);
+				helper.assertTrue(placed != null, "machine can be placed");
+				var footprint = machine.footprint(placed);
+				helper.assertTrue(ghost.cells().size() == footprint.size(), "preview contains every part");
+				for (int part = 0; part < footprint.size(); part++) {
+					var cell = ghost.cells().get(part);
+					helper.assertTrue(cell.state().is(machine) && machine.part(cell.state()) == part
+							&& cell.state().getValue(MachineBlock.FACING) == placed.getValue(MachineBlock.FACING)
+							&& cell.pos().equals(footprint.partPos(place.getClickedPos(), placed.getValue(MachineBlock.FACING), part)),
+							"preview matches placement at part " + part);
+				}
+			}
+		}
+		Jugcraft.LOGGER.info("[machine-preview-audit] checked {} machines in four orientations; {} formerly affected", checked, formerlyAffected);
+		helper.assertTrue(checked > 2 && formerlyAffected > 2, "audit covers the registered machine roster");
 		helper.succeed();
 	}
 

@@ -1,0 +1,21 @@
+{
+  "variants": {
+    "": [
+      {
+        "model": "jugcraft:block/pumpkin_vine_cover"
+      },
+      {
+        "model": "jugcraft:block/pumpkin_vine_cover",
+        "y": 90
+      },
+      {
+        "model": "jugcraft:block/pumpkin_vine_cover",
+        "y": 180
+      },
+      {
+        "model": "jugcraft:block/pumpkin_vine_cover",
+        "y": 270
+      }
+    ]
+  }
+}

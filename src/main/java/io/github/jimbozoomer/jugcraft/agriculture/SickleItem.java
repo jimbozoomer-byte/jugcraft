@@ -21,7 +21,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * A hand tool for harvest time. Right-clicking a crop harvests every ripe crop in a square around
- * it (3×3 for radius 1, 5×5 for radius 2) and one block up or down:
+ * it (3×3 for radius 1, 5×5 for radius 2, 7×7 for radius 3) and one block up or down:
  * <ul>
  * <li>one-block crops, including vanilla wheat, carrots, potatoes and beetroots, drop their loot and
  * are replanted with one seed from that loot;</li>
