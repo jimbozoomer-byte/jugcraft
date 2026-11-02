@@ -357,15 +357,15 @@ screens) both server jobs passed all 3,206 required tests, his among them, and `
 passed with his flow first; his 33 pictures of that run were not looked at for this record (the Seen column above is run
 40605564166's).
 
-**Since GC-06** ([Marax](marax-pact.md); not merged, not yet run in CI): the chooser has a fourth entry; Buer's body
+**Since GC-06** ([Marax](marax-pact.md); merged into the cohort, not merged into main; run in CI on `be76fd419` and `1a15984d4` (runs 41506566691, 41506582568 and 41521655013)): the chooser has a fourth entry; Buer's body
 stands `PERCH`, as before, and his words, sounds, service and tests are unchanged. His first obligation is now one of
 three that can master The Garden's Regard (with Bathin's and Marax's).
 
-**Since GC-07** ([Foras](foras-pact.md); not merged, not yet run in CI): the chooser has another entry; Buer's body
+**Since GC-07** ([Foras](foras-pact.md); merged into the cohort, not merged into main; run in CI on `be76fd419` and `1a15984d4` (runs 41506566691, 41506582568 and 41521655013)): the chooser has another entry; Buer's body
 stays on the perch, and his words, sounds, service and tests are unchanged. His first obligation counts toward The
 Garden's Regard's mastery as Bathin's, Marax's and Foras's do (any three garden spirits').
 
-**Since GC-08** ([Bifrons](bifrons-pact.md); not merged, not yet run in CI): the chooser has a sixth entry; Buer's words,
+**Since GC-08** ([Bifrons](bifrons-pact.md); merged into the cohort, not merged into main; run in CI on `be76fd419` and `1a15984d4` (runs 41506566691, 41506582568 and 41521655013)): the chooser has a sixth entry; Buer's words,
 sounds, service and tests are unchanged, and SG12's shared cases think at his first hour, 0 as before. Bifrons gives to
 and draws from beds Buer may be tending: a run eases no strain and Buer's tending moves no nutrient, so neither undoes
 the other. His first obligation counts toward The Garden's Regard's mastery as Bathin's, Marax's, Foras's and Bifrons's

@@ -6,12 +6,13 @@ Beds from what they last showed and names the one change that would help the wor
 cohort's third garden spirit, on the same pact record, perch, screen, roster, journal and Jade lines as Stolas, Buer and
 Bathin, and the first to stand on the ground beside the perch instead of on it.
 
-Status: **built, not yet compiled or run in CI, not merged** (Concordance garden cohort, unit 3: brief `736d94541`; the
+Status: **built and run in CI, merged into the cohort, not merged into main** (Concordance garden cohort, unit 3: brief `736d94541`; the
 shared prefix GC-06b `8cf0ef994` with its review's fixes `ee362c3cd` and `cc9db6afa`; Marax `bed9f73b4`; his review's
 fixes `1473e99f1`; these records). The shared prefix was in the head that CI run
 [40777920181](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40777920181) tested (`8af703330`), a run that
-passed in full; nothing of Marax himself (`bed9f73b4` on) has been compiled, and none of his server tests or client
-shots has run ([Verification](#verification)). Every Java file of his was parse-checked only; the repository's Python
+passed in full; Marax himself (`bed9f73b4` on) has since run in CI: on `be76fd419` and `1a15984d4` (the cohort line with main merged) the server suite without the optional integrations and `ConcordanceGardenPactClientGameTests` passed (runs 41506566691, 41506582568 and 41521655013), his server tests and his client
+shots among them ([Verification](#verification)); his pictures are not yet looked at. Where he was built every Java file
+of his was parse-checked only; the repository's Python
 checks and audits ran on his files. No person has played him. This page began as his brief (GC-06a), committed before
 any body file as the contract's per-spirit template asks (D-D5); the sections after "Dependencies and assets" describe
 him as built.
@@ -384,7 +385,11 @@ The unit's proposals as built (each row in full, with its amendments, in the con
 
 ## Verification
 
-**Not run in CI.** Nothing of Marax himself has been compiled: no Minecraft jar was available where he was built, so
+**Run in CI since** (GC-10 unit 7): on `be76fd419` and `1a15984d4` (the cohort line with main merged) the server suite without the optional integrations and `ConcordanceGardenPactClientGameTests` passed (runs 41506566691, 41506582568 and 41521655013); main's own failures in those runs are not this pull request's. The
+paragraph and table below are as written before that run: their "not yet run" now means not yet looked at, and his
+pictures' "Seen" column is still empty.
+
+**Not run in CI (as first written).** Nothing of Marax himself has been compiled: no Minecraft jar was available where he was built, so
 every Java file of his was only parse-checked, and none of the tests and shots below has run. CI is still to run them;
 each row's evidence is what will show the item, not a result. The shared prefix (GC-06a, GC-06b and its review's fixes)
 was in the head CI run [40777920181](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40777920181) tested
@@ -444,7 +449,7 @@ tests as it does in Buer's).
 (the garden's two-client test is unit 7's); the narrator heard; a player's hardware; his astir loop (not photographed,
 as Buer's and Bathin's); the two over-budget page states above.
 
-**Since GC-08** ([Bifrons](bifrons-pact.md); not merged, not yet run in CI): the chooser has a sixth entry; Marax's words,
+**Since GC-08** ([Bifrons](bifrons-pact.md); merged into the cohort, not merged into main; run in CI on `be76fd419` and `1a15984d4` (runs 41506566691, 41506582568 and 41521655013)): the chooser has a sixth entry; Marax's words,
 sounds, service and tests are unchanged, and SG12's shared cases think at his first hour, 0 as before. A Bifrons run
 changes a bed's nutrients, so a planted bed his familiar passed over as proud is read again once Bifrons feeds it (or,
 answered "any full bed", draws from it): the proud count starts again when the bed changes, by design. His familiar never
@@ -468,8 +473,8 @@ reads the client's own sky. No seasonal gate. No cave, dungeon, boss or loot rol
 
 ## Rollout and open questions
 
-Ships with the garden cohort's unit 3 (GC-06), behind the Concordance's switch; built, not yet run in CI, not merged.
-Open: every test and shot of his is still to run in CI, and his pictures to be looked at; his body is built rather than
+Ships with the garden cohort's unit 3 (GC-06), behind the Concordance's switch; built, run in CI on `be76fd419` and `1a15984d4` (runs 41506566691, 41506582568 and 41521655013),
+merged into the cohort, not merged into main. Open: his pictures to be looked at; his body is built rather than
 the owner's (no owner rig fits; the cohort's checkpoint question 1); whether a reading a day or two is the right measure
 (question 2); the two kept-page states estimated over budget; Jade's short form of his note ("Proud beds: %1$s", the
 hourglass) waits for the merge of the magic interfaces' unit 2, whose short-form tables are not on this line; his reading's

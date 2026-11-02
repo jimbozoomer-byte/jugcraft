@@ -33,10 +33,10 @@ its perch) and the bed index's Hearts, Gleaners and pylons. In CI run
 both server jobs passed all 3,206 required tests, unit 2's 38 among them, and the garden client class passed; its 34
 pictures of Bathin were looked at ([the contract's evidence](features/concordance-garden-cohort.md#unit-2-as-built-and-its-evidence)).
 Not played by a person; one client, not two.
-Unit 3 (GC-06) is built and recorded, **not yet compiled or run in CI**: Marax, the third garden spirit, with the
+Unit 3 (GC-06) is built, recorded and run in CI: Marax, the third garden spirit, with the
 standing station beside a perch and the synced work target his familiar flies to. His shared prefix (GC-06a, GC-06b)
-was in the head of run 40777920181, which passed in full; nothing of Marax himself has been compiled, and his 22 server
-tests and 33 client shots wait for their first run. Checked locally by the repository's Python checks and audits and a
+was in the head of run 40777920181, which passed in full; on `be76fd419` and `1a15984d4` the server suite without the optional integrations and `ConcordanceGardenPactClientGameTests` passed (runs 41506566691, 41506582568 and 41521655013), his server tests as that suite runs them and his client
+shots among them; his pictures are not yet looked at. Checked locally by the repository's Python checks and audits and a
 scratch harness of his one-change rule ([the contract's evidence](features/concordance-garden-cohort.md#unit-3-as-built-and-its-evidence)).
 Unit 4 (GC-07) is built and recorded (on its own line from unit 3's shared prefix, merged after unit 3): Foras, a
 garden spirit who keeps grafts, with the graft in one place and the bed index's stores. Run
@@ -46,9 +46,9 @@ polish, before unit 4); in run [40852556175](https://github.com/jimbozoomer-byte
 client shards passed (the 16th, holding main's `PeepoPopulationClientTests`, on its re-run).
 Checked locally by the repository's Python checks and audits
 ([the contract's evidence](features/concordance-garden-cohort.md#unit-4-as-built-and-its-evidence)).
-Unit 5 (GC-08) is built and recorded on its own line from unit 3's head and merged after unit 4, **not yet compiled or
-run in CI**: Bifrons, a garden spirit who runs roots between beds by night, with feeding by hand as a garden act. Nothing
-of him has been compiled; his 22 server tests and 36 client shots wait for their first run, on the merged head. Checked
+Unit 5 (GC-08) is built and recorded on its own line from unit 3's head and merged after unit 4, and run in CI:
+Bifrons, a garden spirit who runs roots between beds by night, with feeding by hand as a garden act. On `be76fd419` and `1a15984d4` the server suite without the optional integrations and `ConcordanceGardenPactClientGameTests` passed (runs 41506566691, 41506582568 and 41521655013),
+his server tests as that suite runs them and his 36 client shots among them; his pictures are not yet looked at. Checked
 locally by the repository's Python checks and audits
 ([the contract's evidence](features/concordance-garden-cohort.md#unit-5-as-built-and-its-evidence)).
 Unit 6 (GC-09) is built and recorded on its own line from the cohort with units 1 to 4, beside unit 5's, and merged

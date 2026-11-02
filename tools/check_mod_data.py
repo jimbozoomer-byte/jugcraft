@@ -24205,6 +24205,17 @@ def check_pact_screen(co, lang):
             or "PactClient.request(menu, PactRequestPayload.RESOLVE, index)" not in matter_body or "state.spirit().answers()" not in matter_body \
             or "state.spirit().matter()" not in matter_body or 'inBody("matter", new MagicText(' not in matter_body:
         err("client/PactScreen.java: the kept page asks its spirit's matter (a narrated line), each answer a RESOLVE by its index (GC-05)")
+    # GC-10 unit 7 (GC-P145): the matter and its plates are drawn above the first task, so the snapped window at 320x180
+    # shows them, and each garden flow asserts so (platesInView) after its 320x180 resize, before its _matter_small picture.
+    keep_matter, keep_needs = keep_body.find("matter(state"), keep_body.find("for (int i : rows.needs())")
+    if not 0 <= keep_matter < keep_needs:
+        err("client/PactScreen.java: the kept page asks its spirit's matter above the first task (GC-P145)")
+    garden_code = re.sub(r"//[^\n]*|/\*.*?\*/", " ", text(TESTS_ROOT / "ConcordanceGardenPactClientGameTests.java"), flags=re.S)
+    for spirit in ("bathin", "foras", "bifrons", "amdusias"):
+        idx = garden_code.find(f'shot(context, "jugcraft_garden_{spirit}_matter_small")')
+        if idx < 0 or garden_code.rfind("platesInView(context", 0, idx) <= garden_code.rfind("resizeWindow(320, 180)", 0, idx):
+            err(f"ConcordanceGardenPactClientGameTests: {spirit}'s matter and its plates are asserted in view at 320x180 "
+                f"(platesInView) before jugcraft_garden_{spirit}_matter_small (GC-P145)")
     # D-S15 as amended for the magic interfaces (spec 1.3; decided by the session, reviewable at the checkpoint): every term
     # is a chip or a line whose message is the server's whole sentence, drawn from its glance; the six standing terms share
     # the chip term:standing, which narrates all six, whose tip says they are the same for every spirit, and whose More

@@ -10,11 +10,12 @@ commit); its tests passed in CI (run 38726242149, with unit 3, and again in run 
 hook and Buer's strain tending; [contract](concordance-garden-cohort.md)) is not merged (draft #526); its tests passed in
 CI run 40605564166. Its unit 2 (GC-05: the Gleaner's and the Heart's named roads, the bed index's devices and Bathin's
 Verdance carrying; [record](bathin-pact.md)) is not merged either; its tests passed in CI run 40777920181. Its unit 3
-(GC-06: `HabitatAdvice` and Marax's habitat reading; [record](marax-pact.md)) is built and not merged, and not yet
-compiled or run in CI. Its unit 4 (GC-07b and GC-07: the graft in one place and Foras's graft keeping;
-[record](foras-pact.md)) is built and not merged, and not yet compiled or run in CI.
+(GC-06: `HabitatAdvice` and Marax's habitat reading; [record](marax-pact.md)) is built, merged into the cohort and
+not merged into main; its tests run in CI (on `be76fd419` and `1a15984d4`, runs 41506566691, 41506582568 and 41521655013). Its unit 4 (GC-07b and GC-07: the graft
+in one place and Foras's graft keeping; [record](foras-pact.md)) is built, merged into the cohort and not merged into
+main; its tests run in CI (on `be76fd419` and `1a15984d4`, runs 41506566691, 41506582568 and 41521655013).
 Its unit 5 (GC-08b and GC-08: the feeding act and Bifrons's root-running between beds; [record](bifrons-pact.md)) is
-built, merged into the cohort after unit 4 and not merged to main, and not yet compiled or run in CI.
+built and merged into the cohort after unit 4, not merged into main; its tests run in CI on `be76fd419` and `1a15984d4` (runs 41506566691, 41506582568 and 41521655013).
 Its unit 6 (GC-09b and GC-09: a canopy's shelter in the pure rule, the garden's memory of canopies and Amdusias's
 canopy; [record](amdusias-pact.md)) is built on its own line, merged into the cohort after unit 5 and not merged to main,
 and not yet compiled or run in CI.
@@ -104,8 +105,8 @@ Sunpetal bears shade, light 9+ (best 11+) for 11+ (best 13+), but wants a wetter
 (best 4+). The graft lasts through every harvest, replanting, save and restart, until a crop of another organism grows
 there. A bed carries one: a second is refused, as is a graft where the gardener may not change the crop or the bed, and
 a refusal spends nothing. Produce, cost, chaff and alchemy are unchanged, so a graft makes nothing. The reports, the
-Inspect page and Jade name it, on a crop only when the crop is its host. Since the garden cohort's GC-07b (not merged;
-not yet run in CI) the graft itself is `garden/Grafting.apply` (the graft set, the ungrafted plant's verdict forgotten,
+Inspect page and Jade name it, on a crop only when the crop is its host. Since the garden cohort's GC-07b (merged into the cohort,
+not merged into main; run in CI) the graft itself is `garden/Grafting.apply` (the graft set, the ungrafted plant's verdict forgotten,
 the particles), which the hand's gesture ends in after its own checks, messages and spent Dewmoss, unchanged, and which
 Foras's graft keeping ([record](foras-pact.md)) ends in after his: `check_graft`'s rules hold it there, and only growth
 clears a graft. `Grafting.gains` is his "would gain": by the bed's cached reading, the grafted niche no worse on any
@@ -194,8 +195,8 @@ returns. A Greenwarden's tending that eases a strain is also a garden pact's fir
 (`PactObligations`, one line in `VerdantBedBlock.tendBy`); the gesture's own checks, rate gate and messages are unchanged.
 Buer's strain tending (GC-04, [record](buer-pact.md)) calls the same `tend` a Greenwarden's hand does, so the 600-tick
 window is one a bed, whoever tends; he never composts, rests or feeds a bed, and his overworked complaint ends when the bed
-eases by these rules. `check_ecology` allows `tend` from `VerdantBedBlock` and `StrainTending` alone. Since GC-06 (not
-merged; not yet run in CI) the pure `HabitatAdvice.one(niche, habitat, grafts)` names the one change for a plant on one
+eases by these rules. `check_ecology` allows `tend` from `VerdantBedBlock` and `StrainTending` alone. Since GC-06 (merged
+into the cohort, not merged into main; run in CI) the pure `HabitatAdvice.one(niche, habitat, grafts)` names the one change for a plant on one
 reading: nothing while it thrives; when one factor holds it at its step, the value nearest its own that alone raises it
 a step (harvest strain eased first where it decided the disturbance fit, and only ever lowered); when two or more do, the
 first in `Factor` order, "one of n", at its nearest ideal value; only ever toward the ideal range, so a plant that needs
@@ -203,7 +204,7 @@ no disturbance is never told to add magic; and a graft its bed could take that a
 at light 9 to 12). Marax's habitat reading ([record](marax-pact.md)) asks it of a bed's `cachedHabitat` (no sample is
 taken) and changes nothing; using a Verdant Bed itself with an empty hand (its report) is his pact's first obligation
 (`PactObligations`, one line after `report` in `VerdantBedBlock.useWithoutItem`); a crop's own report is not. Since GC-08
-(not merged; not yet run in CI) Bifrons's root-running ([record](bifrons-pact.md)) moves nutrients between beds through
+(merged into the cohort, not merged into main; run in CI) Bifrons's root-running ([record](bifrons-pact.md)) moves nutrients between beds through
 the beds' own `take` (exact) and `give` (never past a bed's 32): 2 taken from a full bed, 1 given to a hungry one, in one
 server step, so the beds always hold less than before; he never composts, rests or tends a bed, and a fallow bed (no
 organism crop and no Verdant Heart on it, the garden's own planted test) is his only source until his holder answers
@@ -437,30 +438,32 @@ beating on a lit bed among three kinds of crop) and `bathinsFirstObligationIsADe
 `theHeartBeatsVerdanceIntoAPylon` and Gleaner tests passed unchanged. `check_verdance_roads` and `check_garden_pacts`
 pass locally. Not run: a long unattended garden with Bathin on a real server; any person.
 
-**The garden cohort, unit 3 (GC-06; not merged; not yet run in CI).** `HabitatAdvice` is in the pure package
+**The garden cohort, unit 3 (GC-06; merged into the cohort, not merged into main; run in CI).** `HabitatAdvice` is in the pure package
 (`check_baselines`). A scratch harness outside Git, compiled with JDK 21 against it and the ecology classes as committed
 and holding the shipped organisms' and Dewlit's niches, checks it against brute force over 524,288 readings a niche:
 30,604,024 checks, 0 failures ([the rule](marax-pact.md#the-rule-gc-p64)). Its CI form,
 `ConcordanceGardenGameTests.habitatAdviceHoldsForEveryOrganism`, was in the head of run 40777920181, which passed in
 full; Marax's reading tests (`aReadingNamesOneCorrectionAndChangesNothing`, which also holds the level's sample budget
-unchanged, `aReadingSkipsBedsWithoutACachedSample` and four more) and `maraxsFirstObligationIsABedReadByHand` are written
-and not yet run. Not run: any of them in CI; any person.
+unchanged, `aReadingSkipsBedsWithoutACachedSample` and four more) and `maraxsFirstObligationIsABedReadByHand` are written;
+on `be76fd419` and `1a15984d4` the server suite without the optional integrations, which holds them, passed (runs 41506566691, 41506582568 and 41521655013). Not run: any person.
 
-**The garden cohort, unit 4 (GC-07b, GC-07; not merged; not yet run in CI).** Written and not yet run:
+**The garden cohort, unit 4 (GC-07b, GC-07; merged into the cohort, not merged into main; run in CI).** Written, and
+on `be76fd419` and `1a15984d4` passed in the server suite without the optional integrations (runs 41506566691, 41506582568 and 41521655013):
 `theGraftGestureBehavesAsBefore` (the hand's graft through `Grafting`, its messages and its one spent Dewmoss as before),
 `aGraftGainsOnlyWhereEveryFitIsNoWorseAndOneBetter` (six readings of a Sunpetal with and without Dewlit) and
 `theGardenReachIndexesStoresTouchingThePerch` (`ConcordanceGardenGameTests`); Foras's graft-keeping tests in
 `ConcordanceWorkerGameTests`, among them `forasSpendsOneDonorAGraftAndNeverTwo`, `forasNeverReplacesAKnownGraft`,
 `forasGraftsAgainAfterAReplanting` and `aPrudentForasGraftsWhereItHelps` (a host it helps grafted, one it would not
 left). Chunk C's nine graft tests are unchanged. `check_ecology` and `check_graft` (the graft's rules in `Grafting`) pass
-locally. Not run: any of them in CI; a long unattended garden with Foras on a real server; any person.
+locally. Not run: a long unattended garden with Foras on a real server; any person.
 
-**The garden cohort, unit 5 (GC-08b, GC-08; not merged; not yet run in CI).** Written and not yet run: Bifrons's
+**The garden cohort, unit 5 (GC-08b, GC-08; merged into the cohort, not merged into main; run in CI).** Written, and
+on `be76fd419` and `1a15984d4` passed in the server suite without the optional integrations (runs 41506566691, 41506582568 and 41521655013): Bifrons's
 root-running tests in `ConcordanceWorkerGameTests`, among them `aRootRunnerLosesHalfAndMintsNone`,
 `aRootRunnerNeverEasesStrain` (no strain eased on either bed), `aFullAnswerNeverTakesFromAHeartsBed` and
 `bifronssFirstObligationIsAFeedingByHand` (bone meal on a bed, and on the crop on one, by hand); and
 `rootRunningLeavesNoGainingCycle` (`ConcordanceEconomyGameTests`). `check_garden_pacts` and `check_economy` pass
-locally. Not run: any of them in CI; a long unattended garden with Bifrons on a real server; any person.
+locally. Not run: a long unattended garden with Bifrons on a real server; any person.
 
 **The garden cohort, unit 6 (GC-09b, GC-09; not merged; not yet run in CI).** Written and not yet run:
 `aShelteredHabitatKeepsItsStrainedValue` (the pure rule's named cases, Marax's advice on a sheltered reading, and a

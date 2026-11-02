@@ -374,7 +374,7 @@ graft keeping, the graft in one place and the bed index's stores; [record](featu
 merged; on the cohort line's head `5e93bb0a7`, which holds units 1 to 4, CI run 40852556175 passed in full.
 Its unit 5 (Bifrons, who by night runs roots from your full Verdant Beds to your hungry ones, two nutrients taken for one
 given, and asks before drawing from beds with crops growing on them; [record](features/bifrons-pact.md)) is built and
-merged into the cohort after unit 4, not merged into main, and not yet compiled or run in CI. Its unit 6 (Amdusias,
+merged into the cohort after unit 4, not merged into main; on `be76fd419` and `1a15984d4` the server suite without the optional integrations and `ConcordanceGardenPactClientGameTests` passed (runs 41506566691, 41506582568 and 41521655013). Its unit 6 (Amdusias,
 the bending canopy, a canopy's shelter in the ecology rule and the garden's memory of canopies;
 [record](features/amdusias-pact.md)) is built and merged into the cohort after unit 5, not merged into main, and not yet
 compiled or run in CI. Contract and

@@ -7,14 +7,14 @@ until told otherwise. He is the cohort's fourth garden spirit (Marax, the third,
 same pact record, perch, screen, roster, journal and Jade lines as Stolas, Buer and Bathin, and the first to spend an
 item for his work: one donor from the store for each graft.
 
-Status: **built and recorded, not yet compiled or run in CI, not merged** (Concordance garden cohort, unit 4: brief
+Status: **built, recorded and run in CI, merged into the cohort, not merged into main** (Concordance garden cohort, unit 4: brief
 `e3194d0be` (GC-07a); the graft in one place and the bed index's stores `8d8fba4b5` (GC-07b); Foras `e4fca201d` (GC-07);
-his review's fixes `8a50bbd33`; these records). Nothing of unit 4 has been compiled: no Minecraft build was possible
-where it was written, so every Java file of it was parse-checked only, and none of his server tests or client shots has
-run ([Verification](#verification)). His line is merged after unit 3's (Marax; [the
+his review's fixes `8a50bbd33`; these records). No Minecraft build was possible where it was written, so every Java
+file of it was parse-checked only there; it has since run in CI: on `be76fd419` and `1a15984d4` (the cohort line with main merged) the server suite without the optional integrations and `ConcordanceGardenPactClientGameTests` passed (runs 41506566691, 41506582568 and 41521655013), his server tests and client shots among them
+([Verification](#verification)); his pictures are not yet looked at. His line is merged after unit 3's (Marax; [the
 merge](concordance-garden-cohort.md#unit-4s-merge-after-unit-3)); the newest CI result the merged line descends from is
 run [40823371480](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40823371480), green in full on `5e8e0cba3`,
-before unit 4; nothing of unit 4 has run in CI. The repository's Python checks and audits ran on his files. No
+before unit 4 (as first written; see above for the runs since). The repository's Python checks and audits ran on his files. No
 person has played him. This page began as his brief (GC-07a), committed before any of his body files (D-D5); the
 sections after "Dependencies and assets" describe him as built. Where it goes beyond Dossier 4 (the greeting's stage
 direction, how his body is built, which cue plays which file at what pitch, the short words the screens draw) it is
@@ -393,7 +393,11 @@ The unit's proposals as built (each row in full, with its amendments, in the con
 
 ## Verification
 
-**Not run in CI.** Nothing of unit 4 has been compiled: no Minecraft jar was available where it was built, so every Java
+**Run in CI since** (GC-10 unit 7): on `be76fd419` and `1a15984d4` (the cohort line with main merged) the server suite without the optional integrations and `ConcordanceGardenPactClientGameTests` passed (runs 41506566691, 41506582568 and 41521655013); main's own failures in those runs are not this pull request's. The
+paragraph and table below are as written before that run: their "not yet run" now means not yet looked at, and his
+pictures' "Seen" column is still empty.
+
+**Not run in CI (as first written).** Nothing of unit 4 has been compiled: no Minecraft jar was available where it was built, so every Java
 file of it was only parse-checked (no syntax errors), and none of the tests and shots below has run. CI is still to run
 them; each row's evidence is what will show the item, not a result. The last CI result this line descends from is run
 [40782439981](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40782439981) (green in full on `d7185041b`,
@@ -527,9 +531,9 @@ seasonal gate. No cave, dungeon, boss or loot role.
 
 ## Rollout and open questions
 
-Ships with the garden cohort's unit 4 (GC-07), behind the Concordance's switch; built, not yet compiled or run in CI,
-not merged. Open: every test and shot of his is still to run in CI (the server jobs, then the garden client class and a
-dispatch of every client class), his pictures to be looked at and this record given their "Seen" column; his line is
+Ships with the garden cohort's unit 4 (GC-07), behind the Concordance's switch; built, run in CI on `be76fd419` and `1a15984d4` (runs 41506566691, 41506582568 and 41521655013),
+merged into the cohort, not merged into main. Open: a dispatch of every client class, his pictures to be looked at and
+this record given their "Seen" column; his line is
 merged after unit 3's (Marax), as the cohort's order 3, 4, 5, 6 asks. Known limits: nearly idle once his hosts are
 grafted, while his weekly honeycomb goes on (the cohort's checkpoint question 2); his count is an action-bar line, not a
 voiced one; a host whose bed holds no reading waits until it has one (he never samples): its crop's growth reads it, but

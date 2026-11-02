@@ -1183,6 +1183,27 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 				.sum());
 	}
 
+	// GC-10 unit 7
+	/** GC-10 unit 7 (GC-P145): at 320x180, the matter and each of its answers' plates lie inside the body's snapped window. */
+	private static void platesInView(ClientGameTestContext context, String who) {
+		String out = context.computeOnClient(client -> {
+			PactScreen screen = screen(client);
+			int answers = PactClient.state().spirit().answers().size();
+			List<String> missing = new ArrayList<>();
+			if (!screen.inView("matter")) {
+				missing.add("matter");
+			}
+			for (int i = 0; i < answers; i++) {
+				if (!screen.inView("answer:" + i)) {
+					missing.add("answer:" + i);
+				}
+			}
+			return answers + " " + missing;
+		});
+		Jugcraft.LOGGER.info("[garden-check] {}'s matter at 320x180, answers and any out of view: {}", who, out);
+		check(out.endsWith(" []") && !out.startsWith("0 "), who + "'s matter and its plates show without scrolling at 320x180: " + out);
+	}
+
 	/**
 	 * Waits until the pact screen shows the state the client holds and awaits no answer: a state packet marks it to rebuild
 	 * on the next tick, and an awaited answer draws its own line, so the words, controls and budgets read the settled page.
@@ -1740,7 +1761,15 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 			// GC-06 unit 3: marax.geo.json's head runs from 9 to 19 px ahead of him and from 10.5 px up; his eyes are at 1.0.
 			case MARAX -> new double[] {19.0 / 16.0, 0.34};
 			// GC-07 unit 4
+			// GC-10 unit 7 (GC-P149): foras.geo.json's beard front 8.75 px ahead of him, its foot 17 px up; his eyes at 1.55.
+			case FORAS -> new double[] {8.75 / 16.0, 0.49};
 			// GC-08 unit 5
+			// GC-10 unit 7 (GC-P149): bifrons.geo.json, by his synced shape. His facing pictures are frozen just after the screen
+			// closes, before a think clears his listening, so he is drawn risen (inferred, not seen): his risen head's front 3 px
+			// ahead, its chin 21.5 px up against eyes at 0.5 (Workers), a point above his eyes. Low, his hump's front 5 px ahead,
+			// its foot 4.5 px up. His eye position while risen is taken as Workers' 0.5 (not seen).
+			case BIFRONS -> spirit instanceof BifronsEntity bifrons && bifrons.listening()
+					? new double[] {3.0 / 16.0, 0.5 - 21.5 / 16.0} : new double[] {5.0 / 16.0, 0.5 - 4.5 / 16.0};
 			// GC-09 unit 6
 			// GC-09: amdusias.geo.json's muzzle reaches 16.5 px ahead of him; his head's underside is 27 px up, his eyes at 1.9.
 			case AMDUSIAS -> new double[] {16.5 / 16.0, 0.21};
@@ -1823,6 +1852,18 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 	private static void yard(MinecraftServer minecraft, BlockPos perch) {
 		ServerLevel level = minecraft.overworld();
 		BlockPos buersBed = perch.west(3);
+		// GC-10 unit 7 (GC-P140): every container the yard clears is emptied first (Foras's chest north of the perch kept his
+		// Dewmoss), so clearing it drops nothing into a later flow's pictures.
+		for (int dx = -7; dx <= 4; dx++) {
+			for (int dz = -3; dz <= 10; dz++) {
+				for (int dy = 0; dy <= 3; dy++) {
+					BlockPos at = perch.offset(dx, dy, dz);
+					if (!at.equals(perch) && !at.equals(buersBed) && level.getBlockEntity(at) instanceof net.minecraft.world.Container store) {
+						store.clearContent();
+					}
+				}
+			}
+		}
 		for (int dx = -7; dx <= 4; dx++) {
 			for (int dz = -3; dz <= 10; dz++) {
 				level.setBlockAndUpdate(perch.offset(dx, -1, dz), Blocks.STONE.defaultBlockState());
@@ -1834,6 +1875,17 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 				}
 			}
 		}
+		// GC-10 unit 7 (GC-P140): and no dropped item lies about the yard (within 12 blocks of the perch) for a later picture.
+		level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, new AABB(perch).inflate(12.0)).forEach(Entity::discard);
+	}
+
+	// GC-10 unit 7
+	/** GC-10 unit 7 (GC-P140): no dropped item lies within 12 blocks of {@code perch} as a flow begins (server side), any found named. */
+	private static void tidyYard(TestDedicatedServerContext server, BlockPos perch, String who) {
+		List<String> lying = server.computeOnServer(minecraft -> minecraft.overworld()
+				.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class, new AABB(perch).inflate(12.0)).stream()
+				.map(item -> item.getItem() + " at " + item.blockPosition().toShortString()).toList());
+		check(lying.isEmpty(), "No item lies about the yard as " + who + "'s flow begins: " + lying);
 	}
 
 	/** Dossier 2 item 6: with no Heart of the player's near, the chooser lists Bathin not ready, his refusal in his words. */
@@ -2226,6 +2278,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		fits(context, "his matter at 320x180");
 		named(context);
 		budget(context, keptWords(context) + firstTask(context), "his matter at 320x180");
+		platesInView(context, "Bathin"); // GC-10 unit 7 (GC-P145)
 		shot(context, "jugcraft_garden_bathin_matter_small");
 		context.getInput().resizeWindow(width, height);
 		context.waitTicks(10);
@@ -3008,6 +3061,13 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		standingFacing(context, server, perch, FORAS, FORAS_FACES);
 		standSouth(context, server, perch);
 		forasEnding(context, server, perch, grafted);
+		// GC-10 unit 7 (GC-P140): his chest emptied and taken away, so no later flow finds it or its Dewmoss.
+		server.runOnServer(minecraft -> {
+			if (minecraft.overworld().getBlockEntity(chest) instanceof ChestBlockEntity store) {
+				store.clearContent();
+			}
+			minecraft.overworld().setBlockAndUpdate(chest, Blocks.AIR.defaultBlockState());
+		});
 	}
 
 	/** GC-07: Foras's presence at {@code perch}, asserted there (server side). */
@@ -3319,6 +3379,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		fits(context, "his matter at 320x180");
 		named(context);
 		budget(context, keptWords(context) + firstTask(context), "his matter at 320x180");
+		platesInView(context, "Foras"); // GC-10 unit 7 (GC-P145)
 		shot(context, "jugcraft_garden_foras_matter_small");
 		context.getInput().resizeWindow(width, height);
 		context.waitTicks(10);
@@ -3585,6 +3646,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 			level.setBlockAndUpdate(perch.west(3).above(), Blocks.AIR.defaultBlockState());
 			level.setBlockAndUpdate(perch.west(3), Blocks.AIR.defaultBlockState());
 		});
+		tidyYard(server, perch, "Bifrons"); // GC-10 unit 7 (GC-P140)
 		server.runCommand("time set 18000");
 		server.runCommand("time pause");
 		// A paused midnight in an unlit yard would leave every picture of him dark.
@@ -4068,6 +4130,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		fits(context, "his matter at 320x180");
 		named(context);
 		budget(context, keptWords(context) + firstTask(context), "his matter at 320x180");
+		platesInView(context, "Bifrons"); // GC-10 unit 7 (GC-P145)
 		shot(context, "jugcraft_garden_bifrons_matter_small");
 		context.getInput().resizeWindow(width, height);
 		context.waitTicks(10);
@@ -4322,6 +4385,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 				minecraft.overworld().setBlockAndUpdate(at, Blocks.BUDDING_AMETHYST.defaultBlockState());
 			}
 		});
+		tidyYard(server, perch, "Amdusias"); // GC-10 unit 7 (GC-P140)
 		standSouth(context, server, perch);
 		connection.waitForChunksRender();
 		amdusiasNoTree(context, server, perch);
@@ -4856,6 +4920,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		fits(context, "his matter at 320x180");
 		named(context);
 		budget(context, keptWords(context) + firstTask(context), "his matter at 320x180");
+		platesInView(context, "Amdusias"); // GC-10 unit 7 (GC-P145)
 		shot(context, "jugcraft_garden_amdusias_matter_small");
 		context.getInput().resizeWindow(width, height);
 		context.waitTicks(10);

@@ -615,11 +615,13 @@ public class PactScreen extends MagicScreen implements MenuAccess<PactMenu> {
 			boolean foot = rows.next() >= 0 || !state.offerings().isEmpty();
 			boolean offersBelow = offersFit(state);
 			ScreenRectangle text = body(foot ? MagicArt.PLATE_HEIGHT + 3 : 0);
+			// GC-05: the matter its spirit raises, asked before its service and offerings.
+			// GC-10 unit 7 (GC-P145): the matter and its plates first, above the first task, so at 320x180 the snapped window
+			// shows them (CI: bifrons_matter_small, bathin_matter_small).
+			matter(state, rows, text);
 			for (int i : rows.needs()) {
 				row(state, i);
 			}
-			// GC-05: the matter its spirit raises, asked before its service and offerings.
-			matter(state, rows, text);
 			for (int i : rows.others()) {
 				row(state, i);
 			}

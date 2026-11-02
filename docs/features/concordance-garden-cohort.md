@@ -8,11 +8,12 @@ shared prefix, recorded and merged after unit 3's line (see
 [unit 4 as built and its evidence](#unit-4-as-built-and-its-evidence)): on the cohort line's head `5e93bb0a7` (units 1
 to 4) both server jobs and all 16 client shards passed in run 40852556175 (the 16th, holding main's
 `PeepoPopulationClientTests`, on its re-run); unit 5 (GC-08, Bifrons) built on its own line
-from unit 3's head, recorded and merged after unit 4, not yet compiled or run in CI (see
+from unit 3's head, recorded and merged after unit 4; on `be76fd419` and `1a15984d4` the server suite without the optional integrations and `ConcordanceGardenPactClientGameTests` passed (runs 41506566691, 41506582568 and 41521655013) (see
 [unit 5 as built and its evidence](#unit-5-as-built-and-its-evidence)); unit 6 (GC-09, Amdusias) built on its own line
 from unit 4's merged head `4201217b3` beside unit 5's, recorded and merged after unit 5, not yet compiled or run in CI
 (see [unit 6 as built and its evidence](#unit-6-as-built-and-its-evidence)); units 1 to 6 merged on this line, in the
-order 1 to 6; unit 7 not built here; nothing of the cohort is merged into main.** The contract was written read-only from
+order 1 to 6; unit 7 (GC-10) under way: its combined fixes built and not yet run in CI (GC-P140); nothing of the
+cohort is merged into main.** The contract was written read-only from
 the worktree of `claude/chunk-d-pact-hall` at `5eba71ced` (main's
 `78f9353a7` + Chunk B #465 + Chunk C #466 + Chunk D #474, all then open and unmerged), from the five survey reports
 written for it (`survey-pacts.md`, `survey-gardens.md`, `survey-assets.md`, `survey-sources.md`, `survey-plans.md`; kept with the session's working notes, not committed), from a critique of its
@@ -145,9 +146,9 @@ unchanged. Every Java compile and game test runs only in CI (GC-S24; [Checks](#c
 | 2 | GC-05 | **Bathin**: Verdance carrying, two roads from one Heart; with him, the shared accord machinery (`resolve`, the perch's `accord`, the payload's matter and answers, the roster's "awaiting your answer") and the bed index's Hearts, Gleaners and pylons | new `bathin-pact.md` | Built (`28a963b63` to `85eb1a0ba`, and `d7185041b` since) and recorded; in CI run 40777920181 every unit-2 server test passed with and without the optional integrations, and the garden client class passed; not merged (draft #526); [evidence](#unit-2-as-built-and-its-evidence) |
 | 3 | GC-06 | **Marax**: one-correction reading by his familiar, the proud familiar; the synced work target and its renderer hook; The Garden's Regard mastery reachable from here (three spirits) | new `marax-pact.md` | Built (`736d94541` to `1473e99f1`) and recorded; the shared prefix (GC-06a, GC-06b and its review's fixes) was in the head of CI run 40777920181, which passed in full; Marax himself (`bed9f73b4` on): on the cohort line's head `5e93bb0a7` run 40852556175 passed in full; not merged; [evidence](#unit-3-as-built-and-its-evidence) |
 | 4 | GC-07 | **Foras**: graft keeping from a store beside the perch, the logician's objection; the bed index's containers; the owner library's second edited part in `tools/owner_art.py` | new `foras-pact.md` | Built (`e3194d0be` to `8a50bbd33`) from unit 3's shared prefix and recorded, then merged after unit 3's line; on the cohort line's head `5e93bb0a7` run 40852556175 passed in full; not merged; [evidence](#unit-4-as-built-and-its-evidence) |
-| 5 | GC-08 | **Bifrons**: root-running with half lost, which beds are reserves | new `bifrons-pact.md`; `tools/concordance_economy.py` | Built (`1c57700dd` to `7b08d26a0`) on its own line from unit 3's head (`3c2d36b0f`) and recorded (`d6f63f32b`), then merged after unit 4's line; not yet compiled or run in CI; not merged; [evidence](#unit-5-as-built-and-its-evidence) |
+| 5 | GC-08 | **Bifrons**: root-running with half lost, which beds are reserves | new `bifrons-pact.md`; `tools/concordance_economy.py` | Built (`1c57700dd` to `7b08d26a0`) on its own line from unit 3's head (`3c2d36b0f`) and recorded (`d6f63f32b`), then merged after unit 4's line; on `be76fd419` and `1a15984d4` the server suite without the optional integrations and `ConcordanceGardenPactClientGameTests` passed (runs 41506566691, 41506582568 and 41521655013); not merged; [evidence](#unit-5-as-built-and-its-evidence) |
 | 6 | GC-09 | **Amdusias**: the bending canopy (a one-factor disturbance shelter: the pure rule in `ecology`, the registry in `garden`), the stir a Gloamcap wants | new `amdusias-pact.md`; `arcane-concordance-ecology.md` | Built (`23236575e` to `28953d21b`) on its own line from `4201217b3` (units 1 to 4) and recorded (`8763ffbac`), then merged after unit 5's line; not yet compiled or run in CI; not merged; [evidence](#unit-6-as-built-and-its-evidence) |
-| 7 | GC-10 | Combined fixes, the cohort's whole path, its load card, client evidence (the line-up), the two-client test, records, the checkpoint and handoff | this page; the six records; `arcane-concordance-journey.md`; `docs/TESTING.md` | Not started |
+| 7 | GC-10 | Combined fixes, the cohort's whole path, its load card, client evidence (the line-up), the two-client test, records, the checkpoint and handoff | this page; the six records; `arcane-concordance-journey.md`; `docs/TESTING.md` | Under way: the combined fixes (GC-P140, GC-P145, GC-P147, GC-P149) built, not yet run in CI |
 
 Order of the spirits after Buer goes from least to most invasive: Bathin moves an existing essence through existing
 transfer rules; Marax reads and changes nothing; Foras spends items; Bifrons adds an economy conversion; Amdusias changes
@@ -1211,8 +1212,8 @@ reading on screen with the familiar hovering over the named bed (frozen); his ni
 changes nothing; the advice never names supplying disturbance to a plant whose niche forbids it.
 
 **As built (brief `736d94541`; GC-06b `8cf0ef994`, the shared prefix units 4 to 6 branch from, with its review's fixes
-`ee362c3cd` and `cc9db6afa`; Marax `bed9f73b4`; his review's fixes `1473e99f1`; [record](marax-pact.md); not yet compiled
-or run in CI from `bed9f73b4` on):** the shared prefix first. A standing body's station
+`ee362c3cd` and `cc9db6afa`; Marax `bed9f73b4`; his review's fixes `1473e99f1`; [record](marax-pact.md); run in CI
+from `bed9f73b4` on since: on `be76fd419` and `1a15984d4` the server suite without the optional integrations and `ConcordanceGardenPactClientGameTests` passed (runs 41506566691, 41506582568 and 41521655013)):** the shared prefix first. A standing body's station
 side is clear when both cells out to it are loaded and they and the cells over them, up to the body's height (at least
 two: Marax, 1.4 tall, needs two; Foras, 2.2, and Amdusias, 2.4, need three), have no collision shape and the outer cell's
 floor is sturdy on top. Known limits, decided by the session: the check does not read a body's width past its cell (a
@@ -1396,7 +1397,7 @@ unit 5: no `check_acquisition` row; both are vanilla, held by the progression to
 route)*. **Acceptance:** Dossier 5's items; nutrients never rise in sum; half of every unit lost and accounted.
 
 **As built (brief `1c57700dd`; GC-08b `ce4f71b66`, the feeding act and SG12 at each spirit's hours; Bifrons `a3e672ba8`;
-his review's fixes `7b08d26a0`; his records `d6f63f32b`; [record](bifrons-pact.md); not yet compiled or run in CI, built
+his review's fixes `7b08d26a0`; his records `d6f63f32b`; [record](bifrons-pact.md); run in CI since: on `be76fd419` and `1a15984d4` the server suite without the optional integrations and `ConcordanceGardenPactClientGameTests` passed (runs 41506566691, 41506582568 and 41521655013); built
 on unit 5's own line from unit 3's head, `3c2d36b0f`, and merged into the cohort after unit 4):**
 
 - **Bifrons as a character:** `S/BifronsEntity` on the shared base, registered 1.2 x 0.7 (eyes 0.5; his low shape, the
@@ -2736,7 +2737,7 @@ flow in `ConcordanceGardenPactClientGameTests`, his graft frozen with the cap ti
 checks (bodies and `owner_art --check`, with the acorn cap from the second edited part) ran on each commit and passed
 ([unit 4's evidence](#unit-4-as-built-and-its-evidence)).
 
-**Unit 5 as written** (row 5 above against the build; **not yet run**: nothing of Bifrons has run in CI): Worker
+**Unit 5 as run** (row 5 above against the build; on `be76fd419` and `1a15984d4` the server suite without the optional integrations and `ConcordanceGardenPactClientGameTests` passed (runs 41506566691, 41506582568 and 41521655013); his pictures not yet looked at): Worker
 (Bifrons's root-running, character and matter tests, `FEED`, SG12 through his fixture at his first hour), Economy
 (`rootRunningLeavesNoGainingCycle`: a game day's quota of runs, the beds' sum falling by exactly the runs made) and
 Persistence (`theReservesAnswerSurvivesARestart`: the perch's `fallow` or `full` across a restart, a save test row 5 did
@@ -2929,8 +2930,12 @@ proposals (GC-P, numbered in the reserved blocks). Chunk A to D decisions are un
 | GC-P137 | 27 October 2026 | Unit 3's `HabitatAdvice`: its strain branch `habitat.withStrain(value)`, so advice on a sheltered reading keeps its shelter *(amended unit 6: made in GC-09b on his own line, unit 3 being in its base, not at a merge; the disturbance named is the sheltered value, decided by the session)* | Proposed (unit 6) | GC-09, GC-06 |
 | GC-P138 | 27 October 2026 | Evidence: his server tests, the ecology harnesses, his flow in the garden client class after Foras's (25 shots and 10 body shots; `WEIGHTS` +240), the staged subtitle *(amended unit 6: 26 server tests; since the merge after unit 5 his flow follows Bifrons's and the class's `WEIGHTS` sum is 1520, decided by the session)* | Proposed (unit 6) | GC-09 |
 | GC-P139 | 27 October 2026 | The merge register: every shared line under its `GC-09 unit 6` marker, resolved in unit order at the merge with unit 5's line | Proposed (unit 6) | GC-09 |
+| GC-P140 | 2 November 2026 | Unit 7's combined fixes, each line under a `GC-10 unit 7` marker beside Amdusias's CI fixes: a matter's plates in view at 320x180 (GC-P145); the face rows (GC-P149); a tidy yard (every container `yard` clears is emptied first and every dropped item within 12 blocks of the perch discarded; Foras's chest emptied and taken away when his flow ends; Bifrons's and Amdusias's flows assert no item lies within 12 blocks as they begin); Bifrons's finding 11 decided (GC-P147); the records' "not yet run" lines for units 3 to 5 rewritten to the cohort line's runs *(decided by the session)* | Proposed (unit 7) | GC-10 |
 | GC-P141 | 26 October 2026 | The garden load card's workload and budget (above) | Proposed (unit 7) | GC-10 |
 | GC-P142 | 26 October 2026 | The garden two-client scenario (above) | Proposed (unit 7) | GC-10 |
+| GC-P145 | 2 November 2026 | The kept page draws a spirit's matter and its answer plates first, above the first task (`PactScreen.keep`), so the body's snapped window at 320x180 shows them; the tab order becomes header, matter, answers, first task, the other rows; each garden flow asserts the matter and every plate in view (`platesInView`) before its `_matter_small` picture; `check_pact_screen` holds both. Not yet run: whether the compact body holds two matter lines and a plate row (if not, the matter's lines at the compact layout are the next step) *(decided by the session)* | Proposed (unit 7) | GC-10, GC-05 |
+| GC-P147 | 2 November 2026 | Bifrons's review finding 11 (each kind of log carried draws its own Offer plate): one plate per kind kept, not built. Each plate is a distinct `DEPOSIT` index the server offers by item kind; one plate for a tag would need a server change *(decided by the session)* | Proposed (unit 7) | GC-08 |
+| GC-P149 | 2 November 2026 | The facing camera's face rows for Foras (`foras.geo.json`: the beard's front 8.75 px ahead, its foot 17 px up, eyes 1.55) and Bifrons (by his synced listening: risen, the head's front 3 px ahead and its chin 21.5 px up, a point above his eyes at 0.5; low, the hump's front 5 px ahead and its foot 4.5 px up). Inferred, not seen: that he is drawn risen in his facing pictures, and his eye position while risen *(decided by the session)* | Proposed (unit 7) | GC-10, GC-07, GC-08 |
 
 ### Unit 1's amendments and reconciliations (cited in code and commits)
 

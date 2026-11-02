@@ -8,14 +8,15 @@ could give, he asks which beds are reserves. He is the cohort's fifth garden spi
 screen, roster, journal and Jade lines as Stolas, Buer, Bathin, Marax and Foras, and he stands on the ground beside the
 perch as Marax and Foras do.
 
-Status: **built and merged into the cohort after unit 4, not yet compiled or run in CI, not merged to main** (Concordance
+Status: **built, merged into the cohort after unit 4 and run in CI, not merged to main** (Concordance
 garden cohort, unit 5: brief `1c57700dd`; the feeding act and SG12 at each spirit's hours, GC-08b `ce4f71b66`; Bifrons
 `a3e672ba8`; his review's fixes `7b08d26a0`; these records, `d6f63f32b`; then the merge of the cohort line at
 `5e93bb0a7`, units 3 and 4 first, in the order 3, 4, 5). His line was built from `3c2d36b0f` (Marax and the roster).
 The newest CI results the merged line descends from are the cohort line's: run 40840353835, green in full on `3bfd63a97`
 (the magic interfaces' polish), and run 40852556175 on `5e93bb0a7` (Marax, Foras and the polish), in which both server
-jobs and all 16 client shards passed (the 16th, holding main's `PeepoPopulationClientTests`, on its re-run). Nothing of Bifrons has been compiled or has run in CI: none of his server tests or client shots has run
-([Verification](#verification)). Every Java file of his was parse-checked only; the
+jobs and all 16 client shards passed (the 16th, holding main's `PeepoPopulationClientTests`, on its re-run). Since then he has compiled and run in CI: on `be76fd419` and `1a15984d4` (the cohort line with main merged) the server suite without the optional integrations and `ConcordanceGardenPactClientGameTests` passed (runs 41506566691, 41506582568 and 41521655013), his server tests and his 36 client shots' class
+among them ([Verification](#verification)); his pictures are not yet looked at (the "Seen" column is empty). Where he was
+built every Java file of his was parse-checked only; the
 repository's Python checks and audits ran on his files. No person has played him. This page began as his brief (GC-08a),
 committed before any of his body files as the contract's per-spirit template asks (D-D5); his character, his words and
 his assets below began as that brief and now describe him as built, as the sections after them do. Where unit 5's
@@ -434,7 +435,11 @@ The unit's proposals as built (each row in full, with its amendments, in the con
 
 ## Verification
 
-**Not run in CI.** Nothing of Bifrons has been compiled: no Minecraft jar was available where he was built, so every
+**Run in CI since** (GC-10 unit 7): on `be76fd419` and `1a15984d4` (the cohort line with main merged) the server suite without the optional integrations and `ConcordanceGardenPactClientGameTests` passed (runs 41506566691, 41506582568 and 41521655013); main's own failures in those runs are not this pull request's. The
+paragraph and table below are as written before that run: their "not run" now means not yet looked at, and his
+pictures' "Seen" column is still empty. Still to run: one workflow_dispatch of every client class.
+
+**Not run in CI (as first written).** Nothing of Bifrons has been compiled: no Minecraft jar was available where he was built, so every
 Java file of his was only parse-checked, and none of the tests and shots below has run. His line, built from
 `3c2d36b0f`, is merged with the cohort line at `5e93bb0a7` (its CI in the status above; none of it holds him). Still to
 run, on the merged head: the `mod` and `optional integrations absent` jobs, the garden client class (its weight 1280)
@@ -519,6 +524,10 @@ as Buer's, Bathin's, Marax's and Foras's are not).
 - **Reserves are reckoned against the think's hungriest bed:** a planted bed is a reserve when it could give to the bed
   that think chose; as beds fill and empty the matter can come and go, and it costs nothing while it waits.
 - **The risen man does not block movement:** his box is his low shape (1.2 x 0.7); the man is drawn above it.
+- **Each kind of log carried draws its own Offer plate** (his review's finding 11; GC-P147, decided by the session, not
+  built): one plate per kind is kept. Each plate is a distinct `DEPOSIT` index the server offers (`PactMenu.deposit`
+  pays the one item kind at that index), so one plate for his `#minecraft:logs` tag would need a server change to pay a
+  tag; the plates stay, as Stolas's do for his tag.
 
 ## World and event applicability
 
@@ -528,8 +537,7 @@ world clock of the level he serves in. No seasonal gate. No cave, dungeon, boss 
 ## Rollout and open questions
 
 Ships with the garden cohort's unit 5 (GC-08), behind the Concordance's switch; built and merged into the cohort after
-unit 4, not yet compiled or run in CI, not merged to main. Open: every test and shot of his is still to run in CI, and
-his pictures to be looked at; root-running rests on a softened reading of his entry's corpse-moving line, with a wood or
+unit 4, run in CI on `be76fd419` and `1a15984d4` (runs 41506566691, 41506582568 and 41521655013), not merged to main. Open: his pictures to be looked at; root-running rests on a softened reading of his entry's corpse-moving line, with a wood or
 orchard service the alternative (the cohort's checkpoint, question 1); his body is built rather than the owner's (no
 owner rig fits; question 1); whether 24 runs a night is the right measure (question 2); the Offer plates for several
-kinds of log (his review's finding 11, for the cohort's line); his astir loop is not photographed.
+kinds of log (his review's finding 11: one plate per kind kept, GC-P147 in Known limits); his astir loop is not photographed.
