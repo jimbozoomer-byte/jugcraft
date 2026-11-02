@@ -74,6 +74,19 @@ def build(jar):
     for ore in ('quartz_ore', 'deepslate_quartz_ore'):
         values['jugcraft:'+ore] = 4 * values['minecraft:quartz']
         origins['jugcraft:'+ore] = 'local quartz mining/Fortune accounting'
+    # Roots of decorative families the tablet makes (docs/features/tablet-decorations.md) that nothing crafts: mud is
+    # 5, the contributor's price (a water bottle makes it from dirt, so water treatment drying it into clay is a farm); resin clumps and glow ink sacs are mob/creaking drops (provisional, for the owner). Their
+    # crafted forms (packed mud, mud bricks, resin bricks, glow item frames) then come from the game's recipes.
+    for item, price in {'mud': 5, 'resin_clump': 16, 'glow_ink_sac': 64}.items():
+        values['minecraft:'+item] = Fraction(price); origins['minecraft:'+item] = 'local decorative accounting'
+    # Manipulation essence is uncommon loot; at one essence, eight tablet-made tuff and one essence became eight
+    # calcite worth 224 more. This is the least price that makes that recipe (and deepslate to tuff) gain nothing.
+    values['jugcraft:nouveau_manipulation_essence'] = 8 * Fraction(32) - 8 * Fraction(4)
+    origins['jugcraft:nouveau_manipulation_essence'] = 'local tuff/calcite conversion accounting'
+    # Materials no recipe makes under the tablet's decorations, and values only a machine recipe sets (the builder reads
+    # none): without these they fell to the one-essence fallback, a Landscapes plank was worth a quarter and steel one.
+    for item, price in json.loads((ROOT / 'tools/data/alchemy_decorative_roots.json').read_text())['items'].items():
+        values[item] = Fraction(price); origins[item] = 'local decorative accounting'
     locked=set(values)
     edges=[]
     for rid,r in recipes.items():
@@ -111,6 +124,29 @@ def build(jar):
                 if v<=0 or v>1_000_000_000 or v.numerator>2**63-1 or v.denominator>2**63-1:continue
                 if out not in values or v<values[out]:values[out]=v;origins[out]='recipe '+rid;changed=True
             if not changed:break
+    propagate()
+    # Decorative blocks no recipe makes (docs/features/tablet-decorations.md): each is worth its plain counterpart,
+    # never less than what a recipe makes from it, so pricing them lowers nothing already derived. Weathered copper is
+    # the copper it grew from; concrete is its powder set in water. Froglights, shroomlights and the bell are
+    # provisional, for the owner.
+    natural = {'pale_moss_block': 'moss_block', 'pale_moss_carpet': 'moss_carpet', 'wildflowers': 'yellow_dye',
+               'red_mushroom_block': 'red_mushroom', 'brown_mushroom_block': 'brown_mushroom',
+               'mushroom_stem': 'brown_mushroom', 'warped_wart_block': 'nether_wart_block',
+               'stripped_bamboo_block': 'bamboo_block', 'rooted_dirt': 'dirt'}
+    for form in ('cut_copper', 'cut_copper_slab', 'cut_copper_stairs', 'chiseled_copper', 'copper_grate', 'copper_door',
+                 'copper_trapdoor', 'copper_bars', 'copper_chain', 'copper_lantern'):
+        for stage in ('exposed', 'weathered', 'oxidized'):
+            natural[stage+'_'+form] = form
+    for colour in ('white', 'orange', 'magenta', 'light_blue', 'yellow', 'lime', 'pink', 'gray', 'light_gray', 'cyan',
+                   'purple', 'blue', 'brown', 'green', 'red', 'black'):
+        natural[colour+'_concrete'] = colour+'_concrete_powder'
+    for item, base in natural.items():
+        if 'minecraft:'+base in values:
+            values['minecraft:'+item] = values['minecraft:'+base]; origins['minecraft:'+item] = 'local decorative accounting'
+    for item, price in {'ochre_froglight': 64, 'verdant_froglight': 64, 'pearlescent_froglight': 64, 'shroomlight': 64,
+                        'bell': 8192}.items():
+        values['minecraft:'+item] = Fraction(price); origins['minecraft:'+item] = 'local decorative accounting'
+    locked |= {k for k, s in origins.items() if s == 'local decorative accounting'}
     propagate()
     # Unseeded reversible families (ingot <-> block/nugget) need one base, not three
     # independent one-essence fallbacks. Anchor the unit and derive its other forms.
