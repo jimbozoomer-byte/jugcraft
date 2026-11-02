@@ -151,7 +151,8 @@ word counts are from screens composed from the generated files at 427x240 (spec 
   the design's units: the pact screen, the roster and chooser, the composer and Field Guide, the alchemy and Nouveau
   family.
 - **Garden units 3 to 6** (Marax, Foras, Bifrons, Amdusias) add each work's row to `WORK_GLANCES` (its name, service
-  line, icon, kept-page rows, blockers and chooser reason; its gauge row, if any, "%1$s/%2$s today"); `check_magic_ui`
+  line, icon, kept-page rows, blockers and chooser reason; its gauge row, if any, "%1$s/%2$s today", or "now" for a
+  work in `QUOTA_TERMS`); `check_magic_ui`
   names any row the server can send without one, and a row missing its name or line. A first task whose act runs its
   row past 12 words needs an act glance (`garden_pact.act.<act>`; the row is rendered with every act). Marks follow the
   shape of the server key (`MARK_RULES`), so a work's `missing`, `row.overworked`-like and `matter.*` sentences get
@@ -406,7 +407,8 @@ screens still read long or ran off their parts. What a player sees first:
   rows of their own) and its own change; the four lit copies whose tone changes everywhere keep their shape outside their
   outline; an empty contrast box is reported, not raised; every pact-screen shot asserts its budget (`check_pact_screen`
   reads each shot's stretch of the test), and the two-client refusal shot now does; `check_pacts` reads `isInGameUi`
-  from the class that declares it; a work's gauge row must read "%1$s/%2$s today"; a change to the magic screens' words
+  from the class that declares it; a work's gauge row must read "%1$s/%2$s today" (or "now" for a work in
+  `QUOTA_TERMS`); a change to the magic screens' words
   alone now selects their client tests (`tools/select_client_tests.py` `MAGIC_WORDS`).
 - **Units 4 to 6 add data, not code paths:** a work's name and service line live in its `WORK_GLANCES` row (a row without
   them is reported, not a failure to load the module), Bathin's row icons are keyed by their exact keys, and the comments
@@ -1002,3 +1004,8 @@ None: presentation only.
   blocker named `pact.<work>.missing.<reason>` draws the lock (`MARK_RULES` and `PactGlance`); and `check_magic_ui` asks a
   glance of every work's question in general (`pact.<work>.question`, drawn once an answer is kept and no matter is
   raised; Bathin's reads "Take from Hearts that have a road?") and the lock of every blocker.
+- Since the garden cohort's GC-09 (Amdusias, [record](amdusias-pact.md); not merged; not yet run in CI): a work in
+  `QUOTA_TERMS` (a quota that caps what is held at once, not a day's count) has its gauge row read "%1$s/%2$s now"
+  (`check_magic_ui` takes "now" in place of "today" for it; his "3/16 now"); the quota chip for `term.quota.<work>` draws
+  that work's own item, not the calendar ("Max 16 beds" beside his oak leaves); and a bed's and a Habitat Gauge's
+  Jade carry "Sheltered by Amdusias" while a canopy takes stir from the plant above.

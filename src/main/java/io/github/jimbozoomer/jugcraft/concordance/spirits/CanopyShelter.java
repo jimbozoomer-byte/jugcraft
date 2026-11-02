@@ -8,6 +8,7 @@ import io.github.jimbozoomer.jugcraft.concordance.worker.PactDefinition;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Status;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.BlockPos;
@@ -77,12 +78,16 @@ public final class CanopyShelter {
 	 * canopy stands over at least one crop; WAITING_FOR_RESOURCES with no tree beside the perch; OUTSIDE_AGREEMENT outside his
 	 * hours; what GardenPacts.target answers for the whole pact (suspended, held, the holder not near); else IDLE (nothing to
 	 * shelter, every crop spared, or his holder's canopy elsewhere). Each stop lifts his canopy and forgets the crops he
-	 * spared, so a stopped Amdusias says why he stopped, never an old question. Bounded: his remembered log read (or 125 reads
-	 * at most every TREE_TICKS), one index read (at most 64 beds, one block state and one block entity above each), at most
-	 * MAX_ASKED beds asked, one registry write.
+	 * spared, so a stopped Amdusias says why he stopped, never an old question; a stop that never reaches this step (the
+	 * holder away, suspended, held) leaves his memory stale, and what reads it asks {@link Memory#fresh} first. Each bed is
+	 * asked before it is spared, so he spares only crops he may shelter; a bed refused for itself is skipped until his index
+	 * is read again (Buer's rule, StrainTending), so refused beds never crowd out the rest. Bounded: his remembered log read
+	 * (or 125 reads at most every TREE_TICKS), one index read (at most 64 beds, one block state and one block entity above
+	 * each), at most MAX_ASKED beds asked, one registry write.
 	 */
 	static Status shelter(ServerLevel level, AmdusiasEntity amdusias, BoundWill record, AgreementHolder holder, long time, long now) {
 		Memory memory = amdusias.serviceMemory(Memory.class, Memory::new);
+		memory.served(now);
 		BlockPos perch = amdusias.perch();
 		BoundWill.Service service = record.pact().service();
 		UUID owner = record.holder();
@@ -107,29 +112,38 @@ public final class CanopyShelter {
 		List<BlockPos> covered = new ArrayList<>();
 		List<BlockPos> spared = new ArrayList<>();
 		int asked = 0;
-		for (VerdantBedBlockEntity bed : memory.reach(record).beds(level, now)) {
+		for (VerdantBedBlockEntity bed : memory.beds(level, record, now)) {
 			if (covered.size() >= cap || asked >= MAX_ASKED) {
 				break;
+			}
+			BlockPos pos = bed.getBlockPos();
+			if (memory.skipped(pos)) {
+				continue; // refused for itself since his index was last read
 			}
 			Organism plant = bed.canopyPlant(level);
 			if (plant == null) {
 				continue; // a Verdant Heart, a device, bare soil: never sheltered
 			}
-			if (bed.niche(plant).wantsStir() && !all) {
-				spared.add(bed.getBlockPos());
+			asked++;
+			Status refused = GardenPacts.target(level, record, pos, bed.keeper(), time, now);
+			if (refused == Status.IDLE || refused == Status.BLOCKED_BY_ACCESS) {
+				// This bed's own answer (not a beneficiary's now, not the holder's to change): skipped until the index is read
+				// again, and never spared, so his matter names only crops he may shelter (the unit review).
+				memory.skip(pos);
 				continue;
 			}
-			asked++;
-			Status refused = GardenPacts.target(level, record, bed.getBlockPos(), bed.keeper(), time, now);
-			if (refused == null) {
-				covered.add(bed.getBlockPos());
-			} else if (refused != Status.IDLE && refused != Status.BLOCKED_BY_ACCESS) {
+			if (refused != null) {
 				// His pact cannot serve now (suspended, held, the holder away): no canopy anywhere.
 				Canopies.lift(level, owner, perch);
 				memory.stopped();
 				memory.spared(List.of());
 				return refused;
 			}
+			if (bed.niche(plant).wantsStir() && !all) {
+				spared.add(pos);
+				continue;
+			}
+			covered.add(pos);
 		}
 		memory.spared(spared);
 		if (covered.isEmpty()) {
@@ -190,7 +204,8 @@ public final class CanopyShelter {
 
 	/**
 	 * The rows of his kept page for {@code record} at game time {@code now}: the beds sheltered now of his cap and the damping
-	 * (its gauge); then, as it stands, no tree, or the crops he spares while unanswered. Reads only.
+	 * (its gauge); then, as it stands, no tree, or the crops he spares while unanswered (as of a think within
+	 * Canopies.LAPSE_TICKS: a stopped Amdusias spares nothing). Reads only.
 	 */
 	public static List<Component> rows(ServerLevel level, BoundWill record, long now) {
 		BoundWill.Service service = record.pact().service();
@@ -205,7 +220,7 @@ public final class CanopyShelter {
 		Memory memory = amdusias.serviceMemory(Memory.class, Memory::new);
 		if (memory.looked() && memory.tree() == null) {
 			rows.add(Component.translatable(KEY + "row.no_tree", TREE_REACH));
-		} else if (!memory.spared().isEmpty() && answer(level, amdusias) == null) {
+		} else if (memory.fresh(now) && !memory.spared().isEmpty() && answer(level, amdusias) == null) {
 			rows.add(Component.translatable(KEY + "row.spared", memory.spared().size()));
 		}
 		return rows;
@@ -214,8 +229,11 @@ public final class CanopyShelter {
 	/** What one presence remembers between its thinks; never saved, lost with the entity (S6). Server thread only. */
 	public static final class Memory {
 		private @Nullable GardenReach reach;
+		private final HashSet<BlockPos> skipped = new HashSet<>();
+		private int skippedAt = -1;
 		private @Nullable BlockPos tree;
 		private long lookedAt = Long.MIN_VALUE;
+		private long servedAt = Long.MIN_VALUE;
 		private List<BlockPos> covered = List.of();
 		private List<BlockPos> spared = List.of();
 		private @Nullable Idle idle;
@@ -226,12 +244,54 @@ public final class CanopyShelter {
 		public Memory() {
 		}
 
-		/** His bed index for {@code record}'s area (GardenReach.of, made again when the area changed). */
+		/** His bed index for {@code record}'s area (GardenReach.of, made again, forgetting the beds skipped, when the area changed). */
 		GardenReach reach(BoundWill record) {
 			if (reach == null || !reach.covers(record)) {
 				reach = GardenReach.of(record);
+				skipped.clear();
+				skippedAt = -1;
 			}
 			return reach;
+		}
+
+		/**
+		 * {@code record}'s indexed beds at game time {@code now} (GardenReach.beds). When that read refreshed the index, the
+		 * beds skipped since the last are forgotten, so a claim lifted or a keeper who joined the party is asked again.
+		 */
+		List<VerdantBedBlockEntity> beds(ServerLevel level, BoundWill record, long now) {
+			GardenReach index = reach(record);
+			List<VerdantBedBlockEntity> beds = index.beds(level, now);
+			if (index.refreshes() != skippedAt) {
+				skippedAt = index.refreshes();
+				skipped.clear();
+			}
+			return beds;
+		}
+
+		/** GardenPacts.target refused the bed at {@code pos} for itself: not asked again until the index is next read. */
+		void skip(BlockPos pos) {
+			if (skipped.size() < GardenReach.MAX_BEDS) {
+				skipped.add(pos.immutable());
+			}
+		}
+
+		/** Whether the bed at {@code pos} was refused for itself since the index was last read (tests and shelter). */
+		public boolean skipped(BlockPos pos) {
+			return skipped.contains(pos);
+		}
+
+		/** His service took a step at game time {@code now} (the top of shelter, whatever it answered). */
+		void served(long now) {
+			servedAt = now;
+		}
+
+		/**
+		 * Whether what he remembers of his last step (the crops spared, why he idled) is current at game time {@code now}: his
+		 * service stepped less than Canopies.LAPSE_TICKS before (a clock run back: stale). A stop outside his step (the holder
+		 * away or offline, suspended, held) never clears it, so Jade, the kept page and his matter ask this first.
+		 */
+		public boolean fresh(long now) {
+			return servedAt != Long.MIN_VALUE && now >= servedAt && now - servedAt < Canopies.LAPSE_TICKS;
 		}
 
 		/** Forgets his bed index, so his next think reads his area again (GardenReach.forget): an operator's or a test's. */
@@ -419,12 +479,14 @@ public final class CanopyShelter {
 		/**
 		 * His matter while a crop that wants the stir is spared in his area, answered or not (so the answer can be changed at
 		 * the perch): the nearest, re-read (one bed: still awake, still bearing such a plant), with how many he spares; null
-		 * otherwise. Reads only (his presence's memory, one bed).
+		 * otherwise, and null while his last step is stale (Memory.fresh: a stopped Amdusias asks nothing). Reads only (his
+		 * presence's memory, one bed).
 		 */
 		@Override
 		public PactService.@Nullable Complication complication(ServerLevel level, BoundWill record, PactPerchBlockEntity perch, long now) {
 			AmdusiasEntity amdusias = GardenPacts.presence(level, record, AmdusiasEntity.class);
-			List<BlockPos> spared = amdusias == null ? List.of() : amdusias.serviceMemory(Memory.class, Memory::new).spared();
+			Memory memory = amdusias == null ? null : amdusias.serviceMemory(Memory.class, Memory::new);
+			List<BlockPos> spared = memory == null || !memory.fresh(now) ? List.of() : memory.spared();
 			if (spared.isEmpty()) {
 				return null;
 			}
@@ -441,8 +503,9 @@ public final class CanopyShelter {
 		}
 
 		/**
-		 * Jade's note: no tree (looked for and none found); crops spared while unanswered (how many); the beds he shelters now
-		 * (how many); else why he idled; none while his pact is held. Reads only; names no player.
+		 * Jade's note: no tree (looked for and none found); crops spared while unanswered (how many, as of a fresh step); the
+		 * beds his canopy covers now (how many, the registry's own reading, as his kept page's gauge reads it); else why he
+		 * idled (as of a fresh step); none while his pact is held. Reads only; names no player.
 		 */
 		@Override
 		public PactService.@Nullable Note note(ServerLevel level, PactSpiritEntity<?> spirit, BoundWill record, long time, long now) {
@@ -453,11 +516,16 @@ public final class CanopyShelter {
 			if (memory.looked() && memory.tree() == null) {
 				return new PactService.Note("no_tree", 0);
 			}
-			if (answer(level, amdusias) == null && !memory.spared().isEmpty()) {
+			boolean fresh = memory.fresh(now);
+			if (fresh && answer(level, amdusias) == null && !memory.spared().isEmpty()) {
 				return new PactService.Note("spared", memory.spared().size());
 			}
-			if (!memory.covered().isEmpty()) {
-				return new PactService.Note("covered", memory.covered().size());
+			Canopies.Canopy canopy = Canopies.of(level, record.holder(), now);
+			if (canopy != null && canopy.perch().equals(amdusias.perch()) && !canopy.beds().isEmpty()) {
+				return new PactService.Note("covered", canopy.beds().size());
+			}
+			if (!fresh) {
+				return null;
 			}
 			return memory.idle() == Idle.ELSEWHERE ? new PactService.Note("elsewhere", 0)
 					: memory.idle() == Idle.NOTHING ? new PactService.Note("nothing", 0) : null;

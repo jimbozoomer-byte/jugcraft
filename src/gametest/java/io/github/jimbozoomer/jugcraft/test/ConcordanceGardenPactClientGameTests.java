@@ -3596,7 +3596,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		amdusiasPoses(context, server, perch);
 		standingFacing(context, server, perch, AMDUSIAS, AMDUSIAS_FACES);
 		standSouth(context, server, perch);
-		amdusiasEnding(context, server, perch);
+		amdusiasEnding(context, server, perch, log);
 	}
 
 	/** GC-09: an awake, wet Verdant Bed of the player's at {@code at} holding 4 nutrients, nothing on it. */
@@ -3705,9 +3705,9 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 				.map(term -> term.value().getString()).toList()).toLowerCase(Locale.ROOT));
 		List<String> drawn = context.computeOnClient(client -> screen(client).drawn());
 		Jugcraft.LOGGER.info("[garden-check] his terms: {}; his quota: {}; drawn {}", words, quota, drawn);
-		check("At most 16 beds sheltered at once".equals(quota) && String.join(" ", drawn).contains("16 at once") && !quota.contains("day")
+		check("At most 16 beds sheltered at once".equals(quota) && String.join(" ", drawn).contains("Max 16 beds") && !quota.contains("day")
 				&& !words.contains("astrolabe") && !words.contains("resonance") && words.contains("shelter"),
-				"His quota is a cap, its chip 16 at once; his terms name his shelter and no astrolabe or resonance: " + quota + " / " + drawn);
+				"His quota is a cap, its chip Max 16 beds; his terms name his shelter and no astrolabe or resonance: " + quota + " / " + drawn);
 		fits(context, "his terms at GUI scale 2");
 		named(context);
 		budget(context, TERMS_WORDS, "his terms");
@@ -4153,7 +4153,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		});
 		String note = context.computeOnClient(client -> Component.translatable("tooltip.jugcraft.concordance.jade.pact.note.canopy_shelter.covered", covered).getString());
 		Jugcraft.LOGGER.info("[garden-check] Jade's readings of his perch and of Amdusias ({} beds, \"{}\"): {}", covered, note, readings);
-		check(covered == 3 && "Sheltering 3 beds".equals(note) && readings.startsWith("ok"),
+		check(covered == 3 && "Beds sheltered: 3".equals(note) && readings.startsWith("ok"),
 				"Answered, his canopy covers three; Jade's readings: his pact, service, state, answer and note, naming no player: " + readings);
 		String roster = server.computeOnServer(minecraft -> {
 			WorkerRoster.Entry entry = WorkerRoster.of(minecraft).workers(player(minecraft).getUUID()).get(amdusiasAt(minecraft, perch).getUUID());
@@ -4247,7 +4247,7 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 	 * is gone, his tree sways once, and his horn follows a beat later, as he fades (the pact ended once). The canopy lapses
 	 * with him (no think refreshes it).
 	 */
-	private static void amdusiasEnding(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
+	private static void amdusiasEnding(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch, BlockPos log) {
 		context.waitTicks(OPEN_GAP);
 		open(context, server, perch);
 		context.waitFor(client -> PactClient.state() != null && PactClient.state().mode() == PactStatePayload.KEEP, WAIT);
@@ -4273,12 +4273,23 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		context.waitFor(client -> AmdusiasEntity.Gesture.DEPART.animation.equals(gesturedOf(client, perch, AMDUSIAS)), WAIT);
 		RawAnimation going = context.computeOnClient(client -> gesturedOf(client, perch, AMDUSIAS));
 		String after = server.computeOnServer(minecraft -> holds(minecraft, AMDUSIAS) + " "
-				+ (minecraft.overworld().getEntity(him) instanceof AmdusiasEntity left ? "departing " + left.departing() + " sways " + left.sways() : "gone"));
+				+ (minecraft.overworld().getEntity(him) instanceof AmdusiasEntity left ? "departing " + left.departing() : "gone"));
+		// His canopy stood until the end, so his tree's own sway (every SWAY_TICKS) may fall inside the window between the
+		// count read above and his departure: one sway more or two, the last his departure's, at his tree, after the request.
+		String swaying = server.computeOnServer(minecraft -> {
+			if (!(minecraft.overworld().getEntity(him) instanceof AmdusiasEntity left)) {
+				return "gone";
+			}
+			AmdusiasEntity.Sway last = left.lastSway();
+			int more = left.sways() - swayed;
+			return ((more == 1 || more == 2) && last != null && last.tree().equals(log) && last.at() >= endedAt ? "ok " : "bad ")
+					+ more + " " + last;
+		});
 		int endedMode = context.computeOnClient(client -> PactClient.state().mode());
-		Jugcraft.LOGGER.info("[garden-check] ended: {}; held, then his presence = {}", ended.reason(), after);
+		Jugcraft.LOGGER.info("[garden-check] ended: {}; held, then his presence = {}; his tree's sways since: {}", ended.reason(), after, swaying);
 		check(ended.done() && "ended".equals(ended.reason()) && AmdusiasEntity.Gesture.DEPART.animation.equals(going)
-				&& endedMode == PactStatePayload.CLOSED && after.equals("false departing true sways " + (swayed + 1)),
-				"Ending ends the pact once; he bows his horn and his tree sways once: " + after);
+				&& endedMode == PactStatePayload.CLOSED && after.equals("false departing true") && swaying.startsWith("ok "),
+				"Ending ends the pact once; he bows his horn and his tree sways as he goes: " + after + "; " + swaying);
 		untilServer(context, server, minecraft -> !(minecraft.overworld().getEntity(him) instanceof AmdusiasEntity left)
 				|| left.soundedAt("depart") != Long.MIN_VALUE, "His horn follows his departure");
 		long horn = server.computeOnServer(minecraft -> minecraft.overworld().getEntity(him) instanceof AmdusiasEntity left ? left.soundedAt("depart") : Long.MIN_VALUE);

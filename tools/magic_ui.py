@@ -880,8 +880,10 @@ GLANCES = {
     # GC-08 unit 5
     # GC-09 unit 6
     # GC-09 (GC-P126): Amdusias's quota is a cap, beds sheltered at once (tools/concordance_pacts.py QUOTA_TERMS): its chip says
-    # so, never by the day, and draws his work's item (PactScreen.chip).
-    "pact.term.quota.canopy_shelter": [("", "%1$s at once", (16,), "16 at once", "chip")],
+    # so, never by the day, and draws his work's item (PactScreen.chip). The chip names its noun beside the oak leaves (the
+    # unit review: "16 at once" said nothing of beds); the review's "16 beds at once" is 4 words, over the chip's 3 (the
+    # style's 1.1), so it reads "Max 16 beds" and the sentence it keeps as its tip says "at once".
+    "pact.term.quota.canopy_shelter": [("", "Max %1$s beds", (16,), "Max 16 beds", "chip")],
     # Blockers (every one drawn above the terms as a lock line, keeping its action).
     "pact.missing.owner": [("", "Only the perch's owner may invite %1$s", ("Bathin",),
                             "Only the perch's owner may invite Bathin", "blocker")],
@@ -1253,8 +1255,9 @@ SENTENCES = {
     # GC-08 unit 5
     # GC-09 unit 6
     _JADE + "pact.matter.canopy_shelter.wants_stir": ("Crops want the stir", (), "Crops want the stir", "jade"),
-    _JADE + "pact.note.canopy_shelter.covered": ("Sheltering %1$s beds", (3,), "Sheltering 3 beds", "jade"),
-    _JADE + "pact.note.canopy_shelter.spared": ("Spared: %1$s", (2,), "Spared: 2", "jade"),
+    # Each note names its noun before its count, as the other spirits' do (the unit review: "Sheltering 1 beds", "Spared: 2").
+    _JADE + "pact.note.canopy_shelter.covered": ("Beds sheltered: %1$s", (3,), "Beds sheltered: 3", "jade"),
+    _JADE + "pact.note.canopy_shelter.spared": ("Spared crops: %1$s", (2,), "Spared crops: 2", "jade"),
     _JADE + "pact.note.canopy_shelter.no_tree": ("No tree", (), "No tree", "jade"),
     _JADE + "pact.note.canopy_shelter.elsewhere": ("Canopy elsewhere", (), "Canopy elsewhere", "jade"),
     _JADE + "pact.note.canopy_shelter.nothing": ("Nothing to shelter", (), "Nothing to shelter", "jade"),

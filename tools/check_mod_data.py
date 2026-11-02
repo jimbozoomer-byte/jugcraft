@@ -19667,7 +19667,7 @@ def check_ecology(co, root, lang, registered, research):
     if "ecology.sheltered" not in ec.TEXT or "jade.sheltered" not in ec.TOOLTIPS:
         err("tools/concordance_ecology.py: the canopy's words (ecology.sheltered, jade.sheltered)")
     advice = java("ecology/HabitatAdvice.java")
-    if advice and "habitat.withStrain(value)" not in advice:
+    if not advice or "habitat.withStrain(value)" not in advice:
         err("ecology/HabitatAdvice.java: a changed strain keeps the reading's shelter (withStrain; GC-P137)")
 
 
@@ -22051,18 +22051,22 @@ def check_garden_pacts(co, root, lang, registered, research):
     # missing. ---
     canopy_java = re.sub(r"//[^\n]*|/\*.*?\*/", " ", text(spirits / "CanopyShelter.java"), flags=re.S)
     step = _java_body(canopy_java, "static Status shelter(")
+    # Amdusias's review: each bed is asked before it is spared (a crop on a bed he may not change is never his matter), and a
+    # bed refused for itself is skipped until his index is read again (Buer's rule), so refused beds never use up his asks.
     order = [step.find(n) for n in (
-        "Pacts.inHours(service, time)", "memory.tree(level, perch, now)", "ALL.equals(answer(level, amdusias))",
-        "Math.min(service.quota(), Canopies.MAX_BEDS)", "memory.reach(record).beds(level, now)", "bed.canopyPlant(level)",
-        "bed.niche(plant).wantsStir() && !all", "GardenPacts.target(level, record, bed.getBlockPos(), bed.keeper(), time, now)",
+        "memory.served(now)", "Pacts.inHours(service, time)", "memory.tree(level, perch, now)", "ALL.equals(answer(level, amdusias))",
+        "Math.min(service.quota(), Canopies.MAX_BEDS)", "memory.beds(level, record, now)", "memory.skipped(pos)", "bed.canopyPlant(level)",
+        "asked++", "GardenPacts.target(level, record, pos, bed.keeper(), time, now)", "memory.skip(pos)",
+        "bed.niche(plant).wantsStir() && !all", "covered.add(pos)",
         "Canopies.cover(level, owner, perch, DAMPING, all, covered, now)", "amdusias.gesture(AmdusiasEntity.Gesture.WORK)",
         "memory.swayDue(now)", "return Status.WORKING;")]
     if -1 in order or order != sorted(order) or "asked >= MAX_ASKED" not in step or step.count("Canopies.lift(level, owner, perch)") < 4 \
             or step.count("memory.spared(List.of());") != 3 \
-            or "refused != Status.IDLE && refused != Status.BLOCKED_BY_ACCESS" not in step:
-        err("CanopyShelter.shelter: hours, his tree, the answer, his cap, the index nearest first, the plant above, the stir "
-            "spared, whose land, one cover, his gesture, the sway; every stop lifts the canopy and forgets the crops spared, "
-            "so a stopped Amdusias says why he stopped (GC-P128)")
+            or "refused == Status.IDLE || refused == Status.BLOCKED_BY_ACCESS" not in step \
+            or "skippedAt = index.refreshes();" not in canopy_java:
+        err("CanopyShelter.shelter: hours, his tree, the answer, his cap, the index nearest first (refused beds skipped until "
+            "it is read again), the plant above, whose land, then the stir spared, one cover, his gesture, the sway; every stop "
+            "lifts the canopy and forgets the crops spared, so a stopped Amdusias says why he stopped (GC-P128)")
     find = _java_body(canopy_java, "static @Nullable BlockPos find(ServerLevel level, BlockPos perch)")
     if not all(n in find for n in ("dy = -TREE_REACH", "dx = -TREE_REACH", "dz = -TREE_REACH", "level.isLoaded(at)", "is(BlockTags.LOGS)")) \
             or "now - lookedAt < TREE_TICKS" not in canopy_java:
@@ -22073,11 +22077,16 @@ def check_garden_pacts(co, root, lang, registered, research):
             err(f"spirits/CanopyShelter.java: never {banned} (he makes, moves, spends, samples, shows and saves nothing himself; GC-P128)")
     noted = _java_body(canopy_java, "public PactService.@Nullable Note note(")
     order = [noted.find(n) for n in ('"no_tree"', '"spared"', '"covered"', '"elsewhere"', '"nothing"')]
-    if -1 in order or order != sorted(order) or "!Pacts.serving(record)" not in noted:
-        err("CanopyShelter.note: no tree, then the crops spared while unanswered, then the beds sheltered, then why he idled; "
-            "none while his pact is held (GC-P128)")
+    # His service's members sit two tabs deep, so _java_body would run on to the class's end: cut at the next member.
+    matter = canopy_java[canopy_java.find("public PactService.@Nullable Complication complication("):canopy_java.find("public PactService.@Nullable Note note(")]
+    if -1 in order or order != sorted(order) or "!Pacts.serving(record)" not in noted \
+            or "Canopies.of(level, record.holder(), now)" not in noted or "memory.fresh(now)" not in noted \
+            or "memory == null || !memory.fresh(now) ? List.of() : memory.spared()" not in matter or "memory.fresh(now)" not in _java_body(canopy_java, "public static List<Component> rows("):
+        err("CanopyShelter.note: no tree, then the crops spared while unanswered, then the beds sheltered (the live canopy's), "
+            "then why he idled; none while his pact is held; what he remembers of a step read only while fresh, in his note, "
+            "matter and rows (GC-P128; Amdusias's review)")
     if co.pacts.SPIRITS["amdusias"]["pact"]["service"]["radius"] != 6 \
-            or co.pacts.SPIRITS["amdusias"]["body"].get("sway") != {"sign": "mend", "ticks": gp.CONSTANTS["canopy_shelter"]["spirits/CanopyShelter.java"]["SWAY_TICKS"]}:
+            or co.pacts.SPIRITS["amdusias"]["body"].get("sway") != {"sign": "work", "ticks": gp.CONSTANTS["canopy_shelter"]["spirits/CanopyShelter.java"]["SWAY_TICKS"]}:
         err("SPIRITS['amdusias']: radius 6 and his sway as CanopyShelter's and AmdusiasEntity's constants (GC-P121, GC-P134)")
     entity = re.sub(r"//[^\n]*|/\*.*?\*/", " ", text(spirits / "AmdusiasEntity.java"), flags=re.S)
     sway = _java_body(entity, "public void sway(ServerLevel level, BlockPos tree)")
@@ -26431,7 +26440,7 @@ GC09_TESTS = {
         "aStrangersCropIsNeverSheltered", "amdusiassFirstObligationIsAHarvestUnderHisCanopy",
         "theInspectPageAndTheGaugeReadTheShelteredValue", "theCanopysQuotaIsWordedAsACap",
         "aCanopyReturnsAfterARestartWithinOneThink", "hisTreeSwaysWhileHeShelters", "aHolderKeepsOneCanopy",
-        "amdusiassReadingSaysItsNoteAndNamesNoPlayer"],
+        "amdusiassReadingSaysItsNoteAndNamesNoPlayer", "aCanopySkipsBedsHeMayNotChange"],
     "ConcordanceEconomyGameTests": ["theEconomyStillHasNoGainingCycle"],
 }
 # The garden cohort, GC-09's game tests of Amdusias as a character and of his standing station (check_pacts).

@@ -44,8 +44,11 @@ public class AmdusiasEntity extends PactSpiritEntity<AmdusiasEntity> {
 	public static final int HORN_BEAT = 20;
 	/** The cues his horn sounds (menagerie/pocket/horn_fade); the rest are his whistles, heard with their gestures. */
 	public static final Set<String> HORNS = Set.of("arrive", "work", "depart");
-	/** Detail (b): the sign his tree's sway shows at the log's top: a mend's green motes, drifting (SPIRITS["amdusias"]["body"]["sway"]). */
-	public static final Sign SWAY = Sign.MEND;
+	/**
+	 * Detail (b): the sign his tree's sway shows at the log's top: work being done (execution), as Bathin's shimmer and a
+	 * bed's reading show it; never an effect mark, which says an effect was applied (SPIRITS["amdusias"]["body"]["sway"]).
+	 */
+	public static final Sign SWAY = Sign.WORK;
 
 	/** His loops on the worker's main controller, for what the server synced (SPIRITS["amdusias"]["body"]["loops"]). */
 	public enum Loop {

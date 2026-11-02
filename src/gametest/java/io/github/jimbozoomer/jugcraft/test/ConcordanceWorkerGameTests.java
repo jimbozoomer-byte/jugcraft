@@ -9395,6 +9395,11 @@ public class ConcordanceWorkerGameTests {
 			long now = level.getGameTime();
 			helper.assertTrue(Canopies.of(level, id, now) == null && Canopies.damping(level, bed.getBlockPos(), false, now) == 0,
 					"His holder logged out: lapsed within 40 ticks");
+			// No think of his ran since (his holder away), so his memory still holds the bed he covered: Jade reads the live
+			// canopy, never that memory (the unit review).
+			CompoundTag reading = PactReading.presence(level, amdusias, now);
+			helper.assertTrue(!"covered".equals(reading.getStringOr("note", "")) && !canopy(amdusias).fresh(now),
+					"and Jade no longer says he shelters: " + reading);
 			helper.succeed();
 		});
 	}
@@ -9431,6 +9436,45 @@ public class ConcordanceWorkerGameTests {
 				&& Integer.valueOf(16).equals(arg(rows.getFirst(), 1)) && Integer.valueOf(2).equals(arg(rows.getFirst(), 2)),
 				"His kept page's gauge: 16 of at most 16, 2 lower: " + rows);
 		helper.assertValueEqual(Pacts.done(pactOf(level, perch).pact(), now), 0, "His record counts nothing");
+		helper.succeed();
+	}
+
+	/**
+	 * GC-09 (the unit review; Buer's rule, StrainTending): the sixteen beds nearest his perch, his holder's, stand in a claim
+	 * the holder may not change, and a seventeenth of theirs lies beyond them. His first think asks the sixteen (his
+	 * MAX_ASKED), is refused each and covers nothing; his next, inside the same read of his index, skips them and covers the
+	 * seventeenth. A refused bed is asked once a read of the index, so refused beds never use up his asks.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 20)
+	public void aCanopySkipsBedsHeMayNotChange(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		ServerPlayer holder = gardenHolder(helper);
+		BlockPos at = new BlockPos(8, 1, 8);
+		List<VerdantBedBlockEntity> beds = new ArrayList<>();
+		for (int i = 0; i < CanopyShelter.MAX_ASKED + 1; i++) {
+			// Rows of five west and north of the perch, as the cap's test lays them, clear of his log, his holder and his station.
+			beds.add(shelteredCrop(helper, new BlockPos(3 + 2 * (i % 5), 1, 2 + (i / 5)), holder.getUUID(), Garden.SUNPETAL_CROP));
+		}
+		long now = level.getGameTime();
+		PactPerchBlockEntity perch = amdusiasPact(helper, holder, at, now);
+		AmdusiasEntity amdusias = amdusias(helper, perch);
+		List<BlockPos> order = beds.stream().map(VerdantBedBlockEntity::getBlockPos).sorted(GardenReach.nearest(perch.getBlockPos())).toList();
+		List<BlockPos> claimed = order.subList(0, CanopyShelter.MAX_ASKED);
+		BlockPos allowed = order.getLast();
+		try (TestClaims claims = TestClaims.open()) {
+			for (BlockPos pos : claimed) {
+				claims.block(pos, STRANGER);
+			}
+			helper.assertValueEqual(amdusias.think(level, 6000L, now), Status.IDLE, "The sixteen nearest asked, each in a claim: refused, nothing covered");
+			helper.assertTrue(claimed.stream().allMatch(pos -> canopy(amdusias).skipped(pos)) && !canopy(amdusias).skipped(allowed)
+					&& Canopies.of(level, holder.getUUID(), now) == null, "Those sixteen are skipped until his index is read again; the last is not");
+			long next = now + WorkerEntity.THINK_TICKS;
+			helper.assertValueEqual(amdusias.think(level, 6000L, next), Status.WORKING, "His next think skips them and shelters the bed beyond them");
+			Canopies.Canopy shelter = Canopies.of(level, holder.getUUID(), next);
+			helper.assertTrue(shelter != null && shelter.beds().equals(Set.of(allowed)) && canopy(amdusias).spared().isEmpty(),
+					"His canopy covers the holder's bed beyond the claim, and no claimed crop: " + shelter);
+			Canopies.lift(level, holder.getUUID(), perch.getBlockPos());
+		}
 		helper.succeed();
 	}
 
@@ -9551,7 +9595,8 @@ public class ConcordanceWorkerGameTests {
 				&& PactObligations.key(AmdusiasEntity.COUNTERPART).equals("practice:" + GardenPacts.ACTIVITY + ":" + AmdusiasEntity.COUNTERPART),
 				"A ripe crop harvested by hand in his area while the pact is active keeps it, once");
 		ConcordanceGardenGameTests.handUse(helper, holder, inside.get(2).above(), ItemStack.EMPTY, false);
-		helper.assertTrue(GARDEN_SERVED.getOrDefault(holder.getUUID(), 0) == heard + 1, "and it is not recorded again");
+		helper.assertTrue(GARDEN_SERVED.getOrDefault(holder.getUUID(), 0) == heard + 1 && !helper.getBlockState(inside.get(2).above()).equals(ripe),
+				"and it is not recorded again (the harvest itself done)");
 		helper.succeed();
 	}
 

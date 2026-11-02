@@ -704,8 +704,9 @@ SPIRITS = {
                         "garland#8": "west", "garland#9": "west", "garland#10": "south", "garland#11": "north"},
             # Detail (b): his tree's sway, the shared sign (AmdusiasEntity.SWAY; tools/concordance_signs.py SIGNS) every
             # CanopyShelter.SWAY_TICKS while he shelters, and once as he departs. No spirit sends particles of its own
-            # (check_signs), so the design's falling leaves are the sign system's (decided by the session).
-            "sway": {"sign": "mend", "ticks": 200},
+            # (check_signs), so the design's falling leaves are the sign system's (decided by the session): the work
+            # sign (execution), never an effect mark such as "mend", which says an effect was applied (the unit review).
+            "sway": {"sign": "work", "ticks": 200},
             "shots": ["jugcraft_garden_amdusias_idle", "jugcraft_garden_amdusias_listen", "jugcraft_garden_amdusias_waiting",
                       "jugcraft_garden_amdusias_suspended", "jugcraft_garden_amdusias_inspect", "jugcraft_garden_amdusias_assent",
                       "jugcraft_garden_amdusias_refuse", "jugcraft_garden_amdusias_work", "jugcraft_garden_amdusias_depart",
@@ -1394,7 +1395,7 @@ SERVICE_WORDS = {
         },
         # Third person, as every Jade pact line (the C3 review's rule): Jade's reader may be anyone.
         "notes": {
-            "covered": "Sheltering %s beds",
+            "covered": "Beds sheltered: %s",
             "spared": "Sparing %s crops that want the stir, waiting for his holder's answer at the perch",
             "no_tree": "No tree: no log stands beside his perch",
             "elsewhere": "His holder's canopy stands at another perch",

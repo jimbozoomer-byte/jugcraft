@@ -79,7 +79,7 @@ No source quotation in game (GC-S14).
     most every 200 ticks.
   - Over a covered bed, the plant above it reads the area's disturbance up to 2 lower, never below 0: a crop on it, or a
     Habitat Gauge attuned on it, which reads what that crop would (so a Gauge's bed counts toward his 16 and toward
-    "Sheltering n beds"). Never a Verdant Heart (the block above the bed decides), never more stir, never harvest strain
+    "Beds sheltered: n"). Never a Verdant Heart (the block above the bed decides), never more stir, never harvest strain
     eased (the strained judgement keeps the unsheltered value: `Habitat.strained()` adds back the stir he took), never
     two canopies added (the larger damping applies).
   - A crop whose niche wants the stir (its ideal disturbance starts above 0: today only Gloamcap) he spares until
@@ -113,7 +113,7 @@ No source quotation in game (GC-S14).
   - (b) His tree sways: every 10 s while he shelters, and once as he leaves, at the log's top. No spirit or service sends
     particles of its own (`check_signs`), so the sway is the shared sign system's (`Signs.show` with an existing `Sign`,
     as Bathin's ring of dust is `Sign.SHOVE`); none falls like leaves, so it is drawn in the nearest look the system has,
-    chosen with the code (proposed: `Sign.MEND`'s six green motes at full intensity). The design's six tinted leaves sent
+    chosen with the code (proposed: `Sign.MEND`'s six green motes; built as `Sign.WORK`, see "As built"). The design's six tinted leaves sent
     by the server (`ParticleTypes.TINTED_LEAVES` through `sendParticles`) are not used.
 - **Not imported:** the music line, as a quotation or an attribution; thunder; "Exorcist" framing, any seal, conjuration,
   title or legion count; the human shape; the "Excellent Familiars" (another spirit's, Marax's, identity); the
@@ -149,7 +149,7 @@ measured here with that module's own word and width counts):
 | What | Drawn | Words |
 |---|---|---|
 | The header's service line (its icon `minecraft:oak_leaves`, the canopy) | "Shelters your crops from the stir" | 6 (175 px of the header's 211) |
-| The quota as a cap: the quota chip's glance for `term.quota.canopy_shelter` (the server's "At most %s beds sheltered at once", its message) | "%1$s at once" ("16 at once") | 3 |
+| The quota as a cap: the quota chip's glance for `term.quota.canopy_shelter` (the server's "At most %s beds sheltered at once", its message) | "Max %1$s beds" ("Max 16 beds"; "%1$s at once" until the unit review, which gave it its noun within the chip's 3 words; its tip keeps the sentence's "at once") | 3 |
 | The kept page's gauge (his `row.service`: beds covered of 16) | "%1$s/%2$s now" ("3/16 now"); see below | 2 |
 | Blockers (no tree; no bed), each a lock line | "Needs a log within %1$s blocks of the perch"; "Needs your awake Verdant Bed within %1$s blocks" | 9; 8 |
 | Chooser card reasons (no tree; no bed) | "Tree needed"; "Bed needed" | 2; 2 |
@@ -158,7 +158,7 @@ measured here with that module's own word and width counts):
 | His question in general (answered, and no matter raised now) | "Shelter crops that want the stir?" | 6 |
 | His answers (their own words) | "Spare them" (`spare`); "Shelter all" (`all`) | 2; 2 |
 | His first task's row | "First task: harvest a ripe crop by hand here" | 9: no act glance needed |
-| Jade on him (his notes and matter) | "Sheltering %1$s beds" (covered), "Spared: %1$s", "No tree", "Canopy elsewhere", "Nothing to shelter"; "Crops want the stir" (his matter) | at most 4 |
+| Jade on him (his notes and matter) | "Beds sheltered: %1$s" (covered), "Spared crops: %1$s", "No tree", "Canopy elsewhere", "Nothing to shelter"; "Crops want the stir" (his matter); each count after its noun, as the other spirits' notes (the unit review; "Sheltering %1$s beds" and "Spared: %1$s" before it) | at most 4 |
 | The readers' line, short: on a bed's and a Gauge's Jade (`jade.sheltered`), and for the Inspect page's and the reports' sentence (`ecology.sheltered`) | "Sheltered by Amdusias: -%1$s" ("Sheltered by Amdusias: -2") | 4 |
 
 Two of these depart from the unit's design and one from the shared rule; GC-09 settles each with the code:
@@ -180,7 +180,7 @@ Two of these depart from the unit's design and one from the shared rule; GC-09 s
 
 Nothing below has run. Each is what GC-09 is to build and run, in CI only (no Minecraft here):
 
-- **Server tests** (25): in the garden class, `aShelteredHabitatKeepsItsStrainedValue` and
+- **Server tests** (26 with the unit review's): in the garden class, `aShelteredHabitatKeepsItsStrainedValue` and
   `theCanopyRegistryTakesTheLargestNeverTheSumAndLapses`; in the worker class, `aCanopyLowersOnlyDisturbanceForCropsInItsArea`,
   `aCanopyNeverSuppliesDisturbance`, `aCanopyNeverHelpsAHeart`, `aCanopyNeverEasesStrain`, `twoCanopiesNeverStack`,
   `aCanopySparesAGloamcapUntilAnswered`, `aCanopyLapsesWithin40TicksOfSuspension` (and of the tree's felling, the holder
@@ -189,7 +189,8 @@ Nothing below has run. Each is what GC-09 is to build and run, in CI only (no Mi
   `theInspectPageAndTheGaugeReadTheShelteredValue`, `theCanopysQuotaIsWordedAsACap`,
   `aCanopyReturnsAfterARestartWithinOneThink`, `amdusiasHornsABeatLate`, `hisTreeSwaysWhileHeShelters`,
   `aHolderKeepsOneCanopy`, `amdusiassReadingSaysItsNoteAndNamesNoPlayer`, `amdusiasAnswersEachActionWithHisGesture`,
-  `aDuplicateAmdusiasSheltersNothing`, `amdusiasStandsBesideHisPerch`; in the economy class,
+  `aDuplicateAmdusiasSheltersNothing`, `amdusiasStandsBesideHisPerch`, `aCanopySkipsBedsHeMayNotChange` (the unit
+  review's); in the economy class,
   `theEconomyStillHasNoGainingCycle`; and the shared SG12 cases through his fixture. Tests that compare readings sample
   through the shared `afterSampling` and think at the level's own time; each asserts only its own holders and beds.
 - **The pure rule's harness** (scratch, not in Git): every shipped niche over a grid of the other factors, every
@@ -398,7 +399,7 @@ What a player meets first: with The Garden's Regard understood, a Pact Perch wit
 Verdant Bed of theirs within 6 lists Amdusias on its chooser; without the log his card says "Tree needed" and his words
 "I bend trees. There is no tree here." Chosen, a garlanded white unicorn steps up beside the perch (two blocks west of it,
 facing whoever speaks) and his horn is heard a beat later. His terms name a note block and 2 oak saplings once, then a
-sapling a week, and his quota as a cap ("16 at once"). Sealed, while his holder is near he bends his tree's shelter over
+sapling a week, and his quota as a cap ("Max 16 beds"). Sealed, while his holder is near he bends his tree's shelter over
 the crops of up to 16 of their and their party's awake beds in his area, the nearest first: each reads the stir up to 2
 lower, never below nothing, and the Inspect page, the crop's and the bed's reports, a Habitat Gauge set on a bed and
 Jade say "Sheltered by Amdusias". A Gloamcap, which wants the stir, he spares and asks about ("Spare them" or "Shelter
@@ -450,9 +451,12 @@ all"). Every 10 s while he shelters, and once as he bows and leaves, his tree sw
   this unit was built from lists the shared "%1$s/%2$s today"; "3/16 today" would present his cap as the daily count
   his terms and the contract deny, so the brief's proposal is taken. Reviewable at the checkpoint.
 - **His sway is the shared sign.** No spirit sends particles of its own (`check_signs`), so his tree's sway is
-  `Signs.show` with `Sign.MEND` (green motes) at the log's top (`AmdusiasEntity.SWAY`; his row's `"sway": {"sign":
-  "mend", "ticks": 200}`), where the design sent tinted leaves; each client draws it as its settings allow. Whether it
-  reads as falling leaves is for the owner to see in game.
+  `Signs.show` with `Sign.WORK` (execution: work being done) at the log's top (`AmdusiasEntity.SWAY`; his row's
+  `"sway": {"sign": "work", "ticks": 200}`), where the design sent tinted leaves; each client draws it as its settings
+  allow. It was `Sign.MEND` until the unit review: MEND is an effect mark (where an effect was applied), and no mend
+  happens when his tree sways; Bathin's shimmer and the strain and habitat readings show `Sign.WORK` too. A leaf sign of
+  its own is left to a later, reviewed change to the shared `SIGNS`. Whether it reads as his tree swaying is for the
+  owner to see in game.
 - **SG12's fixture puts his log north-west of the perch's cell** (`perch.offset(-1, 0, -1)`), not east: on this line
   he is the sixth cell, `(7, 1, 4)`, whose east is outside the 8-wide structure; north-west stays inside there and in the
   merged line's seventh cell `(1, 1, 7)`, clear of every fixture and of the second perch the shared cases place north.
@@ -475,7 +479,7 @@ all"). Every 10 s while he shelters, and once as he bows and leaves, his tree sw
   Heart's own beat; the stranger's test drops the design's "a stranger's crop on the holder's bed" (a crop has no
   keeper of its own); the economy test answers "shelter all" so a Gloamcap is covered too.
 - **The client flow follows Foras's restyled flow**, with his own steps: his refusal shown on the chooser (as every
-  garden spirit's now), his quota checked as its sentence and its chip ("16 at once"), his three beds left bare until
+  garden spirit's now), his quota checked as its sentence and its chip ("Max 16 beds"), his three beds left bare until
   the horn's step (so his canopy forms with the test's own think and its gesture, not with one of his), the Inspect
   page opened with the encyclopedia's key looking at the bed, his sway shown by a call after his tree is read, and no
   end-confirmation shot (his list has none). The horn's subtitle is staged on the HUD's own overlay where no sound
@@ -483,8 +487,10 @@ all"). Every 10 s while he shelters, and once as he bows and leaves, his tree sw
 
 ## Verification
 
-Nothing of unit 6 has run in CI, and no Minecraft jar is here: no build, game test or client shot has exercised him. The line this brief starts from (`4201217b3`, with Foras) is in CI with no result recorded here;
-the newest result it descends from is run 40840353835, green in full on `3bfd63a97`.
+Nothing of unit 6 has run in CI, and no Minecraft jar is here: no build, game test or client shot has exercised him. The line this brief starts from is `4201217b3` (with Foras).
+4201217b3's Build (run 40847753203) failed in `mod` and `optional integrations absent`. 5e93bb0a77 fixes it (the reload
+test thinks first; 6G heap), and this line takes it at the merge. Do not run CI on this line alone. The newest green
+result it descends from is run 40840353835, green in full on `3bfd63a97`.
 
 GC-09b: no Minecraft jar here, so its Java was parse-checked only (the `ecology` package, all but its JSON parser,
 also compiled with JDK 21 for the harnesses above); its two server tests have not run. Run and passed locally:
@@ -532,3 +538,28 @@ built body files), `owner_art.py --check`, `tools/check_mod_data.py` (with the G
 `concordance_journey.py --check`, `concordance_economy.py` (gaining cycles: none), `check_icon_maps.py`,
 `tools/magic_ui.py`, the world designer's model tests, `scripts/tests` and `git diff --check`. The commit's audit
 mutations, each on a scratch copy, are reported with the commit.
+
+Fixes from Amdusias's review (written, not run; parse-checked only, none of it compiled or run in CI):
+
+- **A stopped Amdusias says nothing stale.** His service's step remembers when it last ran (`Memory.fresh`: within
+  `Canopies.LAPSE_TICKS`); a stop that never reaches it (the holder away or offline, suspended, held) no longer leaves
+  Jade saying "Beds sheltered: 3" over a lapsed canopy, nor the spared crops raising his matter and the "Spared" row.
+  Jade's covered count is the live canopy's, as the kept page's gauge reads it. `aCanopyLapsesWhenItsHolderLeaves`
+  asserts it.
+- **Beds he may not change are asked once a read.** Each bed is asked (`GardenPacts.target`) before its crop is spared,
+  so a Gloamcap on a bed in another's claim is never his matter, and a bed refused for itself is skipped until his index
+  is read again (Buer's rule), so refused beds never use up his 16 asks. New test: `aCanopySkipsBedsHeMayNotChange`.
+- **His tree's sway is the work sign**, not the mend mark (see "Decided by the session").
+- **Words:** the quota chip reads "Max 16 beds" (the review asked "16 beds at once", 4 words, over the chip's 3 in
+  the style's 1.1, which `check_magic_ui` holds; the server's sentence, its tip, keeps "at once"); Jade's notes read "Beds sheltered: %1$s" and "Spared crops: %1$s".
+- **Tests:** the client flow's ending allows his tree's own sway inside the window before he departs (one sway more or
+  two, the last his departure's, at his tree, after the request); the obligation test checks the fourth harvest was
+  done; `check_mod_data` reports a missing `HabitatAdvice.java`.
+
+Run and passed locally for these fixes: the generators (one at a time; the generated difference is four lang lines),
+`owner_art.py --check`, `tools/check_mod_data.py`, `scripts/check_repository.py`, `concordance_journey.py --check`,
+`concordance_economy.py` (gaining cycles: none), `check_icon_maps.py`, `tools/magic_ui.py`, the world designer's model
+tests, `scripts/tests` and `git diff --check`. Thirteen audit mutations on a scratch copy (the live covered count, the
+fresh step in his note, matter and rows, the step's time, the ask before the spare, the skip and its forgetting, the
+mend mark in the entity and in his row, `HabitatAdvice.java` emptied, the four-word chip, the new test renamed) were
+each caught.
