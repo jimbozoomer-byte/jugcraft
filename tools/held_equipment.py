@@ -97,11 +97,12 @@ def generate(assets=ASSETS):
     for relative, hands in profiles().items():
         path = assets / relative
         model = json.loads(path.read_text(encoding="utf-8"))
-        old = json.loads(json.dumps(model))
+        old_display = json.dumps(model.get("display", {}), sort_keys=True)
         model.setdefault("display", {}).update(hands)
-        if model != old:
+        # Numeric equality hides -0.0 versus 0.0; compare their serialized display
+        # values so canonical zeros are written even on an otherwise-correct model.
+        if json.dumps(model["display"], sort_keys=True) != old_display:
             path.write_text(json.dumps(model, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-        if model != old:
             changed.append(relative)
     return changed
 
