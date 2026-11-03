@@ -19,7 +19,6 @@ import net.minecraft.world.entity.animal.sheep.Sheep;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.entity.EntityTypeTest;
 import net.minecraft.world.level.gameevent.GameEvent;
-import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.phys.*;
 
@@ -39,7 +38,7 @@ public final class CompanionLivestock {
     public static Identifier assignmentType(Animal animal){return animal instanceof Sheep?SHEARING:animal instanceof Cow?MILKING:animal instanceof Chicken?EGGS:null;}
     private long now(){return npc.level().getGameTime();}
     private long milkClock(){return ((ServerLevel)npc.level()).getServer().overworld().getGameTime();}
-    private boolean enabled(){return npc.level() instanceof ServerLevel level && level.getGameRules().get(GameRules.MOB_GRIEFING);}
+    private boolean enabled(){return npc.level() instanceof ServerLevel;}
     private boolean shears(){var held=npc.belongings.getItem(9);return held.is(Items.SHEARS) && (!held.isDamageableItem() || held.getDamageValue()<held.getMaxDamage());}
     private int bucketSlot(){for(int i=0;i<8;i++)if(!npc.transport.reserved(i) && npc.belongings.getItem(i).is(Items.BUCKET))return i;return -1;}
     public CompanionJob job(BlockPos anchor){

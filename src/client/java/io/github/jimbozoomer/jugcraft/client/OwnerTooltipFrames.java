@@ -27,6 +27,8 @@ public final class OwnerTooltipFrames {
                 var mc=net.minecraft.client.Minecraft.getInstance();
                 if(mc.level==null){g.item(stack,x+(w-16)/2,y+8);return;}
                 var item=new net.minecraft.world.entity.item.ItemEntity(mc.level,0,0,0,stack.copyWithCount(1));
+                // Render extraction reads the ID even though this preview never joins the level.
+                item.setId(-1);
                 var state=mc.getEntityRenderDispatcher().extractEntity(item,0);
                 if(state instanceof net.minecraft.client.renderer.entity.state.ItemEntityRenderState dropped)dropped.bobOffset=0;
                 float angle=ConcordanceClientOptions.reducedMotion()?0:(System.nanoTime()%12_000_000_000L)/12_000_000_000F*(float)(Math.PI*2);

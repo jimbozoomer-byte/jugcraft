@@ -9,7 +9,7 @@ Owner-requested implementation, 12 October 2026, using OpenAI Codex (GPT-6). Reu
 - Supply requests at most four total compatible containers after counting unreserved carried inputs. Full containers use existing marked cargo and Output delivery, including multiple linked containers. Player-given compatible inputs may also be used.
 - An uninterrupted fill takes 40 ticks at 4 reserve JE/t (160 JE). Hauling uses normal cargo-scaled effort. Existing work animation and native fill sounds are reused.
 - Bottles and canteens preserve water. Buckets consume the actual source; normal fluid ticks can renew an infinite pool. There is no generated water or direct machine-tank transfer.
-- A missing source pauses work while retaining the assignment and completed cargo. A short handoff grace allows a renewable source to refill. Work requires mob-griefing, permission, loaded positions, energy and safe dry footing within reach.
+- A missing source pauses work while retaining the assignment and completed cargo. A short handoff grace allows a renewable source to refill. Work requires permission, loaded positions, energy and safe dry footing within reach. Companion collection is exempt from mob griefing.
 
 ## Server and inventory handling
 

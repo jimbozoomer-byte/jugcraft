@@ -21,7 +21,7 @@ class ShapeArchiveTests(unittest.TestCase):
             model = {'elements': [{'from': [0, 0, 0], 'to': [16, 16, 16]}]}
             with zipfile.ZipFile(jar, 'w') as archive:
                 archive.writestr('assets/minecraft/models/block/cube.json', json.dumps(model))
-            with patch.object(Path, 'home', return_value=home), patch.object(Path, 'glob', return_value=iter(())):
+            with patch.object(newest_shapes, 'VANILLA', jar), patch.object(newest_shapes, 'ROOT', home):
                 self.assertEqual(model, newest_shapes.vanilla_model('block/cube'))
                 with self.assertRaisesRegex(ValueError, 'unavailable'):
                     newest_shapes.vanilla_model('block/nonexistent')

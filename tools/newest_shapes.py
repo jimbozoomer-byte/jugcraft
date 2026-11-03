@@ -7,17 +7,18 @@ from pathlib import Path
 from functools import lru_cache
 from menagerie_content import read
 
+ROOT = Path(__file__).resolve().parents[1]
+VANILLA = Path.home() / '.gradle/caches/fabric-loom/26.3/minecraft-client.jar'
+
 
 @lru_cache(maxsize=256)
 def vanilla_model(path):
     if path=='block/template_farmland':path='block/template_cube_bottom_top_indented'
     # Read pinned game assets as shape references; never copy game art into the mod.
-    root = Path(__file__).resolve().parents[1]
-    jars = sorted((root / '.gradle/loom-cache/minecraftMaven/net/minecraft').glob('minecraft-clientOnly-*/26.3/*.jar'))
-    # CI prepares the verified pinned client archive before Loom creates its split JARs.
-    pinned = Path.home() / ".gradle/caches/fabric-loom/26.3/minecraft-client.jar"
-    if pinned.is_file():
-        jars.append(pinned)
+    # CI prepares this verified archive before generation, without compiling the
+    # mod. Keep the derived Loom cache as a fallback for existing local setups.
+    jars = ([VANILLA] if VANILLA.is_file() else [])
+    jars += sorted((ROOT / '.gradle/loom-cache/minecraftMaven/net/minecraft').glob('minecraft-clientOnly-*/26.3/*.jar'))
     for jar in jars:
         with zipfile.ZipFile(jar) as archive:
             name = 'assets/minecraft/models/' + path + '.json'
@@ -95,3 +96,10 @@ def variants(assets, namespace, state, properties=None):
             if matches(part.get('when', {}), values): boxes.extend(boxes_for(assets, namespace, part['apply']))
         result[','.join(key + '=' + values[key] for key in keys)] = boxes
     return result
+
+
+def order_shape_keys(blocks):
+    """Stabilize serialized state order without changing geometry or registry order."""
+    for spec in blocks.values():
+        if 'shapes' in spec:
+            spec['shapes'] = dict(sorted(spec['shapes'].items()))

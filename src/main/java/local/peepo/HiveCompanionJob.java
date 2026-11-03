@@ -2,7 +2,6 @@ package local.peepo;
 
 import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
 import net.minecraft.world.level.block.*;
-import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.item.*;
@@ -50,7 +49,7 @@ public final class HiveCompanionJob implements CompanionJob {
     public static boolean ready(net.minecraft.world.level.block.entity.BlockEntity block){
         return !block.isRemoved() && block.getLevel() instanceof ServerLevel l && l.hasChunkAt(block.getBlockPos())
             && block.getBlockState().getBlock() instanceof BeehiveBlock && block.getBlockState().hasProperty(BeehiveBlock.HONEY_LEVEL) && block.getBlockState().getValue(BeehiveBlock.HONEY_LEVEL)>=5
-            && l.getGameRules().get(GameRules.MOB_GRIEFING) && CampfireBlock.isSmokeyPos(l,block.getBlockPos());
+            && CampfireBlock.isSmokeyPos(l,block.getBlockPos());
     }
     public static boolean needsShears(PeepoEntity npc,CompanionAssignments.Target target){
         if(target==null || !target.present(npc.level()))return false;
@@ -58,7 +57,6 @@ public final class HiveCompanionJob implements CompanionJob {
     }
     CompanionStatus readiness(){
         if(hive.isRemoved() || !(hive.getLevel() instanceof ServerLevel l) || !l.hasChunkAt(stationPosition()))return CompanionStatus.MISSING;
-        if(!l.getGameRules().get(GameRules.MOB_GRIEFING))return CompanionStatus.GARDEN_DISABLED;
         if(!(hive.getBlockState().getBlock() instanceof BeehiveBlock))return CompanionStatus.MISSING;
         if(!hive.getBlockState().hasProperty(BeehiveBlock.HONEY_LEVEL) || hive.getBlockState().getValue(BeehiveBlock.HONEY_LEVEL)<5)return CompanionStatus.HONEY_GROWING;
         if(!CampfireBlock.isSmokeyPos(l,stationPosition()))return CompanionStatus.NEEDS_SMOKE;

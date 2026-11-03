@@ -17,6 +17,7 @@ import net.minecraft.world.level.storage.ValueOutput;
  * taken. Saved with the world; each change shows the stand's new stock on its blocks; breaking it gives everything back.
  */
 public class CaramelAppleStandBlockEntity extends BlockEntity {
+	public final ConfectionCompanion companion = new ConfectionCompanion(this);
 	private int caramel;
 	private int sticks;
 	/** The game time each tray spot's apple was dipped, or -1 for an empty spot. */
@@ -33,6 +34,15 @@ public class CaramelAppleStandBlockEntity extends BlockEntity {
 
 	public int sticks() {
 		return sticks;
+	}
+
+	/** Copy the native pot, jar and cooling tray for an atomic companion transfer. */
+	record Stock(int caramel, int sticks, long[] dipped) {}
+	Stock companionStock() { return new Stock(caramel, sticks, dipped.clone()); }
+	void restoreCompanionStock(Stock stock) {
+		caramel = stock.caramel(); sticks = stock.sticks();
+		System.arraycopy(stock.dipped(), 0, dipped, 0, dipped.length);
+		changed();
 	}
 
 	/** How many caramel apples stand on the tray. */
@@ -110,6 +120,7 @@ public class CaramelAppleStandBlockEntity extends BlockEntity {
 
 	private void changed() {
 		setChanged();
+		local.peepo.CompanionReadiness.invalidate(this);
 		if (level != null && !level.isClientSide() && getBlockState().getBlock() instanceof CaramelAppleStandBlock stand) {
 			stand.show(level, worldPosition, getBlockState(), caramel, sticks, apples());
 		}
@@ -132,6 +143,7 @@ public class CaramelAppleStandBlockEntity extends BlockEntity {
 	@Override
 	protected void loadAdditional(ValueInput input) {
 		super.loadAdditional(input);
+		companion.load(input);
 		caramel = Math.clamp(input.getIntOr("caramel", 0), 0, CaramelAppleStandBlock.CARAMEL);
 		sticks = Math.clamp(input.getIntOr("sticks", 0), 0, CaramelAppleStandBlock.STICKS);
 		for (int spot = 0; spot < dipped.length; spot++) {
@@ -143,6 +155,7 @@ public class CaramelAppleStandBlockEntity extends BlockEntity {
 	@Override
 	protected void saveAdditional(ValueOutput output) {
 		super.saveAdditional(output);
+		companion.save(output);
 		output.putInt("caramel", caramel);
 		output.putInt("sticks", sticks);
 		for (int spot = 0; spot < dipped.length; spot++) {

@@ -53,6 +53,12 @@ public class ButterChurnBlock extends HandWorkedBlock {
 		return SHAPE;
 	}
 
+	@Override
+	protected boolean isPathfindable(BlockState state, net.minecraft.world.level.pathfinder.PathComputationType type) {
+		// Keep delivery paths around the narrow barrel instead of through its collision box.
+		return false;
+	}
+
 	/** A bucket of milk goes in; anything else does what it would on any block, and an empty hand works the dasher. */
 	@Override
 	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
@@ -86,6 +92,7 @@ public class ButterChurnBlock extends HandWorkedBlock {
 			return InteractionResult.SUCCESS;
 		}
 		long now = level.getGameTime();
+		if (player.isSecondaryUseActive() && churn.companion.collect(player)) return InteractionResult.SUCCESS;
 		if (!churn.ready(now)) {
 			return InteractionResult.CONSUME;
 		}

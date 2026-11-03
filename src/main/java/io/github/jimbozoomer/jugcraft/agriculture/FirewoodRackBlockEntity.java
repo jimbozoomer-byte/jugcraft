@@ -18,6 +18,13 @@ import net.minecraft.world.level.storage.ValueOutput;
  */
 public class FirewoodRackBlockEntity extends BlockEntity {
 	private final List<ItemStack> logs = new ArrayList<>();
+	public final FarmStoreStorage storage = new FarmStoreStorage(this, logs, () -> FirewoodRackBlock.CAPACITY, stack -> stack.is(ItemTags.LOGS), this::storageChanged, true);
+
+	private void storageChanged() {
+		setChanged();
+		if (level != null && !level.isClientSide() && getBlockState().getBlock() instanceof FirewoodRackBlock)
+			level.setBlock(worldPosition, getBlockState().setValue(FirewoodRackBlock.LOGS, count()), net.minecraft.world.level.block.Block.UPDATE_ALL);
+	}
 
 	public FirewoodRackBlockEntity(BlockPos pos, BlockState state) {
 		super(JugcraftAgriculture.FIREWOOD_RACK_ENTITY, pos, state);

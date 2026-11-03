@@ -24,6 +24,13 @@ public final class ProcessorJob implements CompanionJob {
     private boolean clearance;
 
     public ProcessorJob(ProcessorHost host,int slot) { this.host=host;this.machine=host.companionBlock();this.slot=slot; }
+    @Override public boolean finishLoadedBatch(PeepoEntity npc){
+        return machine instanceof io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity processor
+            && processor.companionPort.loadedBatch() && planningStatus(npc)==CompanionStatus.READY;
+    }
+    @Override public boolean collectAfterWork(){
+        return machine instanceof io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity processor && processor.companionPort.batchProcessor();
+    }
     @Override public WorkAnimation animation(){return WorkAnimation.processor(host.kind(),slot);}
     public boolean requestedAt(long now){return worker!=null && requested>=now-1 && requested<=now;}
     public boolean assignedTo(PeepoEntity npc){return worker!=null && worker.equals(npc.getUUID());}

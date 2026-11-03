@@ -181,7 +181,7 @@ final class CompanionStockRecipes {
         if(busy(block)){
             if(block instanceof FormMachineBlockEntity form && form.companionPort.stockRecipe()==null)form.companionPort.prepare(source,null);
             // Recover a selected native plan after a filter edit or manually installed ingredients.
-            if(block instanceof MachineBlockEntity machine && (machine.companionPort.plan()==null || machine.kind()==MachineKind.ELECTROPLATING_BATH && machine.companionPort.selection()==null))machine.companionPort.prepare(source);
+            if(block instanceof MachineBlockEntity machine && (machine.companionPort.batchProcessor() || machine.companionPort.plan()==null || machine.kind()==MachineKind.ELECTROPLATING_BATH && machine.companionPort.selection()==null))machine.companionPort.prepare(source);
             else if(block instanceof AbstractFurnaceBlockEntity || block instanceof CampfireBlockEntity){var port=VanillaCompanionPort.of(block);if(port.plan()==null)port.prepare(source);}
             return;
         }

@@ -47,11 +47,26 @@ class AcquisitionRecipesTests(unittest.TestCase):
 
     def test_restored_special_recipes_keep_their_runtime_constraints(self):
         rows = build()
-        self.assertEqual('jugcraft:botanical_water_shaped', rows['jugtania/water_rod']['type'])
+        self.assertEqual('jugcraft:botanical_water_crafting', rows['jugtania/water_rod']['type'])
         for part in ('helmet', 'chestplate', 'leggings', 'boots'):
             self.assertEqual('jugcraft:botanical_armor_upgrade', rows['jugtania/terrasteel_' + part]['type'])
-        self.assertEqual(['jugcraft:supps_trapped_present', 'minecraft:red_dye'],
-                         rows['acquisition/supps_trapped_present_red']['ingredients'])
+        self.assertNotIn('acquisition/supps_trapped_present_red', rows)
+        for kind in ('present', 'trapped_present'):
+            for color in 'white orange magenta light_blue yellow lime pink gray light_gray cyan purple blue brown green red black'.split():
+                name = 'acquisition/supps_' + kind + '_' + color
+                self.assertNotIn(name, rows)
+                self.assertFalse((ROOT / 'src/main/resources/data/jugcraft/recipe' / (name + '.json')).exists(),
+                                 'Ordinary dye recipes must not discard stored present contents')
+        conversion=ROOT/'src/main/resources/data/jugcraft/recipe/acquisition/present_conversion.json'
+        self.assertEqual('jugcraft:supps_present_conversion', json.loads(conversion.read_text())['type'])
+
+    def test_botanical_serializers_have_one_registration_owner(self):
+        root = ROOT / 'src/main/java/io/github/jimbozoomer/jugcraft/botany'
+        for source in root.glob('*.java'):
+            self.assertNotIn('BotanicalShapedRecipe.register();', source.read_text(), source.name)
+        source = (root / 'Jugtania.java').read_text()
+        self.assertEqual(1, source.count('Jugcraft.id("botanical_armor_upgrade")'))
+        self.assertEqual(1, source.count('Jugcraft.id("botanical_water_crafting")'))
 
 
 if __name__ == '__main__':

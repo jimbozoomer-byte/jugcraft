@@ -9,7 +9,6 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.*;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.*;
 
@@ -67,7 +66,7 @@ public final class BatHouseCompanionJob implements CompanionJob {
         if(!availableTo(p))return CompanionStatus.OCCUPIED;
         if(!p.orders.tamed() || !p.assignments.assignedWork(stationPosition()) || !CompanionJobs.permitted(p,stationPosition()))return CompanionStatus.FORBIDDEN;
         if(!JugcraftConfig.isFeatureEnabled(JugcraftAgriculture.FEATURE))return CompanionStatus.BAT_HOUSE_DISABLED;
-        if(!(p.level() instanceof ServerLevel level) || !level.getGameRules().get(GameRules.MOB_GRIEFING))return CompanionStatus.GARDEN_DISABLED;
+        if(!(p.level() instanceof ServerLevel level))return CompanionStatus.GARDEN_DISABLED;
         if(house.guano()==0)return CompanionStatus.GUANO_WAIT;
         if(entrance==null)return CompanionStatus.BLOCKED;
         long now=level.getGameTime();

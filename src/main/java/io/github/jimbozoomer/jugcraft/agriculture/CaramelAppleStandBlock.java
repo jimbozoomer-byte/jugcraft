@@ -170,6 +170,8 @@ public class CaramelAppleStandBlock extends MultiDecorationBlock implements Enti
 		return part(state) == MASTER ? new CaramelAppleStandBlockEntity(pos, state) : null;
 	}
 
+	@Override protected boolean isPathfindable(BlockState state, net.minecraft.world.level.pathfinder.PathComputationType type) { return false; }
+
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
 		super.createBlockStateDefinition(builder);

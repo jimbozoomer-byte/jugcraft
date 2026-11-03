@@ -20,6 +20,14 @@ The owner library and farming/food catalog were inspected, including its pot, bo
 
 ## Validation
 
+### Continuous cutting batches — 29 October 2026
+
+Owner-requested correction with OpenAI Codex (GPT-6). CHOP now wraps elapsed work time by its current swing duration before evaluating the existing knife/body pose. A continuous batch keeps one synchronized action start, so previously its second and subsequent cuts stayed at the final lowered pose. The same lift/downstroke now repeats for Peepo and Jughead, retaining the Chef uniform's shorter duration. This is a client timing correction: no new animation assets, server messages, processing, energy or knife-wear changes.
+
+`PeepoCuttingBatchClientTests` now samples the real renderer during the third and fourth swings of autonomous twelve-item batches for both companions. It checks raised/striking knife and body poses, a bounded repeating phase and the unchanged batch action start, alongside the existing batch conservation and stock-target checks.
+
+Focused validation passed **861 assertions** on 29 October 2026 using `build-local.ps1 -Tasks @('runClientGameTest','-PclientTests=PeepoCuttingBatchClientTests')`. Evidence: `build/peepo-cutting-loop-tests.log`. Only the cutting-board batch suite ran; compilation and `git diff --check` also passed. No new assets, distribution update or human multiplayer visual approval is claimed.
+
 ### Stirring fluidity revision — 12 October 2026
 
 Owner-requested, implemented using OpenAI Codex (GPT-6). The Cooking Pot spoon now sweeps a wider elliptical path with a gentle variation in pace, small vertical motion and changing shaft tilt. Both hands share its exact transform at staggered heights. The torso leans and shifts with the sweep and the head follows the spoon; feet remain planted on the existing handle-free rim. Peepo, Jughead and the pumpkin costume use the same clip and existing wooden spoon. No new geometry, textures, inventory props or dependencies are introduced.

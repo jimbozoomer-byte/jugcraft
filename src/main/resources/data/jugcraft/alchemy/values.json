@@ -938,14 +938,14 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:aquatic_gold_hook": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
+      "numerator": 8201,
+      "denominator": 9,
+      "source": "recipe jugcraft:newest/aquatic/gold_hook"
     },
     "jugcraft:aquatic_goldfish": {
       "numerator": 2048,
       "denominator": 9,
-      "source": "local fishing salvage accounting"
+      "source": "local aquatic salvage accounting (1 gold nugget yield)"
     },
     "jugcraft:aquatic_heavy_hook": {
       "numerator": 1,
@@ -1335,7 +1335,7 @@
     "jugcraft:aquatic_tin_can": {
       "numerator": 1792,
       "denominator": 9,
-      "source": "local fishing salvage accounting"
+      "source": "local aquatic salvage accounting (7 iron nugget yield)"
     },
     "jugcraft:aquatic_treasure_chest": {
       "numerator": 1,
@@ -31083,9 +31083,9 @@
       "source": "recipe jugcraft:newest/homeworks/spruce_chair"
     },
     "jugcraft:homeworks_spruce_chandelier": {
-      "numerator": 1,
+      "numerator": 794,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "recipe jugcraft:newest/homeworks/spruce_chandelier"
     },
     "jugcraft:homeworks_spruce_couch": {
       "numerator": 104,
@@ -36843,13 +36843,13 @@
       "source": "recipe jugcraft:jimtafacts_heat/iron_blade"
     },
     "jugcraft:jimta_iron_scaffold": {
-      "numerator": 4880,
-      "denominator": 27,
+      "numerator": 176,
+      "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_construction/iron_scaffold"
     },
     "jugcraft:jimta_iron_scaffold_reinforced": {
-      "numerator": 12379,
-      "denominator": 54,
+      "numerator": 449,
+      "denominator": 2,
       "source": "recipe jugcraft:jimtafacts_construction/iron_scaffold_reinforced"
     },
     "jugcraft:jimta_iron_turning_blank": {
@@ -51713,8 +51713,8 @@
       "source": "recipe jugcraft:nouveau/allow_scroll"
     },
     "jugcraft:nouveau_alteration_table": {
-      "numerator": 2,
-      "denominator": 1,
+      "numerator": 4789,
+      "denominator": 9,
       "source": "recipe jugcraft:nouveau/alteration_table"
     },
     "jugcraft:nouveau_amethyst_golem_charm": {
@@ -51918,9 +51918,9 @@
       "source": "recipe jugcraft:nouveau/scry_to_blank_parchment"
     },
     "jugcraft:nouveau_blank_thread": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
+      "numerator": 4105,
+      "denominator": 6,
+      "source": "recipe jugcraft:nouveau/blank_thread"
     },
     "jugcraft:nouveau_blue_archwood_leaves": {
       "numerator": 1,
@@ -52688,9 +52688,9 @@
       "source": "recipe jugcraft:nouveau/magebloom_fiber"
     },
     "jugcraft:nouveau_magelight_torch": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
+      "numerator": 2051,
+      "denominator": 3,
+      "source": "recipe jugcraft:nouveau/magelight_torch"
     },
     "jugcraft:nouveau_manipulation_essence": {
       "numerator": 1,
@@ -52878,13 +52878,13 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:nouveau_repository": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
+      "numerator": 9344,
+      "denominator": 9,
+      "source": "recipe jugcraft:nouveau/repository"
     },
     "jugcraft:nouveau_repository_controller": {
-      "numerator": 5,
-      "denominator": 4,
+      "numerator": 37385,
+      "denominator": 36,
       "source": "recipe jugcraft:nouveau/repository_controller"
     },
     "jugcraft:nouveau_reset": {
@@ -53053,14 +53053,14 @@
       "source": "recipe jugcraft:nouveau/runic_chalk"
     },
     "jugcraft:nouveau_sconce": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
+      "numerator": 4105,
+      "denominator": 9,
+      "source": "recipe jugcraft:nouveau/sconce"
     },
     "jugcraft:nouveau_scribes_table": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
+      "numerator": 4780,
+      "denominator": 9,
+      "source": "recipe jugcraft:nouveau/scribes_table"
     },
     "jugcraft:nouveau_scryer_scroll": {
       "numerator": 1,
@@ -58763,34 +58763,34 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:ribbits_mossy_oak_door": {
-      "numerator": 1,
+      "numerator": 32,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "recipe jugcraft:ribbits_mossy_oak_door"
     },
     "jugcraft:ribbits_mossy_oak_planks": {
-      "numerator": 1,
+      "numerator": 16,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "recipe jugcraft:ribbits_mossy_oak_planks_from_vine"
     },
     "jugcraft:ribbits_mossy_oak_planks_fence": {
-      "numerator": 4,
+      "numerator": 24,
       "denominator": 1,
       "source": "recipe jugcraft:newest/ribbits/mossy_oak_planks_fence"
     },
     "jugcraft:ribbits_mossy_oak_planks_fence_gate": {
-      "numerator": 18,
+      "numerator": 44,
       "denominator": 1,
-      "source": "recipe jugcraft:newest/ribbits/mossy_oak_planks_fence_gate"
+      "source": "recipe jugcraft:newest/ribbits/mossy_oak_planks_fence_gate_from_moss_block"
     },
     "jugcraft:ribbits_mossy_oak_planks_slab": {
-      "numerator": 1,
-      "denominator": 2,
-      "source": "recipe jugcraft:newest/ribbits/mossy_oak_planks_slab"
+      "numerator": 8,
+      "denominator": 1,
+      "source": "recipe jugcraft:ribbits_mossy_oak_planks_slab"
     },
     "jugcraft:ribbits_mossy_oak_planks_stairs": {
-      "numerator": 3,
-      "denominator": 2,
-      "source": "recipe jugcraft:newest/ribbits/mossy_oak_planks_stairs"
+      "numerator": 24,
+      "denominator": 1,
+      "source": "recipe jugcraft:newest/ribbits/mossy_oak_planks_stairs_from_moss_block"
     },
     "jugcraft:ribbits_red_toadstool": {
       "numerator": 1,
@@ -66423,9 +66423,9 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:supps_candle_holder_cupric": {
-      "numerator": 3445,
-      "denominator": 18,
-      "source": "recipe jugcraft:acquisition/supps_candle_holder_cupric"
+      "numerator": 129,
+      "denominator": 1,
+      "source": "recipe jugcraft:acquisition/candle_holder_cupric"
     },
     "jugcraft:supps_candle_holder_cyan": {
       "numerator": 1,
@@ -66433,9 +66433,9 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:supps_candle_holder_ender": {
-      "numerator": 19573,
-      "denominator": 18,
-      "source": "recipe jugcraft:acquisition/supps_candle_holder_ender"
+      "numerator": 1025,
+      "denominator": 1,
+      "source": "recipe jugcraft:acquisition/candle_holder_ender"
     },
     "jugcraft:supps_candle_holder_gray": {
       "numerator": 1,
@@ -66493,9 +66493,9 @@
       "source": "recipe jugcraft:acquisition/supps_candle_holder_soul"
     },
     "jugcraft:supps_candle_holder_spectacle": {
-      "numerator": 1717,
-      "denominator": 18,
-      "source": "recipe jugcraft:acquisition/supps_candle_holder_spectacle"
+      "numerator": 33,
+      "denominator": 1,
+      "source": "recipe jugcraft:acquisition/candle_holder_spectacle"
     },
     "jugcraft:supps_candle_holder_white": {
       "numerator": 1,
@@ -66978,84 +66978,84 @@
       "source": "recipe jugcraft:supps_present"
     },
     "jugcraft:supps_present_black": {
-      "numerator": 129,
-      "denominator": 4,
-      "source": "recipe jugcraft:acquisition/supps_present_black"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_present_blue": {
-      "numerator": 129,
-      "denominator": 4,
-      "source": "recipe jugcraft:acquisition/supps_present_blue"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_present_brown": {
-      "numerator": 129,
-      "denominator": 4,
-      "source": "recipe jugcraft:acquisition/supps_present_brown"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_present_cyan": {
-      "numerator": 129,
-      "denominator": 4,
-      "source": "recipe jugcraft:acquisition/supps_present_cyan"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_present_gray": {
-      "numerator": 773,
-      "denominator": 24,
-      "source": "recipe jugcraft:acquisition/supps_present_gray"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_present_green": {
-      "numerator": 129,
-      "denominator": 4,
-      "source": "recipe jugcraft:acquisition/supps_present_green"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_present_light_blue": {
-      "numerator": 773,
-      "denominator": 24,
-      "source": "recipe jugcraft:acquisition/supps_present_light_blue"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_present_light_gray": {
-      "numerator": 515,
-      "denominator": 16,
-      "source": "recipe jugcraft:acquisition/supps_present_light_gray"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_present_lime": {
-      "numerator": 773,
-      "denominator": 24,
-      "source": "recipe jugcraft:acquisition/supps_present_lime"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_present_magenta": {
-      "numerator": 1547,
-      "denominator": 48,
-      "source": "recipe jugcraft:acquisition/supps_present_magenta"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_present_orange": {
-      "numerator": 161,
-      "denominator": 5,
-      "source": "recipe jugcraft:acquisition/supps_present_orange"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_present_pink": {
-      "numerator": 773,
-      "denominator": 24,
-      "source": "recipe jugcraft:acquisition/supps_present_pink"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_present_purple": {
-      "numerator": 129,
-      "denominator": 4,
-      "source": "recipe jugcraft:acquisition/supps_present_purple"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_present_red": {
-      "numerator": 129,
-      "denominator": 4,
-      "source": "recipe jugcraft:acquisition/supps_present_red"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_present_white": {
-      "numerator": 193,
-      "denominator": 6,
-      "source": "recipe jugcraft:acquisition/supps_present_white"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_present_yellow": {
-      "numerator": 129,
-      "denominator": 4,
-      "source": "recipe jugcraft:acquisition/supps_present_yellow"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_prismarine_rod": {
       "numerator": 256,
@@ -67120,7 +67120,7 @@
     "jugcraft:supps_sconce_ender": {
       "numerator": 1025,
       "denominator": 1,
-      "source": "recipe jugcraft:acquisition/supps_sconce_ender"
+      "source": "recipe jugcraft:acquisition/sconce_ender"
     },
     "jugcraft:supps_sconce_glow": {
       "numerator": 1,
@@ -67128,9 +67128,9 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:supps_sconce_green": {
-      "numerator": 129,
-      "denominator": 1,
-      "source": "recipe jugcraft:acquisition/supps_sconce_green"
+      "numerator": 5,
+      "denominator": 4,
+      "source": "recipe jugcraft:acquisition/sconce_green"
     },
     "jugcraft:supps_sconce_lever": {
       "numerator": 65,
@@ -67138,9 +67138,9 @@
       "source": "recipe jugcraft:supps_sconce_lever"
     },
     "jugcraft:supps_sconce_nether_brass": {
-      "numerator": 2049,
+      "numerator": 769,
       "denominator": 1,
-      "source": "recipe jugcraft:acquisition/supps_sconce_nether_brass"
+      "source": "recipe jugcraft:acquisition/sconce_nether_brass"
     },
     "jugcraft:supps_sconce_soul": {
       "numerator": 1,
@@ -67253,84 +67253,84 @@
       "source": "recipe jugcraft:supps_trapped_present_2"
     },
     "jugcraft:supps_trapped_present_black": {
-      "numerator": 665,
-      "denominator": 4,
-      "source": "recipe jugcraft:acquisition/supps_trapped_present_black"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_trapped_present_blue": {
-      "numerator": 665,
-      "denominator": 4,
-      "source": "recipe jugcraft:acquisition/supps_trapped_present_blue"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_trapped_present_brown": {
-      "numerator": 665,
-      "denominator": 4,
-      "source": "recipe jugcraft:acquisition/supps_trapped_present_brown"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_trapped_present_cyan": {
-      "numerator": 665,
-      "denominator": 4,
-      "source": "recipe jugcraft:acquisition/supps_trapped_present_cyan"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_trapped_present_gray": {
-      "numerator": 3989,
-      "denominator": 24,
-      "source": "recipe jugcraft:acquisition/supps_trapped_present_gray"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_trapped_present_green": {
-      "numerator": 665,
-      "denominator": 4,
-      "source": "recipe jugcraft:acquisition/supps_trapped_present_green"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_trapped_present_light_blue": {
-      "numerator": 3989,
-      "denominator": 24,
-      "source": "recipe jugcraft:acquisition/supps_trapped_present_light_blue"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_trapped_present_light_gray": {
-      "numerator": 2659,
-      "denominator": 16,
-      "source": "recipe jugcraft:acquisition/supps_trapped_present_light_gray"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_trapped_present_lime": {
-      "numerator": 3989,
-      "denominator": 24,
-      "source": "recipe jugcraft:acquisition/supps_trapped_present_lime"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_trapped_present_magenta": {
-      "numerator": 7979,
-      "denominator": 48,
-      "source": "recipe jugcraft:acquisition/supps_trapped_present_magenta"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_trapped_present_orange": {
-      "numerator": 831,
-      "denominator": 5,
-      "source": "recipe jugcraft:acquisition/supps_trapped_present_orange"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_trapped_present_pink": {
-      "numerator": 3989,
-      "denominator": 24,
-      "source": "recipe jugcraft:acquisition/supps_trapped_present_pink"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_trapped_present_purple": {
-      "numerator": 665,
-      "denominator": 4,
-      "source": "recipe jugcraft:acquisition/supps_trapped_present_purple"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_trapped_present_red": {
-      "numerator": 665,
-      "denominator": 4,
-      "source": "recipe jugcraft:acquisition/supps_trapped_present_red"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_trapped_present_white": {
-      "numerator": 997,
-      "denominator": 6,
-      "source": "recipe jugcraft:acquisition/supps_trapped_present_white"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_trapped_present_yellow": {
-      "numerator": 665,
-      "denominator": 4,
-      "source": "recipe jugcraft:acquisition/supps_trapped_present_yellow"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:supps_turn_table": {
       "numerator": 1,
@@ -75135,7 +75135,7 @@
     "minecraft:copper_nugget": {
       "numerator": 128,
       "denominator": 9,
-      "source": "local metal compression accounting"
+      "source": "recipe minecraft:copper_nugget"
     },
     "minecraft:copper_pickaxe": {
       "numerator": 392,
@@ -76070,7 +76070,7 @@
     "minecraft:gold_nugget": {
       "numerator": 2048,
       "denominator": 9,
-      "source": "local metal compression accounting"
+      "source": "recipe minecraft:gold_nugget"
     },
     "minecraft:golden_apple": {
       "numerator": 16512,
@@ -76475,7 +76475,7 @@
     "minecraft:iron_nugget": {
       "numerator": 256,
       "denominator": 9,
-      "source": "local metal compression accounting"
+      "source": "recipe minecraft:iron_nugget"
     },
     "minecraft:iron_pickaxe": {
       "numerator": 776,

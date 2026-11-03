@@ -116,6 +116,7 @@ public class PopcornWagonBlock extends MultiDecorationBlock implements EntityBlo
 				level.setBlock(at, there.setValue(property, value), Block.UPDATE_ALL);
 			}
 		}
+		if (level.getBlockEntity(master) instanceof DecorationBlockEntity wagon) local.peepo.CompanionReadiness.invalidate(wagon);
 	}
 
 	private static void give(Level level, BlockPos pos, Player player, ItemStack stack) {
@@ -186,6 +187,8 @@ public class PopcornWagonBlock extends MultiDecorationBlock implements EntityBlo
 	/** An empty hand takes a Popcorn out of the case. */
 	@Override
 	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+		if (!level.isClientSide() && player.isShiftKeyDown() && level.getBlockEntity(masterPos(pos,state)) instanceof DecorationBlockEntity wagon
+			&& wagon.confection != null && wagon.confection.collect(player)) return InteractionResult.SUCCESS;
 		int popcorn = state.getValue(POPCORN);
 		if (popcorn == 0) {
 			if (!state.getValue(LIT) && !level.isClientSide()) {
@@ -201,6 +204,8 @@ public class PopcornWagonBlock extends MultiDecorationBlock implements EntityBlo
 		}
 		return InteractionResult.SUCCESS;
 	}
+
+	@Override protected boolean isPathfindable(BlockState state, net.minecraft.world.level.pathfinder.PathComputationType type) { return false; }
 
 	/** The kernel in the kettle has popped: the kettle spills it into the case (its first block's scheduled tick). */
 	@Override

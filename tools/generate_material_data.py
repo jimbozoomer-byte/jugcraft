@@ -1930,14 +1930,28 @@ def main():
     walnut_data.reconcile(write)
     import newest_building
     def write_imported_building(path, data):
-        # Imported meshes include intentional inward faces and source-specific UV
-        # repairs. Use the same source-preserving writer as standalone import;
-        # model_atlas and the exact repair manifest audit/finish them afterward.
+        # Keep supplied meshes intact until their bounded finishing passes.
         if path.is_relative_to(RES):
             WRITTEN_RESOURCES.add(path.relative_to(RES).as_posix())
         newest_building.write(path, data)
     newest_building.generate(write_imported_building)
+    # The supplied Ribbits pack uses both singular and legacy data directories.
+    # Import its native recipes/loot before pruning and building the JEI catalog.
+    import newest_ribbits
+    newest_ribbits.import_data_resources(writer=write)
+    import newest_supplementaries
+    newest_supplementaries.write_native_recipes(write)
+    # Reproduce the release's reviewed acquisition content after native imports.
+    import newest_acquisition_recipes
+    for name, data in newest_acquisition_recipes.build().items():
+        write(RES / 'data/jugcraft/recipe' / (name + '.json'), data)
+    for name, data in newest_acquisition_recipes.build_rituals().items():
+        write(RES / 'data/jugcraft/arcane_ritual' / ('acquisition_' + name + '.json'), data)
+    for name, data in newest_acquisition_recipes.build_rewards().items():
+        write(RES / 'data/jugcraft/loot_table' / (name + '.json'), data)
     diagonal_connections.write_all(write, ASSETS, RES / "assets/minecraft")
+    import newest_model_finishing
+    newest_model_finishing.generate(write)
     import board_game_data
     board_game_data.generate(write)
     import thanksgiving_data
@@ -1954,6 +1968,9 @@ def main():
     newest_model_finishing.generate(write)
     import model_atlas
     model_atlas.generate(write)
+    # Separately authored importers also contribute to these shared resources;
+    # preserve their enumerated additions after the final tag and atlas writers.
+    owner_resource_patches.apply(phase='final')
     from generated_resource_cleanup import prune
     prune(RES, previous, WRITTEN_RESOURCES)
     # Include finished server recipes after removing obsolete generated recipes.

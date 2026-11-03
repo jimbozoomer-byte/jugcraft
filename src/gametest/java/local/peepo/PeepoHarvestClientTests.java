@@ -26,6 +26,7 @@ public final class PeepoHarvestClientTests implements FabricClientGameTest {
             world.getConnection().waitForChunksRender();var server=world.getServer();var base=context.computeOnClient(c->c.player.blockPosition().above(4));
             server.runCommand("time set noon");server.runCommand("weather clear");server.runCommand("gamemode spectator @a");
             server.runCommand("gamerule minecraft:random_tick_speed 0");
+            new CompanionWorkPermissionChecks(this::check,server.computeOnServer(s->s.overworld()),base.offset(0,0,24)).run(server);
             for(int variant=0;variant<2;variant++)tomatoes(server,base.offset(12,0,0),variant);
             new CompanionEggCollectionChecks(this::check,base.offset(-20,0,0)).run(server);
             new CompanionAnimalCareChecks(this::check,base.offset(-20,0,12)).run(context,server);

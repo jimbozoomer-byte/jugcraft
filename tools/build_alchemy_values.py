@@ -74,19 +74,20 @@ def build(jar):
     for ore in ('quartz_ore', 'deepslate_quartz_ore'):
         values['jugcraft:'+ore] = 4 * values['minecraft:quartz']
         origins['jugcraft:'+ore] = 'local quartz mining/Fortune accounting'
-    # Fishing salvage contains recoverable metal. A one-essence fallback for
-    # these roots would cheapen every nugget-derived recipe while ingots stay fixed.
-    for metal in ('iron', 'gold', 'copper'):
-        values['minecraft:'+metal+'_nugget'] = values['minecraft:'+metal+'_ingot'] / 9
-        origins['minecraft:'+metal+'_nugget'] = 'local metal compression accounting'
-    for item, metal, count in (('aquatic_tin_can', 'iron', 7), ('aquatic_goldfish', 'gold', 1)):
-        values['jugcraft:'+item] = count * values['minecraft:'+metal+'_nugget']
-        origins['jugcraft:'+item] = 'local fishing salvage accounting'
+    # Fishing loot can be reclaimed into historical metals: one discarded tin
+    # smelts/blasts into seven iron nuggets, and one goldfish crafts into a gold
+    # nugget. Price these otherwise uncraftable roots at their recoverable metal,
+    # rather than letting a one-essence fallback devalue nuggets below their
+    # reversible nine-nuggets-per-ingot conversion. The recipe-count regression
+    # requires this accounting to be reviewed if either salvage yield changes.
+    for item, metal, nuggets in (('aquatic_tin_can', 'iron', 7), ('aquatic_goldfish', 'gold', 1)):
+        values['jugcraft:'+item] = nuggets * values['minecraft:'+metal+'_ingot'] / 9
+        origins['jugcraft:'+item] = f'local aquatic salvage accounting ({nuggets} {metal} nugget yield)'
     locked=set(values)
     edges=[]
     for rid,r in recipes.items():
         typ=r.get('type',''); ingredients=[]
-        if typ in ('minecraft:crafting_shaped','jugcraft:botanical_armor_upgrade','jugcraft:botanical_water_shaped','jugcraft:packworks_tier_upgrade'):
+        if typ in ('minecraft:crafting_shaped','jugcraft:botanical_armor_upgrade','jugcraft:botanical_water_shaped','jugcraft:botanical_water_crafting','jugcraft:packworks_tier_upgrade'):
             for c,n in Counter(''.join(r['pattern'])).items():
                 if c!=' ':ingredients.extend([expand(r['key'][c])]*n)
         elif typ=='minecraft:crafting_shapeless': ingredients=[expand(x) for x in r['ingredients']]

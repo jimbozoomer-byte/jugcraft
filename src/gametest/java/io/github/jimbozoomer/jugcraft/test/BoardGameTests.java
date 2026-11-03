@@ -27,4 +27,3 @@ public final class BoardGameTests {
  }
  @GameTest(maxTicks=40) public void tablesArePublicAndBreakDropsOnlyOneTable(GameTestHelper h){var t=table(h,false);h.assertTrue(io.github.jimbozoomer.jugcraft.town.TownProtection.publicBlock(h.getLevel(),t.getBlockPos(),t.getBlockState()),"Public town board has no shared inventory");var drops=Block.getDrops(t.getBlockState(),h.getLevel(),t.getBlockPos(),t);h.assertTrue(drops.size()==1&&drops.getFirst().is(BoardGames.CHECKERS.asItem())&&drops.getFirst().getCount()==1,"One table drop, no pieces/currency duplication");h.getLevel().destroyBlock(t.getBlockPos(),false);h.assertTrue(t.isRemoved(),"Broken match removed");h.succeed();}
 }
-

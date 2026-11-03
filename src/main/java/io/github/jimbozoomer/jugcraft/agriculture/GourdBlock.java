@@ -19,14 +19,18 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class GourdBlock extends HorizontalDirectionalBlock {
 	private final VoxelShape northSouth;
 	private final VoxelShape eastWest;
+	private final String seedId;
 
 	/** {@code northSouth} is the shape facing north or south; {@code eastWest} the same shape turned a quarter. */
-	public GourdBlock(Properties properties, VoxelShape northSouth, VoxelShape eastWest) {
+	public GourdBlock(Properties properties, VoxelShape northSouth, VoxelShape eastWest, String seedId) {
 		super(properties);
 		this.northSouth = northSouth;
 		this.eastWest = eastWest;
+		this.seedId = seedId;
 		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH));
 	}
+
+	public net.minecraft.world.item.Item seed() { return JugcraftAgriculture.item(seedId); }
 
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext context) {

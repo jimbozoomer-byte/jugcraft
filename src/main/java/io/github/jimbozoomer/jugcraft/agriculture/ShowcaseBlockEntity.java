@@ -32,6 +32,7 @@ import net.minecraft.world.level.storage.ValueOutput;
  */
 public class ShowcaseBlockEntity extends BlockEntity {
 	private final NonNullList<ItemStack> items;
+	public final local.peepo.DisplayCompanion companion;
 	/** When it was last opened (the cabinet's doors swing open), on clients. */
 	private long opened = Long.MIN_VALUE;
 
@@ -52,6 +53,7 @@ public class ShowcaseBlockEntity extends BlockEntity {
 	public ShowcaseBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
 		super(type, pos, state);
 		items = NonNullList.withSize(state.getBlock() instanceof Showcase showcase ? showcase.places() : 1, ItemStack.EMPTY);
+		companion = state.getBlock() instanceof FoodDisplayBlock ? new local.peepo.DisplayCompanion(this) : null;
 	}
 
 	public int places() {
@@ -145,10 +147,25 @@ public class ShowcaseBlockEntity extends BlockEntity {
 
 	private void changed() {
 		setChanged();
+		if (companion != null) {
+			companion.observe();
+			local.peepo.CompanionReadiness.invalidate(this);
+		}
 		if (level != null) {
 			level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), Block.UPDATE_CLIENTS);
 			level.updateNeighbourForOutputSignal(worldPosition, getBlockState().getBlock());
 		}
+	}
+
+	/** Transactional restocking writes the native slots silently until its outer commit. */
+	public void restoreCompanionStock(java.util.List<ItemStack> stock) {
+		for (int i = 0; i < items.size(); i++) {
+			items.set(i, i < stock.size() ? stock.get(i).copyWithCount(stock.get(i).isEmpty() ? 0 : 1) : ItemStack.EMPTY);
+		}
+	}
+
+	public void companionChanged() {
+		changed();
 	}
 
 	@Override
@@ -162,12 +179,14 @@ public class ShowcaseBlockEntity extends BlockEntity {
 				items.set(i, list.get(i));
 			}
 		});
+		if (companion != null) companion.load(input);
 	}
 
 	@Override
 	protected void saveAdditional(ValueOutput output) {
 		super.saveAdditional(output);
 		output.store("items", ItemStack.OPTIONAL_CODEC.listOf(), java.util.List.copyOf(items));
+		if (companion != null) companion.save(output);
 	}
 
 	@Override

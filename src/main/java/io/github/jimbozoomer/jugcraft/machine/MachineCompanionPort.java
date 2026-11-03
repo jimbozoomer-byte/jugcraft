@@ -22,26 +22,48 @@ public final class MachineCompanionPort implements CompanionLogistics.Port {
     public static void clearCatalog(){CATALOG.clear();}
     private final MachineBlockEntity machine;
     private Identifier selected;
+    private static final int MAX_BATCHES=8;
+    /** Bounded saved delivery caps/mapping only; real ingredients remain solely in inventories. */
+    private List<ItemStack> batchInputs=List.of();
+    private int[] batchSlots=new int[0];
     private final MachineSpecialSupply special;
     public final local.peepo.CompanionRecipeFilter filter=new local.peepo.CompanionRecipeFilter();
     public local.peepo.CompanionRecipeFilter filter(){var old=selection();filter.initialize(old==null || old.results.isEmpty()?ItemStack.EMPTY:old.results.getFirst());return filter;}
     public boolean acceptsFilter(ItemStack stack){return special.applies()?special.acceptsFilter(stack):stack.isEmpty() || catalog().values().stream().anyMatch(p->p.results.stream().anyMatch(s->s.is(stack.getItem())));}
-    public void filterChanged(){selected=null;machine.companionRecipeChanged();}
+    public void filterChanged(){selected=null;batchInputs=List.of();batchSlots=new int[0];machine.companionRecipeChanged();}
     @Override public void prepare(Storage<ItemVariant> source){
         prepare(source,null);
     }
     public void prepare(Storage<ItemVariant> source,java.util.function.ToDoubleFunction<ItemStack> priority){
         if(special.applies()){special.prepare(source,priority);return;}
+        if(batchProcessor() && filter.stock.hasIncoming(machine))return;
+        // Finish the already loaded operation before fetching more. This also respects manually/hopper-loaded inputs.
+        if(batchProcessor()){
+            var loaded=recipe();
+            if(loaded!=null){for(var p:catalog().values())if(p.recipe==loaded){select(p.id);break;}return;}
+            if(finishedOutput())return;
+        }
         var allowed=filter();var supplies=local.peepo.RecipeSupplies.available(source);
         var installed=new ArrayList<ItemStack>();for(int i=0;i<machine.kind().outputSlot();i++)installed.add(machine.getItem(i));
         var choices=new ArrayList<>(catalog().values());
         java.util.function.ToDoubleFunction<Plan> score=p->priority==null?0:p.results.stream().filter(allowed::allows).mapToDouble(priority).max().orElse(-2);
         choices.sort(Comparator.<Plan>comparingDouble(score).reversed().thenComparingInt(p->p.id.equals(selected)?0:1));
+        // Shared across every candidate recipe and batch size, with a small one-recipe escape hatch.
+        int[] bulkBudget={8192},singleBudget={256};
         int inspected=0;for(var p:choices){if(++inspected>256)break;
             if(score.applyAsDouble(p)<=-2 || (!allowed.empty() && p.results.stream().noneMatch(allowed::allows)) || allocation(p)==null)continue;
             if(p.recipe instanceof FluidRecipe fluid && (machine.tanks()==null || !fluid.fluidsMatch(machine.tanks())))continue;
             var parts=p.parts.stream().map(part->new local.peepo.RecipeSupplies.Part(part.ingredient,part.count)).toList();
-            if(local.peepo.RecipeSupplies.completes(parts,installed,supplies)){select(p.id);return;}
+            if(local.peepo.RecipeSupplies.completes(parts,installed,supplies)){
+                if(batchProcessor()){
+                    var batch=balancedInputs(p,supplies,bulkBudget,singleBudget);if(batch.isEmpty())continue;
+                    var slots=allocation(p);select(p.id);
+                    boolean changed=!Arrays.equals(batchSlots,slots) || batchInputs.size()!=batch.size();
+                    if(!changed)for(int i=0;i<batch.size();i++)if(!ItemStack.matches(batchInputs.get(i),batch.get(i))){changed=true;break;}
+                    batchInputs=batch;batchSlots=slots;if(changed)machine.setChanged();
+                }else select(p.id);
+                return;
+            }
         }
         if(installed.stream().allMatch(ItemStack::isEmpty))select((Identifier)null);
     }
@@ -76,6 +98,14 @@ public final class MachineCompanionPort implements CompanionLogistics.Port {
     public boolean supportsOutput(){return machine.kind()!=MachineKind.COAL_GENERATOR && machine.kind().outputSlot()<machine.kind().slots;}
     public Plan selection(){return machine.kind()==MachineKind.ELECTROPLATING_BATH?special.stockPlan():selected==null?null:catalog().get(selected);}
     public boolean locked(){return selected!=null || !filter().empty();}
+    /** Only the original item processors opt into bounded resident batches; fluids and special ports keep their rules. */
+    public boolean batchProcessor(){return !special.applies() && !machine.kind().isFluidProcessor();}
+    public boolean loadedBatch(){var current=selection();return batchProcessor() && current!=null && ready(current);}
+    public boolean finishedOutput(){
+        if(!batchProcessor())return false;
+        for(int i=machine.kind().outputSlot();i<machine.kind().slots;i++)if(!machine.getItem(i).isEmpty())return true;
+        return false;
+    }
     private boolean ready(Plan p){
         var slots=allocation(p);if(slots==null)return false;
         for(int i=0;i<slots.length;i++)if(machine.getItem(slots[i]).getCount()<p.parts.get(i).count)return false;
@@ -88,7 +118,7 @@ public final class MachineCompanionPort implements CompanionLogistics.Port {
             if((allowed.empty() || p.results.stream().anyMatch(allowed::allows)) && ready(p))return p.recipe;
         }return null;
     }
-    private void select(Identifier id){if(Objects.equals(selected,id))return;selected=id;machine.companionRecipeChanged();}
+    private void select(Identifier id){if(Objects.equals(selected,id))return;selected=id;batchInputs=List.of();batchSlots=new int[0];machine.companionRecipeChanged();}
     public boolean select(ItemStack output){
         if(output.isEmpty()){select((Identifier)null);return true;}
         var matches=catalog().values().stream().filter(p->p.results.stream().anyMatch(s->s.is(output.getItem()))).toList();
@@ -97,8 +127,33 @@ public final class MachineCompanionPort implements CompanionLogistics.Port {
         select(matches.get((index+1)%matches.size()).id);return true;
     }
     public Identifier plan(){return special.applies()?special.plan():selection()==null?null:selected;}
+    private boolean guidance(Plan plan){
+        if(!plan.id.equals(selected) || batchInputs.size()!=plan.parts.size() || batchSlots.length!=plan.parts.size())return false;
+        var used=new boolean[machine.kind().outputSlot()];int batches=0;
+        for(int i=0;i<batchSlots.length;i++){
+            int slot=batchSlots[i];var part=plan.parts.get(i);var target=batchInputs.get(i);
+            if(slot<0 || slot>=used.length || used[slot] || target.isEmpty() || !part.ingredient.test(target)
+                || target.getCount()>Math.min(machine.getMaxStackSize(),target.getMaxStackSize())
+                || part.count<=0 || target.getCount()%part.count!=0 || target.getCount()/part.count>MAX_BATCHES)return false;
+            int amount=target.getCount()/part.count;if(i>0 && amount!=batches || plan.ordered && slot!=i)return false;batches=amount;
+            used[slot]=true;
+        }
+        return true;
+    }
     /** Assign every ingredient its own slot; preserve existing stacks, including ambiguous tag recipes. */
     private int[] allocation(Plan plan){
+        // A narrow ingredient can arrive before a broad tag ingredient. Keep each in its planned slot
+        // through transaction probes and real multi-stack deliveries instead of greedily remapping it.
+        if(guidance(plan)){
+            boolean valid=true;var used=new boolean[machine.kind().outputSlot()];
+            for(int i=0;i<batchSlots.length;i++){
+                int slot=batchSlots[i];if(slot<0 || slot>=used.length || used[slot]){valid=false;break;}
+                used[slot]=true;var held=machine.getItem(slot);
+                if(!held.isEmpty() && !plan.parts.get(i).ingredient.test(held)){valid=false;break;}
+            }
+            if(valid)for(int slot=0;slot<used.length;slot++)if(!used[slot] && !machine.getItem(slot).isEmpty()){valid=false;break;}
+            if(valid)return batchSlots.clone();
+        }
         int[] slots=new int[plan.parts.size()];Arrays.fill(slots,-1);
         return assign(plan,0,slots,new boolean[machine.kind().outputSlot()])?slots:null;
     }
@@ -117,15 +172,72 @@ public final class MachineCompanionPort implements CompanionLogistics.Port {
             if(exposed==slot && machine.canPlaceItemThroughFace(slot,stack,side))return true;
         return false;
     }
+    /** Worst-case native output packing, including every enabled probabilistic byproduct. */
+    private int outputBatches(Plan plan){
+        var held=new ArrayList<ItemStack>();
+        for(int slot=machine.kind().outputSlot();slot<machine.kind().slots;slot++)held.add(machine.getItem(slot).copy());
+        if(plan.results.isEmpty() || held.isEmpty())return 0;
+        for(int batch=0;batch<MAX_BATCHES;batch++)for(int result=0;result<plan.results.size();result++){
+            var stack=plan.results.get(result);int found=-1;
+            for(int slot=result==0?0:1;slot<(result==0?1:held.size());slot++){
+                var present=held.get(slot);int cap=Math.min(machine.getMaxStackSize(),stack.getMaxStackSize());
+                if((present.isEmpty() || ItemStack.isSameItemSameComponents(present,stack)) && present.getCount()+stack.getCount()<=cap){found=slot;break;}
+            }
+            if(found<0)return batch;
+            var present=held.get(found);held.set(found,stack.copyWithCount(present.getCount()+stack.getCount()));
+        }
+        return MAX_BATCHES;
+    }
+    private List<ItemStack> balancedInputs(Plan plan,List<ItemStack> supplies,int[] bulkBudget,int[] singleBudget){
+        var slots=allocation(plan);if(slots==null)return List.of();
+        // Aggregate exact components. Tagged ingredients must not pretend differently named stacks can merge.
+        var variants=new LinkedHashMap<ItemVariant,Integer>();
+        for(var stack:supplies)if(!stack.isEmpty())variants.merge(ItemVariant.of(stack),stack.getCount(),Integer::sum);
+        for(int batches=outputBatches(plan);batches>0;batches--){
+            var budget=batches==1?singleBudget:bulkBudget;if(budget[0]<=0)continue;
+            var targets=new ArrayList<ItemStack>(Collections.nCopies(slots.length,ItemStack.EMPTY));
+            if(balance(plan,slots,0,batches,variants,targets,budget))return List.copyOf(targets);
+        }
+        return List.of();
+    }
+    private boolean balance(Plan plan,int[] slots,int index,int batches,Map<ItemVariant,Integer> supplies,List<ItemStack> targets,int[] budget){
+        if(index==slots.length)return true;
+        if(--budget[0]<0)return false;
+        var part=plan.parts.get(index);var held=machine.getItem(slots[index]);int wanted=part.count*batches;
+        var choices=held.isEmpty()?new ArrayList<>(supplies.keySet()):List.of(ItemVariant.of(held));
+        for(var variant:choices){
+            if(--budget[0]<0)return false;
+            var stack=variant.toStack(1);
+            if(!part.ingredient.test(stack) || wanted>Math.min(machine.getMaxStackSize(),stack.getMaxStackSize()))continue;
+            int missing=Math.max(0,wanted-held.getCount()),available=supplies.getOrDefault(variant,0);
+            if(missing>available || missing>0 && !inputAllowed(slots[index],stack))continue;
+            supplies.put(variant,available-missing);targets.set(index,stack.copyWithCount(wanted));
+            boolean fits=balance(plan,slots,index+1,batches,supplies,targets,budget);supplies.put(variant,available);
+            if(fits)return true;
+        }
+        return false;
+    }
     private int missing(Plan plan,int part,int slot,ItemStack stack){
         var held=machine.getItem(slot);var ingredient=plan.parts.get(part);
+        int target=ingredient.count;
+        if(batchProcessor()){
+            // Old saves may have an in-flight manifest without guidance; retain the native eight-batch cap.
+            target=ingredient.count*MAX_BATCHES;
+            if(guidance(plan)){
+                var planned=batchInputs.get(part);
+                if(!ItemStack.isSameItemSameComponents(planned,stack))return 0;
+                target=planned.getCount();
+            }
+        }
         return ingredient.ingredient.test(stack) && (held.isEmpty() || ItemStack.isSameItemSameComponents(stack,held)) && inputAllowed(slot,stack)
-            ?Math.max(0,Math.min(stack.getMaxStackSize(),ingredient.count)-held.getCount()):0;
+            ?Math.max(0,Math.min(machine.getMaxStackSize(),Math.min(stack.getMaxStackSize(),target))-held.getCount()):0;
     }
+    @Override public int pickupNeeded(ItemStack stack){return acceptsSupplyBatch()?needed(stack):0;}
+    @Override public boolean acceptsSupplyBatch(){return !batchProcessor() || !loadedBatch() && !finishedOutput() && !filter.stock.hasIncoming(machine);}
     public int needed(ItemStack stack){
         if(special.applies())return Arrays.stream(special.needs(stack)).sum();
         var plan=selection();if(plan==null)return 0;var slots=allocation(plan);if(slots==null)return 0;
-        int total=0;for(int i=0;i<slots.length;i++)total=Math.min(32,total+missing(plan,i,slots[i],stack));return total;
+        int total=0;for(int i=0;i<slots.length;i++)total=Math.min(stack.getMaxStackSize(),total+missing(plan,i,slots[i],stack));return total;
     }
     public Storage<ItemVariant> inputs(){return new InsertionOnlyStorage<>(){
         public long insert(ItemVariant item,long amount,TransactionContext tx){
@@ -152,6 +264,24 @@ public final class MachineCompanionPort implements CompanionLogistics.Port {
         return new CombinedStorage<>(outputs);
     }
     public local.peepo.CompanionStatus status(){return machine.isLocked()?local.peepo.CompanionStatus.FORBIDDEN:local.peepo.CompanionStatus.IDLE;}
-    public void save(ValueOutput out){filter().save(out);if(selected!=null)out.store("CompanionSupplyRecipe",Identifier.CODEC,selected);}
-    public void load(ValueInput in){filter.load(in);selected=in.read("CompanionSupplyRecipe",Identifier.CODEC).orElse(null);}
+    public void save(ValueOutput out){
+        filter().save(out);if(selected!=null)out.store("CompanionSupplyRecipe",Identifier.CODEC,selected);
+        var plan=selection();if(batchProcessor() && plan!=null && guidance(plan)){
+            var guidance=out.child("CompanionBatchGuidance");guidance.putInt("Count",batchInputs.size());
+            for(int i=0;i<batchInputs.size();i++){var entry=guidance.child("Part"+i);entry.putInt("Slot",batchSlots[i]);entry.store("Target",ItemStack.CODEC,batchInputs.get(i));}
+        }
+    }
+    public void load(ValueInput in){
+        filter.load(in);selected=in.read("CompanionSupplyRecipe",Identifier.CODEC).orElse(null);batchInputs=List.of();batchSlots=new int[0];
+        var data=in.child("CompanionBatchGuidance");if(!batchProcessor() || selected==null || data.isEmpty())return;
+        int count=data.get().getIntOr("Count",0);if(count<=0 || count>machine.kind().outputSlot())return;
+        var targets=new ArrayList<ItemStack>();var slots=new int[count];var used=new boolean[machine.kind().outputSlot()];
+        for(int i=0;i<count;i++){
+            var entry=data.get().child("Part"+i);if(entry.isEmpty())return;
+            int slot=entry.get().getIntOr("Slot",-1);var target=entry.get().read("Target",ItemStack.CODEC).orElse(ItemStack.EMPTY);
+            if(slot<0 || slot>=used.length || used[slot] || target.isEmpty() || target.getCount()>Math.min(machine.getMaxStackSize(),target.getMaxStackSize()))return;
+            used[slot]=true;slots[i]=slot;targets.add(target);
+        }
+        batchInputs=List.copyOf(targets);batchSlots=slots;
+    }
 }

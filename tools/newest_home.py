@@ -131,7 +131,16 @@ def finish_item_models():
 
 def resources(base, res, writer, copier, blocks):
     from newest_building import merge_tag
+    from newest_twigs import recipe
     merge_tag(res / 'data/minecraft/tags/item/dyeable.json', ['jugcraft:homeworks_' + name for name in ('cushion', 'trader_cushion', 'paint_brush')], writer)
+    # The supplied compatibility tag names optional third-party materials. Its
+    # native counterparts must also make the chimney craftable in Jugcraft.
+    calcite = ['jugcraft:' + name for name, source in
+               (('stoneworks_polished_calcite', 'stoneworks:polished_calcite'),
+                ('twigworks_polished_calcite', 'twigs:polished_calcite'))
+               if blocks.get(name, {}).get('source') == source]
+    if calcite:
+        merge_tag(res / 'data/c/tags/item/polished_calcite.json', calcite, writer)
     # Source block-entity animation/audio remains data, never executed code.
     soundfile = base / 'assets/cozyhome/sounds.json'
     if soundfile.exists():
@@ -160,8 +169,8 @@ def resources(base, res, writer, copier, blocks):
     # Native survival routes use paid vanilla materials, not creative-only aliases.
     for name, ingredients in {'spruce_chandelier': ['minecraft:iron_chain', 'minecraft:lantern', 'minecraft:lantern', 'minecraft:spruce_planks'],
                               'dye_vat': ['minecraft:cauldron', 'minecraft:oak_planks', 'minecraft:iron_ingot']}.items():
-        writer(res / 'data/jugcraft/recipe/newest/homeworks' / (name + '.json'), {'type': 'minecraft:crafting_shapeless',
-            'ingredients': ingredients, 'result': {'id': 'jugcraft:homeworks_' + name, 'count': 1}})
+        writer(res / 'data/jugcraft/recipe/newest/homeworks' / (name + '.json'), recipe({'type': 'minecraft:crafting_shapeless',
+            'ingredients': ingredients, 'result': {'id': 'jugcraft:homeworks_' + name, 'count': 1}}))
         if 'homeworks_' + name not in blocks: continue
         if name != 'spruce_chandelier': writer(res / 'data/jugcraft/loot_table/blocks' / ('homeworks_' + name + '.json'),
             {'type': 'minecraft:block', 'pools': [{'rolls': 1, 'entries': [{'type': 'minecraft:item', 'name': 'jugcraft:homeworks_' + name}], 'conditions': [{'condition': 'minecraft:survives_explosion'}]}]})

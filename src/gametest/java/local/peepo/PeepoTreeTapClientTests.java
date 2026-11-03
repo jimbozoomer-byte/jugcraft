@@ -47,6 +47,7 @@ public final class PeepoTreeTapClientTests implements FabricClientGameTest {
             world.getConnection().waitForChunksRender();var server=world.getServer();
             base=context.computeOnClient(c->c.player.blockPosition().above(4));
             server.runCommand("time set noon");server.runCommand("weather clear");server.runCommand("gamemode spectator @a");
+            server.runCommand("gamerule minecraft:mob_griefing false");
             CompanionJob[] batch={null};server.runOnServer(s->batch[0]=unit(s.overworld()));
             batch(server,batch[0]);
             delivery(server,false,4,false,1);

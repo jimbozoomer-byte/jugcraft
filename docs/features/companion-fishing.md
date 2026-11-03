@@ -10,7 +10,7 @@ The real Hand rod is required and can be fetched/replaced through stocked Tools-
 
 The native fishing loot table supplies catches, including data-pack modifications. An unspawned FishingHook supplies the correct entity predicate and location context without a fake player. A bounded source-water/open-air check determines open-water eligibility, which cannot be regained during a cast once lost. Lure reduces waiting time, rain and sky access affect the countdown, Luck of the Sea supplies loot luck, and normal rod damage handles Unbreaking. Catch XP may repair a Mending rod but creates no XP orbs. Player-activated magic rod powers are not invoked. Waiting uses the native 100–600-tick base plus 20–80-tick approach interval, subject to Lure/weather; the NPC also has explicit cast, bite and reel phases.
 
-Fishing costs 1 reserve JE/t throughout, plus 2 JE/t during its 20-tick cast and 20-tick reel (80 extra JE per completed cycle). Interrupted work pays only for elapsed work. The seated pose does not grant chair regeneration. Rest, food, commands, editing pauses and live owner/town permissions remain authoritative; mob-griefing disables the job.
+Fishing costs 1 reserve JE/t throughout, plus 2 JE/t during its 20-tick cast and 20-tick reel (80 extra JE per completed cycle). Interrupted work pays only for elapsed work. The seated pose does not grant chair regeneration. Rest, food, commands, editing pauses and live owner/town permissions remain authoritative; the companion job is exempt from mob griefing.
 
 ## Animation and framework integration
 

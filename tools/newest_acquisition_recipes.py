@@ -25,7 +25,7 @@ def build():
     for part in ('helmet','chestplate','leggings','boots'):
         name='terrasteel_'+part
         add('Jugtania','botania','jugtania','recipes/'+name+'.json','jugtania/'+name,'botanical_armor_upgrade')
-    add('Jugtania','botania','jugtania','recipes/water_rod.json','jugtania/water_rod','botanical_water_shaped')
+    add('Jugtania','botania','jugtania','recipes/water_rod.json','jugtania/water_rod','botanical_water_crafting')
     # Native variants were registered without their ordinary material recipes.
     # Keep each source family's pattern and quantities rather than inventing a
     # cheap generic recipe for functional equipment or boss rewards.
@@ -33,10 +33,7 @@ def build():
     outputs['newest/homeworks/jungle_wall_mirror']=json.loads(json.dumps(mirror).replace('oak_planks','jungle_planks').replace('homeworks_oak_wall_mirror','homeworks_jungle_wall_mirror'))
     def shapeless(name, ingredients, count=1):
         outputs['acquisition/'+name]={'type':'minecraft:crafting_shapeless','ingredients':ingredients,'result':{'id':'jugcraft:'+name,'count':count}}
-    # These are actual separate color block IDs, not an NBT tint on the plain box.
-    for color in 'white orange magenta light_blue yellow lime pink gray light_gray cyan purple blue brown green red black'.split():
-        for kind in ('present','trapped_present'):
-            shapeless('supps_'+kind+'_'+color,['jugcraft:supps_'+kind,'minecraft:'+color+'_dye'])
+    # Present dyeing uses OwnerPresentRecipe to preserve stored contents.
     outputs['acquisition/forbidden_edelwood_stick']={'type':'minecraft:crafting_shaped','pattern':['P','P'],'key':{'P':'jugcraft:forbidden_edelwood_planks'},'result':{'id':'jugcraft:forbidden_edelwood_stick','count':4}}
     for material, plank, slab in (('glass','glass','glass_pane'),('iron','iron_block','iron_ingot')):
         for form in ('chair','wall_clock','grandfather_clock'):

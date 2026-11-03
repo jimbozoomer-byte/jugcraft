@@ -15,9 +15,23 @@ import net.minecraft.world.level.block.state.BlockState;
  */
 public class DecorationBlockEntity extends BlockEntity {
 	private long marked = Long.MIN_VALUE;
+	/** Only the two native confection carts carry companion settings/products. Other decorations stay empty. */
+	public final ConfectionCompanion confection;
 
 	public DecorationBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
 		super(type, pos, state);
+		confection = state.getBlock() instanceof CottonCandyCartBlock || state.getBlock() instanceof PopcornWagonBlock
+			? new ConfectionCompanion(this) : null;
+	}
+
+	@Override protected void saveAdditional(net.minecraft.world.level.storage.ValueOutput output) {
+		super.saveAdditional(output); if (confection != null) confection.save(output);
+	}
+	@Override protected void loadAdditional(net.minecraft.world.level.storage.ValueInput input) {
+		super.loadAdditional(input); if (confection != null) confection.load(input);
+	}
+	@Override public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+		super.preRemoveSideEffects(pos, state); if (confection != null) confection.dropProducts();
 	}
 
 	/** Records the game time of a moment to animate from. */

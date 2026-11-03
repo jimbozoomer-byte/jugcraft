@@ -15,7 +15,6 @@ import net.minecraft.sounds.*;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.block.*;
-import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.*;
 
@@ -29,7 +28,7 @@ public final class CompanionTreeTap {
     private static final Map<Level,LinkedHashMap<BlockPos,Lease>> LEASES=new WeakHashMap<>();
     private static boolean source(Level level,BlockPos pos){return level.hasChunkAt(pos) && level.getBlockState(pos).getBlock() instanceof TreeTapBlock;}
     private static boolean input(ItemStack stack){return stack.is(Items.GLASS_BOTTLE);}
-    private boolean enabled(){return JugcraftConfig.isFeatureEnabled(JugcraftAgriculture.FEATURE) && npc.level() instanceof ServerLevel server && server.getGameRules().get(GameRules.MOB_GRIEFING);}
+    private boolean enabled(){return JugcraftConfig.isFeatureEnabled(JugcraftAgriculture.FEATURE) && npc.level() instanceof ServerLevel;}
     private boolean assigned(CompanionAssignments.Target target){int row=npc.assignments.workPriority(target.at().pos());return row<5 && target.equals(npc.assignments.get(row)) && target.present(npc.level());}
     public Job job(BlockPos pos){
         int row=npc.assignments.workPriority(pos);var target=row<5?npc.assignments.get(row):null;

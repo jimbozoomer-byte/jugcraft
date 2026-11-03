@@ -4,6 +4,7 @@ Original models and pixel data are retained. Only resource/registry references
 and the item-definition schema are adapted; no supplied program is executed.
 """
 from pathlib import Path
+from copy import deepcopy
 import json
 import shutil
 from menagerie_content import read
@@ -39,10 +40,51 @@ def repair_unused_faces(data):
     return data
 
 
-def write(path, data):
-    if '/loot_table/' in str(path).replace('\\','/'):
-        from menagerie_data import loot as native_loot
-        data=native_loot(data)
+def native_model(path, data):
+    """Preserve authored geometry with bounded, deterministic native adaptations."""
+    model_path = str(path).replace('\\', '/')
+    if model_path.endswith('/models/newest/fenceworks/block/parent/grass_topped_wall_triple.json'):
+        # Crossed, zero-thickness grass planes have equal-area coplanar faces.
+        # Platform trig rounding can make the generic finishing pass choose
+        # opposite faces to separate. Pin the already-reviewed 0.1px offsets
+        # before that pass; keep UVs, rotations and the preserved source intact.
+        source = map_value(read(SOURCE / 'fences/assets/mcwfences/models/block/parent/grass_topped_wall_triple.json'),
+                           'mcwfences', 'fenceworks', True)
+        data = deepcopy(data)
+        for index, axis in ((5, 0), (23, 2)):
+            original = source['elements'][index]
+            fixed = deepcopy(original)
+            if original['from'][axis] != 8 or original['to'][axis] != 8:
+                raise ValueError('Changed supplied grass-wall plane: ' + str(index))
+            fixed['from'][axis] = 7.9
+            if data['elements'][index] not in (original, fixed):
+                raise ValueError('Changed native grass-wall plane: ' + str(index))
+            data['elements'][index] = fixed
+    lantern = next((name for name in ('template_paper_lantern', 'template_paper_lantern_hanging')
+                    if model_path.endswith('/models/newest/twigworks/block/' + name + '.json')), None)
+    if lantern and any(any(a > b for a, b in zip(e['from'], e['to'])) for e in data.get('elements', [])):
+        source = read(SOURCE / 'twig/assets/twigs/models/block' / (lantern + '.json'))
+        lining = data['elements'][1]
+        if (lining != source['elements'][1] or lining['from'] != [13, 9, 13] or lining['to'] != [3, 0, 3]):
+            raise ValueError('Changed supplied paper-lantern lining: ' + lantern)
+        data = deepcopy(data)
+        planes = []
+        for face, material in lining['faces'].items():
+            axis, positive = {'north': (2, False), 'south': (2, True), 'west': (0, False),
+                              'east': (0, True), 'down': (1, False), 'up': (1, True)}[face]
+            plane = deepcopy(lining)
+            plane['from'] = [min(a, b) for a, b in zip(lining['from'], lining['to'])]
+            plane['to'] = [max(a, b) for a, b in zip(lining['from'], lining['to'])]
+            coordinate = lining['to' if positive else 'from'][axis]
+            plane['from'][axis] = plane['to'][axis] = coordinate
+            material = deepcopy(material)
+            # Both tangential axes reverse when the inside-out cube is unfolded.
+            # Keep the inward normal and exactly the same texture at every point.
+            u0, v0, u1, v1 = material['uv']
+            material['uv'] = [u1, v1, u0, v0]
+            plane['faces'] = {face: material}
+            planes.append(plane)
+        data['elements'][1:2] = planes
     if '/models/newest/homeworks/' in str(path).replace('\\','/'): data=repair_unused_faces(data)
     # Repair four supplied faces which otherwise sample adjacent sprites in the atlas.
     if any(str(path).replace('\\', '/').endswith('/models/newest/' + name + '.json') for name in (
@@ -50,6 +92,21 @@ def write(path, data):
         'lightworks/block/upgraded_torch', 'lightworks/block/upgraded_torch_wall')):
         from model_writer import fit_uvs
         fit_uvs(data.get('elements', []))
+    return data
+
+
+def write(path, data):
+    if '/loot_table/' in str(path).replace('\\','/'):
+        from menagerie_data import loot as native_loot
+        data=native_loot(data)
+    data = native_model(path, data)
+    if any(path.as_posix().endswith('/models/newest/' + ref + '.json') for ref in (
+        'fenceworks/block/parent/grass_topped_wall_triple',
+        'twigworks/block/template_paper_lantern', 'twigworks/block/template_paper_lantern_hanging')):
+        # These source-checked plane adaptations own their finishing pass. Other
+        # imported cuboids are handled by the exact repair manifest afterward.
+        from model_writer import finish_elements
+        finish_elements(data['elements'])
     path.parent.mkdir(parents=True, exist_ok=True)
     # This large runtime descriptor exceeds GitHub's file limit when indented.
     # Keep the identical JSON data compact in both standalone and shared generation.
@@ -193,6 +250,7 @@ def generate(writer=write):
     def writer(path, data):
         # 26.3 uses condition/modifier codecs, including for manually assembled
         # architecture drops. Convert once at the common output boundary.
+        data = native_model(path, data)
         original_writer(path, native_loot(data) if '/loot_table/' in path.as_posix() else data)
     blocks, items, language, omitted, provenance = {}, {}, {}, [], []
     holiday_behaviors = read(CAT / 'holiday-behaviors.json')['entries']
@@ -551,8 +609,11 @@ def generate(writer=write):
                 entries += ['jugcraft:twigworks_polished_calcite', 'jugcraft:stoneworks_polished_calcite']
             merge_tag(target / rel, entries, writer)
         prune_unregistered(prefix, allowed)
+        changes = 'Native block behaviors; remapped identifiers; original model coordinates and texture bytes retained'
+        if prefix == 'twigworks':
+            changes += '; paper-lantern inverted inner cubes unfolded into six inward-facing planes with identical surface positions and UV mapping'
         provenance.append({'folder': folder, 'namespace': ns, 'blocks': sum(d['collection'] == prefix for d in blocks.values()), 'items': sum(d['collection'] == prefix for d in items.values()), 'runtime': 'newest/' + prefix,
-                           'changes': 'Native block behaviors; remapped identifiers; original model coordinates and texture bytes retained'})
+                           'changes': changes})
     painting_root = SOURCE / 'painting'
     paintings = []
     labels = read(painting_root / 'assets/mcwpaintings/lang/en_us.json')
@@ -570,10 +631,10 @@ def generate(writer=write):
         copy(painting_root / 'assets/mcwpaintings/textures/painting' / (source.stem + '.png'), ASSET / 'textures/painting/newest' / (source.stem + '.png'))
         paintings.append('jugcraft:' + ident)
     merge_tag(RES / 'data/minecraft/tags/painting_variant/placeable.json', paintings, writer)
-    # Property combinations originate in sets; serialize states deterministically.
-    for spec in blocks.values():
-        if 'shapes' in spec:
-            spec['shapes'] = dict(sorted(spec['shapes'].items()))
+    # Multipart properties arrive as sets; their iteration order must not leak
+    # into the compact descriptor in either shared or standalone generation.
+    from newest_shapes import order_shape_keys
+    order_shape_keys(blocks)
     writer(RES / 'jugcraft/newest_building.json', {'blocks': blocks, 'items': items, 'paintings': paintings})
     lang_path = ASSET / 'lang/en_us.json'
     merged = read(lang_path); merged.update(language)

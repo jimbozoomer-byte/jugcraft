@@ -102,6 +102,10 @@ public class DryingRackBlock extends MultiDecorationBlock implements EntityBlock
 	protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
 		return SHAPES.get(state.getValue(FACING))[part(state)];
 	}
+	@Override
+	protected boolean isPathfindable(BlockState state, net.minecraft.world.level.pathfinder.PathComputationType type) {
+		return false;
+	}
 
 	@Override
 	public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {

@@ -2,6 +2,10 @@
 
 The manifest stores reviewed element patches and hashes, not a blanket geometry
 normalizer. A changed importer must be reviewed rather than silently overwritten.
+
+Paper-lantern linings and hanging basket handles are instead unfolded into
+source-matched planes by newest_building/newest_model_finishing. Their dedicated
+surface/UV regression tests own those four models, not this cuboid patch manifest.
 """
 import copy
 import hashlib

@@ -9,6 +9,8 @@ import net.minecraft.world.phys.Vec3;
 
 /** A pot owns one short-lived reservation. No ticking worker search or saved entity reference. */
 public final class CookingPotJob implements CompanionJob {
+    public boolean finishLoadedBatch(PeepoEntity npc){return planningStatus(npc)==CompanionStatus.READY;}
+    public boolean collectAfterWork(){return true;}
     private final CookingPotBlockEntity pot;
     private UUID worker;
     private long lease, nextEntrance;

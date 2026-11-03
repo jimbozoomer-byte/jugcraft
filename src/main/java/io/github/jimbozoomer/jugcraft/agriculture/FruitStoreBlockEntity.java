@@ -18,6 +18,7 @@ import net.minecraft.world.level.storage.ValueOutput;
  */
 public class FruitStoreBlockEntity extends BlockEntity {
 	private final List<ItemStack> fruit = new ArrayList<>();
+	public final FarmStoreStorage storage = new FarmStoreStorage(this, fruit, this::capacity, stack -> stack.is(FruitStore.takes(this)), this::changed, false);
 
 	public FruitStoreBlockEntity(BlockPos pos, BlockState state) {
 		this(JugcraftAgriculture.FRUIT_STORE_ENTITY, pos, state);
