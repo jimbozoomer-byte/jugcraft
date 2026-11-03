@@ -999,12 +999,12 @@ None: presentation only.
 - Unit 2 (the roster's cards, the chooser's shared pieces and Jade's short lines) is built and ends at its own
   checkpoint: the roster's client shots at every size beside the design's pictures, with each shot's word count from its
   log, and Jade's shots. Units 3 and 4: the composer and Field Guide, then the alchemy and Nouveau screens.
-- Since the garden cohort's GC-07 (Foras, [record](foras-pact.md); not merged; not yet run in CI): a work with several
+- Since the garden cohort's GC-07 (Foras, [record](foras-pact.md); not merged into main; run in CI on `be76fd419` and `1a15984d4` (runs 41506566691, 41506582568 and 41521655013; GC-10 unit 7)): a work with several
   refusals gives each its own chooser reason (its `WORK_GLANCES` row's `card` keyed by the blocker; `work_cards`); a
   blocker named `pact.<work>.missing.<reason>` draws the lock (`MARK_RULES` and `PactGlance`); and `check_magic_ui` asks a
   glance of every work's question in general (`pact.<work>.question`, drawn once an answer is kept and no matter is
   raised; Bathin's reads "Take from Hearts that have a road?") and the lock of every blocker.
-- Since the garden cohort's GC-08 (Bifrons, [record](bifrons-pact.md); not merged; not yet run in CI): the upkeep chip's
+- Since the garden cohort's GC-08 (Bifrons, [record](bifrons-pact.md); not merged into main; run in CI on `be76fd419` and `1a15984d4` (runs 41506566691, 41506582568 and 41521655013; GC-10 unit 7)): the upkeep chip's
   hover lists at most three of an offering tag's items, then how many more (the short label `any_of_more`, "Any of: %1$s
   and %2$s more", `PactScreen.offering`; `check_pact_screen` holds it), since his `#minecraft:logs` holds dozens; Stolas's
   tag of four now ends "and 1 more". His work's row, act glance, question, matter and Jade short forms are data under his

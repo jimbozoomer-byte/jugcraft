@@ -358,7 +358,7 @@ Each is the session's, reviewable at the cohort's checkpoint; none is the owner'
 - **Two class Javadocs are left as they are** (`Workers` and the garden client class): neither has a marker, and the
   merge with units 3, 5 and 6 would conflict there.
 - **His records** (decided by the session): his codex pages are named by title, not by page number, since each unit's
-  pages renumber the entry at its merge; nothing of unit 4 has run in CI, so his Verification names each test and shot
+  pages renumber the entry at its merge; nothing of unit 4 had run in CI then (it has since: see Verification, GC-10 unit 7), so his Verification names each test and shot
   as not run and has no "Seen" column yet; `docs/INTEGRATION_STATUS.md` gains his lines, though the unit's specification
   left it unedited, because the cohort's units keep their index there (units 2 and 3 did); the economy record gains his
   row (a spirit spending an item), and the magic interfaces' record the rules his words added.

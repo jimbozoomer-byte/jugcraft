@@ -885,7 +885,9 @@ public class ConcordanceGardenLoadGameTests {
 		}
 
 		void drive(int now) {
-			if (card.current == null || markedAt < 0) {
+			// GC-10 unit 7 (review): drive runs before advance closes the span, so the tick after the measured span (markedAt +
+			// MEASURED) takes no reading, sample, scaffolding or audit: two readings a span, as Marax's quota allows.
+			if (card.current == null || markedAt < 0 || now - markedAt >= MEASURED) {
 				return;
 			}
 			long gameTime = level.getGameTime();

@@ -5,12 +5,14 @@ on:
     branches: [main]
   workflow_dispatch:
     inputs:
+      # GC-10 unit 7 (review): the description names the garden's load card too; only its words changed.
       load_card:
-        description: Also run the Concordance load cards, the workshop's and the pact hall's (docs/TESTING.md); ordinary runs never do
+        description: Also run the Concordance load cards, the workshop's, the pact hall's and the garden's (docs/TESTING.md); ordinary runs never do
         type: boolean
         default: false
+      # GC-10 unit 7 (review): the description names the garden cohort's client classes too; only its words changed.
       clients_without_optional:
-        description: Also run Chunk D's pact, roster and two-client tests without the optional integrations (docs/TESTING.md); ordinary runs never do
+        description: Also run Chunk D's pact, roster and two-client tests and the garden cohort's client and two-client tests without the optional integrations (docs/TESTING.md); ordinary runs never do
         type: boolean
         default: false
 permissions:

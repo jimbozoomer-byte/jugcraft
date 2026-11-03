@@ -22,11 +22,12 @@ groundwork and [Buer](buer-pact.md); [contract](concordance-garden-cohort.md)), 
 in CI run 40605564166 (see Verification). Extended by the cohort's unit 2 (GC-05: [Bathin](bathin-pact.md), the accord
 machinery and the bed index's devices), not merged either; its tests passed in CI run 40777920181. Extended by the
 cohort's unit 3 (GC-06: [Marax](marax-pact.md), a body's station beside its perch and a synced work target), built and
-not merged, and not yet compiled or run in CI. Extended by the cohort's unit 4 (GC-07: [Foras](foras-pact.md), graft
+merged into the cohort, not merged into main. Extended by the cohort's unit 4 (GC-07: [Foras](foras-pact.md), graft
 keeping and the bed index's stores), built on its own line from unit 3's shared prefix and merged after unit 3, not
-merged to main, and not yet compiled or run in CI.
+merged to main.
 Extended by the cohort's unit 5 (GC-08: [Bifrons](bifrons-pact.md), root-running by night and the feeding act), built
-on its own line from unit 3's head and merged after unit 4, not merged to main, and not yet compiled or run in CI.
+on its own line from unit 3's head and merged after unit 4, not merged to main.
+Units 3 to 5 (GC-10 unit 7): on `be76fd419` and `1a15984d4` the server suite without the optional integrations and `ConcordanceGardenPactClientGameTests` passed (runs 41506566691, 41506582568 and 41521655013).
 Extended by the cohort's unit 6 (GC-09: [Amdusias](amdusias-pact.md), the bending canopy, a cue a beat late and a
 quota worded as a cap), built on its own line beside unit 5's and merged after unit 5, not merged to main, and not yet
 compiled or run in CI.
@@ -169,15 +170,15 @@ kind: his offer is the Concordance's `pact` data, `concordance/pact/stolas.json`
   and Buer (GC-04) the second; nothing saved changed. Since GC-04 a pact's service also steps while an offering is due,
   through its grace, as long as its holder is near (GC-P27). Since GC-05 Bathin is the third, and a pact spirit may show
   something in the world as a gesture plays (`PactSpiritEntity.gestured`: his ring of dust) and raise a matter for its
-  holder to settle at its perch (the accord, below). Since GC-06 (not yet run in CI) Marax is the fourth: a body names
+  holder to settle at its perch (the accord, below). Since GC-06 (run in CI on `be76fd419` and `1a15984d4` (runs 41506566691, 41506582568 and 41521655013; GC-10 unit 7)) Marax is the fourth: a body names
   its station (`PactSpiritEntity.Station`: `PERCH`, as every earlier spirit; `BESIDE`, two blocks out on the first clear
   side, a quarter turn clockwise from its inviter, never between them and the perch, else on the perch; kept each think,
   saved nowhere), and a spirit may show the block it means to every client (`showTarget`: a synced `TARGET`, set only
   while a conversation is open at its perch, cleared after it, never saved), which a renderer row's named bone flies to
-  (`PactSpiritRenderers.Row.reach`). Since GC-07 (not yet run in CI) Foras joins them, standing on the ground beside his
+  (`PactSpiritRenderers.Row.reach`). Since GC-07 (run in CI on `be76fd419` and `1a15984d4` (runs 41506566691, 41506582568 and 41521655013; GC-10 unit 7)) Foras joins them, standing on the ground beside his
   perch through the shared prefix's `PactSpiritEntity.Station.BESIDE` (GC-06b), the first garden service to spend an
   item: one donor a graft, taken from a store touching the perch in one transaction.
-  Since GC-08 (not yet run in CI) Bifrons serves by night only (a pact's hours need not begin at the world clock's 0,
+  Since GC-08 (run in CI on `be76fd419` and `1a15984d4` (runs 41506566691, 41506582568 and 41521655013; GC-10 unit 7)) Bifrons serves by night only (a pact's hours need not begin at the world clock's 0,
   06:00; SG12's shared cases think at each spirit's first hour) and works in two beats a think apart, remembering a
   measure under way in his presence only, never saved.
   Since GC-09 (not yet run in CI) Amdusias stands beside his perch too; a pact spirit may hold a cue's sound for a beat
@@ -699,7 +700,7 @@ the perch's optional saved `accord` (`yield`, `claim`; stamp 1) and the worker s
 the wire (network only) the action `resolve` (10), the reason `resolved` and the state's `spirit.matter` and
 `spirit.answers`; Jade's keys `matter` and `accord`. No block, item or block entity; no migration.
 
-Since the garden cohort's unit 3 (not merged; not yet run in CI): the entity `jugcraft:marax`, his definition
+Since the garden cohort's unit 3 (not merged into main; run in CI on `be76fd419` and `1a15984d4` (runs 41506566691, 41506582568 and 41521655013; GC-10 unit 7)): the entity `jugcraft:marax`, his definition
 `concordance/pact/marax.json` and agreement `jugcraft:marax_pact`, the work `habitat_reading` (saved in a Bound Will's
 service; appended; holder only), the tag `#jugcraft:marax_offerings`, his sound events `jugcraft:marax.*`, codex pages
 `p12` to `p16` of `binding/garden_regard` (the last, "Mastered", stays the entry's last page as later spirits add
@@ -707,7 +708,7 @@ theirs); on the wire (network only) the spirit's synced `TARGET`. Nothing saved 
 base's `perch` and `record`; the station, the target and the familiar's pique are never saved. No block, item or block
 entity; no migration.
 
-Since the garden cohort's unit 4 (not merged; not yet run in CI): the entity `jugcraft:foras`, his definition
+Since the garden cohort's unit 4 (not merged into main; run in CI on `be76fd419` and `1a15984d4` (runs 41506566691, 41506582568 and 41521655013; GC-10 unit 7)): the entity `jugcraft:foras`, his definition
 `concordance/pact/foras.json` and agreement `jugcraft:foras_pact`, the work `graft_keeping` (saved in a Bound Will's
 service; appended), the tag `#jugcraft:foras_offerings`, his sound events `jugcraft:foras.*`, his four codex pages of
 `binding/garden_regard` after Marax's and before "Mastered" (named by title, since each unit's pages renumber the
@@ -716,7 +717,7 @@ values `prudent` and `always` (appended). Nothing saved of his own: his entity w
 `record`; his memory and his station's side are never saved, and a bed's `graft` is Chunk C's key. No block, item or
 block entity; no migration.
 
-Since the garden cohort's unit 5 (not merged; not yet run in CI): the entity `jugcraft:bifrons`, his definition
+Since the garden cohort's unit 5 (not merged into main; run in CI on `be76fd419` and `1a15984d4` (runs 41506566691, 41506582568 and 41521655013; GC-10 unit 7)): the entity `jugcraft:bifrons`, his definition
 `concordance/pact/bifrons.json` and agreement `jugcraft:bifrons_pact`, the work `root_running` (saved in a Bound Will's
 service; appended), the tag `#jugcraft:bifrons_offerings` (`#minecraft:logs`), his sound events `jugcraft:bifrons.*`,
 his four codex pages of `binding/garden_regard` after Foras's and before "Mastered" (named by title, since each unit's

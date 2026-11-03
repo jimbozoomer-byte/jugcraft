@@ -6,6 +6,7 @@ import com.geckolib.animation.RawAnimation;
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.client.ConcordanceClientOptions;
+import io.github.jimbozoomer.jugcraft.client.MagicScreen;
 import io.github.jimbozoomer.jugcraft.client.PactClient;
 import io.github.jimbozoomer.jugcraft.client.PactScreen;
 import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
@@ -237,11 +238,15 @@ public final class ConcordanceGardenNetworkTests implements FabricClientGameTest
 		context.waitFor(client -> buer(client, perch) instanceof BuerEntity him && Mth.degreesDifferenceAbs(him.yBodyRot, 0.0F) <= FACING_TOLERANCE, PEER_WAIT);
 		float yaw = context.computeOnClient(client -> buer(client, perch) instanceof BuerEntity him ? him.yBodyRot : Float.NaN);
 		Jugcraft.LOGGER.info("[garden-network] second client: Buer's drawn body yaw {} against the stranger's bearing 0", yaw);
+		// GC-10 unit 7 (review): spec 4.5, the taken page held to the closed page's budget before its picture.
+		budget(context, ENDED_WORDS, "the stranger's taken page");
 		shot(context, "jugcraft_garden_peer_faced");
 		PactStatePayload.Result end = ask(context, PactRequestPayload.END);
 		CLIENT.mark("ended.txt", end.reason());
 		check(!end.done() && AgreementHolder.Ended.NOT_HOLDER.name().toLowerCase(Locale.ROOT).equals(end.reason()),
 				"The stranger's End is refused as not the holder's: " + end.reason());
+		// GC-10 unit 7 (review): the refusal drawn on the taken page, held to the budget for a page with a refusal (spec 1.1).
+		budget(context, TERMS_WORDS, "the stranger's refused End");
 		shot(context, "jugcraft_garden_peer_refused");
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 		context.waitForScreen(null);
@@ -369,6 +374,29 @@ public final class ConcordanceGardenNetworkTests implements FabricClientGameTest
 		check(sent > 0, "The request was sent");
 		context.waitFor(client -> PactClient.lastAnswer() > before && !PactClient.waiting() && PactClient.state() != null, WAIT);
 		return context.computeOnClient(client -> PactClient.state().result().orElseThrow());
+	}
+
+	// GC-10 unit 7 (review): the word budgets and their check, as ConcordancePactNetworkTests holds them.
+	/** The magic interfaces' budget for a closed page (ConcordancePactClientGameTests' ended page). */
+	private static final int ENDED_WORDS = 30;
+	/** The magic interfaces' budget for his terms, a refusal included (spec 1.1). */
+	private static final int TERMS_WORDS = 50;
+
+	/**
+	 * Waits until the pact screen shows the state the client holds and awaits no answer: a state packet marks it to rebuild
+	 * on the next tick, and an awaited answer draws its own line, so the words read the settled page.
+	 */
+	private static void settle(ClientGameTestContext context) {
+		context.waitFor(client -> !PactClient.waiting() && (!(client.gui.screen() instanceof MagicScreen magic) || magic.settled()), WAIT);
+	}
+
+	/** Spec 1.1, 4.5: the pact screen draws at most {@code most} words without hovering, counted from what it drew. */
+	private static void budget(ClientGameTestContext context, int most, String what) {
+		settle(context);
+		List<String> drawn = context.computeOnClient(client -> client.gui.screen() instanceof PactScreen screen ? screen.drawn() : List.of());
+		int words = context.computeOnClient(client -> client.gui.screen() instanceof PactScreen screen ? screen.words() : -1);
+		Jugcraft.LOGGER.info("[garden-network] {} draws {} words (at most {}): {}", what, words, most, drawn);
+		check(words >= 0 && words <= most, what + " draws at most " + most + " words (spec 1.1): " + words + " " + drawn);
 	}
 
 	/** A picture with no toast over it (the peer's own profile keeps it, under owner-network-evidence/). */

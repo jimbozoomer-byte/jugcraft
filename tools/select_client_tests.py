@@ -177,6 +177,8 @@ SHOWN_BY["PactAccords"] = {"ConcordanceGardenPactClientGameTests"}
 # classes too (MAGIC_ASSETS), as does the end confirmation drawn on the scroll.
 MAGIC_SHOWN = {"ConcordancePactClientGameTests", "ConcordanceGardenPactClientGameTests", "ConcordancePactNetworkTests",
                "ConcordanceRosterClientGameTests", "ScreenFitClientGameTests"}
+# GC-10 unit 7 (review): the garden's two-client class opens the stranger's pact screen too.
+MAGIC_SHOWN.add("ConcordanceGardenNetworkTests")
 for _name in ("MagicArt", "MagicTheme", "MagicLayout", "MagicScreen", "MagicButton", "MagicText", "MagicChip", "MagicStacks",
               "MagicPortrait", "MagicPortraits", "PactGlance", "RosterGlance", "PactAfford", "KeepFirstConfirmScreen", "ComposerScroll",
               "ConcordanceClientOptions"):

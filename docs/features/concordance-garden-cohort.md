@@ -2991,7 +2991,7 @@ they wait in draft pull request #526 for the owner's review. Unit 3 (GC-06, Mara
 its own line from unit 3's shared prefix and merged after unit 3's line) are built and recorded; on the cohort line's
 head `5e93bb0a7` run 40852556175 passed in full (item 5). Unit 5 (GC-08,
 Bifrons) is built and recorded on its own line from unit 3's head and merged after unit 4
-([the merge](#unit-5s-merge-after-unit-4)), not yet compiled or run in CI. Unit 6 (GC-09, Amdusias) is built and recorded
+([the merge](#unit-5s-merge-after-unit-4)); units 3 to 5 have since run in CI (GC-10 unit 7): on `be76fd419` and `1a15984d4` the server suite without the optional integrations and `ConcordanceGardenPactClientGameTests` passed (runs 41506566691, 41506582568 and 41521655013). Unit 6 (GC-09, Amdusias) is built and recorded
 on its own line (`wip/garden-u6`, from `4201217b3`) and merged after unit 5 ([the merge](#unit-6s-merge-after-unit-5)),
 not yet compiled or run in CI. Next:
 
@@ -2999,8 +2999,7 @@ not yet compiled or run in CI. Next:
    whole and the magic interfaces' `73464e938`); no record here describes them yet.
 2. Refresh main and the open pull requests; merge main into `claude/garden-cohort` if it moved (generated files
    regenerated, never hand-merged).
-3. Run CI on unit 3 (Marax): the server jobs and the garden client class. Fix in the test what is the test's, in the
-   code what is the code's; then look at his 33 pictures and complete [his Verification](marax-pact.md#verification)
+3. Unit 3 (Marax) has run in CI (GC-10 unit 7: on `be76fd419` and `1a15984d4` the server suite without the optional integrations and `ConcordanceGardenPactClientGameTests` passed (runs 41506566691, 41506582568 and 41521655013)). Look at his 33 pictures and complete [his Verification](marax-pact.md#verification)
    (a Seen column, as Bathin's) and the results in [unit 3's evidence](#unit-3-as-built-and-its-evidence). His two
    kept-page states estimated over budget (the answer just after the third reading, about 47 words; a different bed named
    while one stays proud, about 50) are to be measured or narrowed then. At the merge that brings the magic interfaces'
@@ -3024,10 +3023,10 @@ not yet compiled or run in CI. Next:
    [his Verification](foras-pact.md#verification) its results and its "Seen" column.
 6. Unit 5 (GC-08, Bifrons) is merged after unit 4, from his own line (built from unit 3's head, `3c2d36b0f`)
    ([the merge](#unit-5s-merge-after-unit-4)): his journey steps are 17 to 19, his codex pages follow Foras's, before
-   "Mastered", the entry's last page, and the garden class's weight is 1280. Run CI on the merged head (the server jobs,
-   the garden client class at 1280, a dispatch of every client class), look at his 36 pictures and give
-   [his Verification](bifrons-pact.md#verification) its results and its "Seen" column; and decide his review's finding 11
-   (the shared kept page drawing an Offer plate for each kind of offering carried) on the cohort's line.
+   "Mastered", the entry's last page, and the garden class's weight is 1280. His tests have run in CI (GC-10 unit 7: on `be76fd419` and `1a15984d4` the server suite without the optional integrations and `ConcordanceGardenPactClientGameTests` passed (runs 41506566691, 41506582568 and 41521655013));
+   a dispatch of every client class is still to run. Look at his 36 pictures and give
+   [his Verification](bifrons-pact.md#verification) its results and its "Seen" column. His review's finding 11
+   (the shared kept page drawing an Offer plate for each kind of offering carried) is decided (GC-P147).
 7. Unit 6 (GC-09, Amdusias) is merged after unit 5, from his own line (built from `4201217b3`)
    ([the merge](#unit-6s-merge-after-unit-5)): his journey steps are 20 to 22, his codex pages follow Bifrons's, before
    "Mastered", the entry's last page, and the garden class's weight is 1520. Run CI on the merged head (the server jobs,

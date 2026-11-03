@@ -24381,9 +24381,13 @@ def check_pact_screen(co, lang):
     # test last worked the screen (fits, named, a control pressed or read, the screen awaited) rather than closed it; a
     # budget(...) or confirmBudget(...) call must stand in that stretch (comments read as nothing).
     opened = re.compile(r"fits\(context|named\(context\)|screen\(client\)|instanceof PactScreen|waitForScreen\(PactScreen\.class\)"
-                        r"|KeepFirstConfirmScreen|tabTo\(context|press\(context")
+                        r"|KeepFirstConfirmScreen|tabTo\(context|press\(context"
+                        # GC-10 unit 7 (review): a request sent from the open pact screen works it too.
+                        r"|\bask\(context|\banswer\(context")
     closed = re.compile(r"waitForScreen\(null\)|KEY_ESCAPE|setScreen\(null\)")
-    for cls in ("ConcordancePactClientGameTests", "ConcordanceGardenPactClientGameTests", "ConcordancePactNetworkTests"):
+    # GC-10 unit 7 (review): the garden two-client class opens the stranger's pact screen too.
+    for cls in ("ConcordancePactClientGameTests", "ConcordanceGardenPactClientGameTests", "ConcordancePactNetworkTests",
+                "ConcordanceGardenNetworkTests"):
         source = re.sub(r"//[^\n]*|/\*.*?\*/", " ", text(TESTS_ROOT / f"{cls}.java"), flags=re.S)
         before = 0
         for shot in re.finditer(r'\bshot\(context, "([a-z0-9_]+)"\)', source):

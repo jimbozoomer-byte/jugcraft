@@ -171,6 +171,10 @@ class ClientTestSelectionTests(unittest.TestCase):
         chosen, _ = selection.select(["src/gametest/java/io/github/jimbozoomer/jugcraft/test/ConcordanceGardenNetworkTests.java"], self.tests, set())
         self.assertIn("ConcordanceGardenNetworkTests", chosen)
         self.assertIn("ConcordanceGardenNetworkTests", selection.WEIGHTS)
+        # GC-10 unit 7 (review): it opens the stranger's pact screen, so a change to the magic interface kit's sprites, which
+        # no class names, selects it with the others.
+        chosen, _ = selection.select(["src/main/resources/assets/jugcraft/textures/gui/sprites/magic/plate.png"], self.tests, set())
+        self.assertIn("ConcordanceGardenNetworkTests", chosen)
 
     def test_workflow_runs_every_selected_shard(self):
         workflow = (ROOT / ".github/workflows/build.yml").read_text()
