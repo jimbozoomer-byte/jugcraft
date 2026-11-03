@@ -78,6 +78,11 @@ encounters it waits on (night, the open sky, creatures, days), a pact's service 
 Jugcraft item's recipes (or what makes it otherwise: the Adept's Wand from its ritual, dreamglass from dreams) down to
 what the world gives, every vanilla material listed with how it is had. `tools/check_mod_data.py` runs it.
 
+Since the garden cohort (GC-03, GB26; not merged) one practice's `distinct` is read: The Garden's Regard is mastered by
+its practice kept with three different garden spirits, so the tool reads its mastered state out of reach until three
+garden pact definitions ship (`garden_unreached`, which `audit` expects); Java's graph reads every practice through its
+gate alone.
+
 ## Mandatory steps
 
 Removing one node at a time and asking whether one player alone still reaches each stage identifies what every way to

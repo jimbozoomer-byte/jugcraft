@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "agreement": "jugcraft:bifrons_pact",
+  "research": "jugcraft:garden_regard",
+  "service": {
+    "work": "root_running",
+    "radius": 8,
+    "from": 13000,
+    "to": 23000,
+    "quota": 24
+  },
+  "upkeep": {
+    "offering": "jugcraft:bifrons_offerings",
+    "count": 2,
+    "period_days": 7,
+    "grace_days": 1,
+    "cap": 4
+  },
+  "beneficiaries": "party",
+  "compact": {
+    "items": [
+      {
+        "item": "minecraft:oak_log",
+        "count": 4
+      },
+      {
+        "item": "minecraft:emerald",
+        "count": 1
+      }
+    ],
+    "resonance": 0
+  },
+  "beats": [
+    "greeting",
+    "service",
+    "price"
+  ]
+}

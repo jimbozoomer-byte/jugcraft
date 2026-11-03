@@ -32,6 +32,7 @@ import io.github.jimbozoomer.jugcraft.client.ProspectorScreen;
 import io.github.jimbozoomer.jugcraft.client.ReactorConsoleScreen;
 import io.github.jimbozoomer.jugcraft.client.RemoteShutdownScreen;
 import io.github.jimbozoomer.jugcraft.client.RocketPadScreen;
+import io.github.jimbozoomer.jugcraft.client.PactScreen;
 import io.github.jimbozoomer.jugcraft.client.RosterScreen;
 import io.github.jimbozoomer.jugcraft.client.ScreenKit;
 import io.github.jimbozoomer.jugcraft.client.ShopScreen;
@@ -48,6 +49,7 @@ import io.github.jimbozoomer.jugcraft.client.jimtafacts.WorkshopChuteScreen;
 import io.github.jimbozoomer.jugcraft.client.jimtafacts.WorkshopEngineScreen;
 import io.github.jimbozoomer.jugcraft.client.jimtafacts.WorkshopTableScreen;
 import io.github.jimbozoomer.jugcraft.concordance.LampwrightBenchMenu;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactMenu;
 import io.github.jimbozoomer.jugcraft.control.LogicControllerMenu;
 import io.github.jimbozoomer.jugcraft.finance.MarketChestMenu;
 import io.github.jimbozoomer.jugcraft.jimtafacts.computers.ComputerTerminal;
@@ -209,6 +211,9 @@ public class ScreenFitClientGameTests implements FabricClientGameTest {
 						new CarvingFace.Sized(PumpkinCarving.SIZE, CarvingTemplates.ALL.getFirst().face().clone()), true, Optional.empty())));
 				// The Concordance's roster (Concordance Chunk D, D-07), before its first state: only its size and layout.
 				check(context, faults, "Concordance roster", "concordance_roster", inventory -> new RosterScreen());
+				// The pact perch's screen (the magic interfaces), on a stand-in menu before its first state: only its size and layout.
+				check(context, faults, "Concordance pact perch", null, inventory -> new PactScreen(new PactMenu(0, inventory, new PactMenu.Opening(BlockPos.ZERO)),
+						inventory, Component.translatable("container.jugcraft.pact_perch")));
 
 				// The workshop, aircraft and furniture screens (docs/features/new-screen-styles.md).
 				check(context, faults, "lathe", "lathe", inventory -> new IndustrialLatheScreen(new IndustrialLathe.Menu(0, inventory, BlockPos.ZERO),

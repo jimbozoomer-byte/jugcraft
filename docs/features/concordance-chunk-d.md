@@ -1624,6 +1624,16 @@ Twenty-two findings were confirmed and fixed; nine were rejected and left unchan
   the level's time moves only while the tick rate runs normally), so the sweep, which ends a departure at its game time
   (`departAt`), holds a frozen departure; and GeckoLib's animation clock is the render state's `ageInTicks`
   (`EntityRenderStateMixin:46`). No test checks either by itself.
+- **Since the magic interfaces' unit 2** ([magic-interfaces.md](magic-interfaces.md), "Unit 2: the roster as relic cards,
+  and short Jade lines"): the roster is drawn on the magic layer as two columns of relic cards: the portrait in its gilded
+  card frame, the name, the state's mark and a few words (its row's own waiting reason, short), one fact with its item, the
+  kind, and its actions as the kit's icons. Every sentence of a row stays its narration and its tip; the payloads, the
+  requests, the rate gate and the server's decisions are unchanged; ending still asks first, now on the scroll, the
+  keyboard on Keep it. The portraits are the layer's (`MagicPortraits`; `RosterScreen.Portraits` is gone). A page holds
+  eight cards from 240 tall, six at 320x180. `check_roster_screen` follows the screen onto the layer, and the client test
+  holds each shot to the roster's budget of 70 words drawn with no card's words cut. Since that unit's review the
+  server's answer sits in the title row (never pushing the cards), "more not listed" in the footer, a click on a card's
+  action presses it, Resume draws a play triangle, and a familiar or construct not loaded says so.
 
 ### D-08. The contrasting service: the workshop hand (unit 4)
 
@@ -2796,6 +2806,7 @@ Unit 5 takes D-P122 upward: D-P122 to D-P137 from its reconciled specification.
 | D-S13 | 23 October 2026 | The Open Hand Compact is the acceptance cost (ordinary materials and astrolabe resonance), spent in the call that seals; not a rite. Spending tests use a survival test player: vanilla's mock reports creative whatever game mode is set on it, so setting survival on the mock is not enough (Facts; D-04) | Decided by the session under D-D2 (23 October 2026) | D-04 |
 | D-S14 | 23 October 2026 | A perch-bound menu (the `ShopMenu` pattern) with bounded actions and a terms revision, carried by one small client-to-server payload (container id, sequence, action, choice, revision); no free text, player ids, client totals, Dialog, chat commands, mixins or GuiLib; a native, narrated, keyboard-operable `PactScreen` (D-04) | Decided by the session under D-D2 (23 October 2026) | D-04, D-05 |
 | D-S15 | 23 October 2026 | The terms page shows service, hours, area, quota, upkeep and grace, what suspension does, duration, breach rules, how to end, what returns, beneficiaries and the compact's cost. The perch is placed only where the placer may build, never in Styx's protected district; one Stolas a holder is the entity cap (D-04) | Decided by the session under D-D2 (23 October 2026) | D-04 |
+| D-S15 amended | 28 October 2026 | D-S15's first sentence, for the magic interfaces ([magic-interfaces.md](magic-interfaces.md), unit 1): before Accept, the terms page shows every term as a chip (a glyph or item stack and a short value), each narrated and hovered with its full sentence. The six standing terms share one chip, "Standing terms", whose hover says they are the same for every spirit, whose narration reads all six sentences, and whose More toggle shows their six lines in place of the chips. Every blocker is drawn above the terms; the price stays in view. `check_pact_screen` holds this wording; the placement and entity cap of D-S15 are unchanged | Decided by the session, in answer to the owner's request for far less reading; reviewable at the checkpoint (not owner-accepted) | D-04 |
 | D-S16 | 23 October 2026 | With the Concordance disabled, no upkeep falls due and nothing suspends; Stolas waits (`DISABLED`); records and escrow untouched; tested (D-02, D-05). As built (unit 1): a switch-off, like any gap between looks, of at most `ABSENT_TICKS` (1,200 ticks) is not an absence, so a due date or grace end inside it counts at the first look after (D-P2; the unit review's fix 8) | Decided by the session under D-D2 (23 October 2026) | D-02, D-05 |
 | D-S17 | 23 October 2026 | The familiar's fade, an adjacent routine fix and not E2 evidence: the bond fades only for its person's own play time away, so offline days never count, even unloaded; days played in another dimension still count (D-01) | Decided by the session under D-D2 (23 October 2026) | D-01 |
 | D-S18 | 23 October 2026 | A shade's death: its load into the anchor's slots when the anchor is loaded, otherwise dropped where it fell; "lost" read from the roster, not from an absent entity; a re-call while the old shade is unloaded makes it leave once and deliver once (D-01) | Decided by the session under D-D2 (23 October 2026) | D-01 |

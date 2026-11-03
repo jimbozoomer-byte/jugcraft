@@ -45,6 +45,8 @@ public final class PactClient {
 			if (left) {
 				left = false;
 				reset();
+				// The magic interfaces' visual-only portraits belong to the world just left: forget them, so none keeps it reachable.
+				MagicPortraits.clear();
 			}
 			if (pending >= 0 && ++waited >= PATIENCE_TICKS) {
 				pending = -1;

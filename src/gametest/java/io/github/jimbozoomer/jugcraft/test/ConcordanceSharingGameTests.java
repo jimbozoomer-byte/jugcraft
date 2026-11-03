@@ -28,6 +28,7 @@ import io.github.jimbozoomer.jugcraft.concordance.sky.AstrolabeItem;
 import io.github.jimbozoomer.jugcraft.concordance.sky.ObservatoryBlockEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.AgreementHolder;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.BoundWills;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.GardenPacts;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GatheringShadeEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactHistory;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactKeeping;
@@ -85,7 +86,7 @@ import org.jspecify.annotations.Nullable;
  * D, D-02) a copied Spirit Anchor gives nothing and releases nothing, an anchor from before Chunk D claims its record only
  * at its own place, and ending a pact twice returns its escrow once; and (D-04) a copied pact perch is inert; and (D-05)
  * it recalls nothing, and nobody but its holder (their party, a stranger, a stand-in) uses, pays, suspends or ends their
- * pact or keeps its obligation.
+ * pact or keeps its obligation; and (the garden cohort, GC-03) notes never stand in for The Garden's Regard.
  */
 public class ConcordanceSharingGameTests {
 	private static final String FIRST_LIGHT = "jugcraft:first_light";
@@ -222,6 +223,50 @@ public class ConcordanceSharingGameTests {
 		Knowledge.Progress earned = ConcordanceProgress.knowledge(reader).progress(StolasRegard.RESEARCH);
 		ResearchNotesItem.read(reader, notes);
 		helper.assertTrue(ConcordanceProgress.knowledge(reader).progress(StolasRegard.RESEARCH).equals(earned)
+				&& earned.evidence().keySet().stream().noneMatch(key -> key.startsWith("notes:")), "Reading again adds nothing: " + earned);
+		helper.succeed();
+	}
+
+	/**
+	 * The garden cohort, GC-03 (03:132): The Garden's Regard takes no notes. An author who has mastered it writes it down; a
+	 * reader with the Binding Arts and Verdant Husbandry understood reads the sheet and gains nothing toward it, not even kept
+	 * evidence. The reader earns each state only by their own examination, hand harvest and bound worker's service, and reading
+	 * again after that adds nothing.
+	 */
+	@GameTest(maxTicks = 20)
+	public void notesNeverStandInForTheGardensRegard(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		Definitions.Research regard = ConcordanceData.rules().research(GardenPacts.RESEARCH);
+		helper.assertTrue(regard != null && regard.states().values().stream().flatMap(List::stream)
+				.noneMatch(rule -> rule.kind() == EvidenceRule.Kind.NOTES), "No state of The Garden's Regard takes notes: " + regard);
+		ServerPlayer author = player(helper, new BlockPos(1, 2, 1));
+		ServerPlayer reader = player(helper, new BlockPos(3, 2, 1));
+		for (ServerPlayer each : List.of(author, reader)) {
+			ConcordanceProgress.grant(each, FIRST_LIGHT, ResearchState.UNDERSTOOD);
+			ConcordanceProgress.grant(each, Workers.RESEARCH, ResearchState.UNDERSTOOD);
+			ConcordanceProgress.grant(each, Garden.RESEARCH, ResearchState.UNDERSTOOD);
+		}
+		ConcordanceProgress.grant(author, GardenPacts.RESEARCH, ResearchState.MASTERED);
+		author.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftConcordance.RESEARCH_NOTES_ITEM));
+		ResearchNotesItem.write(author, InteractionHand.MAIN_HAND, author.getMainHandItem());
+		ResearchNotes notes = writtenNotes(author).get(JugcraftConcordance.RESEARCH_NOTES);
+		helper.assertTrue(notes != null && notes.entries().get(GardenPacts.RESEARCH) == ResearchState.UNDERSTOOD,
+				"The author's notes name The Garden's Regard, understood: " + notes);
+		ResearchNotesItem.read(reader, notes);
+		Knowledge.Progress read = ConcordanceProgress.knowledge(reader).progress(GardenPacts.RESEARCH);
+		helper.assertTrue(read.state() == ResearchState.NONE && read.evidence().isEmpty(),
+				"Read, the notes give The Garden's Regard nothing, not even kept evidence: " + read);
+		Examination.forget(reader.getUUID());
+		Examination.examine(reader, level, new ItemStack(Garden.SUNPETAL));
+		helper.assertValueEqual(ConcordanceProgress.knowledge(reader).state(GardenPacts.RESEARCH), ResearchState.ENCOUNTERED,
+				"Their own examination of a Sunpetal begins it");
+		ConcordanceProgress.record(reader, new Evidence.Practiced(Garden.ACTIVITY, "jugcraft:sunpetal"));
+		ConcordanceProgress.record(reader, new Evidence.Practiced(Workers.ACTIVITY, "familiar"));
+		helper.assertValueEqual(ConcordanceProgress.knowledge(reader).state(GardenPacts.RESEARCH), ResearchState.UNDERSTOOD,
+				"Their own hand harvest and a bound worker's service understand it");
+		Knowledge.Progress earned = ConcordanceProgress.knowledge(reader).progress(GardenPacts.RESEARCH);
+		ResearchNotesItem.read(reader, notes);
+		helper.assertTrue(ConcordanceProgress.knowledge(reader).progress(GardenPacts.RESEARCH).equals(earned)
 				&& earned.evidence().keySet().stream().noneMatch(key -> key.startsWith("notes:")), "Reading again adds nothing: " + earned);
 		helper.succeed();
 	}

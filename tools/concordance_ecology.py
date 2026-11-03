@@ -303,6 +303,10 @@ TEXT = {
     "ecology.strain": "Recently harvested: strain %s of %s",
     "ecology.strained.excess": "%s %s, recently harvested (+%s): too much (at most %s)",
     "ecology.strained.tolerable": "%s %s, recently harvested (+%s): tolerable (best from %s to %s)",
+    # Concordance garden cohort, GC-09 (HabitatInspection.sheltered): a canopy's shelter, said on the Inspect page and in the
+    # bed's and the crop's reports (never in the bed's saved note, which would outlive the canopy).
+    "ecology.sheltered": "Sheltered by Amdusias: the stir here reads %s lower (%s unsheltered); harvest strain still counts "
+                         "against the unsheltered stir",
     "ecology.inspect.disturbance_strained": "Disturbance %s, and %s more from recent harvests counted against its limit: the "
                                             "working magic in the %s by %s round the plant, %s block above and below",
     # Concordance Chunk C (C-09): a graft named, then each range it changes against its host's own (Graft.lines).
@@ -325,6 +329,7 @@ TOOLTIPS = {
     "jade.dormant": "Dormant: a Greenwarden must wake it",
     "jade.as_it_grew": "As it grew: %s",  # Concordance Chunk C, C-07: a ripe crop's last verdict
     "jade.graft": "Grafted: %s",  # Concordance Chunk C, C-09: a bed's graft, and on its host's crop
+    "jade.sheltered": "Sheltered by Amdusias: the stir reads %s lower",  # GC-09: a bed's or Gauge's reading
 }
 
 

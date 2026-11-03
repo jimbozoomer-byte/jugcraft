@@ -174,7 +174,8 @@ public class VerdantBedBlockEntity extends BlockEntity {
 	 * The habitat for a plant on this bed: the bed's moisture and nutrients, the server's light at the plant (sky or
 	 * block, never the time of day) and the area's sample, taken again when older than {@value Sampler#FRESH_TICKS}
 	 * ticks if the level's allowance permits. Null only when there has never been a sample and none can be taken this
-	 * tick (the plant waits for a reading).
+	 * tick (the plant waits for a reading). Since the garden cohort (GC-03) its reading is {@link #cachedHabitat}'s once the
+	 * sample is fresh.
 	 */
 	public @Nullable Habitat habitat(ServerLevel level) {
 		BlockPos plant = worldPosition.above();
@@ -186,10 +187,52 @@ public class VerdantBedBlockEntity extends BlockEntity {
 				sampledAt = now;
 			}
 		}
+		return cachedHabitat(level);
+	}
+
+	/**
+	 * Concordance garden cohort, GC-03 (GB11): the habitat a plant on this bed reads from the area's last sample, whatever its
+	 * age, without ever taking a sample, so no reader spends the level's allowance (Garden.budget) and none can starve growth
+	 * of its readings. Null while it holds no sample (none since it was loaded, or one forgotten). The bed's moisture and
+	 * nutrients, the light at the plant and the strain growth would count are read now, as {@link #habitat} reads them; only the
+	 * area is the sample's. It only reads. Server only. Since GC-09 under the largest canopy covering it ({@link #sheltered}),
+	 * for the plant a canopy shelters only.
+	 */
+	public @Nullable Habitat cachedHabitat(ServerLevel level) {
 		if (area == null) {
 			return null;
 		}
-		return Sampler.habitat(moisture(), level.getRawBrightness(plant, 0), nutrients, area, strainNow());
+		BlockPos plant = worldPosition.above();
+		// GC-09 (GC-P122): a canopy's shelter for the plant above, applied here once, so growth and every reader agree.
+		return sheltered(level, Sampler.habitat(moisture(), level.getRawBrightness(plant, 0), nutrients, area, strainNow()));
+	}
+
+	/**
+	 * Concordance garden cohort, GC-09 (GC-S21, GC-P122): {@code habitat} as the plant above reads it under the largest canopy
+	 * covering this bed now (Canopies.damping, never a sum), or unchanged: no canopy is kept in the level, nothing a canopy
+	 * shelters stands above (a Verdant Heart, which beats on this same reading; a device; bare soil), or the plant wants the
+	 * stir (Niche.wantsStir, read in the niche this bed gives it) and no canopy over it was answered "shelter all". Reads only:
+	 * one block state, at most one block entity and one chunk's canopies.
+	 */
+	private Habitat sheltered(ServerLevel level, Habitat habitat) {
+		if (!Canopies.any(level)) {
+			return habitat;
+		}
+		Organism plant = canopyPlant(level);
+		int damping = plant == null ? 0 : Canopies.damping(level, worldPosition, niche(plant).wantsStir(), level.getGameTime());
+		return damping == 0 ? habitat : habitat.sheltered(damping);
+	}
+
+	/**
+	 * GC-09: the plant a canopy may shelter on this bed: the organism crop above it, or the organism a Habitat Gauge above it is
+	 * attuned to (so the Gauge reads what that crop would); null for anything else. Reads only.
+	 */
+	public @Nullable Organism canopyPlant(ServerLevel level) {
+		BlockPos above = worldPosition.above();
+		if (level.getBlockState(above).getBlock() instanceof OrganismCropBlock crop) {
+			return crop.organism();
+		}
+		return level.getBlockEntity(above) instanceof HabitatGaugeBlockEntity gauge ? Garden.catalog().organism(gauge.attuned()) : null;
 	}
 
 	/** Forgets the area's sample, so the next reading takes a fresh one (a test changes the area round it). */
@@ -277,6 +320,11 @@ public class VerdantBedBlockEntity extends BlockEntity {
 		if (habitat != null) {
 			player.sendSystemMessage(ComposeText.show(Text.of("ecology.habitat", habitat.moisture(), habitat.light(),
 					habitat.nutrients(), habitat.diversity(), habitat.disturbance())));
+			// GC-09: what a canopy took from the stir, as growth reads it.
+			Text sheltered = HabitatInspection.sheltered(habitat);
+			if (sheltered != null) {
+				player.sendSystemMessage(ComposeText.show(sheltered));
+			}
 		}
 		// Concordance Chunk C (C-08): its strain, as growth will count it.
 		for (Text line : notes(null)) {
@@ -365,12 +413,28 @@ public class VerdantBedBlockEntity extends BlockEntity {
 			return false;
 		}
 		settle();
-		if (strain == 0 || tendedAt != Long.MIN_VALUE && now >= tendedAt && now - tendedAt < Garden.TEND_TICKS) {
+		if (strain == 0 || tendedLately(now)) {
 			return false;
 		}
 		tendedAt = now;
 		ease();
 		return true;
+	}
+
+	/**
+	 * Concordance garden cohort, GC-03: whether {@link #tend} at game time {@code now} would ease a strain, changing nothing:
+	 * awake, the Concordance on, a strain growth would count (a harvest seen and not yet counted included, which tend counts
+	 * first: {@link #strainNow}), and not within {@value Garden#TEND_TICKS} ticks of its last tending, whoever tended it (one
+	 * window a bed, kept in memory only: a restart forgets it, GB14). A pact's service asks it before it tends; the
+	 * Greenwarden's gesture asks its own questions (VerdantBedBlock.tendBy). It only reads.
+	 */
+	public boolean mayTendAt(long now) {
+		return awake && Garden.enabled() && strainNow() > 0 && !tendedLately(now);
+	}
+
+	/** Whether it was tended less than TEND_TICKS before {@code now} (a clock run back opens the window again, as before). */
+	private boolean tendedLately(long now) {
+		return tendedAt != Long.MIN_VALUE && now >= tendedAt && now - tendedAt < Garden.TEND_TICKS;
 	}
 
 	/** Tests only (no game code calls it): sets the strain (clamped) and forgets a ripening not yet counted. */

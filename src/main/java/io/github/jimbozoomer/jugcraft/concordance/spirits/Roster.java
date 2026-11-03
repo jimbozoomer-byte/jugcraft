@@ -81,10 +81,12 @@ public final class Roster {
 	/**
 	 * An unloaded worker's portrait by its kind (tools/concordance_roster.py KIND_PORTRAITS); any other kind is jugcraft:<kind>.
 	 * A spirit has none of its own: a Gathering Shade's kind and a Workshop Hand's are both spirit, so the client draws the
-	 * Spirit Anchor rather than the wrong creature (the unit's critique 8).
+	 * Spirit Anchor rather than the wrong creature (the unit's critique 8). A pact presence has none either (GC-01, GB6): every
+	 * pact spirit's kind is pact, so the client draws the Spirit Anchor rather than the wrong spirit; a record's row is drawn as
+	 * its counterpart.
 	 */
 	static final Map<String, String> KIND_PORTRAITS = Map.of("familiar", "jugcraft:hearthling", "spirit", "",
-			"construct", "jugcraft:clockwork_porter", "pact", "jugcraft:stolas");
+			"construct", "jugcraft:clockwork_porter", "pact", "");
 	private static final String KEY = "message.jugcraft.concordance.roster.";
 
 	/**
@@ -293,7 +295,7 @@ public final class Roster {
 	}
 
 	/**
-	 * The journal's pacts lines after Stolas's Regard's (D-07; StolasRegard.report calls this): each Bound Will {@code player}
+	 * The journal's pacts lines after the Regards' (D-07; PactRegards.report calls this): each Bound Will {@code player}
 	 * holds, in the order sealed, named with where it is kept and its next obligation, why it waits as the exact; then their
 	 * departures, newest first (at most Pacts.HISTORY). Only reads; nothing for one who holds and lost none.
 	 */
@@ -388,7 +390,7 @@ public final class Roster {
 			}
 		}
 		String counterpart = Pacts.counterpart(record.counterpart());
-		String kind = entry != null ? entry.kind() : counterpart.equals(StolasEntity.COUNTERPART) ? "pact" : "spirit";
+		String kind = entry != null ? entry.kind() : PactSpirits.knows(counterpart) ? "pact" : "spirit";
 		Component name = PactKeeping.name(record.counterpart());
 		BoundWill.Service service = pact == null ? null : pact.service();
 		Request claim = presence == null ? null : claims.get(presence);
