@@ -1,5 +1,14 @@
 # Remaining upstream Survival acquisition gaps
 
+## November 3 main reconciliation
+
+Merged main through `a279a133ba` (PRs #605–#608) into the companion branch with OpenAI Codex (GPT-6). Preserve the companion features, 24 client groups, component-safe acquisition recipes, source-bounded 60-model finishing pass and prepared-vanilla-archive lookup. Integrate upstream dry-block water-placement safety, harvest/pet/machine updates, Pumpkling wild-death versus owned-knockout tests, Chima pre-save health setup, and completed mock-transport cleanup.
+
+Resolve the shared Lua fixture in favor of upstream's bounded startup-aware polling. Keep the stronger native-recipe and inventory-conservation assertions in the Peepo crafting-table suite. Retain both common and client-only test mixin configurations. Remove duplicate `TestPlayersGameTests` and `PeerClientStartupGameTests` entrypoints introduced by the overlapping additions; the first focused startup caught the duplicate registry key before tests ran. Adapt upstream's archive regression to the retained explicit archive/root injection points, keeping its fresh-cache behavior and missing-model failure assertion.
+
+Validation so far: common/client/game-test compilation passed; all 35 focused Python regressions passed; repository/documentation and staged whitespace checks passed. All 19 selected server tests passed (`PumpklingGameTests`, `TestPlayersGameTests`, `JimtaLuaGameTests`, `PeerClientStartupGameTests`; `build/nov3-merge-server-verified.log`). The rerun reused unchanged Kotlin outputs from the successful compilation after an expensive redundant cache snapshot was interrupted. The actual `UndergroundDepositClientGameTests` client suite passed its world save/reopen check in 7m 53s (`build/nov3-merge-chima-verified.log`). Its initial local startup needed `processClientResources` to prepare the client mixin configuration. Canonical resource regeneration completed successfully and reproduced the staged merge exactly: zero additional generated-file differences (`build/nov3-merge-generation.log`). Full remote CI and the formerly cancelled group remain separate checks. No live deployment or restart is included.
+
+
 ## November 2 release reconciliation
 
 The main release `c0a9532563` supplies the remaining acquisition routes. Merging it with the native repairs gives **zero unresolved routes and zero ingredient diagnostics** in the refreshed audit. The 78 entries already classified by upstream as deferred acquisition design remain unchanged; this reconciliation adds no exclusions. Earlier counts below are historical, not current blockers.
