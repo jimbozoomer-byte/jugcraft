@@ -34,6 +34,13 @@ public final class FairyRings {
 	public static final int LUCK_TICKS = 6000;
 	/** The circle a sprouting mushroom plants round, radius three: a fairy ring of eight. */
 	static final int[][] RING = {{3, 0}, {2, 2}, {0, 3}, {-2, 2}, {-3, 0}, {-2, -2}, {0, -3}, {2, -2}};
+	/**
+	 * How far round a sprouting mushroom (blocks across, a block up or down) fewer than {@value #RING_MUSHROOMS} wild
+	 * mushrooms, itself included, must stand for it to sprout a ring: a ring sprouts only from open ground, never from or
+	 * beside another ring (all of whose mushrooms stand within six blocks of each other), so rings do not breed rings on
+	 * every full moon.
+	 */
+	public static final int CROWD_RADIUS = 8;
 	private static final int DAY = 24000;
 	private static final Map<UUID, Long> BLESSED = new HashMap<>();
 
@@ -83,6 +90,17 @@ public final class FairyRings {
 		return found;
 	}
 
+	/** Whether {@value #RING_MUSHROOMS} or more wild mushrooms stand within {@value #CROWD_RADIUS} blocks of {@code pos}. */
+	static boolean crowded(Level level, BlockPos pos) {
+		int found = 0;
+		for (BlockPos at : BlockPos.betweenClosed(pos.offset(-CROWD_RADIUS, -1, -CROWD_RADIUS), pos.offset(CROWD_RADIUS, 1, CROWD_RADIUS))) {
+			if (level.hasChunkAt(at) && level.getBlockState(at).getBlock() instanceof WildMushroomBlock && ++found >= RING_MUSHROOMS) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** Whether {@code centre} is the middle of a fairy ring. */
 	public static boolean ring(Level level, BlockPos centre) {
 		return count(level, centre) >= RING_MUSHROOMS;
@@ -113,12 +131,13 @@ public final class FairyRings {
 	/**
 	 * A mushroom at {@code pos} sprouts a fairy ring of its kind: a circle of radius three it stands on, its centre on the
 	 * far side of it. A mushroom goes wherever the ground takes one (a block up or down for slopes); nothing sprouts where a
-	 * ring already stands.
+	 * ring already stands, and none from a mushroom with {@value #RING_MUSHROOMS} wild mushrooms (itself included) within
+	 * {@value #CROWD_RADIUS} blocks of it.
 	 */
 	public static int sprout(ServerLevel level, BlockPos pos, BlockState mushroom, RandomSource random) {
 		int[] at = RING[random.nextInt(RING.length)];
 		BlockPos centre = pos.offset(-at[0], 0, -at[1]);
-		if (ring(level, centre)) {
+		if (ring(level, centre) || crowded(level, pos)) {
 			return 0;
 		}
 		int planted = 0;
