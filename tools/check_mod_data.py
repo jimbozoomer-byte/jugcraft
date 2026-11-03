@@ -18028,6 +18028,7 @@ def check_concordance(registered):
     check_game_test_entrypoints()
     check_load_card()
     check_pact_hall_load_card()
+    check_garden_load_card()  # GC-10 unit 7
     check_workshop_client_evidence()
 
 
@@ -18308,7 +18309,9 @@ def check_game_test_entrypoints():
 
 
 PACT_HALL_CARD = "ConcordancePactHallLoadGameTests"
-LOAD_CARDS = ("ConcordanceWorkshopLoadGameTests", PACT_HALL_CARD)
+# GC-10 unit 7 (GC-S17, GC-P141): the garden's load card joins the two.
+GARDEN_CARD = "ConcordanceGardenLoadGameTests"
+LOAD_CARDS = ("ConcordanceWorkshopLoadGameTests", PACT_HALL_CARD, GARDEN_CARD)
 
 
 def load_card_id(name):
@@ -18489,6 +18492,113 @@ def check_pact_hall_load_card():
     job = re.search(r"^  load-card:\n(.*?)(?=^  [A-Za-z][\w-]*:\s*$|\Z)", workflow, re.S | re.M)
     if job and (not selects.search(job.group(1)) or "Pact hall load card |" not in job.group(1)):
         err(".github/workflows/build.yml: the load-card job must run the pact hall card too, and show its lines as a notice")
+
+
+# GC-10 unit 7 (GC-S17, GC-P141): the garden load card.
+def check_garden_load_card():
+    """Concordance garden cohort, GC-10 unit 7 (GC-S17, GC-P141): the garden's load card, opted in as the workshop's and the
+    pact hall's (check_load_card holds the workflow's filters). It names Fabric's own id for itself and passes at once unless
+    selected; shares the workshop card's Measure, so its WINDOW and MEASURED are that card's; has room in maxTicks for two
+    warm-ups, the wait for a game day's turn and two measured spans; force-loads its yard from begin(); never schedules an
+    entry for every remaining tick; drains every player's channel. It builds GC-P141's garden (two holders, seven pacts each,
+    48 beds, two Hearts, Gleaners and pylons, a Maw, eight disturbing blocks, a tree), reports its budget and asserts five
+    times it, samples GC-P141's rules from the services' own memories, keeps its readings within Marax's quota, and times the
+    services' calls. It is registered, docs/TESTING.md names its id, and the load-card job, if the workflow has one, runs it
+    and shows its lines. Comments are ignored."""
+    test_dir = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test"
+    path = test_dir / f"{GARDEN_CARD}.java"
+    name = f"{GARDEN_CARD}.java"
+    if not path.exists():
+        err(f"src/gametest/{name}: missing (the garden cohort's load card, GC-10, GC-P141)")
+        return
+
+    def strip(text):
+        return re.sub(r"//[^\n]*|/\*.*?\*/", " ", text, flags=re.S)
+
+    code = strip(path.read_text(encoding="utf-8"))
+    ident = load_card_id(GARDEN_CARD)
+    if f'public static final String ID = "{ident}";' not in code:
+        err(f"{name}: ID must be Fabric's id for loadCard, {ident}")
+    if 'static final String FILTER = "fabric-api.gametest.filter";' not in code or "return ID.equals(System.getProperty(FILTER));" not in code:
+        err(f"{name}: selected() must compare Fabric's filter property with ID exactly")
+    if not re.search(r"public void loadCard\(GameTestHelper helper\) \{\s*if \(!selected\(\)\) \{\s*helper\.succeed\(\);\s*return;\s*\}"
+                     r"\s*new Card\(helper\)\.begin\(\);\s*\}", code):
+        err(f"{name}: loadCard must pass at once unless it is selected, and selected, begin the card (new Card(helper).begin())")
+    if "@GameTest(maxTicks = MAX_TICKS, skyAccess = true)" not in code:
+        err(f"{name}: loadCard's @GameTest must take maxTicks = MAX_TICKS")
+    number = re.compile(r"static final int ([A-Z][A-Z0-9_]*) = ([0-9_]+);")
+    numbers = {key: int(value.replace("_", "")) for key, value in number.findall(code)}
+    doubles = {key: float(value) for key, value in re.findall(r"static final double ([A-Z][A-Z0-9_]*) = ([0-9.]+);", code)}
+    workshop = {key: int(value.replace("_", "")) for key, value in
+                number.findall(strip((test_dir / "ConcordanceWorkshopLoadGameTests.java").read_text(encoding="utf-8")))}
+    wanted = ("WINDOW", "MEASURED", "WARMUP_CAP", "DAY_WAIT", "MAX_TICKS", "OFF", "HOLDERS", "PACTS", "BEDS", "HEARTS", "GLEANERS", "PYLONS",
+              "MAWS", "DISTURBING", "TREES", "READ_TICKS")
+    missing = [key for key in wanted if key not in numbers]
+    missing += [key for key in ("BUDGET_MEDIAN_MS", "BUDGET_P95_MS", "BUDGET_RETAINED_MIB", "LIMIT_MEDIAN_MS", "LIMIT_P95_MS",
+                                "LIMIT_RETAINED_MIB") if key not in doubles]
+    if missing:
+        err(f"{name}: missing constants {missing}")
+    else:
+        if numbers["WINDOW"] != workshop.get("WINDOW") or numbers["MEASURED"] != workshop.get("MEASURED"):
+            err(f"{name}: WINDOW and MEASURED must be the workshop card's, whose Measure it shares")
+        if numbers["MEASURED"] < 6000 or numbers["MEASURED"] % numbers["WINDOW"]:
+            err(f"{name}: MEASURED must be at least 6,000 ticks in whole windows")
+        if numbers["DAY_WAIT"] != 24000:
+            err(f"{name}: DAY_WAIT must be a game day (Pacts.DAY): the garden span waits for a day's turn, each quota fresh")
+        if numbers["MAX_TICKS"] < 2 * numbers["WARMUP_CAP"] + numbers["DAY_WAIT"] + 2 * numbers["MEASURED"] + 2 * numbers["WINDOW"] + 100:
+            err(f"{name}: MAX_TICKS leaves no room for two warm-ups, the wait for a day's turn and two measured spans")
+        if numbers["OFF"] < 9:
+            err(f"{name}: OFF must keep the yard clear of the default structure's barrier walls (x and z of 8)")
+        if (numbers["HOLDERS"], numbers["PACTS"], numbers["BEDS"]) != (2, 7, 48):
+            err(f"{name}: GC-P141's garden has two holders, seven pacts each (the six garden spirits and Stolas) and 48 beds")
+        if (numbers["HEARTS"], numbers["GLEANERS"], numbers["PYLONS"], numbers["MAWS"], numbers["TREES"], numbers["DISTURBING"]) != (2, 2, 2, 1, 1, 8):
+            err(f"{name}: GC-P141's garden has two Hearts, two Gleaners, two pylons, a Maw, a tree and eight disturbing blocks")
+        budget = (doubles["BUDGET_MEDIAN_MS"], doubles["BUDGET_P95_MS"], doubles["BUDGET_RETAINED_MIB"])
+        limit = (doubles["LIMIT_MEDIAN_MS"], doubles["LIMIT_P95_MS"], doubles["LIMIT_RETAINED_MIB"])
+        if budget != (1.0, 2.5, 4.0):
+            err(f"{name}: GC-P141's budget is +1.0 ms median, +2.5 ms p95 and +4 MiB retained")
+        if any(abs(have - 5 * want) > 1e-9 for have, want in zip(limit, budget)):
+            err(f"{name}: the asserted limits must be five times GC-P141's budget")
+        marax = load(ROOT / "src" / "main" / "resources" / "data" / "jugcraft" / "concordance" / "pact" / "marax.json") or {}
+        quota = marax.get("service", {}).get("quota", 0)
+        if numbers["READ_TICKS"] < 1 or -(-numbers["MEASURED"] // numbers["READ_TICKS"]) > quota:
+            err(f"{name}: READ_TICKS must ask Marax for no more readings a span than his day's quota ({quota})")
+    if not re.search(r"\bsetChunkForced\([^;]*,\s*true\)", code) or not re.search(r"\bvoid begin\(\)\s*\{[^}]*\bforce\(\);", code):
+        err(f"{name}: loadCard must force-load its yard's chunks (setChunkForced(..., true), from begin())")
+    if "i < channels.size()" not in code or "readOutbound()" not in code:
+        err(f"{name}: every player's channel must be drained every tick (nothing a test player is sent may pile up)")
+    for needle, what in (("getTickTimesNanos()", "the server's ring of tick times"), ("BoundWills.of(server).problems()", "the Bound Wills' own check"),
+                         ("Signs.observe(", "the signs it would be sent"), ("Workers.PACT_PERCH.setPlacedBy(", "perches placed by their holders"),
+                         ("PactPerchBlockEntity.sealing(", "pacts sealed under the shipped offers"), ("PactKeeping.deposit(", "offerings in each pact's escrow"),
+                         ("StolasEntity.COUNTERPART", "Stolas's pact"), ("BuerEntity.COUNTERPART", "Buer's pact"),
+                         ("BathinEntity.COUNTERPART", "Bathin's pact"), ("MaraxEntity.COUNTERPART", "Marax's pact"),
+                         ("ForasEntity.COUNTERPART", "Foras's pact"), ("BifronsEntity.COUNTERPART", "Bifrons's pact"),
+                         ("AmdusiasEntity.COUNTERPART", "Amdusias's pact"), ("Garden.VERDANT_BED", "Verdant Beds"),
+                         ("Garden.VERDANT_HEART", "Verdant Hearts"), ("Garden.GLEANER", "Gleaners"), ("Garden.MULCH_MAW", "a Mulch Maw"),
+                         ("JugcraftConcordance.LEY_PYLON", "Ley Pylons"), ("Blocks.OAK_LOG", "a tree"), ("Blocks.BUDDING_AMETHYST", "disturbing blocks"),
+                         ("Garden.DEWMOSS", "Foras's donors"), ("PactRequestPayload.RECALL", "readings asked as the kept page asks them"),
+                         ("Canopies.of(", "one canopy a holder"), ("Canopies.damping(", "no two canopies summed"),
+                         ("Garden.budget(", "no area sample taken by a reading"), ("VerdanceCarrying.Memory", "Bathin's moves read from his memory"),
+                         ("RootRunning.Memory", "Bifrons's runs read from his memory"), ("GraftKeeping.Memory", "Foras's grafts read from his memory"),
+                         ("CanopyShelter.Memory", "Amdusias's canopy read from his memory"), ("WorkerEntity.THINK_TICKS", "the rules sampled once a think"),
+                         ("GardenReach.", "a GardenReach refresh timed"), ("HabitatReading.read(", "a reading timed"),
+                         ("Transaction.openOuter()", "a graft's transaction timed")):
+        if needle not in code:
+            err(f"{name}: GC-P141's garden lacks {what}")
+    if "onEachTick" in code:
+        err(f"{name}: no onEachTick (its entry for every remaining tick is test work that shrinks as the run goes on)")
+    if 'LOGGER.info("Garden load card | {}", line)' not in code:
+        err(f'{name}: its lines must begin "Garden load card |" (the workflow\'s notice reads them)')
+    mod = load(ROOT / "src" / "gametest" / "resources" / "fabric.mod.json") or {}
+    if f"io.github.jimbozoomer.jugcraft.test.{GARDEN_CARD}" not in mod.get("entrypoints", {}).get("fabric-gametest", []):
+        err(f"src/gametest/resources/fabric.mod.json: {GARDEN_CARD} must be a fabric-gametest entrypoint")
+    selects = re.compile(rf"fabric-api\.gametest\.filter={re.escape(ident)}(?![\w-])")
+    if not selects.search((ROOT / "docs" / "TESTING.md").read_text(encoding="utf-8")):
+        err("docs/TESTING.md: the garden card's command must select its id")
+    workflow = re.sub(r"^[ \t]*#[^\n]*\n", "", (ROOT / ".github" / "workflows" / "build.yml").read_text(encoding="utf-8"), flags=re.M)
+    job = re.search(r"^  load-card:\n(.*?)(?=^  [A-Za-z][\w-]*:\s*$|\Z)", workflow, re.S | re.M)
+    if job and (not selects.search(job.group(1)) or "Garden load card |" not in job.group(1)):
+        err(".github/workflows/build.yml: the load-card job must run the garden card too, and show its lines as a notice")
 
 
 WORKSHOP_CLIENT = "io.github.jimbozoomer.jugcraft.test.ConcordanceWorkshopClientGameTests"

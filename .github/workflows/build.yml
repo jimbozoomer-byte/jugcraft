@@ -131,6 +131,21 @@ jobs:
           if [ -s pacthall.txt ]; then
             echo "::notice title=Pact hall load card::$(awk '{gsub(/%/, "%25"); printf "%s%%0A", $0}' pacthall.txt)"
           fi
+      # Concordance garden cohort, GC-10 unit 7 (GC-S17, GC-P141): the garden load card, opted in as the two above.
+      - name: Run the garden load card
+        if: ${{ !cancelled() }}
+        env:
+          JAVA_TOOL_OPTIONS: -Dfabric-api.gametest.filter=jugcraft-test:concordance_garden_load_game_tests_load_card
+        run: |
+          set -o pipefail
+          ./gradlew runGameTest --no-daemon 2>&1 | tee garden.out
+      - name: Show the garden load card as a notice
+        if: always()
+        run: |
+          grep -F 'Garden load card |' garden.out | sed 's/^.*Garden load card | //' > garden.txt || true
+          if [ -s garden.txt ]; then
+            echo "::notice title=Garden load card::$(awk '{gsub(/%/, "%25"); printf "%s%%0A", $0}' garden.txt)"
+          fi
 
   # Concordance Chunk D, D-09 (08:175; D-P137): the pact's client tests in a build without the optional integrations (Jade
   # among them), only when a manual run asks for it.
