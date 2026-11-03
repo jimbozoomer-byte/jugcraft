@@ -148,7 +148,7 @@ unchanged. Every Java compile and game test runs only in CI (GC-S24; [Checks](#c
 | 4 | GC-07 | **Foras**: graft keeping from a store beside the perch, the logician's objection; the bed index's containers; the owner library's second edited part in `tools/owner_art.py` | new `foras-pact.md` | Built (`e3194d0be` to `8a50bbd33`) from unit 3's shared prefix and recorded, then merged after unit 3's line; on the cohort line's head `5e93bb0a7` run 40852556175 passed in full; not merged; [evidence](#unit-4-as-built-and-its-evidence) |
 | 5 | GC-08 | **Bifrons**: root-running with half lost, which beds are reserves | new `bifrons-pact.md`; `tools/concordance_economy.py` | Built (`1c57700dd` to `7b08d26a0`) on its own line from unit 3's head (`3c2d36b0f`) and recorded (`d6f63f32b`), then merged after unit 4's line; on `be76fd419` and `1a15984d4` the server suite without the optional integrations and `ConcordanceGardenPactClientGameTests` passed (runs 41506566691, 41506582568 and 41521655013); not merged; [evidence](#unit-5-as-built-and-its-evidence) |
 | 6 | GC-09 | **Amdusias**: the bending canopy (a one-factor disturbance shelter: the pure rule in `ecology`, the registry in `garden`), the stir a Gloamcap wants | new `amdusias-pact.md`; `arcane-concordance-ecology.md` | Built (`23236575e` to `28953d21b`) on its own line from `4201217b3` (units 1 to 4) and recorded (`8763ffbac`), then merged after unit 5's line; not yet compiled or run in CI; not merged; [evidence](#unit-6-as-built-and-its-evidence) |
-| 7 | GC-10 | Combined fixes, the cohort's whole path, its load card, client evidence (the line-up), the two-client test, records, the checkpoint and handoff | this page; the six records; `arcane-concordance-journey.md`; `docs/TESTING.md` | Built and recorded (GC-P140 to GC-P149), not yet compiled or run in CI ([unit 7](#unit-7-as-built-and-its-evidence)) |
+| 7 | GC-10 | Combined fixes, the cohort's whole path, its load card, client evidence (the line-up), the two-client test, records, the checkpoint and handoff | this page; the six records; `arcane-concordance-journey.md`; `docs/TESTING.md` | Built, recorded and run in CI on `fcee07554d` and `dd71438c92` (GC-P140 to GC-P149): the server suite, the garden client class and the garden load card passed; the two-client test not reached ([unit 7](#unit-7-as-built-and-its-evidence)) |
 
 Order of the spirits after Buer goes from least to most invasive: Bathin moves an existing essence through existing
 transfer rules; Marax reads and changes nothing; Foras spends items; Bifrons adds an economy conversion; Amdusias changes
@@ -1559,13 +1559,14 @@ candidate commit; the load card's block pasted verbatim; the two-client run pass
 every shot named in the records looked at and marked; the checkpoint at most three questions, 300 to 500 words (10:87-121);
 the handoff on 10:133-146.
 
-**As built (unit 7):** built and recorded on `wip/garden-u7`, **not yet compiled or run in CI** (GC-P140 to GC-P149;
-[unit 7 as built and its evidence](#unit-7-as-built-and-its-evidence)). The shared second-client helper is
+**As built (unit 7):** built and recorded on `wip/garden-u7`, pushed to `claude/garden-cohort` and run in CI (GC-P140 to
+GC-P149; [unit 7 as built and its evidence](#unit-7-as-built-and-its-evidence)). The shared second-client helper is
 `T/SecondClient`; `tools/acquisition.py` gains a comment only (`GARDEN_PACTS` holds the Concordance items, the vanilla
 ones come from the shipped definitions); `tools/check_mod_data.py` also gains `check_garden_network` and
-`check_pact_screen`'s line-up and plates-in-view audits. Acceptance is not yet met: no dispatch has run, no load card
-block or two-client result exists, no shot is looked at, and while main's own checks are red no dispatch can be green
-in every job ([Known defects](#known-defects-and-limits-unit-7)).
+`check_pact_screen`'s line-up and plates-in-view audits. Acceptance is met in part: the server suite, the garden
+client class and the garden load card passed and the shots were looked at; the two-client test was never reached (its
+shard ran out of memory in main's content first), and while main's own checks are red no dispatch can be green in every
+job ([Known defects](#known-defects-and-limits-unit-7)).
 
 ### The per-spirit template (every spirit ticket, GC-04 to GC-09)
 
@@ -1720,7 +1721,7 @@ and the bed's strain fall on the holder's bed. Evidence under `owner-network-evi
 shard. Added to the opted-in `clients_without_optional` class list (an additive change; `check_pact_network` updated).
 Recorded as two automated clients on one machine, never as two people.
 
-**As built (unit 7):** the load card and the two-client test are written, not run; where they depart from GC-P141 and
+**As built (unit 7):** the load card passed in run 41576637311; the two-client test is written but was not reached in CI; where they depart from GC-P141 and
 GC-P142 is in [unit 7's evidence](#the-garden-load-card) (decided by the session).
 
 **Not claimable without people:** a human playtest alone or with others; balance; frame time on a player's hardware;
@@ -2513,19 +2514,40 @@ compiled or run (no Minecraft jar here).
 
 ### Unit 7 as built and its evidence
 
-Written on 3 November 2026 for unit 7's records commit, from the unit's commits and their messages and from this
-session's own local runs. **No CI run has compiled or run unit 7:** its commits were made where no Minecraft jar was
-available, every Java file of it was parse-checked only, and every server test, load card, client shot and second client
-of it is still to run. "Passed" below means a local Python check, audit or harness passed. Nothing here was run by a
-person. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
+Written on 3 November 2026 for unit 7's records commit and brought to its CI runs the same day. Unit 7's commits were
+made where no Minecraft jar was available (its Java parse-checked only); CI then compiled and ran them on the cohort
+branch. "Passed" below names the run; a local Python check, audit or harness is called local. Nothing here was run by
+a person. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
 
 #### Candidate and CI
 
-- **Candidate:** unit 7's records commit (this one) on `wip/garden-u7`, its own line from the cohort head `2c61471b2a`
-  (units 1 to 6 merged in order, the magic interfaces' restyle, main through #599), above `0bdc737b12` (unit 6's tests
-  amended by the session on that head; no CI result of it is recorded here). Not pushed to draft pull request
-  [#526](https://github.com/jimbozoomer-byte/jugcraft/pull/526) when this was written; not merged into main.
-- **CI for unit 7: none (none has run).**
+- **Candidate:** `dd71438c92` on `claude/garden-cohort` (draft pull request
+  [#526](https://github.com/jimbozoomer-byte/jugcraft/pull/526)): unit 7's records commit `fcee07554d` and the load
+  card's fix, above `0bdc737b12` (units 1 to 6, the magic interfaces' restyle, main through #599). Not merged into main.
+- **CI for unit 7:**
+  - workflow_dispatch [41571742158](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/41571742158) on
+    `fcee07554d`, every client class with `load_card` and `clients_without_optional` ticked. `optional integrations absent`
+    passed: "All 3475 required tests passed", unit 7's whole path among them. Client shard 1 passed with
+    `ConcordanceGardenPactClientGameTests` (the line-up, the roster of seven, the matter pictures, the face rows);
+    shards 0, 2, 3, 7, 8, 13 and 14 passed. `Concordance load cards`: the workshop's and the pact hall's cards passed;
+    the garden's stopped at its own setup check ("Each pact has its presence at its perch: 0"): a presence learns its
+    Bound Will at its first think, so at the seal none carries one. Fixed in `dd71438c92` (counted by perch and holder
+    there; the samples while measured still check the record).
+  - workflow_dispatch [41576637311](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/41576637311) on
+    `dd71438c92` with `load_card`: `Concordance load cards` passed, all three cards (the garden's block below).
+  - Failures in these runs that are main's, not the cohort's: `mod` (the generator guard on `walls.json`; on the pull
+    request's merge with main, `newest_shapes`' missing vanilla reference); shards 9 (`CraftingChoices`), 10
+    (`WeaponArts`), 11 (`ImportedModelAtlas`), 12 (`HerobrineNetworkTests`' second client), 15
+    (`OwnerCollectionsNetworkTests`' second client), 4 and 6 (out of memory); on the pull request's merge
+    (run 41571740087) `optional integrations absent` failed only `raid_approach` and `pumpkling`, main's
+    `c0a9532563`.
+  - Shard 5: `ConcordancePactNetworkTests` (Chunk D's, now through the shared `SecondClient`) failed: "The second client
+    exited before joining: 255", the first client's heap 3,521 of 4,096 MiB after a collection before it started and
+    4,083 at the failure. The helper's heap line shows the cause is the shard's heap, filled by the classes before it.
+  - `pact clients without optional integrations` failed in both steps at Fabric's `waitForChunksRender`, before any test
+    step: Chunk D's unchanged `ConcordancePactClientGameTests` (line 152) and the garden network test (line 116) alike.
+    That job passed in Chunk D's run 40133540741; the cause is not established here (main's content since then is the
+    likely one).
 - **CI the line descends from**, cited only so: on `be76fd419` (main merged, units 1 to 5) and `1a15984d4` (units 1 to 5,
   Bifrons's first task and matter shortened) the server suite without the optional integrations and
   `ConcordanceGardenPactClientGameTests` passed (runs 41506566691, 41506582568 and 41521655013); on `5e93bb0a7` (units 1
@@ -2585,25 +2607,75 @@ Unit 7's additions to the [Completion evidence](#completion-evidence) rows; **ea
 
 #### Client evidence
 
-Nothing of unit 7 has run, so no picture of it exists; "Seen" is empty for every row (nobody has looked). A
-screenshot shows presentation; the tests' assertions are the evidence of behaviour.
+From run 41571742158, shard 1, looked at by the session on 3 November 2026 (not by a person). A screenshot shows
+presentation; the tests' assertions are the evidence of behaviour.
 
 | Shots (class) | What the test asserts | Seen |
 |---|---|---|
-| `jugcraft_garden_lineup` (`ConcordanceGardenPactClientGameTests`) | the seven pact spirits made under `tick freeze`, 3 blocks apart, frozen, from the front at one distance; every drawn box in the picture | |
-| `jugcraft_garden_roster_seven` (the same) | seven pacts sealed, the roster open with seven portraits drawn | |
-| `jugcraft_garden_amdusias_chooser` (the same; an existing shot) | now also that the chooser lists seven | |
-| `jugcraft_garden_bathin_matter_small`, `_foras_matter_small`, `_bifrons_matter_small`, `_amdusias_matter_small` (the same; re-shot) | the matter and every answer plate in view at 320x180 (`platesInView`) | |
-| `jugcraft_garden_foras_faces_*`, `jugcraft_garden_bifrons_faces_*` (the same; reframed) | the face rows of GC-P149 | |
-| `jugcraft_garden_peer_work` (`ConcordanceGardenNetworkTests`, the second client) | Buer's work gesture and the holder's bed's strain falling, seen from the stranger's client | |
-| `jugcraft_garden_peer_faced` (the same) | Buer turned to the stranger within 15 degrees; the taken page within 30 words | |
-| `jugcraft_garden_peer_refused` (the same) | the stranger's End refused as not the holder's; within 50 words | |
-| Marax's 33, Foras's 33, Bifrons's 36 and Amdusias's 35 pictures (the garden class) | as their records' Verification | |
+| `jugcraft_garden_lineup` (`ConcordanceGardenPactClientGameTests`) | the seven pact spirits made under `tick freeze`, 3 blocks apart, frozen, from the front at one distance; every drawn box in the picture | Seen: all seven stand in a row on the stone, each whole; small at this distance |
+| `jugcraft_garden_roster_seven` (the same) | seven pacts sealed, the roster open with seven portraits drawn | Seen: seven relic cards, each with its portrait, one page |
+| `jugcraft_garden_amdusias_chooser` (the same; an existing shot) | now also that the chooser lists seven | Seen: seven portraits, four ready and three "Not yet" with their reasons |
+| `jugcraft_garden_bathin_matter_small`, `_foras_matter_small`, `_bifrons_matter_small`, `_amdusias_matter_small` (the same; re-shot) | the matter and every answer plate in view at 320x180 (`platesInView`) | Seen: all four show the matter and both plates above the next payment; Foras's matter wraps to two lines and fits |
+| `jugcraft_garden_foras_faces_*`, `jugcraft_garden_bifrons_faces_*` (the same; reframed) | the face rows of GC-P149 | Seen: Foras's beard and Bifrons's face in frame, Bifrons drawn risen |
+| `jugcraft_garden_peer_work` (`ConcordanceGardenNetworkTests`, the second client) | Buer's work gesture and the holder's bed's strain falling, seen from the stranger's client | Not reached |
+| `jugcraft_garden_peer_faced` (the same) | Buer turned to the stranger within 15 degrees; the taken page within 30 words | Not reached |
+| `jugcraft_garden_peer_refused` (the same) | the stranger's End refused as not the holder's; within 50 words | Not reached |
+| Marax's 33, Foras's 33, Bifrons's 36 and Amdusias's 35 pictures (the garden class) | as their records' Verification | Not looked at one by one in this unit; their flows passed |
 
 #### The garden load card
 
-**Not run.** Its block will be pasted here verbatim from the `Concordance load cards` job's "Garden load card" notice
-of its first run, with the run and commit. As built (`cd6028b413`, `71c030c7e1`): two survival holders, each with seven
+**Passed** in run [41576637311](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/41576637311) on `dd71438c92` (the `Concordance load cards` job). Every figure is within GC-P141's budget: median +0.018 ms
+(budget +1.0), p95 +0.098 ms (+2.5), retained +0 MiB (+4). Its block, verbatim from the job's log:
+
+```text
+===== Concordance garden cohort load card (GC-10, GC-P141) =====
+build: Jugcraft 0.1.0-alpha; Jade loaded
+runner: Minecraft Version: 26.3
+runner: Operating System: Linux (amd64) version 7.0.0-1017-azure
+runner: Java Version: 25.0.5, Eclipse Adoptium
+runner: Java VM Version: OpenJDK 64-Bit Server VM (mixed mode, sharing), Eclipse Adoptium
+runner: Processor Vendor: GenuineIntel
+runner: Processor Name: Intel(R) Xeon(R) 6973P-C
+runner: Frequency (GHz): -0.00
+runner: Number of physical packages: 1
+runner: Number of physical CPUs: 2
+runner: Number of logical CPUs: 4
+runner: Memory: 1997288496 bytes (1904 MiB) / 3107979264 bytes (2964 MiB) up to 6442450944 bytes (6144 MiB)
+runner: JVM Flags: 2 total; -XX:+ExitOnOutOfMemoryError -Xmx6G
+runner: max heap 6144 MiB; collectors G1 Young Generation, G1 Concurrent GC, G1 Old Generation
+runner: JVM arguments: -Dfabric-api.gametest.filter=jugcraft-test:concordance_garden_load_game_tests_load_card -Dfabric-api.gametest -Dfabric.dli.config=/home/runner/work/jugcraft/jugcraft/.gradle/loom-cache/launch.cfg -Dfabric.dli.env=server -Dfabric.dli.main=net.fabricmc.loader.impl.launch.knot.KnotServer -XX:+ExitOnOutOfMemoryError --sun-misc-unsafe-memory-access=allow --enable-native-access=ALL-UNNAMED -Xmx6G -Dfile.encoding=UTF-8 -Duser.country -Duser.language=en -Duser.variant
+world: game test server (flat world, ticks run back to back); time running in both spans, each opened at world time 10000 (Buer's daylight to 12000, Bifrons's night from 13000), the garden span on a game day's turn (each quota fresh); weather held, mobs and wandering traders off, random tick speed 3; player list view 0 and simulation 0; the yard's 16 chunks force-loaded (16 by the card); players 2 in both spans (2 holders: server-side test players, no client)
+spans: baseline from tick 2013, garden from tick 24000 (game time 24000); each 6000 ticks in 60 windows of 100 after warm-ups of 2000 and 15986 ticks (at least 2000 and 1500, then until the loaded chunk count held 400 ticks, the garden's also until a game day's turn); tick times net of the test's own work (readings, scaffolding and sampling, timed apart below)
+tick ms, net of the test's own work | median p95 mean max over-50ms | 100-tick window means: median p95
+baseline 0.056 0.111 0.071 60.1 1 | 0.063 0.084
+garden 0.074 0.209 0.103 22.5 0 | 0.093 0.135
+raw medians 0.058 and 0.077 ms; the test's own work 0.004 and 0.009 ms a tick
+delta: median +0.018 ms, p95 +0.098 ms; baseline drift (second half less first) +0.001 ms
+memory: retained after a full collection: baseline 799 -> 799 MiB, garden 801 -> 801 MiB (+0 MiB beyond the baseline's change); heap in use +37.94 and +65.54 MiB per 1,000 ticks; collections 0 (0 ms) and 0 (0 ms)
+chunks loaded: baseline 992 -> 992, garden 992 -> 992
+counts: holders 2 (each keeping 7 pacts: the six garden spirits and Stolas), Pact Perches 14, Bound Wills 14, escrow one offering a pact, Verdant Beds 48 (awake, wet; 40 planted, 8 fallow), Verdant Hearts 2, Gleaners 2 (holder 0's beyond its Heart's reach, holder 1's within), Ley Pylons 2 (holder 0's beside its Heart, holder 1's apart), Mulch Maws 1, disturbing blocks 8, trees 1 (beside holder 0's Amdusias), chests 2 (64 Dewmoss, touching each Foras perch), readings every 3000 ticks a holder while measured
+level at the end: players: 2, entities: 16,16,3,90,90,0,0 [jugcraft:amdusias:2,jugcraft:marax:2,jugcraft:stolas:2,jugcraft:bifrons:2,jugcraft:foras:2], block_entities: 21 [jugcraft:pact_perch:14,jugcraft:gleaner:2,jugcraft:ley_pylon:2,jugcraft:verdant_heart:2,jugcraft:mulch_maw:1], block_ticks: 0, fluid_ticks: 0, chunk_source: Chunks[S] W: 992 E: 16,16,3,90,90,0,0
+active terms: jugcraft:stolas's pact star_reckoning (radius 8, hours 0 to 24000, quota 1; upkeep 1 of #jugcraft:stolas_offerings every 168000 ticks, grace 24000, up to 4 ahead)
+active terms: jugcraft:buer's pact strain_tending (radius 8, hours 0 to 12000, quota 16; upkeep 1 of #jugcraft:buer_offerings every 168000 ticks, grace 24000, up to 4 ahead)
+active terms: jugcraft:bathin's pact verdance_carrying (radius 10, hours 0 to 24000, quota 12; upkeep 4 of #jugcraft:bathin_offerings every 168000 ticks, grace 24000, up to 4 ahead)
+active terms: jugcraft:marax's pact habitat_reading (radius 8, hours 0 to 24000, quota 2; upkeep 2 of #jugcraft:marax_offerings every 168000 ticks, grace 24000, up to 4 ahead)
+active terms: jugcraft:foras's pact graft_keeping (radius 8, hours 0 to 24000, quota 8; upkeep 1 of #jugcraft:foras_offerings every 168000 ticks, grace 24000, up to 4 ahead)
+active terms: jugcraft:bifrons's pact root_running (radius 8, hours 13000 to 23000, quota 24; upkeep 2 of #jugcraft:bifrons_offerings every 168000 ticks, grace 24000, up to 4 ahead)
+active terms: jugcraft:amdusias's pact canopy_shelter (radius 6, hours 0 to 24000, quota 16; upkeep 1 of #jugcraft:amdusias_offerings every 168000 ticks, grace 24000, up to 4 ahead)
+the garden's rules sampled while measured: every 20 ticks (one think of each spirit between samples; 300 samples) no Verdance minted by a move (a pylon's Ley at most 2 for 3), no nutrient minted by a run (at most half reaches), one Dewmoss a graft (each chest's fall equals the new grafts), at most one task counted a pact a think; every 100 ticks (60 samples) one presence a pact, one canopy a holder at its Amdusias's perch and no bed's damping above it (canopies seen 60); around each reading no area sample taken (Garden.budget); every 1000 ticks the Bound Wills' own check, each escrow and the ground. Spirits' statuses at the window samples: {amdusias awaiting_answer=60, amdusias waiting_for_resources=60, bathin finished=86, bathin idle=34, bifrons awaiting_answer=94, bifrons finished=6, bifrons working=20, buer finished=62, buer idle=19, buer outside_agreement=38, buer working=1, foras finished=114, foras idle=4, foras working=2, marax idle=120, stolas idle=120}
+work while measured: Buer eased 32 beds, Bathin made 24 moves (204 Verdance, 72 Ley Charge), Marax gave 4 readings (4 answered, reasons {read=4}), Foras grafted 16, Bifrons ran 48 roots (96 nutrients taken, 48 given), Amdusias covered at most 4 beds
+the test's own actions, timed apart (not in the tick figures above): readings 4 at 4523.2 us, scaffolding 30 at 123.4 us (every 200 ticks: two beds a holder re-strained to 2, the Hearts refilled to 16 Verdance, the Gleaners and pylons emptied, the fallow beds refilled to 30 nutrients, each Foras chest topped up to 64 Dewmoss, grafts cleared), sampling 300 at 30.7 us; 0.005 ms a tick in all
+calls timed after the spans (one unmeasured tick, holder 0's spirits; 1000 thinks, refreshes and lookups, 200 readings and transactions, each after as many untimed; the thinks may change the garden within each quota): Buer's think 0.77 us, Bathin's 1.69 us, Marax's 0.30 us, Foras's 2.95 us, Bifrons's 0.34 us, Amdusias's 8.54 us; a GardenReach refresh (a new index's first read) 6.83 us; a canopy lookup (Canopies.damping, one a habitat build) 0.04 us; a reading (HabitatReading.read, as the page's Recall calls it; answered quota_spent) 0.66 us; a graft's transaction (one Dewmoss extracted in an outer transaction, rolled back) 4.35 us
+escrow and ground: escrow 24 items in 14 pacts (one offering each, none taken: no period fell due); the compacts not paid (sealed as the worker tests seal); Bound Wills held 14; Dewmoss in the chests 64 and 64; ground and the Bound Wills checked; problems none
+network to holder 0, the observed player (uncompressed, unframed): baseline 384 packets 23.2 KiB (0.08 KiB/s), garden 380 packets 23.0 KiB (0.08 KiB/s); unsized 0 and 0; signs in reach 0 and 218 (11.3 KiB, an upper bound); pact states a client that declared them would be sent 2 (5.5 KiB); holder 1 was sent 390 and 378 messages (counted, not sized)
+network, garden, holder 0 by kind: minecraft:level_particles 378/22.9 KiB, minecraft:system_chat 1/0.0 KiB, minecraft:set_time 1/0.0 KiB
+not measured: Jade's replies (they answer a client's request); compression and framing; client frame time (no client here)
+not in the workload: an open kept page left open, the roster, Star-reckoning, an offering falling due, a suspension, ending a pact, a party, a stranger's beds, holder 1's Amdusias at a tree (none beside his perch: he waits for one), an unloading chunk
+budget (GC-P141 in C-P19's form, proposed; the owner decides at merge review): median +1.0 ms: within; p95 +2.5 ms: within; retained +4 MiB beyond the baseline's: within. Asserted here: +5.0, +12.5 ms, +20 MiB
+===== end =====
+```
+
+As built (`cd6028b413`, `71c030c7e1`): two survival holders, each with seven
 sealed pacts (the six garden spirits and Stolas) and one offering in each escrow; 48 awake, wet beds (40 planted, 8
 fallow), 2 Hearts, 2 Gleaners, 2 Ley Pylons, a Mulch Maw, 8 budding amethyst, an oak and a chest of 64 Dewmoss by each
 Foras perch; holder 0's Bathin answered CLAIM, both Foras ALWAYS; readings asked through the kept page's own `RECALL`.
@@ -2616,7 +2688,9 @@ beds refilled, grafts cleared) timed apart and reported.
 
 #### The two-client run
 
-**Not run.** `ConcordanceGardenNetworkTests` (`4ac43e82ff`, `71c030c7e1`): on a loopback dedicated server the holder
+**Not reached.** In run 41571742158 (and the pull request's run 41571740087) the class sat in client shard 4, which ran out of memory in
+main's content before reaching it, and the opted-in job without the optional integrations stopped at Fabric's
+`waitForChunksRender` before its first step (above). No result, pass or fail, exists. `ConcordanceGardenNetworkTests` (`4ac43e82ff`, `71c030c7e1`): on a loopback dedicated server the holder
 seals Buer on the server; the second client (`GardenPeer`, through the shared `SecondClient`, its heap logged after a
 collection before it starts) stands by its own strained bed and the perch. When run, record here passed or failed with
 the run, the job and its `peer.log` (under `owner-network-evidence/garden-*/`). Two automated clients on one machine,
@@ -2624,10 +2698,9 @@ never two people.
 
 #### Not run
 
-Everything of unit 7 in CI: compilation, the whole path, the load card, the two-client test, the line-up, the roster of
-seven, the plates in view, the face rows, the tidy yard, the opted-in run without the optional integrations; a dispatch
-of every client class with `load_card` and `clients_without_optional` ticked; anything of Amdusias's; any picture looked
-at; a person playing, alone or with others; a sound heard; a player's hardware.
+The two-client test (not reached); the garden classes without the optional integrations (the job stopped before any
+step); a person playing, alone or with others; a sound heard; a player's hardware; Marax's, Foras's, Bifrons's and
+Amdusias's pictures looked at one by one.
 
 #### Known defects and limits (unit 7)
 
@@ -2638,11 +2711,10 @@ at; a person playing, alone or with others; a sound heard; a player's hardware.
 - **Job ceilings:** the `load-card` job (30 minutes) now runs three cards, the garden's up to 60,000 ticks; the
   `pact-clients-without-optional` job (45 minutes) now runs the pact classes (730 s by their weights) and the two garden
   classes (1,610 s and 300 s by theirs: estimates, not measurements), each step with its own build and start. Either may time out; raising a timeout is not an additive change, so it is left for the owner's review.
-- **Inferred, not seen:** that a spirit added under `tick freeze` reaches the client (the line-up); that Bifrons is
-  drawn low in the line-up and risen in his facing pictures, and his eye height while risen (the face rows come from the
-  geo files); that removing a container drops its contents (the tidy yard is safe either way); that the 320x180 body
-  holds two matter lines and a plate row (if not, the matter's compact lines are the next step); that Buer turns to a
-  stranger who is not the holder; the 30- and 50-word budgets of the stranger's pages.
+- **Seen since:** a spirit added under `tick freeze` reaches the client (the line-up); Bifrons is drawn risen in his
+  facing pictures; the 320x180 body holds two matter lines and a plate row.
+- **Inferred, not seen:** that removing a container drops its contents (the tidy yard is safe either way); that Buer
+  turns to a stranger who is not the holder; the 30- and 50-word budgets of the stranger's pages (the two-client test).
 - **Bifrons's finding 11 kept** (GC-P147): each kind of log carried draws its own Offer plate.
 - **Outside the cohort:** main's failures above.
 
@@ -2650,13 +2722,13 @@ at; a person playing, alone or with others; a sound heard; a player's hardware.
 
 | Feature | Tier | Input producer | Output consumer | Costs | Unlocks | Failure behaviour | Test evidence |
 |---|---|---|---|---|---|---|---|
-| The evidence (GC-10) | none | the garden cohort, units 1 to 6 | the owner's checkpoint | none in play | nothing | not applicable | `theGardenPactsFromCodexToDeparture`; the garden load card; `ConcordanceGardenPactClientGameTests`; `ConcordanceGardenNetworkTests`; none run yet |
+| The evidence (GC-10) | none | the garden cohort, units 1 to 6 | the owner's checkpoint | none in play | nothing | not applicable | `theGardenPactsFromCodexToDeparture`; the garden load card; `ConcordanceGardenPactClientGameTests`; `ConcordanceGardenNetworkTests`; all but the last passed in runs 41571742158 and 41576637311; the two-client test not reached |
 
 #### The handoff (10:133-146)
 
 - **What was built:** base `2c61471b2a` (with `0bdc737b12`) to this records commit: GC-10's combined fixes, the whole
   path, the garden load card, the two-client test with its shared helper, the line-up and the roster of seven, the
-  records, the checkpoint. GC-10 is **built, not yet run**.
+  records, the checkpoint. GC-10 is **built and run**, but for the two-client test.
 - **APIs reused:** `SecondClient` (new, shared by `ConcordancePactNetworkTests` and the garden network test;
   `OwnerCollectionsNetworkTests` untouched); Chunk C's `Measure`, `Traffic` and `Stats` and the pact hall card's
   structure; `TestPlayers.survivor`; the worker and garden tests' package-private helpers (`FIXTURES`, the offers,
@@ -2667,7 +2739,7 @@ at; a person playing, alone or with others; a sound heard; a player's hardware.
   record's block regenerated from it), `tools/concordance_pacts.py` (`GARDEN_CLIENT_SHOTS`, `GARDEN_NETWORK_SHOTS`),
   `tools/select_client_tests.py` (weights), `tools/check_mod_data.py` (`check_garden_load_card`, `check_garden_network`,
   `check_pact_network`, `check_pact_screen`); no art or sound added.
-- **What to look at:** the checkpoint below; the shots under Client evidence, once run.
+- **What to look at:** the checkpoint below; the shots under Client evidence (run 41571742158, shard 1).
 - **How to verify:** a workflow_dispatch of the Build workflow with every client class and `load_card` and
   `clients_without_optional` ticked; locally, the commands in `docs/TESTING.md`.
 - **Not verified:** under Not run. **Known defects:** above.
@@ -3179,8 +3251,7 @@ every citation resolves; none is the owner's.
 #### The cohort checkpoint (draft, GC-10 unit 7)
 
 Drafted for the owner from the three questions above, their facts brought to the build (all six built, Amdusias 2.4
-tall, the matter plates' fix); 487 words. To be reported once CI has run on the cohort head and its pictures are
-looked at, with "What I checked" brought to that run.
+tall, the matter plates' fix); "What I checked" brought to runs 41571742158 and 41576637311 on 3 November 2026.
 
 **The garden cohort: six garden spirits on the shared pact record**
 
@@ -3193,9 +3264,9 @@ looked at, with "What I checked" brought to that run.
 All six are built, each facing whoever speaks. A kept page now shows a spirit's matter and its answer plates above the first task, so a small window keeps them in view. Unit 7 adds one server test through all six, a garden load card, a two-client test at Buer's perch, a line-up of the seven and a roster of seven.
 
 **What I checked**
-Candidate: unit 7's records commit on `wip/garden-u7`. Nothing of unit 7 has run in CI; its Java was only parse-checked, and the Python checks show only main's known failures. On `be76fd419` and `1a15984d4` (units 1 to 5) the server suite without the optional integrations and the garden client class passed (runs 41506566691, 41506582568, 41521655013); Amdusias's first run was in progress. Not checked: anyone playing; sound; two people; any load figure.
+Candidate: `dd71438c92` on `claude/garden-cohort`. In runs 41571742158 and 41576637311 all 3,475 server tests passed, the whole path among them; the garden client class passed with all seven spirits; the garden load card passed, every figure well within budget (median +0.018 ms, p95 +0.098 ms, +0 MiB). The two-client test never ran: its shard ran out of memory in main's content first. The other red jobs are main's. Not checked: anyone playing; sound; two clients; two people.
 
-**What to look at** (once run)
+**What to look at**
 - `jugcraft_garden_lineup`, `jugcraft_garden_roster_seven`, `jugcraft_garden_bifrons_matter_small`, `jugcraft_garden_peer_faced`.
 - In creative: `/jugcraft concordance grant @s jugcraft:garden_regard understood`, place a perch by an awake Verdant Bed, invite Buer, accept, end him from the roster.
 
@@ -3209,15 +3280,12 @@ CI on the cohort head and these pictures looked at, then the cohort you choose. 
 
 ## Where to resume
 
-Units 1 to 7 are built and recorded on the cohort line (units 1 to 6 merged in order on `claude/garden-cohort`, unit 7
-on its own line `wip/garden-u7` from the cohort head `2c61471b2a`, its fixes under `GC-10 unit 7` markers so
-Amdusias's CI fixes merge beside them); they wait in draft pull request
-[#526](https://github.com/jimbozoomer-byte/jugcraft/pull/526) for the owner's review; nothing is merged into main.
-What has run in CI, cited only so: units 1 and 2 in their own runs (40605564166, 40777920181; their records); on
-`5e93bb0a7` (units 1 to 4) run 40852556175 passed in full; on `be76fd419` and `1a15984d4` (units 1 to 5) the server suite
-without the optional integrations and `ConcordanceGardenPactClientGameTests` passed (runs 41506566691, 41506582568 and
-41521655013). Amdusias (unit 6) has not run: his first run, on `2c61471b2a`, was in progress when this was written.
-**Nothing of unit 7 has run** ([unit 7](#unit-7-as-built-and-its-evidence)). Next:
+Units 1 to 7 are built, recorded and pushed on `claude/garden-cohort` (head `dd71438c92`), in draft pull request
+[#526](https://github.com/jimbozoomer-byte/jugcraft/pull/526) for the owner's review; nothing is merged into main. Unit 7
+ran in runs 41571742158 and 41576637311: the server suite, the garden client class and the garden load card passed;
+the two-client test was not reached ([unit 7](#unit-7-as-built-and-its-evidence)). The checkpoint below has been reported
+to the owner; do not start another cohort before the owner answers. Steps 1 to 6 below are done but for the two-client
+run (step 5): it waits for a shard with heap to spare, or for main's out-of-memory shards to be fixed. Next:
 
 1. Merge unit 7's line into the cohort after Amdusias's CI fixes (each side's lines under its own markers), refresh main
    and the open pull requests, and merge main if it moved (generated files written by their own tools, never
