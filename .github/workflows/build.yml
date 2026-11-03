@@ -190,7 +190,9 @@ jobs:
   plan:
     name: choose client tests
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    # Fetching both merge parents of the expanded asset repository exceeded five minutes.
+    # This is setup time only; selection and every client assertion remain unchanged.
+    timeout-minutes: 15
     outputs:
       shard0: ${{ steps.choose.outputs.shard0 }}
       shard1: ${{ steps.choose.outputs.shard1 }}
