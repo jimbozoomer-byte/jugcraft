@@ -15435,5 +15435,985 @@
     "sounds": [
       "jugcraft:jimtafacts/spellbooks/music/music_disc_whispers_of_ice"
     ]
+  },
+  "twigworks_item.bronzed_seashell.play": {
+    "sounds": [
+      "jugcraft:newest/twigworks/item/bronzed_seashell/play"
+    ],
+    "subtitle": "subtitles.item.bronzed_seashell.play"
+  },
+  "twigworks_block.seashell.break": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/seashell/break1",
+      "jugcraft:newest/twigworks/block/seashell/break2",
+      "jugcraft:newest/twigworks/block/seashell/break3",
+      "jugcraft:newest/twigworks/block/seashell/break4"
+    ],
+    "subtitle": "subtitles.block.generic.break"
+  },
+  "twigworks_block.seashell.place": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/seashell/place1",
+      "jugcraft:newest/twigworks/block/seashell/place2",
+      "jugcraft:newest/twigworks/block/seashell/place3",
+      "jugcraft:newest/twigworks/block/seashell/place4"
+    ],
+    "subtitle": "subtitles.block.generic.break"
+  },
+  "twigworks_block.seashell.fall": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.seashell.break",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.seashell.step": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/seashell/step1",
+      "jugcraft:newest/twigworks/block/seashell/step2",
+      "jugcraft:newest/twigworks/block/seashell/step3",
+      "jugcraft:newest/twigworks/block/seashell/step4"
+    ],
+    "subtitle": "subtitles.block.generic.footsteps"
+  },
+  "twigworks_block.seashell.hit": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.seashell.step",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.schist.break": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/schist/heavy1",
+      "jugcraft:newest/twigworks/block/schist/heavy2",
+      "jugcraft:newest/twigworks/block/schist/heavy3"
+    ],
+    "subtitle": "subtitles.block.generic.break"
+  },
+  "twigworks_block.schist.step": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/schist/light1",
+      "jugcraft:newest/twigworks/block/schist/light2",
+      "jugcraft:newest/twigworks/block/schist/light3",
+      "jugcraft:newest/twigworks/block/schist/light4"
+    ],
+    "subtitle": "subtitles.block.generic.footsteps"
+  },
+  "twigworks_block.schist.fall": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.schist.break",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.schist.hit": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.schist.step",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.hit"
+  },
+  "twigworks_block.schist.place": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.schist.break",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.place"
+  },
+  "twigworks_block.schist_bricks.break": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/schist_bricks/heavy1",
+      "jugcraft:newest/twigworks/block/schist_bricks/heavy2",
+      "jugcraft:newest/twigworks/block/schist_bricks/heavy3"
+    ],
+    "subtitle": "subtitles.block.generic.break"
+  },
+  "twigworks_block.schist_bricks.fall": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.schist_bricks.break",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.schist_bricks.hit": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.schist.hit",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.hit"
+  },
+  "twigworks_block.schist_bricks.place": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.schist_bricks.break",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.place"
+  },
+  "twigworks_block.schist_bricks.step": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.schist.step",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.footsteps"
+  },
+  "twigworks_block.bloodstone.break": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/bloodstone/heavy1",
+      "jugcraft:newest/twigworks/block/bloodstone/heavy2",
+      "jugcraft:newest/twigworks/block/bloodstone/heavy3",
+      "jugcraft:newest/twigworks/block/bloodstone/heavy4"
+    ],
+    "subtitle": "subtitles.block.generic.break"
+  },
+  "twigworks_block.bloodstone.fall": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.bloodstone.break",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.bloodstone.hit": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.bloodstone.step",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.hit"
+  },
+  "twigworks_block.bloodstone.place": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.bloodstone.break",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.place"
+  },
+  "twigworks_block.bloodstone.step": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/bloodstone/light1",
+      "jugcraft:newest/twigworks/block/bloodstone/light2",
+      "jugcraft:newest/twigworks/block/bloodstone/light3",
+      "jugcraft:newest/twigworks/block/bloodstone/light4"
+    ],
+    "subtitle": "subtitles.block.generic.footsteps"
+  },
+  "twigworks_block.bloodstone_bricks.break": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/bloodstone_bricks/heavy1",
+      "jugcraft:newest/twigworks/block/bloodstone_bricks/heavy2",
+      "jugcraft:newest/twigworks/block/bloodstone_bricks/heavy3",
+      "jugcraft:newest/twigworks/block/bloodstone_bricks/heavy4"
+    ],
+    "subtitle": "subtitles.block.generic.break"
+  },
+  "twigworks_block.bloodstone_bricks.fall": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.bloodstone_bricks.break",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.bloodstone_bricks.hit": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.bloodstone.hit",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.hit"
+  },
+  "twigworks_block.bloodstone_bricks.place": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.bloodstone_bricks.break",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.place"
+  },
+  "twigworks_block.bloodstone_bricks.step": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.bloodstone.step",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.footsteps"
+  },
+  "twigworks_block.rhyolite.break": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/rhyolite/heavy1",
+      "jugcraft:newest/twigworks/block/rhyolite/heavy2",
+      "jugcraft:newest/twigworks/block/rhyolite/heavy3",
+      "jugcraft:newest/twigworks/block/rhyolite/heavy4"
+    ],
+    "subtitle": "subtitles.block.generic.break"
+  },
+  "twigworks_block.rhyolite.fall": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.rhyolite.break",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.rhyolite.hit": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.rhyolite.step",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.hit"
+  },
+  "twigworks_block.rhyolite.place": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.rhyolite.break",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.place"
+  },
+  "twigworks_block.rhyolite.step": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/rhyolite/light1",
+      "jugcraft:newest/twigworks/block/rhyolite/light2",
+      "jugcraft:newest/twigworks/block/rhyolite/light3",
+      "jugcraft:newest/twigworks/block/rhyolite/light4",
+      "jugcraft:newest/twigworks/block/rhyolite/light5"
+    ],
+    "subtitle": "subtitles.block.generic.footsteps"
+  },
+  "twigworks_block.rhyolite_bricks.break": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/rhyolite_bricks/heavy1",
+      "jugcraft:newest/twigworks/block/rhyolite_bricks/heavy2",
+      "jugcraft:newest/twigworks/block/rhyolite_bricks/heavy3",
+      "jugcraft:newest/twigworks/block/rhyolite_bricks/heavy4"
+    ],
+    "subtitle": "subtitles.block.generic.break"
+  },
+  "twigworks_block.rhyolite_bricks.fall": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.rhyolite_bricks.break",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.rhyolite_bricks.hit": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.rhyolite.hit",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.hit"
+  },
+  "twigworks_block.rhyolite_bricks.place": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.rhyolite_bricks.break",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.place"
+  },
+  "twigworks_block.rhyolite_bricks.step": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.rhyolite.step",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.footsteps"
+  },
+  "twigworks_block.tuff_bricks.break": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/tuff_bricks/heavy1",
+      "jugcraft:newest/twigworks/block/tuff_bricks/heavy2",
+      "jugcraft:newest/twigworks/block/tuff_bricks/heavy3",
+      "jugcraft:newest/twigworks/block/tuff_bricks/heavy4"
+    ],
+    "subtitle": "subtitles.block.generic.break"
+  },
+  "twigworks_block.tuff_bricks.fall": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.tuff_bricks.break",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.tuff_bricks.hit": {
+    "sounds": [
+      {
+        "name": "block.tuff.hit",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.hit"
+  },
+  "twigworks_block.tuff_bricks.place": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.tuff_bricks.break",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.place"
+  },
+  "twigworks_block.tuff_bricks.step": {
+    "sounds": [
+      {
+        "name": "block.tuff.step",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.footsteps"
+  },
+  "twigworks_block.calcite_bricks.break": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/calcite_bricks/heavy1",
+      "jugcraft:newest/twigworks/block/calcite_bricks/heavy2",
+      "jugcraft:newest/twigworks/block/calcite_bricks/heavy3",
+      "jugcraft:newest/twigworks/block/calcite_bricks/heavy4"
+    ],
+    "subtitle": "subtitles.block.generic.break"
+  },
+  "twigworks_block.calcite_bricks.fall": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.calcite_bricks.break",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.calcite_bricks.hit": {
+    "sounds": [
+      {
+        "name": "block.calcite.hit",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.hit"
+  },
+  "twigworks_block.calcite_bricks.place": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.calcite_bricks.break",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.place"
+  },
+  "twigworks_block.calcite_bricks.step": {
+    "sounds": [
+      {
+        "name": "block.calcite.step",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.footsteps"
+  },
+  "twigworks_block.paper_lantern.break": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/paper_lantern/heavy1",
+      "jugcraft:newest/twigworks/block/paper_lantern/heavy2",
+      "jugcraft:newest/twigworks/block/paper_lantern/heavy3",
+      "jugcraft:newest/twigworks/block/paper_lantern/heavy4"
+    ],
+    "subtitle": "subtitles.block.generic.break"
+  },
+  "twigworks_block.paper_lantern.place": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.paper_lantern.break",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.paper_lantern.fall": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.paper_lantern.break",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.paper_lantern.step": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/paper_lantern/light1",
+      "jugcraft:newest/twigworks/block/paper_lantern/light2",
+      "jugcraft:newest/twigworks/block/paper_lantern/light3",
+      "jugcraft:newest/twigworks/block/paper_lantern/light4"
+    ],
+    "subtitle": "subtitles.block.generic.footsteps"
+  },
+  "twigworks_block.paper_lantern.hit": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.paper_lantern.step",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.lamp.break": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/lamp/break1",
+      "jugcraft:newest/twigworks/block/lamp/break2",
+      "jugcraft:newest/twigworks/block/lamp/break3",
+      "jugcraft:newest/twigworks/block/lamp/break4"
+    ],
+    "subtitle": "subtitles.block.generic.break"
+  },
+  "twigworks_block.lamp.place": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/lamp/place1",
+      "jugcraft:newest/twigworks/block/lamp/place2",
+      "jugcraft:newest/twigworks/block/lamp/place3",
+      "jugcraft:newest/twigworks/block/lamp/place4"
+    ],
+    "subtitle": "subtitles.block.generic.place"
+  },
+  "twigworks_block.lamp.fall": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.lamp.break",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.lamp.step": {
+    "sounds": [
+      {
+        "name": "block.lantern.step",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.lamp.hit": {
+    "sounds": [
+      {
+        "name": "block.lantern.hit",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.lamp.on": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/lamp/on1",
+      "jugcraft:newest/twigworks/block/lamp/on2",
+      "jugcraft:newest/twigworks/block/lamp/on3"
+    ],
+    "subtitle": "subtitles.block.lamp.on"
+  },
+  "twigworks_block.lamp.off": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/lamp/off1",
+      "jugcraft:newest/twigworks/block/lamp/off2",
+      "jugcraft:newest/twigworks/block/lamp/off3"
+    ],
+    "subtitle": "subtitles.block.lamp.off"
+  },
+  "twigworks_block.shroomlamp.break": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/shroomlamp/heavy1",
+      "jugcraft:newest/twigworks/block/shroomlamp/heavy2",
+      "jugcraft:newest/twigworks/block/shroomlamp/heavy3",
+      "jugcraft:newest/twigworks/block/shroomlamp/heavy4"
+    ],
+    "subtitle": "subtitles.block.generic.break"
+  },
+  "twigworks_block.shroomlamp.place": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.shroomlamp.break",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.place"
+  },
+  "twigworks_block.shroomlamp.fall": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.shroomlamp.break",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.shroomlamp.hit": {
+    "sounds": [
+      {
+        "name": "block.shroomlight.hit",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.shroomlamp.step": {
+    "sounds": [
+      {
+        "name": "block.wood.hit",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.basalt_bricks.break": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/basalt_bricks/heavy1",
+      "jugcraft:newest/twigworks/block/basalt_bricks/heavy2",
+      "jugcraft:newest/twigworks/block/basalt_bricks/heavy3",
+      "jugcraft:newest/twigworks/block/basalt_bricks/heavy4"
+    ],
+    "subtitle": "subtitles.block.generic.break"
+  },
+  "twigworks_block.basalt_bricks.place": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.basalt_bricks.break",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.place"
+  },
+  "twigworks_block.basalt_bricks.fall": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.basalt_bricks.break",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.basalt_bricks.hit": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/basalt_bricks/light1",
+      "jugcraft:newest/twigworks/block/basalt_bricks/light2",
+      "jugcraft:newest/twigworks/block/basalt_bricks/light3",
+      "jugcraft:newest/twigworks/block/basalt_bricks/light4",
+      "jugcraft:newest/twigworks/block/basalt_bricks/light5"
+    ],
+    "subtitle": "subtitles.block.generic.hit"
+  },
+  "twigworks_block.basalt_bricks.step": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.basalt_bricks.hit",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.footsteps"
+  },
+  "twigworks_block.rocky_dirt.break": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/rocky_dirt/heavy1",
+      "jugcraft:newest/twigworks/block/rocky_dirt/heavy2",
+      "jugcraft:newest/twigworks/block/rocky_dirt/heavy3",
+      "jugcraft:newest/twigworks/block/rocky_dirt/heavy4"
+    ],
+    "subtitle": "subtitles.block.generic.break"
+  },
+  "twigworks_block.rocky_dirt.place": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.rocky_dirt.break",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.place"
+  },
+  "twigworks_block.rocky_dirt.fall": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.rocky_dirt.break",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.rocky_dirt.hit": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/rocky_dirt/light1",
+      "jugcraft:newest/twigworks/block/rocky_dirt/light2",
+      "jugcraft:newest/twigworks/block/rocky_dirt/light3",
+      "jugcraft:newest/twigworks/block/rocky_dirt/light4"
+    ],
+    "subtitle": "subtitles.block.generic.hit"
+  },
+  "twigworks_block.rocky_dirt.step": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.rocky_dirt.hit",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.footsteps"
+  },
+  "twigworks_block.gravel_bricks.break": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/gravel_bricks/heavy1",
+      "jugcraft:newest/twigworks/block/gravel_bricks/heavy2",
+      "jugcraft:newest/twigworks/block/gravel_bricks/heavy3",
+      "jugcraft:newest/twigworks/block/gravel_bricks/heavy4"
+    ],
+    "subtitle": "subtitles.block.generic.break"
+  },
+  "twigworks_block.gravel_bricks.fall": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.gravel_bricks.break",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.gravel_bricks.hit": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.gravel_bricks.step",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.hit"
+  },
+  "twigworks_block.gravel_bricks.place": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.gravel_bricks.break",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.place"
+  },
+  "twigworks_block.gravel_bricks.step": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/gravel_bricks/light1",
+      "jugcraft:newest/twigworks/block/gravel_bricks/light2",
+      "jugcraft:newest/twigworks/block/gravel_bricks/light3",
+      "jugcraft:newest/twigworks/block/gravel_bricks/light4"
+    ],
+    "subtitle": "subtitles.block.generic.footsteps"
+  },
+  "twigworks_block.packed_silt.break": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/packed_silt/heavy1",
+      "jugcraft:newest/twigworks/block/packed_silt/heavy2",
+      "jugcraft:newest/twigworks/block/packed_silt/heavy3",
+      "jugcraft:newest/twigworks/block/packed_silt/heavy4"
+    ],
+    "subtitle": "subtitles.block.generic.break"
+  },
+  "twigworks_block.packed_silt.fall": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.packed_silt.break",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.packed_silt.hit": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.packed_silt.step",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.hit"
+  },
+  "twigworks_block.packed_silt.place": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.packed_silt.break",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.place"
+  },
+  "twigworks_block.packed_silt.step": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/packed_silt/light1",
+      "jugcraft:newest/twigworks/block/packed_silt/light2",
+      "jugcraft:newest/twigworks/block/packed_silt/light3",
+      "jugcraft:newest/twigworks/block/packed_silt/light4",
+      "jugcraft:newest/twigworks/block/packed_silt/light5"
+    ],
+    "subtitle": "subtitles.block.generic.footsteps"
+  },
+  "twigworks_block.silt.break": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/silt/heavy1",
+      "jugcraft:newest/twigworks/block/silt/heavy2",
+      "jugcraft:newest/twigworks/block/silt/heavy3",
+      "jugcraft:newest/twigworks/block/silt/heavy4"
+    ],
+    "subtitle": "subtitles.block.generic.break"
+  },
+  "twigworks_block.silt.fall": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.silt.break",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.silt.hit": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.silt.step",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.hit"
+  },
+  "twigworks_block.silt.place": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.silt.break",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.place"
+  },
+  "twigworks_block.silt.step": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/silt/light1",
+      "jugcraft:newest/twigworks/block/silt/light2",
+      "jugcraft:newest/twigworks/block/silt/light3",
+      "jugcraft:newest/twigworks/block/silt/light4"
+    ],
+    "subtitle": "subtitles.block.generic.footsteps"
+  },
+  "twigworks_block.silt_pot.break": {
+    "sounds": [
+      {
+        "name": "jugcraft:newest/twigworks/block/silt_pot/heavy1",
+        "pitch": 1.2,
+        "volume": 0.6
+      },
+      {
+        "name": "jugcraft:newest/twigworks/block/silt_pot/heavy2",
+        "pitch": 1.2,
+        "volume": 0.6
+      },
+      {
+        "name": "jugcraft:newest/twigworks/block/silt_pot/heavy3",
+        "pitch": 1.2,
+        "volume": 0.6
+      },
+      {
+        "name": "jugcraft:newest/twigworks/block/silt_pot/heavy4",
+        "pitch": 1.2,
+        "volume": 0.6
+      }
+    ],
+    "subtitle": "subtitles.block.generic.break"
+  },
+  "twigworks_block.silt_pot.fall": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.packed_silt.fall",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.silt_pot.hit": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.packed_silt.hit",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.silt_pot.place": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.packed_silt.place",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.silt_pot.step": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.packed_silt.step",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.silt_pot_filled.break": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.silt_pot.break",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.silt_pot_filled.fall": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.silt_pot.fall",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.silt_pot_filled.hit": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.silt_pot.hit",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.silt_pot_filled.place": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.silt_pot.place",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.silt_pot_filled.step": {
+    "sounds": [
+      {
+        "name": "minecraft:block.rooted_dirt.step",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.silt_shingles.break": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/silt_shingles/heavy1",
+      "jugcraft:newest/twigworks/block/silt_shingles/heavy2",
+      "jugcraft:newest/twigworks/block/silt_shingles/heavy3",
+      "jugcraft:newest/twigworks/block/silt_shingles/heavy4",
+      "jugcraft:newest/twigworks/block/silt_shingles/heavy5"
+    ],
+    "subtitle": "subtitles.block.generic.break"
+  },
+  "twigworks_block.silt_shingles.fall": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.silt_shingles.break",
+        "type": "event"
+      }
+    ]
+  },
+  "twigworks_block.silt_shingles.hit": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.silt_shingles.step",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.hit"
+  },
+  "twigworks_block.silt_shingles.place": {
+    "sounds": [
+      {
+        "name": "jugcraft:twigworks_block.silt_shingles.break",
+        "type": "event"
+      }
+    ],
+    "subtitle": "subtitles.block.generic.place"
+  },
+  "twigworks_block.silt_shingles.step": {
+    "sounds": [
+      "jugcraft:newest/twigworks/block/silt_shingles/light1",
+      "jugcraft:newest/twigworks/block/silt_shingles/light2",
+      "jugcraft:newest/twigworks/block/silt_shingles/light3",
+      "jugcraft:newest/twigworks/block/silt_shingles/light4",
+      "jugcraft:newest/twigworks/block/silt_shingles/light5"
+    ],
+    "subtitle": "subtitles.block.generic.footsteps"
+  },
+  "twigworks_entity.pebble.throw": {
+    "sounds": [
+      "minecraft:random/bow"
+    ],
+    "subtitle": "subtitles.entity.twigs.pebble.throw"
+  },
+  "homeworks_lamp_toggle": {
+    "subtitle": "sounds.cozyhome.lamp_toggle",
+    "sounds": [
+      "jugcraft:newest/homeworks/lamp_toggle"
+    ]
+  },
+  "homeworks_fireplace_loop": {
+    "subtitle": "sounds.cozyhome.fireplace_loop",
+    "sounds": [
+      "jugcraft:newest/homeworks/fireplace_loop_0",
+      "jugcraft:newest/homeworks/fireplace_loop_1"
+    ]
+  },
+  "homeworks_grandfather_clock_tick": {
+    "subtitle": "sounds.cozyhome.grandfather_clock_tick",
+    "sounds": [
+      "jugcraft:newest/homeworks/grandfather_clock_tick_0",
+      "jugcraft:newest/homeworks/grandfather_clock_tick_1",
+      "jugcraft:newest/homeworks/grandfather_clock_tick_2",
+      "jugcraft:newest/homeworks/grandfather_clock_tick_3",
+      "jugcraft:newest/homeworks/grandfather_clock_tick_4",
+      "jugcraft:newest/homeworks/grandfather_clock_tick_5"
+    ]
+  },
+  "homeworks_grandfather_clock_midnight": {
+    "subtitle": "sounds.cozyhome.grandfather_clock_midnight",
+    "sounds": [
+      "jugcraft:newest/homeworks/grandfather_clock_midnight"
+    ]
+  },
+  "homeworks_light_water_flow": {
+    "subtitle": "sounds.cozyhome.light_water_flow",
+    "sounds": [
+      "jugcraft:newest/homeworks/light_water_flow_1",
+      "jugcraft:newest/homeworks/light_water_flow_2",
+      "jugcraft:newest/homeworks/light_water_flow_3",
+      "jugcraft:newest/homeworks/light_water_flow_4"
+    ]
+  },
+  "homeworks_splash": {
+    "subtitle": "sounds.cozyhome.splash",
+    "sounds": [
+      "jugcraft:newest/homeworks/splash_01",
+      "jugcraft:newest/homeworks/splash_02",
+      "jugcraft:newest/homeworks/splash_03",
+      "jugcraft:newest/homeworks/splash_04",
+      "jugcraft:newest/homeworks/splash_05",
+      "jugcraft:newest/homeworks/splash_06",
+      "jugcraft:newest/homeworks/splash_07",
+      "jugcraft:newest/homeworks/splash_08"
+    ]
+  },
+  "homeworks_sink_toggle": {
+    "subtitle": "sounds.cozyhome.sink_toggle",
+    "sounds": [
+      "jugcraft:newest/homeworks/sink_toggle"
+    ]
+  },
+  "homeworks_running_water": {
+    "subtitle": "sounds.cozyhome.running_water",
+    "sounds": [
+      "jugcraft:newest/homeworks/running_water_0",
+      "jugcraft:newest/homeworks/running_water_1",
+      "jugcraft:newest/homeworks/running_water_2",
+      "jugcraft:newest/homeworks/running_water_3"
+    ]
   }
 }

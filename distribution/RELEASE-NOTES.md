@@ -1,20 +1,24 @@
-JUGCRAFT living city, harvest and Halloween update — release candidate.
+JUGCRAFT companions, harvest and server tools — 0.1.0-alpha.20261102.1
 
-- Also included since the currently hosted October 27 build: Peepo/Jughead spawning and work feedback, the earlier gun additions and hit effects, seasonal Horseman sightings, Blood Moons, Graveyard Rising, the Church Bridge Horseman lair, and fixes for queued Herobrine groves and codex packet disconnects.
-- Living spawn city: residents work, socialize in the evening and go to bed late; shop hours and essential late-night service; additive decorations using existing blocks; a full-size City Commission Board on the square's south edge; public door, seat and workstation access while private containers stay protected.
-- Economy: lower crop and commission payouts aligned with 1 gold ingot = 1 Jug; current balances preserved. No diamond conversion added.
-- Harvest and home: pumpkin patch produce and displays, orchard ladders/bins/bags/handcarts, barn tools and processing, planters and porch furniture, café string lights, fireplaces, stoves, tea kettles, simmer pots, firewood and knitting decorations.
-- Halloween entertainment: cotton candy and caramel corn, ticket booths, Whack-a-Zombie, shooting gallery, ghost train and haunted carousel; haunted mailbox, pumpkin path lights, skeleton animals, rising zombie, door decorations, crashed witch and candy chute; party foods, cake stands and table.
-- Clockwork shows: Organ-Grinder Skeleton, Animatronic Werewolf, Flying Crank Ghost, Clockwork Raven and Pumpkin-Headed Drummer, plus a powered Show Controller.
-- Festival grounds: giant cornucopia and show vegetables, prize ribbon display, animated steam traction engine and hay wagon, harvest bunting and wearable sack-race sack.
-- Costume disguises work all year against their matching monsters, with retaliation and boss exclusions. The Cursed Mirror adds a break-triggered Bad Luck curse.
-- Guns: recoil push, flying microjets and heavy-gun movement costs; Hush Pistol, Salvo Rifle, Highball Repeater, Comet Pistol, Narwhal Lance and Halibut Gun.
-- Fixes: industrial machine placement previews no longer use the wrong multipart property; winter aspen uses leaves rather than bare twigs; GeckoLib's Windows glow pipeline gets explicit Iris entity/shadow mappings. BSL/Bliss/without-Iris checks passed locally before this batch; confirmation of the owner's intermittent live streaks remains pending.
+Changes since 0.1.0-alpha.20261031.2:
+- Persistent pet roster, recall/resummon, knockout recovery, Follow/Stay/Defend/Passive modes, bond levels and abilities; ownership and stale-entity safeguards.
+- Repaired 27 placed meals, added placement/serving geometry for the remaining audited foods and connected linen Feast Tables.
+- Four harvest dishes, a 24-portion giant turkey feast, player Pilgrim costumes, seasonal citizen/raider outfits and a Thanksgiving Day raid truce.
+- Craftable two-player chess/checkers, live in-world pieces, legal move controls, saved matches and optional mutually agreed Jugs wagers with escrow/refunds.
+- Public warp/spawn and nearby held-stack trades; operator warp management, persistent god mode and read-only inventory inspection.
+- Persistent operator protection cuboids, visible surveyor tool and shared town/automation protection.
+- Custom NPCs and guards: names, dialogue, player-name skins, posts and patrols; seasonal overlays preserve custom appearances.
+- 111 survival crafting recipes, 25 paid forge upgrades, restored Ribbit loot tables, staff behaviors, stripping and acquisition/audit corrections.
+- Source-preserving repairs to 112 model templates, lunch-basket/quartz-furniture fixes and expanded missing-texture/aircraft banking checks.
 
-No world regeneration is required. Existing cities receive only an explicit, conservative additive upgrade that preserves edited blocks and owner fixtures. Keep the matching world/configuration backup and previous managed files for rollback. Matching server/client versions are required for new registrations.
+Held work: the larger town-square cornucopia/decor replacement and November joke events are NOT activated. Existing worlds, owner builds, settings and player data must be preserved. No world reset or town regeneration.
 
-Existing players: after the matching server is verified and this release is promoted, open JUGCRAFT Updates, download, apply and quit, wait for the updater, then relaunch the same Modrinth profile. Settings, keybinds, saves and extra mods remain in place.
+Limits: /trade exchanges one held stack per player; /invsee is read-only; /setspawn changes the command destination, not vanilla death respawn. Temporary summons retain their own lifecycle. Real username skin retrieval, classic/slim appearance and human multiplayer acceptance remain playtest follow-ups. Existing missing source assets and 48 possible open-surface findings remain documented; this is not a claim that every imported asset is perfect. The harvest equipment empty-layer warning is also retained for follow-up.
 
-Combined results and the full PR list are recorded in docs/features/ready-pr-batch-oct29.md. Candidate preparation is not live deployment. Owner confirmation and a full 30-second player warning are required before restarting.
+Validation: focused server, resource and rendered checks are recorded in docs/features/{visual-cleanup-nov1,thanksgiving-festival-nov1,pet-inventory-nov2,server-utilities-nov2,custom-npcs}.md and the newest collection audit record. Current release-wide/CI results will be recorded separately; do not treat older passing tests as this exact release's full-suite result.
 
-Contributions by their original authors with Claude Code and OpenAI Codex assistance. Combined integration: OpenAI Codex, directed by the owner.
+Deployment: update the server first after owner restart confirmation and a full 30-second in-game warning. Verify startup before promoting the client channel. Existing players use JUGCRAFT Updates > Download > Apply update & quit, then relaunch the same Modrinth profile. No public Modrinth listing or new launcher profile is required.
+
+Implementation: OpenAI Codex, with owner-authorized Claude Code assistance on pets and custom NPCs. Supplied originals and notices retained.
+
+Release exception: the owner requested skipping the full GitHub suite. Local package/asset/recipe checks and corrected Foundation groups passed; full CI is not certified. Previously documented visual backlog remains. Deployment still requires the owner's separate restart confirmation and a 30-second player warning.

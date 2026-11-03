@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "jugcraft:blighted_soil",
-    "jugcraft:rich_soil"
+    "jugcraft:rich_soil",
+    "jugcraft:holidayworks_snowy_grass_block"
   ]
 }

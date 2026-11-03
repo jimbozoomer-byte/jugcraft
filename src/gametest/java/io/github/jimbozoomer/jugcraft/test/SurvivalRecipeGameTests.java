@@ -18,6 +18,41 @@ import net.minecraft.world.item.crafting.*;
 
 /** Real data-reload, matching and output checks for the survival acquisition pass. */
 public class SurvivalRecipeGameTests {
+    @GameTest(maxTicks = 40)
+    public void magicalWoodStrippingPreservesAxisAndDoesNotStripTwice(GameTestHelper h) {
+        var player=TestPlayers.survivor(h);var pos=new net.minecraft.core.BlockPos(1,1,1);
+        for(String name:List.of("jugtania_livingwood","jugtania_livingwood_log","jugtania_dreamwood","jugtania_dreamwood_log","forbidden_aurum_log","forbidden_aurum_wood")){
+            var block=BuiltInRegistries.BLOCK.getValue(Jugcraft.id(name));
+            String target=name.replace("jugtania_","jugtania_stripped_").replace("forbidden_","forbidden_stripped_");
+            var stripped=BuiltInRegistries.BLOCK.getValue(Jugcraft.id(target));
+            for(var axis:net.minecraft.core.Direction.Axis.values()){
+                h.setBlock(pos,block.defaultBlockState().setValue(net.minecraft.world.level.block.RotatedPillarBlock.AXIS,axis));
+                var axe=new ItemStack(Items.IRON_AXE);player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,axe);
+                h.useBlock(pos,player);
+                h.assertTrue(h.getBlockState(pos).is(stripped)&&h.getBlockState(pos).getValue(net.minecraft.world.level.block.RotatedPillarBlock.AXIS)==axis&&axe.getDamageValue()==1,"Strip once with axis: "+name);
+                h.useBlock(pos,player);
+                h.assertTrue(h.getBlockState(pos).is(stripped)&&axe.getDamageValue()==1,"Already stripped remains intact: "+name);
+            }
+        }
+        h.succeed();
+    }
+
+    @GameTest(maxTicks = 40)
+    public void sunblockRewardRequiresPaymentAndCannotSpamHealing(GameTestHelper h) {
+        var player=TestPlayers.survivor(h);
+        var item=BuiltInRegistries.ITEM.getValue(Jugcraft.id("wilds_sunblock_staff"));
+        var staff=new ItemStack(item);player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND,staff);
+        item.use(h.getLevel(),player,net.minecraft.world.InteractionHand.MAIN_HAND);
+        h.assertTrue(!player.hasEffect(io.github.jimbozoomer.jugcraft.wilds.WildSunEquipment.SUNBLOCK),"No unpaid healing");
+        var gold=new ItemStack(Items.GOLD_INGOT,2);player.getInventory().setItem(1,gold);
+        item.use(h.getLevel(),player,net.minecraft.world.InteractionHand.MAIN_HAND);
+        h.assertTrue(gold.getCount()==1&&player.hasEffect(io.github.jimbozoomer.jugcraft.wilds.WildSunEquipment.SUNBLOCK),"One ingot buys the timed effect");
+        h.assertTrue(player.getCooldowns().isOnCooldown(staff),"Paid cast starts cooldown");
+        item.use(h.getLevel(),player,net.minecraft.world.InteractionHand.MAIN_HAND);
+        h.assertTrue(gold.getCount()==1,"Repeated use during cooldown neither charges nor refreshes");
+        h.succeed();
+    }
+
     private static JsonElement read(String name) {
         try (var in = SurvivalRecipeGameTests.class.getResourceAsStream(name)) {
             if (in == null) throw new IllegalStateException("Missing fixture " + name);
@@ -25,6 +60,13 @@ public class SurvivalRecipeGameTests {
         } catch (IOException e) { throw new UncheckedIOException(e); }
     }
     private static ItemStack ingredient(GameTestHelper h, JsonElement json) {
+        // Native ritual loaders intentionally keep the owner's {item}/{tag}
+        // descriptors; vanilla 26.3 Ingredient.CODEC uses strings instead.
+        if(json.isJsonObject()){
+            var object=json.getAsJsonObject();
+            if(object.has("item"))json=object.get("item");
+            else if(object.has("tag"))json=new JsonPrimitive("#"+object.get("tag").getAsString());
+        }
         var value = Ingredient.CODEC.parse(RegistryOps.create(JsonOps.INSTANCE, h.getLevel().registryAccess()), json).getOrThrow();
         h.assertTrue(!value.isEmpty(), "Ingredient resolves after the real reload: " + json);
         return new ItemStack(value.items().findFirst().orElseThrow());
@@ -35,6 +77,44 @@ public class SurvivalRecipeGameTests {
         h.assertTrue(result.getCount() == (expected.has("count") ? expected.get("count").getAsInt() : 1), "Correct output quantity: " + name);
         h.assertTrue(result.getCount() <= result.getMaxStackSize(), "Output fits its real stack limit: " + name);
     }
+    @GameTest(maxTicks = 40)
+    public void newestAcquisitionRecipesAndPaidForgeUpgradesLoadAndMatch(GameTestHelper h) {
+        var cases=read("/newest-acquisition-cases.json").getAsJsonObject();
+        for(var entry:cases.getAsJsonArray("crafting")){
+            String name=entry.getAsString();
+            var data=read("/data/jugcraft/recipe/"+name+".json").getAsJsonObject();
+            var key=ResourceKey.create(Registries.RECIPE,Jugcraft.id(name));
+            var recipe=(CraftingRecipe)h.getLevel().recipeAccess().byKey(key).orElseThrow().value();
+            var stacks=new ArrayList<ItemStack>();int width=3,height;
+            if(data.has("pattern")){
+                var pattern=data.getAsJsonArray("pattern");width=pattern.get(0).getAsString().length();height=pattern.size();
+                for(var row:pattern)for(char c:row.getAsString().toCharArray())stacks.add(c==' '?ItemStack.EMPTY:ingredient(h,data.getAsJsonObject("key").get(Character.toString(c))));
+            }else{
+                for(var value:data.getAsJsonArray("ingredients"))stacks.add(ingredient(h,value));
+                height=(stacks.size()+2)/3;while(stacks.size()<width*height)stacks.add(ItemStack.EMPTY);
+            }
+            if(data.get("type").getAsString().equals("jugcraft:botanical_water_shaped"))for(var stack:stacks)if(stack.is(Items.POTION))
+                stack.set(net.minecraft.core.component.DataComponents.POTION_CONTENTS,new net.minecraft.world.item.alchemy.PotionContents(net.minecraft.world.item.alchemy.Potions.WATER));
+            var input=CraftingInput.of(width,height,stacks);
+            h.assertTrue(recipe.matches(input,h.getLevel()),"Restored recipe matches: "+name);
+            result(h,recipe.assemble(input),data.getAsJsonObject("result"),name);
+            h.assertTrue(!recipe.matches(CraftingInput.EMPTY,h.getLevel()),"No free crafting: "+name);
+        }
+        for(var entry:cases.getAsJsonArray("rituals")){
+            String name=entry.getAsString();
+            var ritual=io.github.jimbozoomer.jugcraft.arcane.ArcaneRituals.all().stream()
+                    .filter(r->r.id().equals("jugcraft:acquisition_"+name)).findFirst().orElseThrow();
+            var main=ingredient(h,ritual.data().get("main_ingredient"));var slots=new ArrayList<ItemStack>();
+            for(var input:ritual.inputs())slots.add(ingredient(h,input));
+            h.assertTrue(ritual.matches(main,slots,ritual.tier(),ritual.essence(),ritual.essence(),List.of()),"Paid ritual matches: "+name);
+            h.assertTrue(!ritual.matches(main,slots,ritual.tier()-1,ritual.essence(),ritual.essence(),List.of()),"Cannot skip forge tier: "+name);
+            h.assertTrue(!ritual.matches(main,slots,ritual.tier(),new int[4],ritual.essence(),List.of()),"Cannot skip essence payment: "+name);
+            var output=ritual.output(h.getLevel().registryAccess(),main);
+            h.assertTrue(!output.isEmpty()&&BuiltInRegistries.ITEM.getKey(output.getItem()).toString().equals("jugcraft:forbidden_"+name),"Valid ritual output: "+name);
+        }
+        h.succeed();
+    }
+
     @GameTest(maxTicks = 40)
     public void everyCompletedRecipeMatchesRealIngredientsAndProducesValidStacks(GameTestHelper h) {
         int checked = 0; var failures=new ArrayList<String>();
@@ -58,9 +138,25 @@ public class SurvivalRecipeGameTests {
                 var grid = CraftingInput.of(width, height, stacks);
                 h.assertTrue(crafting.matches(grid, h.getLevel()), "Actual grid matches " + name);
                 result(h, crafting.assemble(grid), data.getAsJsonObject("result"), name);
-                // A syntactically valid recipe can still be hidden by an older recipe with the same grid.
+                // Validate the default output or the actual conflicting-recipe picker.
                 var selected = h.getLevel().recipeAccess().getRecipeFor(RecipeType.CRAFTING, grid, h.getLevel()).orElseThrow();
-                result(h, selected.value().assemble(grid), data.getAsJsonObject("result"), "selected grid " + name);
+                if (selected.id().equals(key)) {
+                    result(h, selected.value().assemble(grid), data.getAsJsonObject("result"), "selected grid " + name);
+                } else {
+                    // Shared layouts are intentionally supported by the owner's
+                    // output picker; verify this recipe remains reachable there.
+                    var player=TestPlayers.survivor(h);
+                    var pos=h.absolutePos(net.minecraft.core.BlockPos.ZERO);
+                    h.getLevel().setBlockAndUpdate(pos,net.minecraft.world.level.block.Blocks.CRAFTING_TABLE.defaultBlockState());
+                    player.setPos(pos.getX()+.5,pos.getY()+1,pos.getZ()+.5);
+                    var menu=new net.minecraft.world.inventory.CraftingMenu(63,player.getInventory(),net.minecraft.world.inventory.ContainerLevelAccess.create(h.getLevel(),pos));
+                    player.containerMenu=menu;
+                    var choiceGrid=io.github.jimbozoomer.jugcraft.crafting.CraftingChoices.grid(menu);
+                    for(int y=0;y<height;y++)for(int x=0;x<width;x++)choiceGrid.inputs().setItem(y*3+x,stacks.get(y*width+x).copy());
+                    var choices=io.github.jimbozoomer.jugcraft.crafting.CraftingChoices.state(choiceGrid.result());
+                    h.assertTrue(io.github.jimbozoomer.jugcraft.crafting.CraftingChoices.select(player,63,choices.revision(),key.identifier()),"Completion recipe is selectable: "+name);
+                    result(h,menu.getSlot(0).getItem(),data.getAsJsonObject("result"),"selected grid "+name);
+                }
                 h.assertTrue(!crafting.matches(CraftingInput.EMPTY, h.getLevel()), "No free empty-grid output: " + name);
             } else if (recipe instanceof CuttingRecipe cutting) {
                 var input = new SingleRecipeInput(ingredient(h, data.get("ingredient")));
@@ -163,6 +259,11 @@ public class SurvivalRecipeGameTests {
     }
     @GameTest(maxTicks=40)
     public void everyNewSourcePoolLoadsAndProducesTheRegisteredReward(GameTestHelper h){
+        for(String path:List.of("ribbits_chests/fisherman_main","ribbits_chests/fisherman_storage","ribbits_chests/gardener","ribbits_chests/merchant","ribbits_chests/nitwit","ribbits_chests/sorcerer",
+                "botanical_gaia/normal_killer","botanical_gaia/hard_killer","entities/wilds_umvuthi","ars_additions_chests/arcane_library","ars_additions_chests/nexus_tower")){
+            var key=ResourceKey.create(Registries.LOOT_TABLE,Jugcraft.id(path));
+            h.assertTrue(h.getLevel().getServer().reloadableRegistries().getLootTable(key)!=net.minecraft.world.level.storage.loot.LootTable.EMPTY,"Restored collection reward table loads: "+path);
+        }
         for(var row:read("/survival-source-cases.json").getAsJsonArray()){
             var d=row.getAsJsonObject();String id=d.get("table").getAsString(),item=d.get("item").getAsString();
             var key=ResourceKey.create(Registries.LOOT_TABLE,Identifier.parse(id));

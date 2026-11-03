@@ -1,0 +1,70 @@
+{
+  "pools": [
+    {
+      "name": "barako",
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "name": "jugcraft:wilds_sol_visage",
+          "weight": 1
+        }
+      ],
+      "condition": {
+        "type": "killed_by_player"
+      }
+    },
+    {
+      "name": "umvuthana_feather",
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "item",
+          "name": "minecraft:feather",
+          "weight": 1,
+          "modifier": [
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 0,
+                "max": 4
+              },
+              "type": "minecraft:set_count"
+            },
+            {
+              "count": {
+                "type": "minecraft:uniform",
+                "min": 0,
+                "max": 2
+              },
+              "type": "minecraft:enchanted_count_increase",
+              "enchantment": "minecraft:looting"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "acquisition_nov1_wilds_sunblock_staff",
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:wilds_sunblock_staff"
+        }
+      ],
+      "condition": {
+        "type": "minecraft:all_of",
+        "terms": [
+          {
+            "type": "minecraft:random_chance",
+            "chance": 0.15
+          },
+          {
+            "type": "minecraft:killed_by_player"
+          }
+        ]
+      }
+    }
+  ]
+}
