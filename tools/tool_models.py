@@ -110,7 +110,8 @@ BLOCKS = {"charging_station": with_sockets(charging_station(), exterior_ports([(
 LIT = {"charging_station": ("el_screen", "el_screen_on")}
 
 HANDHELD = {
-    # In the hand, +z is forward: tip the upright tool forward so the bit or bar points away from the player.
+    # Authoring defaults. The final held_equipment pass replaces the four native hand poses
+    # using each tool's grip; GUI, ground and frame poses below remain as authored.
     "thirdperson_righthand": {"rotation": [70, 0, 0], "translation": [0, 1, 2], "scale": [0.55, 0.55, 0.55]},
     "thirdperson_lefthand": {"rotation": [70, 0, 0], "translation": [0, 1, 2], "scale": [0.55, 0.55, 0.55]},
     "firstperson_righthand": {"rotation": [80, -10, 0], "translation": [-1.5, 4.5, 1], "scale": [0.5, 0.5, 0.5]},

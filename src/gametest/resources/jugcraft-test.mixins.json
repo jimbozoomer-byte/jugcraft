@@ -4,6 +4,7 @@
   "package": "io.github.jimbozoomer.jugcraft.test.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "EquipmentAudioProbeMixin",
     "GameTestHelperPlayersMixin"
   ],
   "injectors": {

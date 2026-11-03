@@ -18,7 +18,8 @@ public abstract class JimtaLivingMixin {
     @Unique private int jimta$eatenNutrition;
     @ModifyReturnValue(method="getDamageAfterMagicAbsorb",at=@At("RETURN"))
     private float jimta$industrialShield(float amount,@Local(argsOnly=true) net.minecraft.world.damagesource.DamageSource source){
-        return io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialGear.absorb((LivingEntity)(Object)this,source,amount);
+        return io.github.jimbozoomer.jugcraft.gear.Exosuit.cushion((LivingEntity)(Object)this,source,
+            io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialGear.absorb((LivingEntity)(Object)this,source,amount));
     }
     @Inject(method="canStandOnFluid",at=@At("HEAD"),cancellable=true)
     private void jimta$walkFluid(FluidState state,CallbackInfoReturnable<Boolean> cir){if(JimtaAbilities.fluidWalking((LivingEntity)(Object)this,state))cir.setReturnValue(true);}

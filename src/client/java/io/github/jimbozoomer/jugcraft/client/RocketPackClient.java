@@ -28,7 +28,8 @@ public final class RocketPackClient {
 			return;
 		}
 		Vec3 motion = player.getDeltaMovement();
-		player.setDeltaMovement(motion.x, Math.min(motion.y + RocketPackItem.THRUST, RocketPackItem.MAX_CLIMB), motion.z);
+		double power=io.github.jimbozoomer.jugcraft.tools.Jetpack.thrustScale(player.getItemBySlot(net.minecraft.world.entity.EquipmentSlot.CHEST));
+        player.setDeltaMovement(motion.x, Math.min(motion.y + RocketPackItem.THRUST*power, RocketPackItem.MAX_CLIMB*power), motion.z);
 		player.resetFallDistance();
 		// Nozzles: on the back, left and right of the spine.
 		double yaw = Math.toRadians(player.yBodyRot);

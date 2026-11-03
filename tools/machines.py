@@ -173,13 +173,14 @@ POWERED_TOOLS = {"mining_drill": "Mining Drill", "chainsaw": "Chainsaw", "rocket
 # Upgrade modules for the powered tools, fitted at the charging station (tools/ToolUpgrades): display name, short
 # name for tooltips, and what it does.
 UPGRADE_MODULES = {
-    "overclock_module": ("Overclock Module", "Overclock", "Mines 50% faster for twice the JE a block (up to 2)"),
-    "range_module": ("Range Module", "Range", "The drill's area mode mines 5×5 (drill only)"),
-    "capacity_module": ("Capacity Module", "Capacity", "Holds its base charge again (up to 2)"),
+    "efficiency_module": ("Efficiency Module", "Efficiency", "15% less tool energy per level after Overclock, rounded up (max 2); no speed change"),
+    "overclock_module": ("Overclock Module", "Overclock", "Adds 50% base mining speed and JE per block (up to 2)"),
+    "range_module": ("Range Module", "Range", "Unlocks selectable 5×5 mining and doubles the vein limit (drill only)"),
+    "capacity_module": ("Capacity Module", "Capacity", "Doubles energy capacity each time (up to 2)"),
     "silk_touch_module": ("Silk Touch Module", "Silk Touch", "Blocks drop themselves (drill or chainsaw; not with fortune)"),
     "fortune_module": ("Fortune Module", "Fortune", "More ore drops, up to Fortune III (drill only; not with silk touch)"),
 }
-# Blocks of the powered-tools feature: the 2-tall charging station (lower and upper halves, one item).
+# Blocks of the powered-tools feature: the 2-tall charging station (lower and upper halves, two equipment bays).
 TOOL_BLOCKS = {"charging_station": {"display": "Charging Station"}}
 # Plain storage blocks with their own block entity (storage/). Models: tools/storage_models.py.
 STORAGE_BLOCKS = {"item_crate": {"display": "Item Crate"}}
@@ -546,6 +547,8 @@ CRAFTING = {
                                            "F": "jugcraft:fluid_tank", "L": "minecraft:leather",
                                            "N": "#c:plates/tungsten"}, 1),
     # Upgrade modules: an advanced circuit on a steel card, with what the upgrade is about.
+    "efficiency_module": (["SCS", "CAC", "SCS"], {"S": "#c:plates/steel", "C": "jugcraft:copper_cable",
+                                                "A": "jugcraft:advanced_circuit"}, 1),
     "overclock_module": (["SRS", "RAR", "SRS"], {"S": "#c:plates/steel", "R": "minecraft:redstone_block",
                                                "A": "jugcraft:advanced_circuit"}, 1),
     "range_module": (["STS", "TAT", "STS"], {"S": "#c:plates/steel", "T": "#c:plates/tungsten",

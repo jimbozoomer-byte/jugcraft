@@ -140,6 +140,13 @@ public final class OwnerBackpacks {
         public final String name;
         UpgradeItem(Properties properties,String name){super(properties);this.name=name;}
         @Override public InteractionResult use(Level level,Player player,InteractionHand hand){
+            if(name.equals("battery_upgrade")&&player.isShiftKeyDown()){
+                if(!level.isClientSide()){
+                    var stack=player.getItemInHand(hand);int priority=(Math.floorMod(io.github.jimbozoomer.jugcraft.tools.EquipmentSettings.number(stack,"charging_priority",0),3)+1)%3;
+                    io.github.jimbozoomer.jugcraft.tools.EquipmentSettings.setNumber(stack,"charging_priority",priority);
+                    player.sendOverlayMessage(Component.literal("Backpack charging: "+new String[]{"bag contents first","held tool first","worn armor first"}[priority]));
+                }return InteractionResult.SUCCESS;
+            }
             if(!OwnerBackpackConversions.isConversion(player.getItemInHand(hand)))return super.use(level,player,hand);
             if(player instanceof ServerPlayer who){var pack=who.getItemInHand(hand==InteractionHand.MAIN_HAND?InteractionHand.OFF_HAND:InteractionHand.MAIN_HAND);
                 if(tier(pack)<0||!OwnerBackpackUpgrades.accessible(who,pack))return InteractionResult.FAIL;
@@ -152,7 +159,8 @@ public final class OwnerBackpacks {
         @Override public void appendHoverText(ItemStack stack,TooltipContext context,TooltipDisplay display,java.util.function.Consumer<Component> out,TooltipFlag flag){
             String key=getDescriptionId()+".tooltip";if(net.minecraft.locale.Language.getInstance().has(key))out.accept(Component.translatable(key));
             if(name.equals("survival_infinity_upgrade"))out.accept(Component.literal("Server option: backpacks.survival_infinity (off by default)."));
-            if(name.equals("battery_upgrade"))out.accept(Component.literal(io.github.jimbozoomer.jugcraft.tools.Chargeable.energy(stack)+" / 100,000 JE"));
+            if(name.equals("battery_upgrade"))out.accept(Component.literal(io.github.jimbozoomer.jugcraft.tools.Chargeable.energy(stack)+" / "+io.github.jimbozoomer.jugcraft.tools.Chargeable.capacity(stack)+" JE"));
+            if(name.equals("battery_upgrade"))out.accept(Component.literal("Shift-use in air: bag / held tool / armor charging priority."));
             if(name.equals("xp_pump_upgrade"))out.accept(Component.literal(stack.getOrDefault(io.github.jimbozoomer.jugcraft.concordance.assay.AlchemyStorage.EXPERIENCE,0)+" stored experience points"));
         }
     }

@@ -24,7 +24,8 @@
               "jugcraft:range_module",
               "jugcraft:capacity_module",
               "jugcraft:silk_touch_module",
-              "jugcraft:fortune_module"
+              "jugcraft:fortune_module",
+              "jugcraft:efficiency_module"
             ]
           }
         ]

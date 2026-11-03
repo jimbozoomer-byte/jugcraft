@@ -1,6 +1,8 @@
 package io.github.jimbozoomer.jugcraft.client;
 
 import io.github.jimbozoomer.jugcraft.prospecting.OreSurvey;
+import io.github.jimbozoomer.jugcraft.prospecting.SurveyPayload;
+import net.minecraft.client.gui.components.Button;
 import java.util.List;
 import java.util.Locale;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
@@ -18,30 +20,73 @@ import net.minecraft.world.item.ItemStack;
  * resonance. Every reading is deliberately approximate (see {@link OreSurvey}).
  */
 public class ProspectorScreen extends Screen implements ScreenKit.Fitted {
-	private static final int WIDTH = 268;
-	private static final int HEIGHT = 196;
-	private static final int ROWS = 6;
-	private static final int COLUMN_WIDTH = 124;
+	private static final int WIDTH = 308;
+	private static final int HEIGHT = 232;
+	private static final int ROWS = 5;
+	private static final int COLUMN_WIDTH = 144;
 	/** The glass: from the title strip down to the help strip. */
 	private static final int GLASS_Y = 15;
-	private static final int GLASS_HEIGHT = 150;
+	private static final int GLASS_HEIGHT = 172;
 	private static final int SCANLINE = 0x44000000;
 	private final MachineScreenThemes.Theme theme = MachineScreenThemes.screen("prospector");
 
-	private final List<OreSurvey.Reading> readings;
+	private List<OreSurvey.Reading> readings;
+    private SurveyPayload snapshot;
+    private static final java.util.Deque<SurveyPayload> HISTORY = new java.util.ArrayDeque<>();
+    private int page, filter, historyIndex;
+    public SurveyPayload snapshot() { return snapshot; }
+    public static void clearHistory() { HISTORY.clear(); }
 	private final long openedAt = System.currentTimeMillis();
 	private int left;
 	private int top;
 
 	public ProspectorScreen(List<OreSurvey.Reading> readings) {
-		super(Component.translatable("item.jugcraft.prospector"));
-		this.readings = readings;
+        this(new SurveyPayload(readings));
 	}
+
+    public ProspectorScreen(SurveyPayload payload) {
+        super(Component.translatable(payload.instrument() == 2 ? "item.jugcraft.jimta_advanced_ore_scanner"
+            : payload.instrument() == 1 ? "item.jugcraft.jimta_ore_scanner" : "item.jugcraft.prospector"));
+        snapshot = payload; readings = payload.readings();
+        if (HISTORY.isEmpty() || !HISTORY.peekFirst().equals(payload)) HISTORY.addFirst(payload);
+        while (HISTORY.size() > 5) HISTORY.removeLast();
+    }
+    private List<OreSurvey.Reading> visible() {
+        if (filter == 0) return readings;
+        if (filter >= 5) { int index = filter - 5; return index < readings.size() ? List.of(readings.get(index)) : readings; }
+        return readings.stream().filter(r -> switch (filter) {
+            case 1 -> r.label().isEmpty() && !r.icon().getPath().endsWith("_sand");
+            case 2 -> r.label().contains("bulk_");
+            case 3 -> r.icon().getPath().endsWith("_sand");
+            default -> r.label().contains("oil");
+        }).toList();
+    }
+    private String filterName() {
+        String[] names = {"All", "Ores", "Bulk", "Sands", "Oil"};
+        if (filter < 5) return names[filter];
+        int index = filter - 5;
+        return index < readings.size() ? new ItemStack(BuiltInRegistries.ITEM.getValue(readings.get(index).icon())).getHoverName().getString() : "All";
+    }
+    public static String location(OreSurvey.Reading r) {
+        if (r.distanceLow() < 0) return "Regional signal";
+        return r.distanceLow() + "-" + r.distanceHigh() + " blocks" + (r.direction().isEmpty() ? "" : " " + r.direction()) + (r.label().contains("oil") ? " (surface)" : "");
+    }
 
 	@Override
 	protected void init() {
 		left = (width - WIDTH) / 2;
 		top = (height - HEIGHT) / 2;
+        addRenderableWidget(Button.builder(Component.literal("<"), b -> page = Math.max(0, page - 1)).bounds(left + 7, top + HEIGHT - 23, 25, 18).build());
+        addRenderableWidget(Button.builder(Component.literal(">"), b -> page = Math.min(Math.max(0, (visible().size() - 1) / (ROWS * 2)), page + 1)).bounds(left + 35, top + HEIGHT - 23, 25, 18).build());
+        addRenderableWidget(Button.builder(Component.literal("Filter: " + filterName()), b -> {
+            filter = (filter + 1) % (5 + readings.size()); page = 0; b.setMessage(Component.literal("Filter: " + filterName()));
+        }).bounds(left + 64, top + HEIGHT - 23, 144, 18).build());
+        addRenderableWidget(Button.builder(Component.literal("History"), b -> {
+            var history = List.copyOf(HISTORY); if (!history.isEmpty()) {
+                historyIndex = (historyIndex + 1) % history.size(); snapshot = history.get(historyIndex); readings = snapshot.readings();
+                page = 0; filter = 0; rebuildWidgets();
+            }
+        }).bounds(left + 212, top + HEIGHT - 23, 60, 18).build());
 	}
 
 	private float seconds() {
@@ -59,8 +104,7 @@ public class ProspectorScreen extends Screen implements ScreenKit.Fitted {
 		ScreenKit.title(graphics, font, theme, left, top, title, readings.isEmpty() ? theme.dim() : theme.ok(), WIDTH - 80);
 		ScreenKit.chip(graphics, font, theme, left + WIDTH - 4, top + 1, t("signals", readings.size()), theme.text());
 		ScreenKit.pane(graphics, theme, left + 6, top + GLASS_Y, WIDTH - 12, GLASS_HEIGHT);
-		ScreenKit.help(graphics, font, theme, left + 6, top + GLASS_Y + GLASS_HEIGHT + 4, WIDTH - 44, HEIGHT - GLASS_Y - GLASS_HEIGHT - 10,
-				Component.translatable("screen.jugcraft.prospector.help"));
+
 	}
 
 	@Override
@@ -74,7 +118,8 @@ public class ProspectorScreen extends Screen implements ScreenKit.Fitted {
 		// The phosphor warms up: dim for the first moment.
 		int text = t < 0.4F ? theme.dim() : theme.text();
 
-		graphics.text(font, t("survey"), sx + 6, sy + 5, text, false);
+		graphics.text(font, snapshot.diameter() + "x" + snapshot.diameter() + " chunks | coverage " + snapshot.coverage() + "/" + (snapshot.diameter() * snapshot.diameter()), sx + 6, sy + 5, text, false);
+        if (snapshot.instrument() > 0) graphics.text(font, snapshot.dimension().substring(snapshot.dimension().indexOf(':')+1) + " " + snapshot.origin().toShortString() + " | " + Math.max(0, ((net.minecraft.client.Minecraft.getInstance().level == null ? snapshot.sampledAt() : net.minecraft.client.Minecraft.getInstance().level.getGameTime()) - snapshot.sampledAt()) / 20) + "s ago", sx + 6, sy + 18, theme.dim(), false);
 		// Under the heading, the workshop glass's band (a plain rule if the look has none).
 		int band = theme.frame().band();
 		graphics.fill(sx + 4, sy + 15, sx + sw - 4, sy + 17, band != 0 ? band : (theme.dim() & 0x00FFFFFF) | 0xA0000000);
@@ -83,11 +128,13 @@ public class ProspectorScreen extends Screen implements ScreenKit.Fitted {
 			String none = t("none");
 			graphics.text(font, none, sx + (sw - font.width(none)) / 2, sy + sh / 2 - 4, theme.text(), false);
 		}
-		int shown = Math.min(readings.size(), ROWS * 2);
+		List<OreSurvey.Reading> filtered = visible();
+        int start = page * ROWS * 2;
+        int shown = Math.min(Math.max(0, filtered.size() - start), ROWS * 2);
 		for (int i = 0; i < shown; i++) {
-			OreSurvey.Reading reading = readings.get(i);
+			OreSurvey.Reading reading = filtered.get(start + i);
 			int x = sx + 6 + (i / ROWS) * COLUMN_WIDTH;
-			int y = sy + 20 + (i % ROWS) * 20;
+			int y = sy + 30 + (i % ROWS) * 26;
 			ItemStack icon = new ItemStack(BuiltInRegistries.ITEM.getValue(reading.icon()));
 			graphics.item(icon, x, y);
 			String name = (reading.label().isEmpty() ? icon.getHoverName().getString().replace(" Ore", "")
@@ -104,15 +151,16 @@ public class ProspectorScreen extends Screen implements ScreenKit.Fitted {
 				}
 			}
 			// Its depth, as a tag: brighter the nearer the surface.
-			String depth = t("depth." + Math.max(0, Math.min(2, reading.depth())));
+			String depth = snapshot.instrument() == 2 && reading.depthHigh() > reading.depthLow() ? "Y " + reading.depthLow() + ".." + reading.depthHigh() : t("depth." + Math.max(0, Math.min(2, reading.depth())));
 			int tag = reading.depth() <= 0 ? theme.text() : reading.depth() == 1 ? theme.progress() : theme.dim();
 			graphics.text(font, depth, x + 66, y + 9, tag, false);
+            if (snapshot.instrument() > 0) graphics.text(font, ScreenKit.fit(font, location(reading), COLUMN_WIDTH - 20), x + 19, y + 18, theme.text(), false);
 			if (mouseX >= x && mouseX < x + 16 && mouseY >= y && mouseY < y + 16) {
 				graphics.setTooltipForNextFrame(font, icon, mouseX, mouseY);
 			}
 		}
-		if (readings.size() > shown) {
-			String more = t("fainter", readings.size() - shown);
+		if (filtered.size() > shown) {
+			String more = "Page " + (page + 1) + "/" + Math.max(1, (filtered.size() + ROWS * 2 - 1) / (ROWS * 2));
 			graphics.text(font, more, sx + sw - 6 - font.width(more), sy + sh - 11, theme.dim(), false);
 		}
 

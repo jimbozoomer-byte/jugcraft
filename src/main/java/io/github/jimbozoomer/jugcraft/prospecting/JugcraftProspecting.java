@@ -18,6 +18,7 @@ public final class JugcraftProspecting {
 	}
 
 	public static void register() {
+        OreScannerItem.register();
 		ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, Jugcraft.id("prospector"));
 		PROSPECTOR = Registry.register(BuiltInRegistries.ITEM, key, new ProspectorItem(new Item.Properties().setId(key).stacksTo(1)));
 		PayloadTypeRegistry.clientboundPlay().register(SurveyPayload.TYPE, SurveyPayload.CODEC);

@@ -17,7 +17,7 @@ every `pile_every` ticks a layer of each leaf pile (and each piece of vanilla le
 up into its user's inventory, for the composter.
 """
 LEAF_BLOWER = {
-    "item": "leaf_blower", "display": "Leaf Blower", "capacity": 40000, "blow_je": 4, "vacuum_je": 6,
+    "item": "leaf_blower", "display": "Leaf Blower", "capacity": 250000, "blow_je": 4, "vacuum_je": 6,
     "range": 8.0, "cone": 25.0, "push_items": 0.12, "push_mobs": 0.05, "pile_range": 6, "pile_every": 4, "vacuum_range": 4,
 }
 

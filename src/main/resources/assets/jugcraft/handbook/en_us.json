@@ -2500,7 +2500,7 @@
           "title": "Charging Station",
           "icon": "jugcraft:charging_station",
           "text": [
-            "Two blocks tall. Hang a drill, chainsaw or rocket pack on its cradle and it fills it from cables, 512 JE a tick; take it back with an empty hand. Its lamp lights while it charges."
+            "Right-click either half to open two equipment bays. Each lists its installed modules. Use + to install from your cursor or inventory and - to recover one. The bays fairly share 512 JE/t from cables; one item alone receives the full rate. The buffer holds 100,000 JE."
           ],
           "craft": {
             "grid": [
@@ -2522,7 +2522,7 @@
           "title": "Mining Drill",
           "icon": "jugcraft:mining_drill",
           "text": [
-            "Runs on JE instead of wearing out: 60 JE a block, 100,000 JE when full. Mines everything a pickaxe or shovel does, faster than netherite. Sneak and use it to switch mode: one block, a 3x3 square, or a whole ore vein. Empty, it mines like a bare hand."
+            "Runs on JE instead of wearing out: 60 JE a block, 250,000 JE when full. Mines everything a pickaxe or shovel does, faster than netherite. Sneak and use it to switch mode: one block, a 3x3 square, or a whole ore vein. Empty, it mines like a bare hand."
           ],
           "craft": {
             "grid": [
@@ -2544,7 +2544,7 @@
           "title": "Chainsaw",
           "icon": "jugcraft:chainsaw",
           "text": [
-            "A JE-powered axe that also cuts leaves: 40 JE a block. Cutting a log fells the whole tree above it; sneak to cut one log."
+            "A JE-powered axe that also cuts leaves: 40 JE a block. Cutting a log fells the whole tree above it; sneak to cut one log. Shift-use cycles tree, single-log and leaf-clearing modes. Leaf clearing costs 10 JE/block."
           ],
           "craft": {
             "grid": [
@@ -2566,7 +2566,7 @@
           "title": "Rocket Pack",
           "icon": "jugcraft:rocket_pack",
           "text": [
-            "Wear it and hold jump in the air to fly, 50 JE a tick (200,000 JE when full). Landing is safe while it fires. On a dedicated server, set allow-flight=true or long hovers get you kicked."
+            "Wear it and hold jump in the air to fly, 20 JE a tick (200,000 JE when full). Landing is safe while it fires. Shift-use the held pack to choose gentle, cruise or full thrust (all 20 JE/t). On a dedicated server, set allow-flight=true or long hovers get you kicked."
           ],
           "craft": {
             "grid": [
@@ -2585,10 +2585,32 @@
           }
         },
         {
+          "title": "Efficiency Module",
+          "icon": "jugcraft:efficiency_module",
+          "text": [
+            "15% less tool energy per level after Overclock, rounded up (max 2); no speed change. Open the charging station menu, place the equipment in either bay, then use + to fit a module from your inventory or - to recover one. Discharge before reducing capacity."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "jugcraft:copper_cable",
+              "jugcraft:steel_plate",
+              "jugcraft:copper_cable",
+              "jugcraft:advanced_circuit",
+              "jugcraft:copper_cable",
+              "jugcraft:steel_plate",
+              "jugcraft:copper_cable",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:efficiency_module",
+            "count": 1
+          }
+        },
+        {
           "title": "Overclock Module",
           "icon": "jugcraft:overclock_module",
           "text": [
-            "Mines 50% faster for twice the JE a block (up to 2). Fit it by using it on a charging station holding the tool; it is used up and stays in the tool."
+            "Adds 50% base mining speed and JE per block (up to 2). Open the charging station menu, place the equipment in either bay, then use + to fit a module from your inventory or - to recover one. Discharge before reducing capacity."
           ],
           "craft": {
             "grid": [
@@ -2610,7 +2632,7 @@
           "title": "Range Module",
           "icon": "jugcraft:range_module",
           "text": [
-            "The drill's area mode mines 5\u00d75 (drill only). Fit it by using it on a charging station holding the tool; it is used up and stays in the tool."
+            "Unlocks selectable 5×5 mining and doubles the vein limit (drill only). Open the charging station menu, place the equipment in either bay, then use + to fit a module from your inventory or - to recover one. Discharge before reducing capacity."
           ],
           "craft": {
             "grid": [
@@ -2632,7 +2654,7 @@
           "title": "Capacity Module",
           "icon": "jugcraft:capacity_module",
           "text": [
-            "Holds its base charge again (up to 2). Fit it by using it on a charging station holding the tool; it is used up and stays in the tool."
+            "Doubles energy capacity each time (up to 2). Open the charging station menu, place the equipment in either bay, then use + to fit a module from your inventory or - to recover one. Discharge before reducing capacity."
           ],
           "craft": {
             "grid": [
@@ -2654,7 +2676,7 @@
           "title": "Silk Touch Module",
           "icon": "jugcraft:silk_touch_module",
           "text": [
-            "Blocks drop themselves (drill or chainsaw; not with fortune). Fit it by using it on a charging station holding the tool; it is used up and stays in the tool."
+            "Blocks drop themselves (drill or chainsaw; not with fortune). Open the charging station menu, place the equipment in either bay, then use + to fit a module from your inventory or - to recover one. Discharge before reducing capacity."
           ],
           "craft": {
             "grid": [
@@ -2676,7 +2698,7 @@
           "title": "Fortune Module",
           "icon": "jugcraft:fortune_module",
           "text": [
-            "More ore drops, up to Fortune III (drill only; not with silk touch). Fit it by using it on a charging station holding the tool; it is used up and stays in the tool."
+            "More ore drops, up to Fortune III (drill only; not with silk touch). Open the charging station menu, place the equipment in either bay, then use + to fit a module from your inventory or - to recover one. Discharge before reducing capacity."
           ],
           "craft": {
             "grid": [
@@ -3300,9 +3322,9 @@
           "title": "Powered Exosuit",
           "icon": "jugcraft:exosuit_helmet",
           "text": [
-            "Four pieces of armor as strong as netherite that run on JE. Each piece holds 400,000 JE and charges at a charging station; capacity modules fit.",
+            "Four pieces of armor as strong as netherite that run on JE. Each piece holds 500,000 JE and charges at a charging station; two capacity modules double storage each time.",
             "Helmet: night vision whenever it is dark. Chestplate: an energy shield that regrows up to four hearts of absorption, and a jetpack (hold jump in the air). Leggings: 30% more speed. Boots: no fall damage and a full-block step.",
-            "Each piece works only while it is charged; a flat piece is plain armor."
+            "Boots spend 100 JE per heart of fall damage actually prevented. Shield recovery costs 1,000 JE per point; thrust costs 20 JE/t. Legs spend only during boosted movement. A flat piece is plain armor."
           ]
         },
         {
@@ -6686,6 +6708,30 @@
           "text": [
             "Set a car on the line just behind a train's last car and use the Coupler on it: it joins the train, up to eight cars behind one locomotive, and the locomotive pulls or pushes them all. Sneak and use the Coupler to uncouple a car and those behind it, or every car from the locomotive.",
             "The locomotive burns diesel or kerosene: use a bucket of either on it (it holds eight). Each notch of throttle burns 2 mB a second. Cargo Wagons hold 27 stacks, opened by using them anywhere along the line; coaches seat four."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Powered Ore Surveys",
+      "icon": "jugcraft:jimta_ore_scanner",
+      "pages": [
+        {
+          "title": "Ore Scanner",
+          "icon": "jugcraft:jimta_ore_scanner",
+          "text": [
+            "A powered upgrade in convenience over the Geo-Resonance Prospector: 250,000 JE, doubled by each of two Capacity Modules.",
+            "Use for a loaded 3x3-chunk survey at 500 JE per completed scan. Distance bands describe the nearest detected sample, not an exact ore location. Shift-use to reopen the last saved survey for free.",
+            "Use the survey screen filters, page controls and recent history. Coverage reports skipped terrain; no signal is not proof that no ore exists."
+          ]
+        },
+        {
+          "title": "Advanced Ore Scanner",
+          "icon": "jugcraft:jimta_advanced_ore_scanner",
+          "text": [
+            "The same battery capacity with better instrumentation: detailed 3x3 sampling costs 1,000 JE; wide 5x5 sampling costs 4,000 JE.",
+            "Shift-use to switch mode. Detailed readings add eight-block distance bands, compass bearings and approximate depth bands. Distance refers to the nearest sampled resource.",
+            "Sprint and shift-use to reopen the last saved survey without spending energy. Surveying unloaded terrain never generates or loads chunks."
           ]
         }
       ]
