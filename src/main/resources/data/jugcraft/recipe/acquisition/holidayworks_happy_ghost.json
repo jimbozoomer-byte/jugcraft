@@ -1,8 +1,7 @@
 {
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
-    "jugcraft:holidayworks_ghost",
-    "minecraft:yellow_dye"
+    "jugcraft:holidayworks_ghost"
   ],
   "result": {
     "id": "jugcraft:holidayworks_happy_ghost",

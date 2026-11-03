@@ -1,5 +1,5 @@
 {
-  "type": "jugcraft:botanical_water_crafting",
+  "type": "jugcraft:botanical_water_shaped",
   "category": "equipment",
   "key": {
     "B": "minecraft:potion",

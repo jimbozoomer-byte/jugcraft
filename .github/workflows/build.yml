@@ -36,10 +36,8 @@ jobs:
           cache: gradle
       - name: Install data-generation dependencies
         run: python3 -m pip install --quiet pillow numpy
-      - name: Prepare pinned Minecraft shape references
-        # Architectural generation reads vanilla model geometry from Loom's pinned game JAR.
-        # A fresh checkout has no such cache until Gradle prepares the platform.
-        run: ./gradlew compileJava --no-daemon
+      - name: Prepare pinned vanilla assets for data tests
+        run: python3 scripts/prepare_vanilla_assets.py
       - name: Check generated JSON is up to date
         run: |
           python3 tools/generate_material_data.py
@@ -192,7 +190,9 @@ jobs:
   plan:
     name: choose client tests
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    # Fetching both merge parents of the expanded asset repository exceeded five minutes.
+    # This is setup time only; selection and every client assertion remain unchanged.
+    timeout-minutes: 15
     outputs:
       shard0: ${{ steps.choose.outputs.shard0 }}
       shard1: ${{ steps.choose.outputs.shard1 }}
@@ -279,14 +279,11 @@ jobs:
       - name: Run client game tests (shard ${{ matrix.shard }} of 16)
         if: env.CLASSES != ''
         run: |
-          # Two rendered clients plus Gradle and Mesa can exceed physical RAM.
-          # Keep bounded JVM heaps; give the disposable runner spillover instead
-          # of letting host memory pressure kill its control process.
+          # Both bounded JVMs plus software rendering need spillover on hosted runners.
           sudo fallocate -l 8G /mnt/jugcraft-client.swap
           sudo chmod 600 /mnt/jugcraft-client.swap
           sudo mkswap /mnt/jugcraft-client.swap
           sudo swapon /mnt/jugcraft-client.swap
-          free -h
           ./gradlew runClientGameTest --no-daemon "-PclientTests=$CLASSES" &
           client_build_pid=$!
           # A world-close hang previously exhausted the job limit without a Java stack.
@@ -295,8 +292,6 @@ jobs:
             while kill -0 "$client_build_pid" 2>/dev/null; do
               sleep 600
               kill -0 "$client_build_pid" 2>/dev/null || break
-              free -h
-              ps -eo pid,comm,rss --sort=-rss | head -n 12 || true
               jcmd -l | awk '$2 == "net.fabricmc.devlaunchinjector.Main" {print $1}' | while read -r client_jvm_pid; do
                 jcmd "$client_jvm_pid" Thread.print || true
               done

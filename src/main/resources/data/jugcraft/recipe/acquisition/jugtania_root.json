@@ -1,10 +1,8 @@
 {
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
-    "jugcraft:jugtania_living_root",
-    "jugcraft:jugtania_living_root",
-    "jugcraft:jugtania_living_root",
-    "jugcraft:jugtania_living_root"
+    "minecraft:mangrove_roots",
+    "jugcraft:jugtania_redstone_root"
   ],
   "result": {
     "id": "jugcraft:jugtania_root",

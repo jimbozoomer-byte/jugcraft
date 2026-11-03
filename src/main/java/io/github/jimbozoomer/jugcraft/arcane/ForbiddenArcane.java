@@ -145,7 +145,7 @@ public final class ForbiddenArcane {
             else if(cls.equals("WhirlwindPrismItem"))i=new ArcaneWind.Prism(p);
             else if(cls.equals("CapacityBucketItem")||cls.equals("CapacityMilkBucketItem")||cls.equals("SolidCapacityBucketItem"))i=new ArcaneBuckets(name,p);
             else if(cls.equals("QuantumCatcherItem"))i=new ArcaneCapture(name.equals("boss_catcher"),p);
-            else if(cls.equals("MagicWandItem")||cls.equals("DracoArcanusScepterItem"))i=new ArcaneMissile.Wand(cls.equals("DracoArcanusScepterItem"),p);
+            else if(cls.equals("MagicWandItem")||cls.equals("DracoArcanusScepterItem")||name.equals("draco_arcanus_staff"))i=new ArcaneMissile.Wand(!cls.equals("MagicWandItem"),p);
             else if(cls.equals("Food"))i=new ArcaneFood(name,p);
             else{
                 ToolMaterial material=name.startsWith("draco_")?new ToolMaterial(BlockTags.INCORRECT_FOR_NETHERITE_TOOL,2661,12,7,20,repair("draco")):name.startsWith("reinforced_")?new ToolMaterial(BlockTags.INCORRECT_FOR_NETHERITE_TOOL,2561,9,3.5F,26,repair("deorum")):name.startsWith("wooden_")?ToolMaterial.WOOD:name.startsWith("stone_")?ToolMaterial.STONE:name.startsWith("golden_")?ToolMaterial.GOLD:name.startsWith("diamond_")?ToolMaterial.DIAMOND:name.startsWith("netherite_")?ToolMaterial.NETHERITE:ToolMaterial.IRON;
@@ -176,8 +176,8 @@ public final class ForbiddenArcane {
     }
     private static final class MysteryLog extends io.github.jimbozoomer.jugcraft.agriculture.StrippableLogBlock {
         private final String name;
-        MysteryLog(String name,Properties p){super(p,"forbidden_stripped_"+name);this.name=name;}
-        @Override public Block stripped(){return ForbiddenArcane.block("stripped_"+name);}
+        MysteryLog(String name,Properties p){super(p,"stripped_"+name);this.name=name;}
+        @Override public Block stripped(){return block("stripped_"+name);}
         @Override protected InteractionResult useItemOn(ItemStack stack,BlockState state,Level level,BlockPos pos,Player player,InteractionHand hand,BlockHitResult hit){
             if(name.startsWith("stripped_"))return InteractionResult.PASS;
             if(player instanceof ServerPlayer actor&&!Authority.mayChange(actor.level(),actor,pos))return InteractionResult.FAIL;

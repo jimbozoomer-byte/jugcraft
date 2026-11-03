@@ -43,7 +43,8 @@ CLOSE_FACES = {
     'supps/special_models/block/books/book_enchanted': ((2, 'up'), (2, 'west')),
     **{'supps/special_models/plants/' + n + '_block': ((0, 'down'),) for n in ('cantaloupe', 'honeydew', 'squash')},
 }
-TARGETS = SEPARATE | BASKETS | CRYSTALS | CLOSE_FACES.keys()
+# Narrow release backport: pre-existing separation repairs remain authoritative.
+TARGETS = {name for name in BASKETS if '_hanging' not in name} | CRYSTALS | CLOSE_FACES.keys()
 
 
 def owner_relative(relative):

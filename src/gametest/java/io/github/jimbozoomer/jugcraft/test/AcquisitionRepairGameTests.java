@@ -87,10 +87,10 @@ public final class AcquisitionRepairGameTests {
             h.assertTrue(!ritual.matches(new ItemStack(Items.DIRT),slots,ritual.tier(),ritual.essence(),ritual.essence(),List.of()),"Wrong base cannot buy equipment");
             var output=ritual.output(h.getLevel().registryAccess(),main);
             h.assertTrue(!output.isEmpty()&&output.getCount()==1&&main.get(DataComponents.CUSTOM_NAME).equals(output.get(DataComponents.CUSTOM_NAME))&&main.get(DataComponents.ENCHANTMENTS).equals(output.get(DataComponents.ENCHANTMENTS)),"Ritual keeps name and enchantments "+ritual.id());
-            if(ritual.id().startsWith("jugcraft:acquisition/mortem_"))h.assertTrue(!output.isDamageableItem()&&!output.has(DataComponents.MAX_DAMAGE),"Mortem retains its native indestructible armor behavior");
-            else h.assertTrue(output.isDamageableItem()&&output.getDamageValue()==main.getDamageValue(),"Damageable upgrades retain paid wear "+ritual.id());
+            if(BuiltInRegistries.ITEM.getKey(output.getItem()).getPath().startsWith("forbidden_mortem_"))h.assertTrue(!output.isDamageableItem()&&!output.has(DataComponents.MAX_DAMAGE),"Mortem retains its native indestructible armor behavior");
+            else if(output.isDamageableItem())h.assertTrue(output.getDamageValue()==main.getDamageValue(),"Damageable upgrades retain paid wear "+ritual.id());
             h.assertTrue(main.getCount()==1,"Ritual preview leaves the paid base untouched");checked++;
         }
-        h.assertTrue(checked==23,"All fifteen added upgrades and eight existing Draco/Tyr armor upgrades loaded");h.succeed();
+        h.assertTrue(checked==48,"All PR and upstream transmutations, including existing Draco/Tyr armor upgrades, loaded");h.succeed();
     }
 }

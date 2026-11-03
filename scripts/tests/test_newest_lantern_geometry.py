@@ -8,6 +8,8 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tools'))
 import model_writer
 import newest_building
+import imported_geometry_repairs as repairs
+import newest_original_art
 
 
 class NewestLanternGeometryTests(unittest.TestCase):
@@ -20,23 +22,22 @@ class NewestLanternGeometryTests(unittest.TestCase):
                 mapped = newest_building.map_value(original, 'twigs', 'twigworks', True)
                 target = newest_building.ASSET / 'models/newest/twigworks/block' / (name + '.json')
                 adapted = newest_building.native_model(target, mapped)
-                self.assertEqual(len(mapped['elements']) + 5, len(adapted['elements']))
-                self.assertEqual(mapped['elements'][0], adapted['elements'][0])
-                self.assertEqual(mapped['elements'][2:], adapted['elements'][7:])
-                lining = mapped['elements'][1]
-                for plane in adapted['elements'][1:7]:
-                    self.assertTrue(all(a <= b for a, b in zip(plane['from'], plane['to'])))
-                    self.assertEqual(1, sum(a == b for a, b in zip(plane['from'], plane['to'])))
-                    face = next(iter(plane['faces']))
-                    self.assertEqual(lining['faces'][face]['texture'], plane['faces'][face]['texture'])
-                    before = model_writer._face_frame(lining, face, None)
-                    after = model_writer._face_frame(plane, face, None)
-                    self.assertEqual({tuple(p) for p in before[0]}, {tuple(p) for p in after[0]})
-                    for point in before[0]:
-                        self.assertEqual(model_writer._uv_at(before, point), model_writer._uv_at(after, point))
+                record = repairs.records()[target.relative_to(repairs.MODELS).as_posix()]
+                self.assertEqual(record['after_sha256'], repairs.digest(adapted['elements']))
+                self.assertEqual(mapped['elements'], repairs.original_elements(target, adapted['elements']))
+                self.assertEqual(len(mapped['elements']), len(adapted['elements']))
+                for original_box, box in zip(mapped['elements'], adapted['elements']):
+                    self.assertEqual(original_box['faces'], box['faces'], 'Every face, material and UV is retained')
+                    self.assertEqual(original_box.get('rotation'), box.get('rotation'))
+                    for corner in ('from', 'to'):
+                        self.assertTrue(all(abs(a-b) <= .301 for a,b in zip(original_box[corner], box[corner])))
+                lining = adapted['elements'][1]
+                self.assertTrue(all(a > b for a,b in zip(lining['from'], lining['to'])), 'Authored inward-facing lining is retained')
                 self.assertEqual(adapted, newest_building.native_model(target, deepcopy(adapted)))
-                model_writer.finish_elements(adapted['elements'])
-                self.assertTrue(all(all(a <= b for a, b in zip(e['from'], e['to'])) for e in adapted['elements']))
+                self.assertTrue(newest_original_art.intentional_reversed_elements(target, adapted['elements']))
+                changed = deepcopy(adapted['elements'])
+                changed[1]['from'][0] += 1
+                self.assertFalse(newest_original_art.intentional_reversed_elements(target, changed))
                 self.assertEqual(original_bytes, source.read_bytes())
 
     def test_changed_or_unrelated_reversed_geometry_is_still_rejected(self):
@@ -44,7 +45,7 @@ class NewestLanternGeometryTests(unittest.TestCase):
         changed = newest_building.read(source)
         changed['elements'][1]['from'][0] = 14
         target = newest_building.ASSET / 'models/newest/twigworks/block/template_paper_lantern.json'
-        with self.assertRaisesRegex(ValueError, 'Changed supplied paper-lantern lining'):
+        with self.assertRaisesRegex(ValueError, 'Imported geometry changed'):
             newest_building.native_model(target, changed)
         unrelated = newest_building.native_model(target.with_name('unrelated.json'), changed)
         with self.assertRaisesRegex(ValueError, 'runs backwards'):

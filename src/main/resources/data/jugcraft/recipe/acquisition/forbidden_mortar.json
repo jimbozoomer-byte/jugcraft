@@ -1,10 +1,10 @@
 {
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
-    "jugcraft:forbidden_polished_darkstone",
-    "jugcraft:forbidden_polished_darkstone",
-    "jugcraft:forbidden_polished_darkstone",
-    "minecraft:flint"
+    "minecraft:stone_slab",
+    "minecraft:stone_slab",
+    "minecraft:stone_slab",
+    "minecraft:stick"
   ],
   "result": {
     "id": "jugcraft:forbidden_mortar",

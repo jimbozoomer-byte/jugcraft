@@ -140,6 +140,13 @@ tasks.register('herobrineScheduleTest', JavaExec) {
 }
 tasks.named('check') { dependsOn tasks.named('herobrineScheduleTest') }
 
+tasks.register('boardRulesTest', JavaExec) {
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'io.github.jimbozoomer.jugcraft.boardgames.BoardRulesTests'
+}
+tasks.named('check') { dependsOn tasks.named('boardRulesTest') }
+
 tasks.register('gameUpdaterTest', JavaExec) {
     dependsOn tasks.named('testClasses')
     classpath = sourceSets.test.runtimeClasspath
@@ -215,8 +222,6 @@ def clientTests = providers.gradleProperty("clientTests").getOrElse("")
 // Bound both test JVMs explicitly: the full server suite also retains substantial
 // world state. Fail on exhaustion so CI preserves the cause instead of hanging.
 tasks.matching { it.name in ["runGameTest", "runClientGameTest"] }.configureEach {
-	// Expanded natural-world tours exhausted 4 GB in CI (shards 2 and 5).
-	// Keep the server's bound; allow the rendered client room for loaded terrain.
 	maxHeapSize = name == "runClientGameTest" ? "6G" : "4G"
 	jvmArgs "-XX:+ExitOnOutOfMemoryError"
 }

@@ -43,48 +43,16 @@ def repair_unused_faces(data):
 def native_model(path, data):
     """Preserve authored geometry with bounded, deterministic native adaptations."""
     model_path = str(path).replace('\\', '/')
-    if model_path.endswith('/models/newest/fenceworks/block/parent/grass_topped_wall_triple.json'):
-        # Crossed, zero-thickness grass planes have equal-area coplanar faces.
-        # Platform trig rounding can make the generic finishing pass choose
-        # opposite faces to separate. Pin the already-reviewed 0.1px offsets
-        # before that pass; keep UVs, rotations and the preserved source intact.
-        source = map_value(read(SOURCE / 'fences/assets/mcwfences/models/block/parent/grass_topped_wall_triple.json'),
-                           'mcwfences', 'fenceworks', True)
+    if any(model_path.endswith('/models/' + ref) for ref in (
+            'newest/fenceworks/block/parent/grass_topped_wall_triple.json',
+            'newest/twigworks/block/template_paper_lantern.json',
+            'newest/twigworks/block/template_paper_lantern_hanging.json')):
+        # Main's exact repair records own these surfaces. Reusing that definition
+        # keeps native import and final atlas finishing idempotent, not cumulative.
+        from imported_geometry_repairs import records, repair_elements
+        ref = model_path.rsplit('/models/', 1)[1]
         data = deepcopy(data)
-        for index, axis in ((5, 0), (23, 2)):
-            original = source['elements'][index]
-            fixed = deepcopy(original)
-            if original['from'][axis] != 8 or original['to'][axis] != 8:
-                raise ValueError('Changed supplied grass-wall plane: ' + str(index))
-            fixed['from'][axis] = 7.9
-            if data['elements'][index] not in (original, fixed):
-                raise ValueError('Changed native grass-wall plane: ' + str(index))
-            data['elements'][index] = fixed
-    lantern = next((name for name in ('template_paper_lantern', 'template_paper_lantern_hanging')
-                    if model_path.endswith('/models/newest/twigworks/block/' + name + '.json')), None)
-    if lantern and any(any(a > b for a, b in zip(e['from'], e['to'])) for e in data.get('elements', [])):
-        source = read(SOURCE / 'twig/assets/twigs/models/block' / (lantern + '.json'))
-        lining = data['elements'][1]
-        if (lining != source['elements'][1] or lining['from'] != [13, 9, 13] or lining['to'] != [3, 0, 3]):
-            raise ValueError('Changed supplied paper-lantern lining: ' + lantern)
-        data = deepcopy(data)
-        planes = []
-        for face, material in lining['faces'].items():
-            axis, positive = {'north': (2, False), 'south': (2, True), 'west': (0, False),
-                              'east': (0, True), 'down': (1, False), 'up': (1, True)}[face]
-            plane = deepcopy(lining)
-            plane['from'] = [min(a, b) for a, b in zip(lining['from'], lining['to'])]
-            plane['to'] = [max(a, b) for a, b in zip(lining['from'], lining['to'])]
-            coordinate = lining['to' if positive else 'from'][axis]
-            plane['from'][axis] = plane['to'][axis] = coordinate
-            material = deepcopy(material)
-            # Both tangential axes reverse when the inside-out cube is unfolded.
-            # Keep the inward normal and exactly the same texture at every point.
-            u0, v0, u1, v1 = material['uv']
-            material['uv'] = [u1, v1, u0, v0]
-            plane['faces'] = {face: material}
-            planes.append(plane)
-        data['elements'][1:2] = planes
+        data['elements'] = repair_elements(ref, data['elements'], records()[ref])
     if '/models/newest/homeworks/' in str(path).replace('\\','/'): data=repair_unused_faces(data)
     # Repair four supplied faces which otherwise sample adjacent sprites in the atlas.
     if any(str(path).replace('\\', '/').endswith('/models/newest/' + name + '.json') for name in (
@@ -111,6 +79,7 @@ def write(path, data):
 
 def map_value(value, ns, prefix, resource=False):
     if isinstance(value, str):
+        if value == 'minecraft:chain': return 'minecraft:iron_chain'  # 26.3 registry rename.
         if resource and value == 'minecraft:block/air': return 'jugcraft:newest/empty'
         if value.startswith('#'): return '#' + map_value(value[1:], ns, prefix, resource)
         if value.startswith(ns + ':'):
@@ -596,6 +565,9 @@ def generate(writer=write):
             target = RES / 'data' / ('jugcraft' if parts[0] == ns else parts[0]) / 'tags' / category
             rel = Path(*parts[3:])
             if parts[0] == ns: rel = Path(prefix + '_' + rel.as_posix())
+            if parts[0] == 'c' and category == 'item' and rel.as_posix() == 'polished_calcite.json':
+                entries = [v for v in entries if (v.get('id') if isinstance(v, dict) else v) != 'minecraft:polished_calcite']
+                entries += ['jugcraft:twigworks_polished_calcite', 'jugcraft:stoneworks_polished_calcite']
             merge_tag(target / rel, entries, writer)
         prune_unregistered(prefix, allowed)
         changes = 'Native block behaviors; remapped identifiers; original model coordinates and texture bytes retained'

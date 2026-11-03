@@ -113,7 +113,8 @@
           "texture": "#wall",
           "tintindex": 0
         }
-      }
+      },
+      "__comment": "Center post"
     },
     {
       "from": [
@@ -190,7 +191,8 @@
           "texture": "#wall",
           "tintindex": 0
         }
-      }
+      },
+      "__comment": "Full wall"
     }
   ]
 }

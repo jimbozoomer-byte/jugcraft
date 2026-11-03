@@ -19,7 +19,10 @@ class AcquisitionRepairTests(unittest.TestCase):
                 else:
                     with patch.object(repairs,'write',side_effect=capture):
                         repairs.generate()
-                self.assertEqual(87,len(written))
+                self.assertEqual(49,len(written))
+                from newest_acquisition_recipes import build
+                reviewed={repairs.RES/'data/jugcraft/recipe'/(name+'.json') for name in build()}
+                self.assertFalse(set(written) & reviewed, 'Upstream recipe IDs have one authoritative writer')
                 for path,value in written.items():
                     self.assertEqual(value,json.loads(path.read_text()),str(path))
     def test_divine_pact_requires_boss_materials(self):
@@ -31,7 +34,7 @@ class AcquisitionRepairTests(unittest.TestCase):
         from newest_jugtania import D,mapped,recipe,read
         for name in ('terrasteel_helmet','terrasteel_chestplate','terrasteel_leggings','terrasteel_boots','water_rod'):
             source=read(D/'recipes'/(name+'.json'))
-            source['type']='jugcraft:botanical_water_crafting' if name=='water_rod' else 'jugcraft:botanical_armor_upgrade'
+            source['type']='jugcraft:botanical_water_shaped' if name=='water_rod' else 'jugcraft:botanical_armor_upgrade'
             self.assertEqual(recipe(mapped(source)),read(repairs.RES/'data/jugcraft/recipe/jugtania'/(name+'.json')))
 
 if __name__=='__main__':unittest.main()

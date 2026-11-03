@@ -159,6 +159,17 @@ def original(path, elements):
                 authored = resolve(models / 'special_models/block/blackboard_frame.json', models, namespace)
             if authored == elements:
                 return family, name
+            # Current main already carries bounded, hash-guarded source repairs.
+            # Accept only their exact recorded output and prove the restored mesh
+            # still equals the preserved source before considering hidden seams.
+            import imported_geometry_repairs as repairs
+            record = read(repairs.MANIFEST).get(path.relative_to(repairs.MODELS).as_posix())
+            if record and repairs.digest(elements) == record['after_sha256']:
+                restored = deepcopy(elements)
+                for index, change in record['elements'].items():
+                    restored[int(index)] = change['before']
+                if restored == authored and repairs.digest(restored) == record['before_sha256']:
+                    return family, name
             # Geometry finishing is deterministic and source-bounded; accept its
             # output too, without accepting arbitrary altered source meshes.
             import newest_model_finishing as finishing

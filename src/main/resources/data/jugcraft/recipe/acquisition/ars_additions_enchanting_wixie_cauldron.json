@@ -2,8 +2,8 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     "jugcraft:nouveau_wixie_cauldron",
-    "jugcraft:nouveau_enchanting_apparatus",
-    "minecraft:enchanting_table"
+    "minecraft:enchanting_table",
+    "minecraft:diamond"
   ],
   "result": {
     "id": "jugcraft:ars_additions_enchanting_wixie_cauldron",

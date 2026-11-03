@@ -1,8 +1,7 @@
 {
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
-    "jugcraft:holidayworks_bat_sleeping",
-    "minecraft:redstone"
+    "jugcraft:holidayworks_bat_sleeping"
   ],
   "result": {
     "id": "jugcraft:holidayworks_bat_awake",

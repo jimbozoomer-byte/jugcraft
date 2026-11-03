@@ -1,26 +1,18 @@
-JUGCRAFT NEWEST collection and progression update — 20261031.1 candidate
+JUGCRAFT harvest polish — release candidate
 
-- Building and decoration collection: supplied stone finishes, paths, doors and garage gates, fences, bridges, windows, stairs, lights, furniture, seasonal decorations and paintings, with native interactions and survival recipes.
-- Household tools and storage: seating, cabinets, sinks, cooking and utility blocks, rope workshops, movable attachments, backpacks and portable tools.
-- Botanical and arcane systems: mana production and transport, functional flowers, crafting and control devices, equipment, brews, rituals, relics and encounters; supplied models, textures and animation data integrated into Jugcraft.
-- Creatures and exploration: aquatic content, Ribbits, Moobloom variants, Naga, Wroughtnaut, Frostmaw, Bluff, Elokosa, Suntribe, Sculptor and monastery/galleon content. Missing originals remain explicitly documented.
-- Equipment: accessory slots accept supported equipment without research. The tested client equipped and removed items in 14 slot groups.
-- Getting started: unified Encyclopedia sections for technology, magic and transmutation, current-inventory ingredient lists, recipe previews and free NPC mentor lessons.
-- Crafting: choose between matching crafting outputs using the small result selector. Six server tests covered all 76 outputs across 38 conflicts; table and inventory client flows were exercised.
-- Repairs: supplied missing models/textures, aircraft banking direction and raid approach/pathing fixes from the accumulated local batch.
+Changes prepared since 0.1.0-alpha.20261102.2:
+- Visible raider pilots riding walker hatches and blimp gondolas, persistent crews, bailout handling and bounded stuck-path recovery. No extra raiders or increased attack power.
+- Restyled pet stable with portraits, status indicators, health and bond information, recovery timers, behavior controls and compact-window navigation.
+- Sculpted models for Cornbread Stuffing, Vegetable Noodles, Squid Ink Pasta, Bacon and Eggs, Steak and Potatoes, Roasted Mutton Chops, Pasta with Meatballs and Tomato Sauce.
+- Nineteen craftable harvest decorations: produce baskets, gourd stacks, place settings, cutlery, bread baskets, gravy boats, covered butter dishes, pie stands, leaf garlands, amber lanterns, candle centerpieces, market signs, copper pan racks, turkey/squirrel ornaments, acorn mobiles and tabletop cornucopias.
+- An autumn leaf runner for connected Feast Tables.
 
-Known priority fixes (docs/TODO.md):
-- 708 static geometry diagnostics still require source-aware visual review; these are findings, not 708 confirmed broken models. The static art check is NOT passing.
-- Missing originals: two monastery dead-end templates, Home saddle/mangrove-zaisu geometry, two trophy skins, four cherry-waffle door variants, and the empty Fast Paintings source folder.
-- Owner/player survival and visual acceptance remains outstanding.
-- Full-suite CI memory reliability: the default 4 GB test run exhausted memory; the local 6 GB sweep completed.
+- Recoverable industrial machines and Chemical Reactors retaining stored fluid, plus bounded Lua startup (PR 597 integrated into the release branch).
+- Imported model cap/handle repairs and source-verified multipart seam checks.
+- Third-person aiming preserves external yaw and pitch corrections.
 
-Validation: the full local server sweep passed 3,258/3,263 tests; all five old test expectations were corrected and a 58-test follow-up passed without optional integrations, including all 19 NEWEST regressions. Rendered client checks passed, including 837,276 block states and representative content. Data/recipe and native resource-reference checks passed. This is evidence across runs, not one completely green unfiltered run or a human multiplayer playtest.
+Validation: 52 focused server tests, 29 Python checks and both rendered pet/holiday client suites passed on the holiday batch. See docs/features/holiday-batch-nov3.md. Fresh GitHub checks are pending. Full data and geometry audits now pass; combined runtime and full CI validation remain pending. Stationary crew visuals were checked; a full populated-city raid soak was not performed.
 
-Preserve worlds, player data, settings and owner configuration. Do not regenerate the world for this update. New world-generation content appears in newly generated areas. Matching server/client versions are required. Keep the previous mod and a matching world backup for rollback after new content is saved.
+No automatic replacement of owner city builds, no world reset, no personal-profile replacement. Release version and exact source must be finalized after merge. Deploy the server only after separate owner restart confirmation and a full 30-second player warning; promote client updates only after server verification.
 
-Existing players: only after the server is updated and the channel promoted, use JUGCRAFT Updates > Download > Apply update & quit, wait for completion, then relaunch the same Modrinth profile. No new profile or public Modrinth pack listing is needed.
-
-Implementation and release preparation: OpenAI Codex (GPT-6), directed by the owner. Original supplied assets and notices retained. This candidate is not a claim of completed deployment or clean CI.
-
-Additional pre-publication priority: reconcile new essence values and conversion-cost fixtures, JEI station coverage, duplicate shapeless bills and survival-audit registry coverage. The broader local Python suite did not pass; packaging-specific tests did. These findings are tracked in docs/TODO.md and are not hidden by the passing gameplay tests.
+Implementation: Claude Opus 5.5 with OpenAI Codex integration, fixes, review and validation.

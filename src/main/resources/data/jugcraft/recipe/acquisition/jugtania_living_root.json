@@ -1,11 +1,11 @@
 {
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
-    "jugcraft:jugtania_livingwood_twig",
-    "minecraft:wheat_seeds"
+    "jugcraft:jugtania_root",
+    "jugcraft:jugtania_mana_powder"
   ],
   "result": {
     "id": "jugcraft:jugtania_living_root",
-    "count": 2
+    "count": 1
   }
 }

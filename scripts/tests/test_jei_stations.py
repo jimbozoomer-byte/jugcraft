@@ -74,7 +74,7 @@ class StationRecipes(unittest.TestCase):
         # which extends SimpleSmithingRecipe and uses the vanilla smithing table.
         covered |= {'jugcraft:' + x for x in (
             'amends_dye_bottle', 'aquatic_fillet', 'arcane_aureal_bottle', 'arcane_modifier',
-            'botanical_armor_upgrade', 'botanical_water_crafting', 'supps_present_conversion',
+            'botanical_armor_upgrade', 'botanical_water_crafting', 'botanical_water_shaped', 'supps_present_conversion',
             'botanical_armor_customization', 'botanical_blaster_crafting', 'botanical_cosmetic_attachment',
             'botanical_laputa_upgrade', 'botanical_lens_crafting', 'botanical_resolute_ivy', 'botanical_spell_cloth',
             'packworks_tier_upgrade', 'supps_antique_book', 'supps_bubble_fill', 'supps_confetti_dye',

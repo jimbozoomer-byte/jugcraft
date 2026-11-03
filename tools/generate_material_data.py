@@ -1576,6 +1576,10 @@ def tags():
     for block in machine_blocks():
         if block not in CROPS:
             tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+    # Industrial forms inherit the furnace's correct-tool requirement too.
+    import industrial_forms
+    for block in industrial_forms.FORMS:
+        tags.add("block", "minecraft:mineable/pickaxe", rid(block))
     # Crops grow on farmland, take bone meal and fertilizer, and keep the farmland under them.
     for crop, info in CROPS.items():
         tags.add("block", "minecraft:crops", rid(crop))
@@ -1929,16 +1933,35 @@ def main():
     import walnut_data
     walnut_data.reconcile(write)
     import newest_building
-    newest_building.generate(write)
-    # The supplied Ribbits pack uses both singular and legacy data directories.
-    # Import its native recipes/loot before pruning and building the JEI catalog.
+    def write_imported_building(path, data):
+        # Imported meshes include intentional inward faces and source-specific UV
+        # repairs. Use the same source-preserving writer as standalone import;
+        # model_atlas and the exact repair manifest audit/finish them afterward.
+        if path.is_relative_to(RES):
+            WRITTEN_RESOURCES.add(path.relative_to(RES).as_posix())
+        newest_building.write(path, data)
+    newest_building.generate(write_imported_building)
     import newest_ribbits
     newest_ribbits.import_data_resources(writer=write)
     import newest_supplementaries
     newest_supplementaries.write_native_recipes(write)
+    import newest_acquisition_recipes
+    newest_acquisition_recipes.main(writer=write)
     import acquisition_repairs
     acquisition_repairs.generate(write)
     diagonal_connections.write_all(write, ASSETS, RES / "assets/minecraft")
+    import board_game_data
+    board_game_data.generate(write)
+    import thanksgiving_data
+    thanksgiving_data.generate(write)
+    import food_servings
+    def write_food_serving(path, data):
+        # Food geometry already uses the closed-mesh finish and rests at y=0.
+        WRITTEN_RESOURCES.add(path.relative_to(RES).as_posix())
+        food_servings.write(path, data)
+    food_servings.generate(write_food_serving)
+    import authored_resource_reconciliation
+    authored_resource_reconciliation.apply(write)
     import newest_model_finishing
     newest_model_finishing.generate(write)
     import model_atlas

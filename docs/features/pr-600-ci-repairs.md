@@ -6,7 +6,7 @@ Owner request: fix the remaining checks on upstream PR 600, including the catalo
 
 The wall/tag patch failed because its exact old list no longer matched the expanded catalogue. Additive list patches now retain current members and reject conflicting definitions; replacements and removals still require their exact preconditions. Final language, sounds, tags and atlas additions run after their owning generators. Source archives remain unchanged.
 
-The inverted supplied lantern shell is represented by inward-facing planes with the same surfaces and UVs. Source-backed multipart repairs remove internal or duplicate faces, preserve visible caps, and separate coincident grass planes deterministically. Shape keys have a stable order. Atlas validation resolves inherited materials and model references. Opaque caps are verified against their decoded pixels; the art gate still checks exposed geometry rather than exempting whole collections. CI prepares the pinned vanilla shape references before generation.
+The supplied lantern shell retains its authored inward-facing surfaces and UVs under exact source proofs. Native imports and final atlas finishing share main's reviewed geometry records, accepting only their exact before/after hashes. Source-backed multipart repairs remove internal or duplicate faces, preserve visible caps, and separate coincident grass planes deterministically. Shape keys have a stable order. Atlas validation resolves inherited materials and model references. Opaque caps are verified against their decoded pixels; the art gate still checks exposed geometry rather than exempting whole collections. CI prepares the pinned vanilla shape references before generation.
 
 ## Catalogue and acquisition
 
@@ -25,7 +25,7 @@ The remaining missing active recipes receive paid native routes through existing
 - Aurum logs and wood use the shared stripping behavior. Existing skull degradation, obelisk formation and Edelwood milk/powder-snow collection are represented in the audit. Magical Farmland remains an in-world state whose actual loot returns dirt. The infinite Blessing administrator item and inert Sunblock Staff presentation are not Survival rewards.
 - The supplied Largemouth Bass spawn data names Smallmouth Bass. A native Largemouth entry in rivers and swamps makes the distinct fish bucket capturable.
 
-These routes use existing IDs, recipes, workshops and server authority. There are no new dependencies, registries or saved-state formats. Existing earned items remain valid. Reverting removes new acquisition recipes without deleting saved items. No live server or personal world is involved.
+These routes use existing item IDs, workshops and server authority. There are no new dependencies, item/block registrations or saved-state formats. Existing earned items remain valid. Reverting removes new acquisition recipes without deleting saved items. No live server or personal world is involved.
 
 ## Test infrastructure
 
@@ -61,3 +61,19 @@ Local verification on November 1, 2026:
 - Pack pins, repository structure/documentation links and all twelve World Designer/pack-compiler tests pass.
 
 The [upstream PR 600 checks](https://github.com/jimbozoomer-byte/jugcraft/pull/600/checks) record the fresh generated-data comparison, complete material audit, full server suites with/without optional integrations and rendered clients. Automated results do not constitute human gameplay, independent two-client or restart testing. No live server or personal world was changed.
+
+## Upstream main integration — November 3, 2026
+
+OpenAI Codex (GPT-6) integrated upstream `a279a133ba` into the component-yield branch. The merge retains main's mock-transport disposal, Chima persistence correction, board checks, prepared vanilla assets and longer CI setup budget. All server/client entrypoints from both branches remain registered, along with the PR's season clock and client shutdown adapters. The four component recipe families retain their prepared-material yields.
+
+The native botanical shaped recipe implementation from main is authoritative; the redundant PR serializer class is removed. Main owns shared acquisition recipe IDs, while 49 distinct repair outputs remain reproducible through the PR helper. The component-preserving Soulscribe conversion has its own recipe ID beside main's ordinary crafting route. Both sets of paid forge transmutations remain, and their component-preservation regression checks both indestructible armor and damageable results.
+
+Canonical generation now explicitly invokes the reviewed upstream acquisition writer with tracked output, preserving the combined resource manifest. Model finishing uses main's scoped cap/handle repairs together with its exact hash-guarded separation repairs. The runtime atlas check keeps inherited-material/alias validation and includes main's new visual gallery. Original owner assets are unchanged.
+
+The first regeneration caught overlapping grass-wall and lantern adaptations. Both native import and final finishing now use the same reviewed element repair function and records, rather than applying different changes cumulatively. The three real source meshes reproduce main's exact approved hashes; the lantern tests retain every face/material/UV, bound displacement, preserve inward normals and reject altered or unrelated geometry.
+
+Main's final walnut/dye price reconciliation runs for a scoped recalculation only when walnut husks are affected. A component-only catalogue update therefore keeps its existing ingredient prices and membership without requiring unrelated dye records. All four scoped-recalculation regressions pass with the original partial-catalogue fixture.
+
+The shared native present conversion owns recoloring and trapping for every color. Remove main's 32 overlapping ordinary dye recipes, which could otherwise return an empty replacement and discard a filled present's contents. The generator regression rejects ordinary present-consuming alternatives; the loaded-game regression checks contents, custom names, color, trapping and refusal to combine inventories.
+
+Validation in the isolated merge checkout: common, client and game-test compilation passes; repository/documentation links, all 26 package pins and all twelve World Designer tests pass. Canonical generation completes, followed by focused acquisition regeneration and owned-manifest cleanup for the superseded present recipes; regenerating the recipe view leaves it identical. The full price rebuild emits 15,969 records and preserves the four component prices. All 31 board-rule assertions pass with the pinned Java toolchain. Full Python, material-data and focused server checks are in progress. No live server or personal world is involved. The original checkout and its unfinished pharmacology work remain intact.

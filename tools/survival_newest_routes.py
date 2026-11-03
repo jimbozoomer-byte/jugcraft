@@ -72,10 +72,10 @@ def extend(root, edge, evidence, items):
     mana_supply = [j('endoflame'), j('mana_spreader'), '#minecraft:coals']
     for path in sorted((data / 'recipe/jugtania').rglob('*.json')):
         recipe = read(path)
-        if recipe.get('type') not in ('jugcraft:botanical_armor_upgrade', 'jugcraft:botanical_water_crafting'):
+        if recipe.get('type') not in ('jugcraft:botanical_armor_upgrade', 'jugcraft:botanical_water_crafting', 'jugcraft:botanical_water_shaped'):
             continue
         needs = [recipe['key'][symbol] for symbol in ''.join(recipe['pattern']) if symbol != ' ']
-        if recipe['type'] == 'jugcraft:botanical_water_crafting':
+        if recipe['type'] in ('jugcraft:botanical_water_crafting', 'jugcraft:botanical_water_shaped'):
             # The serializer rejects every potion except bottled plain water.
             needs = [value for value in needs if value != 'minecraft:potion']
             needs += ['minecraft:glass_bottle', 'fluid:minecraft:water']

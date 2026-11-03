@@ -2,7 +2,8 @@
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
     "minecraft:sugar_cane",
-    "minecraft:slime_ball"
+    "minecraft:chorus_fruit",
+    "minecraft:string"
   ],
   "result": {
     "id": "jugcraft:supps_propelplant_cane",

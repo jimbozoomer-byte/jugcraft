@@ -9,6 +9,12 @@ from newest_building import RES, read
 
 def generate(write):
     data = RES / 'data/jugcraft'
+    from newest_acquisition_recipes import build as reviewed_recipes
+    reviewed_paths = {data / 'recipe' / (name + '.json') for name in reviewed_recipes()}
+    emit = write
+    def write(path, value):
+        if path not in reviewed_paths:
+            emit(path, value)
     from newest_building import SOURCE, map_value
     from newest_twigs import recipe as native_recipe
     botanical = SOURCE / 'Jugtania/data/botania/recipes'
@@ -85,7 +91,7 @@ def generate(write):
         'type': 'minecraft:stonecutting', 'ingredient': 'minecraft:cobblestone',
         'result': {'id': item('jugtania_pebble'), 'count': 4}})
     # A paid conversion from the equivalent Ender Dagger retains its components.
-    write(data / 'recipe/acquisition/jugtania_soulscribe.json', {
+    write(data / 'recipe/acquisition/jugtania_soulscribe_from_ender_dagger.json', {
         'type': 'minecraft:smithing_transform', 'base': item('jugtania_ender_dagger'),
         'addition': 'minecraft:ink_sac', 'result': {'id': item('jugtania_soulscribe')}})
     craft('jugtania_lens_storm', ['jugtania_lens_normal', 'jugtania_rune_air', 'jugtania_rune_water', 'minecraft:lightning_rod'])

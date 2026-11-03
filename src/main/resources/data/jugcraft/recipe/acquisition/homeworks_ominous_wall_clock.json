@@ -1,8 +1,7 @@
 {
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
-    "jugcraft:homeworks_oak_wall_clock",
-    "minecraft:echo_shard",
+    "jugcraft:homeworks_dark_oak_wall_clock",
     "minecraft:echo_shard"
   ],
   "result": {

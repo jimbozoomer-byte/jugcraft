@@ -39,7 +39,7 @@ class GrassWallGenerationTests(unittest.TestCase):
     def test_changed_native_plane_is_rejected_and_other_models_are_untouched(self):
         changed = deepcopy(self.original)
         changed['elements'][5]['from'][0] = 7
-        with self.assertRaisesRegex(ValueError, 'Changed native grass-wall plane'):
+        with self.assertRaisesRegex(ValueError, 'Imported geometry changed; review before patching: newest/fenceworks/'):
             building.native_model(self.target, changed)
         self.assertEqual(changed, building.native_model(self.target.with_name('unrelated.json'), changed))
 

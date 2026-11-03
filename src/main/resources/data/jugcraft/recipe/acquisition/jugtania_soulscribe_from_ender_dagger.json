@@ -1,0 +1,8 @@
+{
+  "type": "minecraft:smithing_transform",
+  "base": "jugcraft:jugtania_ender_dagger",
+  "addition": "minecraft:ink_sac",
+  "result": {
+    "id": "jugcraft:jugtania_soulscribe"
+  }
+}

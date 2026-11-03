@@ -1,7 +1,8 @@
 """JSON resources for the harvest feast (fall additions 7), from tools/agriculture.py: the Harvest Feast Table's models
 (a length on its own, at the start or end of a table, or in its middle: the trestle legs only at a table's ends; each
-again with the Halloween Party Table's Bat Table Runner laid over its orange runner, `runner`), blockstates, item,
-loot, recipe, tag, and its messages.
+again with the Halloween Party Table's Bat Table Runner laid over its orange runner, `runner`, or the Thanksgiving
+decorations' Autumn Leaf Table Runner, tools/thanksgiving_decor_data.py leaf_runner), blockstates, item, loot, recipe,
+tag, and its messages.
 
 Called from agriculture_data.py (assets, loot, recipes, tags). Formats follow vanilla Minecraft 26.3's own files. The
 dishes on a table are drawn by the client's FeastTableRenderer.
@@ -10,8 +11,9 @@ from agriculture import FEAST
 from decor_data import MOD, rid, box, block_model, self_drop
 
 PARTS = ("single", "start", "middle", "end")
-# The runners a length can wear (FeastTableBlock.Runner): its own, and the Bat Table Runner laid over it.
-RUNNERS = ("harvest", "bats")
+# Cloth styles stay synchronized with FeastTableBlock.Runner; linen is applied with white carpet, leaves with the
+# Autumn Leaf Table Runner (tools/thanksgiving_decor.py RUNNER).
+RUNNERS = ("harvest", "bats", "linen", "leaves")
 TEXT = {
     "message.jugcraft.feast_table.dish_taken": "That dish holds something else",
     "message.jugcraft.feast_table.empty": "That dish is empty",
@@ -31,9 +33,20 @@ def table_model(part, runner="harvest"):
     legs_west = part in ("single", "start")
     legs_east = part in ("single", "end")
     elements = [box((0, 12, 0), (16, 13, 16), t, textures={"north": w, "south": w, "east": w, "west": w, "down": w})]
-    if runner == "bats":
+    if runner == "linen":
+        # Cloth tiles exactly at x=0/16; drape only over the outer table ends.
+        # Fixed UVs repeat the weave without stretching it across the full table.
+        elements.append(box((0,13,0),(16,13.22,16),"#linen",faces=["up"]))
+        for z0,z1 in ((0,.18),(15.82,16)):
+            elements.append(box((0,8,z0),(16,13,z1),"#linen"))
+        if legs_west: elements.append(box((0,8,.18),(.18,13,15.82),"#linen"))
+        if legs_east: elements.append(box((15.82,8,.18),(16,13,15.82),"#linen"))
+    elif runner == "bats":
         import party_table_data
         elements += party_table_data.bat_runner(legs_west, legs_east)
+    elif runner == "leaves":
+        import thanksgiving_decor_data
+        elements += thanksgiving_decor_data.leaf_runner(legs_west, legs_east)
     else:
         elements.append(box((0, 13, 5), (16, 13.25, 11), r, faces=["up", "north", "south"]))
     beam_from = 3 if legs_west else 0
@@ -46,11 +59,16 @@ def table_model(part, runner="harvest"):
     textures = {"wood": "feast_table_wood", "top": "feast_table_top", "runner": "feast_table_runner"}
     if runner == "bats":
         textures = {"wood": "feast_table_wood", "top": "feast_table_top", "bats": "feast_table_bat_runner"}
-    return block_model(textures, elements, "feast_table_wood")
+    if runner == "leaves":
+        textures = {"wood": "feast_table_wood", "top": "feast_table_top", "hessian": "feast_table_leaf_runner",
+                    "leaves": "feast_table_leaf_runner_leaves"}
+    model = block_model(textures, elements, "feast_table_wood")
+    if runner == "linen": model['textures']['linen'] = 'minecraft:block/white_wool'
+    return model
 
 
 def model_name(block, part, runner):
-    """A length's model: `<block>_<part>`, with `_bats` for the Bat Table Runner."""
+    """A length's model: `<block>_<part>`, with `_<runner>` for any runner but its own (`_bats`, `_linen`, `_leaves`)."""
     return f"{block}_{part}" + ("" if runner == "harvest" else f"_{runner}")
 
 
@@ -72,12 +90,23 @@ def assets(root, write, lang):
 
 
 def loot(out, write):
-    """A length drops itself, and the Bat Table Runner laid on it."""
+    """A length drops itself, and the runner laid on it: the Bat Table Runner, white carpet (linen) or the Autumn Leaf
+    Table Runner."""
     table = self_drop(FEAST["block"])
     table["pools"].append({"condition": {"type": "minecraft:all_of", "terms": [
         {"type": "minecraft:survives_explosion"},
         {"type": "minecraft:match_block", "blocks": rid(FEAST["block"]), "state": {"runner": "bats"}}]},
         "entries": [{"type": "minecraft:item", "name": rid("bat_table_runner")}], "rolls": 1})
+    import copy
+    linen = copy.deepcopy(table['pools'][-1])
+    linen['condition']['terms'][1]['state']['runner'] = 'linen'
+    linen['entries'][0]['name'] = 'minecraft:white_carpet'
+    table['pools'].append(linen)
+    # The Autumn Leaf Table Runner (tools/thanksgiving_decor.py RUNNER) drops with its length too.
+    leaves = copy.deepcopy(table['pools'][1])
+    leaves['condition']['terms'][1]['state']['runner'] = 'leaves'
+    leaves['entries'][0]['name'] = rid('autumn_leaf_table_runner')
+    table['pools'].append(leaves)
     write(out / f"{FEAST['block']}.json", table)
 
 

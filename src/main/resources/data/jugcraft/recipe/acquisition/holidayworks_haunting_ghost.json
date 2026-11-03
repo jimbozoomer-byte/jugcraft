@@ -1,8 +1,7 @@
 {
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
-    "jugcraft:holidayworks_ghost",
-    "minecraft:cyan_dye"
+    "jugcraft:holidayworks_happy_ghost"
   ],
   "result": {
     "id": "jugcraft:holidayworks_haunting_ghost",
