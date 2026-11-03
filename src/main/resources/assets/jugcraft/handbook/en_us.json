@@ -2632,7 +2632,7 @@
           "title": "Range Module",
           "icon": "jugcraft:range_module",
           "text": [
-            "Unlocks selectable 5×5 mining and doubles the vein limit (drill only). Open the charging station menu, place the equipment in either bay, then use + to fit a module from your inventory or - to recover one. Discharge before reducing capacity."
+            "Unlocks selectable 5\u00d75 mining and doubles the vein limit (drill only). Open the charging station menu, place the equipment in either bay, then use + to fit a module from your inventory or - to recover one. Discharge before reducing capacity."
           ],
           "craft": {
             "grid": [

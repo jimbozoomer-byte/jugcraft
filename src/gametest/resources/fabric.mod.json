@@ -751,6 +751,10 @@
     "jugcraft": "*"
   },
   "mixins": [
-    "jugcraft-test.mixins.json"
+    "jugcraft-test.mixins.json",
+    {
+      "config": "jugcraft-test.client.mixins.json",
+      "environment": "client"
+    }
   ]
 }

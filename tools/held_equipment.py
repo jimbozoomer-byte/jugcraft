@@ -46,7 +46,9 @@ def hand_pose(grip, third, first, mirror_aim=False, first_offset=(0, 0, 0)):
             translation = [base_translation[i] + carry[i] + (-delta[i] if left and i == 0 and not mirror_aim else delta[i]) for i in range(3)]
             rotation = list(angles) if not left or mirror_aim else [angles[0], -angles[1], -angles[2]]
             display[f"{view}_{'left' if left else 'right'}hand"] = {
-                "rotation": rotation, "translation": [round(v, 5) for v in translation], "scale": [size] * 3}
+                # libm can leave either sign on near-zero trig results. Serialize one
+                # canonical zero so Linux regeneration matches Windows-authored poses.
+                "rotation": rotation, "translation": [round(v, 5) or 0.0 for v in translation], "scale": [size] * 3}
     return display
 
 
