@@ -823,10 +823,13 @@ public class ConcordanceGardenLoadGameTests {
 				}
 			}
 			helper.setBlock(crown.above(), Blocks.OAK_LEAVES.defaultBlockState().setValue(LeavesBlock.PERSISTENT, true));
+			// GC-10 unit 7 (CI): a presence learns its Bound Will at its first think (PactSpiritEntity.record), so here, at the
+			// seal, each is counted by its perch and holder; the samples while measured check the record too (presence).
 			int present = 0;
 			for (int h = 0; h < HOLDERS; h++) {
 				for (int k = 0; k < PACTS; k++) {
-					present += presence(h, k) != null ? 1 : 0;
+					PactSpiritEntity<?> spirit = perches[h][k].presence(level);
+					present += spirit != null && card.players.get(h).getUUID().equals(spirit.owner()) ? 1 : 0;
 				}
 			}
 			helper.assertTrue(present == HOLDERS * PACTS, "Each pact has its presence at its perch: " + present);
