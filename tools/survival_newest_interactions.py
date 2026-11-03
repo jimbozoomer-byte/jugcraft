@@ -86,7 +86,6 @@ def extend(root, edge, evidence, items):
     # loot deliberately returns their base material even with Silk Touch.
     exclusions = {
         'jugcraft:wilds_grant_suns_blessing': 'Creative administrator item: OwnerWilds registers an unlimited permanent Blessing grant. Survival players earn the effect through the Umvuthi encounter instead of receiving this control item.',
-        'jugcraft:wilds_sunblock_staff': 'Presentation-only source preview: OwnerWilds registers a plain Item with no staff action. Native Sunblock combat is owned by WildSunCasting and the Umvuthi encounter, not this stack.',
         'jugcraft:aquatic_farmland': 'In-world soil state: OwnerNeptunium.SeaHoe tills dirt into moist farmland; its native block loot returns dirt, not a farmland item.',
         'jugcraft:wilds_raked_sand': 'In-world sand state: WildRakedSand.Rake converts sand; its native block loot returns ordinary sand, not a raked-sand item.',
         'jugcraft:wilds_red_raked_sand': 'In-world sand state: WildRakedSand.Rake converts red sand; its native block loot returns ordinary red sand, not a raked-sand item.',

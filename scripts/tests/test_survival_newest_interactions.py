@@ -62,11 +62,16 @@ class NewestInteractionsTests(unittest.TestCase):
     def test_presentation_exclusions_match_actual_native_drops(self):
         self.assertEqual({'jugcraft:aquatic_farmland', 'jugcraft:wilds_raked_sand',
                           'jugcraft:wilds_red_raked_sand', 'jugcraft:jugtania_solid_vine',
-                          'jugcraft:wilds_grant_suns_blessing', 'jugcraft:wilds_sunblock_staff'}, set(self.excluded))
+                          'jugcraft:wilds_grant_suns_blessing'}, set(self.excluded))
         registry = (ROOT / 'src/main/java/io/github/jimbozoomer/jugcraft/wilds/OwnerWilds.java').read_text()
         self.assertIn('"grant_suns_blessing"->new Item(p)', registry)
         self.assertIn('BLESSING,-1', registry)
-        self.assertNotIn('case "sunblock_staff"', registry)
+        self.assertIn('case "sunblock_staff"->new WildSunEquipment.SunblockStaff(p)', registry)
+        staff = (ROOT / 'src/main/java/io/github/jimbozoomer/jugcraft/wilds/WildSunEquipment.java').read_text()
+        self.assertIn('candidate.is(Items.GOLD_INGOT)', staff)
+        self.assertIn('payment.shrink(1)', staff)
+        reward = ROOT / 'src/main/resources/data/jugcraft/loot_table/entities/wilds_umvuthi.json'
+        self.assertIn('jugcraft:wilds_sunblock_staff', reward.read_text())
         for item, drop in (('aquatic_farmland', 'minecraft:dirt'),
                            ('wilds_raked_sand', 'minecraft:sand'),
                            ('wilds_red_raked_sand', 'minecraft:red_sand')):
