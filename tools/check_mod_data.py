@@ -24412,6 +24412,15 @@ def check_pact_screen(co, lang):
     for name in pa.GARDEN_CLIENT_SHOTS:
         if f'"{name}"' not in garden:
             err(f"ConcordanceGardenPactClientGameTests: takes {name}")
+    # GC-10 unit 7 (GC-P144): after Amdusias's flow the garden class lines up all seven spirits in one frozen picture and opens
+    # a roster of seven portraits; the line-up makes each of the seven itself (Workers' own types).
+    run_body = _java_body(garden, "public void runTest(")
+    if not 0 <= run_body.find("amdusias(context") < run_body.find("lineUp(context") < run_body.find("rosterOfSeven(context"):
+        err("ConcordanceGardenPactClientGameTests: runTest calls lineUp and then rosterOfSeven after Amdusias's flow (GC-P144)")
+    line_body = _java_body(garden, "private static void lineUp(")
+    for kind in ("STOLAS", "BUER", "BATHIN", "MARAX", "FORAS", "BIFRONS", "AMDUSIAS"):
+        if f"Workers.{kind}" not in line_body:
+            err(f"ConcordanceGardenPactClientGameTests.lineUp: lines up all seven spirits, Workers.{kind} among them (GC-P144)")
     if not 0 <= garden.find("context.waitForScreen(null);") < garden.find("takeScreenshot("):
         err("ConcordanceGardenPactClientGameTests: waits for no screen (the level loaded) before its first picture")
     if '"io.github.jimbozoomer.jugcraft.test.ConcordanceGardenPactClientGameTests"' not in (ROOT / "src" / "gametest" / "resources" / "fabric.mod.json").read_text(encoding="utf-8"):
@@ -25500,8 +25509,10 @@ def check_pact_network(co):
     for name in pa.NETWORK_SHOTS:
         if f'"{name}"' not in code:
             err(f"ConcordancePactNetworkTests: takes {name}")
+    # GC-10 unit 7 (GC-P146): the second JVM's evidence directory and its launch moved to the shared SecondClient; the pact
+    # test names its own prefix and launches through it.
     for needle in ("Pacts.Outcome.NOT_PERMITTED.id", "AgreementHolder.Ended.NOT_HOLDER", "Roster.NOT_LISTED", "ConnectScreen.startConnecting(",
-                   'Path.of("owner-network-evidence", "pact-"', "net.fabricmc.loader.impl.launch.knot.KnotClient"):
+                   'new SecondClient(PEER, COORDINATION, "pact",', "CLIENT.launch("):
         if needle not in code:
             err(f"ConcordancePactNetworkTests: a second client JVM, refused with each reason, its evidence uploaded ({needle})")
     if "StorageCrateMultiplayer" in code or "storage-crate-multiplayer" in code:
@@ -25512,12 +25523,64 @@ def check_pact_network(co):
         err(".github/workflows/build.yml: the client shards upload the second clients' logs (owner-network-evidence)")
     job = re.search(r"^  pact-clients-without-optional:\n(.*?)(?=^  [A-Za-z][\w-]*:\s*$|\Z)", workflow, re.S | re.M)
     classes = re.findall(r"-PclientTests=([\w,]+)", job.group(1)) if job else []
+    # GC-10 unit 7 (GC-P148): the first step's list is held here, exactly as before; the whole list, the garden step's
+    # included, exactly, in check_garden_network.
     if not job or not re.search(r"^    if: github\.event_name == 'workflow_dispatch' && inputs\.clients_without_optional[ \t]*$", job.group(1), re.M) \
             or "-PjugcraftOptionalIntegrations=false" not in job.group(1) \
-            or classes != ["ConcordancePactClientGameTests,ConcordanceRosterClientGameTests,ConcordancePactNetworkTests"]:
+            or classes[:1] != ["ConcordancePactClientGameTests,ConcordanceRosterClientGameTests,ConcordancePactNetworkTests"]:
         err(".github/workflows/build.yml: the job pact-clients-without-optional runs ConcordancePactClientGameTests, "
             "ConcordanceRosterClientGameTests and ConcordancePactNetworkTests without the optional integrations, only when a manual "
             f"run asks (D-P137): {classes}")
+    check_garden_network(co, mod, job.group(1) if job else "", classes)
+
+
+# GC-10 unit 7
+def check_garden_network(co, mod, job, classes):
+    """Concordance garden cohort, GC-10 unit 7 (GC-S18, GC-P142, GC-P146, GC-P148): the garden's two-client test. The
+    second client JVM's code is one shared helper, SecondClient (the pact network test's, moved): it alone of the new code
+    launches KnotClient and keeps the evidence under owner-network-evidence/<prefix>-<uuid>; the pact and garden network
+    tests each make one with their own prefix and launch through it; OwnerCollectionsNetworkTests (#435) and
+    HerobrineNetworkTests keep their own copies, untouched. ConcordanceGardenNetworkTests is a registered client game test
+    that takes GARDEN_NETWORK_SHOTS, seals Buer without the screen, sees his work and is refused an End as not the holder.
+    The opt-in run without the optional integrations keeps its first step and adds a second for the garden classes."""
+    pa = co.pacts
+    tests = ROOT / "src" / "gametest" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "test"
+
+    def source(name):
+        path = tests / f"{name}.java"
+        return path.read_text(encoding="utf-8") if path.exists() else ""
+    helper, garden = source("SecondClient"), source("ConcordanceGardenNetworkTests")
+    for needle in ("net.fabricmc.loader.impl.launch.knot.KnotClient", 'Path.of("owner-network-evidence", evidencePrefix + "-"',
+                   "System.gc();", "heap()"):
+        if needle not in helper:
+            err(f"SecondClient.java: the shared second client JVM, its evidence directory and its heap logged ({needle}) (GC-P146)")
+    entry = "io.github.jimbozoomer.jugcraft.test.ConcordanceGardenNetworkTests"
+    if entry not in mod.get("entrypoints", {}).get("fabric-client-gametest", []):
+        err(f"src/gametest/resources/fabric.mod.json: {entry} is a registered client game test (GC-P142)")
+    for needle in ('new SecondClient(PEER, COORDINATION, "garden",', "CLIENT.launch(", "AgreementHolder.Ended.NOT_HOLDER",
+                   "BuerEntity.Gesture.WORK", "PactPerchBlockEntity.sealing(", "ConnectScreen.startConnecting("):
+        if needle not in garden:
+            err(f"ConcordanceGardenNetworkTests: a second client JVM through SecondClient sees Buer's work and is refused an End ({needle}) (GC-P142)")
+    for name in getattr(pa, "GARDEN_NETWORK_SHOTS", []):
+        if f'"{name}"' not in re.sub(r"//[^\n]*|/\*.*?\*/", " ", garden, flags=re.S):
+            err(f"ConcordanceGardenNetworkTests: takes {name}")
+    if len(getattr(pa, "GARDEN_NETWORK_SHOTS", [])) != 3:
+        err("tools/concordance_pacts.py: GARDEN_NETWORK_SHOTS names the garden network test's three pictures (GC-P142)")
+    launching = sorted(path.stem for path in tests.rglob("*.java") if "net.fabricmc.loader.impl.launch.knot.KnotClient" in path.read_text(encoding="utf-8"))
+    if launching != ["HerobrineNetworkTests", "OwnerCollectionsNetworkTests", "SecondClient"]:
+        err(f"src/gametest: only SecondClient launches a second client JVM, besides OwnerCollectionsNetworkTests and HerobrineNetworkTests "
+            f"(their own copies): {launching} (GC-P146)")
+    if "private static Process launchPeer(int port,ClientGameTestContext c)" not in source("OwnerCollectionsNetworkTests"):
+        err("OwnerCollectionsNetworkTests.java: unchanged, its own launchPeer kept (GC-P146: SecondClient serves the Concordance tests only)")
+    if classes != ["ConcordancePactClientGameTests,ConcordanceRosterClientGameTests,ConcordancePactNetworkTests",
+                   "ConcordanceGardenPactClientGameTests,ConcordanceGardenNetworkTests"]:
+        err(".github/workflows/build.yml: the job pact-clients-without-optional keeps its pact step and adds one for "
+            f"ConcordanceGardenPactClientGameTests,ConcordanceGardenNetworkTests (GC-P148): {classes}")
+    garden_step = re.search(r"^      - name: Run the garden client tests without optional integrations\n(.*?)(?=^      - |\Z)", job, re.S | re.M)
+    if not garden_step or not re.search(r"^        if: \$\{\{ !cancelled\(\) \}\}[ \t]*$", garden_step.group(1), re.M) \
+            or "-PjugcraftOptionalIntegrations=false" not in garden_step.group(1):
+        err(".github/workflows/build.yml: the garden step of pact-clients-without-optional runs without the optional integrations "
+            "unless the run was cancelled (GC-P148)")
 
 
 def check_magic_ui(lang):

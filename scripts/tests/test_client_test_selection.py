@@ -165,6 +165,13 @@ class ClientTestSelectionTests(unittest.TestCase):
         self.assertIn("ConcordancePactNetworkTests", chosen)
         self.assertIn("ConcordancePactNetworkTests", selection.WEIGHTS)
 
+    def test_garden_network_test_is_its_own_class_and_weighed(self):
+        # Concordance garden cohort, GC-10 unit 7 (GC-P142): the garden's two-client test is a client class of its own, with
+        # a running-time estimate.
+        chosen, _ = selection.select(["src/gametest/java/io/github/jimbozoomer/jugcraft/test/ConcordanceGardenNetworkTests.java"], self.tests, set())
+        self.assertIn("ConcordanceGardenNetworkTests", chosen)
+        self.assertIn("ConcordanceGardenNetworkTests", selection.WEIGHTS)
+
     def test_workflow_runs_every_selected_shard(self):
         workflow = (ROOT / ".github/workflows/build.yml").read_text()
         matrix = re.search(r"shard: \[([\d, ]+)\]", workflow)

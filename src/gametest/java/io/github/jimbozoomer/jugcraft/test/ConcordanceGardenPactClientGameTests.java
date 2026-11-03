@@ -126,6 +126,10 @@ import net.minecraft.client.gui.components.SubtitleOverlay;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+// GC-10 unit 7
+import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
+import io.github.jimbozoomer.jugcraft.concordance.worker.PactDefinition;
+import net.minecraft.world.entity.EntitySpawnReason;
 
 /**
  * Concordance garden cohort, GC-04 (GC-P30; GC-P18 for the chooser; docs/features/buer-pact.md): the garden pacts in a real
@@ -280,6 +284,10 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 				// GC-09 unit 6
 				// GC-09: Amdusias at the same perch, standing beside it, from the chooser to his departure (his yard first).
 				amdusias(context, server, connection, perch);
+				// GC-10 unit 7
+				// GC-10 unit 7 (GC-P144): the seven spirits side by side in one frozen picture, then a roster of seven portraits.
+				lineUp(context, server, connection, perch);
+				rosterOfSeven(context, server, perch);
 				context.runOnClient(client -> {
 					client.options.guiScale().set(scale);
 					client.resizeGui();
@@ -4468,6 +4476,9 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		cardsWhole(context, "the chooser with his tree");
 		named(context);
 		budget(context, chooserWords(context), "the chooser with his tree");
+		// GC-10 unit 7 (GC-P144): this chooser is the seven-entry one: Stolas and the six garden spirits.
+		int listed = context.computeOnClient(client -> PactClient.state().patterns().size());
+		check(listed == 7, "The chooser lists seven, Stolas and the six garden spirits: " + entries);
 		shot(context, "jugcraft_garden_amdusias_chooser");
 		String name = context.computeOnClient(client -> Component.translatable("entity.jugcraft.amdusias").getString());
 		tabToNamed(context, name);
@@ -5120,5 +5131,293 @@ public class ConcordanceGardenPactClientGameTests implements FabricClientGameTes
 		shot(context, "jugcraft_garden_amdusias_ended");
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 		context.waitForScreen(null);
+	}
+
+	// ---------------------------------------------------------------- GC-10 unit 7: the line-up and the roster of seven
+
+	/** GC-10 unit 7 (GC-P144): how far apart the line-up's spirits and the roster's perches stand (block centres; see lineUp). */
+	private static final int LINE_STEP = 3;
+	private static final int ROSTER_STEP = 4;
+
+	/**
+	 * GC-10 unit 7 (GC-P144): a stone floor and clear air from 15 west to 15 east and 1 to 8 south of the perch, four high
+	 * (the perch and Buer's bed, north of it, kept): room for the line-up's row four south of the perch, the roster's seven
+	 * perches on the same row and a standing spirit two beside the outermost.
+	 */
+	private static void lineFloor(MinecraftServer minecraft, BlockPos perch) {
+		ServerLevel level = minecraft.overworld();
+		for (int dx = -15; dx <= 15; dx++) {
+			for (int dz = 1; dz <= 8; dz++) {
+				level.setBlockAndUpdate(perch.offset(dx, -1, dz), Blocks.STONE.defaultBlockState());
+				for (int dy = 0; dy <= 4; dy++) {
+					level.setBlockAndUpdate(perch.offset(dx, dy, dz), Blocks.AIR.defaultBlockState());
+				}
+			}
+		}
+	}
+
+	/**
+	 * GC-10 unit 7 (GC-P144): the seven spirits side by side, turned south, in one frozen picture from the front at one
+	 * distance. The world is frozen first (each one's think would send away a visitor nobody speaks to), then on the server
+	 * each is made and added in the route's order, Stolas, Buer, Bathin, Marax, Foras, Bifrons, Amdusias, {@value
+	 * #LINE_STEP} blocks apart along x on the row four south of the perch: Stolas, Buer and Bathin each on a perch block of
+	 * its own (its station, the perch's top: a block centre, so the spec's 2.5 became 3), the four standing ones on the floor.
+	 * That an entity added while frozen reaches the client is inferred from ChunkMap's pairing at add (the perch's summon
+	 * says so), not seen. On the client, once all seven are there: the player flies south of the row's middle, on its axis,
+	 * as far back and as high as frames every one of their drawn bodies (PactSpiritRenderers.standing) whole with a tenth's
+	 * margin, looking level or a little down (0 to 10 degrees); asserted from where the camera then is; each box's height
+	 * logged; the picture. Bifrons is drawn in his low shape (nobody speaks to him: not listening). Then the seven are
+	 * discarded, the three perch blocks removed, the world thawed and the player landed.
+	 */
+	private static void lineUp(ClientGameTestContext context, TestDedicatedServerContext server, TestDedicatedServerConnection connection, BlockPos perch) {
+		BlockPos row = perch.south(4);
+		server.runOnServer(minecraft -> {
+			yard(minecraft, perch);
+			lineFloor(minecraft, perch);
+		});
+		tidyYard(server, perch, "the line-up");
+		Vec3 landing = new Vec3(row.getX() + 0.5, row.getY(), row.getZ() + 6.5);
+		server.runCommand(String.format(Locale.ROOT, "tp @a %.1f %d %.1f 180 0", landing.x, row.getY(), landing.z));
+		context.waitTicks(10);
+		connection.waitForChunksRender();
+		boolean hidden = hideHud(context);
+		List<BlockPos> perches = new ArrayList<>();
+		List<UUID> placed = new ArrayList<>();
+		server.runCommand("tick freeze");
+		try {
+			placed.addAll(server.computeOnServer(minecraft -> {
+				ServerLevel level = minecraft.overworld();
+				List<EntityType<?>> types = List.of(Workers.STOLAS, Workers.BUER, Workers.BATHIN, Workers.MARAX, Workers.FORAS, Workers.BIFRONS,
+						Workers.AMDUSIAS);
+				List<UUID> made = new ArrayList<>();
+				for (int i = 0; i < types.size(); i++) {
+					BlockPos cell = row.offset((i - 3) * LINE_STEP, 0, 0);
+					Entity created = types.get(i).create(level, EntitySpawnReason.COMMAND);
+					check(created instanceof PactSpiritEntity<?>, "Each of the seven is made: " + types.get(i));
+					PactSpiritEntity<?> spirit = (PactSpiritEntity<?>) created;
+					double standsAt = cell.getY();
+					if (i < 3) {
+						level.setBlockAndUpdate(cell, Workers.PACT_PERCH.defaultBlockState());
+						perches.add(cell);
+						spirit.setPerch(cell);
+						standsAt = cell.getY() + 1.0;
+					}
+					spirit.setYRot(0.0F);
+					spirit.setYHeadRot(0.0F);
+					spirit.setYBodyRot(0.0F);
+					spirit.snapTo(cell.getX() + 0.5, standsAt, cell.getZ() + 0.5, 0.0F, 0.0F);
+					check(level.addFreshEntity(spirit), "Each of the seven is added: " + types.get(i));
+					made.add(spirit.getUUID());
+				}
+				return made;
+			}));
+			context.waitFor(client -> lined(client, row, placed).size() == placed.size(), WAIT);
+			double[] camera = context.computeOnClient(client -> lineCamera(client, row, placed));
+			Jugcraft.LOGGER.info("[garden-check] the line-up's camera: feet, yaw and pitch {}", Arrays.toString(camera));
+			check(camera != null, "A place south of the row frames all seven whole, looking level or a little down");
+			server.runOnServer(minecraft -> {
+				ServerPlayer player = player(minecraft);
+				player.getAbilities().mayfly = true;
+				player.getAbilities().flying = true;
+				player.onUpdateAbilities();
+			});
+			server.runCommand(String.format(Locale.ROOT, "tp @a %.3f %.3f %.3f %.1f %.1f", camera[0], camera[1], camera[2], camera[3], camera[4]));
+			Vec3 feet = new Vec3(camera[0], camera[1], camera[2]);
+			context.waitFor(client -> client.player.position().distanceToSqr(feet) < 0.01, WAIT);
+			context.waitTicks(3);
+			connection.waitForChunksRender();
+			List<String> outside = context.computeOnClient(client -> {
+				double tall = FRAME_FILL * Math.tan(Math.toRadians(client.options.fov().get() / 2.0));
+				double wide = tall * client.getWindow().getWidth() / Math.max(1, client.getWindow().getHeight());
+				Vec3 from = client.player.getEyePosition();
+				Vec3 look = client.player.getViewVector(1.0F);
+				List<String> out = new ArrayList<>();
+				for (PactSpiritEntity<?> spirit : lined(client, row, placed)) {
+					AABB body = PactSpiritRenderers.standing(spirit);
+					Jugcraft.LOGGER.info("[garden-check] the line-up: {} drawn {} tall", BuiltInRegistries.ENTITY_TYPE.getKey(spirit.getType()),
+							String.format(Locale.ROOT, "%.2f", body.getYsize()));
+					if (!frames(from, look, body, tall, wide)) {
+						out.add(BuiltInRegistries.ENTITY_TYPE.getKey(spirit.getType()).toString());
+					}
+				}
+				return out;
+			});
+			check(outside.isEmpty(), "Every one of the seven stands whole in the line-up's picture: " + outside);
+			shot(context, "jugcraft_garden_lineup");
+		} finally {
+			server.runOnServer(minecraft -> {
+				ServerLevel level = minecraft.overworld();
+				for (UUID id : placed) {
+					Entity left = level.getEntity(id);
+					if (left != null) {
+						left.discard();
+					}
+				}
+				for (BlockPos at : perches) {
+					level.setBlockAndUpdate(at, Blocks.AIR.defaultBlockState());
+				}
+			});
+			land(context, server, landing);
+			server.runCommand("tick unfreeze");
+			restoreHud(context, hidden);
+		}
+	}
+
+	/** GC-10 unit 7: the client's spirits among {@code ids} within the row's reach, in the order the client holds them. */
+	private static List<PactSpiritEntity<?>> lined(Minecraft client, BlockPos row, List<UUID> ids) {
+		List<PactSpiritEntity<?>> out = new ArrayList<>();
+		for (Entity entity : client.level.getEntities((Entity) null, new AABB(row).inflate(14.0, 4.0, 3.0), entity -> ids.contains(entity.getUUID()))) {
+			if (entity instanceof PactSpiritEntity<?> spirit) {
+				out.add(spirit);
+			}
+		}
+		return out;
+	}
+
+	/**
+	 * GC-10 unit 7: the line-up's camera ({x, y, z, yaw, pitch} of the player's feet and look), or null: on the row's axis
+	 * south of its middle, from 4 to 30 blocks back and 0 to 4 up, the first place where every one of the seven drawn bodies
+	 * stands whole in the picture's middle (frame's fill), looking at their middle level or down by at most 10 degrees, and
+	 * where the standing player's box meets no block.
+	 */
+	private static double @Nullable [] lineCamera(Minecraft client, BlockPos row, List<UUID> ids) {
+		List<AABB> bodies = new ArrayList<>();
+		for (PactSpiritEntity<?> spirit : lined(client, row, ids)) {
+			bodies.add(PactSpiritRenderers.standing(spirit));
+		}
+		if (bodies.size() != ids.size()) {
+			return null;
+		}
+		AABB all = bodies.getFirst();
+		for (AABB body : bodies) {
+			all = all.minmax(body);
+		}
+		Vec3 centre = all.getCenter();
+		double tall = FRAME_FILL * Math.tan(Math.toRadians(client.options.fov().get() / 2.0));
+		double wide = tall * client.getWindow().getWidth() / Math.max(1, client.getWindow().getHeight());
+		double eye = client.player.getEyeHeight();
+		for (double back = 4.0; back <= 30.0; back += 0.25) {
+			for (double lift = 0.0; lift <= 4.0; lift += 0.25) {
+				Vec3 from = new Vec3(centre.x, row.getY() + eye + lift, row.getZ() + 0.5 + back);
+				Vec3 look = centre.subtract(from);
+				double pitch = -Math.toDegrees(Math.atan2(look.y, look.horizontalDistance()));
+				if (pitch < 0.0 || pitch > 10.0) {
+					continue;
+				}
+				boolean whole = true;
+				for (AABB body : bodies) {
+					whole &= frames(from, look, body, tall, wide);
+				}
+				if (!whole || !client.level.noCollision(client.player,
+						client.player.getDimensions(Pose.STANDING).makeBoundingBox(new Vec3(from.x, from.y - eye, from.z)).deflate(1.0E-7))) {
+					continue;
+				}
+				float yaw = Mth.wrapDegrees((float) (Mth.atan2(look.z, look.x) * Mth.RAD_TO_DEG) - 90.0F);
+				return new double[] {from.x, from.y - eye, from.z, yaw, pitch};
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * GC-10 unit 7 (GC-P144): a roster of seven portraits. Seven perches of the player's on the row four south of the perch,
+	 * {@value #ROSTER_STEP} apart (room for a standing spirit two beside its own), each sealed on the server for the player
+	 * as ConcordanceRosterClientGameTests seals Stolas (PactPerchBlockEntity.sealing, no screen, no compact; Stolas's Regard
+	 * and the Lantern Star granted in prepare); the roster opened by its key, bound for this one look as rosterAwaiting binds
+	 * it; once it lists the seven, each row brought into view by the keyboard and asserted drawn as its portrait; back to the
+	 * first; the picture. Then the seven are ended on the server, each once, nothing left held, and once all have departed
+	 * the perches are taken up.
+	 */
+	private static void rosterOfSeven(ClientGameTestContext context, TestDedicatedServerContext server, BlockPos perch) {
+		BlockPos row = perch.south(4);
+		List<String> counterparts = List.of(PactDefinition.STOLAS, BUER, BATHIN, MARAX, FORAS, BIFRONS, AMDUSIAS);
+		List<BlockPos> perches = new ArrayList<>();
+		for (int i = 0; i < counterparts.size(); i++) {
+			perches.add(row.offset((i - 3) * ROSTER_STEP, 0, 0));
+		}
+		server.runCommand(String.format(Locale.ROOT, "tp @a %.1f %d %.1f 180 0", row.getX() + 0.5, row.getY(), row.getZ() + 4.5));
+		context.waitTicks(5);
+		List<UUID> records = server.computeOnServer(minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			ServerPlayer player = player(minecraft);
+			lineFloor(minecraft, perch);
+			List<UUID> sealed = new ArrayList<>();
+			for (int i = 0; i < counterparts.size(); i++) {
+				BlockPos at = perches.get(i);
+				level.setBlockAndUpdate(at, Workers.PACT_PERCH.defaultBlockState());
+				PactPerchBlockEntity kept = (PactPerchBlockEntity) level.getBlockEntity(at);
+				kept.holder().setOwner(player.getUUID());
+				PactDefinition offer = PactPerchBlockEntity.definition(counterparts.get(i));
+				AgreementHolder.Sealed seal = offer == null ? null
+						: kept.holder().seal(level, player, PactPerchBlockEntity.sealing(offer, null, null), level.getGameTime());
+				check(seal != null && seal.outcome() == Pacts.Outcome.DONE, counterparts.get(i) + "'s pact is sealed at its own perch: "
+						+ (seal == null ? "no offer" : seal.outcome()));
+				sealed.add(Pacts.pactWith(BoundWills.of(minecraft).ledger(), player.getUUID(), counterparts.get(i)).id());
+			}
+			return sealed;
+		});
+		KeyMapping key = RosterClient.key();
+		context.runOnClient(client -> {
+			key.setKey(InputConstants.Type.KEYBOARD.getOrCreate(ROSTER_TEST_KEY));
+			KeyMapping.resetMapping();
+		});
+		try {
+			context.getInput().pressKey(key);
+			context.waitForScreen(RosterScreen.class);
+			context.waitFor(client -> RosterClient.state() != null && records.stream().allMatch(id -> RosterClient.state().rows().stream()
+					.anyMatch(listed -> listed.id().equals(id))), WAIT);
+			context.waitFor(client -> client.gui.screen() instanceof RosterScreen roster && roster.settled() && !RosterClient.waiting(), WAIT);
+			List<String> drawn = new ArrayList<>();
+			for (UUID id : records) {
+				toRow(context, "row:" + id);
+				context.waitFor(client -> client.gui.screen() instanceof RosterScreen roster && !roster.drawn(id).isEmpty(), WAIT);
+				String how = context.computeOnClient(client -> ((RosterScreen) client.gui.screen()).drawn(id));
+				drawn.add(how);
+			}
+			Jugcraft.LOGGER.info("[garden-check] the roster of seven drawn: {}", drawn);
+			check(drawn.equals(List.of("portrait", "portrait", "portrait", "portrait", "portrait", "portrait", "portrait")),
+					"Each of the seven pacts is drawn as its spirit's portrait: " + drawn);
+			toRow(context, "row:" + records.getFirst());
+			context.waitTicks(2);
+			context.waitFor(client -> client.gui.screen() instanceof RosterScreen roster && roster.settled() && !RosterClient.waiting(), WAIT);
+			shot(context, "jugcraft_garden_roster_seven");
+			context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+			context.waitForScreen(null);
+		} finally {
+			context.runOnClient(client -> {
+				key.setKey(key.getDefaultKey());
+				KeyMapping.resetMapping();
+			});
+		}
+		String ended = server.computeOnServer(minecraft -> {
+			ServerLevel level = minecraft.overworld();
+			List<String> out = new ArrayList<>();
+			for (BlockPos at : perches) {
+				out.add(((PactPerchBlockEntity) level.getBlockEntity(at)).holder().end(level, player(minecraft), level.getGameTime()).name());
+			}
+			return out + " " + BoundWills.of(minecraft).ledger().heldBy(player(minecraft).getUUID()).size();
+		});
+		Jugcraft.LOGGER.info("[garden-check] the seven ended: {}", ended);
+		check(ended.equals(List.of("ENDED", "ENDED", "ENDED", "ENDED", "ENDED", "ENDED", "ENDED") + " 0"),
+				"Each of the seven pacts ends once, nothing left held: " + ended);
+		untilServer(context, server, minecraft -> minecraft.overworld().getEntities((Entity) null, new AABB(row).inflate(16.0, 4.0, 4.0),
+				entity -> entity instanceof PactSpiritEntity<?>).isEmpty(), "The seven have departed");
+		server.runOnServer(minecraft -> {
+			for (BlockPos at : perches) {
+				minecraft.overworld().setBlockAndUpdate(at, Blocks.AIR.defaultBlockState());
+			}
+		});
+	}
+
+	/** GC-10 unit 7: Tab until the roster's focused control is {@code key} (as ConcordanceRosterClientGameTests does). */
+	private static void toRow(ClientGameTestContext context, String key) {
+		for (int i = 0; i < 96; i++) {
+			if (key.equals(context.computeOnClient(client -> client.gui.screen() instanceof RosterScreen roster ? roster.focusedKey() : ""))) {
+				return;
+			}
+			context.getInput().pressKey(InputConstants.KEY_TAB);
+			context.waitTicks(1);
+		}
+		throw new AssertionError("Tab never reached " + key);
 	}
 }

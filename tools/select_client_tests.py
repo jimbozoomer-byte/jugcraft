@@ -90,6 +90,10 @@ WEIGHTS = {
     # OwnerCollectionsNetworkTests does), and the stranger's steps at the holder's perch with three shots: an estimate,
     # not a measurement.
     "ConcordancePactNetworkTests": 300,
+    # GC-10 unit 7
+    # Concordance garden cohort, GC-10 unit 7 (GC-P142): a dedicated server's start, a second client JVM's start and join
+    # (SecondClient), two thinks over two beds and three shots: an estimate, not a measurement.
+    "ConcordanceGardenNetworkTests": 300,
     # Concordance garden cohort, GC-04 (GC-P30): a dedicated server's start, the perch refused for want of a bed, the
     # chooser and Buer's conversation by keyboard at three sizes, a refused and a sealed acceptance, his work on a bed,
     # the overworked row, Jade, ten poses frozen, his underside, four bearings and the ending: about 35 shots and their
@@ -128,6 +132,12 @@ WEIGHTS = {
                                              # ending: 35 shots and their waits, about 240 s more (an estimate, not a
                                              # measurement).
                                              + 240
+                                             # GC-10 unit 7
+                                             # GC-10 unit 7 (GC-P144): the line-up, seven spirits placed and one frozen
+                                             # shot, about 20 s; the seven-portrait roster, seven seals, the roster opened
+                                             # and shot, about 40 s; the four plates-in-view asserts and the yard's tidying,
+                                             # nothing; about 90 s with the waits (an estimate, not a measurement).
+                                             + 90
                                              ),
     "JugcraftServerClientGameTests": 90,
     # Companion suites exercise timed AI, inventory trips and cooking, not just

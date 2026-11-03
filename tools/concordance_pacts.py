@@ -1673,3 +1673,11 @@ GARDEN_CLIENT_SHOTS += ["jugcraft_garden_amdusias_no_tree", "jugcraft_garden_amd
 # Amdusias's beds sheltered at once (GC-P126).
 QUOTA_TERMS = {"canopy_shelter": "At most %s beds sheltered at once"}
 MESSAGES.update({f"pact.term.quota.{work}": words for work, words in QUOTA_TERMS.items()})
+# GC-10 unit 7
+# ------------------------------------------------------------------------------- garden cohort, GC-10: the evidence
+# What ConcordanceGardenPactClientGameTests photographs after Amdusias's flow (GC-P144): the seven spirits side by side,
+# frozen, from the front, and a roster of seven portraits.
+GARDEN_CLIENT_SHOTS += ["jugcraft_garden_lineup", "jugcraft_garden_roster_seven"]
+# What ConcordanceGardenNetworkTests' second client photographs (GC-S18, GC-P142): Buer's work seen from the stranger's
+# client, Buer turned to the stranger at the holder's kept perch, and the stranger's End refused.
+GARDEN_NETWORK_SHOTS = ["jugcraft_garden_peer_work", "jugcraft_garden_peer_faced", "jugcraft_garden_peer_refused"]

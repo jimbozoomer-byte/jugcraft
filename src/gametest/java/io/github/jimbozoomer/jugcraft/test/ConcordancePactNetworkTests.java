@@ -3,9 +3,6 @@ package io.github.jimbozoomer.jugcraft.test;
 import com.geckolib.animatable.manager.AnimatableManager;
 import com.geckolib.animation.AnimationController;
 import com.geckolib.animation.RawAnimation;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.client.ConcordanceClientOptions;
@@ -33,23 +30,16 @@ import io.github.jimbozoomer.jugcraft.concordance.worker.PactDefinition;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
-import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
-import java.util.stream.Stream;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerConnection;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestDedicatedServerContext;
-import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.ConnectScreen;
 import net.minecraft.client.gui.screens.DisconnectedScreen;
@@ -107,6 +97,8 @@ public final class ConcordancePactNetworkTests implements FabricClientGameTest {
 	private static final int WAIT = 200;
 	/** Client ticks the other JVM may take for a step: it starts, joins and renders on its own. */
 	private static final int PEER_WAIT = 2400;
+	// GC-10 unit 7 (GC-P146): the second client JVM, its files and its launch, shared with ConcordanceGardenNetworkTests.
+	private static final SecondClient CLIENT = new SecondClient(PEER, COORDINATION, "pact", PEER_NAME, ConcordancePactNetworkTests.class);
 
 	@Override
 	public void runTest(ClientGameTestContext context) {
@@ -116,8 +108,7 @@ public final class ConcordancePactNetworkTests implements FabricClientGameTest {
 		}
 		Process peer = null;
 		try {
-			System.setProperty(COORDINATION, Path.of("owner-network-evidence", "pact-" + UUID.randomUUID()).toAbsolutePath().toString());
-			Files.createDirectories(coordination());
+			CLIENT.begin(); // GC-10 unit 7 (GC-P146)
 			Properties properties = new Properties();
 			properties.setProperty("server-ip", "127.0.0.1");
 			properties.setProperty("online-mode", "false");
@@ -478,130 +469,30 @@ public final class ConcordancePactNetworkTests implements FabricClientGameTest {
 		context.takeScreenshot(name);
 	}
 
+	// GC-10 unit 7 (GC-P146): the coordination and the launch are SecondClient's; these keep the names the steps above use.
 	private static void awaitPeer(ClientGameTestContext context, Process peer, String name) {
-		context.waitFor(client -> {
-			if (marked(name)) {
-				return true;
-			}
-			if (!peer.isAlive()) {
-				throw failure("The second client exited (" + peer.exitValue() + ") before " + name);
-			}
-			return false;
-		}, PEER_WAIT);
+		CLIENT.awaitPeer(context, peer, name, PEER_WAIT);
 	}
 
 	private static void awaitMark(ClientGameTestContext context, String name) {
-		context.waitFor(client -> marked(name), PEER_WAIT);
-	}
-
-	private static Path coordination() {
-		return Path.of(System.getProperty(COORDINATION, "owner-network-evidence")).toAbsolutePath();
+		CLIENT.awaitMark(context, name, PEER_WAIT);
 	}
 
 	private static void mark(String name, String text) {
-		try {
-			Files.createDirectories(coordination());
-			Files.writeString(coordination().resolve(name), text);
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
-		}
-	}
-
-	private static boolean marked(String name) {
-		return Files.exists(coordination().resolve(name));
+		CLIENT.mark(name, text);
 	}
 
 	private static String read(String name) {
-		try {
-			return Files.readString(coordination().resolve(name)).trim();
-		} catch (IOException e) {
-			throw new UncheckedIOException(e);
-		}
+		return CLIENT.read(name);
 	}
 
 	private static AssertionError failure(String message) {
-		ArrayDeque<String> tail = new ArrayDeque<>();
-		try (Stream<String> lines = Files.lines(coordination().resolve("peer.log"))) {
-			lines.forEach(line -> {
-				if (tail.size() == 120) {
-					tail.removeFirst();
-				}
-				tail.addLast(line);
-			});
-		} catch (IOException | UncheckedIOException e) {
-			tail.addLast("The second client's log could not be read: " + e);
-		}
-		return new AssertionError(message + "\nThe second client's log, last lines:\n" + String.join("\n", tail));
+		return CLIENT.failure(message);
 	}
 
-	/** OwnerCollectionsNetworkTests.launchPeer (#435), with this class's names: a second client JVM on the same classpath. */
+	/** OwnerCollectionsNetworkTests.launchPeer (#435), with this class's names, as SecondClient launches it: its heap 2 GiB as before. */
 	private static Process launchPeer(int port) throws IOException {
-		Path profile = coordination().resolve("peer-profile");
-		Files.createDirectories(profile);
-		Files.writeString(profile.resolve("options.txt"), "preferredGraphicsBackend:\"opengl\"\nfullscreen:false\nlang:en_us\n");
-		Path metadata = FabricLoader.getInstance().getModContainer("jugcraft-test").orElseThrow().findPath("fabric.mod.json").orElseThrow();
-		Path resources = coordination().resolve("peer-test-resources");
-		Files.createDirectories(resources);
-		try (Stream<Path> paths = Files.walk(metadata.getParent())) {
-			for (Path file : paths.filter(Files::isRegularFile).toList()) {
-				Path target = resources.resolve(metadata.getParent().relativize(file));
-				Files.createDirectories(target.getParent());
-				Files.copy(file, target, StandardCopyOption.REPLACE_EXISTING);
-			}
-		}
-		JsonObject json = JsonParser.parseString(Files.readString(metadata)).getAsJsonObject();
-		JsonArray tests = new JsonArray();
-		tests.add(ConcordancePactNetworkTests.class.getName());
-		json.getAsJsonObject("entrypoints").add("fabric-client-gametest", tests);
-		JsonArray client = new JsonArray();
-		client.add(ConcordancePactNetworkTests.class.getName() + "$PeerStartup");
-		json.getAsJsonObject("entrypoints").add("client", client);
-		Files.writeString(resources.resolve("fabric.mod.json"), json.toString());
-		String oldResources = metadata.getParent().toAbsolutePath().toString();
-		Path config = Path.of(System.getProperty("user.dir")).toAbsolutePath();
-		while (config != null && !Files.isRegularFile(config.resolve(".gradle/loom-cache/launch.cfg"))) {
-			config = config.getParent();
-		}
-		if (config == null) {
-			throw new IllegalStateException("Cannot locate this checkout's Loom launch.cfg");
-		}
-		List<String> launch = Files.readAllLines(config.resolve(".gradle/loom-cache/launch.cfg"));
-		String assets = null;
-		String assetIndex = null;
-		for (int i = 0; i + 1 < launch.size(); i++) {
-			if (launch.get(i).trim().equals("--assetsDir")) {
-				assets = launch.get(i + 1).trim();
-			}
-			if (launch.get(i).trim().equals("--assetIndex")) {
-				assetIndex = launch.get(i + 1).trim();
-			}
-		}
-		if (assets == null || assetIndex == null) {
-			throw new IllegalStateException("Loom's launch config lacks asset paths");
-		}
-		List<String> command = new ArrayList<>();
-		command.add(Path.of(System.getProperty("java.home"), "bin", System.getProperty("os.name").startsWith("Windows") ? "java.exe" : "java").toString());
-		command.add("-Xmx2G");
-		command.add("-XX:ActiveProcessorCount=4");
-		command.add("-XX:ErrorFile=" + coordination().resolve("hs_err_peer.log"));
-		for (Map.Entry<Object, Object> entry : System.getProperties().entrySet()) {
-			String key = entry.getKey().toString();
-			if (key.startsWith("fabric.") || key.startsWith("fabric-api.") || key.startsWith("org.lwjgl.") || key.equals("java.library.path")
-					|| key.equals("log4j.configurationFile")) {
-				command.add("-D" + key + "=" + entry.getValue().toString().replace(oldResources, resources.toString()));
-			}
-		}
-		command.add("-D" + PEER + "=" + port);
-		command.add("-D" + COORDINATION + "=" + coordination());
-		command.add("-cp");
-		command.add(System.getProperty("java.class.path").replace(oldResources, resources.toString()));
-		command.add("net.fabricmc.loader.impl.launch.knot.KnotClient");
-		command.addAll(List.of("--username", PEER_NAME, "--version", "26.3", "--accessToken", "0", "--gameDir", profile.toString(),
-				"--assetIndex", assetIndex, "--assetsDir", assets));
-		Path arguments = coordination().resolve("peer-java.args");
-		Files.write(arguments, command.subList(1, command.size()).stream().map(a -> "\"" + a.replace("\\", "\\\\").replace("\"", "\\\"") + "\"").toList());
-		return new ProcessBuilder(command.getFirst(), "@" + arguments).directory(profile.toFile()).redirectErrorStream(true)
-				.redirectOutput(coordination().resolve("peer.log").toFile()).start();
+		return CLIENT.launch(port, "-Xmx2G");
 	}
 
 	private static void check(boolean condition, String message) {
