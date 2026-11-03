@@ -36,10 +36,8 @@ jobs:
           cache: gradle
       - name: Install data-generation dependencies
         run: python3 -m pip install --quiet pillow numpy
-      - name: Prepare pinned Minecraft shape references
-        # Architectural generation reads vanilla model geometry from Loom's pinned game JAR.
-        # A fresh checkout has no such cache until Gradle prepares the platform.
-        run: ./gradlew compileJava --no-daemon
+      - name: Prepare pinned vanilla assets for data tests
+        run: python3 scripts/prepare_vanilla_assets.py
       - name: Check generated JSON is up to date
         run: |
           python3 tools/generate_material_data.py
@@ -187,7 +185,7 @@ jobs:
             **/screenshots/*.png
             **/owner-network-evidence/**/peer.log
 
-  # Which client game test classes to run, shared out between sixteen client jobs (tools/select_client_tests.py).
+  # Which client game test classes to run, shared out between twenty-four client jobs (tools/select_client_tests.py).
   # A pull request runs the classes that show what it changed; main and a manual run of this workflow run them all.
   plan:
     name: choose client tests
@@ -210,6 +208,14 @@ jobs:
       shard13: ${{ steps.choose.outputs.shard13 }}
       shard14: ${{ steps.choose.outputs.shard14 }}
       shard15: ${{ steps.choose.outputs.shard15 }}
+      shard16: ${{ steps.choose.outputs.shard16 }}
+      shard17: ${{ steps.choose.outputs.shard17 }}
+      shard18: ${{ steps.choose.outputs.shard18 }}
+      shard19: ${{ steps.choose.outputs.shard19 }}
+      shard20: ${{ steps.choose.outputs.shard20 }}
+      shard21: ${{ steps.choose.outputs.shard21 }}
+      shard22: ${{ steps.choose.outputs.shard22 }}
+      shard23: ${{ steps.choose.outputs.shard23 }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
@@ -222,17 +228,17 @@ jobs:
         run: |
           if [ "$EVENT" = pull_request ]; then
             # The pull request's merge commit against its first parent, the base branch.
-            python3 tools/select_client_tests.py --base HEAD^1 --shards 16 --github-output "$GITHUB_OUTPUT"
+            python3 tools/select_client_tests.py --base HEAD^1 --shards 24 --github-output "$GITHUB_OUTPUT"
           else
-            python3 tools/select_client_tests.py --all --shards 16 --github-output "$GITHUB_OUTPUT"
+            python3 tools/select_client_tests.py --all --shards 24 --github-output "$GITHUB_OUTPUT"
           fi
 
   # A real game client with software rendering (Mesa): runs the chosen client game tests in src/gametest
-  # (JugcraftClientGameTests and the rest), which build showrooms and worlds and take screenshots. Sixteen jobs share
+  # (JugcraftClientGameTests and the rest), which build showrooms and worlds and take screenshots. Twenty-four jobs share
   # them out (the plan job above), so every chosen class runs once; the "client" job below passes only when the plan
-  # and all sixteen do. A job with no classes passes at once.
+  # and all twenty-four do. A job with no classes passes at once.
   client-shard:
-    name: client (shard ${{ matrix.shard }} of 16)
+    name: client (shard ${{ matrix.shard }} of 24)
     needs: plan
     runs-on: ubuntu-24.04
     # Keep the 60-minute limit; the expanded gun gallery has its own measured weight.
@@ -240,7 +246,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
     env:
       CLASSES: ${{ needs.plan.outputs[format('shard{0}', matrix.shard)] }}
       LIBGL_ALWAYS_SOFTWARE: 'true'
@@ -273,7 +279,7 @@ jobs:
           # Test options are written by runClientGameTest after Loom cleans its run directory.
           mkdir -p run
           echo "eula=true" > run/eula.txt
-      - name: Run client game tests (shard ${{ matrix.shard }} of 16)
+      - name: Run client game tests (shard ${{ matrix.shard }} of 24)
         if: env.CLASSES != ''
         run: |
           # Two rendered clients plus Gradle and Mesa can exceed physical RAM.

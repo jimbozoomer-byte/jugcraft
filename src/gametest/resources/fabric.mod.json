@@ -414,7 +414,15 @@
       "io.github.jimbozoomer.jugcraft.test.NewestManaGameTests",
       "io.github.jimbozoomer.jugcraft.test.NewestBackpackGameTests",
       "io.github.jimbozoomer.jugcraft.menagerie.NewestLumiseneGameTests",
-      "io.github.jimbozoomer.jugcraft.test.AcquisitionRepairGameTests"
+      "io.github.jimbozoomer.jugcraft.test.AcquisitionRepairGameTests",
+      "io.github.jimbozoomer.jugcraft.test.FestivalRegressionGameTests",
+      "io.github.jimbozoomer.jugcraft.test.CustomNpcGameTests",
+      "io.github.jimbozoomer.jugcraft.test.FoodServingGameTests",
+      "io.github.jimbozoomer.jugcraft.test.BoardGameTests",
+      "io.github.jimbozoomer.jugcraft.test.BoardWagerTests",
+      "io.github.jimbozoomer.jugcraft.test.PetRosterTests",
+      "io.github.jimbozoomer.jugcraft.test.PetBehaviorsGameTests",
+      "io.github.jimbozoomer.jugcraft.test.ServerUtilitiesTests"
     ],
     "jei_mod_plugin": [
       "io.github.jimbozoomer.jugcraft.test.JeiStationClientGameTests$WithJei$Probe"
@@ -731,7 +739,11 @@
       "io.github.jimbozoomer.jugcraft.test.LivingCityClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.StarterGuidanceClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.NewestCollectionClientTests",
-      "io.github.jimbozoomer.jugcraft.test.OwnerTooltipClientGameTests"
+      "io.github.jimbozoomer.jugcraft.test.OwnerTooltipClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.FoodServingClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.BoardGameClientTests",
+      "io.github.jimbozoomer.jugcraft.test.PetInventoryClientTests",
+      "io.github.jimbozoomer.jugcraft.test.ServerUtilitiesClientTests"
     ]
   },
   "depends": {

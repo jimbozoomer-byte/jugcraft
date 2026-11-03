@@ -1,5 +1,19 @@
 # Remaining upstream Survival acquisition gaps
 
+## November 2 release reconciliation
+
+The main release `c0a9532563` supplies the remaining acquisition routes. Merging it with the native repairs gives **zero unresolved routes and zero ingredient diagnostics** in the refreshed audit. The 78 entries already classified by upstream as deferred acquisition design remain unchanged; this reconciliation adds no exclusions. Earlier counts below are historical, not current blockers.
+
+The combined implementation retains component-preserving present conversions instead of the release's ordinary shapeless recoloring recipes, uses a single registration for botanical special recipes, and retains the owner-approved Divine Pact crafting route alongside the release's forge ritual. Both audit adapters remain active so existing native evidence is preserved.
+
+Imported model generation now uses the release's source-preserving writer before bounded finishing. The two hanging baskets and two paper-lantern templates retain the PR's surface/UV-preserving plane conversion and its dedicated regression tests; the redundant cuboid patches for those four models were removed from the release's exact-repair manifest. The other 108 exact repairs remain checked against their before/after hashes. The transparent-cap check uses the release's actual pixel sampling rather than the older overlapping shortcut.
+
+The previous PR build and optional-library absence checks passed. Fourteen of sixteen rendered client groups passed; two reached the 60-minute job limit while still making progress, without a recorded assertion or out-of-memory exception. The workflow now divides the same selected suites across 24 groups, preserving the three isolated independent-peer suites and existing failure diagnostics. Passing the new remote run is still required; changing the grouping is not proof that every rendered test passes.
+
+Reconciled with OpenAI Codex (GPT-6). No live server was restarted or updated by this work.
+
+Local validation of the combined release: common/client/game-test compilation and canonical resource generation completed. All 13 `AcquisitionRepairGameTests` and `SurvivalRecipeGameTests` passed, exporting the actual registry used for the refreshed audit. The 399-test Foundation run passed 398 tests; its only failure was a stale scaffold crafting fixture, corrected to the retained recipe, after which all six recipe-conflict tests passed. Geometry regressions also passed for transparent caps, rotated occluders, lantern surfaces/UVs and repeatable candy structures. The test runtime used isolated resources linked to this checkout, with only the two server suites selected; it did not use or restart the live server.
+
 ## November 1 native acquisition follow-up
 
 The owner-authorized [native acquisition repairs](../features/native-acquisition-repairs.md) reduced the refreshed audit to **84 unresolved entries: 78 without a documented route and 6 blocked chains**, with **zero invalid ingredients**. This resolves 62 entries through present conversions, botanical upgrades and stripping, native compatibility decorations, Silk Touch Ashen Basalt and the approved Divine Pact recipe. The strict all-items assertion still fails on the remaining content; no exclusions were added. The counts and examples below are the historical 146-entry baseline and describe the state before those repairs.

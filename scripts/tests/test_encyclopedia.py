@@ -1,5 +1,5 @@
 """Factory expansion links into the shared encyclopedia, without a second protocol."""
-import json, sys, unittest
+import json, re, sys, unittest
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tools'))
@@ -18,6 +18,7 @@ class EncyclopediaCatalogTests(unittest.TestCase):
         self.assertEqual([r['id'] for r in self.book['routes']], ['technology', 'magic'])
 
     def test_every_technology_link_resolves_to_a_real_page(self):
+        registered_pages = set(re.findall(r'page\("([^"]+)"', (ROOT / 'src/main/java/io/github/jimbozoomer/jugcraft/guide/encyclopedia/Encyclopedia.java').read_text()))
         route = self.book['routes'][0]
         for entry in route['chapters'] + route['milestones']:
             link = entry['link']

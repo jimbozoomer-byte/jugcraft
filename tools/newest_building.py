@@ -100,6 +100,13 @@ def write(path, data):
         from menagerie_data import loot as native_loot
         data=native_loot(data)
     data = native_model(path, data)
+    if any(path.as_posix().endswith('/models/newest/' + ref + '.json') for ref in (
+        'fenceworks/block/parent/grass_topped_wall_triple',
+        'twigworks/block/template_paper_lantern', 'twigworks/block/template_paper_lantern_hanging')):
+        # These source-checked plane adaptations own their finishing pass. Other
+        # imported cuboids are handled by the exact repair manifest afterward.
+        from model_writer import finish_elements
+        finish_elements(data['elements'])
     path.parent.mkdir(parents=True, exist_ok=True)
     # This large runtime descriptor exceeds GitHub's file limit when indented.
     # Keep the identical JSON data compact in both standalone and shared generation.
@@ -111,6 +118,7 @@ def write(path, data):
 
 def map_value(value, ns, prefix, resource=False):
     if isinstance(value, str):
+        if value == 'minecraft:chain': return 'minecraft:iron_chain'  # 26.3 registry rename.
         if resource and value == 'minecraft:block/air': return 'jugcraft:newest/empty'
         if value.startswith('#'): return '#' + map_value(value[1:], ns, prefix, resource)
         if value.startswith(ns + ':'):
@@ -596,6 +604,9 @@ def generate(writer=write):
             target = RES / 'data' / ('jugcraft' if parts[0] == ns else parts[0]) / 'tags' / category
             rel = Path(*parts[3:])
             if parts[0] == ns: rel = Path(prefix + '_' + rel.as_posix())
+            if parts[0] == 'c' and category == 'item' and rel.as_posix() == 'polished_calcite.json':
+                entries = [v for v in entries if (v.get('id') if isinstance(v, dict) else v) != 'minecraft:polished_calcite']
+                entries += ['jugcraft:twigworks_polished_calcite', 'jugcraft:stoneworks_polished_calcite']
             merge_tag(target / rel, entries, writer)
         prune_unregistered(prefix, allowed)
         changes = 'Native block behaviors; remapped identifiers; original model coordinates and texture bytes retained'

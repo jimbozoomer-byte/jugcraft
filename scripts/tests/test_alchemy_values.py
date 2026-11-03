@@ -77,6 +77,7 @@ class AlchemyValueTests(unittest.TestCase):
         for item,v in VALUES.items():
             self.assertGreater(value(item),0,item);self.assertLessEqual(value(item),1_000_000_000,item)
             self.assertTrue(v['source'],item)
+            self.assertLessEqual(max(v['numerator'],v['denominator']),2**63-1,item)
 
     def test_matter_uses_actual_local_recipe_inputs(self):
         self.assertEqual(value('jugcraft:dark_matter'),8*value('jugcraft:aeternalis_fuel')+value('minecraft:diamond_block'))

@@ -120,6 +120,27 @@ public final class ImportedModelAtlasClientTests implements FabricClientGameTest
             c.waitTicks(15);
             c.takeScreenshot("oct29_reported_item_models");
             c.runOnClient(mc -> mc.player.closeContainer());
+            var gallery = new ArrayList<String>();
+            try(var reader=new java.io.InputStreamReader(java.util.Objects.requireNonNull(
+                    getClass().getResourceAsStream("/imported-visual-gallery.json")),java.nio.charset.StandardCharsets.UTF_8)){
+                for(var id:JsonParser.parseReader(reader).getAsJsonArray())gallery.add(id.getAsString());
+            }catch(java.io.IOException e){throw new AssertionError(e);}
+            for(int start=0;start<gallery.size();start+=54){
+                var page=gallery.subList(start,Math.min(start+54,gallery.size()));
+                world.getServer().runOnServer(server->{
+                    var inventory=new net.minecraft.world.SimpleContainer(54);int slot=0;
+                    for(String name:page){
+                        var item=net.minecraft.core.registries.BuiltInRegistries.ITEM.getValue(Identifier.parse(name));
+                        if(item==net.minecraft.world.item.Items.AIR)throw new AssertionError("Gallery item absent: "+name);
+                        inventory.setItem(slot++,new net.minecraft.world.item.ItemStack(item));
+                    }
+                    server.getPlayerList().getPlayers().getFirst().openMenu(new net.minecraft.world.SimpleMenuProvider((id,inv,who)->
+                        new net.minecraft.world.inventory.ChestMenu(net.minecraft.world.inventory.MenuType.GENERIC_9x6,id,inv,inventory,6),
+                        net.minecraft.network.chat.Component.literal("Original art repair gallery")));
+                });
+                c.waitTicks(15);c.takeScreenshot("nov1_original_art_gallery_"+(start/54));
+                c.runOnClient(mc->mc.player.closeContainer());
+            }
         }
     }
 
