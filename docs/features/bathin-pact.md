@@ -436,6 +436,13 @@ Marax's, Foras's and Bifrons's do (any three garden spirits').
 in CI): the chooser has a seventh entry. A Verdant Heart is never sheltered, so its beat and the Verdance Bathin carries
 are unchanged; his words, sounds, service, matter and tests are unchanged.
 
+**Since GC-10** (unit 7, [the cohort's evidence](concordance-garden-cohort.md#unit-7-as-built-and-its-evidence); built
+on its own line, not merged into main, **not yet compiled or run in CI**): the kept page draws his matter and its answer
+plates above the first task, and his flow asserts them in view at 320x180 before `jugcraft_garden_bathin_matter_small`
+(GC-P145): the matter pictures' tip over the plates is to be looked at again. The whole path answers him "take from it"
+(CLAIM) and has him carry from a roaded Heart into its own Gleaner; the garden load card answers one holder's Bathin
+CLAIM. His words, sounds, service and tests are otherwise unchanged.
+
 **Local** (this record's commit; no Minecraft build here): `python3 tools/owner_art.py --check`, `python3 -B
 tools/check_mod_data.py`, `python3 scripts/check_repository.py`, `python3 tools/concordance_journey.py --check`,
 `python3 tools/concordance_economy.py` ("gaining cycles: none"), `python3 tools/check_icon_maps.py`, `node --test

@@ -377,7 +377,9 @@ given, and asks before drawing from beds with crops growing on them; [record](fe
 merged into the cohort after unit 4, not merged into main; on `be76fd419` and `1a15984d4` the server suite without the optional integrations and `ConcordanceGardenPactClientGameTests` passed (runs 41506566691, 41506582568 and 41521655013). Its unit 6 (Amdusias,
 the bending canopy, a canopy's shelter in the ecology rule and the garden's memory of canopies;
 [record](features/amdusias-pact.md)) is built and merged into the cohort after unit 5, not merged into main, and not yet
-compiled or run in CI. Contract and
+compiled or run in CI. Its unit 7 (the evidence: the whole path through all six, a garden load card, a two-client test,
+the line-up of seven and the checkpoint draft; [the cohort's evidence](features/concordance-garden-cohort.md#unit-7-as-built-and-its-evidence))
+is built, not merged, and not yet compiled or run in CI. Contract and
 vocabulary: [ARCANE_CONCORDANCE.md](ARCANE_CONCORDANCE.md); records, among them:
 [arcane-concordance-first-light.md](features/arcane-concordance-first-light.md),
 [arcane-concordance-sharing.md](features/arcane-concordance-sharing.md),

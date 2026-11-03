@@ -504,6 +504,15 @@ it has none of Foras's): it checks that nothing stands before a face at his box'
 height (0.5) to 0.3 below, his low shape's, while risen he is drawn far above it. Whether the chest Foras's flow leaves
 by the perch spills its Dewmoss when the yard clears it, and so shows in his pictures, is not known.
 
+**Since GC-10** (unit 7, [the cohort's evidence](concordance-garden-cohort.md#unit-7-as-built-and-its-evidence); built
+on its own line, not merged into main, **not yet compiled or run in CI**): the facing camera has his rows by his synced
+listening (risen, the head's front 3 px ahead and its chin 21.5 px up; low, the hump's; GC-P149), so the paragraph above
+is as first written; the yard empties every container before clearing it and his flow begins by asserting no item lies
+within 12 blocks (GC-P140); his matter's plates are asserted in view at 320x180 (GC-P145); finding 11 is decided as kept
+(GC-P147, [Known limits](#known-limits)). The whole path runs one root and raises his reserves matter; the load card
+sets each span to 10,000 so he works through its night. Inferred, not seen: that he is risen in his facing pictures, his
+eye height risen, and that he is drawn low in the line-up.
+
 **Not covered:** people; sound (CI has none: the subtitles are checked as defined and fired); two clients at his perch
 (the garden's two-client test is unit 7's); the narrator heard; a player's hardware; his astir loop (not photographed,
 as Buer's, Bathin's, Marax's and Foras's are not).

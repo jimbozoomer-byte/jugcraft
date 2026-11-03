@@ -466,6 +466,12 @@ scratch advice harness, run for that edit on the changed classes, ran 30,604,024
 151,395,025 and 16,516,020 checks, each with 0 failures ([Amdusias's
 record](amdusias-pact.md#the-canopys-shelter-gc-09b)).
 
+**Since GC-10** (unit 7, [the cohort's evidence](concordance-garden-cohort.md#unit-7-as-built-and-its-evidence); built
+on its own line, not merged into main, **not yet compiled or run in CI**): in the whole path his reading names one
+remedy for a bed sampled over five ticks, and his first obligation is the third kept, which masters The Garden's Regard;
+the garden load card asks a reading every 3,000 ticks, within his two a day. His words, sounds, service and tests are
+unchanged.
+
 ## World and event applicability
 
 Overworld, Nether and End alike (a perch and planted beds in one level; his area never crosses levels). His night look

@@ -524,6 +524,13 @@ in CI): the chooser has a seventh entry. Foras's "would gain" reads a bed's cach
 a host under Amdusias's canopy is judged by the stir it reads there. His words, sounds, service, matter and tests are
 otherwise unchanged.
 
+**Since GC-10** (unit 7, [the cohort's evidence](concordance-garden-cohort.md#unit-7-as-built-and-its-evidence); built
+on its own line, not merged into main, **not yet compiled or run in CI**): the facing camera has his row (the beard's
+front 8.75 px ahead, eyes 1.55; GC-P149), his chest north of the perch is emptied and taken away when his flow ends
+(GC-P140), and his flow asserts his matter's plates in view at 320x180 (GC-P145). The whole path has him name a useless
+host unanswered, graft nothing answered PRUDENT and graft with one Dewmoss answered ALWAYS; the garden load card answers
+both holders' Foras ALWAYS. His words, sounds, service and tests are otherwise unchanged.
+
 ## World and event applicability
 
 Overworld, Nether and End alike (a perch, its store and the beds in one level; his area never crosses levels). No

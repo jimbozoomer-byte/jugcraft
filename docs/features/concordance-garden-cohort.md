@@ -12,8 +12,8 @@ from unit 3's head, recorded and merged after unit 4; on `be76fd419` and `1a1598
 [unit 5 as built and its evidence](#unit-5-as-built-and-its-evidence)); unit 6 (GC-09, Amdusias) built on its own line
 from unit 4's merged head `4201217b3` beside unit 5's, recorded and merged after unit 5, not yet compiled or run in CI
 (see [unit 6 as built and its evidence](#unit-6-as-built-and-its-evidence)); units 1 to 6 merged on this line, in the
-order 1 to 6; unit 7 (GC-10) under way: its combined fixes built and not yet run in CI (GC-P140); nothing of the
-cohort is merged into main.** The contract was written read-only from
+order 1 to 6; unit 7 (GC-10) built on its own line from that head, recorded, not yet compiled or run in CI (see
+[unit 7 as built and its evidence](#unit-7-as-built-and-its-evidence)); nothing of the cohort is merged into main.** The contract was written read-only from
 the worktree of `claude/chunk-d-pact-hall` at `5eba71ced` (main's
 `78f9353a7` + Chunk B #465 + Chunk C #466 + Chunk D #474, all then open and unmerged), from the five survey reports
 written for it (`survey-pacts.md`, `survey-gardens.md`, `survey-assets.md`, `survey-sources.md`, `survey-plans.md`; kept with the session's working notes, not committed), from a critique of its
@@ -148,7 +148,7 @@ unchanged. Every Java compile and game test runs only in CI (GC-S24; [Checks](#c
 | 4 | GC-07 | **Foras**: graft keeping from a store beside the perch, the logician's objection; the bed index's containers; the owner library's second edited part in `tools/owner_art.py` | new `foras-pact.md` | Built (`e3194d0be` to `8a50bbd33`) from unit 3's shared prefix and recorded, then merged after unit 3's line; on the cohort line's head `5e93bb0a7` run 40852556175 passed in full; not merged; [evidence](#unit-4-as-built-and-its-evidence) |
 | 5 | GC-08 | **Bifrons**: root-running with half lost, which beds are reserves | new `bifrons-pact.md`; `tools/concordance_economy.py` | Built (`1c57700dd` to `7b08d26a0`) on its own line from unit 3's head (`3c2d36b0f`) and recorded (`d6f63f32b`), then merged after unit 4's line; on `be76fd419` and `1a15984d4` the server suite without the optional integrations and `ConcordanceGardenPactClientGameTests` passed (runs 41506566691, 41506582568 and 41521655013); not merged; [evidence](#unit-5-as-built-and-its-evidence) |
 | 6 | GC-09 | **Amdusias**: the bending canopy (a one-factor disturbance shelter: the pure rule in `ecology`, the registry in `garden`), the stir a Gloamcap wants | new `amdusias-pact.md`; `arcane-concordance-ecology.md` | Built (`23236575e` to `28953d21b`) on its own line from `4201217b3` (units 1 to 4) and recorded (`8763ffbac`), then merged after unit 5's line; not yet compiled or run in CI; not merged; [evidence](#unit-6-as-built-and-its-evidence) |
-| 7 | GC-10 | Combined fixes, the cohort's whole path, its load card, client evidence (the line-up), the two-client test, records, the checkpoint and handoff | this page; the six records; `arcane-concordance-journey.md`; `docs/TESTING.md` | Under way: the combined fixes (GC-P140, GC-P145, GC-P147, GC-P149) built, not yet run in CI |
+| 7 | GC-10 | Combined fixes, the cohort's whole path, its load card, client evidence (the line-up), the two-client test, records, the checkpoint and handoff | this page; the six records; `arcane-concordance-journey.md`; `docs/TESTING.md` | Built and recorded (GC-P140 to GC-P149), not yet compiled or run in CI ([unit 7](#unit-7-as-built-and-its-evidence)) |
 
 Order of the spirits after Buer goes from least to most invasive: Bathin moves an existing essence through existing
 transfer rules; Marax reads and changes nothing; Foras spends items; Bifrons adds an economy conversion; Amdusias changes
@@ -1559,6 +1559,14 @@ candidate commit; the load card's block pasted verbatim; the two-client run pass
 every shot named in the records looked at and marked; the checkpoint at most three questions, 300 to 500 words (10:87-121);
 the handoff on 10:133-146.
 
+**As built (unit 7):** built and recorded on `wip/garden-u7`, **not yet compiled or run in CI** (GC-P140 to GC-P149;
+[unit 7 as built and its evidence](#unit-7-as-built-and-its-evidence)). The shared second-client helper is
+`T/SecondClient`; `tools/acquisition.py` gains a comment only (`GARDEN_PACTS` holds the Concordance items, the vanilla
+ones come from the shipped definitions); `tools/check_mod_data.py` also gains `check_garden_network` and
+`check_pact_screen`'s line-up and plates-in-view audits. Acceptance is not yet met: no dispatch has run, no load card
+block or two-client result exists, no shot is looked at, and while main's own checks are red no dispatch can be green
+in every job ([Known defects](#known-defects-and-limits-unit-7)).
+
 ### The per-spirit template (every spirit ticket, GC-04 to GC-09)
 
 Each spirit ticket also delivers, and is accepted only with:
@@ -1712,6 +1720,9 @@ and the bed's strain fall on the holder's bed. Evidence under `owner-network-evi
 shard. Added to the opted-in `clients_without_optional` class list (an additive change; `check_pact_network` updated).
 Recorded as two automated clients on one machine, never as two people.
 
+**As built (unit 7):** the load card and the two-client test are written, not run; where they depart from GC-P141 and
+GC-P142 is in [unit 7's evidence](#the-garden-load-card) (decided by the session).
+
 **Not claimable without people:** a human playtest alone or with others; balance; frame time on a player's hardware;
 any sound heard (CI has no sound device; subtitles are checked as defined and fired).
 
@@ -1724,7 +1735,7 @@ any sound heard (CI has no sound device; subtitles are checked as defined and fi
 | GE3 | Copying multiplies nothing (E3) | GC-01, GC-05 | `aCopiedPerchIsInertForEverySpirit` and `onePresencePerPactForEverySpirit` (every definition: a copied or duplicate spirit entity never works); `aDuplicateBathinCarriesNothing`, `aDuplicateForasGraftsNothing`, `aDuplicateBifronsRunsNothing`; `anAnsweredAccordSurvivesARestart` with a copy reading nothing |
 | GE4 | End, death, unload and restart return property once (E4) | GC-01, GC-05, GC-07, GC-08 | SG12's ending and removal cases; `bathinNeverHoldsVerdance`, `noVerdanceIsMintedByCarrying`; `forasSpendsOneDonorAGraftAndNeverTwo`, `aForasReloadedKeepsHisStoreAndAnswer`; `aRootRunnerLosesHalfAndMintsNone`, `aRootRunnerNeverHoldsNutrients`, `theReservesAnswerSurvivesARestart` |
 | GE5 | Two users cannot both own one pact place or one unique service (E5) | GC-01, GC-04, GC-05, GC-07, GC-09 | `twoNegotiationsAtOnePerchSealOnceForEverySpirit` (every definition; the other player `NOT_PERMITTED`); `twoBuersShareOneBedsTendWindow`, `twoBathinsShareOneHeartExactly`, `twoForasNeverGraftOneBedTwice`, `twoCanopiesNeverStack` |
-| GE6 | The named suites extended (09:172) | every ticket | Worker, Sharing, Persistence, Logistics (none expected), Economy, Journey, Progression, Journal (unit 1: Sharing's `notesNeverStandInForTheGardensRegard` and Persistence's `theGardenGroundworkSavesNothing`, beyond the specification; copies only by the Worker class's `aCopiedPerchIsInertForEverySpirit`; Economy no new test; unit 2: Economy's `noVerdanceIsMintedByCarrying`, Persistence's `anAwaitingAnswerSurvivesARestart`, Garden's four named-road and device tests, Sharing unchanged; unit 4, its server tests passed in run 40852556175: Garden's three GC-07b tests, Persistence's `aForasReloadedKeepsHisStoreAndAnswer`, Journey's recipes with Dewmoss, Economy and Sharing unchanged; unit 5, not yet run: Economy's `rootRunningLeavesNoGainingCycle`, Persistence's `theReservesAnswerSurvivesARestart`, Garden, Journey and Sharing unchanged); `ConcordanceGardenPactClientGameTests`, `ConcordancePactClientGameTests`, `ConcordanceRosterClientGameTests`, `ScreenFitClientGameTests`, `ConcordanceGardenNetworkTests` |
+| GE6 | The named suites extended (09:172) | every ticket | Worker, Sharing, Persistence, Logistics (none expected), Economy, Journey, Progression, Journal (unit 1: Sharing's `notesNeverStandInForTheGardensRegard` and Persistence's `theGardenGroundworkSavesNothing`, beyond the specification; copies only by the Worker class's `aCopiedPerchIsInertForEverySpirit`; Economy no new test; unit 2: Economy's `noVerdanceIsMintedByCarrying`, Persistence's `anAwaitingAnswerSurvivesARestart`, Garden's four named-road and device tests, Sharing unchanged; unit 4, its server tests passed in run 40852556175: Garden's three GC-07b tests, Persistence's `aForasReloadedKeepsHisStoreAndAnswer`, Journey's recipes with Dewmoss, Economy and Sharing unchanged; unit 5, since run (GC-10 unit 7: on `be76fd419` and `1a15984d4`, runs 41506566691, 41506582568 and 41521655013): Economy's `rootRunningLeavesNoGainingCycle`, Persistence's `theReservesAnswerSurvivesARestart`, Garden, Journey and Sharing unchanged); `ConcordanceGardenPactClientGameTests`, `ConcordancePactClientGameTests`, `ConcordanceRosterClientGameTests`, `ScreenFitClientGameTests`, `ConcordanceGardenNetworkTests` |
 | GE7 | A conversation-to-service-to-departure sequence (09:174) | GC-04, GC-10 | `buerFromTheCodexToDeparture`; `theGardenPactsFromCodexToDeparture`; the client classes |
 | GE8 | Mechanically distinct services (03:170, 03:177) | GC-04 to GC-09 | the distinctness table held by `check_garden_pacts` (one work, one service class, one state changed, distinct verbs); each service's own tests |
 | GE9 | Each dossier's eight items (03:167-175) | GC-04 to GC-09 | the per-spirit template's checklist in each record, every line naming its test, shot or record |
@@ -2500,6 +2511,173 @@ line; `scripts/tests` (349 tests) failing only main's 8; the parse check of the 
 syntax error; and a search for any name either line removed that the other uses, none found. Not checked: anything
 compiled or run (no Minecraft jar here).
 
+### Unit 7 as built and its evidence
+
+Written on 3 November 2026 for unit 7's records commit, from the unit's commits and their messages and from this
+session's own local runs. **No CI run has compiled or run unit 7:** its commits were made where no Minecraft jar was
+available, every Java file of it was parse-checked only, and every server test, load card, client shot and second client
+of it is still to run. "Passed" below means a local Python check, audit or harness passed. Nothing here was run by a
+person. AI-assisted implementation with Claude Code; the model is named in the commit trailers.
+
+#### Candidate and CI
+
+- **Candidate:** unit 7's records commit (this one) on `wip/garden-u7`, its own line from the cohort head `2c61471b2a`
+  (units 1 to 6 merged in order, the magic interfaces' restyle, main through #599), above `0bdc737b12` (unit 6's tests
+  amended by the session on that head; no CI result of it is recorded here). Not pushed to draft pull request
+  [#526](https://github.com/jimbozoomer-byte/jugcraft/pull/526) when this was written; not merged into main.
+- **CI for unit 7: none (none has run).**
+- **CI the line descends from**, cited only so: on `be76fd419` (main merged, units 1 to 5) and `1a15984d4` (units 1 to 5,
+  Bifrons's first task and matter shortened) the server suite without the optional integrations and
+  `ConcordanceGardenPactClientGameTests` passed (runs 41506566691, 41506582568 and 41521655013); on `5e93bb0a7` (units 1
+  to 4) run 40852556175 passed in full. Main's own failures in those runs (Foundation's 8 Python tests, the `mod` job's
+  generator guard, client shards in main's content or under its heap) are not this pull request's. Amdusias's first run,
+  on `2c61471b2a`, was in progress when this was written; nothing of his is claimed from it.
+
+| Commit | What it holds |
+|---|---|
+| `b09584ad1e` | combined fixes (GC-P140, GC-P145, GC-P147, GC-P149) |
+| `2c21abbf9e` | the whole path from the codex to departure (GC-P143) |
+| `cd6028b413` | the garden load card (GC-S17, GC-P141) |
+| `4ac43e82ff` | the garden two-client test and the line-up (GC-S18, GC-P142, GC-P144, GC-P146, GC-P148) |
+| `71c030c7e1` | the fixes from the unit's review (five findings, all applied) |
+| this commit | the records, the checkpoint and the handoff |
+
+#### Combined fixes
+
+Each in `b09584ad1e` unless named, each line under a `GC-10 unit 7` marker beside Amdusias's CI fixes; **none seen in
+CI yet**.
+
+- **A matter's plates in view at 320x180 (GC-P145):** `PactScreen.keep` draws the matter and its answer plates above
+  the first task; each of Bathin's, Foras's, Bifrons's and Amdusias's flows asserts the matter and every plate in view
+  (`platesInView`) before its `_matter_small` picture. Evidence: two `check_pact_screen` audits, each with a mutation
+  (m1, the matter moved back below the first task; m2, Bifrons's `platesInView` deleted), both caught.
+- **The records' "not yet run" lines (records only):** Marax's, Foras's and Bifrons's now cite the cohort line's runs
+  above; their pictures are recorded as not yet looked at; Amdusias's stay "not yet run". The review's fixes
+  (`71c030c7e1`) rewrote the remaining lines of units 3 to 5 in the workers, journey, economy, magic interfaces and Foras
+  records.
+- **The face rows (GC-P149):** `face()` gains Foras's row (`{8.75/16, 0.49}`) and Bifrons's by his synced listening
+  flag (risen `{3/16, 0.5 - 21.5/16}`, low `{5/16, 0.5 - 4.5/16}`), from the geo files. No audit was added.
+- **A tidy yard (GC-P140):** `yard()` empties every container in its box (not the perch or Buer's bed) and discards
+  dropped items within 12 blocks of the perch; Foras's chest is emptied and taken away at the end of his flow;
+  `tidyYard` asserts no item within 12 blocks as Bifrons's and Amdusias's flows begin. No audit was added.
+- **Bifrons's review finding 11 (GC-P147):** one Offer plate per kind of log kept, not built; recorded in
+  [his Known limits](bifrons-pact.md#known-limits).
+- **From the unit's review (`71c030c7e1`):** the two-client test's taken and refused pages held to word budgets (30 and
+  50 words, never measured) and the word-budget audit extended to that class and to `ask`/`answer` steps; the class
+  added to `MAGIC_SHOWN`, so a magic sprite's change selects it; the load card's `drive` stops at the span's last tick;
+  the two workflow inputs' descriptions name the garden's card and classes (words only).
+
+#### The demonstration (GE1 to GE9)
+
+Unit 7's additions to the [Completion evidence](#completion-evidence) rows; **each written, not run**.
+
+| Code | Unit 7, as built |
+|---|---|
+| GE1 | `ConcordanceGardenNetworkTests`: the stranger's own strained bed inside Buer's area keeps its strain while he eases the holder's; the stranger's End is refused as not the holder's |
+| GE2 | none new (the whole path never suspends a pact) |
+| GE3 | `ConcordanceGardenLoadGameTests.loadCard`: no Verdance or nutrient minted (sums over the spans), one donor per graft, at most one change per spirit per think, sampled from the services' own memories |
+| GE4 | `ConcordanceJourneyGameTests.theGardenPactsFromCodexToDeparture`: each of the six ended with its escrow returned once, ending again returns nothing, every entity gone after its departure; the load card's end audit (escrow, ground, Bound Wills) |
+| GE5 | the load card: at most one canopy a holder and no two canopies summed; `ConcordanceGardenNetworkTests`: one holder's pact, the stranger refused |
+| GE6 | Journey (`theGardenPactsFromCodexToDeparture`); the new `ConcordanceGardenLoadGameTests` and `ConcordanceGardenNetworkTests`; `ConcordanceGardenPactClientGameTests` (the line-up, the roster of seven, the seven-entry chooser, the plates in view); Worker, Sharing, Persistence, Logistics and Economy unchanged |
+| GE7 | `theGardenPactsFromCodexToDeparture`: one survival player from the Regard learnt by their own deeds and a perch crafted by hand, through each spirit's refusal from the bare chooser and one cannot-afford refusal, every seal, service, conflict and first obligation (the Regard mastered at Marax's), to six departures in route order; `GARDEN_TEST` names it in all 22 garden steps (`tools/concordance_journey.py`); `buerFromTheCodexToDeparture` unchanged |
+| GE8 | the whole path exercises each of the six services once, each by its own mechanism; the distinctness table unchanged |
+| GE9 | unchanged: each record's checklist; the six records' GC-10 lines |
+
+#### Client evidence
+
+Nothing of unit 7 has run, so no picture of it exists; "Seen" is empty for every row (nobody has looked). A
+screenshot shows presentation; the tests' assertions are the evidence of behaviour.
+
+| Shots (class) | What the test asserts | Seen |
+|---|---|---|
+| `jugcraft_garden_lineup` (`ConcordanceGardenPactClientGameTests`) | the seven pact spirits made under `tick freeze`, 3 blocks apart, frozen, from the front at one distance; every drawn box in the picture | |
+| `jugcraft_garden_roster_seven` (the same) | seven pacts sealed, the roster open with seven portraits drawn | |
+| `jugcraft_garden_amdusias_chooser` (the same; an existing shot) | now also that the chooser lists seven | |
+| `jugcraft_garden_bathin_matter_small`, `_foras_matter_small`, `_bifrons_matter_small`, `_amdusias_matter_small` (the same; re-shot) | the matter and every answer plate in view at 320x180 (`platesInView`) | |
+| `jugcraft_garden_foras_faces_*`, `jugcraft_garden_bifrons_faces_*` (the same; reframed) | the face rows of GC-P149 | |
+| `jugcraft_garden_peer_work` (`ConcordanceGardenNetworkTests`, the second client) | Buer's work gesture and the holder's bed's strain falling, seen from the stranger's client | |
+| `jugcraft_garden_peer_faced` (the same) | Buer turned to the stranger within 15 degrees; the taken page within 30 words | |
+| `jugcraft_garden_peer_refused` (the same) | the stranger's End refused as not the holder's; within 50 words | |
+| Marax's 33, Foras's 33, Bifrons's 36 and Amdusias's 35 pictures (the garden class) | as their records' Verification | |
+
+#### The garden load card
+
+**Not run.** Its block will be pasted here verbatim from the `Concordance load cards` job's "Garden load card" notice
+of its first run, with the run and commit. As built (`cd6028b413`, `71c030c7e1`): two survival holders, each with seven
+sealed pacts (the six garden spirits and Stolas) and one offering in each escrow; 48 awake, wet beds (40 planted, 8
+fallow), 2 Hearts, 2 Gleaners, 2 Ley Pylons, a Mulch Maw, 8 budding amethyst, an oak and a chest of 64 Dewmoss by each
+Foras perch; holder 0's Bathin answered CLAIM, both Foras ALWAYS; readings asked through the kept page's own `RECALL`.
+Budget as proposed (GC-P141): +1.0 ms median, +2.5 ms p95, +4 MiB retained beyond the baseline, reported; asserted at
+five times (5 ms, 12.5 ms, 20 MiB). Where it departs from GC-P141 (decided by the session): a reading every 3,000 ticks,
+not 1,200 (Marax's two a day); time of day set to 10,000 as each span opens rather than held (Buer works by day, Bifrons
+by night), and the garden's warm-up waits a game day (24,000 ticks) so every quota is fresh; at most 60,000 ticks, a run
+about 40,000; its scaffolding every 200 ticks (beds re-strained, stock refilled, Gleaners and pylons emptied, fallow
+beds refilled, grafts cleared) timed apart and reported.
+
+#### The two-client run
+
+**Not run.** `ConcordanceGardenNetworkTests` (`4ac43e82ff`, `71c030c7e1`): on a loopback dedicated server the holder
+seals Buer on the server; the second client (`GardenPeer`, through the shared `SecondClient`, its heap logged after a
+collection before it starts) stands by its own strained bed and the perch. When run, record here passed or failed with
+the run, the job and its `peer.log` (under `owner-network-evidence/garden-*/`). Two automated clients on one machine,
+never two people.
+
+#### Not run
+
+Everything of unit 7 in CI: compilation, the whole path, the load card, the two-client test, the line-up, the roster of
+seven, the plates in view, the face rows, the tidy yard, the opted-in run without the optional integrations; a dispatch
+of every client class with `load_card` and `clients_without_optional` ticked; anything of Amdusias's; any picture looked
+at; a person playing, alone or with others; a sound heard; a player's hardware.
+
+#### Known defects and limits (unit 7)
+
+- **Main's red checks:** `tools/check_mod_data.py` exits 1 on main with 708 lines from main's `newest/` and jugtania
+  models; `scripts/tests` has main's 8 failures; the `mod` job's generator guard and some client shards fail in main's
+  content or under its heap. Unit 7 adds no line and no failure to them, but **acceptance's single dispatch with every
+  job green cannot be met while main is red**: the owner's call whether a dispatch green but for main's failures counts.
+- **Job ceilings:** the `load-card` job (30 minutes) now runs three cards, the garden's up to 60,000 ticks; the
+  `pact-clients-without-optional` job (45 minutes) now runs the pact classes (730 s by their weights) and the two garden
+  classes (1,610 s and 300 s by theirs: estimates, not measurements), each step with its own build and start. Either may time out; raising a timeout is not an additive change, so it is left for the owner's review.
+- **Inferred, not seen:** that a spirit added under `tick freeze` reaches the client (the line-up); that Bifrons is
+  drawn low in the line-up and risen in his facing pictures, and his eye height while risen (the face rows come from the
+  geo files); that removing a container drops its contents (the tidy yard is safe either way); that the 320x180 body
+  holds two matter lines and a plate row (if not, the matter's compact lines are the next step); that Buer turns to a
+  stranger who is not the holder; the 30- and 50-word budgets of the stranger's pages.
+- **Bifrons's finding 11 kept** (GC-P147): each kind of log carried draws its own Offer plate.
+- **Outside the cohort:** main's failures above.
+
+#### Record fields (CLAUDE.md)
+
+| Feature | Tier | Input producer | Output consumer | Costs | Unlocks | Failure behaviour | Test evidence |
+|---|---|---|---|---|---|---|---|
+| The evidence (GC-10) | none | the garden cohort, units 1 to 6 | the owner's checkpoint | none in play | nothing | not applicable | `theGardenPactsFromCodexToDeparture`; the garden load card; `ConcordanceGardenPactClientGameTests`; `ConcordanceGardenNetworkTests`; none run yet |
+
+#### The handoff (10:133-146)
+
+- **What was built:** base `2c61471b2a` (with `0bdc737b12`) to this records commit: GC-10's combined fixes, the whole
+  path, the garden load card, the two-client test with its shared helper, the line-up and the roster of seven, the
+  records, the checkpoint. GC-10 is **built, not yet run**.
+- **APIs reused:** `SecondClient` (new, shared by `ConcordancePactNetworkTests` and the garden network test;
+  `OwnerCollectionsNetworkTests` untouched); Chunk C's `Measure`, `Traffic` and `Stats` and the pact hall card's
+  structure; `TestPlayers.survivor`; the worker and garden tests' package-private helpers (`FIXTURES`, the offers,
+  `invite`, `answered`, `keptBed`, `heartWithItsOwnRoad`, `bifronsBed`, `ripeOn`); `PactMenu`, `AgreementHolder.seal` and
+  `end`, `Canopies`, `GardenReach`, `Pacts.done`; Fabric's client game test API.
+- **Schemas, defaults, migration:** none changed; nothing new is saved.
+- **Generators and provenance:** no generated file changed; `tools/concordance_journey.py` (`GARDEN_TEST`, the journey
+  record's block regenerated from it), `tools/concordance_pacts.py` (`GARDEN_CLIENT_SHOTS`, `GARDEN_NETWORK_SHOTS`),
+  `tools/select_client_tests.py` (weights), `tools/check_mod_data.py` (`check_garden_load_card`, `check_garden_network`,
+  `check_pact_network`, `check_pact_screen`); no art or sound added.
+- **What to look at:** the checkpoint below; the shots under Client evidence, once run.
+- **How to verify:** a workflow_dispatch of the Build workflow with every client class and `load_card` and
+  `clients_without_optional` ticked; locally, the commands in `docs/TESTING.md`.
+- **Not verified:** under Not run. **Known defects:** above.
+- **Decisions:** the owner's are GC-D1 to GC-D3. The session's GC-S1 to GC-S26 (GC-S17 and GC-S18 this unit's) are decided by the session,
+  not the owner's. Proposed, reviewable at the checkpoint: GC-P140 to GC-P149; the opted-in workflow steps for review in
+  the pull request.
+- **Where to resume:** [Where to resume](#where-to-resume).
+- **Next smallest complete outcome:** CI on the cohort head, then the owner's checkpoint; after it, the next cohort the
+  owner chooses (minerals proposed), or Gloam Ink.
+
 ## Schema review (the shared schema against eight services)
 
 | Concern | The six garden services | For the shared schema |
@@ -2760,6 +2938,16 @@ as scratch harnesses outside Git (13,221,792 checks; unit 3's advice harness wit
 The row's local checks (bodies, `owner_art --check` with the flower crown, `check_baselines` holding `ecology` pure) ran
 on each commit and passed ([unit 6's evidence](#unit-6-as-built-and-its-evidence)).
 
+**Unit 7 as written** (row 7 above against the build; **not yet run**: nothing of unit 7 has run in CI): Journey
+(`theGardenPactsFromCodexToDeparture`, the whole path, named by every garden step's `GARDEN_TEST`), the garden load
+card (`ConcordanceGardenLoadGameTests.loadCard`, opted in under `load_card`), `ConcordanceGardenPactClientGameTests`
+(the line-up, the roster of seven, the seven-entry chooser, the matter plates in view at 320x180, Foras's and Bifrons's
+face rows, the tidy yard), `ConcordanceGardenNetworkTests` (two clients at Buer's perch) and the opted-in run of both
+garden classes without the optional integrations; no save test (nothing new is saved). The row's local checks
+(`check_garden_load_card`, `check_pact_network` with `check_garden_network`, `check_pact_screen`'s new audits,
+`concordance_journey --check` with `garden_problems`, the selection test) ran on each commit and passed, each audit's
+mutations caught ([unit 7's evidence](#unit-7-as-built-and-its-evidence)).
+
 ## Decisions
 
 The owner's (GC-D), the session's under the standing instruction (GC-S, "Decided by the session"), and the units'
@@ -2933,8 +3121,12 @@ proposals (GC-P, numbered in the reserved blocks). Chunk A to D decisions are un
 | GC-P140 | 2 November 2026 | Unit 7's combined fixes, each line under a `GC-10 unit 7` marker beside Amdusias's CI fixes: a matter's plates in view at 320x180 (GC-P145); the face rows (GC-P149); a tidy yard (every container `yard` clears is emptied first and every dropped item within 12 blocks of the perch discarded; Foras's chest emptied and taken away when his flow ends; Bifrons's and Amdusias's flows assert no item lies within 12 blocks as they begin); Bifrons's finding 11 decided (GC-P147); the records' "not yet run" lines for units 3 to 5 rewritten to the cohort line's runs *(decided by the session)* | Proposed (unit 7) | GC-10 |
 | GC-P141 | 26 October 2026 | The garden load card's workload and budget (above) | Proposed (unit 7) | GC-10 |
 | GC-P142 | 26 October 2026 | The garden two-client scenario (above) | Proposed (unit 7) | GC-10 |
+| GC-P143 | 2 November 2026 | The whole path, `ConcordanceJourneyGameTests.theGardenPactsFromCodexToDeparture`: one survival player in drone_depot, 200 ticks, the perch at (3,1,3); each spirit refused once from the bare chooser naming its own missing key, one cannot-afford refusal, each sealed with its compact spent once, served, its conflict met, its first obligation kept by hand, paid ahead and ended once; Marax's bed sampled over ticks 1 to 5 and the later four spirits run at tick 6; `GARDEN_TEST` in all 22 garden steps, held by `garden_problems` *(decided by the session)* | Proposed (unit 7) | GC-10 |
+| GC-P144 | 2 November 2026 | The line-up and the roster of seven: after Amdusias's flow the garden class makes the seven pact spirits under `tick freeze`, 3 blocks apart (not 2.5, so each perched one stands on a block centre), and photographs them frozen from the front at one distance; then seven pacts sealed and the roster shot with seven portraits; `check_pact_screen` holds both *(decided by the session)* | Proposed (unit 7) | GC-10 |
 | GC-P145 | 2 November 2026 | The kept page draws a spirit's matter and its answer plates first, above the first task (`PactScreen.keep`), so the body's snapped window at 320x180 shows them; the tab order becomes header, matter, answers, first task, the other rows; each garden flow asserts the matter and every plate in view (`platesInView`) before its `_matter_small` picture; `check_pact_screen` holds both. Not yet run: whether the compact body holds two matter lines and a plate row (if not, the matter's lines at the compact layout are the next step) *(decided by the session)* | Proposed (unit 7) | GC-10, GC-05 |
+| GC-P146 | 2 November 2026 | One shared second-client helper, `T/SecondClient`, used by `ConcordancePactNetworkTests` (its steps and assertions unchanged) and `ConcordanceGardenNetworkTests`; `OwnerCollectionsNetworkTests` untouched; it logs the heap after a collection before the second JVM starts, and a failure carries the heap; only it, `OwnerCollectionsNetworkTests` and `HerobrineNetworkTests` launch a second client *(decided by the session)* | Proposed (unit 7) | GC-10 |
 | GC-P147 | 2 November 2026 | Bifrons's review finding 11 (each kind of log carried draws its own Offer plate): one plate per kind kept, not built. Each plate is a distinct `DEPOSIT` index the server offers by item kind; one plate for a tag would need a server change *(decided by the session)* | Proposed (unit 7) | GC-08 |
+| GC-P148 | 2 November 2026 | The garden classes without the optional integrations: one additive step in `pact-clients-without-optional` after the pact step, `ConcordanceGardenPactClientGameTests,ConcordanceGardenNetworkTests`, run unless the run was cancelled; the job's guard, 45-minute timeout and uploads unchanged (whether it fits is not measured) *(decided by the session)* | Proposed (unit 7) | GC-10 |
 | GC-P149 | 2 November 2026 | The facing camera's face rows for Foras (`foras.geo.json`: the beard's front 8.75 px ahead, its foot 17 px up, eyes 1.55) and Bifrons (by his synced listening: risen, the head's front 3 px ahead and its chin 21.5 px up, a point above his eyes at 0.5; low, the hump's front 5 px ahead and its foot 4.5 px up). Inferred, not seen: that he is drawn risen in his facing pictures, and his eye position while risen *(decided by the session)* | Proposed (unit 7) | GC-10, GC-07, GC-08 |
 
 ### Unit 1's amendments and reconciliations (cited in code and commits)
@@ -2984,65 +3176,76 @@ every citation resolves; none is the owner's.
 3. **The next six.** I recommend minerals (Stolas's other deferred topic, and the "precious stones" half of Bathin's,
    Foras's and Marax's entries), or Gloam Ink first if you prefer a small outcome.
 
+#### The cohort checkpoint (draft, GC-10 unit 7)
+
+Drafted for the owner from the three questions above, their facts brought to the build (all six built, Amdusias 2.4
+tall, the matter plates' fix); 487 words. To be reported once CI has run on the cohort head and its pictures are
+looked at, with "What I checked" brought to that run.
+
+**The garden cohort: six garden spirits on the shared pact record**
+
+**What you can do now**
+- With the Binding Arts understood, learn The Garden's Regard from your own garden, craft a Pact Perch and choose among six garden spirits (Stolas the seventh); each names what is missing before anything is spent.
+- Buer eases strained beds by day; Bathin carries Verdance from a Heart to a far Gleaner or pylon; Marax's familiar names the one change your worst bed needs; Foras grafts Sunpetals with Dewmoss from a chest; Bifrons runs roots by night from full beds to hungry ones; Amdusias bends a tree's shelter over up to 16 beds.
+- Four of them raise a matter you answer at the perch. Three spirits' first obligations master the Regard. End any pact at its perch or from the roster: what you paid ahead comes back once.
+
+**What changed**
+All six are built, each facing whoever speaks. A kept page now shows a spirit's matter and its answer plates above the first task, so a small window keeps them in view. Unit 7 adds one server test through all six, a garden load card, a two-client test at Buer's perch, a line-up of the seven and a roster of seven.
+
+**What I checked**
+Candidate: unit 7's records commit on `wip/garden-u7`. Nothing of unit 7 has run in CI; its Java was only parse-checked, and the Python checks show only main's known failures. On `be76fd419` and `1a15984d4` (units 1 to 5) the server suite without the optional integrations and the garden client class passed (runs 41506566691, 41506582568, 41521655013); Amdusias's first run was in progress. Not checked: anyone playing; sound; two people; any load figure.
+
+**What to look at** (once run)
+- `jugcraft_garden_lineup`, `jugcraft_garden_roster_seven`, `jugcraft_garden_bifrons_matter_small`, `jugcraft_garden_peer_faced`.
+- In creative: `/jugcraft concordance grant @s jugcraft:garden_regard understood`, place a perch by an awake Verdant Bed, invite Buer, accept, end him from the roster.
+
+**Decisions for you**
+1. **The six looks and manners.** Buer is your Decor Blossom grown into a rooted healer; the other five are new bodies painted from your paintings (a serpent-tailed carrier, a mossy bull with a familiar, an acorn-capped elder, a root-mass that stands to speak, a garlanded unicorn 2.4 blocks tall, the tallest), as no unused library rig fit. I recommend keeping them; or name a rig, or a wood service for Bifrons.
+2. **How much a garden spirit does.** The quotas; Bathin feeding a far pylon; Amdusias sheltering a garden beside a workshop; Marax advising; Buer refusing overworked beds; Foras grafting little after his first pass. I recommend keeping them as built until play says otherwise.
+3. **The next six.** I recommend minerals (Stolas's other deferred topic), or Gloam Ink first for a small outcome.
+
+**Next proposed chunk**
+CI on the cohort head and these pictures looked at, then the cohort you choose. Its main risk is main's red checks holding every dispatch short of green.
+
 ## Where to resume
 
-Units 1 (GC-01 to GC-04) and 2 (GC-05) are built, their CI evidence and records are in this page and their records, and
-they wait in draft pull request #526 for the owner's review. Unit 3 (GC-06, Marax) and unit 4 (GC-07, Foras, built on
-its own line from unit 3's shared prefix and merged after unit 3's line) are built and recorded; on the cohort line's
-head `5e93bb0a7` run 40852556175 passed in full (item 5). Unit 5 (GC-08,
-Bifrons) is built and recorded on its own line from unit 3's head and merged after unit 4
-([the merge](#unit-5s-merge-after-unit-4)); units 3 to 5 have since run in CI (GC-10 unit 7): on `be76fd419` and `1a15984d4` the server suite without the optional integrations and `ConcordanceGardenPactClientGameTests` passed (runs 41506566691, 41506582568 and 41521655013). Unit 6 (GC-09, Amdusias) is built and recorded
-on its own line (`wip/garden-u6`, from `4201217b3`) and merged after unit 5 ([the merge](#unit-6s-merge-after-unit-5)),
-not yet compiled or run in CI. Next:
+Units 1 to 7 are built and recorded on the cohort line (units 1 to 6 merged in order on `claude/garden-cohort`, unit 7
+on its own line `wip/garden-u7` from the cohort head `2c61471b2a`, its fixes under `GC-10 unit 7` markers so
+Amdusias's CI fixes merge beside them); they wait in draft pull request
+[#526](https://github.com/jimbozoomer-byte/jugcraft/pull/526) for the owner's review; nothing is merged into main.
+What has run in CI, cited only so: units 1 and 2 in their own runs (40605564166, 40777920181; their records); on
+`5e93bb0a7` (units 1 to 4) run 40852556175 passed in full; on `be76fd419` and `1a15984d4` (units 1 to 5) the server suite
+without the optional integrations and `ConcordanceGardenPactClientGameTests` passed (runs 41506566691, 41506582568 and
+41521655013). Amdusias (unit 6) has not run: his first run, on `2c61471b2a`, was in progress when this was written.
+**Nothing of unit 7 has run** ([unit 7](#unit-7-as-built-and-its-evidence)). Next:
 
-1. Look at the pictures of run 40782439981 (green in full on `d7185041b`, which holds Bathin's facing pictures framed
-   whole and the magic interfaces' `73464e938`); no record here describes them yet.
-2. Refresh main and the open pull requests; merge main into `claude/garden-cohort` if it moved (generated files
-   regenerated, never hand-merged).
-3. Unit 3 (Marax) has run in CI (GC-10 unit 7: on `be76fd419` and `1a15984d4` the server suite without the optional integrations and `ConcordanceGardenPactClientGameTests` passed (runs 41506566691, 41506582568 and 41521655013)). Look at his 33 pictures and complete [his Verification](marax-pact.md#verification)
-   (a Seen column, as Bathin's) and the results in [unit 3's evidence](#unit-3-as-built-and-its-evidence). His two
-   kept-page states estimated over budget (the answer just after the third reading, about 47 words; a different bed named
-   while one stays proud, about 50) are to be measured or narrowed then. At the merge that brings the magic interfaces'
-   unit 2 (`wip/magic-ui-roster`: its `6cb85aef0` is already on unit 4's line, its review's fixes `57a324264` not) into
-   this line, Marax's Jade note needs its short form and mark (`SENTENCES` and `SENTENCE_MARKS` in
-   `tools/magic_ui.py`, `MagicGlance.MARKS`: "Proud beds: %1$s", the hourglass), and GC-S26's per-spirit list gains "a
-   Jade note's short form and mark".
-4. Units 4 to 6 (built in parallel from the shared prefix; merged in the order 3, 4, 5, 6, GC-P79): each takes unit 3's
-   markers in the shared tables (`tools/magic_ui.py`'s act glances and `WORK_GLANCES`; `PactGlance.WORK_ICONS`, a
-   `Map.ofEntries` whose last entry stays Star-reckoning's) and adds its lines under its own; stands on `Station.BESIDE`
-   with no station code of its own; adds codex pages to `PAGES` only (the mastered page, the mastery step and its test are
-   unit 3's, and the mastered page stays the entry's last, so its index moves at each merge); drops its own `dewmoss`
-   addition (unit 4); adds its client flow after Marax's, calling `yard` first (his two Sunpetal beds lie in it), and its
-   weight under its own line; and, for unit 6, keeps `HabitatAdvice` and Marax's reading right under the sheltered
-   habitat (re-running the advice harness and `habitatAdviceHoldsForEveryOrganism`).
-5. Unit 4 (GC-07, Foras) is merged after unit 3's line ([the merge](#unit-4s-merge-after-unit-3)): his journey steps
-   are 14 to 16, his codex pages follow Marax's, and the garden class's weight was 1040 (1280 since unit 5). On the
-   cohort line's head `5e93bb0a7`, in run 40852556175, both server jobs and all 16 client shards passed (the
-   16th, holding main's `PeepoPopulationClientTests`, on its re-run); run 40840353835 passed in full on
-   `3bfd63a97` (the magic interfaces' polish), before unit 4. Look at his 33 pictures and give
-   [his Verification](foras-pact.md#verification) its results and its "Seen" column.
-6. Unit 5 (GC-08, Bifrons) is merged after unit 4, from his own line (built from unit 3's head, `3c2d36b0f`)
-   ([the merge](#unit-5s-merge-after-unit-4)): his journey steps are 17 to 19, his codex pages follow Foras's, before
-   "Mastered", the entry's last page, and the garden class's weight is 1280. His tests have run in CI (GC-10 unit 7: on `be76fd419` and `1a15984d4` the server suite without the optional integrations and `ConcordanceGardenPactClientGameTests` passed (runs 41506566691, 41506582568 and 41521655013));
-   a dispatch of every client class is still to run. Look at his 36 pictures and give
-   [his Verification](bifrons-pact.md#verification) its results and its "Seen" column. His review's finding 11
-   (the shared kept page drawing an Offer plate for each kind of offering carried) is decided (GC-P147).
-7. Unit 6 (GC-09, Amdusias) is merged after unit 5, from his own line (built from `4201217b3`)
-   ([the merge](#unit-6s-merge-after-unit-5)): his journey steps are 20 to 22, his codex pages follow Bifrons's, before
-   "Mastered", the entry's last page, and the garden class's weight is 1520. Run CI on the merged head (the server jobs,
-   the garden client class at 1520, a dispatch of every client class), look at his 35 pictures and give
-   [his Verification](amdusias-pact.md#verification) its results and its "Seen" column.
-8. Open items units 1 to 6 leave: Buer's listen, asleep and depart pictures and his refused picture (GC-04's As built);
-   Bathin's ring and shimmer drawn as the shared movement and work signs, his arrive and depart pictures alike, his assent
-   picture showing no fist at the chest, the matter pictures with the row's tip over the plates, the pylon road not
-   photographed (GC-05's As built and [his record](bathin-pact.md#rollout-and-open-questions)); the journey's Buer steps
-   still write his numbers as literals; Marax's astir loop not photographed and his reading's sign the shared work sign
-   ([his record](marax-pact.md#rollout-and-open-questions)); Foras's astir loop not photographed, his count an action-bar
-   line rather than a voiced one, and a ripe host whose bed holds no reading waiting until it is read
-   ([his record](foras-pact.md#rollout-and-open-questions)); Bifrons's astir loop not photographed, a slept night not
-   resetting his quota, and his Jade note a think stale ([his record](bifrons-pact.md#known-limits)); Amdusias's open
-   questions ([his record](amdusias-pact.md#rollout-and-open-questions)); GB18 (Gutenberg's
-   record); a dispatch of every client class on the cohort's head.
+1. Merge unit 7's line into the cohort after Amdusias's CI fixes (each side's lines under its own markers), refresh main
+   and the open pull requests, and merge main if it moved (generated files written by their own tools, never
+   hand-merged; the full generator cannot run without the vanilla jar).
+2. Run CI on the merged cohort head: the server jobs (`mod`, `optional integrations absent`), then one workflow_dispatch
+   of the Build workflow with every client class and `load_card` and `clients_without_optional` ticked. Fix what fails
+   in the cohort's classes; record main's own failures as main's. If the `load-card` (30 minutes) or
+   `pact-clients-without-optional` (45 minutes) job times out, say so and leave raising its limit to the owner.
+3. Look at the pictures and fill each record's "Seen" column: unit 7's (the line-up, the roster of seven, the four
+   `_matter_small` re-shots, Foras's and Bifrons's facing pictures, the three peer shots), then Marax's 33, Foras's 33,
+   Bifrons's 36 and Amdusias's 35 ([unit 7's client evidence](#client-evidence) and each spirit's Verification). If the
+   compact body does not hold a matter and its plates at 320x180 (GC-P145), the matter's compact lines are the next
+   step; if Bifrons is not risen in his facing pictures, his low row is the one drawn (GC-P149).
+4. Paste the garden load card's notice verbatim into [its section](#the-garden-load-card) with the run and commit, and
+   say whether each figure is within GC-P141's budget.
+5. Record the two-client run: passed, or failed with its run, job and `peer.log`.
+6. Bring the checkpoint's "What I checked" to that run and report [the checkpoint](#the-cohort-checkpoint-draft-gc-10-unit-7)
+   to the owner: its three questions are the only ones. Do not start another cohort before the owner answers.
+7. Open items the units leave, unchanged by unit 7: Buer's listen, asleep and depart pictures and his refused picture
+   (GC-04's As built); Bathin's ring and shimmer drawn as the shared signs, his arrive and depart pictures alike, his
+   assent picture, the pylon road not photographed ([his record](bathin-pact.md#rollout-and-open-questions)); the
+   journey's Buer steps writing his numbers as literals; Marax's astir loop and his reading's sign, his two kept-page
+   states estimated over budget ([his record](marax-pact.md#rollout-and-open-questions)); Foras's astir loop, his count
+   an action-bar line, a ripe host with no reading ([his record](foras-pact.md#rollout-and-open-questions)); Bifrons's
+   astir loop, a slept night not resetting his quota, his Jade note a think stale, finding 11 kept (GC-P147;
+   [his record](bifrons-pact.md#known-limits)); Amdusias's open questions
+   ([his record](amdusias-pact.md#rollout-and-open-questions)); GB18 (Gutenberg's record); the pictures of run
+   40782439981, never described.
 
 ## How this contract was checked
 

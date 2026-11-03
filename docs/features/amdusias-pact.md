@@ -707,6 +707,13 @@ may each cover the other's bed (Authority with no claims); that `Sign.WORK` read
 encyclopedia's ray hits the bed under the crop in the client yard; and that budding amethyst gives exactly 1 stir each
 there.
 
+**Since GC-10** (unit 7, [the cohort's evidence](concordance-garden-cohort.md#unit-7-as-built-and-its-evidence); built
+on its own line, not merged into main, **not yet compiled or run in CI**): his chooser picture asserts seven entries;
+his flow begins by asserting no item lies within 12 blocks (GC-P140) and asserts his matter's plates in view at 320x180
+(GC-P145); the whole path shelters exactly the Sunpetal's and the Gloamcap's beds after ALL; the load card samples at
+most one canopy a holder and no two summed; the line-up and the roster of seven show him. His own first CI run was in
+progress when this was written; nothing of his is claimed from it.
+
 **Not covered:** everything that needs a build: compiling, every game test above, the client flow and its pictures;
 people; sound (CI has none: the horn's subtitle is staged there, and the other cues' subtitles are checked as defined and
 fired); two clients at his perch (the garden's two-client test is unit 7's); a player's hardware; a long unattended

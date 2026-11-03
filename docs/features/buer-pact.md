@@ -376,6 +376,16 @@ in CI): the chooser has a seventh entry. Amdusias's canopy never eases strain (i
 stir), so Buer's tending, its window and his overworked bed are unchanged; his words, sounds, service and tests are
 unchanged.
 
+**Since GC-10** (unit 7, [the cohort's evidence](concordance-garden-cohort.md#unit-7-as-built-and-its-evidence); built
+on its own line, not merged into main, **not yet compiled or run in CI**): the whole path
+(`theGardenPactsFromCodexToDeparture`) walks him first: refused once from the bare chooser and once for want of his
+compact, sealed with it spent once, his tending served, his first obligation kept by hand (the Regard at 1 kept, still
+understood), paid ahead and ended once. The garden's two-client test (`ConcordanceGardenNetworkTests`) is at his perch:
+a stranger's own strained bed in his area keeps its strain while he eases the holder's, he turns to the stranger who
+speaks, and the stranger's End is refused as not the holder's (three pictures from the stranger's client). The garden
+load card keeps two of him; the line-up and the roster of seven show him. His words, sounds, service and tests are
+unchanged.
+
 **Local** (this record's commit; no Minecraft build here): `python3 scripts/check_repository.py` (structure and links), `python3 tools/concordance_journey.py
 --check`, `python3 -B tools/check_mod_data.py` (its `check_delivery` holding the re-pasted delivery matrix) and
 `git diff --check`, each run on this commit's tree and passed; `python3 tools/owner_art.py --provenance pacts` printed
