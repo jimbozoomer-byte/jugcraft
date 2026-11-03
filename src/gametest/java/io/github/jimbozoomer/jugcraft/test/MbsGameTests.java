@@ -77,7 +77,8 @@ public class MbsGameTests {
 	}
 
 	private static void clearItems(GameTestHelper helper, BlockPos around) {
-		helper.getLevel().getEntitiesOfClass(ItemEntity.class, new AABB(around).inflate(40)).forEach(ItemEntity::discard);
+		// Large machines need a wide search, but adjacent tests own their drops. Never clear outside this arena.
+		helper.getLevel().getEntitiesOfClass(ItemEntity.class, new AABB(around).inflate(40).intersect(helper.getBounds())).forEach(ItemEntity::discard);
 	}
 
 	private static StorageTankPortBlockEntity outlet(GameTestHelper helper, Blueprint blueprint, BlockPos stake, Rotation rotation) {

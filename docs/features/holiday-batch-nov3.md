@@ -278,3 +278,16 @@ Canonical generation completes. Shape lookup now reads the prepared pinned vanil
 Full Python discovery passes all 327 tests outside the Windows sandbox. The six earlier shell failures were Git Bash being unable to create its signal pipe in the sandbox. Four additional hosted-runner disk-boundary tests and four model-finishing tests pass separately.
 
 Runtime follow-up: isolate the Thanksgiving-truce/season-restart tests in separate test environments so temporary global dates cannot overlap ordinary raid tests. Verify owned Pumpklings enter the pet roster without pumpkin drops, while unowned Pumpklings retain their drop behavior. Backported bounded peer startup/log diagnostics from PR 600; normal network deadlines stay unchanged. Rendered clients get bounded 6 GiB heaps and CI uses swap plus guarded disposable-runner SDK cleanup; no tests or assertions removed. Compilation, full data audit and combined runtime validation are pending. No live actions or client-channel promotion.
+
+### Combined release follow-up
+
+PR 597 is integrated into this branch (ad556a94a7), not yet main. Full data audit passes. Foundation run 41693607607 passes. Full Build remains pending the following repairs and validation:
+
+- Connected textures use the existing pixel-aware PNG writer. All 439 sheets regenerated with identical bytes and metadata; the PNG regression confirms changed pixels and corrupt files are replaced. This resolves cross-platform encoding drift without ignoring visual changes.
+- Machine-test cleanup extended 40 blocks beyond its arena and removed neighboring food drops. Cleanup now intersects the fixture bounds. Two combined 95-test runs exposed this interference; rerun pending.
+- Reviewed PR 600 third-person applied-pitch/external-view synchronization and regression checks backported. Crafting-planner tests now cover the actual catalog page count instead of an outdated 32-page limit. Client validation pending.
+- Client selector checkout timeout increased from 5 to 15 minutes after the two-parent fetch timed out. Coverage remains unchanged.
+
+No live maintenance, release publication, main merge or client-channel promotion occurred.
+
+Combined server rerun passes **95/95 required tests** (`build/nov3-release-combined-server-3.log`). This includes machine recovery, raid approaches/crew, pets, seasonal isolation, foods and Lua readiness. Combined five-suite client validation is running.

@@ -7,9 +7,11 @@ Changes prepared since 0.1.0-alpha.20261102.2:
 - Nineteen craftable harvest decorations: produce baskets, gourd stacks, place settings, cutlery, bread baskets, gravy boats, covered butter dishes, pie stands, leaf garlands, amber lanterns, candle centerpieces, market signs, copper pan racks, turkey/squirrel ornaments, acorn mobiles and tabletop cornucopias.
 - An autumn leaf runner for connected Feast Tables.
 
-PR 597 is under fresh validation for inclusion: recoverable industrial machines and Chemical Reactors retaining stored fluid, plus a bounded Lua startup handshake. It is not yet merged or included in this candidate's source.
+- Recoverable industrial machines and Chemical Reactors retaining stored fluid, plus bounded Lua startup (PR 597 integrated into the release branch).
+- Imported model cap/handle repairs and source-verified multipart seam checks.
+- Third-person aiming preserves external yaw and pitch corrections.
 
-Validation: 52 focused server tests, 29 Python checks and both rendered pet/holiday client suites passed on the holiday batch. See docs/features/holiday-batch-nov3.md. Fresh GitHub checks are pending. Existing imported-model audit findings remain; no full-repository passing result is claimed. Stationary crew visuals were checked; a full populated-city raid soak was not performed.
+Validation: 52 focused server tests, 29 Python checks and both rendered pet/holiday client suites passed on the holiday batch. See docs/features/holiday-batch-nov3.md. Fresh GitHub checks are pending. Full data and geometry audits now pass; combined runtime and full CI validation remain pending. Stationary crew visuals were checked; a full populated-city raid soak was not performed.
 
 No automatic replacement of owner city builds, no world reset, no personal-profile replacement. Release version and exact source must be finalized after merge. Deploy the server only after separate owner restart confirmation and a full 30-second player warning; promote client updates only after server verification.
 
