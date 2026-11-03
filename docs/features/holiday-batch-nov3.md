@@ -258,3 +258,7 @@ The checkpoint above is superseded by these completed results:
 - Claude's final data audit remains exit 1 with exactly the same 48 existing imported geometry findings; icon checks pass with 28 existing warnings. This is NOT a clean full-repository audit.
 - Added Claude's docs-only food modelling guide/reference sheet, with links from CLAUDE.md and ART_DIRECTION.md. Patch SHA-256: `173728fb79f2d0bb6b86a53238c0f297c910b1eb8c36713f2b00fdb8449acadc`.
 - Implementation/review/targeted local validation are complete for groups A–G. Owner visual playtest and any later release/deployment remain separate. No commits, pushes, releases, live operations, updater or personal Modrinth changes were made.
+
+## Release preparation — 3 November 2026
+
+Owner authorized review/merge of ready PRs and preparation of a client/server update. Local batch committed as 5bc6383ac1 and pushed in PR 606. PR 597 was reviewed; GitHub requires its branch to be current with main, so update-branch was requested and fresh checks started. Normal merge was refused as out of date; no protection bypass was used. Auto-merge is disabled on this repository. PR 600 remains conflicting with an unsuccessful client run; other unfinished drafts are not release-ready. Deployment and player-channel promotion have not occurred. A new live restart confirmation is still required once files are ready.
