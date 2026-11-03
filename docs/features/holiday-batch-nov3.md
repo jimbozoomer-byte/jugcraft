@@ -291,3 +291,5 @@ PR 597 is integrated into this branch (ad556a94a7), not yet main. Full data audi
 No live maintenance, release publication, main merge or client-channel promotion occurred.
 
 Combined server rerun passes **95/95 required tests** (`build/nov3-release-combined-server-3.log`). This includes machine recovery, raid approaches/crew, pets, seasonal isolation, foods and Lua readiness. Combined five-suite client validation is running.
+
+Combined client run passes all five suites (`build/nov3-release-combined-client.log`): imported-model atlas, Peepo crafting, weapon arts/orbit, holiday visuals and pet inventory. Reviewed the original-art gallery and compact pet UI screenshots. Twelve world-designer tests pass. Evidence copied to `build/nov3-release-evidence`. Foundation run 41697495156 hit its five-minute whole-job timeout during passing contract tests, so the budget is raised to 15 minutes without changing coverage. Full CI remains pending.
