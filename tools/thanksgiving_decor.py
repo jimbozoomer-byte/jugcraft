@@ -94,7 +94,7 @@ SHAPELESS = [
                                                "minecraft:orange_dye", "minecraft:glass_bottle"]},
     {"id": "napkin_and_cutlery_caddy", "inputs": ["#minecraft:wooden_slabs", "minecraft:iron_nugget", "minecraft:iron_nugget",
                                                   "minecraft:iron_nugget", "jugcraft:flax"]},
-    {"id": "bread_basket", "inputs": [STICK, STICK, WHEAT, "minecraft:bread", "jugcraft:dinner_roll", "minecraft:red_dye"]},
+    {"id": "bread_basket", "inputs": [STICK, STICK, WHEAT, "minecraft:bread", "minecraft:bread", "minecraft:red_dye"]},
     {"id": "gravy_boat", "inputs": ["minecraft:clay_ball", "minecraft:clay_ball", "minecraft:bone_meal", "minecraft:brown_mushroom"]},
     {"id": "covered_butter_dish", "inputs": ["minecraft:clay_ball", "minecraft:clay_ball", "minecraft:bone_meal", "jugcraft:butter"]},
     {"id": "pie_stand", "inputs": ["#minecraft:wooden_slabs", "#minecraft:wooden_slabs", STICK, "minecraft:pumpkin_pie", "jugcraft:apple_pie"]},

@@ -262,3 +262,9 @@ The checkpoint above is superseded by these completed results:
 ## Release preparation — 3 November 2026
 
 Owner authorized review/merge of ready PRs and preparation of a client/server update. Local batch committed as 5bc6383ac1 and pushed in PR 606. PR 597 was reviewed; GitHub requires its branch to be current with main, so update-branch was requested and fresh checks started. Normal merge was refused as out of date; no protection bypass was used. Auto-merge is disabled on this repository. PR 600 remains conflicting with an unsuccessful client run; other unfinished drafts are not release-ready. Deployment and player-channel promotion have not occurred. A new live restart confirmation is still required once files are ready.
+
+### Fresh CI review
+
+PR 606 Foundation found two new issues: bread_basket used nonexistent jugcraft:dinner_roll, and the runtime atlas fixture omitted 42 new texture references. Replaced the invalid ingredient with a second vanilla bread in both generator and recipe, and regenerated the resolved-reference fixture. Local full Python discovery now passes 310 of 316 tests, including both repaired tests; six graphics shell-harness tests fail in this Windows execution environment (see build/nov3-release-foundation-local.log). This is not a full green result.
+
+PR 597's refreshed build fails before generation completes: newest_shapes searches only the remapped Loom archive and cannot find pinned vanilla block/cube on fresh CI. Its previous green run predates current main. The independent art audit confirms 48 existing imported-model findings. No merge override or live deployment has occurred. These release blockers must be resolved before normal merge/release.
