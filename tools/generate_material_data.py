@@ -1946,6 +1946,8 @@ def main():
     food_servings.generate(write_food_serving)
     import authored_resource_reconciliation
     authored_resource_reconciliation.apply(write)
+    import newest_model_finishing
+    newest_model_finishing.generate(write)
     import model_atlas
     model_atlas.generate(write)
     from generated_resource_cleanup import prune

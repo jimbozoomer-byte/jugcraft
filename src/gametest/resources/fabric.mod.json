@@ -421,7 +421,8 @@
       "io.github.jimbozoomer.jugcraft.test.PetRosterTests",
       "io.github.jimbozoomer.jugcraft.test.PetStableGameTests",
       "io.github.jimbozoomer.jugcraft.test.PetBehaviorsGameTests",
-      "io.github.jimbozoomer.jugcraft.test.ServerUtilitiesTests"
+      "io.github.jimbozoomer.jugcraft.test.ServerUtilitiesTests",
+      "io.github.jimbozoomer.jugcraft.test.PeerClientStartupGameTests"
     ],
     "jei_mod_plugin": [
       "io.github.jimbozoomer.jugcraft.test.JeiStationClientGameTests$WithJei$Probe"
