@@ -1,5 +1,4 @@
 """Optional buff-focused pharmacy. All formulations and effects are fictional game abstractions."""
-import shutil
 import pharmacy_factory
 import sterile_pharmacy
 import precision_pharmacy
@@ -31,8 +30,8 @@ CRAFTING = {
     "activated_charcoal": (["minecraft:charcoal", "minecraft:charcoal", "minecraft:redstone", "minecraft:paper"], 2),
 }
 
-# Legacy alias sources retained as the exact registered-effect assignment list. Art Batch 6's
-# pharmacy_hud_art generator runs last via pharmacy_item_art and owns the final dedicated PNGs.
+# Legacy source labels are retained only as the registered-effect assignment catalogue.
+# Dedicated pharmacy_hud_art owns these PNGs; alias copies would destroy their saved encoding.
 EFFECT_TEXTURES = {
     "caffeinated": "coffee_beans", "caffeine_jitters": "coffee_beans", "fortitude": "aspirin",
     "pharmacy_recovery": "first_aid_kit", "endurance": "glucose_syrup", "stimulated": "stimulant",
@@ -136,11 +135,6 @@ def write_all(write, assets, data, lang, condition):
                                    "conditions": {"recipes": [f"jugcraft:{recipe}"]}}},
             "requirements": [["has_ingredient", "has_the_recipe"]],
             "rewards": {"recipes": [f"jugcraft:{recipe}"]}})
-    # Reuse authored runtime art. These effect icons have no new pixel painting or third-party download.
-    effects = assets / "textures" / "mob_effect"
-    effects.mkdir(parents=True, exist_ok=True)
-    for effect, texture in EFFECT_TEXTURES.items():
-        shutil.copyfile(assets / "textures" / "item" / f"{texture}.png", effects / f"{effect}.png")
     sterile_pharmacy.write_extras(write, assets, data, lang, condition)
     precision_pharmacy.write_extras(write, assets, data, lang, condition)
     alcohol_pharmacy.write_extras(write, assets, data, lang, condition)
