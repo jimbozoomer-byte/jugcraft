@@ -89,8 +89,10 @@ class ClientTestSelectionTests(unittest.TestCase):
         self.assertIn("ConcordancePactNetworkTests", selection.WEIGHTS)
 
     def test_measured_long_suites_do_not_share_one_shard(self):
-        classes = {"NuclearClientGameTests", "PeepoProductionStockClientTests", "PeepoDeliveryClientTests"}
-        jobs = selection.share(classes, self.tests, 3)
+        # Use the actual full-suite layout: the old estimates put both long
+        # suites together in shard 6 alongside 21 other classes.
+        classes = set(self.tests)
+        jobs = selection.share(classes, self.tests, 16)
         assigned = [name for _, names in jobs for name in names]
         self.assertCountEqual(classes, assigned)
         self.assertFalse(any({"NuclearClientGameTests", "PeepoProductionStockClientTests"} <= set(names)
