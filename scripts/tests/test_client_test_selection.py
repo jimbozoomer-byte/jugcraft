@@ -88,6 +88,14 @@ class ClientTestSelectionTests(unittest.TestCase):
         self.assertIn("ConcordancePactNetworkTests", chosen)
         self.assertIn("ConcordancePactNetworkTests", selection.WEIGHTS)
 
+    def test_measured_long_suites_do_not_share_one_shard(self):
+        classes = {"NuclearClientGameTests", "PeepoProductionStockClientTests", "PeepoDeliveryClientTests"}
+        jobs = selection.share(classes, self.tests, 3)
+        assigned = [name for _, names in jobs for name in names]
+        self.assertCountEqual(classes, assigned)
+        self.assertFalse(any({"NuclearClientGameTests", "PeepoProductionStockClientTests"} <= set(names)
+                             for _, names in jobs))
+
     def test_workflow_runs_every_selected_shard(self):
         workflow = (ROOT / ".github/workflows/build.yml").read_text()
         matrix = re.search(r"shard: \[([\d, ]+)\]", workflow)

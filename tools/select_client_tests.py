@@ -94,6 +94,11 @@ WEIGHTS = {
     "PeepoHearthClientTests": 240,
     "PeepoWorkSessionClientTests": 240,
     "PeepoDeliveryClientTests": 240,
+    # PR #611, run 41884611786 shard 6: these completed worlds took ~876 s
+    # (nuclear) and ~585 s (stock), while length-based estimates were ~20 s.
+    # Keep all selected classes and the 60-minute job limit; spread the real work.
+    "NuclearClientGameTests": 1000,
+    "PeepoProductionStockClientTests": 660,
     "PeepoKitchenAnimationClientTests": 120,
     "PeepoGardenExpansionClientTests": 60,  # focused local runs: about 55 seconds
     "PeepoSuppliesClientTests": 60,

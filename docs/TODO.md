@@ -2,6 +2,9 @@
 
 ## Pharmacy follow-up — November 4
 
+- [ ] Add companion automation to pharmacy machines after reusable Precision Process Modules can be supplied and retained safely in upgrade slots. These eight forms currently remain outside helper assistance; preserve the existing 40 supported industrial processors.
+
+
 The chemistry/pharmacy manufacturing foundation, existing drug roster, shared strain rules, visual profiles and item-art batches are implemented locally. The owner accepted the current result for now and requested commit/push/PR preparation on November 4. Remaining work stays open here; the [delivery plan](features/pharmacology-remaining-batches.md) and [latest art/HUD record](features/pharmacology-item-art-6.md) distinguish completed work from future scope. Prepared with OpenAI Codex (GPT-6 family).
 
 - [ ] **Review pharmacy textures in ordinary play.** Revisit all finished drugs, ingredients, stocks, formulas, effect symbols and whole machine models for recognizability, held scale, stack overlays, lighting, color-vision readability and consistency with the existing coffee/crop art. The current 146 item sprites and 39 effect icons are the accepted baseline, not the end of the art review.

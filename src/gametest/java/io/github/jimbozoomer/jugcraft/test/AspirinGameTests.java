@@ -45,7 +45,7 @@ public class AspirinGameTests {
 				"Aspirin now grants Fortitude after onset with 10 strain");
 		helper.assertTrue(!player.hasEffect(MobEffects.REGENERATION), "The old regeneration effect is no longer applied");
 		helper.assertTrue(player.hasEffect(MobEffects.POISON) && player.hasEffect(MobEffects.NAUSEA), "Unrelated conditions are preserved");
-		helper.assertTrue(!Pharmacology.mayDrink(player, Pharmacology.ASPIRIN, false), "The shared ledger blocks immediate reuse");
+		helper.assertTrue(Pharmacology.mayDrink(player, Pharmacology.ASPIRIN, false), "The shared strain ledger permits redosing with its full strain and tolerance cost");
 		helper.succeed();
 	}
 

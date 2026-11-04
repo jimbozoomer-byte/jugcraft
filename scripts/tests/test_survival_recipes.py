@@ -46,6 +46,11 @@ class SurvivalGraphTests(unittest.TestCase):
                 self.assertTrue(any('/recipe/storage_crates/' in route for route in row['routes']), name)
                 self.assertEqual([], row['blocked_by'], name)
                 self.assertNotIn('jugcraft:' + name, report['unregistered_model_definitions'])
+        for name in ('botanical_resin', 'dreamcap', 'prism_cactus_fruit', 'lucid_imprint',
+                     'pattern_imprint', 'oneiric_imprint', 'lsd', 'dmt'):
+            self.assertIn(rows['jugcraft:' + name]['status'],
+                          ('recipe_chain_reachable', 'chain_with_acquisition_evidence'), name)
+            self.assertEqual([], rows['jugcraft:' + name]['blocked_by'], name)
         unresolved = [r['item'] for r in report['items'] if r['status'] in ('no_documented_route','recipe_chain_needs_review')]
         self.assertEqual([], unresolved, 'Every active survival chain needs a real source')
         from survival_jimtafacts_routes import DEFERRED_ACQUISITION

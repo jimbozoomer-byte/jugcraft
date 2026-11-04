@@ -1,6 +1,7 @@
 """Canonical pharmacy Art Batches 1–5 maps/models using the shared item-icon renderer."""
 from pathlib import Path
 from PIL import Image
+from asset_png import save_rgba
 import arms_icons
 from check_icon_maps import Map
 from pharmacy_art_catalog import BATCH2, BATCH3, BATCH4, BATCH5
@@ -28,7 +29,7 @@ def render(key):
 def generate_textures():
     folder=ROOT/'src/main/resources/assets/jugcraft/textures/item/pharmacy'
     folder.mkdir(parents=True,exist_ok=True)
-    for key in ITEMS: render(key).save(folder/(key+'.png'))
+    for key in ITEMS: save_rgba(render(key), folder/(key+'.png'))
     # Run after older pharmacology alias writers and at the end of both canonical generators.
     import pharmacy_hud_art
     pharmacy_hud_art.generate_textures()

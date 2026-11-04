@@ -6,6 +6,7 @@ The 9px HUD source is separate because it follows vanilla heart/hunger footprint
 from pathlib import Path
 import csv
 from PIL import Image
+from asset_png import save_rgba
 import arms_icons
 from check_icon_maps import Map
 
@@ -42,8 +43,8 @@ def pill_atlas():
 
 def generate_textures():
     effects=ASSETS/'textures/mob_effect';effects.mkdir(parents=True,exist_ok=True)
-    for key in EFFECTS:render_effect(key).save(effects/(key+'.png'))
+    for key in EFFECTS:save_rgba(render_effect(key), effects/(key+'.png'))
     gui=ASSETS/'textures/gui';gui.mkdir(parents=True,exist_ok=True)
-    pill_atlas().save(gui/'strain_pills.png')
+    save_rgba(pill_atlas(), gui/'strain_pills.png')
 
 if __name__=='__main__':generate_textures()
