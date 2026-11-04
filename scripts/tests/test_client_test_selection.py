@@ -97,6 +97,8 @@ class ClientTestSelectionTests(unittest.TestCase):
         self.assertCountEqual(classes, assigned)
         self.assertFalse(any({"NuclearClientGameTests", "PeepoProductionStockClientTests"} <= set(names)
                              for _, names in jobs))
+        mineral_job = next(names for _, names in jobs if "MineralSandClientGameTests" in names)
+        self.assertEqual(["MineralSandClientGameTests"], mineral_job)
 
     def test_workflow_runs_every_selected_shard(self):
         workflow = (ROOT / ".github/workflows/build.yml").read_text()

@@ -97,6 +97,10 @@ WEIGHTS = {
     # PR #611, run 41884611786 shard 6: these completed worlds took ~876 s
     # (nuclear) and ~585 s (stock), while length-based estimates were ~20 s.
     # Keep all selected classes and the 60-minute job limit; spread the real work.
+    # Run 41919904118: two natural mineral-sand surveys occupied ~21 minutes
+    # (22:00-22:20), leaving its 25-class group at the one-hour limit during upload.
+    # Give this discovery suite its own shard, keeping every test and the 60m limit.
+    "MineralSandClientGameTests": 1500,
     "NuclearClientGameTests": 1000,
     "PeepoProductionStockClientTests": 660,
     "PeepoKitchenAnimationClientTests": 120,
