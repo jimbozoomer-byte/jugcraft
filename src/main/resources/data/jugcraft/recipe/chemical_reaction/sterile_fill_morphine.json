@@ -1,0 +1,43 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "jugcraft:chemical_reaction",
+  "capability": "jugcraft:sterile_filling",
+  "items": [
+    {
+      "ingredient": "jugcraft:redleaf_medical_stock",
+      "count": 2
+    },
+    {
+      "ingredient": "jugcraft:sterile_carrier",
+      "count": 1
+    },
+    {
+      "ingredient": "jugcraft:sterile_vial",
+      "count": 4
+    }
+  ],
+  "fluids": [
+    {
+      "fluid": "minecraft:water",
+      "amount": 250
+    }
+  ],
+  "results": [
+    {
+      "id": "jugcraft:morphine",
+      "count": 4
+    }
+  ],
+  "tool": "jugcraft:morphine_formula_plate",
+  "energy_per_tick": 96,
+  "time": 200
+}

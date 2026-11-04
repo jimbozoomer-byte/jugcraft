@@ -4,6 +4,7 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.chemistry.FluidRecipes;
 import io.github.jimbozoomer.jugcraft.machine.MachineKind;
 import io.github.jimbozoomer.jugcraft.weapons.FieldChemistry;
+import io.github.jimbozoomer.jugcraft.pharmacology.Pharmacology;
 import java.util.List;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
@@ -17,8 +18,8 @@ import net.minecraft.world.item.ItemStack;
 
 /**
  * Aspirin (docs/features/aspirin.md): the Chemical Reactor steeps willow (two) or birch (one) into salicylic acid and
- * acetylates two with a cider vinegar over 50 mB of sulfuric acid into four tablets; a tablet gives Regeneration I for
- * 10 seconds and clears nausea, leaves every other effect, and waits 30 seconds before the next.
+ * processes two with cider vinegar and 50 mB sulfuric acid into four tablets. The stable item now grants
+ * Fortitude through the shared pharmacy ledger; it does not clear unrelated conditions.
  */
 public class AspirinGameTests {
 	@GameTest
@@ -31,18 +32,20 @@ public class AspirinGameTests {
 	}
 
 	@GameTest(maxTicks = 40)
-	public void aspirinRegeneratesAndClearsNausea(GameTestHelper helper) {
-		Mob pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, new BlockPos(2, 1, 2));
-		pig.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 400, 0));
-		pig.addEffect(new MobEffectInstance(MobEffects.POISON, 400, 0));
+	public void aspirinUsesFortitudeAndPreservesUnrelatedEffects(GameTestHelper helper) {
+		var player = TestPlayers.survivor(helper);
+		player.addEffect(new MobEffectInstance(MobEffects.NAUSEA, 400, 0));
+		player.addEffect(new MobEffectInstance(MobEffects.POISON, 400, 0));
 		ItemStack tablet = new ItemStack(FieldChemistry.ASPIRIN);
-		helper.assertTrue(tablet.has(DataComponents.USE_COOLDOWN), "Aspirin has no cooldown");
-		tablet.finishUsingItem(helper.getLevel(), pig);
-		MobEffectInstance regeneration = pig.getEffect(MobEffects.REGENERATION);
-		helper.assertTrue(regeneration != null && regeneration.getAmplifier() == 0
-				&& regeneration.getDuration() <= FieldChemistry.ASPIRIN_REGENERATION_TICKS, "No Regeneration I: " + regeneration);
-		helper.assertTrue(!pig.hasEffect(MobEffects.NAUSEA), "The nausea stayed");
-		helper.assertTrue(pig.hasEffect(MobEffects.POISON), "Aspirin cleared poison too");
+		tablet.finishUsingItem(helper.getLevel(), player);
+		for (int second = 0; second < 5; second++) {
+			Pharmacology.tickSecond(player);
+		}
+		helper.assertTrue(player.hasEffect(Pharmacology.FORTITUDE) && Pharmacology.strain(player) == 10,
+				"Aspirin now grants Fortitude after onset with 10 strain");
+		helper.assertTrue(!player.hasEffect(MobEffects.REGENERATION), "The old regeneration effect is no longer applied");
+		helper.assertTrue(player.hasEffect(MobEffects.POISON) && player.hasEffect(MobEffects.NAUSEA), "Unrelated conditions are preserved");
+		helper.assertTrue(!Pharmacology.mayDrink(player, Pharmacology.ASPIRIN, false), "The shared ledger blocks immediate reuse");
 		helper.succeed();
 	}
 

@@ -1,0 +1,43 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "jugcraft:chemical_reaction",
+  "capability": "jugcraft:drug_formulation",
+  "items": [
+    {
+      "ingredient": "jugcraft:caffeine_concentrate",
+      "count": 8
+    },
+    {
+      "ingredient": "minecraft:sugar",
+      "count": 4
+    },
+    {
+      "ingredient": "minecraft:glass_bottle",
+      "count": 8
+    }
+  ],
+  "fluids": [
+    {
+      "fluid": "minecraft:water",
+      "amount": 2000
+    }
+  ],
+  "results": [
+    {
+      "id": "jugcraft:caffeine_drink",
+      "count": 8
+    }
+  ],
+  "tool": "jugcraft:caffeine_formula_plate",
+  "energy_per_tick": 64,
+  "time": 160
+}

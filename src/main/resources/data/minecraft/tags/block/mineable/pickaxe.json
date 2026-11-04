@@ -1416,6 +1416,14 @@
     "jugcraft:water_wheel",
     "jugcraft:wax_melting_pot",
     "jugcraft:wet_processing_bench",
+    "jugcraft:laboratory_analyzer",
+    "jugcraft:pharmaceutical_separator",
+    "jugcraft:formulation_press",
+    "jugcraft:autoclave",
+    "jugcraft:sterile_filler",
+    "jugcraft:mash_conditioning_barrel",
+    "jugcraft:moonshine_still",
+    "jugcraft:release_coater",
     "jugcraft:white_plastic",
     "jugcraft:whiteboard",
     "jugcraft:willow_urn_headstone",
@@ -4168,6 +4176,7 @@
     "jugcraft:homeworks_quartz_desk",
     "jugcraft:homeworks_quartz_drawer",
     "jugcraft:homeworks_quartz_wall_mirror",
-    "jugcraft:homeworks_quartz_mirror_stand"
+    "jugcraft:homeworks_quartz_mirror_stand",
+    "jugcraft:dream_study_plinth"
   ]
 }

@@ -2802,6 +2802,11 @@ def write_all(write, assets, data, lang, condition, self_drop):
     phosphate_processing.write_extras(write, assets, data, lang, condition)
     synthetic_fuels.write_extras(write, assets, data, lang, condition)
     cryogenic_fuels.write_extras(write, assets, data, lang, condition)
+    pharmacy_factory.write_extras(write, assets, data, lang, condition)
+    precision_pharmacy.write_extras(write, assets, data, lang, condition)
+    alcohol_pharmacy.write_extras(write, assets, data, lang, condition)
+    controlled_release.write_extras(write, assets, data, lang, condition)
+    psychedelic_pharmacy.write_extras(write, assets, data, lang, condition)
     for kind, name, recipe in form_recipe_files(condition):
         write(data / "recipe" / kind / f"{name}.json", recipe)
 
@@ -2841,6 +2846,7 @@ def recipes_for_form(form):
 
 def form_energy(form, power):
     import machines
+    if FORMS[form].get('ambient') or FORMS[form].get('fuelled'): return 0
     power = power or machines.STATS[FORMS[form]['family']]['use_per_tick']
     percent={'ENTRY':100,'EXPANDED':90,'BULK':80}[FORMS[form]['profile']]
     return max(1,(power*percent+99)//100) if power else 0
@@ -3036,3 +3042,55 @@ for bulk, small in BULK_VARIANTS.items():
                          '. Use the recipe picker and lock to switch jobs; empty incompatible stored fluids first.')
 
 HANDBOOK['large_bio_generator'].append('Also accepts Clean Biogas from the Biogas Cleaner at 335 JE/mB and 256 JE/t, keeping the smaller generator compatible.')
+
+# Pharmacy batch 2 uses the existing shared controller, menus, ports and fixed recipe/tool semantics.
+import pharmacy_factory
+import pharmacy_factory_models
+FORMS.update(pharmacy_factory.FORMS)
+FORM_RECIPES.update(pharmacy_factory.RECIPES)
+HANDBOOK.update(pharmacy_factory.HANDBOOK)
+TANK_NAMES.update(pharmacy_factory.TANK_NAMES)
+MODELS.update(pharmacy_factory_models.MODELS)
+
+import sterile_pharmacy
+import sterile_pharmacy_models
+FORMS.update(sterile_pharmacy.FORMS)
+for machine, recipes in sterile_pharmacy.RECIPES.items():
+    FORM_RECIPES.setdefault(machine, []).extend(recipes)
+FORMS['industrial_fermenter']['capabilities'].append('jugcraft:sterile_culture')
+FORMS['bulk_fermenter']['capabilities'] = list(FORMS['industrial_fermenter']['capabilities'])
+HANDBOOK.update(sterile_pharmacy.HANDBOOK)
+HANDBOOK['industrial_fermenter'].append('Also cultures Prepared Culture Feed with water into Azure Antibiotic Broth at the product outlet. No exhaust is produced by this recipe.')
+HANDBOOK['bulk_fermenter'].append('Also supports the same Azure Antibiotic Broth culture recipe as the Industrial Fermenter.')
+HANDBOOK['laboratory_analyzer'].append('Sterile medicine formulas instead analyze the prepared stock, allowing a first batch without an existing medicine sample.')
+HANDBOOK['pharmaceutical_separator'].append('Also separates 500 mB Azure Antibiotic Broth into four Antibiotic Extract at 48 JE/t for 200 ticks. Use the same rear fluid inlet, leaving the solid feed empty.')
+TANK_NAMES.update(sterile_pharmacy.TANK_NAMES)
+MODELS.update(sterile_pharmacy_models.MODELS)
+
+import precision_pharmacy
+import alcohol_pharmacy
+import precision_pharmacy_models
+FORMS.update(alcohol_pharmacy.FORMS)
+FORMS['bulk_chemical_reactor']['capabilities'].append('jugcraft:precision_preparation')
+FORMS['industrial_fermenter']['capabilities'].append('jugcraft:beverage_culture')
+FORMS['bulk_fermenter']['capabilities'] = list(FORMS['industrial_fermenter']['capabilities'])
+for module in (precision_pharmacy, alcohol_pharmacy):
+    for machine, recipes in module.RECIPES.items():
+        FORM_RECIPES.setdefault(machine, []).extend(recipes)
+HANDBOOK.update(alcohol_pharmacy.HANDBOOK)
+HANDBOOK['bulk_chemical_reactor'].append('Also processes fictional precision reagent blends with Organic Process Stock. Install a reusable Precision Process Module in an existing upgrade slot; no input/tank layout change.')
+MODELS.update(precision_pharmacy_models.MODELS)
+
+import controlled_release
+import controlled_release_models
+FORMS.update(controlled_release.FORMS)
+for machine, recipes in controlled_release.RECIPES.items():
+    FORM_RECIPES.setdefault(machine, []).extend(recipes)
+HANDBOOK.update(controlled_release.HANDBOOK)
+TANK_NAMES.update(controlled_release.TANK_NAMES)
+MODELS.update(controlled_release_models.MODELS)
+
+# Batch 6 adds jobs to existing processors; saved slot and port layouts do not change.
+import psychedelic_pharmacy
+for machine, recipes in psychedelic_pharmacy.RECIPES.items():
+    FORM_RECIPES.setdefault(machine, []).extend(recipes)

@@ -196,6 +196,8 @@ public final class IndustrialForms {
 			.vent("co2")
 			.items(1, 0)
 			.capability("jugcraft:controlled_fermentation")
+			.capability("jugcraft:sterile_culture")
+			.capability("jugcraft:beverage_culture")
 			.alias("crop_mash", "water")
 			.alias("ethanol_broth", "product")
 			.alias("fermentation_exhaust", "co2")
@@ -228,6 +230,8 @@ public final class IndustrialForms {
 			.vent("co2")
 			.items(1, 0)
 			.capability(CONTROLLED_FERMENTATION)
+			.capability("jugcraft:sterile_culture")
+			.capability("jugcraft:beverage_culture")
 			.upgrades()
 			.warmup(40)
 			.port("feed_in", FormPort.Kind.ITEM_IN, 0, 0, 2, 5, FormSide.TOP)
@@ -275,6 +279,7 @@ public final class IndustrialForms {
             .capability("jugcraft:electronics_reagents")
 			.capability("jugcraft:phosphate_formulation")
 			.capability("jugcraft:storable_propellants")
+			.capability("jugcraft:precision_preparation")
 			.companionAssistance()
 			.build();
 
@@ -1167,6 +1172,135 @@ public final class IndustrialForms {
 			.build();
 	public static FormMachineBlock WET_PROCESSING_BENCH;
 
+	/** Pharmacy stations share the established reactor recipe family, ports, persistence and tool locks. */
+	public static final MachineForm LABORATORY_ANALYZER_FORM = MachineForm.builder(Jugcraft.id("laboratory_analyzer"), MachineKind.CHEMICAL_REACTOR)
+			.layer("C#", "##")
+			.layer("##", "##")
+			.profile(OperatingProfile.ENTRY)
+			.inputTank("analysis_water")
+			.items(2, 1)
+			.capability("jugcraft:pharmacy_analysis")
+			.upgrades()
+			.warmup(20)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 0, 0, 0, FormSide.FRONT)
+			.port("sample_in", FormPort.Kind.ITEM_IN, 0, 0, 0, 1, FormSide.FRONT)
+			.port("plate_in", FormPort.Kind.ITEM_IN, 1, 1, 0, 1, FormSide.FRONT)
+			.port("formula_out", FormPort.Kind.ITEM_OUT, 0, 1, 0, 0, FormSide.FRONT)
+			.port("water_in", FormPort.Kind.FLUID_IN, 0, 0, 1, 0, FormSide.BACK)
+			.build();
+	public static FormMachineBlock LABORATORY_ANALYZER;
+
+	public static final MachineForm PHARMACEUTICAL_SEPARATOR_FORM = MachineForm.builder(Jugcraft.id("pharmaceutical_separator"), MachineKind.CHEMICAL_REACTOR)
+			.layer("C#", "##")
+			.layer("##", "##")
+			.layer("##", "##")
+			.profile(OperatingProfile.ENTRY)
+			.inputTank("extraction_water")
+			.items(1, 1)
+			.capability("jugcraft:botanical_separation")
+			.upgrades()
+			.warmup(40)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 0, 0, 0, FormSide.FRONT)
+			.port("feed_in", FormPort.Kind.ITEM_IN, 0, 0, 0, 2, FormSide.TOP)
+			.port("extract_out", FormPort.Kind.ITEM_OUT, 0, 1, 0, 0, FormSide.FRONT)
+			.port("water_in", FormPort.Kind.FLUID_IN, 0, 0, 1, 0, FormSide.BACK)
+			.build();
+	public static FormMachineBlock PHARMACEUTICAL_SEPARATOR;
+
+	public static final MachineForm FORMULATION_PRESS_FORM = MachineForm.builder(Jugcraft.id("formulation_press"), MachineKind.CHEMICAL_REACTOR)
+			.layer("C#", "##", "##")
+			.layer("##", "##", "##")
+			.profile(OperatingProfile.ENTRY)
+			.inputTank("formulation_water")
+			.inputTank("formulation_reagent")
+			.items(3, 1)
+			.socket("formula", TagKey.create(Registries.ITEM, Jugcraft.id("pharmacy_formulas")))
+			.capability("jugcraft:drug_formulation")
+			.upgrades()
+			.warmup(20)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 0, 0, 0, FormSide.FRONT)
+			.port("active_in", FormPort.Kind.ITEM_IN, 0, 0, 0, 1, FormSide.FRONT)
+			.port("binder_in", FormPort.Kind.ITEM_IN, 1, 1, 0, 1, FormSide.FRONT)
+			.port("packaging_in", FormPort.Kind.ITEM_IN, 2, 1, 1, 1, FormSide.RIGHT)
+			.port("medicine_out", FormPort.Kind.ITEM_OUT, 0, 1, 0, 0, FormSide.FRONT)
+			.port("water_in", FormPort.Kind.FLUID_IN, 0, 0, 2, 0, FormSide.BACK)
+			.port("reagent_in", FormPort.Kind.FLUID_IN, 1, 1, 2, 0, FormSide.BACK)
+			.build();
+	public static FormMachineBlock FORMULATION_PRESS;
+
+	public static final MachineForm AUTOCLAVE_FORM = MachineForm.builder(Jugcraft.id("autoclave"), MachineKind.CHEMICAL_REACTOR)
+			.layer("C#", "##", "##")
+			.layer("##", "##", "##")
+			.profile(OperatingProfile.ENTRY)
+			.inputTank("sterilizing_water")
+			.items(1, 1)
+			.capability("jugcraft:sterile_preparation")
+			.upgrades()
+			.warmup(40)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 0, 0, 0, FormSide.FRONT)
+			.port("load_in", FormPort.Kind.ITEM_IN, 0, 0, 0, 1, FormSide.FRONT)
+			.port("sterile_out", FormPort.Kind.ITEM_OUT, 0, 1, 0, 0, FormSide.FRONT)
+			.port("water_in", FormPort.Kind.FLUID_IN, 0, 0, 2, 0, FormSide.BACK)
+			.build();
+	public static FormMachineBlock AUTOCLAVE;
+
+	public static final MachineForm STERILE_FILLER_FORM = MachineForm.builder(Jugcraft.id("sterile_filler"), MachineKind.CHEMICAL_REACTOR)
+			.layer("C#", "##")
+			.layer("##", "##")
+			.layer("##", "##")
+			.profile(OperatingProfile.ENTRY)
+			.inputTank("filling_water")
+			.items(3, 1)
+			.socket("formula", TagKey.create(Registries.ITEM, Jugcraft.id("sterile_pharmacy_formulas")))
+			.capability("jugcraft:sterile_filling")
+			.upgrades()
+			.warmup(40)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 0, 0, 0, FormSide.FRONT)
+			.port("stock_in", FormPort.Kind.ITEM_IN, 0, 0, 0, 2, FormSide.FRONT)
+			.port("carrier_in", FormPort.Kind.ITEM_IN, 1, 1, 0, 2, FormSide.FRONT)
+			.port("vial_in", FormPort.Kind.ITEM_IN, 2, 1, 1, 1, FormSide.RIGHT)
+			.port("medicine_out", FormPort.Kind.ITEM_OUT, 0, 1, 0, 0, FormSide.FRONT)
+			.port("water_in", FormPort.Kind.FLUID_IN, 0, 0, 1, 0, FormSide.BACK)
+			.build();
+	public static FormMachineBlock STERILE_FILLER;
+
+	public static final MachineForm MASH_CONDITIONING_BARREL_FORM = MachineForm.builder(Jugcraft.id("mash_conditioning_barrel"), MachineKind.CHEMICAL_REACTOR)
+			.layer("C#", "##").layer("##", "##")
+			.profile(OperatingProfile.ENTRY).ambient().items(2, 1)
+			.socket("conditioning", TagKey.create(Registries.ITEM, Jugcraft.id("conditioning_tools")))
+			.capability("jugcraft:beverage_barrel")
+			.port("mash_in", FormPort.Kind.ITEM_IN, 0, 0, 0, 1, FormSide.FRONT)
+			.port("flavor_in", FormPort.Kind.ITEM_IN, 1, 1, 1, 1, FormSide.BACK)
+			.port("batch_out", FormPort.Kind.ITEM_OUT, 0, 1, 0, 0, FormSide.FRONT)
+			.build();
+	public static FormMachineBlock MASH_CONDITIONING_BARREL;
+
+	public static final MachineForm MOONSHINE_STILL_FORM = MachineForm.builder(Jugcraft.id("moonshine_still"), MachineKind.CHEMICAL_REACTOR)
+			.layer("C#", "##").layer("##", "##")
+			.profile(OperatingProfile.ENTRY).fuelled().items(3, 2)
+			.capability("jugcraft:moonshine_distillation")
+			.port("mash_in", FormPort.Kind.ITEM_IN, 0, 0, 0, 1, FormSide.FRONT)
+			.port("bottles_in", FormPort.Kind.ITEM_IN, 1, 1, 1, 1, FormSide.BACK)
+			.port("fuel_in", FormPort.Kind.ITEM_IN, 2, 1, 0, 0, FormSide.RIGHT)
+			.port("drinks_out", FormPort.Kind.ITEM_OUT, 0, 1, 0, 0, FormSide.FRONT)
+			.port("jug_out", FormPort.Kind.ITEM_OUT, 1, 0, 1, 0, FormSide.BACK)
+			.build();
+	public static FormMachineBlock MOONSHINE_STILL;
+
+	public static final MachineForm RELEASE_COATER_FORM = MachineForm.builder(Jugcraft.id("release_coater"), MachineKind.CHEMICAL_REACTOR)
+			.layer("C##", "###", "###").layer("###", "###", "###").layer("###", "###", "###")
+			.profile(OperatingProfile.ENTRY).inputTank("release_water").items(3, 1)
+			.socket("release", TagKey.create(Registries.ITEM, Jugcraft.id("release_coater_tools")))
+			.capability("jugcraft:controlled_release").upgrades().warmup(40)
+			.port("power", FormPort.Kind.ENERGY_IN, 0, 0, 0, 0, FormSide.FRONT)
+			.port("active_in", FormPort.Kind.ITEM_IN, 0, 0, 0, 2, FormSide.FRONT)
+			.port("matrix_in", FormPort.Kind.ITEM_IN, 1, 1, 0, 2, FormSide.FRONT)
+			.port("backing_in", FormPort.Kind.ITEM_IN, 2, 2, 0, 2, FormSide.FRONT)
+			.port("cores_out", FormPort.Kind.ITEM_OUT, 0, 2, 0, 0, FormSide.FRONT)
+			.port("water_in", FormPort.Kind.FLUID_IN, 0, 0, 2, 0, FormSide.BACK)
+			.build();
+	public static FormMachineBlock RELEASE_COATER;
+
 	private IndustrialForms() {
 	}
 
@@ -1217,7 +1351,15 @@ public final class IndustrialForms {
 		COMBINED_CYCLE_PLANT = block("combined_cycle_power_plant", COMBINED_CYCLE_PLANT_FORM);
 		PRECISION_FINISHER = block("precision_finisher", PRECISION_FINISHER_FORM);
 		WET_PROCESSING_BENCH = block("wet_processing_bench", WET_PROCESSING_BENCH_FORM);
-		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR, CHEMICAL_INFUSER, CHEMICAL_OXIDIZER, INDUSTRIAL_FERMENTER, BULK_CHEMICAL_REACTOR, ANAEROBIC_DIGESTER, COAL_GASIFIER, GAS_CLEANUP_RACK, BIO_GENERATOR, GAS_CLEANING_RACK, BIOGAS_CLEANER, DIGESTATE_SEPARATOR, MASHING_STATION, CHEMICAL_DISTILLATION_STATION, BAUXITE_DIGESTER, ALUMINATE_FILTER_PRESS, ALUMINA_CALCINER, ALUMINUM_REDUCTION_CELL, COASTAL_SEAWATER_INTAKE, BRINE_CONCENTRATOR, MINERAL_CONDITIONER, CHLORIDE_DRYER, MAGNESIUM_ELECTROLYSIS_CELL, TITANIUM_CHLORINATOR, TITANIUM_REDUCTION_RETORT, POLYMER_MOLDING_PRESS, MONOMER_PREPARATION_UNIT, POLYMERIZATION_KETTLE, POLYMER_EXTRUDER, POLYMER_RECLAIMER, ACID_CONCENTRATOR, CHEMICAL_DISSOLUTION_CHAMBER, FLUOROCARBON_REACTOR, FLUOROMONOMER_CRACKER, PTFE_SINTERING_OVEN, LINED_FLUOROCHEMICAL_REACTOR, PRECISION_FINISHER, WET_PROCESSING_BENCH, COMBINED_CYCLE_PLANT, BULK_FERMENTER, LARGE_BIO_GENERATOR, LARGE_GAS_BURNING_GENERATOR, BULK_CHEMICAL_INFUSER, BULK_CHEMICAL_OXIDIZER, BULK_ELECTROLYTIC_SEPARATOR);
+		LABORATORY_ANALYZER = block("laboratory_analyzer", LABORATORY_ANALYZER_FORM);
+		PHARMACEUTICAL_SEPARATOR = block("pharmaceutical_separator", PHARMACEUTICAL_SEPARATOR_FORM);
+		FORMULATION_PRESS = block("formulation_press", FORMULATION_PRESS_FORM);
+		AUTOCLAVE = block("autoclave", AUTOCLAVE_FORM);
+		STERILE_FILLER = block("sterile_filler", STERILE_FILLER_FORM);
+		MASH_CONDITIONING_BARREL = block("mash_conditioning_barrel", MASH_CONDITIONING_BARREL_FORM);
+		MOONSHINE_STILL = block("moonshine_still", MOONSHINE_STILL_FORM);
+		RELEASE_COATER = block("release_coater", RELEASE_COATER_FORM);
+		List<FormMachineBlock> blocks = List.of(ELECTROLYTIC_SEPARATOR, GAS_BURNING_GENERATOR, CHEMICAL_INFUSER, CHEMICAL_OXIDIZER, INDUSTRIAL_FERMENTER, BULK_CHEMICAL_REACTOR, ANAEROBIC_DIGESTER, COAL_GASIFIER, GAS_CLEANUP_RACK, BIO_GENERATOR, GAS_CLEANING_RACK, BIOGAS_CLEANER, DIGESTATE_SEPARATOR, MASHING_STATION, CHEMICAL_DISTILLATION_STATION, BAUXITE_DIGESTER, ALUMINATE_FILTER_PRESS, ALUMINA_CALCINER, ALUMINUM_REDUCTION_CELL, COASTAL_SEAWATER_INTAKE, BRINE_CONCENTRATOR, MINERAL_CONDITIONER, CHLORIDE_DRYER, MAGNESIUM_ELECTROLYSIS_CELL, TITANIUM_CHLORINATOR, TITANIUM_REDUCTION_RETORT, POLYMER_MOLDING_PRESS, MONOMER_PREPARATION_UNIT, POLYMERIZATION_KETTLE, POLYMER_EXTRUDER, POLYMER_RECLAIMER, ACID_CONCENTRATOR, CHEMICAL_DISSOLUTION_CHAMBER, FLUOROCARBON_REACTOR, FLUOROMONOMER_CRACKER, PTFE_SINTERING_OVEN, LINED_FLUOROCHEMICAL_REACTOR, PRECISION_FINISHER, WET_PROCESSING_BENCH, COMBINED_CYCLE_PLANT, BULK_FERMENTER, LARGE_BIO_GENERATOR, LARGE_GAS_BURNING_GENERATOR, BULK_CHEMICAL_INFUSER, BULK_CHEMICAL_OXIDIZER, BULK_ELECTROLYTIC_SEPARATOR, LABORATORY_ANALYZER, PHARMACEUTICAL_SEPARATOR, FORMULATION_PRESS, AUTOCLAVE, STERILE_FILLER, MASH_CONDITIONING_BARREL, MOONSHINE_STILL, RELEASE_COATER);
 		ENTITY = JugcraftForms.registerBlocks(Jugcraft.id("machine_form"), blocks.toArray(FormMachineBlock[]::new));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> blocks.stream().filter(block -> !isSpecialist(block.form())).forEach(output::accept));
 	}

@@ -460,6 +460,10 @@ FLUID_RECIPES = {
         {"name": "aspirin", "items": [("jugcraft:salicylic_acid", 2), ("jugcraft:cider_vinegar", 1)],
          "fluids": [("jugcraft:sulfuric_acid", 50)], "results": [("jugcraft:aspirin", 4)], "ticks": 120,
          "features": ["agriculture", "sulfur", "machines"]},
+        # Deliberately fictional starch/redstone pharmacy formulation; not a real drug synthesis.
+        {"name": "paracetamol", "items": [("jugcraft:pharmaceutical_starch", 2), ("minecraft:redstone", 1)],
+         "fluids": [("minecraft:water", 250)], "results": [("jugcraft:paracetamol", 4)], "ticks": 160,
+         "features": ["agriculture", "machines"]},
         # Boric acid (docs/features/boric-acid.md): borax freed with sulfuric acid. Quantities for review.
         {"name": "boric_acid", "items": [("jugcraft:borax", 1)], "fluids": [("jugcraft:sulfuric_acid", 250)],
          "results": [("jugcraft:boric_acid", 2)], "ticks": 100, "features": ["silicon", "sulfur"]},
@@ -527,7 +531,7 @@ FLUID_RECIPES = {
          "fluids": [("jugcraft:lye", 250)], "results": [("jugcraft:antidote", 1)], "ticks": 100,
          "features": ["machines", "salt"]},
         # Stimulant: caffeine extracted from cocoa beans with bioethanol.
-        {"name": "stimulant", "items": [("minecraft:cocoa_beans", 4), ("minecraft:glass_bottle", 1)],
+        {"name": "stimulant", "items": [("minecraft:cocoa_beans", 4), ("jugcraft:pharmaceutical_starch", 1)],
          "fluids": [("jugcraft:bioethanol", 250)], "results": [("jugcraft:stimulant", 1)], "ticks": 100,
          "features": ["machines"]},
         # Vanadium electrolyte (batch 17): the vanadium in heavy oil residue leached into sulfuric acid, for the flow
@@ -737,6 +741,19 @@ ITEMS.update(cryogenic_fuels.ITEMS)
 FLUIDS.update(cryogenic_fuels.FLUIDS)
 FLUID_RECIPES["cryogenic_liquefier"].extend(cryogenic_fuels.LIQUEFIER_RECIPES)
 FLUID_RECIPES["chemical_reactor"].extend(cryogenic_fuels.TANK_RECIPES)
+
+import pharmacy_factory
+FLUID_RECIPES['chemical_reactor'].extend(pharmacy_factory.REACTOR_RECIPES)
+import sterile_pharmacy
+FLUIDS.update(sterile_pharmacy.FLUIDS)
+FLUID_RECIPES['chemical_reactor'].extend(sterile_pharmacy.REACTOR_RECIPES)
+import precision_pharmacy
+import alcohol_pharmacy
+FLUIDS.update(precision_pharmacy.FLUIDS)
+FLUIDS.update(alcohol_pharmacy.FLUIDS)
+FLUID_RECIPES['chemical_reactor'].extend(precision_pharmacy.REACTOR_RECIPES)
+import psychedelic_pharmacy
+FLUID_RECIPES['chemical_reactor'].extend(psychedelic_pharmacy.REACTOR_RECIPES)
 # Methyl chloride (docs/features/silicone.md): methane and chlorine in the Chemical Reactor, made into silicone rubber.
 # Last, so the swirls drawn by index for the gases before it keep their seeds.
 GASES["methyl_chloride"] = {"display": "Methyl Chloride", "feature": "machines",

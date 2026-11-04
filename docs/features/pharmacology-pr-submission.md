@@ -1,0 +1,25 @@
+# Pharmacy PR preparation — November 4, 2026
+
+Prepared and verified with **OpenAI Codex (GPT-6 family)** under the owner's direct continuation and commit/push/new-PR request. The owner accepted the current visuals/HUD as a baseline; future texture/effect review, the actual Clockwork Elf realm, safe return travel, trading/endgame progression, balance and validation gaps remain open in [TODO](../TODO.md#pharmacy-follow-up--november-4).
+
+## Submitted scope and upstream reconciliation
+
+The pharmacy work is one feature commit on upstream main `8075c6d58b`. The six older component-yield branch commits were excluded. Shared TODO entries, current-main game-test registrations, language keys, imported mining tags and the latest generator reconciliation are retained. Pharmacy's final item-art hook remains after the shared model/atlas passes; the obsolete final owner-resource-patch phase from the older base is not reinstated.
+
+The review found that the prepared pickaxe tag omitted the eight new furnace-derived pharmacy forms, although the canonical tag builder already enumerated them. Their eight entries are now present, with existing tag values/order preserved. A new native regression verifies that an ordinary iron pickaxe qualifies for every pharmacy machine while empty hands do not. Existing machine break/conservation tests remain in the pharmacy suite.
+
+The accepted 32 formulations, manufacturing chains, current decaying-strain rules, 146 item sprites, 39 effect icons and ten-pill row above hunger remain the scope. Zero strain shows empty pills for three seconds, then hides even while benefits or a held drug remain. No actual Clockwork dimension/trading or release/deployment is claimed. See the [remaining-batches record](pharmacology-remaining-batches.md), [current strain rules](pharmacology-strain.md) and [art/HUD delivery](pharmacology-item-art-6.md).
+
+## Verification after replay
+
+- Common, client and game-test Java compile with the existing pinned Minecraft 26.3 / Loader 0.19.5 / Fabric API 0.161.0+26.3 / Loom 1.17.21 / Java 25 toolchain.
+- **All 95 required pharmacy server tests pass**, including the new native pickaxe qualification regression.
+- **`PharmacologyHudArtClientGameTests` and `PharmacologyHudZeroClientGameTests` pass**, including native hunger-anchor pixels, unchanged vanilla HUD regions, underwater air clearance, armor/extra hearts, GUI scales, forecasts, resource reload, all 39 native effect symbols, all nine complete models, all 146 flat items and the three-second zero grace. The combined server/client run finishes `BUILD SUCCESSFUL in 8m47s`.
+- `python scripts/check_repository.py` passes repository structure and documentation links. All submitted JSON parses, all 28 pharmacy Python generators pass syntax checks, and the 185 pharmacy maps report zero errors with 18 advisory warnings. These are not a full material/economy audit.
+- The replay's 1,821 changed source/runtime resources are byte-verified. Eighty-eight explicitly obsolete runtime files were removed only from the generated build-resource cache. Pickaxe tag ordering was then minimized without changing the tested tag membership, and the exact source/runtime copy was reverified.
+
+The existing local runner used `runGameTest runClientGameTest`, the `jugcraft-test:pharmacology*` server filter and the two selected client classes, with the documented focused initializer, `-x processResources`, `-x compileClientKotlin`, offline resolution and two workers. The skipped resource task was supplied by the byte-verified current-main overlay, not stale pre-replay files. Production Java compilation ran; unchanged Kotlin was not recompiled.
+
+Logs, resource/source hashes and 57 new native captures are outside Git at `../pharmacy-pr-2026-11-04/`. Earlier feature records retain their own implementation-stage evidence. Full unrelated gameplay/data/economy checks, production-load measurement, optional integrations absent, external shader packs and a human two-client dedicated-server session remain explicitly unperformed or deferred. The targeted results are not substitutes for those checks or for CI.
+
+No generated build, world save, credential, local log or screenshot is included in the source commit. No live server, existing Pharmacy Flat Test world or owner client was stopped, replaced or restarted. This checkpoint prepares source publication only.

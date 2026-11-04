@@ -1,0 +1,29 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jugcraft:pharmaceutical_starch",
+    "jugcraft:pharmaceutical_starch",
+    "jugcraft:pharmaceutical_starch",
+    "jugcraft:pharmaceutical_starch",
+    "minecraft:paper",
+    "minecraft:paper",
+    "minecraft:paper",
+    "minecraft:paper",
+    "jugcraft:plastic_pellets"
+  ],
+  "result": {
+    "id": "jugcraft:release_matrix_blend",
+    "count": 4
+  }
+}

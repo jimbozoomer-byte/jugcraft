@@ -180,6 +180,7 @@ public final class GunShots {
 	 * one-handed gun in each hand (slice 10G, {@link GunItem#dual}).
 	 */
 	public static boolean fire(ServerPlayer player, InteractionHand hand) {
+		if (io.github.jimbozoomer.jugcraft.nouveau.NouveauScrying.active(player)) return false;
 		ItemStack stack = player.getItemInHand(hand);
 		if (!(stack.getItem() instanceof GunItem gun) || !player.isAlive() || player.isSpectator()
 				|| hand == InteractionHand.OFF_HAND && !GunItem.dual(player)) {
@@ -210,6 +211,9 @@ public final class GunShots {
 		boolean aiming = GunItem.aiming(player, stack);
 		// Slice 10G: two guns at once are fired from the hip, each straying further than one gun alone.
 		float spread = aiming ? spec.aimSpread() : spec.hipSpread() * (GunItem.dual(player) ? JugcraftGuns.DUAL_SPREAD : 1.0F);
+		// Arc acquisition and flame coverage are useful cones, not an accuracy error to tighten.
+		boolean precision = aiming && !JugcraftGuns.ARC.equals(JugcraftGuns.shot(gun)) && !JugcraftGuns.FLAME.equals(JugcraftGuns.shot(gun));
+		spread *= io.github.jimbozoomer.jugcraft.pharmacology.Pharmacology.aimSpreadMultiplier(player, precision);
 		switch (JugcraftGuns.shot(gun)) {
 			case JugcraftGuns.GRENADE -> lob(level, player, stack, spec, spread);
 			case JugcraftGuns.FLAME -> burn(level, player, spec, spread);
@@ -242,6 +246,7 @@ public final class GunShots {
 	 * damage as a melee blow, with a sword's push.
 	 */
 	public static boolean stab(ServerPlayer player) {
+		if (io.github.jimbozoomer.jugcraft.nouveau.NouveauScrying.active(player)) return false;
 		ItemStack stack = player.getMainHandItem();
 		GunAttachment bayonet = GunItem.bayonet(stack);
 		if (bayonet == null || !player.isAlive() || player.isSpectator() || RELOADS.containsKey(player.getUUID())) {
@@ -290,6 +295,7 @@ public final class GunShots {
 	 * shown to the players who see this one.
 	 */
 	public static void spin(ServerPlayer player) {
+		if (io.github.jimbozoomer.jugcraft.nouveau.NouveauScrying.active(player)) return;
 		ItemStack stack = player.getMainHandItem();
 		if (!(stack.getItem() instanceof GunItem gun) || JugcraftGuns.spinUp(gun) <= 0 || !player.isAlive() || player.isSpectator()) {
 			return;
@@ -320,6 +326,7 @@ public final class GunShots {
 	 * the player holds a one-handed gun in each hand (slice 10G, {@link GunItem#dual}).
 	 */
 	public static boolean reload(ServerPlayer player, InteractionHand hand) {
+		if (io.github.jimbozoomer.jugcraft.nouveau.NouveauScrying.active(player)) return false;
 		ItemStack stack = player.getItemInHand(hand);
 		if (!(stack.getItem() instanceof GunItem gun) || !player.isAlive() || player.isSpectator()
 				|| RELOADS.containsKey(player.getUUID()) || hand == InteractionHand.OFF_HAND && !GunItem.dual(player)) {

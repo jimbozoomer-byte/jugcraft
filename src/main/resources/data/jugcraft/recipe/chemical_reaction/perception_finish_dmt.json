@@ -1,0 +1,39 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "jugcraft:chemical_reaction",
+  "capability": "jugcraft:drug_formulation",
+  "items": [
+    {
+      "ingredient": "jugcraft:dmt_active",
+      "count": 4
+    },
+    {
+      "ingredient": "jugcraft:empty_pharmacy_capsule",
+      "count": 4
+    }
+  ],
+  "fluids": [
+    {
+      "fluid": "minecraft:water",
+      "amount": 250
+    }
+  ],
+  "results": [
+    {
+      "id": "jugcraft:dmt",
+      "count": 4
+    }
+  ],
+  "tool": "jugcraft:dmt_formula_plate",
+  "energy_per_tick": 96,
+  "time": 180
+}

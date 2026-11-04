@@ -1,0 +1,47 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "salt"
+    }
+  ],
+  "type": "jugcraft:chemical_reaction",
+  "capability": "jugcraft:drug_formulation",
+  "items": [
+    {
+      "ingredient": "jugcraft:salt",
+      "count": 4
+    },
+    {
+      "ingredient": "minecraft:sugar",
+      "count": 2
+    },
+    {
+      "ingredient": "minecraft:paper",
+      "count": 8
+    }
+  ],
+  "fluids": [
+    {
+      "fluid": "minecraft:water",
+      "amount": 2000
+    }
+  ],
+  "results": [
+    {
+      "id": "jugcraft:rehydration_salts",
+      "count": 8
+    }
+  ],
+  "tool": "jugcraft:rehydration_salts_formula_plate",
+  "energy_per_tick": 64,
+  "time": 160
+}

@@ -204,6 +204,8 @@ def assets():
     grapple.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import field_chemistry
     field_chemistry.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import pharmacology
+    pharmacology.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import construction
     construction.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import electroplating
@@ -1675,6 +1677,12 @@ def tags():
     for crop in tags.entries[("item", f"{MOD}:fermentable")]:
         if crop not in {rid("lemon"), rid("orange")}:
             tags.add("item", f"{MOD}:compact_fermentable", crop)
+    import pharmacology
+    tags.add("block", "minecraft:mineable/pickaxe", rid("dream_study_plinth"))
+    for crop in pharmacology.blocks():
+        if crop.endswith('_crop'):
+            tags.add("block", "minecraft:crops", rid(crop))
+            tags.add("block", "minecraft:maintains_farmland", rid(crop))
     tags.write()
 
 
@@ -1954,6 +1962,9 @@ def main():
     newest_model_finishing.generate(write)
     import model_atlas
     model_atlas.generate(write)
+    # Finished pharmacy maps own only their named items after the final shared model passes.
+    import pharmacy_item_art
+    pharmacy_item_art.write_all(write, ASSETS)
     from generated_resource_cleanup import prune
     prune(RES, previous, WRITTEN_RESOURCES)
     # Include finished server recipes after removing obsolete generated recipes.

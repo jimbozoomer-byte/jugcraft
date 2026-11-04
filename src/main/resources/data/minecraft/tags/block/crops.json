@@ -40,6 +40,9 @@
     "jugcraft:gloamcap_crop",
     "jugcraft:mendvetch_crop",
     "jugcraft:nouveau_magebloom_crop",
-    "#jugcraft:jimtafacts_crops"
+    "#jugcraft:jimtafacts_crops",
+    "jugcraft:hemp_crop",
+    "jugcraft:dreamcap_crop",
+    "jugcraft:prism_cactus_crop"
   ]
 }

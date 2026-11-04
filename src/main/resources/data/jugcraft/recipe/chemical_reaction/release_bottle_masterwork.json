@@ -1,0 +1,37 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "jugcraft:chemical_reaction",
+  "capability": "jugcraft:drug_formulation",
+  "items": [
+    {
+      "ingredient": "jugcraft:masterwork_reserve_concentrate",
+      "count": 4
+    },
+    {
+      "ingredient": "minecraft:sugar",
+      "count": 1
+    },
+    {
+      "ingredient": "minecraft:glass_bottle",
+      "count": 4
+    }
+  ],
+  "results": [
+    {
+      "id": "jugcraft:masterwork_reserve",
+      "count": 4
+    }
+  ],
+  "tool": "jugcraft:masterwork_reserve_formula_plate",
+  "energy_per_tick": 128,
+  "time": 160
+}

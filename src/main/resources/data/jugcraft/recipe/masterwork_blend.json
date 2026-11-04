@@ -1,0 +1,28 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jugcraft:high_proof_spirits_concentrate",
+    "jugcraft:high_proof_spirits_concentrate",
+    "jugcraft:high_proof_spirits_concentrate",
+    "jugcraft:high_proof_spirits_concentrate",
+    "minecraft:honeycomb",
+    "minecraft:honeycomb",
+    "minecraft:gold_nugget",
+    "minecraft:sugar"
+  ],
+  "result": {
+    "id": "jugcraft:masterwork_blend",
+    "count": 4
+  }
+}

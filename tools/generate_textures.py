@@ -1605,6 +1605,8 @@ def main():
     cursed_mirror.draw_all(save)
     import walnut_furniture
     walnut_furniture.write_all()
+    import pharmacy_item_art
+    pharmacy_item_art.generate_textures()
 
 
 def fluorite_assets(assets):
