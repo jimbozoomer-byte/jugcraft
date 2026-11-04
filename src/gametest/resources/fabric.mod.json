@@ -747,7 +747,8 @@
       "io.github.jimbozoomer.jugcraft.test.BoardGameClientTests",
       "io.github.jimbozoomer.jugcraft.test.HolidayPolishClientTests",
       "io.github.jimbozoomer.jugcraft.test.PetInventoryClientTests",
-      "io.github.jimbozoomer.jugcraft.test.ServerUtilitiesClientTests"
+      "io.github.jimbozoomer.jugcraft.test.ServerUtilitiesClientTests",
+      "local.peepo.PeepoSeasonalCostumeClientTests"
     ]
   },
   "depends": {

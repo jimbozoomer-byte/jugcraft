@@ -1,0 +1,24 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "peepo_companion:item/pilgrim_costume",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 2697517
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 16051676
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 14199888
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 5059365
+      }
+    ]
+  }
+}

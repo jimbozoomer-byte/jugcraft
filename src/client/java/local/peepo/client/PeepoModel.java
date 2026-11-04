@@ -47,7 +47,8 @@ public final class PeepoModel extends EntityModel<PeepoState> {
                 head.getChild(side+"_"+part).visible=!closedEyes;
         }
         boolean jugheadClothes=s.jughead && !s.pumpkin;
-        shorts.visible=jugheadClothes;jug.visible=jugheadClothes;
+        boolean fullCostume=local.peepo.CompanionUniforms.hidesJug(s.uniform);
+        shorts.visible=jugheadClothes && !fullCostume;jug.visible=jugheadClothes && !fullCostume;
         boolean uniformCuffs=local.peepo.CompanionUniforms.coversCuffs(s.uniform);
         leftLeg.getChild("left_shorts_cuff").visible=jugheadClothes && !uniformCuffs;
         rightLeg.getChild("right_shorts_cuff").visible=jugheadClothes && !uniformCuffs;

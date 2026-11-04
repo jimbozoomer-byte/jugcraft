@@ -544,3 +544,14 @@ Assign a Beehive or Bee Nest with the Planner, link Supply and Output, then use 
 - Harvesting takes three seconds at **4 JE/tick (240 JE per completed harvest)**, plus normal delivery effort. He uses the existing two-handed reaching/snipping motion with a bottle or real shears and vanilla sounds.
 - No smoke, missing bottles/shears, full collection storage, blocked access pauses harvesting. Bees are neither released nor angered by the harvesting action.
 - Collected products occupy twelve saved collection slots at the hive until transported. Empty-hand sneak-use retrieves stored products and unused bottles manually; breaking the hive drops them. Filters are station-wide, so companions assigned to the same hive share its selection and only one harvest worker can claim it at a time.
+
+
+## Seasonal cosmetic costumes
+
+**Pilgrim Costume** and **Feathered Regalia** fit Peepo and Jughead through the existing Costume slot. They are cosmetic: no work speed, energy savings, extra yields, or delivery bonuses. They cannot stack with a job uniform or pumpkin costume.
+
+The Pilgrim wears a stepped black buckle hat, charcoal tunic, white collar/cuffs, brown belt, breeches, stockings and shoes. Feathered Regalia uses a compact seven-feather fan, brown patterned band, tan tunic and leggings, short fringe and brown shoes. It is a stylized outfit, not a representation of a particular nation's ceremonial regalia. Both use smooth cloth/leather surfaces, not wool textures.
+
+Jughead's jug **and the pink bump inside it** are hidden while either costume is equipped; both return when removed or swapped for an ordinary work uniform. His face stays pink. Existing expressions and animations remain available.
+
+Craft either with the usual uniform pattern: `SCS / WLW / _W_` (`_` is empty), using two string (S), one leather (L), three wool (W), and the distinguishing ingredient (C). Pilgrim uses black wool and a gold nugget; Feathered Regalia uses brown wool and a feather. Both are also in Creative Tools & Utilities.

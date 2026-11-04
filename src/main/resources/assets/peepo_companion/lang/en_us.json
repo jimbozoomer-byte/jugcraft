@@ -76,5 +76,9 @@
   "item.peepo_companion.orchard_keeper_uniform": "Orchard Keeper's Outfit",
   "item.peepo_companion.orchard_keeper_uniform.bonus": "20% faster fruit/tap collection and loaded orchard/tap/cider deliveries; 15% less matching work/delivery energy. No extra yields.",
   "item.peepo_companion.groundskeeper_uniform": "Groundskeeper's Raincoat",
-  "item.peepo_companion.groundskeeper_uniform.bonus": "20% faster water filling and loaded water/sprinkler deliveries; 20% less water, sprinkler-delivery, soil-repair and fertilizing energy."
+  "item.peepo_companion.groundskeeper_uniform.bonus": "20% faster water filling and loaded water/sprinkler deliveries; 20% less water, sprinkler-delivery, soil-repair and fertilizing energy.",
+  "item.peepo_companion.pilgrim_costume": "Pilgrim Costume",
+  "item.peepo_companion.pilgrim_costume.bonus": "Cosmetic only â€” no work or energy bonuses.",
+  "item.peepo_companion.feathered_regalia": "Feathered Regalia",
+  "item.peepo_companion.feathered_regalia.bonus": "Cosmetic only — no work or energy bonuses."
 }

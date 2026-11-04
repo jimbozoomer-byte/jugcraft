@@ -1,0 +1,24 @@
+{
+  "model": {
+    "type": "minecraft:model",
+    "model": "peepo_companion:item/feathered_regalia",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": 13015653
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 15720634
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 11095868
+      },
+      {
+        "type": "minecraft:constant",
+        "value": 7753781
+      }
+    ]
+  }
+}

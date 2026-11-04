@@ -21,7 +21,8 @@ public final class CompanionUniforms extends SnapshotParticipant<Long> {
         CHEF("chef_uniform",10), MECHANIC("mechanic_uniform",25), PORTER("porter_uniform",25),
         BAKER("baker_uniform",20), RANCH_HAND("ranch_hand_uniform",15), BEEKEEPER("beekeeper_uniform",20),
         RUNNER("runner_uniform",15), ALCHEMIST("alchemist_uniform",20),
-        ORCHARD_KEEPER("orchard_keeper_uniform",15), GROUNDSKEEPER("groundskeeper_uniform",20);
+        ORCHARD_KEEPER("orchard_keeper_uniform",15), GROUNDSKEEPER("groundskeeper_uniform",20),
+        PILGRIM("pilgrim_costume",0), FEATHERED_REGALIA("feathered_regalia",0);
         public final String path;public final int saving;
         Type(String path,int saving){this.path=path;this.saving=saving;}
         public String key(){return "item.peepo_companion."+path;}
@@ -37,7 +38,7 @@ public final class CompanionUniforms extends SnapshotParticipant<Long> {
     public static Type fromId(int id){return Type.values()[Math.clamp(id,0,Type.values().length-1)];}
     public boolean wearing(Type type){return type!=Type.NONE && npc.uniform()==type;}
     public int saving(Type job){return wearing(job)?job.saving:0;}
-    public int duration(Type job,int ticks){return wearing(job)?Math.max(1,(int)Math.ceil(ticks/(job==Type.FARMER?1.15:1.20))):ticks;}
+    public int duration(Type job,int ticks){return job.saving>0 && wearing(job)?Math.max(1,(int)Math.ceil(ticks/(job==Type.FARMER?1.15:1.20))):ticks;}
     public static boolean kitchen(CompanionAssignments.Target target){
         if(target==null)return false;
         return target.block().getNamespace().equals("jugcraft") && KITCHEN.contains(target.block().getPath());
@@ -58,12 +59,13 @@ public final class CompanionUniforms extends SnapshotParticipant<Long> {
             default -> kitchen(target)?Type.CHEF:Type.NONE;
         };
     }
+    public static boolean hidesJug(Type type){return type==Type.PILGRIM || type==Type.FEATHERED_REGALIA;}
     public static boolean coversCuffs(Type type){
-        return switch(type){case FARMER,MECHANIC,PORTER,RANCH_HAND,BEEKEEPER,RUNNER,GROUNDSKEEPER -> true;default -> false;};
+        return switch(type){case FARMER,MECHANIC,PORTER,RANCH_HAND,BEEKEEPER,RUNNER,GROUNDSKEEPER,PILGRIM,FEATHERED_REGALIA -> true;default -> false;};
     }
     /** Deterministic next roll is saved and advances only with a committed production/delivery transaction. */
     public boolean bonus(Type type,TransactionContext tx){
-        if(!wearing(type))return false;
+        if(type.saving==0 || !wearing(type))return false;
         updateSnapshots(tx);
         long z=++bonusSequence+npc.getUUID().getLeastSignificantBits();
         z=(z^(z>>>30))*0xbf58476d1ce4e5b9L;z=(z^(z>>>27))*0x94d049bb133111ebL;z^=z>>>31;
