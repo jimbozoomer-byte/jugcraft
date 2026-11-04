@@ -1,5 +1,8 @@
 # Powered exosuit (Vanguard and Ronin)
 
+Current November 2 balance and scanner behavior: [powered equipment rebalance](powered-equipment-rebalance.md). The original delivery record below is historical.
+
+
 Status: implemented on `feature/exosuit-28` (batch 28), stacked on `feature/gear-27`, awaiting review. Compiles and tests in CI only; **not yet played**.
 Proposal issue: the owner, 2 October 2026: "let's do the powered exosuit next use this as a reference (image 1) then make an alternate / variant style that looks like image 2". Claude had proposed the exosuit as a next step.
 Owner: jimbozoomer-byte

@@ -168,9 +168,9 @@ public final class CivilWorkshops {
                 branchRoot=0;setChanged();return false;
             }
             if(deployedPipes.isEmpty())return false;var head=deployedPipes.getLast();if(head.getY()==scannedY)return false;
-            var scanner=items.get(13);if(!(scanner.getItem() instanceof IndustrialHandTools.Scanner tool))return false;
+            var scanner=items.get(13);if(!(scanner.getItem() instanceof io.github.jimbozoomer.jugcraft.prospecting.OreScannerItem tool))return false;
             if(!Chargeable.drain(scanner,100)){status=3;return true;}
-            scannedY=head.getY();setChanged();int radius=tool.capacity>=100000?4:2;
+            scannedY=head.getY();setChanged();int radius=tool.advanced?4:2;
             var candidates=new ArrayList<BlockPos>();for(var pos:BlockPos.betweenClosed(head.offset(-radius,0,-radius),head.offset(radius,0,radius)))if(!pos.equals(head))candidates.add(pos.immutable());
             candidates.sort(java.util.Comparator.comparingInt((BlockPos pos)->pos.distManhattan(head)).thenComparingLong(BlockPos::asLong));
             for(var target:candidates){
@@ -224,7 +224,7 @@ public final class CivilWorkshops {
         @Override public BlockPos getScreenOpeningData(ServerPlayer p){return worldPosition;}
         @Override protected AbstractContainerMenu createMenu(int id,Inventory player){return new Menu(id,player,worldPosition,this,data);}
         @Override public boolean stillValid(Player p){return super.stillValid(p)&&(!(level instanceof ServerLevel)||permitted(p));}
-        @Override public boolean canPlaceItem(int slot,ItemStack stack){if(pipeMiner()&&slot==13&&stack.getItem() instanceof IndustrialHandTools.Scanner)return true;if(kind().equals("terraformer"))return slot==0?Terraforming.plan(stack):slot<14&&Terraforming.material(stack);if(kind().equals("advanced_miner"))return slot==0?stack.has(DataComponents.TOOL):slot>0&&slot<14;return slot==0?kind().equals("builder")?stack.getItem() instanceof BlueprintItem:stack.has(DataComponents.TOOL):slot<14&&stack.getItem() instanceof BlockItem;}
+        @Override public boolean canPlaceItem(int slot,ItemStack stack){if(pipeMiner()&&slot==13&&stack.getItem() instanceof io.github.jimbozoomer.jugcraft.prospecting.OreScannerItem)return true;if(kind().equals("terraformer"))return slot==0?Terraforming.plan(stack):slot<14&&Terraforming.material(stack);if(kind().equals("advanced_miner"))return slot==0?stack.has(DataComponents.TOOL):slot>0&&slot<14;return slot==0?kind().equals("builder")?stack.getItem() instanceof BlueprintItem:stack.has(DataComponents.TOOL):slot<14&&stack.getItem() instanceof BlockItem;}
         @Override public int[] getSlotsForFace(Direction side){return java.util.stream.IntStream.range(side==Direction.DOWN?14:0,side==Direction.DOWN?27:14).toArray();}
         @Override public boolean canPlaceItemThroughFace(int slot,ItemStack stack,@Nullable Direction side){return canPlaceItem(slot,stack);}
         @Override public boolean canTakeItemThroughFace(int slot,ItemStack stack,Direction side){return slot>=14;}

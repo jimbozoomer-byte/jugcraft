@@ -65,7 +65,11 @@ public class TreeBatchSixClientGameTests extends TreeBatchTwoClientGameTests {
 			Jugcraft.LOGGER.info("[tree 6 regional sample] {} at {}: {}",biome.identifier(),at,counts);
 			if(hasTarget(biome.identifier().getPath(),counts)) return at;
 		}
-		throw new AssertionError("No natural batch 6 vegetation in " + biome.identifier() + " after " + checked.size() + " samples");
+		// A rare juniper need not occur in a small Cold Desert patch. Let the
+		// caller try its remaining bounded anchors; it still requires every biome
+		// to produce a natural stop and validates the actual foliage there.
+		Jugcraft.LOGGER.info("[tree 6 natural search] {} had no target vegetation in {} samples; trying another region", biome.identifier(), checked.size());
+		return null;
 	}
 	@Override protected void validateSurvey(String biome, Map<String,Integer> counts) {
 		if(!hasTarget(biome,counts)) throw new AssertionError("Missing natural vegetation: " + biome);

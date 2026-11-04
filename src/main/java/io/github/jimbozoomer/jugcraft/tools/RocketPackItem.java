@@ -23,7 +23,7 @@ import net.minecraft.world.item.component.TooltipDisplay;
  */
 public class RocketPackItem extends Item implements Chargeable, Jetpack {
 	public static final long CAPACITY = 200_000;
-	public static final long ENERGY_PER_TICK = 50;
+	public static final long ENERGY_PER_TICK = 20;
 	/** Upward speed added per tick of thrust (gravity takes 0.08), and the fastest climb (blocks per tick). */
 	public static final double THRUST = 0.14;
 	public static final double MAX_CLIMB = 0.45;
@@ -31,6 +31,12 @@ public class RocketPackItem extends Item implements Chargeable, Jetpack {
 	public RocketPackItem(Properties properties) {
 		super(properties);
 	}
+
+    @Override public net.minecraft.world.InteractionResult use(net.minecraft.world.level.Level level,Player player,net.minecraft.world.InteractionHand hand) {
+        if(!player.isShiftKeyDown())return super.use(level,player,hand);
+        if(!level.isClientSide())Jetpack.cycleThrust(player,player.getItemInHand(hand));
+        return net.minecraft.world.InteractionResult.SUCCESS;
+    }
 
 	@Override
 	public long baseCapacity() {
@@ -57,6 +63,11 @@ public class RocketPackItem extends Item implements Chargeable, Jetpack {
 		ItemStack chest = player.getItemBySlot(EquipmentSlot.CHEST);
 		if (player.isAlive() && !player.isSpectator() && wornJetpack(chest) && ((Jetpack) chest.getItem()).payThrust(chest)) {
 			player.resetFallDistance();
+            if(chest.getItem() instanceof Chargeable){
+                boolean low=Chargeable.energy(chest)<Chargeable.capacity(chest)/10;
+                if(low&&EquipmentSettings.number(chest,"fuel_warning",0)==0)player.sendOverlayMessage(Component.literal("Jetpack battery below 10%."));
+                EquipmentSettings.setNumber(chest,"fuel_warning",low?1:0);
+            }
 		}
 	}
 
@@ -83,6 +94,7 @@ public class RocketPackItem extends Item implements Chargeable, Jetpack {
 			TooltipFlag flag) {
 		tooltip.accept(PoweredToolItem.energyLine(stack));
 		ToolUpgrades.appendTooltip(stack, tooltip);
+        tooltip.accept(Component.literal("Shift-use held pack: gentle / cruise / full thrust. All modes cost 20 JE/t."));
 		tooltip.accept(Component.translatable("tooltip.jugcraft.rocket_pack").withStyle(ChatFormatting.GRAY));
 	}
 }

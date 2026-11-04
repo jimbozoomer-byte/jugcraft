@@ -10,12 +10,12 @@ public interface Chargeable {
 	/** Most JE the item holds without capacity modules. */
 	long baseCapacity();
 
-	/** Most JE this stack holds: its base capacity once more for each capacity module fitted. */
+	/** Each fitted capacity module doubles storage; malformed component levels never overflow. */
 	static long capacity(ItemStack stack) {
 		if (!(stack.getItem() instanceof Chargeable chargeable)) {
 			return 0;
 		}
-		return chargeable.baseCapacity() * (1 + ToolUpgrades.level(stack, ToolUpgrades.Kind.CAPACITY));
+		return chargeable.baseCapacity() * (1L << ToolUpgrades.level(stack, ToolUpgrades.Kind.CAPACITY));
 	}
 
 	static long energy(ItemStack stack) {
@@ -33,7 +33,9 @@ public interface Chargeable {
 		if (energy < amount) {
 			return false;
 		}
-		setEnergy(stack, energy - amount);
+		if (amount < 0) return false;
+		// Old saves may exceed the new capacity. Spending must not discard that legacy charge.
+		stack.set(JugcraftTools.ENERGY, energy - amount);
 		return true;
 	}
 

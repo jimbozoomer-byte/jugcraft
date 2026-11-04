@@ -8,7 +8,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
 
-/** A tool upgrade module (see {@link ToolUpgrades}); use it on a charging station holding the tool to fit it. */
+/** A tool upgrade module (see {@link ToolUpgrades}); fit or recover it using the charging station menu. */
 public class UpgradeModuleItem extends Item {
 	private final ToolUpgrades.Kind kind;
 

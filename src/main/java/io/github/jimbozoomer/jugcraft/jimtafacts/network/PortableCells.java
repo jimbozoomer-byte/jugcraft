@@ -37,11 +37,23 @@ public final class PortableCells {
     public static final class ItemsCell extends DigitalStorage.CellItem implements Chargeable {
         public ItemsCell(Properties p, int size) { super(p, size * 1024 * 8); }
         public long baseCapacity() { return 32_000; }
+        @Override public boolean isBarVisible(ItemStack stack){return true;}
+        @Override public int getBarWidth(ItemStack stack){return PoweredToolItem.barWidth(stack);}
+        @Override public int getBarColor(ItemStack stack){return PoweredToolItem.BAR_COLOR;}
+        @Override public void appendHoverText(ItemStack stack,TooltipContext c,net.minecraft.world.item.component.TooltipDisplay d,java.util.function.Consumer<net.minecraft.network.chat.Component> out,TooltipFlag f){
+            super.appendHoverText(stack,c,d,out,f);out.accept(PoweredToolItem.energyLine(stack));ToolUpgrades.appendTooltip(stack,out);
+        }
         @Override public InteractionResult use(Level level, Player player, InteractionHand hand) { return open(player, hand); }
     }
     public static final class Fluid extends FluidCells.Cell implements Chargeable {
         public Fluid(Properties p, int size) { super(p, size); }
         public long baseCapacity() { return 32_000; }
+        @Override public boolean isBarVisible(ItemStack stack){return true;}
+        @Override public int getBarWidth(ItemStack stack){return PoweredToolItem.barWidth(stack);}
+        @Override public int getBarColor(ItemStack stack){return PoweredToolItem.BAR_COLOR;}
+        @Override public void appendHoverText(ItemStack stack,TooltipContext c,net.minecraft.world.item.component.TooltipDisplay d,java.util.function.Consumer<net.minecraft.network.chat.Component> out,TooltipFlag f){
+            super.appendHoverText(stack,c,d,out,f);out.accept(PoweredToolItem.energyLine(stack));ToolUpgrades.appendTooltip(stack,out);
+        }
         @Override public InteractionResult use(Level level, Player player, InteractionHand hand) { return open(player, hand); }
     }
     private record Snapshot(CellContents items, FluidCells.Contents fluids, Long energy) {}

@@ -57,7 +57,12 @@ public final class IndustrialGear {
                     case "battery","auto_battery","battery_pack","nightvision","single_battery"->new PowerItem(p,behavior,capacity);
                     case "saber"->new NanoSaber(p.sword(ToolMaterial.DIAMOND,6,-2.4F),capacity);
                     case "plasma"->new IndustrialPlasmaLauncher(p);
-                    case "drill"->new MiningDrillItem(p.tool(ToolMaterial.DIAMOND,JugcraftTools.MINEABLE_WITH_DRILL,3,-2.8F,0).component(JugcraftTools.DRILL_MODE,MiningDrillItem.SINGLE),capacity,60);
+                    case "scanner"->new io.github.jimbozoomer.jugcraft.prospecting.OreScannerItem(p,entry.getKey().contains("advanced"));
+                    case "drill"->{
+                        float speed=entry.getKey().contains("iridium")?20:entry.getKey().contains("diamond")?16:8;
+                        var tier=new ToolMaterial(net.minecraft.tags.BlockTags.INCORRECT_FOR_DIAMOND_TOOL,1,speed,3,10,TagKey.create(Registries.ITEM,Jugcraft.id("repairs_powered_tools")));
+                        yield new MiningDrillItem(p.tool(tier,JugcraftTools.MINEABLE_WITH_DRILL,3,-2.8F,0).component(JugcraftTools.DRILL_MODE,MiningDrillItem.SINGLE),capacity,60);
+                    }
                     case "chainsaw"->new ChainsawItem(p.tool(ToolMaterial.DIAMOND,JugcraftTools.MINEABLE_WITH_CHAINSAW,6,-3,5),capacity,40);
                     default->IndustrialHandTools.create(p,behavior,capacity);
                 };
@@ -82,6 +87,10 @@ public final class IndustrialGear {
         case "hoe"->new Item(p.hoe(JugcraftGear.BRONZE,-2,-1));
         default->new Item(p.sword(JugcraftGear.BRONZE,3,-2.4F));};}
     public static boolean active(ItemStack stack){return !stack.getOrDefault(DataComponents.CUSTOM_DATA,CustomData.EMPTY).copyTag().getBooleanOr("JimtaGearOff",false);}
+    public static boolean providesNightVision(ItemStack stack){
+        return active(stack) && stack.getItem() instanceof GearItem item
+            && (item.behavior.equals("nightvision") || item instanceof PoweredArmor armor && armor.slot==ArmorType.HELMET);
+    }
     public static class GearItem extends Item {
         public final String behavior;public final long capacity;
         GearItem(Properties p,String behavior,long capacity){super(p);this.behavior=behavior;this.capacity=capacity;}
@@ -99,10 +108,26 @@ public final class IndustrialGear {
     public static class PowerItem extends GearItem implements Chargeable {
         PowerItem(Properties p,String behavior,long capacity){super(p,behavior,capacity);}
         @Override public long baseCapacity(){return capacity;}
+        @Override public void appendHoverText(ItemStack stack,TooltipContext c,TooltipDisplay d,Consumer<Component> out,TooltipFlag f){
+            super.appendHoverText(stack,c,d,out,f);ToolUpgrades.appendTooltip(stack,out);
+            if(behavior.equals("battery")||behavior.equals("auto_battery")||behavior.equals("battery_pack"))out.accept(Component.literal("Sprint+Sneak+use: cycle charging priority (held tool / worn armor / inventory)."));
+            if(behavior.equals("jetpack"))out.accept(Component.literal("Thrust: 20 JE/t while active."));
+            if(behavior.equals("nightvision") || this instanceof PoweredArmor armor && armor.slot==ArmorType.HELMET){
+                out.accept(Component.literal("Night vision: "+(active(stack)?"enabled":"disabled")+"; automatic in darkness."));
+                out.accept(Component.literal("200 JE per 8 seconds of active vision. Charge before wearing."));
+            }
+        }
         @Override public boolean isBarVisible(ItemStack s){return capacity>0;}
         @Override public int getBarWidth(ItemStack s){return PoweredToolItem.barWidth(s);}
         @Override public int getBarColor(ItemStack s){return PoweredToolItem.BAR_COLOR;}
         @Override public InteractionResult use(Level level,Player p,InteractionHand hand){
+            if(p instanceof ServerPlayer pilot && p.isShiftKeyDown() && pilot.getLastClientInput().sprint() && this instanceof Jetpack jetpack && jetpack.isJetpack(p.getItemInHand(hand))){Jetpack.cycleThrust(p,p.getItemInHand(hand));return InteractionResult.SUCCESS;}
+            if(p instanceof ServerPlayer user && p.isShiftKeyDown() && user.getLastClientInput().sprint()
+                && (behavior.equals("battery")||behavior.equals("auto_battery")||behavior.equals("battery_pack"))){
+                ItemStack supply=p.getItemInHand(hand);int priority=(Math.floorMod(EquipmentSettings.number(supply,"charging_priority",0),3)+1)%3;
+                EquipmentSettings.setNumber(supply,"charging_priority",priority);
+                p.sendOverlayMessage(Component.literal("Charging priority: "+new String[]{"held tool first","worn armor first","inventory first"}[priority]));return InteractionResult.SUCCESS;
+            }
             if(behavior.equals("battery")||behavior.equals("single_battery")){
                 if(!level.isClientSide()){
                     ItemStack supply=p.getItemInHand(hand);long budget=behavior.equals("single_battery")?1200:Math.min(10000,Chargeable.energy(supply));
@@ -129,11 +154,20 @@ public final class IndustrialGear {
     }
     static long chargeInventory(Player p,ItemStack supply,long budget){
         long remaining=budget;
-        for(int i=0;i<36&&remaining>0;i++){var target=p.getInventory().getItem(i);
-            if(target==supply||!(target.getItem() instanceof Chargeable)||target.getItem() instanceof PowerItem item&&(item.behavior.equals("battery")||item.behavior.equals("auto_battery")||item.behavior.equals("battery_pack")))continue;
+        var targets=new ArrayList<ItemStack>();int priority=EquipmentSettings.number(supply,"charging_priority",0);
+        if(priority==2)for(int i=0;i<36;i++)targets.add(p.getInventory().getItem(i));
+        if(priority!=1)targets.add(p.getMainHandItem());
+        for(var slot:ARMOR)targets.add(p.getItemBySlot(slot));
+        if(priority==1)targets.add(p.getMainHandItem());
+        if(priority!=2)for(int i=0;i<36;i++)targets.add(p.getInventory().getItem(i));
+        var seen=Collections.newSetFromMap(new IdentityHashMap<ItemStack,Boolean>());
+        for(var target:targets){
+            if(remaining<=0)break;
+            if(!seen.add(target)||target==supply||!(target.getItem() instanceof Chargeable)||target.getItem() instanceof PowerItem item&&(item.behavior.equals("battery")||item.behavior.equals("auto_battery")||item.behavior.equals("battery_pack")))continue;
             remaining-=Chargeable.charge(target,remaining);
         }return budget-remaining;
     }
+
     public static void tick(ServerPlayer p){
         boolean speed=false;
         for(var slot:ARMOR){var stack=p.getItemBySlot(slot);if(!(stack.getItem() instanceof GearItem item)||!active(stack))continue;
@@ -141,8 +175,6 @@ public final class IndustrialGear {
             if(item.behavior.equals("solar")&&slot==EquipmentSlot.HEAD&&p.level().isBrightOutside()&&p.level().canSeeSky(p.blockPosition())&&!p.level().isRaining())Chargeable.charge(p.getMainHandItem(),1);
             if(item.behavior.equals("static")&&slot==EquipmentSlot.FEET&&p.tickCount%10==0&&p.onGround()&&p.getDeltaMovement().horizontalDistanceSqr()>.0004)Chargeable.charge(p.getMainHandItem(),1);
             if(slot==EquipmentSlot.HEAD&&(item.behavior.equals("nightvision")||item instanceof PoweredArmor)){
-                if(p.level().getMaxLocalRawBrightness(BlockPos.containing(p.getEyePosition()))<8){var effect=p.getEffect(MobEffects.NIGHT_VISION);
-                    if((effect==null||effect.getDuration()<40)&&Chargeable.drain(stack,200))p.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION,200,0,true,false,true));}
                 if(item instanceof PoweredArmor a&&a.family.equals("quantum")&&p.tickCount%20==0){
                     if(p.getAirSupply()<p.getMaxAirSupply()-20&&Chargeable.drain(stack,100))p.setAirSupply(Math.min(p.getMaxAirSupply(),p.getAirSupply()+100));
                     if(p.hasEffect(MobEffects.POISON)&&Chargeable.drain(stack,10000))p.removeEffect(MobEffects.POISON);

@@ -23,7 +23,7 @@ public class ChargingStationRenderer implements BlockEntityRenderer<ChargingStat
 	private final ItemModelResolver itemModels;
 
 	public static final class State extends BlockEntityRenderState {
-		final ItemStackRenderState tool = new ItemStackRenderState();
+		final ItemStackRenderState[] tools = {new ItemStackRenderState(), new ItemStackRenderState()};
 		Direction facing = Direction.NORTH;
 	}
 
@@ -41,24 +41,24 @@ public class ChargingStationRenderer implements BlockEntityRenderer<ChargingStat
 			ModelFeatureRenderer.@Nullable CrumblingOverlay crumbling) {
 		BlockEntityRenderState.extractBase(station, state, crumbling);
 		state.facing = station.getBlockState().getValue(ChargingStationBlock.FACING);
-		itemModels.updateForTopItem(state.tool, station.tool(), ItemDisplayContext.FIXED, station.getLevel(), null,
-				(int) station.getBlockPos().asLong());
+		for(int i=0;i<2;i++) itemModels.updateForTopItem(state.tools[i], station.tool(i), ItemDisplayContext.FIXED, station.getLevel(), null,
+                (int) station.getBlockPos().asLong()+i);
 	}
 
 	@Override
 	public void submit(State state, PoseStack pose, SubmitNodeCollector collector, CameraRenderState camera) {
-		if (state.tool.isEmpty()) {
-			return;
-		}
-		pose.pushPose();
-		// Turn the north-facing layout to the station's facing, as its block model is turned.
-		pose.translate(0.5F, 0.0F, 0.5F);
-		pose.rotateDegrees(Axis.YP, -yRotation(state.facing));
-		pose.translate(0.0F, 1.5F, -0.32F);
-		pose.rotateDegrees(Axis.YP, 90);
-		pose.scale(1.2F, 1.2F, 1.2F);
-		state.tool.submit(pose, collector, state.lightCoords, OverlayTexture.NO_OVERLAY, 0);
-		pose.popPose();
+        boolean both=!state.tools[0].isEmpty()&&!state.tools[1].isEmpty();
+        for(int i=0;i<2;i++) {
+            if(state.tools[i].isEmpty())continue;
+            pose.pushPose();
+            pose.translate(.5F,0,.5F);
+            pose.rotateDegrees(Axis.YP,-yRotation(state.facing));
+            pose.translate(both?(i==0?-.22F:.22F):0F,1.5F,-.32F);
+            pose.rotateDegrees(Axis.YP,90);
+            float size=both?.8F:1.2F;pose.scale(size,size,size);
+            state.tools[i].submit(pose,collector,state.lightCoords,OverlayTexture.NO_OVERLAY,0);
+            pose.popPose();
+        }
 	}
 
 	private static float yRotation(Direction facing) {

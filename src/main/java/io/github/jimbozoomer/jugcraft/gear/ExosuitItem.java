@@ -60,6 +60,22 @@ public class ExosuitItem extends Item implements Chargeable, Jetpack {
 		};
 	}
 
+    @Override
+    public net.minecraft.world.InteractionResult use(net.minecraft.world.level.Level level, net.minecraft.world.entity.player.Player player,
+            net.minecraft.world.InteractionHand hand) {
+        if (!player.isShiftKeyDown()) return super.use(level, player, hand);
+        if(type==ArmorType.CHESTPLATE){
+            if(!level.isClientSide())Jetpack.cycleThrust(player,player.getItemInHand(hand));
+            return net.minecraft.world.InteractionResult.SUCCESS;
+        }
+        if(type!=ArmorType.HELMET)return super.use(level,player,hand);
+        if (!level.isClientSide()) {
+            boolean enabled = io.github.jimbozoomer.jugcraft.tools.EquipmentSettings.toggle(player.getItemInHand(hand), "night_vision");
+            player.sendOverlayMessage(Component.literal("Helmet night vision: " + (enabled ? "on" : "off")));
+        }
+        return net.minecraft.world.InteractionResult.SUCCESS;
+    }
+
 	@Override
 	public long baseCapacity() {
 		return Exosuit.CAPACITY;
@@ -90,6 +106,7 @@ public class ExosuitItem extends Item implements Chargeable, Jetpack {
 			TooltipFlag flag) {
 		tooltip.accept(PoweredToolItem.energyLine(stack));
 		ToolUpgrades.appendTooltip(stack, tooltip);
+        if(type==ArmorType.HELMET)tooltip.accept(Component.literal("Night vision: " + (io.github.jimbozoomer.jugcraft.tools.EquipmentSettings.enabled(stack,"night_vision")?"enabled":"disabled")));
 		tooltip.accept(Component.translatable("tooltip.jugcraft.exosuit_" + piece()).withStyle(ChatFormatting.GRAY));
 	}
 }

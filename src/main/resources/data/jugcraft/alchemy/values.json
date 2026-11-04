@@ -18732,6 +18732,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:edg_voltage_regulator"
     },
+    "jugcraft:efficiency_module": {
+      "numerator": 4382,
+      "denominator": 3,
+      "source": "recipe jugcraft:efficiency_module"
+    },
     "jugcraft:efficiency_upgrade": {
       "numerator": 649,
       "denominator": 8,

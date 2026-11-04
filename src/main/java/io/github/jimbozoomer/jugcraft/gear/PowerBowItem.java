@@ -26,7 +26,7 @@ import net.minecraft.world.level.Level;
  * picked up. Uncharged, it is an ordinary bow that shoots the player's arrows.
  */
 public class PowerBowItem extends BowItem implements Chargeable {
-	public static final long CAPACITY = 100_000;
+	public static final long CAPACITY = 250_000;
 	public static final long ENERGY_PER_SHOT = 500;
 	/** A full draw: the vanilla bow's arrows leave at 3.0. */
 	public static final float ARROW_SPEED = 3.75F;
@@ -98,5 +98,6 @@ public class PowerBowItem extends BowItem implements Chargeable {
 			TooltipFlag flag) {
 		tooltip.accept(PoweredToolItem.energyLine(stack));
 		ToolUpgrades.appendTooltip(stack, tooltip);
+        tooltip.accept(Component.literal("Energy arrows remaining: " + Chargeable.energy(stack) / ENERGY_PER_SHOT));
 	}
 }

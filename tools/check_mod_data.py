@@ -988,7 +988,7 @@ def check_exosuit():
             err(f"JugcraftExosuit does not register {name}")
     powers = (JAVA_ROOT / "gear" / "Exosuit.java").read_text(encoding="utf-8")
     for const in ("CAPACITY", "NIGHT_VISION_PER_TICK", "SHIELD_POINTS", "SHIELD_INTERVAL", "SHIELD_PER_POINT",
-                  "SPEED_PER_TICK", "SPEED_BONUS", "BOOTS_PER_TICK", "STEP_BONUS"):
+                  "SPEED_PER_TICK", "SPEED_BONUS", "FALL_PER_POINT", "STEP_BONUS"):
         value = getattr(exosuit, const)
         text = f"{value:_}" if isinstance(value, int) else str(value)
         if not re.search(rf"\b{const} = {re.escape(text)};", powers):

@@ -101,6 +101,11 @@ public final class OwnerBackpackUpgrades {
         var upgrades=NonNullList.withSize(7,ItemStack.EMPTY);pack.getOrDefault(OwnerBackpacks.UPGRADES,ItemContainerContents.EMPTY).copyInto(upgrades);boolean changed=false;
         for(var battery:upgrades)if(battery.is(OwnerBackpacks.ITEMS.get("battery_upgrade"))){
             long budget=Math.min(256,io.github.jimbozoomer.jugcraft.tools.Chargeable.energy(battery)),used=0;
+            int priority=io.github.jimbozoomer.jugcraft.tools.EquipmentSettings.number(battery,"charging_priority",0);
+            if(carried&&priority==1)used+=io.github.jimbozoomer.jugcraft.tools.Chargeable.charge(p.getMainHandItem(),budget-used);
+            if(carried&&priority==2)for(var slot:new net.minecraft.world.entity.EquipmentSlot[]{net.minecraft.world.entity.EquipmentSlot.HEAD,net.minecraft.world.entity.EquipmentSlot.CHEST,net.minecraft.world.entity.EquipmentSlot.LEGS,net.minecraft.world.entity.EquipmentSlot.FEET}){
+                if(used>=budget)break;used+=io.github.jimbozoomer.jugcraft.tools.Chargeable.charge(p.getItemBySlot(slot),budget-used);
+            }
             for(int i=0;i<inventory.getContainerSize()&&used<budget;i++)used+=io.github.jimbozoomer.jugcraft.tools.Chargeable.charge(inventory.getItem(i),budget-used);
             for(int i=0;carried&&i<p.getInventory().getContainerSize()&&used<budget;i++){var item=p.getInventory().getItem(i);if(item!=pack)used+=io.github.jimbozoomer.jugcraft.tools.Chargeable.charge(item,budget-used);}
             if(used>0){io.github.jimbozoomer.jugcraft.tools.Chargeable.drain(battery,used);changed=true;}

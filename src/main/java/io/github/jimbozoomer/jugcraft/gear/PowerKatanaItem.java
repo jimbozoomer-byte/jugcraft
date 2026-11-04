@@ -19,7 +19,7 @@ import net.minecraft.world.item.component.TooltipDisplay;
  * station, like the powered tools.
  */
 public class PowerKatanaItem extends Item implements Chargeable {
-	public static final long CAPACITY = 200_000;
+	public static final long CAPACITY = 250_000;
 	public static final long ENERGY_PER_HIT = 1_000;
 
 	public PowerKatanaItem(Properties properties) {
@@ -70,5 +70,6 @@ public class PowerKatanaItem extends Item implements Chargeable {
 			TooltipFlag flag) {
 		tooltip.accept(PoweredToolItem.energyLine(stack));
 		ToolUpgrades.appendTooltip(stack, tooltip);
+        tooltip.accept(Component.literal("Powered hits remaining: " + Chargeable.energy(stack) / ENERGY_PER_HIT));
 	}
 }

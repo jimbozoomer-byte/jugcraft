@@ -110,17 +110,18 @@ ABOUT = {
     "pneumatic_extractor": "Pulls 16 items every 8 ticks from what it faces and pushes them out of its other sides. A "
                            "redstone signal pauses it.",
     "item_sorter": "Takes only the items in its 9-slot filter, and puts them into the inventory it faces.",
-    "mining_drill": "Runs on JE instead of wearing out: 60 JE a block, 100,000 JE when full. Mines everything a "
+    "mining_drill": "Runs on JE instead of wearing out: 60 JE a block, 250,000 JE when full. Mines everything a "
                     "pickaxe or shovel does, faster than netherite. Sneak and use it to switch mode: one block, a 3x3 "
                     "square, or a whole ore vein. Empty, it mines like a bare hand.",
     "chainsaw": "A JE-powered axe that also cuts leaves: 40 JE a block. Cutting a log fells the whole tree above it; "
-                "sneak to cut one log.",
-    "rocket_pack": "Wear it and hold jump in the air to fly, 50 JE a tick (200,000 JE when full). Landing is safe while "
-                   "it fires. On a dedicated server, set allow-flight=true or long hovers get you kicked.",
-    "charging_station": "Two blocks tall. Hang a drill, chainsaw or rocket pack on its cradle and it fills it from "
-                        "cables, 512 JE a tick; take it back with an empty hand. Its lamp lights while it charges.",
-    **{module: f"{about}. Fit it by using it on a charging station holding the tool; it is used up and stays in "
-                 "the tool." for module, (_, _, about) in UPGRADE_MODULES.items()},
+                "sneak to cut one log. Shift-use cycles tree, single-log and leaf-clearing modes. Leaf clearing costs 10 JE/block.",
+    "rocket_pack": "Wear it and hold jump in the air to fly, 20 JE a tick (200,000 JE when full). Landing is safe while "
+                   "it fires. Shift-use the held pack to choose gentle, cruise or full thrust (all 20 JE/t). On a dedicated server, set allow-flight=true or long hovers get you kicked.",
+    "charging_station": "Right-click either half to open two equipment bays. Each lists its installed modules. "
+                        "Use + to install from your cursor or inventory and - to recover one. The bays fairly share "
+                        "512 JE/t from cables; one item alone receives the full rate. The buffer holds 100,000 JE.",
+    **{module: f"{about}. Open the charging station menu, place the equipment in either bay, then use + to fit "
+                 "a module from your inventory or - to recover one. Discharge before reducing capacity." for module, (_, _, about) in UPGRADE_MODULES.items()},
     "conveyor": "Carries items the way you faced when placing it, 2.5 blocks a second, while rotation drives it. A shaft, "
                 "gearbox or motor on any side drives every conveyor joined to it, for 1 KE per conveyor per tick. Pipes, "
                 "hoppers and machines load it, and so do items dropped on it; at the end items go into the conveyor or "
@@ -715,11 +716,11 @@ def gear_pages():
             "harder. Empty, it is an ordinary bow that shoots your arrows."]},
         {"title": "Powered Exosuit", "icon": f"{MOD}:exosuit_helmet", "text": [
             "Four pieces of armor as strong as netherite that run on JE. Each piece holds "
-            f"{exosuit.CAPACITY:,} JE and charges at a charging station; capacity modules fit.",
+            f"{exosuit.CAPACITY:,} JE and charges at a charging station; two capacity modules double storage each time.",
             "Helmet: night vision whenever it is dark. Chestplate: an energy shield that regrows up to four hearts of "
             "absorption, and a jetpack (hold jump in the air). Leggings: 30% more speed. Boots: no fall damage and a "
             "full-block step.",
-            "Each piece works only while it is charged; a flat piece is plain armor."]},
+            "Boots spend 100 JE per heart of fall damage actually prevented. Shield recovery costs 1,000 JE per point; thrust costs 20 JE/t. Legs spend only during boosted movement. A flat piece is plain armor."]},
         {"title": "Liveries", "icon": f"{MOD}:ronin_livery", "text": [
             "The exosuit comes in Vanguard gunmetal. A Ronin livery at a smithing table, with a piece and red dye, "
             "repaints it crimson and silver, with the Ronin's hat and skirt; the power katana becomes the crimson Ronin "
@@ -1278,4 +1279,6 @@ def build():
     chapters.insert(1, starter_workshop.chapter())
     import storage_crates
     chapters.insert(2, storage_crates.chapter())
+    import powered_equipment
+    chapters.append({"title": "Powered Ore Surveys", "icon": "jugcraft:jimta_ore_scanner", "pages": powered_equipment.SCANNER_PAGES})
     return {"chapters": chapters}

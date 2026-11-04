@@ -2,5 +2,75 @@
   "parent": "minecraft:item/handheld",
   "textures": {
     "layer0": "jugcraft:item/jimtafacts/gear/jimta_hand_treetap"
+  },
+  "display": {
+    "thirdperson_righthand": {
+      "rotation": [
+        0,
+        -90,
+        100
+      ],
+      "translation": [
+        0.0,
+        0.54413,
+        -0.18531
+      ],
+      "scale": [
+        0.85,
+        0.85,
+        0.85
+      ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [
+        0,
+        90,
+        -100
+      ],
+      "translation": [
+        0.0,
+        0.54413,
+        -0.18531
+      ],
+      "scale": [
+        0.85,
+        0.85,
+        0.85
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        0,
+        -90,
+        70
+      ],
+      "translation": [
+        1.13,
+        1.07982,
+        -0.72714
+      ],
+      "scale": [
+        0.68,
+        0.68,
+        0.68
+      ]
+    },
+    "firstperson_lefthand": {
+      "rotation": [
+        0,
+        90,
+        -70
+      ],
+      "translation": [
+        1.13,
+        1.07982,
+        -0.72714
+      ],
+      "scale": [
+        0.68,
+        0.68,
+        0.68
+      ]
+    }
   }
 }

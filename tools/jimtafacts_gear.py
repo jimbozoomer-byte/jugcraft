@@ -29,7 +29,7 @@ add('industrial_night_vision_goggles','Industrial Night Vision Goggles','itemNig
 add('solar_helmet','Solar Helmet','itemSolarHelmet','solar',asset='solar',slot='HELMET')
 add('static_boots','Static Boots','itemStaticBoots','static',asset='rubber',slot='BOOTS')
 for id,label,icon,behavior,capacity in [('industrial_drill','Industrial Drill','itemToolDrill','drill',30000),('diamond_drill','Diamond Drill','itemToolDDrill','drill',100000),('iridium_drill','Iridium Drill','itemToolIridiumDrill','drill',500000),('industrial_chainsaw','Industrial Chainsaw','itemToolChainsaw','chainsaw',100000),('electric_hoe','Electric Hoe','itemToolHoe','hoe',10000),('mining_laser','Mining Laser','itemToolMiningLaser','laser',200000),('electric_wrench','Electric Wrench','itemToolWrenchElectric','wrench',10000),('electric_treetap','Electric Treetap','itemTreetapElectric','tap',10000),('crop_analyzer','Crop Analyzer','itemCropnalyzer','analyzer',10000),('ore_scanner','Ore Scanner','itemScanner','scanner',10000),('advanced_ore_scanner','Advanced Ore Scanner','itemScannerAdv','scanner',100000)]:
- add(id,label,icon,behavior,capacity=capacity)
+ add(id,label,icon,behavior,capacity=250000)
 for id,label,icon,behavior in [('industrial_wrench','Industrial Wrench','itemToolWrench','wrench'),('hand_treetap','Hand Treetap','itemTreetap','tap'),('energy_meter','Energy Meter','itemToolMEter','meter'),('wind_meter','Wind Meter','windmeter','wind')]:add(id,label,icon,behavior)
 for kind,icon in [('pickaxe','Pickaxe'),('axe','Axe'),('shovel','Spade'),('hoe','Hoe'),('sword','Sword')]:add('industrial_bronze_'+kind,'Industrial Bronze '+kind.title(),'itemToolBronze'+icon,'bronze_tool',kind=kind)
 

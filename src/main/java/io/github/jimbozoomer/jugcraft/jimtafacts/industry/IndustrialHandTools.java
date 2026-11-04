@@ -32,8 +32,7 @@ final class IndustrialHandTools {
     static Item create(Item.Properties p,String behavior,long capacity){return switch(behavior){
         case "wrench"->new Wrench(p,capacity);
         case "hoe"->new ElectricHoe(p,capacity);
-        case "scanner"->new Scanner(p,capacity);
-        case "laser"->new Laser(p.tool(ToolMaterial.DIAMOND,JugcraftTools.MINEABLE_WITH_DRILL,1,-2.8F,0),capacity);
+                case "laser"->new Laser(p.tool(ToolMaterial.DIAMOND,JugcraftTools.MINEABLE_WITH_DRILL,1,-2.8F,0),capacity);
         default->new Reader(p,behavior,capacity);
     };}
     static InteractionResult exchangePower(UseOnContext ctx){
@@ -48,31 +47,57 @@ final class IndustrialHandTools {
     static final class Wrench extends BrassWrenchItem implements Chargeable {
         final long capacity;Wrench(Properties p,long capacity){super(capacity>0?p:p.durability(128));this.capacity=capacity;}
         @Override public long baseCapacity(){return capacity;}
+        @Override public boolean isBarVisible(ItemStack stack){return capacity>0||super.isBarVisible(stack);}
+        @Override public int getBarWidth(ItemStack stack){return capacity>0?PoweredToolItem.barWidth(stack):super.getBarWidth(stack);}
+        @Override public int getBarColor(ItemStack stack){return capacity>0?PoweredToolItem.BAR_COLOR:super.getBarColor(stack);}
+        @Override public void appendHoverText(ItemStack stack,TooltipContext c,net.minecraft.world.item.component.TooltipDisplay d,java.util.function.Consumer<Component> out,TooltipFlag f){
+            super.appendHoverText(stack,c,d,out,f);
+            if(capacity>0){out.accept(PoweredToolItem.energyLine(stack));ToolUpgrades.appendTooltip(stack,out);}
+        }
+
         @Override public InteractionResult useOn(UseOnContext ctx){
             var p=ctx.getPlayer();if(p==null)return InteractionResult.FAIL;
             if(ctx.getLevel() instanceof ServerLevel level&&(!Authority.mayChange(level,p,ctx.getClickedPos())||capacity>0&&Chargeable.energy(ctx.getItemInHand())<100))return InteractionResult.FAIL;
             var before=ctx.getLevel().getBlockState(ctx.getClickedPos());var result=super.useOn(ctx);
             if(ctx.getLevel() instanceof ServerLevel&&before!=ctx.getLevel().getBlockState(ctx.getClickedPos())){
-                if(capacity>0)Chargeable.drain(ctx.getItemInHand(),100);else ctx.getItemInHand().hurtAndBreak(1,p,ctx.getHand()==InteractionHand.MAIN_HAND?EquipmentSlot.MAINHAND:EquipmentSlot.OFFHAND);}
+                if(capacity>0){Chargeable.drain(ctx.getItemInHand(),100);p.sendOverlayMessage(Component.literal("Adjusted block (100 JE)."));}else ctx.getItemInHand().hurtAndBreak(1,p,ctx.getHand()==InteractionHand.MAIN_HAND?EquipmentSlot.MAINHAND:EquipmentSlot.OFFHAND);}
             return result;
         }
     }
     static final class ElectricHoe extends Item implements Chargeable {
         final long capacity;ElectricHoe(Properties p,long capacity){super(p.hoe(ToolMaterial.IRON,-2,-1));this.capacity=capacity;}
         @Override public long baseCapacity(){return capacity;}
+        @Override public boolean isBarVisible(ItemStack stack){return capacity>0||super.isBarVisible(stack);}
+        @Override public int getBarWidth(ItemStack stack){return capacity>0?PoweredToolItem.barWidth(stack):super.getBarWidth(stack);}
+        @Override public int getBarColor(ItemStack stack){return capacity>0?PoweredToolItem.BAR_COLOR:super.getBarColor(stack);}
+        @Override public void appendHoverText(ItemStack stack,TooltipContext c,net.minecraft.world.item.component.TooltipDisplay d,java.util.function.Consumer<Component> out,TooltipFlag f){
+            super.appendHoverText(stack,c,d,out,f);
+            if(capacity>0){out.accept(PoweredToolItem.energyLine(stack));ToolUpgrades.appendTooltip(stack,out);}
+            out.accept(Component.literal("Shift-use in air: single / 3x3 tilling. 50 JE per successful block."));
+        }
+
+        @Override public InteractionResult use(Level level,Player p,InteractionHand hand){
+            if(!p.isShiftKeyDown())return super.use(level,p,hand);
+            if(!level.isClientSide()){
+                boolean area=EquipmentSettings.number(p.getItemInHand(hand),"hoe_area",0)==0;
+                EquipmentSettings.setNumber(p.getItemInHand(hand),"hoe_area",area?1:0);
+                p.sendOverlayMessage(Component.literal("Electric Hoe: "+(area?"3x3":"single block")));
+            }return InteractionResult.SUCCESS;
+        }
         @Override public InteractionResult useOn(UseOnContext ctx){
             var p=ctx.getPlayer();if(p==null)return InteractionResult.FAIL;
             if(ctx.getLevel() instanceof ServerLevel level&&(!Authority.mayChange(level,p,ctx.getClickedPos())||Chargeable.energy(ctx.getItemInHand())<50))return InteractionResult.FAIL;
-            var before=ctx.getLevel().getBlockState(ctx.getClickedPos());var result=super.useOn(ctx);
-            if(ctx.getLevel() instanceof ServerLevel&&before!=ctx.getLevel().getBlockState(ctx.getClickedPos()))Chargeable.drain(ctx.getItemInHand(),50);return result;
-        }
-    }
-    static final class Scanner extends ProspectorItem implements Chargeable {
-        final long capacity;Scanner(Properties p,long capacity){super(p);this.capacity=capacity;}
-        @Override public long baseCapacity(){return capacity;}
-        @Override public InteractionResult use(Level level,Player p,InteractionHand hand){
-            var s=p.getItemInHand(hand);if(p.getCooldowns().isOnCooldown(s))return InteractionResult.FAIL;
-            if(!level.isClientSide()&&!Chargeable.drain(s,100))return InteractionResult.FAIL;return super.use(level,p,hand);
+            int radius=Math.clamp(EquipmentSettings.number(ctx.getItemInHand(),"hoe_area",0),0,1);
+            InteractionResult result=InteractionResult.PASS;
+            for(int x=-radius;x<=radius;x++)for(int z=-radius;z<=radius;z++){
+                BlockPos pos=ctx.getClickedPos().offset(x,0,z);
+                if(!(ctx.getLevel() instanceof ServerLevel level)||!level.hasChunkAt(pos)||!Authority.mayChange(level,p,pos)||Chargeable.energy(ctx.getItemInHand())<50)continue;
+                var before=level.getBlockState(pos);
+                var target=new UseOnContext(p,ctx.getHand(),new BlockHitResult(Vec3.atCenterOf(pos),ctx.getClickedFace(),pos,false));
+                var action=super.useOn(target);
+                if(before!=level.getBlockState(pos)){Chargeable.drain(ctx.getItemInHand(),50);result=action;}
+            }
+            return result;
         }
     }
     static final class Reader extends IndustrialGear.PowerItem {
@@ -92,7 +117,7 @@ final class IndustrialHandTools {
                 var bottle=p.getItemInHand(ctx.getHand()==InteractionHand.MAIN_HAND?InteractionHand.OFF_HAND:InteractionHand.MAIN_HAND);
                 if(!bottle.is(Items.GLASS_BOTTLE)||!Authority.mayChange(level,p,pos)||capacity>0&&Chargeable.energy(ctx.getItemInHand())<50)return InteractionResult.FAIL;
                 if(!level.setBlock(pos,state.setValue(TreeTapBlock.LATEX,state.getValue(TreeTapBlock.LATEX)-TreeTapBlock.STEPS_PER_BOTTLE),Block.UPDATE_CLIENTS))return InteractionResult.FAIL;
-                bottle.consume(1,p);if(capacity>0)Chargeable.drain(ctx.getItemInHand(),50);
+                bottle.consume(1,p);if(capacity>0)Chargeable.drain(ctx.getItemInHand(),50);p.sendOverlayMessage(Component.literal(capacity>0?"Collected latex (50 JE).":"Collected latex."));
                 var filled=new ItemStack(JugcraftAgriculture.item("latex_bottle"));if(!p.getInventory().add(filled))p.drop(filled,false,net.minecraft.util.Prediction.SERVER_ONLY);
                 level.scheduleTick(pos,state.getBlock(),TreeTapBlock.INTERVAL);return InteractionResult.SUCCESS;
             }return behavior.equals("wind")?use(level,p,ctx.getHand()):InteractionResult.PASS;
@@ -114,14 +139,13 @@ final class IndustrialHandTools {
         @Override public InteractionResult useOn(UseOnContext ctx){return ctx.getPlayer()==null?InteractionResult.FAIL:use(ctx.getLevel(),ctx.getPlayer(),ctx.getHand());}
         @Override public InteractionResult use(Level level,Player player,InteractionHand hand){
             var stack=player.getItemInHand(hand);if(!(level instanceof ServerLevel server)||!(player instanceof ServerPlayer p))return InteractionResult.SUCCESS;
-            int mode=mode(stack);if(p.isShiftKeyDown()){int next=(mode+1)%MODES.length;CustomData.update(DataComponents.CUSTOM_DATA,stack,t->t.putInt("LaserMode",next));p.sendOverlayMessage(Component.literal("Mining laser: "+MODES[next]));return InteractionResult.SUCCESS;}
+            int mode=mode(stack);if(p.isShiftKeyDown()){int next=(mode+1)%MODES.length;CustomData.update(DataComponents.CUSTOM_DATA,stack,t->t.putInt("LaserMode",next));p.sendOverlayMessage(Component.literal("Mining laser: "+MODES[next]+" ("+COST[next]+" JE)"));return InteractionResult.SUCCESS;}
             if(p.getCooldowns().isOnCooldown(stack)||Chargeable.energy(stack)<COST[mode])return InteractionResult.FAIL;
             var hit=p.pick(mode==1?4:mode==2?48:24,1,false);if(!(hit instanceof BlockHitResult block)||hit.getType()!=HitResult.Type.BLOCK)return InteractionResult.PASS;
             BlockPos first=block.getBlockPos();if(!canMine(server,p,first))return InteractionResult.FAIL;
             if(!Chargeable.drain(stack,COST[mode]))return InteractionResult.FAIL;p.getCooldowns().addCooldown(stack,20);
-            List<BlockPos> targets=new ArrayList<>();Direction into=mode==3?p.getDirection():block.getDirection().getOpposite();
-            if(mode==5||mode==6){for(int x=-1;x<=1;x++)for(int y=-1;y<=1;y++)for(int z=-1;z<=1;z++)if(mode==6||switch(block.getDirection().getAxis()){case X->x==0;case Y->y==0;case Z->z==0;})targets.add(first.offset(x,y,z));}
-            else for(int i=0;i<(mode==1||mode==4?1:mode==2?16:8);i++)targets.add(first.relative(into,i));
+            Direction into=mode==3?p.getDirection():block.getDirection().getOpposite();
+            List<BlockPos> targets=MiningLaserPattern.targets(first,into,block.getDirection(),mode);
             int broken=0;for(var pos:targets){if(!canMine(server,p,pos)){if(mode!=5&&mode!=6)break;continue;}
                 BlockState state=server.getBlockState(pos);var drops=Block.getDrops(state,server,pos,null,p,stack);
                 if(!server.destroyBlock(pos,false,p))continue;broken++;
@@ -131,6 +155,11 @@ final class IndustrialHandTools {
             }
             Vec3 a=p.getEyePosition(),b=block.getLocation();for(int i=0;i<16;i++){var at=a.lerp(b,i/15D);server.sendParticles(ParticleTypes.ELECTRIC_SPARK,at.x,at.y,at.z,1,0,0,0,0);}
             if(broken==0)Chargeable.charge(stack,COST[mode]);return InteractionResult.SUCCESS;
+        }
+        @Override public void appendHoverText(ItemStack stack,TooltipContext c,net.minecraft.world.item.component.TooltipDisplay d,java.util.function.Consumer<Component> out,TooltipFlag f){
+            out.accept(PoweredToolItem.energyLine(stack));ToolUpgrades.appendTooltip(stack,out);int mode=mode(stack);
+            out.accept(Component.literal("Mode: "+MODES[mode]+" ("+COST[mode]+" JE)"));
+            out.accept(Component.literal("Shift-use: next mode. Aim to preview affected blocks before firing."));
         }
         private static boolean canMine(ServerLevel level,ServerPlayer p,BlockPos pos){
             if(!level.hasChunkAt(pos)||pos.distSqr(p.blockPosition())>64*64||!Authority.mayChange(level,p,pos))return false;

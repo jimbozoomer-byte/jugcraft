@@ -156,7 +156,7 @@ public final class DigitalEquipment {
         }
     }
     public static final class Entropy extends Powered {
-        Entropy(Properties p) { super(p, 200_000); }
+        Entropy(Properties p) { super(p, 250_000); }
         @Override public InteractionResult use(Level level, Player p, InteractionHand hand) {
             var hit = getPlayerPOVHitResult(level, p, ClipContext.Fluid.ANY);
             return hit.getType() == HitResult.Type.BLOCK && !level.getBlockState(hit.getBlockPos()).getFluidState().isEmpty() ? useOn(new UseOnContext(p, hand, hit)) : InteractionResult.PASS;
@@ -199,7 +199,7 @@ public final class DigitalEquipment {
         @Override public void hurtEnemy(ItemStack s, LivingEntity target, LivingEntity attacker) { if (attacker instanceof ServerPlayer p && Authority.mayStrike(p, target) && ConcordanceEffects.mayHarm(p, target) && Chargeable.drain(s, 1600)) target.igniteForSeconds(8); }
     }
     public static final class Applicator extends Powered {
-        Applicator(Properties p) { super(p, 200_000); }
+        Applicator(Properties p) { super(p, 250_000); }
         @Override public InteractionResult use(Level world, Player player, InteractionHand hand) {
             if (!(player instanceof ServerPlayer p) || hand != InteractionHand.MAIN_HAND || !p.isShiftKeyDown()) return InteractionResult.PASS;
             var tool = p.getItemInHand(hand); var old = tool.getOrDefault(AMMO, ItemStack.EMPTY).copy(); var held = p.getOffhandItem();

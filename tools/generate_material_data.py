@@ -1922,6 +1922,8 @@ def main():
         write(instrument_tag, json.loads(instrument_tag.read_text(encoding='utf-8')))
     language = json.loads((ASSETS / "lang/en_us.json").read_text(encoding="utf-8"))
     language.update(spellbook_language)
+    import powered_equipment
+    language.update(powered_equipment.LANG)
     write(ASSETS / "lang/en_us.json", language)
     # Imported walls/fences are generated after the shared pass and need the same connections.
     import diagonal_connections
@@ -1954,6 +1956,9 @@ def main():
     newest_model_finishing.generate(write)
     import model_atlas
     model_atlas.generate(write)
+    # Keep native player grips after both authored and owner-library model writers.
+    import held_equipment
+    held_equipment.generate()
     from generated_resource_cleanup import prune
     prune(RES, previous, WRITTEN_RESOURCES)
     # Include finished server recipes after removing obsolete generated recipes.

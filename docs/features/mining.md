@@ -1,5 +1,8 @@
 # Mining and prospecting
 
+Current November 2 balance and scanner behavior: [powered equipment rebalance](powered-equipment-rebalance.md). The original delivery record below is historical.
+
+
 Status: implemented in source (PR #25); **not yet played**. Compiles in CI; game tests cover it, and the client test screenshots the prospector screen.
 Proposal issue: none. The owner selected "Mining & prospecting" directly on 30 September 2026 and asked for a prospector that "should only give an idea of whats in like the nearby 9 chunks … not so specific as one chunk" with a "steampunk digital" interface.
 Owner: @jimbozoomer-byte

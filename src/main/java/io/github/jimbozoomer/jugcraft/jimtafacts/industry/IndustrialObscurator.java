@@ -24,7 +24,10 @@ public final class IndustrialObscurator extends Item implements Chargeable {
         ITEM=Registry.register(BuiltInRegistries.ITEM,key,new IndustrialObscurator(new Item.Properties().setId(key)));
         CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(o->o.accept(ITEM));
     }
-    @Override public long baseCapacity(){return 100_000;}
+    @Override public long baseCapacity(){return 250_000;}
+    @Override public boolean isBarVisible(ItemStack stack){return true;}
+    @Override public int getBarWidth(ItemStack stack){return PoweredToolItem.barWidth(stack);}
+    @Override public int getBarColor(ItemStack stack){return PoweredToolItem.BAR_COLOR;}
     @Override public InteractionResult useOn(UseOnContext c){
         if(!(c.getPlayer() instanceof ServerPlayer p))return InteractionResult.SUCCESS;
         if(!p.isAlive()||p.isSpectator()||!Authority.mayChange(p.level(),p,c.getClickedPos()))return InteractionResult.FAIL;

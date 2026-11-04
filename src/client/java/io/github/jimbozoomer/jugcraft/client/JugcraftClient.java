@@ -97,6 +97,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRenderers.register(io.github.jimbozoomer.jugcraft.vehiclebay.VehicleBays.ENTITY, VehicleBayRenderer::new);
 		BlockEntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.machine.form.IndustrialForms.ENTITY, FormMachineRenderer::new);
 		MenuScreens.register(JugcraftAgriculture.COOKING_POT_MENU, CookingPotScreen::new);
+        MenuScreens.register(JugcraftTools.CHARGING_STATION_MENU, ChargingStationScreen::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.ROCKET_PAD_MENU, RocketPadScreen::new);
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.ZIPLINE_RIDER,
 				net.minecraft.client.renderer.entity.NoopRenderer::new);
@@ -126,6 +127,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.powerline.JugcraftPowerLines.ANCHOR_ENTITY, context -> new LineRenderer());
 		// Every MBS item shows a see-through copy of what it would place (the power lines' preview among them).
 		MbsPreview.register();
+        PoweredToolPreview.register();
 		WallRunModel.register();
 		io.github.jimbozoomer.jugcraft.nuclear.StorageTanks.openScreen = pos -> net.minecraft.client.Minecraft.getInstance().gui.setScreen(new StorageTankScreen(pos));
 		WallRunOverlay.register();
@@ -257,6 +259,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			if (client.player != null) {
 				io.github.jimbozoomer.jugcraft.placement.StructureReach.update(client.player);
+                PoweredToolPreview.tick(client);
 			}
 		});
 		ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {
@@ -292,7 +295,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		EncyclopediaClient.register();
         CraftingChoicesClient.register();
 		ClientPlayNetworking.registerGlobalReceiver(SurveyPayload.TYPE,
-				(payload, context) -> Minecraft.getInstance().gui.setScreen(new ProspectorScreen(payload.readings())));
+				(payload, context) -> Minecraft.getInstance().gui.setScreen(new ProspectorScreen(payload)));
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.CARVED_PUMPKIN_ENTITY, CarvedPumpkinRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.GIANT_PUMPKIN_ENTITY, GiantPumpkinRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SCARECROW_ENTITY, ScarecrowRenderer::new);
@@ -475,6 +478,8 @@ public final class JugcraftClient implements ClientModInitializer {
 		ClientPlayNetworking.registerGlobalReceiver(OpenCarvingPayload.TYPE,
 				(payload, context) -> Minecraft.getInstance().gui.setScreen(new CarvingScreen(payload)));
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            ProspectorScreen.clearHistory();
+            PoweredToolPreview.clear();
 			HarvestMoon.clientActive = false;
 			BloodMoon.clientActive = false;
 			client.execute(CarvingTextures::clear);

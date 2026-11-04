@@ -8,12 +8,19 @@
   "environment": "*",
   "entrypoints": {
     "main": [
+      "io.github.jimbozoomer.jugcraft.test.NightVisionUsageProbe",
       "io.github.jimbozoomer.jugcraft.test.TestForms",
       "io.github.jimbozoomer.jugcraft.test.MockPlayerChannels",
       "io.github.jimbozoomer.jugcraft.test.StorageCrateMultiplayerHarness"
     ],
     "fabric-gametest": [
       "io.github.jimbozoomer.jugcraft.test.FestivalRegressionGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PoweredArmorGameTests",
+      "io.github.jimbozoomer.jugcraft.test.ChainsawTreeGameTests",
+      "io.github.jimbozoomer.jugcraft.test.DrillFaceGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PoweredToolEfficiencyGameTests",
+      "io.github.jimbozoomer.jugcraft.test.ChargingStationGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PoweredEquipmentGameTests",
       "io.github.jimbozoomer.jugcraft.building.TwigworksWorldGameTests",
       "io.github.jimbozoomer.jugcraft.test.EquipmentAccessGameTests",
       "io.github.jimbozoomer.jugcraft.test.CraftingChoicesGameTests",
@@ -429,6 +436,12 @@
       "io.github.jimbozoomer.jugcraft.test.JeiStationClientGameTests$WithJei$Probe"
     ],
     "fabric-client-gametest": [
+      "io.github.jimbozoomer.jugcraft.test.PoweredArmorClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.HeldEquipmentClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.ChainsawTreeClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.DrillFaceClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.ChargingStationClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PoweredEquipmentClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.EquipmentAccessClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.CraftingChoicesClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.ImportedModelAtlasClientTests",
@@ -738,6 +751,10 @@
     "jugcraft": "*"
   },
   "mixins": [
-    "jugcraft-test.mixins.json"
+    "jugcraft-test.mixins.json",
+    {
+      "config": "jugcraft-test.client.mixins.json",
+      "environment": "client"
+    }
   ]
 }

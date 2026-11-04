@@ -412,6 +412,16 @@
             "chapter": 26,
             "page": 0
           }
+        },
+        {
+          "title": "Powered Ore Surveys",
+          "icon": "jugcraft:jimta_ore_scanner",
+          "text": "Ore Scanner, Advanced Ore Scanner",
+          "link": {
+            "type": "handbook",
+            "chapter": 27,
+            "page": 0
+          }
         }
       ]
     },

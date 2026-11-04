@@ -2,6 +2,8 @@ package io.github.jimbozoomer.jugcraft.tools;
 
 import java.util.ArrayDeque;
 import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.function.Consumer;
 import net.minecraft.ChatFormatting;
@@ -25,15 +27,16 @@ import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * The mining drill: a JE-powered pickaxe and shovel in one. Sneak and use it to switch between three
- * modes: one block, a 3×3 square facing the way you mine (5×5 with a range module), or a whole ore
+ * modes: one block, a 3×3 square parallel to the starting block face (5×5 with a range module), or a whole ore
  * vein (every touching block of the same ore, up to {@link #VEIN_LIMIT}).
  */
 public class MiningDrillItem extends PoweredToolItem {
 	public static final int SINGLE = 0;
 	public static final int AREA = 1;
 	public static final int VEIN = 2;
+	public static final int AREA_LARGE = 3;
 	public static final int VEIN_LIMIT = 32;
-	private static final String[] MODE_NAMES = {"single", "area", "vein"};
+	private static final String[] MODE_NAMES = {"single", "area", "vein", "large"};
 	private static final TagKey<Block> ORES = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("c", "ores"));
 
 	public MiningDrillItem(Properties properties, long capacity, long energyPerBlock) {
@@ -41,7 +44,8 @@ public class MiningDrillItem extends PoweredToolItem {
 	}
 
 	public static int mode(ItemStack stack) {
-		return Math.floorMod(stack.getOrDefault(JugcraftTools.DRILL_MODE, SINGLE), MODE_NAMES.length);
+		int mode = Math.floorMod(stack.getOrDefault(JugcraftTools.DRILL_MODE, SINGLE), MODE_NAMES.length);
+        return mode == AREA_LARGE && ToolUpgrades.level(stack, ToolUpgrades.Kind.RANGE) == 0 ? AREA : mode;
 	}
 
 	@Override
@@ -51,7 +55,13 @@ public class MiningDrillItem extends PoweredToolItem {
 		}
 		ItemStack stack = player.getItemInHand(hand);
 		if (!level.isClientSide()) {
-			int mode = (mode(stack) + 1) % MODE_NAMES.length;
+			int current = mode(stack);
+            int mode = switch (current) {
+                case SINGLE -> AREA;
+                case AREA -> ToolUpgrades.level(stack, ToolUpgrades.Kind.RANGE) > 0 ? AREA_LARGE : VEIN;
+                case AREA_LARGE -> VEIN;
+                default -> SINGLE;
+            };
 			stack.set(JugcraftTools.DRILL_MODE, mode);
 			player.sendOverlayMessage(Component.translatable("message.jugcraft.drill_mode",
 					Component.translatable("message.jugcraft.drill_mode." + MODE_NAMES[mode])));
@@ -61,17 +71,16 @@ public class MiningDrillItem extends PoweredToolItem {
 
 	@Override
 	protected void afterMining(ItemStack stack, ServerLevel level, BlockState state, BlockPos pos, ServerPlayer player) {
+        if (player.isShiftKeyDown()) return;
 		switch (mode(stack)) {
-			case AREA -> {
-				Direction.Axis facing = miningAxis(player);
-				int reach = areaReach(stack);
-				for (int a = -reach; a <= reach; a++) {
-					for (int b = -reach; b <= reach; b++) {
-						if (a != 0 || b != 0) {
-							breakExtra(stack, level, offset(pos, facing, a, b), player);
-						}
-					}
-				}
+			case AREA, AREA_LARGE -> {
+                Direction face = ((DrillMiningContext) player.gameMode).jugcraft$drillFace(pos);
+                if (face == null) return;
+                for (BlockPos target : areaTargets(stack, pos, face)) {
+                    if (!target.equals(pos) && level.hasChunkAt(target)
+                        && level.getBlockState(target).getDestroySpeed(level, target) <= state.getDestroySpeed(level, pos))
+                        breakExtra(stack, level, target, player);
+                }
 			}
 			case VEIN -> {
 				if (state.is(ORES)) {
@@ -85,13 +94,17 @@ public class MiningDrillItem extends PoweredToolItem {
 
 	/** Blocks mined each way from the centre in area mode: 1 (3×3), or 2 (5×5) with a range module. */
 	public static int areaReach(ItemStack stack) {
-		return 1 + ToolUpgrades.level(stack, ToolUpgrades.Kind.RANGE);
+		return mode(stack) == AREA_LARGE ? 2 : 1;
 	}
 
-	/** The axis the player mines along: vertical when looking steeply up or down, else the way they face. */
-	static Direction.Axis miningAxis(Player player) {
-		return Math.abs(player.getXRot()) > 45 ? Direction.Axis.Y : player.getDirection().getAxis();
-	}
+    /** One layer centred on the clicked block, parallel to its hit face, for both mining and preview. */
+    public static List<BlockPos> areaTargets(ItemStack stack, BlockPos root, Direction face) {
+        int reach = areaReach(stack);
+        List<BlockPos> result = new ArrayList<>((2 * reach + 1) * (2 * reach + 1));
+        for (int a = -reach; a <= reach; a++) for (int b = -reach; b <= reach; b++)
+            result.add(offset(root, face.getAxis(), a, b));
+        return result;
+    }
 
 	/** {@code pos} moved by (a, b) in the plane square to {@code axis}. */
 	static BlockPos offset(BlockPos pos, Direction.Axis axis, int a, int b) {
@@ -102,19 +115,22 @@ public class MiningDrillItem extends PoweredToolItem {
 		};
 	}
 
+    public static int veinLimit(ItemStack stack) { return VEIN_LIMIT * (1 + ToolUpgrades.level(stack, ToolUpgrades.Kind.RANGE)); }
+
 	private void mineVein(ItemStack stack, ServerLevel level, Block ore, BlockPos start, ServerPlayer player) {
 		Set<BlockPos> seen = new HashSet<>();
 		ArrayDeque<BlockPos> queue = new ArrayDeque<>();
 		seen.add(start);
 		queue.add(start);
-		int mined = 0;
-		while (!queue.isEmpty() && mined < VEIN_LIMIT) {
+		int mined = 1;
+        int limit = veinLimit(stack);
+		while (!queue.isEmpty() && mined < limit) {
 			BlockPos pos = queue.poll();
 			for (BlockPos next : BlockPos.betweenClosed(pos.offset(-1, -1, -1), pos.offset(1, 1, 1))) {
-				if (seen.size() > VEIN_LIMIT * 8 || mined >= VEIN_LIMIT) {
+				if (seen.size() > limit * 8 || mined >= limit) {
 					return;
 				}
-				if (seen.add(next.immutable()) && level.getBlockState(next).is(ore)) {
+				if (level.hasChunkAt(next) && seen.add(next.immutable()) && level.getBlockState(next).is(ore)) {
 					BlockPos found = next.immutable();
 					if (breakExtra(stack, level, found, player)) {
 						mined++;
