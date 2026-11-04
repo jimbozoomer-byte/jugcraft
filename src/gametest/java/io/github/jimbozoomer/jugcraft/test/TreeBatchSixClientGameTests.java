@@ -48,12 +48,17 @@ public class TreeBatchSixClientGameTests extends TreeBatchTwoClientGameTests {
 			Jugcraft.LOGGER.info("[tree 6 natural sample] {} at {}: {}",biome.identifier(),at,counts);
 			if (hasTarget(biome.identifier().getPath(),counts)) return at;
 		}
-		// Cold Desert has only a 1-in-6 chunk attempt, restricted to coarse-dirt
-		// patches. Nearby biome lookups can collapse to the same tiny fragment.
-		// Inspect bounded, distinct regional samples; never plant the target tree.
-		for (BlockPos anchor : surveyAnchors(biome.identifier().getPath())) {
-			if (anchor.equals(BlockPos.ZERO)) continue;
-			var nearest=level.findClosestBiome3d(holder -> holder.is(biome),first.offset(anchor),4096,64,64);
+		// A rare coarse-dirt-only tree need not grow in the nearest patch. Reuse the
+		// tour's bounded two rings of independent regions for Cold Desert; the
+		// success condition below still requires naturally generated juniper needles.
+		var regions = new java.util.ArrayList<BlockPos>();
+		if (biome.identifier().getPath().equals("cold_desert")) {
+			for (var anchor : surveyAnchors("cold_desert")) if (!anchor.equals(BlockPos.ZERO)) regions.add(anchor);
+		} else {
+			regions.addAll(List.of(new BlockPos(4096,0,0),new BlockPos(-4096,0,0),new BlockPos(0,0,4096),new BlockPos(0,0,-4096)));
+		}
+		for (BlockPos offset : regions) {
+			var nearest=level.findClosestBiome3d(holder -> holder.is(biome),first.offset(offset),4096,64,64);
 			BlockPos at=nearest==null?null:BiomeClientGameTests.surfaceSpot(level,nearest.getFirst(),biome);
 			if(at==null || !checked.add(at)) continue;
 			var counts=survey(level,at,biome,true);

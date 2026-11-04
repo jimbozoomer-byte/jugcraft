@@ -32,6 +32,7 @@ Usage: select_client_tests.py [--base REV] [--head REV] [--all] [--shards N] [--
 Without --base, or with --all, every class runs. Prints a summary and one line per shard.
 """
 import argparse
+from functools import cache
 import json
 import pathlib
 import re
@@ -43,7 +44,8 @@ MOD_JSON = "src/gametest/resources/fabric.mod.json"
 TEST_DIR = ROOT / "src" / "gametest" / "java"
 CODE_DIRS = (ROOT / "src" / "main" / "java", ROOT / "src" / "client" / "java")
 
-# Rough seconds each class takes on a CI runner, to share them out evenly; others are estimated from their length.
+# Rough seconds each class takes on a CI runner, to share them out evenly; ordinary
+# classes use a startup allowance plus source length, and tree subclasses retain harness work.
 # Estimates from the client jobs' logs of October 2026, not measurements per class: with the biome tour at 600, its
 # job took 22 minutes and the others 15 and 14. Biome, Guns, Styx, Arms and ArmorTiers are measured, from run
 # 37980438983's logs (565, 261, 221, 125 and 123 s; their length put the last four at 13 to 28), after three of them in
@@ -52,7 +54,17 @@ CODE_DIRS = (ROOT / "src" / "main" / "java", ROOT / "src" / "client" / "java")
 # jobs one still reached 29:32 (run 37989465048); the client tests then shared four jobs. With 131 classes the
 # estimates passed 25 minutes a job (the Cinder Kiln's), so they now share five.
 WEIGHTS = {
-    "BiomeClientGameTests": 570,
+    # Run 41745007572: the expanded biome tour and plant/processor galleries
+    # were still producing screenshots when their cohorts reached the hour.
+    # Include discovery, rendering and save/reopen work, not just source length.
+    "BiomeClientGameTests": 2100,
+    "NuclearClientGameTests": 1000,
+    "MachineConsolidationClientGameTests": 720,
+    "StarterChemistryClientGameTests": 240,
+    "DryCountryTreeClientGameTests": 480,
+    "TropicalTreeClientGameTests": 480,
+    "HangingFruitClientGameTests": 300,
+    "OrchardWorldgenClientGameTests": 180,
     # Run 38936177915: gun assertions alone span 17:22:33–17:52:09 (~30 minutes),
     # before setup/teardown. The growing all-gun gallery no longer fits its old 260 s estimate.
     "GunsClientGameTests": 2000,
@@ -118,9 +130,10 @@ WEIGHTS = {
     "TreeBatchSixClientGameTests": 600,
 }
 
-# A second rendered JVM needs its own host budget, without retained worlds
-# from unrelated suites. Small local shard counts still retain every class.
-ISOLATED_CLIENTS = {"OwnerCollectionsNetworkTests", "HerobrineNetworkTests", "ConcordancePactNetworkTests"}
+# Second JVMs, the gun gallery and the expanded biome tour need their own
+# host budget. Small local shard counts still retain every class.
+ISOLATED_CLIENTS = {"OwnerCollectionsNetworkTests", "HerobrineNetworkTests", "ConcordancePactNetworkTests",
+                    "GunsClientGameTests", "BiomeClientGameTests"}
 # Classes a client test shows without naming them (registered by another class, or reached through an optional
 # integration), by the classes that show them: Stolas's renderer (his glowmask layer, scale, culling and departure) and
 # his perch's and anchor's Jade provider (the unit review, D2).
@@ -334,13 +347,22 @@ def select(changed, tests, newly_listed, base=None, head=None):
 
 def share(classes, tests, shards):
     """Longest first, then swap small classes to reduce any remaining imbalance."""
+    @cache
     def weight(name):
         if name in WEIGHTS:
             return WEIGHTS[name]
         path = tests[name]["source"]
-        return 8 + (len(path.read_text(encoding="utf-8").splitlines()) // 15 if path.is_file() else 0)
+        source = path.read_text(encoding="utf-8") if path.is_file() else ""
+        # Short subclasses still run the entire natural-world tree harness,
+        # including regional generation, inspection and save/reopen validation.
+        if name == "TreeBatchTwoClientGameTests" or re.search(
+                r"\bclass\s+\w+\s+extends\s+TreeBatchTwoClientGameTests\b", strip_comments(source)):
+            return 300
+        return 30 + len(source.splitlines()) // 15
 
-    isolated = sorted(set(classes) & ISOLATED_CLIENTS) if shards > len(ISOLATED_CLIENTS) else []
+    isolated = sorted(set(classes) & ISOLATED_CLIENTS)
+    if shards <= len(isolated):
+        isolated = []
     reserved = [[weight(name), [name]] for name in isolated]
     jobs = [[0, []] for _ in range(shards - len(reserved))]
     for name in sorted(set(classes) - set(isolated), key=lambda n: (-weight(n), n)):

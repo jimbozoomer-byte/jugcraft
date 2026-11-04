@@ -2,6 +2,7 @@
 import importlib.util
 import json
 import re
+from tempfile import TemporaryDirectory
 from pathlib import Path
 import unittest
 from unittest.mock import patch
@@ -56,6 +57,32 @@ class ClientTestSelectionTests(unittest.TestCase):
             if count > len(selection.ISOLATED_CLIENTS):
                 for name in selection.ISOLATED_CLIENTS:
                     self.assertEqual(next(names for _, names in jobs if name in names), [name])
+
+    def test_hour_limit_cohorts_are_separated(self):
+        jobs = selection.share(set(self.tests), self.tests, 16)
+        group = lambda name: next(names for _, names in jobs if name in names)
+        self.assertEqual(['BiomeClientGameTests'], group('BiomeClientGameTests'))
+        self.assertNotIn('MachineConsolidationClientGameTests', group('NuclearClientGameTests'))
+        self.assertNotIn('DryCountryTreeClientGameTests', group('NuclearClientGameTests'))
+        self.assertNotIn('TropicalTreeClientGameTests', group('BiomeClientGameTests'))
+
+    def test_local_shards_isolate_only_the_selected_long_suites(self):
+        peers = {'ConcordancePactNetworkTests', 'HerobrineNetworkTests', 'OwnerCollectionsNetworkTests'}
+        selected = peers | {'PeepoHearthClientTests'}
+        jobs = selection.share(selected, self.tests, 4)
+        self.assertCountEqual([name for _, names in jobs for name in names], selected)
+        for name in peers:
+            self.assertEqual([name], next(names for _, names in jobs if name in names))
+
+    def test_short_tree_subclass_retains_its_inherited_world_work(self):
+        with TemporaryDirectory() as directory:
+            tree = Path(directory) / 'NewTree.java'
+            plain = Path(directory) / 'Small.java'
+            tree.write_text('class NewTree extends TreeBatchTwoClientGameTests {}', encoding='utf-8')
+            plain.write_text('class Small implements FabricClientGameTest {}', encoding='utf-8')
+            tree_cost = selection.share({'NewTree'}, {'NewTree': {'source': tree}}, 1)[0][0]
+            plain_cost = selection.share({'Small'}, {'Small': {'source': plain}}, 1)[0][0]
+            self.assertGreater(tree_cost, 4 * plain_cost)
 
     def test_unweighted_companion_uses_its_actual_source_length(self):
         name = "PeepoWorkSessionClientTests"
