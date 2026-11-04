@@ -27,7 +27,7 @@ public class PharmacologyHudArtClientGameTests implements FabricClientGameTest {
 	@Override public void runTest(ClientGameTestContext context) {
 		int scale=context.computeOnClient(c->c.options.guiScale().get());
 		var visuals=context.computeOnClient(c->ConcordanceClientOptions.drugVisuals());
-		context.runOnClient(c->{c.getWindow().setWindowed(1280,800);c.options.guiScale().set(2);c.resizeGui();ConcordanceClientOptions.setDrugVisuals(new DrugVisualOptions(false,75,70,60,70));});
+		context.runOnClient(c->{c.getWindow().setWindowed(1280,800);c.options.guiScale().set(2);c.resizeGui();if(c.gui.hud.isHidden())c.gui.hud.toggle();ConcordanceClientOptions.setDrugVisuals(new DrugVisualOptions(false,75,70,60,70));});
 		try(TestSingleplayerContext world=context.worldBuilder().adjustSettings(s->s.setGameMode(WorldCreationUiState.SelectedGameMode.SURVIVAL)).create()) {
 			world.getConnection().waitForChunksRender();var server=world.getServer();BlockPos at=context.computeOnClient(c->c.player.blockPosition());
 			server.runCommand("gamerule minecraft:send_command_feedback false");server.runCommand("gamerule minecraft:spawn_mobs false");server.runCommand("gamerule minecraft:advance_time false");server.runCommand("time set noon");server.runCommand("weather clear");
