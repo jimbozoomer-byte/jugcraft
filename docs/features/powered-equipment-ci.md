@@ -28,3 +28,17 @@ Submission checks and observed CI results are recorded after execution below. No
 The native client run reuses verified committed runtime resources from `5b550dbd63` and the repaired test fixtures. The prepared-output reconciliation copied 1,855 changed resources and removed 41 obsolete resources relative to its earlier `235524e0c8` preparation, verifying every copied payload. It uses `runClientGameTest -PclientTests=MineralSandClientGameTests,TreeBatchSixClientGameTests` with the documented compiler init, offline cache and `-x processResources -x processClientResources`; it does not read the concurrently regenerated source files. The fresh CI run will validate the submitted resources together.
 
 The mineral-sand regression has now completed both natural seeds: all four depleted positions, recovered inventory units and remaining reserves survived each reopening. The combined run has advanced to the tree regression. These results confirm the shutdown repair without claiming the still-running combined suite passed.
+
+## UTC-midnight follow-up
+
+On `734ec2e3b6`, Foundation passed all 335 repository tests plus 14 academy tests, and both normal and optional-integrations-absent builds passed all 3,408 required server tests. Full regeneration, material/recipe/art checks, pinned downloads, mixin/archive checks and release assembly passed. Fifteen client shards passed; shard 2 found an independent clock-boundary problem in `BiomeClientGameTests`.
+
+Run `41740637356`, job `126282172723`, began generating its biome samples at 23:52 UTC on November 3 and inspected their leaves after 00:01 UTC on November 4 (season day 308). With random ticks deliberately disabled, 74 of 28,164 leaves still had the preceding day's valid generation appearance. Comparing that generation snapshot with a later calendar date made the zero-stale assertion fail.
+
+The biome tour now owns an instant snapshot before creating its world and releases it after the world saves and closes. A client-only test mixin supplies that instant to the existing seasonal date calculation, preserving its configured time zone and calendar rules. The normal clock is delegated to whenever no snapshot is active. These fixtures live exclusively in the test mod.
+
+Before the tour, native assertions exercise instants immediately before and after midnight in the configured zone, then check that the live date is restored. The tour still requires zero stale leaves, its full biome coverage and every existing screenshot/dimension assertion. It neither repairs sampled leaves nor changes generation rules or acceptance thresholds. Main was fetched again and remains `a279a133ba`; there was no newer upstream fix to merge.
+
+The earlier local checks also completed: both original data failures passed, the mineral-sand/tree client pair passed in 26m 30s, and the full local Python attempt passed 325 cases with ten Windows shell-permission failures. All ten passed on a focused rerun with the required process permissions. The new biome-clock regression and its fresh CI run are recorded separately as they complete.
+
+The new fixture compiles, and the native client has passed the explicit before-midnight, after-midnight and live-clock-restoration assertions (`Biome season clock verified across midnight in UTC and released`). The full biome tour is running; a fresh CI run will validate the committed fixture with the rest of the suite.

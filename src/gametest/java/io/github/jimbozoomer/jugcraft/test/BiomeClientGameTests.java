@@ -89,7 +89,11 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 
 	@Override
 	public void runTest(ClientGameTestContext context) {
-		try (TestSingleplayerContext singleplayer = context.worldBuilder().adjustSettings(creator -> {
+		verifySeasonSnapshot();
+		// Generation and inspection must see the same calendar date even when this
+		// long tour crosses midnight. Close the world before releasing its snapshot.
+		try (TestSeasonClock seasonClock = TestSeasonClock.freeze();
+				TestSingleplayerContext singleplayer = context.worldBuilder().adjustSettings(creator -> {
 			creator.setGameMode(WorldCreationUiState.SelectedGameMode.CREATIVE);
 			creator.setWorldType(new WorldCreationUiState.WorldTypeEntry(creator.getSettings().worldgenLoadContext()
 					.lookupOrThrow(Registries.WORLD_PRESET).getOrThrow(WorldPresets.NORMAL)));
@@ -237,6 +241,27 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 						+ SEARCH + " blocks of the start (seed " + SEED + "): " + found);
 			}
 		}
+	}
+
+	/** Exercise the installed clock hook on both sides of midnight before starting the world. */
+	private static void verifySeasonSnapshot() {
+		var zone = JugcraftSeasons.settings().zone();
+		var midnight = java.time.LocalDate.now(zone).minusDays(1).atTime(23, 59, 59).atZone(zone).toInstant();
+		for (var instant : List.of(midnight, midnight.plusSeconds(2))) {
+			try (var clock = TestSeasonClock.freezeAt(instant)) {
+				var expected = java.time.LocalDate.ofInstant(instant, zone);
+				if (!JugcraftSeasons.date().equals(expected)) {
+					throw new AssertionError("Season date snapshot was not installed: expected " + expected);
+				}
+			}
+		}
+		var before = java.time.LocalDate.now(zone);
+		var restored = JugcraftSeasons.date();
+		var after = java.time.LocalDate.now(zone);
+		if (TestSeasonClock.frozenInstant() != null || !restored.equals(before) && !restored.equals(after)) {
+			throw new AssertionError("Season clock was not released after its scope");
+		}
+		LOGGER.info("Biome season clock verified across midnight in {} and released", zone);
 	}
 
 	/**
