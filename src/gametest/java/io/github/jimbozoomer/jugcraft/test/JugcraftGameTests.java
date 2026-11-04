@@ -3904,6 +3904,15 @@ public class JugcraftGameTests {
 		ServerLevel level = helper.getLevel();
 		var raid = io.github.jimbozoomer.jugcraft.raiders.RaiderRaids.start(level, helper.absolutePos(new BlockPos(20, 1, 10)),
 				helper.absolutePos(new BlockPos(20, 1, 34)), 1, level.getRandom());
+		helper.assertTrue(raid != null, "The siege fixture must start a raid");
+		// Establish this test's stuck-at-a-wall precondition independently of random gathering/crowding.
+		// Native gate marching remains covered by RaidApproachGameTests.
+		var grunt = raid.members().stream().map(level::getEntity)
+				.filter(io.github.jimbozoomer.jugcraft.raiders.RaiderInfantry.class::isInstance)
+				.map(io.github.jimbozoomer.jugcraft.raiders.RaiderInfantry.class::cast)
+				.filter(r -> r.role() == io.github.jimbozoomer.jugcraft.raiders.RaiderInfantry.Role.GRUNT)
+				.findFirst().orElseThrow(() -> new AssertionError("The siege fixture must include a grunt"));
+		grunt.setPos(helper.absoluteVec(new Vec3(20.5, 1, 19.5)));
 		helper.succeedWhen(() -> {
 			boolean ladder = false;
 			for (int x = 10; x <= 30 && !ladder; x++) {
