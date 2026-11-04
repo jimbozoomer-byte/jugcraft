@@ -4,7 +4,8 @@
   "package": "io.github.jimbozoomer.jugcraft.test.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "GameTestHelperPlayersMixin"
+    "GameTestHelperPlayersMixin",
+    "SeasonClockMixin"
   ],
   "injectors": {
     "defaultRequire": 1

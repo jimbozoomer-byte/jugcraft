@@ -1,0 +1,11 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "jugcraft:supps_candle_holder",
+    "minecraft:soul_soil"
+  ],
+  "result": {
+    "id": "jugcraft:supps_candle_holder_soul",
+    "count": 1
+  }
+}

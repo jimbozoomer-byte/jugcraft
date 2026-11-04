@@ -5,6 +5,7 @@ import io.github.jimbozoomer.jugcraft.agriculture.SeasonalLeavesBlock;
 import io.github.jimbozoomer.jugcraft.biome.JugcraftDimensions;
 import io.github.jimbozoomer.jugcraft.biome.JugcraftRegions;
 import io.github.jimbozoomer.jugcraft.season.JugcraftSeasons;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -89,7 +90,10 @@ public class BiomeClientGameTests implements FabricClientGameTest {
 
 	@Override
 	public void runTest(ClientGameTestContext context) {
-		try (TestSingleplayerContext singleplayer = context.worldBuilder().adjustSettings(creator -> {
+		// Freeze before world creation, including spawn terrain. Random ticks are disabled below, so a
+		// real midnight during the biome tour must not make correctly generated leaves appear stale.
+		try (TestSeasonClock clock = TestSeasonClock.freeze(Instant.parse("2026-10-20T12:00:00Z"));
+				TestSingleplayerContext singleplayer = context.worldBuilder().adjustSettings(creator -> {
 			creator.setGameMode(WorldCreationUiState.SelectedGameMode.CREATIVE);
 			creator.setWorldType(new WorldCreationUiState.WorldTypeEntry(creator.getSettings().worldgenLoadContext()
 					.lookupOrThrow(Registries.WORLD_PRESET).getOrThrow(WorldPresets.NORMAL)));

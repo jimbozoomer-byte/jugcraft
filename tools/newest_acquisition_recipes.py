@@ -33,10 +33,8 @@ def build():
     outputs['newest/homeworks/jungle_wall_mirror']=json.loads(json.dumps(mirror).replace('oak_planks','jungle_planks').replace('homeworks_oak_wall_mirror','homeworks_jungle_wall_mirror'))
     def shapeless(name, ingredients, count=1):
         outputs['acquisition/'+name]={'type':'minecraft:crafting_shapeless','ingredients':ingredients,'result':{'id':'jugcraft:'+name,'count':count}}
-    # These are actual separate color block IDs, not an NBT tint on the plain box.
-    for color in 'white orange magenta light_blue yellow lime pink gray light_gray cyan purple blue brown green red black'.split():
-        for kind in ('present','trapped_present'):
-            shapeless('supps_'+kind+'_'+color,['jugcraft:supps_'+kind,'minecraft:'+color+'_dye'])
+    # OwnerPresentRecipe owns recoloring/trapping, including these separate color
+    # block IDs. Ordinary shapeless alternatives would discard stored components.
     outputs['acquisition/forbidden_edelwood_stick']={'type':'minecraft:crafting_shaped','pattern':['P','P'],'key':{'P':'jugcraft:forbidden_edelwood_planks'},'result':{'id':'jugcraft:forbidden_edelwood_stick','count':4}}
     for material, plank, slab in (('glass','glass','glass_pane'),('iron','iron_block','iron_ingot')):
         for form in ('chair','wall_clock','grandfather_clock'):
@@ -139,10 +137,11 @@ def build_rewards():
     return out
 
 
-def main():
-    for name,data in build().items():write(RES/'data/jugcraft/recipe'/(name+'.json'),data)
-    for name,data in build_rituals().items():write(RES/'data/jugcraft/arcane_ritual'/('acquisition_'+name+'.json'),data)
-    for name,data in build_rewards().items():write(RES/'data/jugcraft/loot_table'/(name+'.json'),data)
+def main(writer=None):
+    emit = writer or write
+    for name,data in build().items():emit(RES/'data/jugcraft/recipe'/(name+'.json'),data)
+    for name,data in build_rituals().items():emit(RES/'data/jugcraft/arcane_ritual'/('acquisition_'+name+'.json'),data)
+    for name,data in build_rewards().items():emit(RES/'data/jugcraft/loot_table'/(name+'.json'),data)
     write(RES.parents[2]/'src/gametest/resources/newest-acquisition-cases.json',{'crafting':sorted(build()),'rituals':sorted(build_rituals())})
 
 if __name__=='__main__':main()

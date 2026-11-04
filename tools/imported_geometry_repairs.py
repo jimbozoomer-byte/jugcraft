@@ -36,22 +36,30 @@ def original_elements(path, elements):
     return elements
 
 
+def repair_elements(ref, elements, record):
+    """Apply one reviewed record, shared by native imports and the final atlas pass."""
+    current = digest(elements)
+    if current == record['after_sha256']:
+        return elements
+    if current != record['before_sha256']:
+        raise ValueError('Imported geometry changed; review before patching: ' + ref)
+    result = copy.deepcopy(elements)
+    for index, patch in record['elements'].items():
+        result[int(index)] = copy.deepcopy(patch['after'])
+    if digest(result) != record['after_sha256']:
+        raise ValueError('Invalid geometry repair manifest: ' + ref)
+    return result
+
+
 def apply(root=MODELS):
     changed = 0
     for ref, record in json.loads(MANIFEST.read_text(encoding='utf-8')).items():
         path = root / ref
         model = json.loads(path.read_text(encoding='utf-8'))
         elements = model.get('elements', [])
-        current = digest(elements)
-        if current == record['after_sha256']:
+        result = repair_elements(ref, elements, record)
+        if result is elements:
             continue
-        if current != record['before_sha256']:
-            raise ValueError('Imported geometry changed; review before patching: ' + ref)
-        result = copy.deepcopy(elements)
-        for index, patch in record['elements'].items():
-            result[int(index)] = patch['after']
-        if digest(result) != record['after_sha256']:
-            raise ValueError('Invalid geometry repair manifest: ' + ref)
         model['elements'] = result
         path.write_text(json.dumps(model, indent=2) + '\n', encoding='utf-8')
         changed += 1

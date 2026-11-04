@@ -1,0 +1,26 @@
+{
+  "type": "enchanting_apparatus",
+  "reagent": {
+    "item": "minecraft:amethyst_shard"
+  },
+  "pedestalItems": [
+    {
+      "item": "jugcraft:nouveau_source_gem"
+    },
+    {
+      "item": "jugcraft:nouveau_source_gem"
+    },
+    {
+      "item": "minecraft:gold_ingot"
+    },
+    {
+      "item": "minecraft:gold_ingot"
+    }
+  ],
+  "sourceCost": 1000,
+  "keepNbtOfReagent": false,
+  "result": {
+    "id": "jugcraft:ars_additions_memory_crystal",
+    "count": 1
+  }
+}

@@ -17,7 +17,14 @@ public final class ArcaneRituals extends SimpleJsonResourceReloadListener<JsonEl
     private ArcaneRituals(){super(ExtraCodecs.JSON,FileToIdConverter.json("arcane_ritual"));}
     public record Ritual(String id,JsonObject data,List<JsonElement> inputs,int tier,boolean exact,int duration,int[] essence){
         public int upgrade(){return data.getAsJsonObject("result").has("result_tier")?data.getAsJsonObject("result").get("result_tier").getAsInt():0;}
-        public ItemStack output(net.minecraft.core.HolderLookup.Provider registries,ItemStack main){var result=NouveauRecipes.stack(data.getAsJsonObject("result").get("result_item"),registries);return !result.isEmpty()&&data.getAsJsonObject("result").get("type").getAsString().endsWith("transmute_input")?main.transmuteCopy(result.getItem(),1):result;}
+        public ItemStack output(net.minecraft.core.HolderLookup.Provider registries,ItemStack main){
+            var spec=data.getAsJsonObject("result").get("result_item");
+            if(spec!=null&&spec.isJsonPrimitive()&&spec.getAsJsonPrimitive().isString()){
+                var object=new JsonObject();object.add("id",spec);spec=object;
+            }
+            var result=NouveauRecipes.stack(spec,registries);
+            return !result.isEmpty()&&data.getAsJsonObject("result").get("type").getAsString().endsWith("transmute_input")?main.transmuteCopy(result.getItem(),1):result;
+        }
         public boolean matches(ItemStack main,List<ItemStack> slots,int currentTier,int[] stored,int[] cost,List<ItemStack> enhancers){
             if(exact?currentTier!=tier:currentTier<tier)return false;
             if(!NouveauRecipes.ingredient(data.get("main_ingredient"),main))return false;

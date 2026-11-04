@@ -292,6 +292,10 @@ def main():
    write(RES/'data/jugcraft/recipe/jugtania'/p.relative_to(D/'recipes'),converted)
    continue
   if typ=='botania:twig_wand':v['type']=typ='minecraft:crafting_shaped'
+  if typ in ['botania:armor_upgrade','botania:water_bottle_matching_shaped']:
+   v['type']='jugcraft:botanical_armor_upgrade' if typ=='botania:armor_upgrade' else 'jugcraft:botanical_water_crafting'
+   write(RES/'data/jugcraft/recipe/jugtania'/p.relative_to(D/'recipes'),recipe(mapped(v)))
+   continue
   if refs({k:x for k,x in v.items() if k!='brew'})-known:continue
   if typ.startswith('minecraft:'):
    write(RES/'data/jugcraft/recipe/jugtania'/p.relative_to(D/'recipes'),recipe(mapped(v)))

@@ -40,7 +40,11 @@ ABOUT = {
                      "socket, on the outer side of its lower right block.",
     "metal_press": "Presses one ingot into one plate. Four plates craft a gear.",
     "wire_drawer": "Draws one ingot into three wires.",
-    "circuit_assembler": "Assembles circuits from up to three ingredients, in any slots.",
+    "circuit_assembler": "Assembles circuits from up to three ingredients, in any slots. "
+                         "Basic: one silicon, one copper ingot and one tin ingot make one circuit. "
+                         "Use three copper wire instead of copper, or solder instead of tin, for two; both make four. "
+                         "Advanced: two basic circuits, one silver ingot and one invar ingot make one. "
+                         "Three silver wire instead of silver, or an invar plate instead of invar, make two; both make four.",
     "geothermal_generator": "Two blocks wide. Burns lava from its tank (buckets, pumps or pipes): one bucket lasts 1,000 ticks.",
     "wind_turbine": "Nine blocks tall with a seven-block rotor. The higher it stands and the worse the weather, the more it "
                     "makes, up to 72 JE/t (twice that in a thunderstorm). The rotor needs a clear 7x7 square in front of "
@@ -200,7 +204,8 @@ ABOUT = {
                         "energy they hold. It uses no power.",
     "lithography_station": "Three wide, two tall and two deep: a cleanroom and an operator's desk with a monitor bank. "
                            "A silicon wafer, two copper wire and 100 mB of sulfuric acid make four microchips, every "
-                           "10 seconds at 192 JE/t. Pipe the acid into its tank.",
+                           "10 seconds at 192 JE/t. Substitute 50 mB of nitric acid for eight microchips in the same time. "
+                           "Pipe the acid into its tank.",
     "lithium_battery_bank": "Three wide, two tall, one deep: six lithium battery modules holding 32,000,000 JE, eight "
                             "capacitor banks. It charges from any side and gives power out of the sockets on its "
                             "front, 16,384 JE/t.",
@@ -840,7 +845,9 @@ PROGRESSION = [
         ("coal_generator", "Coal generator"), ("copper_cable", "Copper cable"), ("electric_furnace", "Electric furnace"),
         ("crusher", "Crusher: 2x ore")]),
     ("Workshop", "basic_circuit", "Plates, wires and circuits: the parts every later machine needs.", [
-        "Make plates in the metal press and wire in the wire drawer, then basic circuits.",
+        "Craft one silicon, one copper ingot and one tin ingot into one basic circuit, even in your inventory. "
+        "In the workshop bench or circuit assembler, three copper wire replace copper and solder replaces tin: "
+        "either upgrade makes two circuits, both make four. Prepare plates and wire for better yields.",
         "Store power in a battery box. The pulverizer and ore washer take ore to three ingots each.",
         "Find surface deposits with the prospector and put a deposit drill on them."], [
         ("metal_press", "Metal press"), ("wire_drawer", "Wire drawer"), ("basic_circuit", "Basic circuit"),
@@ -1078,7 +1085,7 @@ def build():
                 "The synthesis converter joins hydrogen and nitrogen into ammonia, and burns ammonia in oxygen over "
                 "water into nitric acid.",
                 "Ammonia and phosphate make fertilizer (six for two phosphate, against four with sulfuric acid). "
-                "Nitric acid etches microchips with half as much acid as sulfuric."]},
+                "Nitric acid etches eight microchips per wafer with 50 mB of acid; sulfuric makes four with 100 mB."]},
             machine_page("air_separation_unit"),
             machine_page("synthesis_converter"),
             form_page("chemical_infuser"),

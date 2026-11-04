@@ -279,6 +279,10 @@ jobs:
       - name: Run client game tests (shard ${{ matrix.shard }} of 16)
         if: env.CLASSES != ''
         run: |
+          # Keep the native output and periodic thread dumps in the artifact;
+          # screenshot-heavy job logs can exceed the log connector's limit.
+          mkdir -p build/ci-evidence
+          exec > >(tee "build/ci-evidence/client-shard-${{ matrix.shard }}.log") 2>&1
           # Both bounded JVMs plus software rendering need spillover on hosted runners.
           sudo fallocate -l 8G /mnt/jugcraft-client.swap
           sudo chmod 600 /mnt/jugcraft-client.swap
@@ -304,18 +308,7 @@ jobs:
         if: always() && env.CLASSES != ''
         run: |
           python3 -m pip install --quiet pillow
-          python3 - <<'PY'
-          import base64, glob, io, os
-          from PIL import Image
-          for path in sorted(glob.glob("**/screenshots/*.png", recursive=True)):
-              image = Image.open(path).convert("RGB")
-              image.thumbnail((480, 270))
-              buffer = io.BytesIO()
-              image.save(buffer, "JPEG", quality=60)
-              print(f"=== SCREENSHOT {os.path.basename(path)} {image.size}")
-              print(base64.b64encode(buffer.getvalue()).decode())
-              print("=== END")
-          PY
+          python3 scripts/preview_client_screenshots.py
       - uses: actions/upload-artifact@v4
         if: always() && env.CLASSES != ''
         with:
@@ -323,6 +316,9 @@ jobs:
           path: |
             **/screenshots/*.png
             **/owner-network-evidence/**/peer.log
+            build/ci-evidence/*.log
+            build/run/clientGameTest/logs/*.log
+            build/run/clientGameTest/crash-reports/*.txt
 
   # The client game tests' result: green only when the plan and every shard ran and passed.
   client:

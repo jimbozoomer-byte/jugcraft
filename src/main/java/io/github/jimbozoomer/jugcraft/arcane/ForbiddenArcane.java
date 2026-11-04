@@ -179,7 +179,9 @@ public final class ForbiddenArcane {
         MysteryLog(String name,Properties p){super(p,"stripped_"+name);this.name=name;}
         @Override public Block stripped(){return block("stripped_"+name);}
         @Override protected InteractionResult useItemOn(ItemStack stack,BlockState state,Level level,BlockPos pos,Player player,InteractionHand hand,BlockHitResult hit){
-            return name.startsWith("stripped_")?InteractionResult.PASS:super.useItemOn(stack,state,level,pos,player,hand,hit);
+            if(name.startsWith("stripped_"))return InteractionResult.PASS;
+            if(player instanceof ServerPlayer actor&&!Authority.mayChange(actor.level(),actor,pos))return InteractionResult.FAIL;
+            return super.useItemOn(stack,state,level,pos,player,hand,hit);
         }
         @Override public void animateTick(BlockState s,Level l,BlockPos p,RandomSource r){if(r.nextInt(3)==0)l.addParticle(ParticleTypes.END_ROD,p.getX()+r.nextDouble(),p.getY()+r.nextDouble(),p.getZ()+r.nextDouble(),0,.01,0);}
     }

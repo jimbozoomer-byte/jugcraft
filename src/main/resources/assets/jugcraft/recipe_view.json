@@ -1561,6 +1561,72 @@
               1
             ],
             [
+              "#c:ingots/copper",
+              1
+            ],
+            [
+              "#c:ingots/tin",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:basic_circuit",
+            1
+          ],
+          "extra": [],
+          "ticks": 200
+        },
+        {
+          "in": [
+            [
+              "jugcraft:silicon",
+              1
+            ],
+            [
+              "jugcraft:copper_wire",
+              3
+            ],
+            [
+              "#c:ingots/tin",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:basic_circuit",
+            2
+          ],
+          "extra": [],
+          "ticks": 200
+        },
+        {
+          "in": [
+            [
+              "jugcraft:silicon",
+              1
+            ],
+            [
+              "#c:ingots/copper",
+              1
+            ],
+            [
+              "jugcraft:solder_ingot",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:basic_circuit",
+            2
+          ],
+          "extra": [],
+          "ticks": 200
+        },
+        {
+          "in": [
+            [
+              "jugcraft:silicon",
+              1
+            ],
+            [
               "jugcraft:copper_wire",
               3
             ],
@@ -1571,10 +1637,76 @@
           ],
           "out": [
             "jugcraft:basic_circuit",
-            1
+            4
           ],
           "extra": [],
           "ticks": 200
+        },
+        {
+          "in": [
+            [
+              "jugcraft:basic_circuit",
+              2
+            ],
+            [
+              "#c:ingots/silver",
+              1
+            ],
+            [
+              "#c:ingots/invar",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:advanced_circuit",
+            1
+          ],
+          "extra": [],
+          "ticks": 300
+        },
+        {
+          "in": [
+            [
+              "jugcraft:basic_circuit",
+              2
+            ],
+            [
+              "jugcraft:silver_wire",
+              3
+            ],
+            [
+              "#c:ingots/invar",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:advanced_circuit",
+            2
+          ],
+          "extra": [],
+          "ticks": 300
+        },
+        {
+          "in": [
+            [
+              "jugcraft:basic_circuit",
+              2
+            ],
+            [
+              "#c:ingots/silver",
+              1
+            ],
+            [
+              "jugcraft:invar_plate",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:advanced_circuit",
+            2
+          ],
+          "extra": [],
+          "ticks": 300
         },
         {
           "in": [
@@ -1593,7 +1725,7 @@
           ],
           "out": [
             "jugcraft:advanced_circuit",
-            1
+            4
           ],
           "extra": [],
           "ticks": 300
@@ -11639,7 +11771,7 @@
           "results": [
             [
               "jugcraft:microchip",
-              4
+              8
             ]
           ],
           "ticks": 200,
@@ -17826,6 +17958,90 @@
               1
             ],
             [
+              "#c:ingots/copper",
+              1
+            ],
+            [
+              "#c:ingots/tin",
+              1
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:basic_circuit",
+              1
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:soldering_tool",
+          "retained_inputs": [],
+          "energy_per_tick": 0
+        },
+        {
+          "items": [
+            [
+              "jugcraft:silicon",
+              1
+            ],
+            [
+              "jugcraft:copper_wire",
+              3
+            ],
+            [
+              "#c:ingots/tin",
+              1
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:basic_circuit",
+              2
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:soldering_tool",
+          "retained_inputs": [],
+          "energy_per_tick": 0
+        },
+        {
+          "items": [
+            [
+              "jugcraft:silicon",
+              1
+            ],
+            [
+              "#c:ingots/copper",
+              1
+            ],
+            [
+              "jugcraft:solder_ingot",
+              1
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:basic_circuit",
+              2
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:soldering_tool",
+          "retained_inputs": [],
+          "energy_per_tick": 0
+        },
+        {
+          "items": [
+            [
+              "jugcraft:silicon",
+              1
+            ],
+            [
               "jugcraft:copper_wire",
               3
             ],
@@ -17839,7 +18055,7 @@
           "results": [
             [
               "jugcraft:basic_circuit",
-              1
+              4
             ]
           ],
           "ticks": 200,
@@ -33070,6 +33286,43 @@
         "jugcraft:nouveau_enchanting_apparatus"
       ],
       "recipes": [
+        {
+          "id": "nouveau/memory_crystal",
+          "inputs": [
+            {
+              "ingredient": "minecraft:amethyst_shard",
+              "count": 1
+            },
+            {
+              "ingredient": "jugcraft:nouveau_source_gem",
+              "count": 1
+            },
+            {
+              "ingredient": "jugcraft:nouveau_source_gem",
+              "count": 1
+            },
+            {
+              "ingredient": "minecraft:gold_ingot",
+              "count": 1
+            },
+            {
+              "ingredient": "minecraft:gold_ingot",
+              "count": 1
+            }
+          ],
+          "outputs": [
+            {
+              "id": "jugcraft:ars_additions_memory_crystal",
+              "count": 1
+            }
+          ],
+          "tools": [],
+          "ticks": 0,
+          "notes": [
+            "10 Ley; 0 experience points.",
+            "Requires an Arcane Core below the apparatus."
+          ]
+        },
         {
           "id": "nouveau/advanced_dominion_wand",
           "inputs": [

@@ -1,0 +1,31 @@
+{
+  "forge_tier": 3,
+  "main_ingredient": {
+    "item": "minecraft:netherite_pickaxe"
+  },
+  "inputs": [
+    {
+      "amount": 4,
+      "ingredient": {
+        "item": "jugcraft:forbidden_deorum_ingot"
+      }
+    },
+    {
+      "amount": 1,
+      "ingredient": {
+        "item": "jugcraft:forbidden_stellarite_piece"
+      }
+    }
+  ],
+  "essences": {
+    "aureal": 1200,
+    "blood": 600,
+    "experience": 600,
+    "souls": 9
+  },
+  "magic_circle": "jugcraft:forbidden_create_item",
+  "result": {
+    "type": "jugcraft:forbidden_transmute_input",
+    "result_item": "jugcraft:forbidden_reinforced_deorum_pickaxe"
+  }
+}

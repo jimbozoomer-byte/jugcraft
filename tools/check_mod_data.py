@@ -170,6 +170,7 @@ EXTERNAL_TAGS |= {'minecraft:'+tag for tag in ('terracotta','beehives','coral_bl
 EXTERNAL_TAGS |= {'minecraft:has_structure/ruined_portal_ocean', 'minecraft:is_savanna', 'minecraft:is_beach', 'minecraft:wool_carpets', 'minecraft:gold_ores', 'c:nuggets/iron', 'c:slime_balls', 'minecraft:emerald_ores', 'c:dyes', 'minecraft:has_structure/ruined_portal_jungle', 'c:ingots/gold', 'minecraft:lapis_ores', 'minecraft:is_ocean', 'minecraft:iron_ores', 'c:rods/wooden', 'minecraft:diamond_ores', 'c:strings', 'c:is_mountain', 'minecraft:redstone_ores', 'minecraft:is_deep_ocean', 'minecraft:coal_ores', 'minecraft:copper_ores', 'minecraft:is_river'}
 
 EXTERNAL_TAGS.add('c:music_discs')  # Verified in the pinned Fabric convention JAR.
+EXTERNAL_TAGS.add('c:nuggets/gold')  # Fabric 4.10.3+6b5b47fd5d: minecraft:gold_nugget.
 
 errors = []
 
@@ -441,13 +442,81 @@ import guide_books
 import exchange_blocks
 import exchange_poker
 import exchange_casino
+# OwnerRibbits registers these native oak blocks unconditionally from Jugcraft's
+# initializer. The supplied crafting routes consume wood, moss/vines and sticks;
+# none recovers metal. Keep this bounded to the actual six blocks and eleven
+# recipe/result pairs, rather than treating every future ribbits_* ID as exempt.
+RIBBITS_WOOD_ITEMS = {"ribbits_mossy_oak_door", "ribbits_mossy_oak_planks"} | {
+    "ribbits_mossy_oak_planks_" + form for form in ("stairs", "slab", "fence", "fence_gate")}
+RIBBITS_WOOD_RECIPE_OUTPUTS = {
+    **{name: name for name in RIBBITS_WOOD_ITEMS if name != "ribbits_mossy_oak_planks"},
+    **{name + "_from_moss_block": name for name in RIBBITS_WOOD_ITEMS if name != "ribbits_mossy_oak_door"},
+    "ribbits_mossy_oak_planks_from_vine": "ribbits_mossy_oak_planks",
+}
 NON_METAL = {"chess_table", "checkers_table", "giant_turkey_feast", "candied_sweet_potatoes", "dinner_roll", "harvest_pea_casserole", "mashed_potatoes_and_gravy", "pilgrim_coat_costume", "pilgrim_dress_costume", "cursed_mirror"} | set(guide_books.BOOKS) | {"sawdust"} | set(MINERALS) | set(ITEMS) | set(machine_blocks()) | set(machine_items()) | set(CIRCUITS) | {b for m in MINERALS for b in (f"{m}_ore", f"deepslate_{m}_ore", f"{m}_block")} | {"oil_sand"} | set(petro.petro_items()) | set(ag.all_blocks()) | set(ag.all_items()) | set(petro.petro_blocks()) | set(tank_display.BLOCKS) | set(ph.blocks()) | set(ph.items()) | set((town_assets.blocks() + styx.blocks()))
+
+
+@cache
+def recipe_platform_reference():
+    reference = load(ROOT / 'tools/data/survival-reference-26.3.json') or {}
+    if reference.get('minecraft') != '26.3' or reference.get('fabric_conventions') != '4.10.3+6b5b47fd5d':
+        raise ValueError('Recipe ingredient reference must match the pinned platform')
+    return reference
+
+
+def household_tag_items(ref):
+    """Resolve actual native alternatives, including optional compatibility entries."""
+    reference = recipe_platform_reference()
+    known = set(reference['items']) | {rid_of(item) for item in registered_items()}
+
+    def members(entry, seen=frozenset()):
+        optional = isinstance(entry, dict) and entry.get('required') is False
+        value = entry.get('id') if isinstance(entry, dict) else entry
+        if not isinstance(value, str):
+            err(f'Invalid household ingredient tag member: {entry!r}')
+            return set()
+        if not value.startswith('#'):
+            if value in known:
+                return {value}
+            if not optional:
+                err(f'Unknown required household ingredient: {value}')
+            return set()
+        key = value[1:]
+        if key in seen:
+            err(f'Cyclic household ingredient tag: {value}')
+            return set()
+        values = reference['tags'].get(key)
+        ns, path = split(key)
+        local = DATA / ns / 'tags/item' / (path + '.json')
+        if local.is_file():
+            tag = load(local) or {}
+            values = ([] if tag.get('replace') else list(values or [])) + tag.get('values', [])
+        if values is None:
+            if not optional:
+                err(f'Unknown required household ingredient tag: {value}')
+            return set()
+        return set().union(*(members(entry, seen | {key}) for entry in values))
+
+    result = members(ref)
+    if not result:
+        err(f'Recipe uses empty household ingredient tag {ref}')
+    return result
 
 
 def item_units(ref):
     """Returns {metal: units} for an item or tag reference."""
     import vehicle_bays
+    if ref in {'#jugcraft:supps_blackboard_white', '#jugcraft:supps_straw'}:
+        # A slot consumes one real member, never every optional compatibility
+        # entry. Each metal must be present in every choice; comparing only total
+        # mass could mistake a gold alternative for a source of iron.
+        choices = [item_units(item) for item in sorted(household_tag_items(ref))]
+        metals = set().union(*(units.keys() for units in choices))
+        minimum = {metal: min(units.get(metal, 0) for units in choices) for metal in metals}
+        return {metal: units for metal, units in minimum.items() if units}
     ns, path = split(ref.lstrip("#"))
+    if not ref.startswith('#') and ns == MOD and path in RIBBITS_WOOD_ITEMS:
+        return {}
     if ref in {'#jugcraft:supps_blackboard_white','#jugcraft:supps_straw','#c:ash','#c:crops/flax','#c:dyes','#c:rods/wooden','#c:slime_balls','#c:strings'}:
         return {}  # Ordinary non-metal ingredients, verified native tags.
     if ns == MOD and path.startswith(('supps_','amends_')):
@@ -598,8 +667,9 @@ def check_recipes(registered):
         groups = [sorted([c.get("feature"), *c.get("or", [])]) for c in switches]
         # Owner household families register unconditionally, unlike the older
         # switch-gated industrial recipes; do not require a nonexistent toggle.
-        # These native festival/table registrars run unconditionally.
-        always_on = name.startswith(('supps_', 'amends_')) or name in {
+        ribbits_output = RIBBITS_WOOD_RECIPE_OUTPUTS.get(name)
+        always_on = name.startswith(('supps_', 'amends_')) or (
+            ribbits_output in registered and recipe.get('result', {}).get('id') == f'{MOD}:{ribbits_output}') or name in {
             'chess_table', 'checkers_table', 'giant_turkey_feast',
             'pilgrim_coat_costume', 'pilgrim_dress_costume', 'harvest_dinner_roll',
             'harvest_mashed_potatoes_and_gravy', 'harvest_harvest_pea_casserole',
@@ -20258,6 +20328,23 @@ def _read_recipe_edges():
         if path.relative_to(DATA / MOD).parts[0] in NOT_RECIPES:
             continue
         data = load(path)
+        if path.relative_to(DATA / MOD).parts[0] == 'arcane_ritual' and isinstance(data, dict):
+            # A ritual's result wrapper contains a serializer ID and may name a
+            # magic-circle renderer. Neither is an item: treating the shared
+            # forbidden_create_item ID as output joins unrelated rituals into
+            # fictitious material routes. Keep the actual base and pedestal
+            # ingredients (including retained equipment), and only real results.
+            result = data.get('result', {})
+            output = result.get('result_item')
+            if isinstance(output, dict):
+                output = output.get('id', output.get('item'))
+            if result.get('type') == 'jugcraft:forbidden_upgrade_tier':
+                output = 'jugcraft:forbidden_hephaestus_forge_tier_' + str(result['result_tier'])
+            if isinstance(output, str):
+                feed = {key: data[key] for key in ('main_ingredient', 'inputs', 'enhancers') if key in data}
+                made = named(json.dumps(output))
+                recipes.append((frozenset(named(json.dumps(feed)) - made), frozenset(made)))
+            continue
         made = results(data) if data is not None else set()
         if made:
             # Botanical infusion catalysts are installed beneath the pool, not

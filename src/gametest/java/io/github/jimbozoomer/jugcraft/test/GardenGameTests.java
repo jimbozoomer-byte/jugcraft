@@ -6,6 +6,9 @@ import io.github.jimbozoomer.jugcraft.agriculture.RottenTomato;
 import io.github.jimbozoomer.jugcraft.agriculture.TallCrop;
 import io.github.jimbozoomer.jugcraft.agriculture.TallCropBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.TomatoVineBlock;
+import java.util.HashSet;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -21,6 +24,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -125,6 +129,29 @@ public class GardenGameTests {
 				helper.setBlock(at.offset(dx, 1, dz), Blocks.STONE);
 			}
 		}
+	}
+
+	/** Flush native lighting for the enclosure and open control, without assuming game ticks imply worker progress. */
+	private static void finishColonyLighting(GameTestHelper helper, BlockPos dark, BlockPos open) {
+		ServerLevel level = helper.getLevel();
+		var light = level.getChunkSource().getLightEngine();
+		var chunks = new HashSet<ChunkPos>();
+		BlockPos enclosed = helper.absolutePos(dark);
+		for (int dx = -1; dx <= 1; dx++) {
+			for (int dz = -1; dz <= 1; dz++) {
+				chunks.add(ChunkPos.containing(enclosed.offset(dx, 0, dz)));
+			}
+		}
+		chunks.add(ChunkPos.containing(helper.absolutePos(open)));
+		var pending = CompletableFuture.allOf(chunks.stream()
+				.map(chunk -> light.waitForPendingTasks(chunk.x(), chunk.z())).toArray(CompletableFuture[]::new));
+		long deadline = System.nanoTime() + TimeUnit.SECONDS.toNanos(10);
+		level.getServer().managedBlock(() -> {
+			light.tryScheduleUpdate();
+			return pending.isDone() || System.nanoTime() >= deadline;
+		});
+		helper.assertTrue(pending.isDone(), "Colony lighting work must finish within ten seconds");
+		pending.join();
 	}
 
 	// ---------------------------------------------------------------- the tomato vine that goes over
@@ -247,8 +274,18 @@ public class GardenGameTests {
 	 * A colony shut away from the light grows through its stages; one under the open sky does not, though bone meal grows it
 	 * a stage anywhere. A grown colony stops ticking.
 	 */
-	@GameTest(maxTicks = 80)
+	@GameTest(maxTicks = 200)
 	public void coloniesGrowInTheShade(GameTestHelper helper) {
+		checkColonyGrowthAfterLightingSettles(helper, 0);
+	}
+
+	/** A roof added after the old 40-tick cutoff still gates growth checks on actual lighting. */
+	@GameTest(maxTicks = 200)
+	public void coloniesWaitForLateShadeBeforeCheckingGrowth(GameTestHelper helper) {
+		checkColonyGrowthAfterLightingSettles(helper, 60);
+	}
+
+	private static void checkColonyGrowthAfterLightingSettles(GameTestHelper helper, int roofTick) {
 		floor(helper);
 		BlockPos dark = new BlockPos(2, 1, 2);
 		BlockPos open = new BlockPos(6, 1, 6);
@@ -256,14 +293,23 @@ public class GardenGameTests {
 		helper.setBlock(open, block("rich_soil"));
 		helper.setBlock(dark.above(), colony("brown_mushroom_colony"));
 		helper.setBlock(open.above(), colony("red_mushroom_colony"));
-		shut(helper, dark.above());
-		// Give the light engine time to darken the shut one.
-		helper.runAtTickTime(40, () -> {
+		if (roofTick == 0) {
+			shut(helper, dark.above());
+		} else {
+			helper.runAtTickTime(roofTick, () -> shut(helper, dark.above()));
+		}
+		// Complete the light worker's pending work once the roof exists, then check the actual
+		// readings. Worker errors and growth/bone-meal failures are terminal, never retried away.
+		helper.startSequence().thenWaitUntil(() -> helper.assertBlockPresent(Blocks.STONE, dark.above(2)))
+				.thenExecute(() -> finishColonyLighting(helper, dark.above(), open.above())).thenWaitUntil(() -> {
 			ServerLevel level = helper.getLevel();
 			int shade = level.getRawBrightness(helper.absolutePos(dark.above()), 0);
 			int sky = level.getRawBrightness(helper.absolutePos(open.above()), 0);
 			helper.assertTrue(shade <= MushroomColonyBlock.MAX_LIGHT && sky > MushroomColonyBlock.MAX_LIGHT,
 					"Stone shuts out the light (" + shade + "); the sky lights the other (" + sky + ")");
+		}).thenExecute(() -> {
+			ServerLevel level = helper.getLevel();
+			helper.assertTrue(helper.getTick() >= roofTick, "Growth checks wait for the roof to be installed");
 			tick(helper, dark.above(), 200);
 			tick(helper, open.above(), 200);
 			BlockState grown = helper.getBlockState(dark.above());
@@ -274,8 +320,7 @@ public class GardenGameTests {
 			player.gameMode.useItemOn(player, level, player.getMainHandItem(), InteractionHand.MAIN_HAND,
 					new BlockHitResult(Vec3.atCenterOf(absolute), Direction.UP, absolute, false));
 			helper.assertTrue(helper.getBlockState(open.above()).getValue(MushroomColonyBlock.AGE) == 1, "Bone meal grows it a stage, light or not");
-			helper.succeed();
-		});
+		}).thenSucceed();
 	}
 
 	/** Shears or a knife pick a grown colony: 2-3 of its mushroom, back to its regrowth stage, a use off the tool. A bare hand does not. */

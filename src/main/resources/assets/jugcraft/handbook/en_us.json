@@ -94,7 +94,7 @@
           "icon": "jugcraft:basic_circuit",
           "text": [
             "Plates, wires and circuits: the parts every later machine needs.",
-            "Make plates in the metal press and wire in the wire drawer, then basic circuits.",
+            "Craft one silicon, one copper ingot and one tin ingot into one basic circuit, even in your inventory. In the workshop bench or circuit assembler, three copper wire replace copper and solder replaces tin: either upgrade makes two circuits, both make four. Prepare plates and wire for better yields.",
             "Store power in a battery box. The pulverizer and ore washer take ore to three ingots each.",
             "Find surface deposits with the prospector and put a deposit drill on them."
           ],
@@ -1863,7 +1863,7 @@
           "title": "Circuit Assembler",
           "icon": "jugcraft:circuit_assembler",
           "text": [
-            "Assembles circuits from up to three ingredients, in any slots.",
+            "Assembles circuits from up to three ingredients, in any slots. Basic: one silicon, one copper ingot and one tin ingot make one circuit. Use three copper wire instead of copper, or solder instead of tin, for two; both make four. Advanced: two basic circuits, one silver ingot and one invar ingot make one. Three silver wire instead of silver, or an invar plate instead of invar, make two; both make four.",
             "Uses 32 JE/t while working. Holds 20,000 JE."
           ],
           "craft": {
@@ -1889,11 +1889,11 @@
                   1
                 ],
                 [
-                  "jugcraft:copper_wire",
-                  3
+                  "minecraft:copper_ingot",
+                  1
                 ],
                 [
-                  "jugcraft:solder_ingot",
+                  "jugcraft:tin_ingot",
                   1
                 ]
               ],
@@ -1905,61 +1905,61 @@
             {
               "in": [
                 [
-                  "jugcraft:basic_circuit",
-                  2
+                  "jugcraft:silicon",
+                  1
                 ],
                 [
-                  "jugcraft:silver_wire",
+                  "jugcraft:copper_wire",
                   3
                 ],
                 [
-                  "jugcraft:invar_plate",
+                  "jugcraft:tin_ingot",
                   1
                 ]
               ],
               "out": [
-                "jugcraft:advanced_circuit",
-                1
+                "jugcraft:basic_circuit",
+                2
               ]
             },
             {
               "in": [
                 [
-                  "jugcraft:microchip",
-                  4
-                ],
-                [
-                  "jugcraft:advanced_circuit",
+                  "jugcraft:silicon",
                   1
                 ],
                 [
-                  "minecraft:gold_ingot",
+                  "minecraft:copper_ingot",
+                  1
+                ],
+                [
+                  "jugcraft:solder_ingot",
                   1
                 ]
               ],
               "out": [
-                "jugcraft:processor",
-                1
+                "jugcraft:basic_circuit",
+                2
               ]
             },
             {
               "in": [
                 [
-                  "jugcraft:microchip",
-                  4
-                ],
-                [
-                  "jugcraft:advanced_circuit",
+                  "jugcraft:silicon",
                   1
                 ],
                 [
-                  "jugcraft:optical_fibre",
-                  2
+                  "jugcraft:copper_wire",
+                  3
+                ],
+                [
+                  "jugcraft:solder_ingot",
+                  1
                 ]
               ],
               "out": [
-                "jugcraft:processor",
-                1
+                "jugcraft:basic_circuit",
+                4
               ]
             }
           ]
@@ -4430,7 +4430,7 @@
           "text": [
             "Air is four parts nitrogen to one of oxygen. The air separation unit splits it; hydrogen comes from the electrolytic cell.",
             "The synthesis converter joins hydrogen and nitrogen into ammonia, and burns ammonia in oxygen over water into nitric acid.",
-            "Ammonia and phosphate make fertilizer (six for two phosphate, against four with sulfuric acid). Nitric acid etches microchips with half as much acid as sulfuric."
+            "Ammonia and phosphate make fertilizer (six for two phosphate, against four with sulfuric acid). Nitric acid etches eight microchips per wafer with 50 mB of acid; sulfuric makes four with 100 mB."
           ]
         },
         {
@@ -5417,7 +5417,7 @@
           "title": "Lithography Station",
           "icon": "jugcraft:lithography_station",
           "text": [
-            "Three wide, two tall and two deep: a cleanroom and an operator's desk with a monitor bank. A silicon wafer, two copper wire and 100 mB of sulfuric acid make four microchips, every 10 seconds at 192 JE/t. Pipe the acid into its tank.",
+            "Three wide, two tall and two deep: a cleanroom and an operator's desk with a monitor bank. A silicon wafer, two copper wire and 100 mB of sulfuric acid make four microchips, every 10 seconds at 192 JE/t. Substitute 50 mB of nitric acid for eight microchips in the same time. Pipe the acid into its tank.",
             "Uses 192 JE/t while working. Holds 60,000 JE."
           ],
           "craft": {
@@ -6347,7 +6347,7 @@
           "title": "Precision parts and their uses",
           "icon": "jugcraft:precision_bearing",
           "text": [
-            "Two steel plates hand-assemble two shaft blanks. Finish them with the abrasive head. A shaft, a steel plate and a set of ceramic balls assemble a Precision Bearing. Bearings and shafts make two motors per advanced assembly, or a Speed Upgrade with less gear-making.",
+            "Two steel plates hand-assemble two shaft blanks. Finish them with the abrasive head. A shaft, a steel plate and a set of ceramic balls assemble a Precision Bearing. Ordinary iron parts make one motor; bearings and shafts make two. Add a polymer housing and neodymium magnet to precision parts for four motors. Bearings also make a Speed Upgrade with less gear-making.",
             "Finished Alumina Plates provide the insulating body of an alternate Efficiency Upgrade. Porcelain insulators make existing placed Ceramic Insulators and an alternate Copper Cable recipe. These are extra recipes: old recipes and saved equipment stay available.",
             "Two borosilicate glass make two Optical Blanks. The Felt Polishing Head finishes each into a lens; two lenses, a brass plate and a compass make the existing Range Finder. Lenses also make spyglasses. Advanced wafer equipment will use this same finishing specialty in a later package."
           ]

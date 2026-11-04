@@ -1323,6 +1323,10 @@ def recipes():
         recipe = shaped(MACHINE_FEATURE, pattern, key, result, count)
         recipe["fabric:load_conditions"] = condition(MACHINE_FEATURE) + condition("crude_oil")
         write(out / f"{name}.json", recipe)
+    # The unprepared starter circuit is also craftable before building an assembler.
+    starter_circuit = shapeless(MACHINE_FEATURE, [rid("silicon"), "#c:ingots/copper", "#c:ingots/tin"], "basic_circuit", 1)
+    starter_circuit["fabric:load_conditions"] = condition(MACHINE_FEATURE) + condition("silicon") + condition("tin")
+    write(out / "basic_circuit.json", starter_circuit)
     machine_recipe_files(out)
     import petro
     for kind, name, data in petro.fluid_recipe_files(condition):
@@ -1937,6 +1941,14 @@ def main():
             WRITTEN_RESOURCES.add(path.relative_to(RES).as_posix())
         newest_building.write(path, data)
     newest_building.generate(write_imported_building)
+    import newest_ribbits
+    newest_ribbits.import_data_resources(writer=write)
+    import newest_supplementaries
+    newest_supplementaries.write_native_recipes(write)
+    import newest_acquisition_recipes
+    newest_acquisition_recipes.main(writer=write)
+    import acquisition_repairs
+    acquisition_repairs.generate(write)
     diagonal_connections.write_all(write, ASSETS, RES / "assets/minecraft")
     import board_game_data
     board_game_data.generate(write)
@@ -1954,6 +1966,9 @@ def main():
     newest_model_finishing.generate(write)
     import model_atlas
     model_atlas.generate(write)
+    # Separately authored importers also contribute to these shared resources;
+    # preserve their enumerated additions after the final tag and atlas writers.
+    owner_resource_patches.apply(phase='final')
     from generated_resource_cleanup import prune
     prune(RES, previous, WRITTEN_RESOURCES)
     # Include finished server recipes after removing obsolete generated recipes.

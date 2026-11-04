@@ -520,15 +520,19 @@ PRODUCTS = {
 # Boss drops that reach a product's ingredient by recipes alone (not through the Assayer's Scale, whose exchange is
 # priced): declared reward routes, not loops, since no brew makes anything (C-P9; check_workshop_products).
 PRODUCT_REWARD_ROUTES = {rid("tyrant_scale"): {"minecraft:magma_cream"},  # two magma cream a scale
-                         rid("grave_dust"): {rid("mendvetch"), "minecraft:sugar"},  # two bone meal a dust, and Mendvetch from bone meal
+                         # Bone meal also makes Mundabitur Dust, then Deorum. The paid native Deorum tool
+                         # rituals now connect it to the retained cutting-tool routes described below.
+                         rid("grave_dust"): {rid("mendvetch"), "minecraft:sugar"},
                          # Since main f904df3fd, by tools only: Tatterlace's silk unspins to string, which makes the
                          # household knife; the Iron Dreadnought's coil gives redstone, whose Exchange fuels make red
                          # matter, whose hoe a recipe names, on to sticks and a bronze knife. A knife cuts a bone into
                          # bone meal (Mendvetch) and a stink bottle into spray and its bottle (glucose syrup, then sugar)
                          # and is kept, but the graph (check_mod_data.py _made_from) counts a recipe's tool as an input.
                          rid("gossamer_silk"): {rid("mendvetch"), "minecraft:sugar"},
-                         rid("salvaged_coil"): {rid("mendvetch"), "minecraft:sugar"},
-                         rid("yeti_fur"): {rid("mendvetch"), "minecraft:sugar"}}
+                           rid("salvaged_coil"): {rid("mendvetch"), "minecraft:sugar"},
+                           # Shard -> rare-earth oxide -> neodymium magnet -> prepared electric motors -> tools.
+                           # As above, the recipe graph counts retained cutting tools as inputs to these products.
+                           rid("cydonian_shard"): {rid("mendvetch"), "minecraft:sugar"}}
 ROMAN = ["I", "II", "III", "IV", "V"]
 
 
