@@ -243,6 +243,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		FacePaintLayer.register();
 		RetroTraderLayer.register();
 		RetroTraderClient.register();
+		BeardshyRenderer.register();
 		WornModelLayer.register();
 		BlockEntityRendererRegistry.register(JugcraftKinetics.HAND_CRANK_ENTITY, KineticRotorRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftKinetics.ELECTRIC_MOTOR_ENTITY, KineticRotorRenderer::new);

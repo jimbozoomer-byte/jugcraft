@@ -2367,6 +2367,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:beardshy_spawn_egg": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:beast_acacia_blossom": {
       "numerator": 7,
       "denominator": 6,
