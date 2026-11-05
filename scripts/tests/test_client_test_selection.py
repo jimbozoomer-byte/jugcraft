@@ -31,7 +31,7 @@ class ClientTestSelectionTests(unittest.TestCase):
         self.assertIn("PeepoDeliveryClientTests", shown)
 
     def test_full_run_assigns_every_class_exactly_once(self):
-        jobs = selection.share(set(self.tests), self.tests, 16)
+        jobs = selection.share(set(self.tests), self.tests, 20)
         assigned = [name for _, names in jobs for name in names]
         self.assertCountEqual(assigned, self.tests)
         self.assertEqual(len(assigned), len(set(assigned)))
@@ -92,20 +92,22 @@ class ClientTestSelectionTests(unittest.TestCase):
         # Use the actual full-suite layout: the old estimates put both long
         # suites together in shard 6 alongside 21 other classes.
         classes = set(self.tests)
-        jobs = selection.share(classes, self.tests, 16)
+        jobs = selection.share(classes, self.tests, 20)
         assigned = [name for _, names in jobs for name in names]
         self.assertCountEqual(classes, assigned)
         self.assertFalse(any({"NuclearClientGameTests", "PeepoProductionStockClientTests"} <= set(names)
                              for _, names in jobs))
-        mineral_job = next(names for _, names in jobs if "MineralSandClientGameTests" in names)
-        self.assertEqual(["MineralSandClientGameTests"], mineral_job)
+        for name in ("MineralSandClientGameTests", "BiomeClientGameTests", "ConcordancePactNetworkTests"):
+            with self.subTest(isolated=name):
+                isolated_job = next(names for _, names in jobs if name in names)
+                self.assertEqual([name], isolated_job)
 
     def test_workflow_runs_every_selected_shard(self):
         workflow = (ROOT / ".github/workflows/build.yml").read_text()
         matrix = re.search(r"shard: \[([\d, ]+)\]", workflow)
         self.assertIsNotNone(matrix)
         indices = [int(value) for value in matrix.group(1).split(",")]
-        self.assertEqual(indices, list(range(16)))
+        self.assertEqual(indices, list(range(20)))
         outputs = {int(value) for value in re.findall(r"^\s+shard(\d+):", workflow, re.MULTILINE)}
         self.assertEqual(outputs, set(indices))
         self.assertEqual(re.findall(r"--shards (\d+)", workflow), [str(len(indices))] * 2)
