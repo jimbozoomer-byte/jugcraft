@@ -1,0 +1,43 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "jugcraft:chemical_reaction",
+  "capability": "jugcraft:drug_formulation",
+  "items": [
+    {
+      "ingredient": "jugcraft:fentanyl_patch_stock",
+      "count": 4
+    },
+    {
+      "ingredient": "jugcraft:sterile_carrier",
+      "count": 1
+    },
+    {
+      "ingredient": "minecraft:paper",
+      "count": 4
+    }
+  ],
+  "fluids": [
+    {
+      "fluid": "minecraft:water",
+      "amount": 250
+    }
+  ],
+  "results": [
+    {
+      "id": "jugcraft:fentanyl_patch",
+      "count": 4
+    }
+  ],
+  "tool": "jugcraft:fentanyl_patch_formula_plate",
+  "energy_per_tick": 96,
+  "time": 200
+}

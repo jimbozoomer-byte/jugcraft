@@ -1923,8 +1923,9 @@ public class PetroGameTests {
 		new ItemStack(FieldChemistry.ANTIDOTE).finishUsingItem(helper.getLevel(), pig);
 		helper.assertTrue(!pig.hasEffect(MobEffects.POISON), "The antidote left the poison");
 		helper.assertTrue(pig.hasEffect(MobEffects.SPEED), "The antidote cleared speed");
-		new ItemStack(FieldChemistry.STIMULANT).finishUsingItem(helper.getLevel(), pig);
-		helper.assertTrue(pig.hasEffect(MobEffects.HASTE), "The stimulant gave no haste");
+		ServerPlayer medicated = TestPlayers.survivor(helper);
+		new ItemStack(FieldChemistry.STIMULANT).finishUsingItem(helper.getLevel(), medicated);
+		helper.assertTrue(medicated.hasEffect(MobEffects.HASTE), "The stimulant gave no haste");
 		pig.setHealth(2.0F);
 		new ItemStack(FieldChemistry.FIRST_AID_KIT).finishUsingItem(helper.getLevel(), pig);
 		// Instant health works on the pig's next tick.

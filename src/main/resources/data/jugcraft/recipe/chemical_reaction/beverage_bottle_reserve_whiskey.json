@@ -1,0 +1,37 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "jugcraft:chemical_reaction",
+  "capability": "jugcraft:drug_formulation",
+  "items": [
+    {
+      "ingredient": "jugcraft:reserve_whiskey_concentrate",
+      "count": 4
+    },
+    {
+      "ingredient": "minecraft:sugar",
+      "count": 1
+    },
+    {
+      "ingredient": "minecraft:glass_bottle",
+      "count": 4
+    }
+  ],
+  "results": [
+    {
+      "id": "jugcraft:reserve_whiskey",
+      "count": 4
+    }
+  ],
+  "tool": "jugcraft:reserve_whiskey_formula_plate",
+  "energy_per_tick": 64,
+  "time": 160
+}

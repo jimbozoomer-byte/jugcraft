@@ -210,7 +210,7 @@ public class FormMachineScreen extends AbstractContainerScreen<FormMachineMenu> 
 				status.state().warning() ? theme.warn() : status.state().working() ? theme.ok() : theme.dim());
 		MachineForm form = menu.form();
 		FluidMachineSpec spec = form.tanks();
-		MachineSkin.energyBar(graphics, theme, x + barX(), y + BAR_Y, BAR_WIDTH, BAR_HEIGHT, menu.energy(), menu.capacity());
+		if (!form.ambient()) MachineSkin.energyBar(graphics, theme, x + barX(), y + BAR_Y, BAR_WIDTH, BAR_HEIGHT, menu.energy(), menu.capacity());
 		for (int tank = 0; tank < spec.tanks(); tank++) {
 			int color = menu.tankFluid(tank) != 0 ? fluidColor(fluid(tank)) : 0;
 			tube(graphics, x + tankX(spec, tank), y + MachineMenu.TANK_Y, menu.tankAmount(tank), menu.tankReserved(tank),
@@ -336,7 +336,8 @@ public class FormMachineScreen extends AbstractContainerScreen<FormMachineMenu> 
 	 * its tooltip still give the size.
 	 */
 	private void powerRow(GuiGraphicsExtractor graphics, int y) {
-		String label = Component.translatable("container.jugcraft.terminal.power").getString();
+		if (menu.form().ambient()) return;
+		String label = Component.translatable(menu.form().fuelled() ? "container.jugcraft.form.heat" : "container.jugcraft.terminal.power").getString();
 		String energy = MachineSkin.compact(menu.energy()) + "/" + MachineSkin.compact(menu.capacity());
 		if (!fits(label, energy)) {
 			energy = MachineSkin.thousands(menu.energy()) + "/" + MachineSkin.thousands(menu.capacity());
@@ -366,8 +367,8 @@ public class FormMachineScreen extends AbstractContainerScreen<FormMachineMenu> 
 		int my = mouseY - topPos;
 		MachineForm form = menu.form();
 		FluidMachineSpec spec = form.tanks();
-		if (mx >= barX() - 1 && mx <= barX() + BAR_WIDTH && my >= BAR_Y - 1 && my <= BAR_Y + BAR_HEIGHT) {
-			graphics.setTooltipForNextFrame(font, Component.literal(String.format("%,d / %,d JE", menu.energy(), menu.capacity())),
+		if (!form.ambient() && mx >= barX() - 1 && mx <= barX() + BAR_WIDTH && my >= BAR_Y - 1 && my <= BAR_Y + BAR_HEIGHT) {
+			graphics.setTooltipForNextFrame(font, Component.literal(String.format(menu.form().fuelled() ? "%,d / %,d furnace ticks" : "%,d / %,d JE", menu.energy(), menu.capacity())),
 					mouseX, mouseY);
 			return;
 		}

@@ -26,9 +26,16 @@ public final class AcademyClientGameTests implements FabricClientGameTest {
 			TestServerContext server = world.getServer();
 			server.runCommand("time set noon");
 			server.runCommand("weather clear");
-			server.runCommand("forceload add 0 0 175 160");
+			// /place checks origin + template size, including x=176 in the next chunk.
+			server.runCommand("forceload add 0 0 176 161");
 			// Only this disposable test world: explicitly clear the preview volume above the landscape.
 			server.runOnServer(s -> {
+				// Force-load tickets are asynchronous; finish loading the entire command extent first.
+				for (int chunkX = 0; chunkX <= (176 >> 4); chunkX++) {
+					for (int chunkZ = 0; chunkZ <= (161 >> 4); chunkZ++) {
+						s.overworld().getChunk(chunkX, chunkZ);
+					}
+				}
 				for (int x = 0; x < 176; x++) {
 					for (int z = 0; z < 161; z++) {
 						for (int y = 224; y < 300; y++) {
@@ -148,7 +155,7 @@ public final class AcademyClientGameTests implements FabricClientGameTest {
 			context.takeScreenshot("jugcraft_academy_midden_forge");
 			view(context, server, 71, 244, 69, 155, 5);
 			context.takeScreenshot("jugcraft_academy_echo_chamber");
-			server.runCommand("forceload remove 0 0 144 160");
+			server.runCommand("forceload remove 0 0 176 161");
 			context.getInput().pressKey(options -> options.keyToggleGui);
 		}
 	}

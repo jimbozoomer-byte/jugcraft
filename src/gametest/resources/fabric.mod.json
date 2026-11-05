@@ -423,7 +423,19 @@
       "io.github.jimbozoomer.jugcraft.test.PetBehaviorsGameTests",
       "io.github.jimbozoomer.jugcraft.test.ServerUtilitiesTests",
       "io.github.jimbozoomer.jugcraft.test.PeerClientStartupGameTests",
-      "io.github.jimbozoomer.jugcraft.test.TestPlayersGameTests"
+      "io.github.jimbozoomer.jugcraft.test.TestPlayersGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PharmacologyItemArtGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PharmacologyDreamGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PharmacologyReverieGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PharmacologyCalmGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PharmacologyFocusGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PharmacologyStrainGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PharmacologyGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PharmacologyFactoryGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PharmacologySterileGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PharmacologyPrecisionGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PharmacologyReleaseGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PharmacologyPsychedelicGameTests"
     ],
     "jei_mod_plugin": [
       "io.github.jimbozoomer.jugcraft.test.JeiStationClientGameTests$WithJei$Probe"
@@ -731,7 +743,24 @@
       "io.github.jimbozoomer.jugcraft.test.BoardGameClientTests",
       "io.github.jimbozoomer.jugcraft.test.HolidayPolishClientTests",
       "io.github.jimbozoomer.jugcraft.test.PetInventoryClientTests",
-      "io.github.jimbozoomer.jugcraft.test.ServerUtilitiesClientTests"
+      "io.github.jimbozoomer.jugcraft.test.ServerUtilitiesClientTests",
+      "io.github.jimbozoomer.jugcraft.test.PharmacologyHudZeroClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PharmacologyHudArtClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PharmacologyFormulaArtClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PharmacologySupplyArtClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PharmacologyItemArtClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PharmacologyReverieClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PharmacologyDreamClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PharmacologyCalmClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PharmacologyFocusClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PharmacologyStrainClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PharmacologyVisualClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PharmacologyReleaseClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PharmacologyPsychedelicClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PharmacologyPrecisionClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PharmacologySterileClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PharmacologyClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PharmacologyFactoryClientGameTests"
     ]
   },
   "depends": {

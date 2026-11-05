@@ -88,12 +88,14 @@ public record MachineStatus(MachineLifecycle state, Reason reason, int index, in
 
 	/** The state line as {@code form} words it: a generator at work is "Generating" rather than "Processing". */
 	public Component title(MachineForm form) {
+		if (form.fuelled() && state == MachineLifecycle.WAITING_ENERGY) return Component.translatable("container.jugcraft.form.waiting_fuel");
 		return form.generator() && state == MachineLifecycle.PROCESSING
 				? Component.translatable("container.jugcraft.form.state.generating") : title();
 	}
 
 	/** The reason line, such as "Lye tank is full", or empty when there is nothing to fix. */
 	public Component detail(MachineForm form) {
+		if (form.fuelled() && reason == Reason.NO_ENERGY) return Component.translatable("container.jugcraft.form.add_fuel");
 		if (reason == Reason.NONE) {
 			return Component.empty();
 		}
@@ -142,6 +144,7 @@ public record MachineStatus(MachineLifecycle state, Reason reason, int index, in
 	}
 
 	public static Component socketLabel(MachineForm form, int socket) {
+		if (socket >= form.sockets().size() && socket < form.sockets().size() + form.upgradeSlots()) return Component.translatable("container.jugcraft.form.socket.precision");
 		if (socket < 0 || socket >= form.sockets().size()) {
 			return Component.literal("?");
 		}

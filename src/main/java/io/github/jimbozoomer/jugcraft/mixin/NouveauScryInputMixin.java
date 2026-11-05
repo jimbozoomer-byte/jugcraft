@@ -8,6 +8,19 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(ServerGamePacketListenerImpl.class)
 public abstract class NouveauScryInputMixin {
     @Shadow public ServerPlayer player;
-    @Inject(method={"handleMovePlayer","handlePlayerAction","handleUseItemOn","handleUseItem","handleInteract","handleAttack","handlePunch"},at=@At("HEAD"),cancellable=true)
+    @Inject(method={"handleMovePlayer","handleUseItemOn","handleUseItem","handleInteract","handleAttack","handlePunch","handlePlayerInput"},at=@At("HEAD"),cancellable=true)
     private void nouveau$viewOnly(CallbackInfo ci){if(NouveauScrying.active(player))ci.cancel();}
+    @Inject(method={"handlePlayerAction","handleContainerClick","handleSetCreativeModeSlot","handlePlaceRecipe","handlePickItemFromBlock","handlePickItemFromEntity","handleBundleItemSelectedPacket","handleContainerSlotStateChanged","handleContainerButtonClick"},at=@At("HEAD"),cancellable=true)
+    private void nouveau$viewInventory(CallbackInfo ci){
+        if(!NouveauScrying.active(player))return;
+        var owner=player;
+        // These HEAD guards can run before vanilla schedules a packet onto the server thread.
+        owner.level().getServer().execute(()->{
+            if(NouveauScrying.active(owner)&&io.github.jimbozoomer.jugcraft.concordance.RateGate.allow(owner,"remote_view_inventory",2)){
+                owner.inventoryMenu.sendAllDataToRemote();
+                if(owner.containerMenu!=owner.inventoryMenu)owner.containerMenu.sendAllDataToRemote();
+            }
+        });
+        ci.cancel();
+    }
 }

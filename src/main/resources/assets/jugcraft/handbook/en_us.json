@@ -2415,6 +2415,272 @@
       ]
     },
     {
+      "title": "Pharmacology",
+      "icon": "jugcraft:caffeine_drink",
+      "pages": [
+        {
+          "title": "Coffee and Caffeine",
+          "icon": "jugcraft:caffeine_drink",
+          "text": [
+            "Grow the existing Coffee Plant: pick Coffee Cherries, then roast them into Coffee Beans in a furnace, smoker or campfire.",
+            "Two Coffee Beans make two Caffeine Concentrate. Four cocoa beans make one concentrate as a lower-yield alternative.",
+            "Craft two concentrates, one sugar, two glass bottles and a water bucket into two Caffeine Drinks. The bucket is returned. Drinking returns a glass bottle.",
+            "After a 10-second onset, a drink gives Haste I and 10% faster movement for five minutes, adding 10 strain; 100 is the safe threshold. Stronger potion effects take priority; they do not add their amplifiers together.",
+            "Hold a drink to see remaining onset or benefit time. The strain HUD shows your current strain and the next-dose forecast. The Caffeine status also shows the active effect.",
+            "A new dose replaces its family for a full new strain charge and restarts onset. Replacing an active stimulant causes 60 seconds of Caffeine Jitters: 20% more firearm spread.",
+            "Repeat doses have 75%, then 50% duration. Thirty online minutes without an active stimulant clears tolerance. Strain falls by 6 points per online minute during onset/benefits and 12 otherwise, independently of duration.",
+            "Leaving pauses saved drug timers. Death ends benefits without resetting recovery or tolerance. Milk cancels pending or active caffeine; it does not erase its recovery accounting.",
+            "These are fictional game effects. This system adds no injury, illness or combat-triggered debuffs. Existing coffee food recipes remain available."
+          ]
+        },
+        {
+          "title": "Early Pharmacy",
+          "icon": "jugcraft:aspirin",
+          "text": [
+            "Aspirin grants Fortitude: 10% less armor-sensitive physical damage for 12 minutes, after 5 seconds, at 10 strain. Stronger Resistance takes priority. It does not reduce fire, magic, falling or other armor-bypassing damage.",
+            "Its existing reactor routes remain: four willow logs and 500 mB water give two salicylic acid; birch gives one. Two salicylic acid, cider vinegar and 50 mB sulfuric acid give four Aspirin.",
+            "Paracetamol grants Recovery: 25% more healing from vanilla natural regeneration for 12 minutes, after 5 seconds, at 10 strain. It requires the normal food conditions and natural-regeneration rule. Extra healing pays a proportional food cost; it never amplifies instant healing or regeneration potions.",
+            "Two potatoes and paper make two Pharmaceutical Starch. In the Chemical Reactor, two starch and redstone with 250 mB water make four Paracetamol. This is a fictional game formulation.",
+            "Rehydration Salts grant Endurance: 20% less activity food exhaustion for 15 minutes, after 5 seconds, at 5 strain. They do not restore food or discount natural healing's food cost.",
+            "Craft two salt, sugar, two paper and a water bucket into two Rehydration Salts sachets. Crafting returns the water bucket. A used sachet leaves no glass bottle."
+          ]
+        },
+        {
+          "title": "Dosing and Side Effects",
+          "icon": "jugcraft:activated_charcoal",
+          "text": [
+            "Stimulant tablets grant Speed II and Haste II for 60 seconds immediately, at 25 strain. The existing reactor route uses four cocoa beans and one Pharmaceutical Starch with 250 mB bioethanol. Tablets leave no glass bottle. Drug Appetite adds 0.1 activity exhaustion per second while present.",
+            "Caffeine and Stimulant share one family and replace each other rather than stacking. Aspirin, Paracetamol and Salts have separate families. All doses charge strain; crossing 100 is allowed with penalties.",
+            "One active formulation per family. Any new formulation replaces it for a full strain charge and restarts onset. Repeat duration is 75%, then 50%; it never accumulates. Only an active stimulant redose gives Jitters.",
+            "Two charcoal, redstone and paper make two Activated Charcoal. Taking it clears Caffeine Jitters, Drug Appetite and Adrenaline Fatigue, keeps benefits and unrelated effects, and has a 60-second cooldown. It never frees strain or erases tolerance. Opioid Drowsiness instead ends with Naloxone or the opioid benefit.",
+            "Hold any timed medicine to see its phase, remaining time and total strain. Milk cancels pending and active benefits; accumulated strain continues decaying rather than resetting. Offline time pauses all accounting. Death ends benefits and preserves recovery and tolerance.",
+            "First Aid Kits and Antidote retain their existing instant effects. Aspirin and Stimulant keep their saved item and recipe IDs; older stacks acquire the new shared rules. No new injury or combat conditions are added."
+          ]
+        },
+        {
+          "title": "Laboratory Analyzer",
+          "icon": "jugcraft:laboratory_analyzer",
+          "text": [
+            "Consumes one finished medicine sample and one Blank Formula Plate with 250 mB water to write its reusable Formula Plate. 160 ticks at 32 JE/t. Each sample has a fixed authored result; no random grades, bad batches or personal research requirements.",
+            "Upper front sample and blank-plate drawers; lower front-left power and front-right formula output; rear water inlet. Formula plates are tradeable items. Their initial samples come from the existing manual or compact-reactor recipes.",
+            "Sterile medicine formulas instead analyze the prepared stock, allowing a first batch without an existing medicine sample."
+          ]
+        },
+        {
+          "title": "Pharmaceutical Separator",
+          "icon": "jugcraft:pharmaceutical_separator",
+          "text": [
+            "Powered wet separation improves crop yields: four coffee beans give eight concentrate, eight cocoa beans give four; four willow logs give four salicylic acid, four birch logs give two; four potatoes give eight pharmaceutical starch, four corn give four. Each uses 500 mB water and 160 ticks at 48 JE/t. Water is consumed as extraction loss; no waste-management chore is added.",
+            "Feed hatch on top, lower front-right extract drawer, lower front-left power, and water at the rear. The birch/potato/cocoa alternatives remain reachable without custom biome ingredients.",
+            "Also separates 500 mB Azure Antibiotic Broth into four Antibiotic Extract at 48 JE/t for 200 ticks. Use the same rear fluid inlet, leaving the solid feed empty."
+          ]
+        },
+        {
+          "title": "Formulation Press",
+          "icon": "jugcraft:formulation_press",
+          "text": [
+            "Install the matching reusable Formula Plate in the formula socket. The machine reserves output space and consumes the listed solids and fluids once, keeping the plate. Six fixed recipes produce eight caffeine drinks, eight aspirin, eight paracetamol, eight salts sachets, eight charcoal or four stimulant tablets. Every recipe takes 160 ticks at 64 JE/t.",
+            "Upper front active and binder drawers; the side drawer takes the third solid input, usually bottles. Lower front-right medicine output, lower front-left power. Rear water and reagent are separate inlets. Aspirin also needs sulfuric acid; Stimulant also needs bioethanol. The other four recipes leave the reagent tank unused. Empty incompatible fluids before switching jobs and use the existing recipe picker and lock.",
+            "Every bottled output consumes one empty bottle. No free bottle or bucket is produced by machine work. Drinking still returns its normal bottle. Bulk production changes yields and automation, never duration, potency, strain or tolerance."
+          ]
+        },
+        {
+          "title": "Building a Pharmacy",
+          "icon": "jugcraft:blank_formula_plate",
+          "text": [
+            "Build the three steel-era stations from earlier steel plates, basic circuits, motors, machine casings and copper cable. Their recipes need no formula plate or pharmaceutical output. A copper plate, paper and glass pane make two blank formula plates.",
+            "Prepare each first medicine by its existing route, then sacrifice one sample to the Analyzer. Move the resulting formula into the Press socket once; pipes and hoppers cannot steal tools. Different medicines need different plates. There is no personal research lock on traded equipment or plates.",
+            "Use the Separator for improved concentrate, bark extract and starch yields. The existing Chemical Reactor turns two starch, sugar and 250 mB water into four Prepared Pharmaceutical Base, which supplies both Paracetamol and Stimulant batches. Sugar keeps this recipe distinct from the earlier redstone-based Paracetamol route. All chains are fictional game formulations.",
+            "Connect existing cables, fluid pipes, hoppers or conveyors only at the marked ports. Full output, missing tools, power loss, pause, cancellation and saved work follow the shared machine rules. Original recipes remain useful for first samples and small-scale preparation.",
+            "Batch production makes the same stable medicine items used by early pharmacy. Saved drug rules and positive effects are unchanged. No additional injury conditions, medical debuffs, purity rolls or maintenance timers are introduced."
+          ]
+        },
+        {
+          "title": "Autoclave",
+          "icon": "jugcraft:autoclave",
+          "text": [
+            "Eight glass bottles and 500 mB water make eight Sterile Vials. Eight Pharmaceutical Starch and 500 mB water make eight Sterile Carrier. Each batch takes 200 ticks at 80 JE/t. Sterile items are stable; no contamination or maintenance timers.",
+            "Load at the upper front-left, collect at lower front-right. Power is lower front-left; water is at the rear. Build with four stainless steel plates, borosilicate glass, a motor, basic circuit, casing and copper cable."
+          ]
+        },
+        {
+          "title": "Sterile Filler",
+          "icon": "jugcraft:sterile_filler",
+          "text": [
+            "Install the matching reusable sterile Formula Plate. Two prepared stock, one Sterile Carrier, four Sterile Vials and 250 mB water make four medicines in 200 ticks at 96 JE/t. The plate stays installed. Vials also serve as internal cartridges in injectors, inhalers and sprays; using a medicine returns one ordinary empty glass container.",
+            "Stock and carrier enter at the upper front; vials enter at the marked right side. Medicine leaves at lower front-right. Power is lower front-left and water at the rear. The process conditions its own water; no additional sterile-fluid chore. Construction replaces one of the Autoclave\u2019s four plates with a piston.",
+            "Bootstrap each formula by analyzing its prepared stock with a Blank Formula Plate and 250 mB water in the existing Laboratory Analyzer. A finished medicine is never required to unlock its own manufacture."
+          ]
+        },
+        {
+          "title": "Cultures and Sterile Stocks",
+          "icon": "jugcraft:azure_culture_starter",
+          "text": [
+            "All chains here are fictional game recipes. Blue dye, brown mushroom and sugar make two Azure Culture Starter. The Chemical Reactor combines two Sterile Carrier, one starter and 250 mB water into four Culture Feed.",
+            "An Industrial or Bulk Fermenter turns one Culture Feed and 500 mB water into 500 mB Azure Antibiotic Broth in 400 ticks at 48 JE/t. Only the product outlet is used. The Pharmaceutical Separator consumes 500 mB broth for four Antibiotic Extract in 200 ticks at 48 JE/t. Analyze extract for the Penicillin formula.",
+            "Each other stock recipe uses the Chemical Reactor with 250 mB water for four stock in 160 ticks: two Sterile Carrier + quartz for Lidocaine; two Pharmaceutical Base + redstone for Adrenaline; four kelp + lapis for Salbutamol; four beetroot + amethyst shard for Redleaf Medical Stock (Morphine); two Pharmaceutical Base + quartz for Naloxone.",
+            "Analyze one stock with a blank plate to obtain the corresponding formula, then fill four medicines per batch. Tradeable plates work without a personal research lock. Sterile equipment needs the existing stainless steel and glass industries; no medicine is required to build it."
+          ]
+        },
+        {
+          "title": "Sterile Medicine Effects",
+          "icon": "jugcraft:penicillin",
+          "text": [
+            "Penicillin: 20 minutes, 5-second onset, 15 strain. Recovery II gives 50% more natural healing with proportional food cost. It shares Paracetamol\u2019s family. No infections or injury conditions are added.",
+            "Lidocaine: 10 minutes, 5-second onset, 10 strain. Grants four absorption hearts once per dose and 25% knockback resistance. A spent shield never refills each second. Vanilla Absorption takes priority.",
+            "Adrenaline: 45 seconds immediately, 35 strain. Speed II and Strength II, followed by 60 seconds of Fatigue: 10% slower movement and 15% slower mining. A new dose replaces the old benefit for a full strain charge. Strain decays independently of recovery. Charcoal clears Fatigue without resetting recovery.",
+            "Salbutamol (Albuterol): 15 minutes immediately, 15 strain. Halves ground-sprint exhaustion and improves water movement acceleration by 15%. Salts and sprint savings use the better discount. No water breathing or discount on combat, mining or natural healing.",
+            "Morphine: 12 minutes, 5-second onset, 35 strain. 20% damage reduction (Resistance takes priority) and 50% knockback resistance. Its Drowsiness slows movement and mining by 15%; charcoal does not clear it.",
+            "Naloxone: self-administered utility, 30-second cooldown. Ends opioid benefits and Drowsiness while preserving their recovery, strain and tolerance. Other drug families and unrelated potion effects remain. Milk and death end drug benefits without freeing accounting.",
+            "All timed formulations permit full-cost replacement; recovery no longer locks their family. Repeat duration falls to 75%, then 50%. Leaving pauses online timers. No combat-triggered debuffs or new medical upkeep are introduced."
+          ]
+        },
+        {
+          "title": "Precision Pharmacy",
+          "icon": "jugcraft:precision_process_module",
+          "text": [
+            "Craft a reusable Precision Process Module from existing stainless plates, advanced circuit, amethyst, quartz and a precision stainless valve. No precision medicine is required. Install the module in an existing formed processor upgrade slot; input/output slots and old saved inventories stay in place.",
+            "Four Pharmaceutical Base, an oak log and 500 mB water make 500 mB Organic Process Stock in the compact Chemical Reactor. Each reagent blend combines one Pharmaceutical Base with two Minecraft ingredients: lapis + redstone for Methylphenidate; blaze powder + sugar for Amphetamine; quartz + glowstone dust for Modafinil; amethyst + ender pearl for Ketamine; quartz + redstone for Fentanyl. Every formulation is fictional.",
+            "The existing Bulk Chemical Reactor processes one matching blend and 500 mB Organic Process Stock into four stock, using its liquid inlet and reusable precision module. Blends fit its existing one-solid-input layout. The gas tank remains empty.",
+            "The Pharmaceutical Separator processes four stock and 250 mB water into four verified active, using the precision module. Analyze one active with a blank plate and 250 mB water, also with the module, to write its reusable formula. A finished medicine is never needed to unlock its own production.",
+            "The Formulation Press makes four tablets from two matching active, one starch and 250 mB water with the formula. Ketamine and Fentanyl instead use the Sterile Filler: two active, one sterile carrier, four sterile vials and 250 mB water make four medicine vials. All formulas/modules are retained. Clear incompatible fluids and use the normal recipe picker."
+          ]
+        },
+        {
+          "title": "Precision Drug Effects",
+          "icon": "jugcraft:methylphenidate",
+          "text": [
+            "Methylphenidate: 20 minutes, 20-second onset, 35 strain. Haste II, 25% less aimed-gun hand sway and 25% tighter aimed firearm spread; activity exhaustion costs 20% more. Hip fire is unchanged. Amphetamine: 15 minutes, 20-second onset, 55 strain. Haste III and Speed II; activity exhaustion costs 50% more and natural expiry gives two minutes of Stimulant Fatigue. Modafinil: 40 minutes, 20-second onset, 25 strain. Haste I, 15% less aimed-gun hand sway and 15% less activity hunger. It holds the native phantom rest counter at zero while active; it does not force sleep or grant night vision.",
+            "These three share caffeine\u2019s stimulant family, full-cost family replacement, 75%/50% repeat duration and 30-online-minute tolerance. Replacing caffeine or Stimulant retains that tolerance and restarts onset. Methylphenidate tightens supported aimed firearm errors after the strongest strain/drug spread drawback; flame coverage and arc acquisition cones stay unchanged. Modafinil and Salts use the better activity discount rather than multiplying.",
+            "Fentanyl: eight minutes, five-second onset, 55 strain. 40% applicable damage reduction and 75% knockback resistance, with movement/mining 20% slower. Shares Morphine\u2019s opioid family/tolerance; full-cost replacement and decaying strain. Existing Naloxone cancels the opioid benefit and Drowsiness without freeing strain or tolerance. Charcoal does not remove opioid Drowsiness. Stronger native potion protection wins without multiplying defenses.",
+            "Ketamine: up to 30 seconds immediately, 40 strain. Begin while grounded, unmounted and with no open menu or other remote view. Echo View scouts within 24 blocks through ordinary open space. The body HUD shows its relative direction, distance and height even with cosmetics off. The body stays put and vulnerable; damage, cancellation, cleansing, menus, logout, death or dimension changes end the view. Normal solid walls and hidden ores stay hidden, and the view cannot attack, use blocks or move inventory. A new dose pays its full strain cost. Cancellation ends the view without erasing strain or tolerance.",
+            "Overlapping a different alcohol, opioid or Ketamine family adds 25 strain per new dose. Ended doses do not create a surcharge or block use. New effects never create injury, infection or combat-triggered ailments. Fentanyl patches and Masterwork Reserve remain Batch 5."
+          ]
+        },
+        {
+          "title": "Mash and Conditioning Barrel",
+          "icon": "jugcraft:mash_conditioning_barrel",
+          "text": [
+            "A shared rustic barrel variant for new mash and conditioning jobs. It leaves all existing Cider Barrel items, recipes, saved contents and ageing unchanged. No electricity, generator or motor. New jobs advance only while the machine is loaded, and saved work/cancellation follow the common process rules.",
+            "One Mash Jug ferments into one Fermented Mash Jug in 1200 loaded ticks. Later, four Refined Spirits Concentrate plus honeycomb condition into four Reserve Whiskey Concentrate in 2400 ticks, retaining an Oak Conditioning Insert. Install that insert in the conditioning socket; the initial mash job needs no tool."
+          ]
+        },
+        {
+          "title": "Moonshine Still",
+          "icon": "jugcraft:moonshine_still",
+          "text": [
+            "A fueled copper still with no power connections. One Fermented Mash Jug, four empty glass bottles and 200 furnace-fuel ticks make four Moonshine and return one Empty Mash Jug. Fuel burns only for paid processing; idle, pause, missing tools and blocked output do not consume fuel.",
+            "Upper front mash, upper rear bottles, lower right fuel. Lower front drink output, lower rear returned-jug outlet. Fuel remainder containers stay in the fuel slot exactly once. This is an abstract game recipe with no real distillation controls."
+          ]
+        },
+        {
+          "title": "Alcohol and Spirits",
+          "icon": "jugcraft:moonshine",
+          "text": [
+            "Craft two Empty Mash Jugs from five bricks. Four wheat or four corn, two sugar, a water bucket and an empty jug make one Mash Jug, returning the bucket. Ferment the jug in the Mash and Conditioning Barrel, then fuel the Moonshine Still with it and four empty bottles. Four Moonshine and the empty jug are returned once.",
+            "All grades share one alcohol family and tolerance: Moonshine gives +10% melee damage/+20% knockback resistance for eight minutes at 20 strain; Refined Spirits +15%/+30% for twelve minutes at 30; Reserve Whiskey +20%/+40% for sixteen minutes at 40; High-Proof Spirits +25%/+50% for twenty minutes at 50. Their onset is ten seconds, except fifteen for High-Proof. Masterwork Reserve remains Batch 5.",
+            "Intoxication raises supported gun spread by 15/20/25/30% and slows movement 5/7.5/10/12.5% respectively. Visual motion is not required. All grades may replace the alcohol family for a full new strain charge, a fresh onset and the shared repeat-duration penalty. Unused duration never accumulates. Recovery records do not block another dose.",
+            "For steel-era supply use existing Mashing Station grain mash. An Industrial or Bulk Fermenter combines 1000 mB grain mash with one Beverage Culture Pack for 1000 mB Beverage Wash; no exhaust. The Chemical Distillation Station turns 1000 mB wash into 500 mB Refined Beverage Stock and 500 mB stillage. These are separate beverage jobs; industrial bioethanol is never drinkable.",
+            "For efficient bulk Moonshine, the Formulation Press combines one Refined Spirits Concentrate, one sugar and four bottles into four Moonshine. It retains the Refined Spirits Formula Plate. Producing stronger Refined Spirits costs four concentrate for the same four bottles; bulk bottling does not silently upgrade Moonshine.",
+            "The Pharmaceutical Separator uses two sugar and 1000 mB Refined Beverage Stock for eight Refined Spirits Concentrate. Reserve conditioning uses four concentrate and honeycomb in the rustic barrel with a reusable stainless/oak conditioning insert. The Separator turns four reserve concentrate plus another 500 mB beverage stock into four High-Proof Concentrate, with a reusable Precision Process Module in an upgrade slot.",
+            "Analyze one matching concentrate with a blank plate and 250 mB water for its formula. High-Proof analysis also needs the precision module. The Formulation Press then bottles four concentrate, one sugar and four bottles into four matching drinks with the retained formula. Higher grades consume extra stock and processing; no infinite re-bottling upgrade loop. Drink returns one bottle.",
+            "A new alcohol dose overlapping an active or pending opioid or Ketamine dose adds 25 combination strain. Ended doses do not add this charge. Existing food and cider retain their original behavior; every new consumable is self-administered. These are fixed Minecraft effects and recipes, without injury or illness management."
+          ]
+        },
+        {
+          "title": "Controlled-release Materials",
+          "icon": "jugcraft:release_control_die",
+          "text": [
+            "Craft a Release Control Die from four stainless plates, amethyst, two Advanced Circuits, a Precision Process Module and Silicone Rubber. It is reusable: put it in the Coater release socket or an existing Analyzer/Press upgrade slot. It adds no speed or efficiency bonus and locks during a job.",
+            "Four Pharmaceutical Starch, four paper and one Plastic Pellets craft four Release Matrix Blend. The Press turns four blend and 500 mB water into four Release-control Matrix. Four matrix, two Silicone Rubber and amethyst with 250 mB water make four Advanced Release-control Matrix. These jobs use the release die, 200 ticks and 96 JE/t.",
+            "The same Press makes eight Empty Pharmacy Capsules from two starch, two paper and 250 mB water with the die. Two wool, paper and rubber craft four Patch Backing. Earlier crops, coffee and plastic production remain useful; these are fictional game materials."
+          ]
+        },
+        {
+          "title": "Extended-release Pharmacy",
+          "icon": "jugcraft:caffeine_xr",
+          "text": [
+            "Coat stock in the Release Coater, then analyze one matching core/patch stock with a Blank Formula Plate and 250 mB water. Install the release die in an Analyzer upgrade slot. It takes 200 ticks at 96 JE/t and yields a reusable formula without needing the finished medicine.",
+            "The Press combines four matching cores, four empty capsules and 250 mB water into four XR capsules. For patches, four stock, one Sterile Carrier, four paper and 250 mB water produce four patches. Matching formulas stay in its ordinary formula socket; each job takes 200 ticks at 96 JE/t.",
+            "All XR stimulants begin after 30 s and allow full-cost replacement with shared tolerance. Caffeine XR: Haste I, +10% walking, 30 min, 10 strain. Methylphenidate XR: Haste II, 25% less aimed-gun hand sway and 25% tighter aimed firearm spread, +20% activity food cost, 40 min, 30 strain. Amphetamine XR: Haste II, Speed I, +30% activity food cost, 35 min, 40 strain, then 2 min Stimulant Fatigue. Modafinil XR: Haste I, 15% less supported hand sway, 15% less activity hunger and a native phantom rest counter held at zero while active, 60 min, 25 strain. No forced sleep or night vision.",
+            "All four retain the existing stimulant family, tolerance and 120-second recovery. Fentanyl Patch begins after 30 s: 20% applicable damage reduction and +50% knockback resistance for 20 min at 40 strain, with -10% movement/mining. It shares opioid tolerance and Naloxone reversal. New opioid doses replace it for a full strain charge; recovery does not lock use. Applying a patch consumes no armor slot and returns no bottle. No injury or skin system is added."
+          ]
+        },
+        {
+          "title": "Masterwork Reserve",
+          "icon": "jugcraft:masterwork_reserve",
+          "text": [
+            "This beverage uses no release coating. Craft four Masterwork Blend from four High-Proof Spirits Concentrate, two honeycomb, a gold nugget and sugar. The Pharmaceutical Separator uses four blend and an extra 1000 mB Refined Beverage Stock to make four unconditioned concentrate, retaining a Precision Process Module; 300 ticks at 128 JE/t.",
+            "Craft a Masterwork Conditioning Insert from four stainless plates, amethyst, two Advanced Circuits, the existing Oak Conditioning Insert and Silicone Rubber. Install it in the rustic barrel conditioning socket. Four unconditioned concentrate and two sweet berries condition for 4800 loaded ticks into four Masterwork Reserve Concentrate. No offline progress or medical Coater is involved.",
+            "Analyze one concentrate with a blank plate and 250 mB water, keeping the precision module, for its formula: 200 ticks at 96 JE/t. The Press uses four concentrate, sugar and four bottles to make four Masterwork Reserve, keeping that formula: 160 ticks at 128 JE/t.",
+            "After 20 s onset, Masterwork Reserve gives +30% melee damage and +60% knockback resistance for 25 min at 60 strain. Intoxication: +35% supported gun spread and -15% movement. It shares the existing alcohol family/tolerance, adds 25 extra strain when overlapping opioids or Ketamine, and allows full-cost replacement with a fresh onset. Existing cider is unchanged."
+          ]
+        },
+        {
+          "title": "Botanical Perception Crops",
+          "icon": "jugcraft:dreamcap",
+          "text": [
+            "Craft Hemp Seeds from wheat seeds, honeycomb and bone meal. Dreamcap Spores use brown mushroom, amethyst and bone meal. Prism Cactus Seeds use cactus, amethyst and bone meal. These fictional cultivated varieties all use lit farmland, bone meal and native crop growth. Breaking a mature crop gives two produce and two seeds; an immature crop returns one seed.",
+            "Four Botanical Resin and 500 mB water in the Separator make four THC Game Stock. Craft Mycelium Catalyst from red mushroom, bone meal and amethyst (four); brown mushroom makes starter spores instead. In the compact Chemical Reactor, four Dreamcap plus one catalyst and 500 mB water make four Dream Concentrate; four Prism Cactus Fruit plus amethyst and the same water make four Prismatic Concentrate.",
+            "In that reactor, four Dream Concentrate plus redstone make four Psilocybin Stock; four Prismatic Concentrate plus quartz make four Mescaline Stock. Each compact job takes 180 ticks. None specifies real extraction or synthesis."
+          ]
+        },
+        {
+          "title": "Perception Manufacturing",
+          "icon": "jugcraft:psilocybin",
+          "text": [
+            "The Separator verifies four matching stock into four active with 250 mB water, 180 ticks at 64 JE/t. THC, Psilocybin and Mescaline need no precision tool. LSD and DMT require the existing Precision Process Module in an upgrade slot.",
+            "Analyze one matching active with one Blank Formula Plate and 250 mB water for a reusable formula (180 ticks, 48 JE/t). LSD and DMT analysis requires the precision module. The Press combines four verified active, four paid packaging items and 250 mB water into four doses with that formula (180 ticks, 64 JE/t; LSD/DMT 96 JE/t). THC, Psilocybin and Mescaline use Botanical Capsule Shells, crafted from two starch and two paper (four); DMT uses advanced Empty Pharmacy Capsules. LSD uses four paper for four perforated paper doses. Paper/capsule doses leave no bottle and retain their 0.8-second use time.",
+            "Complete Memory with Psilocybin to earn a Lucid Imprint. Craft it with four Dream Concentrate, redstone and amethyst into Perception Substrate. The existing Bulk Chemical Reactor with a precision module and 500 mB Organic Process Stock makes four LSD Stock (240 ticks, 96 JE/t).",
+            "Complete Mirror with LSD to earn a Pattern Imprint. Craft it with four Dream Concentrate, two Chorus Fruit and an Echo Shard into Oneiric Stock. The same precision reactor job makes four DMT Stock, using Overworld and End supplies. These are wholly fictional recipes."
+          ]
+        },
+        {
+          "title": "Perception Effects and Dream Study",
+          "icon": "jugcraft:dream_folio",
+          "text": [
+            "THC: Luck I and 25% less pre-bite fishing wait while stationary for 10 min, 10 s onset, 20 strain. It does not stack its fishing bonus with stronger Allure. Mining is 10% slower; natural expiry causes 60 s Drug Appetite. Charcoal clears that appetite. Luck uses vanilla fishing rules and loot tables.",
+            "Psilocybin: 8 min Dream Sight, 10 s onset, 20 strain, plinth clues within 16 blocks and line of sight. Mescaline: 15 min Resonance Sense, 15 s onset, 25 strain, compass pulses toward the nearest recorded loaded plinth within 96 blocks. No undiscovered structures, ores, mobs or player bases are searched.",
+            "LSD: 25 min Pattern Sight, 20 s onset, 35 strain; visible recorded plinths within 24 blocks, Memory and Mirror lessons. Supported aimed-gun hand sway is 20% higher, without altering shot spread. DMT: 5 min Overworld Deep Reverie, 20 s onset, 50 strain; all three lessons and 24-block sight.",
+            "Craft a Dream Folio from a book, compass and amethyst. Craft a Dream Study Plinth from three stone, two copper, a book and amethyst. Carry the folio and use the plinth to record one of up to 16 Overworld sites. The last 16 physically visited sites persist in the folio; no chunks are force-loaded.",
+            "At the plinth, Memory repeats the visible sequence, Mirror reverses it, and Reverie advances each symbol through Sun, Wave, Leaf, Star. These layers require Psilocybin or stronger, LSD or DMT, and DMT respectively. Three correct symbols consume one Study Canvas and award one Lucid, Pattern or Oneiric Imprint. Four canvases craft from three paper, lapis and amethyst. Wrong input simply restarts; no combat or injury debuff is created.",
+            "Reopen the plinth to start another paid study. Clues are private and remain readable with reduced magic visuals. Studying uses your own carried canvas and ordinary inventory; Censer expeditions remain their own activity. All four psychedelics share family tolerance and decaying strain; THC has its own family. New doses replace their family for a full strain charge. All use the same strain, online timers, milk and death rules."
+          ]
+        },
+        {
+          "title": "Strain and Redosing",
+          "icon": "jugcraft:caffeine_drink",
+          "text": [
+            "100 strain is a safe threshold, not a consumption cap. Every new dose immediately adds its full strain cost, including replacements. Strain falls by 6 points per online minute during onset or an active dose, and by 12 per minute when no doses remain active. Long benefits can outlast their strain.",
+            "Above 100 through 125: Strained, activity food cost +15% and firearm spread +10%. Above 125 through 150: Overloaded, movement/mining -10%, food cost +25% and spread +20%.",
+            "Above 150 through 200: Severe, movement -20%, mining -25%, attack speed -15%, food cost +40% and spread +35%. Above 200: Critical, movement -30%, mining -40%, attack speed -25%, food cost +60% and spread +50%. Matching drug and strain penalties use the stronger value rather than multiplying.",
+            "A new formulation replaces its family, ends the old benefit and restarts its own onset. Earlier strain is not refunded. Repeated family doses last 75%, then 50%; remaining duration never accumulates. Recovery records do not block use. Active stimulant replacement still causes Jitters.",
+            "A new dose overlapping another alcohol, opioid or Ketamine family costs 25 extra strain, once per new dose even when two such families overlap. Ended doses and replacing the same family alone do not create this surcharge.",
+            "Ten horizontal pills above the hunger bar show strain. Each pill holds 10 points: ivory fills through 100, then amber/orange/red paints over that row through 200, followed by violet through 300. Decay removes the newest fill first. Above 100 the readout shows exact strain and severity, including values above 300. Air bubbles and mounted health keep their vanilla positions; the pill row moves above them when needed.",
+            "While strain is above zero, holding a formulation adds a patterned preview and next-cost readout, including combination strain. At zero the empty row remains for three seconds, then hides, even while a drug is held or benefits remain active. A held drug at zero does not bring it back; the tooltip still gives the next-dose forecast and predicted severity. Visual Off and Reduced Motion do not change penalties.",
+            "Milk, Charcoal, Naloxone and death do not erase strain or tolerance. Death ends benefits. Logout pauses drug, tolerance and strain clocks together. Existing saved reservations seed the new decaying pool once; they are never recharged on subsequent loads."
+          ]
+        },
+        {
+          "title": "Drug Display Settings",
+          "icon": "jugcraft:caffeine_drink",
+          "text": [
+            "Open Jugcraft display settings through Mod Menu, or bind its action in Controls. Drug visuals has an On/Off switch and intensity, blur, sway and double-vision sliders. Minecraft Distortion Effects also limits everything. Reduced motion makes warning rims static and removes sway and visual Jitters. These choices never change drug benefits, strain, hunger or firearm rules.",
+            "Caffeine has a subtle warm contrast lift. Methylphenidate has cool focus contrast; Modafinil has a restrained neutral clarity treatment. Amphetamine and Stimulant have a warmer peripheral tunnel, and Adrenaline has a stronger initial rush that settles. Drug Jitters move only peripheral image samples; Stimulant Fatigue gently desaturates the view.",
+            "Above 100 strain, an amber peripheral warning grows through the strain bands toward a red critical rim. At higher strain, edge blur can accompany it. The center, crosshair and interface remain readable. The strain HUD still names the band when visual effects are off. Milk ends dose visuals but does not erase this strain warning.",
+            "THC adds a gentle warm botanical tint and light edge softness. Morphine and Fentanyl have muted color and softened edges; Fentanyl is stronger, while its patch stays lighter. Naloxone ends opioid visuals together with the opioid benefit.",
+            "Ketamine has a cooler, lightly separated peripheral image during the actual Echo View. Reduced motion removes its peripheral breathing. Its body-direction HUD remains readable with visual effects off: it shows the distance, direction and height back to your vulnerable body. Sneak or open a menu to return.",
+            "Psilocybin adds gentle organic peripheral breathing and violet warmth. Its wisps mark only recorded, visible study plinths. Mescaline has a restrained crystalline rim and a slow resonance pulse; its persistent compass uses only the nearest recorded, loaded plinth within 96 blocks.",
+            "Study and navigation text remain readable with drug visuals off. Carry a Dream Folio and physically record a plinth; Psilocybin then reveals its Memory lesson. Three numbered clue cards show the source and required input, highlight the current source step and describe the rule/trace in narrated tooltips. Mirror reverses the input order; Reverie advances each symbol through Sun, Wave, Leaf, Star, Sun. A successful lesson still pays one Study Canvas for one imprint.",
+            "LSD adds a six-fold geometric lattice and up to three faint directional afterimages when you turn. DMT adds deeper eight-fold geometry and slow peripheral Clockwork arches, gears and schematic pointed figures. These glimpses preview the Clockwork theme; they do not open a portal or provide trading. Actual travel and elven trades remain a later content batch.",
+            "Afterimages use the recent view direction to offset the currently visible world; they do not retain past world frames. They settle within six view ticks when turning stops, and reset on a scene change, menu or sudden jump. Reduced Motion, zero motion or zero double vision removes them while static patterns and real study information remain useful.",
+            "Reduced Motion or zero motion removes moving dream wisps and peripheral breathing. Lower motion reduces wisp count; the shared magic particle budget also applies. No Folio or no eligible site is explained by the dream HUD. It never finds undiscovered plinths or loads chunks.",
+            "Alcohol, focus, calm, dream, Jitters and strain combine in one bounded world filter. Opening an interface suspends the filter. Cosmetic effects never turn the camera, change input, flash or reveal hidden blocks."
+          ]
+        }
+      ]
+    },
+    {
       "title": "Steel",
       "icon": "jugcraft:steel_ingot",
       "pages": [
@@ -3365,8 +3631,8 @@
           "icon": "jugcraft:first_aid_kit",
           "text": [
             "Made in the chemical reactor. First aid kit: two cotton and a soap in bioethanol. Heals four hearts, then a 10 s wait.",
-            "Antidote: two charcoal and a bottle in lye. Clears poison, wither and every other harmful effect, and keeps the good ones (milk clears both).",
-            "Stimulant: four cocoa beans and a bottle in bioethanol. Speed II and Haste II for 60 s, with hunger."
+            "Antidote: two charcoal and a bottle in lye. Clears its listed vanilla harmful effects and keeps benefits (milk clears both). Activated Charcoal handles drug drawbacks.",
+            "Stimulant: four cocoa beans and a bottle in bioethanol. Speed II and Haste II for 60 s, with Stimulant Appetite and shared caffeine-family dosing. See Pharmacology for all sustained medicines."
           ]
         }
       ]
@@ -4060,7 +4326,8 @@
             "Three wide, three deep and four tall: a tall stirred vessel on four legs, built from steel plates, a Steel Tank, glass, an electric motor, a basic circuit and a Machine Casing. Every block it fills must be free when it is placed.",
             "Drop eight crops (wheat, sugar cane, potatoes, carrots, beetroot, berries, melon or apples) into the hatch on its crown and pipe water into the inlet low at the back left. With a bucket of water they ferment into 375 mB of bioethanol at the broth outlet low at the front (half again what the Chemical Reactor gets from the same crops), and 250 mB of carbon dioxide at the flange high at the back, in five seconds at 96 JE/t.",
             "The carbon dioxide feeds the Chemical Infuser's methane. Collecting it is optional: when its tank is full the rest is vented and fermentation goes on.",
-            "Expanded processing is also available. Open Recipes to inspect each route's exact inputs, outputs and power, then lock a recipe for automation. Empty incompatible fluids before changing processes; old factory connections and recipes remain supported."
+            "Expanded processing is also available. Open Recipes to inspect each route's exact inputs, outputs and power, then lock a recipe for automation. Empty incompatible fluids before changing processes; old factory connections and recipes remain supported.",
+            "Also cultures Prepared Culture Feed with water into Azure Antibiotic Broth at the product outlet. No exhaust is produced by this recipe."
           ],
           "craft": {
             "grid": [
@@ -4085,7 +4352,8 @@
             "Five wide, five deep and six tall: the Industrial Fermenter's vessel enlarged, built from an Industrial Fermenter, two Steel Tanks, steel plates, an electric motor and a basic circuit. Every block it fills must be free when it is placed.",
             "It ferments like the Industrial Fermenter, eight crops and a bucket of water into 375 mB of bioethanol and 250 mB of carbon dioxide, but runs four batches at once from 16,000 mB tanks, at 80% of the draw a batch. Crops go in at the hatch on its crown, water at the inlet low at the back left; the alcohol leaves at the outlet low at the front and the gas at the flange high at the back, which vents what is not collected.",
             "It draws its power through the services box low at the back right. Its screen says what it is waiting for, and upgrade cards fit its terminal.",
-            "Supports the same current recipes as the Industrial Fermenter. Use the recipe picker and lock to switch jobs; empty incompatible stored fluids first."
+            "Supports the same current recipes as the Industrial Fermenter. Use the recipe picker and lock to switch jobs; empty incompatible stored fluids first.",
+            "Also supports the same Azure Antibiotic Broth culture recipe as the Industrial Fermenter."
           ],
           "craft": {
             "grid": [
@@ -4114,7 +4382,8 @@
             "Nitric acid in the side inlet and ammonia in the lid inlet neutralize each other: 250 mB of the acid and 125 mB of ammonia give four ammonium nitrate at the chute. It is a strong nitrogen fertilizer, and it packs grenades and high-explosive rockets in place of guncotton.",
             "Eight washed nickel ores in the hatch, a bucket of hydrochloric acid and 250 mB of chlorine leave one ruthenium powder in twenty seconds: the metal of the Chemical Infuser's faster methanation bed.",
             "Also makes Wet Superphosphate from ground phosphate and phosphoric acid, or dissolves Mixed-farm Fertilizer into existing Nutrient Solution. Recipe lock selects the intended job.",
-            "Also prepares storable hydrazine and N2O4 propellants, each with a solid process residue. See Cryogenics and Rocket Fuels for compatible loaded motors and waste recovery."
+            "Also prepares storable hydrazine and N2O4 propellants, each with a solid process residue. See Cryogenics and Rocket Fuels for compatible loaded motors and waste recovery.",
+            "Also processes fictional precision reagent blends with Organic Process Stock. Install a reusable Precision Process Module in an existing upgrade slot; no input/tank layout change."
           ],
           "craft": {
             "grid": [
@@ -5387,6 +5656,30 @@
               "jugcraft:copper_cable"
             ],
             "result": "jugcraft:wet_processing_bench",
+            "count": 1
+          }
+        },
+        {
+          "title": "Release Coater",
+          "icon": "jugcraft:release_coater",
+          "text": [
+            "A 3x3x3 advanced formed processor on the existing power, fluid, ports, escrow and recipe system. Three solid inlets, a rear water inlet and a coated-stock outlet. Its release socket keeps a Release Control Die; normal upgrades remain separate.",
+            "Coat fixed named formulations only. Four matrices and 500 mB water accompany 24 Caffeine Concentrate, four Verified Methylphenidate Active, six Verified Amphetamine Active or four Verified Modafinil Active, producing four matching cores in 300 ticks at 128 JE/t. Modafinil uses Advanced Release Matrix.",
+            "Eight Verified Fentanyl Active, four matrices, four patch backings and 500 mB water instead produce four unverified patch stock. No finished vial is multiplied into patches. Missing tools or output room spend nothing. Cancellation refunds solids and process water; breaking drops original solids/tooling and loses loose fluids as other processors do. Saved work resumes normally."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:stainless_steel_plate",
+              "jugcraft:borosilicate_glass",
+              "jugcraft:stainless_steel_plate",
+              "jugcraft:electric_motor",
+              "jugcraft:advanced_circuit",
+              "jugcraft:polymer_housing",
+              "jugcraft:precision_stainless_valve",
+              "jugcraft:release_control_die",
+              "jugcraft:precision_stainless_valve"
+            ],
+            "result": "jugcraft:release_coater",
             "count": 1
           }
         },

@@ -140,6 +140,7 @@ public final class Jugcraft implements ModInitializer {
 		JugcraftGrapple.register();
 		io.github.jimbozoomer.jugcraft.weapons.JugcraftArms.register();
 		io.github.jimbozoomer.jugcraft.guns.JugcraftGuns.register();
+		io.github.jimbozoomer.jugcraft.pharmacology.Pharmacology.register();
 		io.github.jimbozoomer.jugcraft.weapons.FieldChemistry.register();
 		io.github.jimbozoomer.jugcraft.chemistry.ConstructionChemistry.register();
 		JugcraftGuide.register();

@@ -1,0 +1,250 @@
+{
+  "ambientocclusion": false,
+  "textures": {
+    "cider_barrel_head": "jugcraft:block/cider_barrel_head",
+    "cider_barrel_staves": "jugcraft:block/cider_barrel_staves",
+    "dp_chrome": "jugcraft:block/dp_chrome",
+    "dp_gunmetal": "jugcraft:block/dp_gunmetal",
+    "dp_olive": "jugcraft:block/dp_olive",
+    "dp_rubber": "jugcraft:block/dp_rubber",
+    "dw_ribbed_steel": "jugcraft:block/dw_ribbed_steel",
+    "sp_copper": "jugcraft:block/sp_copper",
+    "particle": "jugcraft:block/dp_olive"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        11.0,
+        9.0,
+        12.1
+      ],
+      "faces": {
+        "south": {
+          "texture": "#cider_barrel_staves"
+        },
+        "east": {
+          "texture": "#cider_barrel_staves"
+        },
+        "up": {
+          "texture": "#cider_barrel_staves"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        9.0,
+        0
+      ],
+      "to": [
+        9.75,
+        12.75,
+        12.1
+      ],
+      "faces": {
+        "south": {
+          "texture": "#cider_barrel_staves"
+        },
+        "east": {
+          "texture": "#cider_barrel_staves"
+        },
+        "up": {
+          "texture": "#cider_barrel_staves"
+        },
+        "down": {
+          "texture": "#cider_barrel_staves"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        12.75,
+        0
+      ],
+      "to": [
+        6.5,
+        15.0,
+        12.1
+      ],
+      "faces": {
+        "south": {
+          "texture": "#cider_barrel_staves"
+        },
+        "east": {
+          "texture": "#cider_barrel_staves"
+        },
+        "up": {
+          "texture": "#cider_barrel_staves"
+        },
+        "down": {
+          "texture": "#cider_barrel_staves"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        11.5,
+        9.25,
+        1.0
+      ],
+      "faces": {
+        "south": {
+          "texture": "#dp_gunmetal"
+        },
+        "east": {
+          "texture": "#dp_gunmetal"
+        },
+        "up": {
+          "texture": "#dp_gunmetal"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        9.25,
+        0
+      ],
+      "to": [
+        10.25,
+        13.25,
+        1.0
+      ],
+      "faces": {
+        "south": {
+          "texture": "#dp_gunmetal"
+        },
+        "east": {
+          "texture": "#dp_gunmetal"
+        },
+        "up": {
+          "texture": "#dp_gunmetal"
+        },
+        "down": {
+          "texture": "#dp_gunmetal"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        13.25,
+        0
+      ],
+      "to": [
+        7.0,
+        15.5,
+        1.0
+      ],
+      "faces": {
+        "south": {
+          "texture": "#dp_gunmetal"
+        },
+        "east": {
+          "texture": "#dp_gunmetal"
+        },
+        "up": {
+          "texture": "#dp_gunmetal"
+        },
+        "down": {
+          "texture": "#dp_gunmetal"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        0,
+        10.0
+      ],
+      "to": [
+        11.5,
+        9.25,
+        12.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#dp_gunmetal"
+        },
+        "south": {
+          "texture": "#dp_gunmetal"
+        },
+        "east": {
+          "texture": "#dp_gunmetal"
+        },
+        "up": {
+          "texture": "#dp_gunmetal"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        9.25,
+        10.0
+      ],
+      "to": [
+        10.25,
+        13.25,
+        12.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#dp_gunmetal"
+        },
+        "south": {
+          "texture": "#dp_gunmetal"
+        },
+        "east": {
+          "texture": "#dp_gunmetal"
+        },
+        "up": {
+          "texture": "#dp_gunmetal"
+        },
+        "down": {
+          "texture": "#dp_gunmetal"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        13.25,
+        10.0
+      ],
+      "to": [
+        7.0,
+        15.5,
+        12.0
+      ],
+      "faces": {
+        "north": {
+          "texture": "#dp_gunmetal"
+        },
+        "south": {
+          "texture": "#dp_gunmetal"
+        },
+        "east": {
+          "texture": "#dp_gunmetal"
+        },
+        "up": {
+          "texture": "#dp_gunmetal"
+        },
+        "down": {
+          "texture": "#dp_gunmetal"
+        }
+      }
+    }
+  ]
+}

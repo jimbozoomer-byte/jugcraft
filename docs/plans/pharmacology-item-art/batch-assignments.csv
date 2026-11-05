@@ -1,0 +1,195 @@
+batch,batch_name,asset_kind,asset_id,display_name
+1,Everyday and medical drugs,item art,jugcraft:activated_charcoal,Activated Charcoal
+1,Everyday and medical drugs,item art,jugcraft:adrenaline,Adrenaline
+1,Everyday and medical drugs,item art,jugcraft:amphetamine,Amphetamine
+1,Everyday and medical drugs,item art,jugcraft:aspirin,Aspirin
+1,Everyday and medical drugs,item art,jugcraft:caffeine_drink,Caffeine Drink
+1,Everyday and medical drugs,item art,jugcraft:fentanyl,Fentanyl
+1,Everyday and medical drugs,item art,jugcraft:ketamine,Ketamine
+1,Everyday and medical drugs,item art,jugcraft:lidocaine,Lidocaine
+1,Everyday and medical drugs,item art,jugcraft:methylphenidate,Methylphenidate
+1,Everyday and medical drugs,item art,jugcraft:modafinil,Modafinil
+1,Everyday and medical drugs,item art,jugcraft:morphine,Morphine
+1,Everyday and medical drugs,item art,jugcraft:naloxone,Naloxone
+1,Everyday and medical drugs,item art,jugcraft:paracetamol,Paracetamol
+1,Everyday and medical drugs,item art,jugcraft:penicillin,Penicillin
+1,Everyday and medical drugs,item art,jugcraft:rehydration_salts,Rehydration Salts
+1,Everyday and medical drugs,item art,jugcraft:salbutamol,Salbutamol (Albuterol)
+1,Everyday and medical drugs,item art,jugcraft:stimulant,Stimulant
+2,Advanced drugs and alcohol,item art,jugcraft:amphetamine_xr,Amphetamine XR
+2,Advanced drugs and alcohol,item art,jugcraft:caffeine_xr,Caffeine XR
+2,Advanced drugs and alcohol,item art,jugcraft:dmt,DMT
+2,Advanced drugs and alcohol,item art,jugcraft:fentanyl_patch,Fentanyl Patch
+2,Advanced drugs and alcohol,item art,jugcraft:high_proof_spirits,Alcohol (High-Proof Spirits)
+2,Advanced drugs and alcohol,item art,jugcraft:lsd,LSD
+2,Advanced drugs and alcohol,item art,jugcraft:masterwork_reserve,Alcohol (Masterwork Reserve)
+2,Advanced drugs and alcohol,item art,jugcraft:mescaline,Mescaline
+2,Advanced drugs and alcohol,item art,jugcraft:methylphenidate_xr,Methylphenidate XR
+2,Advanced drugs and alcohol,item art,jugcraft:modafinil_xr,Modafinil XR
+2,Advanced drugs and alcohol,item art,jugcraft:moonshine,Alcohol (Moonshine)
+2,Advanced drugs and alcohol,item art,jugcraft:psilocybin,Psilocybin
+2,Advanced drugs and alcohol,item art,jugcraft:refined_spirits,Alcohol (Refined Spirits)
+2,Advanced drugs and alcohol,item art,jugcraft:reserve_whiskey,Alcohol (Reserve Whiskey)
+2,Advanced drugs and alcohol,item art,jugcraft:thc,THC
+3,"Ingredients, packaging and study supplies",item art,jugcraft:advanced_release_matrix,Advanced Release-control Matrix
+3,"Ingredients, packaging and study supplies",item art,jugcraft:azure_culture_starter,Azure Culture Starter
+3,"Ingredients, packaging and study supplies",item art,jugcraft:beverage_culture_pack,Beverage Culture Pack
+3,"Ingredients, packaging and study supplies",item art,jugcraft:botanical_capsule_shell,Botanical Capsule Shell
+3,"Ingredients, packaging and study supplies",item art,jugcraft:botanical_resin,Botanical Resin
+3,"Ingredients, packaging and study supplies",item art,jugcraft:culture_feed,Prepared Culture Feed
+3,"Ingredients, packaging and study supplies",item art,jugcraft:dream_folio,Dream Folio
+3,"Ingredients, packaging and study supplies",item art,jugcraft:dreamcap,Dreamcap
+3,"Ingredients, packaging and study supplies",item art,jugcraft:dreamcap_seeds,Dreamcap Spores
+3,"Ingredients, packaging and study supplies",item art,jugcraft:empty_mash_jug,Empty Mash Jug
+3,"Ingredients, packaging and study supplies",item art,jugcraft:empty_pharmacy_capsule,Empty Pharmacy Capsule
+3,"Ingredients, packaging and study supplies",item art,jugcraft:fermented_mash_jug,Fermented Mash Jug
+3,"Ingredients, packaging and study supplies",item art,jugcraft:hemp_seeds,Hemp Seeds
+3,"Ingredients, packaging and study supplies",item art,jugcraft:lucid_imprint,Lucid Imprint
+3,"Ingredients, packaging and study supplies",item art,jugcraft:mash_jug,Mash Jug
+3,"Ingredients, packaging and study supplies",item art,jugcraft:masterwork_conditioning_insert,Masterwork Conditioning Insert
+3,"Ingredients, packaging and study supplies",item art,jugcraft:mycelium_catalyst,Mycelium Catalyst
+3,"Ingredients, packaging and study supplies",item art,jugcraft:oak_conditioning_insert,Oak Conditioning Insert
+3,"Ingredients, packaging and study supplies",item art,jugcraft:oneiric_imprint,Oneiric Imprint
+3,"Ingredients, packaging and study supplies",item art,jugcraft:pattern_imprint,Pattern Imprint
+3,"Ingredients, packaging and study supplies",item art,jugcraft:pharmaceutical_base,Prepared Pharmaceutical Base
+3,"Ingredients, packaging and study supplies",item art,jugcraft:pharmaceutical_starch,Pharmaceutical Starch
+3,"Ingredients, packaging and study supplies",item art,jugcraft:pharmacy_patch_backing,Pharmacy Patch Backing
+3,"Ingredients, packaging and study supplies",item art,jugcraft:precision_process_module,Precision Process Module
+3,"Ingredients, packaging and study supplies",item art,jugcraft:prism_cactus_fruit,Prism Cactus Fruit
+3,"Ingredients, packaging and study supplies",item art,jugcraft:prism_cactus_seeds,Prism Cactus Seeds
+3,"Ingredients, packaging and study supplies",item art,jugcraft:release_control_die,Release Control Die
+3,"Ingredients, packaging and study supplies",item art,jugcraft:release_matrix,Release-control Matrix
+3,"Ingredients, packaging and study supplies",item art,jugcraft:release_matrix_blend,Release Matrix Blend
+3,"Ingredients, packaging and study supplies",item art,jugcraft:sterile_carrier,Sterile Carrier
+3,"Ingredients, packaging and study supplies",item art,jugcraft:sterile_vial,Sterile Vial
+3,"Ingredients, packaging and study supplies",item art,jugcraft:study_canvas,Dream Study Canvas
+4,Processing intermediates and fluids,item art,jugcraft:adrenaline_stock,Adrenaline Game Stock
+4,Processing intermediates and fluids,item art,jugcraft:amphetamine_active,Verified Amphetamine Active
+4,Processing intermediates and fluids,item art,jugcraft:amphetamine_reagent_blend,Amphetamine Game Reagent Blend
+4,Processing intermediates and fluids,item art,jugcraft:amphetamine_stock,Amphetamine Game Stock
+4,Processing intermediates and fluids,item art,jugcraft:amphetamine_xr_core,Amphetamine XR Coated Core
+4,Processing intermediates and fluids,item art,jugcraft:antibiotic_extract,Antibiotic Extract
+4,Processing intermediates and fluids,item art,jugcraft:beverage_wash_bucket,Beverage Wash Bucket
+4,Processing intermediates and fluids,item art,jugcraft:caffeine_concentrate,Caffeine Concentrate
+4,Processing intermediates and fluids,item art,jugcraft:caffeine_xr_core,Caffeine XR Coated Core
+4,Processing intermediates and fluids,item art,jugcraft:dmt_active,DMT Verified Active
+4,Processing intermediates and fluids,item art,jugcraft:dmt_stock,DMT Game Stock
+4,Processing intermediates and fluids,item art,jugcraft:dream_concentrate,Dream Concentrate
+4,Processing intermediates and fluids,item art,jugcraft:fentanyl_active,Verified Fentanyl Active
+4,Processing intermediates and fluids,item art,jugcraft:fentanyl_patch_stock,Unverified Fentanyl Patch Stock
+4,Processing intermediates and fluids,item art,jugcraft:fentanyl_reagent_blend,Fentanyl Game Reagent Blend
+4,Processing intermediates and fluids,item art,jugcraft:fentanyl_stock,Fentanyl Game Stock
+4,Processing intermediates and fluids,item art,jugcraft:high_proof_spirits_concentrate,High-Proof Spirits Beverage Concentrate
+4,Processing intermediates and fluids,item art,jugcraft:ketamine_active,Verified Ketamine Active
+4,Processing intermediates and fluids,item art,jugcraft:ketamine_reagent_blend,Ketamine Game Reagent Blend
+4,Processing intermediates and fluids,item art,jugcraft:ketamine_stock,Ketamine Game Stock
+4,Processing intermediates and fluids,item art,jugcraft:lidocaine_stock,Lidocaine Game Stock
+4,Processing intermediates and fluids,item art,jugcraft:lsd_active,LSD Verified Active
+4,Processing intermediates and fluids,item art,jugcraft:lsd_stock,LSD Game Stock
+4,Processing intermediates and fluids,item art,jugcraft:masterwork_blend,Masterwork Beverage Blend
+4,Processing intermediates and fluids,item art,jugcraft:masterwork_reserve_concentrate,Masterwork Reserve Concentrate
+4,Processing intermediates and fluids,item art,jugcraft:masterwork_unconditioned_concentrate,Unconditioned Masterwork Concentrate
+4,Processing intermediates and fluids,item art,jugcraft:mescaline_active,Mescaline Verified Active
+4,Processing intermediates and fluids,item art,jugcraft:mescaline_stock,Mescaline Game Stock
+4,Processing intermediates and fluids,item art,jugcraft:methylphenidate_active,Verified Methylphenidate Active
+4,Processing intermediates and fluids,item art,jugcraft:methylphenidate_reagent_blend,Methylphenidate Game Reagent Blend
+4,Processing intermediates and fluids,item art,jugcraft:methylphenidate_stock,Methylphenidate Game Stock
+4,Processing intermediates and fluids,item art,jugcraft:methylphenidate_xr_core,Methylphenidate XR Coated Core
+4,Processing intermediates and fluids,item art,jugcraft:modafinil_active,Verified Modafinil Active
+4,Processing intermediates and fluids,item art,jugcraft:modafinil_reagent_blend,Modafinil Game Reagent Blend
+4,Processing intermediates and fluids,item art,jugcraft:modafinil_stock,Modafinil Game Stock
+4,Processing intermediates and fluids,item art,jugcraft:modafinil_xr_core,Modafinil XR Coated Core
+4,Processing intermediates and fluids,item art,jugcraft:naloxone_stock,Naloxone Game Stock
+4,Processing intermediates and fluids,item art,jugcraft:oneiric_stock,Oneiric Stock
+4,Processing intermediates and fluids,item art,jugcraft:organic_process_stock_bucket,Organic Process Stock Bucket
+4,Processing intermediates and fluids,item art,jugcraft:perception_substrate,Perception Substrate
+4,Processing intermediates and fluids,item art,jugcraft:prismatic_concentrate,Prismatic Concentrate
+4,Processing intermediates and fluids,item art,jugcraft:psilocybin_active,Psilocybin Verified Active
+4,Processing intermediates and fluids,item art,jugcraft:psilocybin_stock,Psilocybin Game Stock
+4,Processing intermediates and fluids,item art,jugcraft:redleaf_medical_stock,Redleaf Medical Stock
+4,Processing intermediates and fluids,item art,jugcraft:refined_beverage_stock_bucket,Refined Beverage Stock Bucket
+4,Processing intermediates and fluids,item art,jugcraft:refined_spirits_concentrate,Refined Spirits Beverage Concentrate
+4,Processing intermediates and fluids,item art,jugcraft:reserve_whiskey_concentrate,Reserve Whiskey Beverage Concentrate
+4,Processing intermediates and fluids,item art,jugcraft:salbutamol_stock,Salbutamol Game Stock
+4,Processing intermediates and fluids,item art,jugcraft:thc_active,THC Verified Active
+4,Processing intermediates and fluids,item art,jugcraft:thc_stock,THC Game Stock
+5,Formula plates,item art,jugcraft:activated_charcoal_formula_plate,Activated Charcoal Formula Plate
+5,Formula plates,item art,jugcraft:adrenaline_formula_plate,Adrenaline Formula Plate
+5,Formula plates,item art,jugcraft:amphetamine_formula_plate,Amphetamine Formula Plate
+5,Formula plates,item art,jugcraft:amphetamine_xr_formula_plate,Amphetamine XR Formula Plate
+5,Formula plates,item art,jugcraft:aspirin_formula_plate,Aspirin Formula Plate
+5,Formula plates,item art,jugcraft:blank_formula_plate,Blank Formula Plate
+5,Formula plates,item art,jugcraft:caffeine_formula_plate,Caffeine Formula Plate
+5,Formula plates,item art,jugcraft:caffeine_xr_formula_plate,Caffeine XR Formula Plate
+5,Formula plates,item art,jugcraft:dmt_formula_plate,DMT Formula Plate
+5,Formula plates,item art,jugcraft:fentanyl_formula_plate,Fentanyl Formula Plate
+5,Formula plates,item art,jugcraft:fentanyl_patch_formula_plate,Fentanyl Patch Formula Plate
+5,Formula plates,item art,jugcraft:high_proof_spirits_formula_plate,Alcohol (High-Proof Spirits) Formula Plate
+5,Formula plates,item art,jugcraft:ketamine_formula_plate,Ketamine Formula Plate
+5,Formula plates,item art,jugcraft:lidocaine_formula_plate,Lidocaine Formula Plate
+5,Formula plates,item art,jugcraft:lsd_formula_plate,LSD Formula Plate
+5,Formula plates,item art,jugcraft:masterwork_reserve_formula_plate,Masterwork Reserve Formula Plate
+5,Formula plates,item art,jugcraft:mescaline_formula_plate,Mescaline Formula Plate
+5,Formula plates,item art,jugcraft:methylphenidate_formula_plate,Methylphenidate Formula Plate
+5,Formula plates,item art,jugcraft:methylphenidate_xr_formula_plate,Methylphenidate XR Formula Plate
+5,Formula plates,item art,jugcraft:modafinil_formula_plate,Modafinil Formula Plate
+5,Formula plates,item art,jugcraft:modafinil_xr_formula_plate,Modafinil XR Formula Plate
+5,Formula plates,item art,jugcraft:morphine_formula_plate,Morphine Formula Plate
+5,Formula plates,item art,jugcraft:naloxone_formula_plate,Naloxone Formula Plate
+5,Formula plates,item art,jugcraft:paracetamol_formula_plate,Paracetamol Formula Plate
+5,Formula plates,item art,jugcraft:penicillin_formula_plate,Penicillin Formula Plate
+5,Formula plates,item art,jugcraft:psilocybin_formula_plate,Psilocybin Formula Plate
+5,Formula plates,item art,jugcraft:refined_spirits_formula_plate,Alcohol (Refined Spirits) Formula Plate
+5,Formula plates,item art,jugcraft:rehydration_salts_formula_plate,Rehydration Salts Formula Plate
+5,Formula plates,item art,jugcraft:reserve_whiskey_formula_plate,Alcohol (Reserve Whiskey) Formula Plate
+5,Formula plates,item art,jugcraft:salbutamol_formula_plate,Salbutamol (Albuterol) Formula Plate
+5,Formula plates,item art,jugcraft:stimulant_formula_plate,Stimulant Formula Plate
+5,Formula plates,item art,jugcraft:thc_formula_plate,THC Formula Plate
+6,"HUD, models and final consistency",block-item model review,jugcraft:dream_study_plinth,Dream Study Plinth
+6,"HUD, models and final consistency",effect icon,jugcraft:adrenaline,Adrenaline
+6,"HUD, models and final consistency",effect icon,jugcraft:adrenaline_fatigue,Adrenaline Fatigue
+6,"HUD, models and final consistency",effect icon,jugcraft:amphetamine,Amphetamine
+6,"HUD, models and final consistency",effect icon,jugcraft:amphetamine_xr,Amphetamine Xr
+6,"HUD, models and final consistency",effect icon,jugcraft:botanical_relaxation,Botanical Relaxation
+6,"HUD, models and final consistency",effect icon,jugcraft:caffeinated,Caffeinated
+6,"HUD, models and final consistency",effect icon,jugcraft:caffeine_jitters,Caffeine Jitters
+6,"HUD, models and final consistency",effect icon,jugcraft:caffeine_xr,Caffeine Xr
+6,"HUD, models and final consistency",effect icon,jugcraft:dmt,Dmt
+6,"HUD, models and final consistency",effect icon,jugcraft:endurance,Endurance
+6,"HUD, models and final consistency",effect icon,jugcraft:fentanyl,Fentanyl
+6,"HUD, models and final consistency",effect icon,jugcraft:fentanyl_patch,Fentanyl Patch
+6,"HUD, models and final consistency",effect icon,jugcraft:fortitude,Fortitude
+6,"HUD, models and final consistency",effect icon,jugcraft:high_proof_spirits,High Proof Spirits
+6,"HUD, models and final consistency",effect icon,jugcraft:intoxication,Intoxication
+6,"HUD, models and final consistency",effect icon,jugcraft:ketamine,Ketamine
+6,"HUD, models and final consistency",effect icon,jugcraft:lidocaine,Lidocaine
+6,"HUD, models and final consistency",effect icon,jugcraft:lsd,Lsd
+6,"HUD, models and final consistency",effect icon,jugcraft:masterwork_reserve,Masterwork Reserve
+6,"HUD, models and final consistency",effect icon,jugcraft:mescaline,Mescaline
+6,"HUD, models and final consistency",effect icon,jugcraft:methylphenidate,Methylphenidate
+6,"HUD, models and final consistency",effect icon,jugcraft:methylphenidate_xr,Methylphenidate Xr
+6,"HUD, models and final consistency",effect icon,jugcraft:modafinil,Modafinil
+6,"HUD, models and final consistency",effect icon,jugcraft:modafinil_xr,Modafinil Xr
+6,"HUD, models and final consistency",effect icon,jugcraft:moonshine,Moonshine
+6,"HUD, models and final consistency",effect icon,jugcraft:morphine,Morphine
+6,"HUD, models and final consistency",effect icon,jugcraft:opioid_drowsiness,Opioid Drowsiness
+6,"HUD, models and final consistency",effect icon,jugcraft:pattern_interference,Pattern Interference
+6,"HUD, models and final consistency",effect icon,jugcraft:pharmacy_absorption,Pharmacy Absorption
+6,"HUD, models and final consistency",effect icon,jugcraft:pharmacy_recovery,Pharmacy Recovery
+6,"HUD, models and final consistency",effect icon,jugcraft:precision_focus,Precision Focus
+6,"HUD, models and final consistency",effect icon,jugcraft:psilocybin,Psilocybin
+6,"HUD, models and final consistency",effect icon,jugcraft:refined_spirits,Refined Spirits
+6,"HUD, models and final consistency",effect icon,jugcraft:reserve_whiskey,Reserve Whiskey
+6,"HUD, models and final consistency",effect icon,jugcraft:salbutamol,Salbutamol
+6,"HUD, models and final consistency",effect icon,jugcraft:sterile_recovery,Sterile Recovery
+6,"HUD, models and final consistency",effect icon,jugcraft:stimulant_appetite,Stimulant Appetite
+6,"HUD, models and final consistency",effect icon,jugcraft:stimulated,Stimulated
+6,"HUD, models and final consistency",effect icon,jugcraft:thc,Thc
+6,"HUD, models and final consistency",machine model review,form:autoclave,Autoclave
+6,"HUD, models and final consistency",machine model review,form:formulation_press,Formulation Press
+6,"HUD, models and final consistency",machine model review,form:laboratory_analyzer,Laboratory Analyzer
+6,"HUD, models and final consistency",machine model review,form:mash_conditioning_barrel,Mash and Conditioning Barrel
+6,"HUD, models and final consistency",machine model review,form:moonshine_still,Moonshine Still
+6,"HUD, models and final consistency",machine model review,form:pharmaceutical_separator,Pharmaceutical Separator
+6,"HUD, models and final consistency",machine model review,form:release_coater,Release Coater
+6,"HUD, models and final consistency",machine model review,form:sterile_filler,Sterile Filler

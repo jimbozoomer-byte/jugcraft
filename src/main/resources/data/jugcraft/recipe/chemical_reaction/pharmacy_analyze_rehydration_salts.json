@@ -1,0 +1,42 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "salt"
+    }
+  ],
+  "type": "jugcraft:chemical_reaction",
+  "capability": "jugcraft:pharmacy_analysis",
+  "items": [
+    {
+      "ingredient": "jugcraft:rehydration_salts",
+      "count": 1
+    },
+    {
+      "ingredient": "jugcraft:blank_formula_plate",
+      "count": 1
+    }
+  ],
+  "fluids": [
+    {
+      "fluid": "minecraft:water",
+      "amount": 250
+    }
+  ],
+  "results": [
+    {
+      "id": "jugcraft:rehydration_salts_formula_plate",
+      "count": 1
+    }
+  ],
+  "energy_per_tick": 32,
+  "time": 160
+}

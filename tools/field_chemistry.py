@@ -31,12 +31,8 @@ FLASH_STUN_TICKS = 60
 # use per second in gas instead (mB).
 GAS_MASK_DURABILITY = 20
 SCUBA_GAS_OXYGEN = 20
-# Medicines: the first aid kit's cooldown (seconds) and the stimulant's length (ticks).
+# Instant medicine cooldown; sustained medicine timing belongs to Pharmacology.
 FIRST_AID_COOLDOWN = 10
-STIMULANT_TICKS = 1200
-# Aspirin (docs/features/aspirin.md): Regeneration I for this long (ticks), Nausea cleared, then a wait (seconds).
-ASPIRIN_REGENERATION_TICKS = 200
-ASPIRIN_COOLDOWN = 30
 
 ITEMS = {
     "chlorine_grenade": ("Chlorine Grenade", "Bursts into a cloud of chlorine that hurts whatever breathes inside it for "
@@ -51,10 +47,10 @@ ITEMS = {
     "gas_mask": ("Gas Mask", "Keeps out chlorine and smoke, and its tinted lenses a flashbang. The filter wears in gas; "
                              "repair it with charcoal."),
     "first_aid_kit": ("First Aid Kit", "Heals four hearts. Then a 10 second wait before the next."),
-    "antidote": ("Antidote", "Clears poison, wither and every other harmful effect, and keeps the good ones."),
-    "stimulant": ("Stimulant", "Speed II and Haste II for a minute, and hungry for it."),
+    "antidote": ("Antidote", "Clears listed vanilla harmful effects and keeps benefits. Use Activated Charcoal for drug drawbacks."),
+    "stimulant": ("Stimulant", "Speed II and Haste II for 60 s; Stimulant Appetite adds food exhaustion. Shares caffeine's family."),
     "salicylic_acid": ("Salicylic Acid", "Steeped from willow or birch bark. Acetylated with cider vinegar, it makes aspirin."),
-    "aspirin": ("Aspirin", "Eases pain: Regeneration I for 10 seconds and clears nausea. Then a 30 second wait."),
+    "aspirin": ("Aspirin", "Fortitude: 10% less armor-sensitive physical damage. Stronger Resistance takes priority."),
 }
 GRENADES = ["chlorine_grenade", "smoke_grenade", "thermite_grenade", "flashbang"]
 MEDICINES = ["first_aid_kit", "antidote", "stimulant", "aspirin"]

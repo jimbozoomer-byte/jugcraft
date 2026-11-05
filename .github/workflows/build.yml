@@ -185,7 +185,7 @@ jobs:
             **/screenshots/*.png
             **/owner-network-evidence/**/peer.log
 
-  # Which client game test classes to run, shared out between sixteen client jobs (tools/select_client_tests.py).
+  # Which client game test classes to run, shared out between twenty client jobs (tools/select_client_tests.py).
   # A pull request runs the classes that show what it changed; main and a manual run of this workflow run them all.
   plan:
     name: choose client tests
@@ -210,6 +210,10 @@ jobs:
       shard13: ${{ steps.choose.outputs.shard13 }}
       shard14: ${{ steps.choose.outputs.shard14 }}
       shard15: ${{ steps.choose.outputs.shard15 }}
+      shard16: ${{ steps.choose.outputs.shard16 }}
+      shard17: ${{ steps.choose.outputs.shard17 }}
+      shard18: ${{ steps.choose.outputs.shard18 }}
+      shard19: ${{ steps.choose.outputs.shard19 }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
@@ -222,17 +226,17 @@ jobs:
         run: |
           if [ "$EVENT" = pull_request ]; then
             # The pull request's merge commit against its first parent, the base branch.
-            python3 tools/select_client_tests.py --base HEAD^1 --shards 16 --github-output "$GITHUB_OUTPUT"
+            python3 tools/select_client_tests.py --base HEAD^1 --shards 20 --github-output "$GITHUB_OUTPUT"
           else
-            python3 tools/select_client_tests.py --all --shards 16 --github-output "$GITHUB_OUTPUT"
+            python3 tools/select_client_tests.py --all --shards 20 --github-output "$GITHUB_OUTPUT"
           fi
 
   # A real game client with software rendering (Mesa): runs the chosen client game tests in src/gametest
-  # (JugcraftClientGameTests and the rest), which build showrooms and worlds and take screenshots. Sixteen jobs share
+  # (JugcraftClientGameTests and the rest), which build showrooms and worlds and take screenshots. Twenty jobs share
   # them out (the plan job above), so every chosen class runs once; the "client" job below passes only when the plan
-  # and all sixteen do. A job with no classes passes at once.
+  # and all twenty do. A job with no classes passes at once.
   client-shard:
-    name: client (shard ${{ matrix.shard }} of 16)
+    name: client (shard ${{ matrix.shard }} of 20)
     needs: plan
     runs-on: ubuntu-24.04
     # Keep the 60-minute limit; the expanded gun gallery has its own measured weight.
@@ -240,7 +244,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
     env:
       CLASSES: ${{ needs.plan.outputs[format('shard{0}', matrix.shard)] }}
       LIBGL_ALWAYS_SOFTWARE: 'true'
@@ -276,7 +280,7 @@ jobs:
           # Test options are written by runClientGameTest after Loom cleans its run directory.
           mkdir -p run
           echo "eula=true" > run/eula.txt
-      - name: Run client game tests (shard ${{ matrix.shard }} of 16)
+      - name: Run client game tests (shard ${{ matrix.shard }} of 20)
         if: env.CLASSES != ''
         run: |
           # Both bounded JVMs plus software rendering need spillover on hosted runners.

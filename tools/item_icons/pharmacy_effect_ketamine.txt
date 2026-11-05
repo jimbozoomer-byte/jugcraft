@@ -1,0 +1,20 @@
+# ketamine: Art Batch 6 status glyph; dark contour and top-left highlight.
+# materials: main=pharmacy_lavender
+# family: compact
+# allow: bare D H L M F Y - HUD symbols use a dark fill contour and colored strokes, rather than an item-object outline.
+................
+................
+................
+...DDDD..DDDD...
+..DHHHHDDHHHHD..
+..DLMMMHHMMMMD..
+.DHMDDLMMMDDLHD.
+.DLMD.DLMD.DLMD.
+.DLMD.DLMD.DLMD.
+.DLMD.DLMD.DLMD.
+.DLMD.DLMD.DLMD.
+.DLMD.DLMD.DLMD.
+.DLMD.DLMD.DLMD.
+..DD...DD...DD..
+................
+................

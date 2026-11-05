@@ -4,6 +4,12 @@
   "package": "io.github.jimbozoomer.jugcraft.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "PharmacologyAttackMixin",
+    "PharmacologySprintMixin",
+    "PharmacologySwimMixin",
+    "PharmacologyDamageMixin",
+    "PharmacologyFoodMixin",
+    "PharmacologyExhaustionMixin",
     "ArcaneBucketRemainderMixin",
     "ArcaneDroppedMatterMixin",
     "ArcaneAquaticMiningMixin",

@@ -150,6 +150,14 @@ ADVANCED = {"circuit_assembler", "lithography_station", "gas_centrifuge_cascade"
 FORM_LOOK = "industrial"
 # What each industrial form is for (tools/industrial_forms.py FORMS), shown in its help box.
 FORM_TAGLINES = {
+    "mash_conditioning_barrel": "Ferments mash and conditions reserve stock without electricity.",
+    "moonshine_still": "Burns ordinary furnace fuel for small moonshine batches.",
+    "release_coater": "Coats fixed long-duration formulations with paid active stock and reusable tooling.",
+    "autoclave": "Prepares stable sterile vials and pharmaceutical carrier.",
+    "sterile_filler": "Fills medicine vials using a reusable formula plate.",
+    "laboratory_analyzer": "Write reusable medicine formulas.",
+    "pharmaceutical_separator": "Refine botanical pharmacy inputs.",
+    "formulation_press": "Formulate medicines in bulk.",
     "bulk_electrolytic_separator": "Splits fluids in four lanes, with efficient bulk power use.",
     "bulk_chemical_infuser": "Combines gases and processes synthetic fuels in four lanes.",
     "bulk_chemical_oxidizer": "Oxidizes solid feeds in four parallel batches.",

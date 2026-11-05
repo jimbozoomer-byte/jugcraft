@@ -1,5 +1,20 @@
 # Jugcraft TODO
 
+## Pharmacy follow-up — November 4
+
+- [ ] Add companion automation to pharmacy machines after reusable Precision Process Modules can be supplied and retained safely in upgrade slots. These eight forms currently remain outside helper assistance; preserve the existing 40 supported industrial processors.
+
+
+The chemistry/pharmacy manufacturing foundation, existing drug roster, shared strain rules, visual profiles and item-art batches are implemented locally. The owner accepted the current result for now and requested commit/push/PR preparation on November 4. Remaining work stays open here; the [delivery plan](features/pharmacology-remaining-batches.md) and [latest art/HUD record](features/pharmacology-item-art-6.md) distinguish completed work from future scope. Prepared with OpenAI Codex (GPT-6 family).
+
+- [ ] **Review pharmacy textures in ordinary play.** Revisit all finished drugs, ingredients, stocks, formulas, effect symbols and whole machine models for recognizability, held scale, stack overlays, lighting, color-vision readability and consistency with the existing coffee/crop art. The current 146 item sprites and 39 effect icons are the accepted baseline, not the end of the art review.
+- [ ] **Improve drug screen effects.** Review blur, drunk/double vision, sway, contrast, trails/afterimages and each drug's visual identity with native screenshots/clips. Improve the Clockwork imagery and depth; recheck overlapping drugs, overstrain, Reduced Motion, intensity controls, Visual Off and supported graphics/shader configurations. Preserve useful gameplay cues and readable HUD/menus.
+- [ ] **Implement the Clockwork Elf dimension — original Batch 7.** Add the actual realm, authored environment/structures, Clockwork Elves and psychedelic entry requirements. Existing DMT/Clockwork glimpses are previews, not implemented dimension travel. Reuse the shared dimension, claims and progression systems.
+- [ ] **Complete safe Clockwork visits and return travel.** Implement return anchors and visit accounting, bounded/chunk-safe travel and reliable exits after expiry, cancellation, cleansing, damage where appropriate, death, logout/reconnect and server restart. Preserve the player's inventory/body and provide recovery from an unavailable destination without duplication or stranding.
+- [ ] **Implement Clockwork Elf trading and its later progression.** Define the actual offers, prices, rewards, advanced materials/formulas and any realm-linked pharmacy/manufacturing steps from the existing tree. Make the rewards useful and the costs conserved; keep the ordinary chemistry tree, first medicines, alcohol upgrades and basic Ketamine scouting reachable without elven goods. Record any additional endgame branch explicitly before marking it complete.
+- [ ] **Review full progression and balance.** Play through acquisition, cultivation, machine/tool gates and complete manufacturing chains; tune ingredient/packaging costs, long benefits, XR/patch tradeoffs, premium alcohol grades, family replacement/tolerance, combination strain and high-strain penalties. Retain the positive-first design and no injury/combat-debuff upkeep.
+- [ ] **Close pharmacy integration and validation gaps.** Reconcile current player-facing guides with the final soft-threshold/decaying-strain rules, complete full generated-data/recipe/economy and CI checks, test optional integrations absent and external shader packs, and run a representative performance check plus a human two-client dedicated-server session. Cover private cues, simultaneous machine/trade use, conservation, save migration, reconnect/death and the future dimension's return paths. Earlier automated/native checks remain evidence of their stated scope, not these missing checks.
+
 ## November 3 — raider crews, companion stable, placed-food remodels, Thanksgiving decor (local, Claude Code)
 
 Owner request, 3 November 2026. Local working branches only: nothing is committed, pushed, released or deployed. Codex reviews, integrates and tests. [Ledger](features/holiday-batch-nov3.md).

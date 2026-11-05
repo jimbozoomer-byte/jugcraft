@@ -90,6 +90,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.nuclear.StorageTanks.GATE_ENTITY, RailingGateRenderer::new);
 		BlockEntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.nuclear.StorageTanks.HATCH_ENTITY, StorageTankHatchRenderer::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.machine.form.JugcraftForms.MENU, FormMachineScreen::new);
+		MenuScreens.register(io.github.jimbozoomer.jugcraft.pharmacology.DreamStudies.MENU, DreamStudyScreen::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.workshop.JugcraftWorkshop.MENU, WorkshopScreen::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.storage.JugcraftStorage.STORAGE_CRATE_MENU, StorageCrateScreen::new);
 		WorkshopScreen.registerOverlayCompatibility();
@@ -287,6 +288,10 @@ public final class JugcraftClient implements ClientModInitializer {
 		PartyClient.register();
 		ConcordanceClient.register();
 		GunsClient.register();
+		EchoViewClient.register();
+		DrugVisuals.register();
+		StrainClient.register();
+		DreamSenseClient.register();
 		JugcraftKeyBindings.register();
 		// The Jugcraft Encyclopedia: its key, its inventory button and its screen (Concordance Chunk A, A-04).
 		EncyclopediaClient.register();

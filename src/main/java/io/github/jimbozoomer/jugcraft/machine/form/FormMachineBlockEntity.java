@@ -276,10 +276,10 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 				return tank >= inputs && tank < tanks.size() ? reservedMb(tank - inputs) : 0;
 			}
 			return switch (index) {
-				case DATA_ENERGY_LOW -> (int) (energy.getAmount() & 0xFFFF);
-				case DATA_ENERGY_HIGH -> (int) ((energy.getAmount() >>> 16) & 0xFFFF);
-				case DATA_CAPACITY_LOW -> (int) (energy.getCapacity() & 0xFFFF);
-				case DATA_CAPACITY_HIGH -> (int) ((energy.getCapacity() >>> 16) & 0xFFFF);
+				case DATA_ENERGY_LOW -> (int) (displayWorkBudget() & 0xFFFF);
+				case DATA_ENERGY_HIGH -> (int) ((displayWorkBudget() >>> 16) & 0xFFFF);
+				case DATA_CAPACITY_LOW -> (int) (displayWorkCapacity() & 0xFFFF);
+				case DATA_CAPACITY_HIGH -> (int) ((displayWorkCapacity() >>> 16) & 0xFFFF);
 				case DATA_PAUSED -> paused ? 1 : 0;
 				case DATA_HOLD_VENTED -> holdVented ? 1 : 0;
 				case DATA_LANE_USE -> (int) Math.min(0xFFFF, form.generator() ? made : lanePrice);
@@ -306,7 +306,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 		super(((FormMachineBlock) state.getBlock()).entityType(), pos, state);
 		this.form = ((FormMachineBlock) state.getBlock()).form();
 		// A generator only gives power out; every other form only takes it in.
-		this.energy = form.generator()
+		this.energy = form.fuelled() || form.ambient() ? new SimpleEnergyStorage(0, 0, 0, this::setChanged) : form.generator()
 				? new SimpleEnergyStorage(form.family().capacity, 0, form.family().maxOutput, this::setChanged)
 				: new SimpleEnergyStorage(form.family().capacity, form.family().maxInput, 0, this::setChanged);
 		this.slots = new SimpleContainer(form.containerSize()) {
@@ -451,6 +451,47 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 		return energy;
 	}
 
+	private int heatTicks;
+	private int heatCapacity;
+	public int furnaceTicksRemaining() { return heatTicks; }
+	private long displayWorkBudget() { return form.fuelled() ? heatTicks : energy.getAmount(); }
+	private long displayWorkCapacity() { return form.fuelled() ? heatCapacity : energy.getCapacity(); }
+	private static final class FuelProbe extends net.minecraft.world.level.block.entity.FurnaceBlockEntity {
+		FuelProbe(ServerLevel level) { super(BlockPos.ZERO, net.minecraft.world.level.block.Blocks.FURNACE.defaultBlockState()); setLevel(level); }
+		int ticks(ServerLevel level, ItemStack stack) { return getBurnDuration(level, stack); }
+	}
+	public static int furnaceTicks(ServerLevel level, ItemStack stack) {
+		return stack.isEmpty() ? 0 : new FuelProbe(level).ticks(level, stack);
+	}
+	/** Furnace burn time is spent directly; these forms have zero JE storage and no power ports. */
+	private boolean payWork(MinecraftServer server, long price) {
+		if (form.ambient()) return true;
+		if (!form.fuelled()) {
+			if (energy.getAmount() < price) return false;
+			energy.setAmount(energy.getAmount() - price);
+			return true;
+		}
+		if (heatTicks == 0) {
+			ItemStack fuel = items.get(form.fuelSlot());
+			int duration = furnaceTicks((ServerLevel) level, fuel);
+			if (duration <= 0) return false;
+			var remainder = fuel.getItem().getCraftingRemainder();
+			if (remainder != null && fuel.getCount() != 1) return false;
+			fuel.shrink(1);
+			if (remainder != null) items.set(form.fuelSlot(), remainder.create());
+			heatTicks = Math.min(1_000_000, duration);
+			heatCapacity = heatTicks;
+		}
+		heatTicks--;
+		return true;
+	}
+	private boolean processToolPresent(int tool) {
+		int slot = form.firstSocketSlot() + tool;
+		if (slot < 0 || slot >= items.size()) return false;
+		return tool < form.sockets().size() ? form.sockets().get(tool).accepts(items.get(slot))
+				: items.get(slot).getItem() instanceof io.github.jimbozoomer.jugcraft.pharmacology.PrecisionPharmacy.ProcessModule;
+	}
+
 	public MachineStatus status() {
 		return status;
 	}
@@ -485,7 +526,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 		if (all != recipeSource) {
 			List<FluidRecipes.Entry> runs = new ArrayList<>();
 			for (FluidRecipes.Entry entry : all) {
-				if (form.runs(entry.recipe()) && (entry.recipe().tool().isEmpty() || !form.sockets().isEmpty())) {
+				if (form.runs(entry.recipe()) && (entry.recipe().tool().isEmpty() || !form.sockets().isEmpty() || form.upgradeSlots() > 0)) {
 					runs.add(entry);
 				}
 			}
@@ -634,17 +675,18 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 			}
 			lanePrice = form.profile().lanePerTick(upgrades.use(lane.energyPerTick() > 0
 					? lane.energyPerTick() : form.family().usePerTick));
+			if (form.ambient()) lanePrice = 0;
+			else if (form.fuelled()) lanePrice = 1;
 			int required = upgrades.ticks(lane.duration());
 			if (lane.progress() < required) {
-				if (lane.tool() >= 0 && !form.sockets().get(lane.tool()).accepts(items.get(form.firstSocketSlot() + lane.tool()))) {
+				if (lane.tool() >= 0 && !processToolPresent(lane.tool())) {
 					stuck = MachineStatus.at(MachineLifecycle.WAITING_TOOL, MachineStatus.Reason.TOOL_REQUIRED, lane.tool());
 					continue;
 				}
-				if (energy.getAmount() < lanePrice) {
+				if (!payWork(server, lanePrice)) {
 					starved = true;
 					continue;
 				}
-				energy.setAmount(energy.getAmount() - lanePrice);
 				lane.advance(1);
 				if (requested && lane.progress() < required && resultSpace(lane) == null) {
 					eligible |= 1 << index;
@@ -759,7 +801,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 	 * preferring a recipe that has all its inputs (it then needs only a tool or room) over a list of missing inputs.
 	 */
 	private Start start(List<FluidRecipes.Entry> runs, long now) {
-		List<ItemStack> inputs = items.subList(0, form.itemInputs());
+		List<ItemStack> inputs = items.subList(0, form.recipeItemInputs());
 		if (recipeLock != null && runs.isEmpty()) {
 			return new Start(null, MachineStatus.of(MachineLifecycle.WAITING_INPUT, MachineStatus.Reason.RECIPE_UNAVAILABLE));
 		}
@@ -804,7 +846,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 	}
 
 	private boolean inputsEmpty() {
-		for (int slot = 0; slot < form.itemInputs(); slot++) {
+		for (int slot = 0; slot < form.recipeItemInputs(); slot++) {
 			if (!items.get(slot).isEmpty()) {
 				return false;
 			}
@@ -823,6 +865,12 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 			ItemStack held = items.get(form.firstSocketSlot() + socket);
 			if (!held.isEmpty() && tool.test(held)) {
 				return socket;
+			}
+		}
+		for (int upgrade = 0; upgrade < form.upgradeSlots(); upgrade++) {
+			ItemStack held = items.get(form.firstUpgradeSlot() + upgrade);
+			if (held.getItem() instanceof io.github.jimbozoomer.jugcraft.pharmacology.PrecisionPharmacy.ProcessModule && tool.test(held)) {
+				return form.sockets().size() + upgrade;
 			}
 		}
 		return -1;
@@ -1358,6 +1406,8 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 	 * upgrade slots take upgrade cards.
 	 */
 	public boolean canPlaceItem(int slot, ItemStack stack) {
+		if (slot == form.fuelSlot()) return level instanceof ServerLevel server && furnaceTicks(server, stack) > 0;
+		if (slot >= form.firstSocketSlot() && socketLocked(slot - form.firstSocketSlot())) return false;
 		if (slot < form.firstOutputSlot()) {
 			return !(level instanceof ServerLevel server) || usesItem(allowedRecipes(server.getServer()), slot, stack);
 		}
@@ -1427,6 +1477,8 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 			items.set(previewUpgradeStart, ItemStack.EMPTY);
 		}
 		energy.setAmount(input.getLongOr("energy", 0L));
+		heatTicks = Math.clamp(input.getIntOr("furnace_ticks", 0), 0, 1_000_000);
+		heatCapacity = Math.clamp(input.getIntOr("furnace_capacity", 0), heatTicks, 1_000_000);
 		paused = input.getBooleanOr("paused", false);
 		holdVented = input.getBooleanOr("hold_vented", false);
 		recipeLock = input.read("recipe_lock", Identifier.CODEC).orElse(null);
@@ -1467,6 +1519,8 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 		output.putInt("inventory_layout", 2);
 		output.putInt("form_version", form.version());
 		output.putLong("energy", energy.getAmount());
+		output.putInt("furnace_ticks", heatTicks);
+		output.putInt("furnace_capacity", heatCapacity);
 		output.putBoolean("paused", paused);
 		output.putBoolean("hold_vented", holdVented);
 		if (recipeLock != null) output.store("recipe_lock", Identifier.CODEC, recipeLock);
