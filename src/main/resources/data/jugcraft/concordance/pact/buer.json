@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "agreement": "jugcraft:buer_pact",
+  "research": "jugcraft:garden_regard",
+  "service": {
+    "work": "strain_tending",
+    "radius": 8,
+    "from": 0,
+    "to": 12000,
+    "quota": 16
+  },
+  "upkeep": {
+    "offering": "jugcraft:buer_offerings",
+    "count": 1,
+    "period_days": 7,
+    "grace_days": 1,
+    "cap": 4
+  },
+  "beneficiaries": "party",
+  "compact": {
+    "items": [
+      {
+        "item": "jugcraft:mendvetch",
+        "count": 4
+      },
+      {
+        "item": "minecraft:bone_meal",
+        "count": 4
+      }
+    ],
+    "resonance": 0
+  },
+  "beats": [
+    "greeting",
+    "service",
+    "price"
+  ]
+}

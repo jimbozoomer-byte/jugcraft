@@ -15,13 +15,15 @@ import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
  * @param containerId the pact menu this is for; a request naming any other container is dropped
  * @param sequence    the screen's own count of its requests, rising; one not above the last the server took for this menu is dropped
  * @param action      an index into {@link #ACTIONS}
- * @param choice      an index into a list the server last sent this menu (a pattern for RECALL, an offering for DEPOSIT); 0 otherwise
+ * @param choice      an index into a list the server last sent this menu: a pattern for RECALL, an offering for DEPOSIT, a
+ *                    spirit for INVITE (the invite mode), an answer for RESOLVE (the kept page's matter, GC-05), a pact
+ *                    without its perch for CHOOSE, SEAT and END on the seat page; 0 otherwise
  * @param revision    the terms revision the screen last heard; any other is answered "changed" with the terms again
  */
 public record PactRequestPayload(int containerId, int sequence, int action, int choice, int revision) implements CustomPacketPayload {
-	public static final int CHOOSE = 0, ACCEPT = 1, DECLINE = 2, RECALL = 3, DEPOSIT = 4, SUSPEND = 5, RESUME = 6, END = 7, SEAT = 8;
-	/** The actions, by index (tools/concordance_pacts.py ACTIONS; check_pacts). Append only. */
-	public static final List<String> ACTIONS = List.of("choose", "accept", "decline", "recall", "deposit", "suspend", "resume", "end", "seat");
+	public static final int CHOOSE = 0, ACCEPT = 1, DECLINE = 2, RECALL = 3, DEPOSIT = 4, SUSPEND = 5, RESUME = 6, END = 7, SEAT = 8, INVITE = 9, RESOLVE = 10;
+	/** The actions, by index (tools/concordance_pacts.py ACTIONS; check_pacts). Append only: INVITE (GC-01) and RESOLVE (GC-05) since the garden cohort. */
+	public static final List<String> ACTIONS = List.of("choose", "accept", "decline", "recall", "deposit", "suspend", "resume", "end", "seat", "invite", "resolve");
 	public static final Type<PactRequestPayload> TYPE = new Type<>(Jugcraft.id("concordance_pact_request"));
 	public static final StreamCodec<RegistryFriendlyByteBuf, PactRequestPayload> CODEC = StreamCodec.composite(
 			ByteBufCodecs.VAR_INT, PactRequestPayload::containerId,

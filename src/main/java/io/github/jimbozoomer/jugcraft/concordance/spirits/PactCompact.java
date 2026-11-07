@@ -43,16 +43,12 @@ public final class PactCompact {
 		return List.copyOf(needs);
 	}
 
+	/**
+	 * Whether {@code player} can pay the compact now. The count is PactAfford's, which the pact screen's short marks read
+	 * too (the magic interfaces), so what the screen marks and what the seal decides never disagree.
+	 */
 	public static boolean affords(ServerPlayer player, List<Need> needs, int resonance) {
-		if (player.hasInfiniteMaterials()) {
-			return true;
-		}
-		for (Need need : needs) {
-			if (player.getInventory().countItem(need.item()) < need.count()) {
-				return false;
-			}
-		}
-		return resonance <= 0 || astrolabe(player, resonance) != null;
+		return PactAfford.count(player, needs, resonance).affords();
 	}
 
 	public static void pay(ServerPlayer player, List<Need> needs, int resonance) {

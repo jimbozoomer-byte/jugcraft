@@ -1,0 +1,22 @@
+{
+  "parent": "jugcraft:concordance_garden_regard_encountered",
+  "display": {
+    "icon": {
+      "id": "jugcraft:mendvetch"
+    },
+    "title": {
+      "translate": "advancements.jugcraft.concordance_garden_regard_observed.title"
+    },
+    "description": {
+      "translate": "advancements.jugcraft.concordance_garden_regard_observed.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": false
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

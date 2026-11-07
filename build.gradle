@@ -221,8 +221,11 @@ def clientTests = providers.gradleProperty("clientTests").getOrElse("")
 // The complete content/biome suite needs the same practical heap floor as a modded client.
 // Bound both test JVMs explicitly: the full server suite also retains substantial
 // world state. Fail on exhaustion so CI preserves the cause instead of hanging.
+// The server suite runs its tests fifty at once; its last batch (the Jimtafacts network, survival, collection and
+// storage classes together) outgrew 4G when the garden cohort filled it (3251 tests, PR #526), so it has 6G.
 tasks.matching { it.name in ["runGameTest", "runClientGameTest"] }.configureEach {
-	maxHeapSize = name == "runClientGameTest" ? "6G" : "4G"
+	// Main raised the client suite to 6G; the garden cohort's server batch needs 6G too.
+	maxHeapSize = "6G"
 	jvmArgs "-XX:+ExitOnOutOfMemoryError"
 }
 def clientTestShard = providers.gradleProperty("clientTestShard").getOrElse("")

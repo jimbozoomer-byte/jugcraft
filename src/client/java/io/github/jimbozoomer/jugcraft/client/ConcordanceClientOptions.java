@@ -7,7 +7,9 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.LinkedHashSet;
 import java.util.Properties;
+import java.util.Set;
 import net.fabricmc.loader.api.FabricLoader;
 
 /**
@@ -15,7 +17,8 @@ import net.fabricmc.loader.api.FabricLoader;
  * Focus line shows while an instrument is held, reduced motion (fewer, calmer particles and no sliding in the journal),
  * the visual intensity (how many particles signs and blocks draw: {@link Presentation.Intensity}), whether the journal
  * shows exact values beside its descriptions, whether it always opens as the simple screen, and whether this player's
- * worn trinkets (Wayfaring's belt and boots) are drawn on them. Presentation only. The server sees only the last, which
+ * worn trinkets (Wayfaring's belt and boots) are drawn on them, and which pact spirits' beats this player has paged
+ * through (their perch then opens on their terms: docs/features/magic-interfaces.md). Presentation only. The server sees only the last, which
  * it shows to everyone who sees this player ({@link WayfaringClient#sendChoice}); it never sees the others. Changed from
  * {@link ConcordanceSettingsScreen} and the journal.
  */
@@ -27,6 +30,8 @@ public final class ConcordanceClientOptions {
 	private static boolean simpleJournal;
 	private static boolean wornTrinkets = true;
 	private static Presentation.Intensity intensity = Presentation.Intensity.FULL;
+	/** The pact spirits (their counterparts, entity ids) whose three beats this player has paged through. */
+	private static final Set<String> heardBeats = new LinkedHashSet<>();
 
 	private ConcordanceClientOptions() {
 	}
@@ -79,6 +84,27 @@ public final class ConcordanceClientOptions {
 		WayfaringClient.sendChoice();
 	}
 
+	/**
+	 * Whether this player has paged through {@code spirit}'s beats before (the magic interfaces, spec 1.5): his perch then
+	 * opens on his terms. Clearing it only replays the beats; the server hears the terms asked for either way.
+	 */
+	public static boolean heardBeats(String spirit) {
+		return heardBeats.contains(spirit);
+	}
+
+	/** Remembers that {@code spirit}'s beats were heard (paged through, or skipped to his terms). */
+	public static void hearBeats(String spirit) {
+		if (!spirit.isEmpty() && heardBeats.add(spirit)) {
+			save();
+		}
+	}
+
+	/** Forgets every spirit's beats, so each perch replays them (the client tests start from here). */
+	public static void forgetBeats() {
+		heardBeats.clear();
+		save();
+	}
+
 	/** The journal's own switch for exact values (kept with the other settings). */
 	public static void setExactValues(boolean exact) {
 		exactValues = exact;
@@ -102,6 +128,12 @@ public final class ConcordanceClientOptions {
 		// The two settings on at first are off only when they say so: a mistyped value leaves them on.
 		wornTrinkets = !"false".equalsIgnoreCase(properties.getProperty("concordance.worn_trinkets", "true").trim());
 		intensity = Presentation.Intensity.fromId(properties.getProperty("concordance.visual_intensity", "full"));
+		heardBeats.clear();
+		for (String spirit : properties.getProperty("concordance.heard_beats", "").split(",")) {
+			if (!spirit.isBlank()) {
+				heardBeats.add(spirit.trim());
+			}
+		}
 		Presentation.configure(intensity, reducedMotion);
 		save();
 	}
@@ -115,6 +147,7 @@ public final class ConcordanceClientOptions {
 		properties.setProperty("concordance.simple_journal", Boolean.toString(simpleJournal));
 		properties.setProperty("concordance.worn_trinkets", Boolean.toString(wornTrinkets));
 		properties.setProperty("concordance.visual_intensity", intensity.id());
+		properties.setProperty("concordance.heard_beats", String.join(",", heardBeats));
 		try (Writer writer = Files.newBufferedWriter(path)) {
 			properties.store(writer, "Jugcraft client display settings (kept on this computer): concordance.hud shows Focus while"
 					+ " a Concordance instrument is held; concordance.reduced_motion makes Kindled light, the bench and the journal"
@@ -122,7 +155,8 @@ public final class ConcordanceClientOptions {
 					+ " opens the plain journal screen; concordance.worn_trinkets draws your worn trinkets (Wayfaring's belt and"
 					+ " boots) on you, unless armour covers them, and everyone who sees you sees the same;"
 					+ " concordance.visual_intensity (full, reduced or minimal) is how many particles the Concordance draws"
-					+ " (warnings always show).");
+					+ " (warnings always show); concordance.heard_beats lists the pact spirits whose beats you have heard, whose perch"
+					+ " then opens on their terms (empty it to hear them again).");
 		} catch (IOException e) {
 			Jugcraft.LOGGER.warn("Could not write {}", path, e);
 		}

@@ -384,6 +384,30 @@
     ]
   },
   {
+    "id": "jugcraft:concordance/garden_regard_encountered",
+    "required_facts": [
+      "jugcraft:concordance/garden_regard_encountered"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/garden_regard_observed",
+    "required_facts": [
+      "jugcraft:concordance/garden_regard_observed"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/garden_regard_understood",
+    "required_facts": [
+      "jugcraft:concordance/garden_regard_understood"
+    ]
+  },
+  {
+    "id": "jugcraft:concordance/garden_regard_mastered",
+    "required_facts": [
+      "jugcraft:concordance/garden_regard_mastered"
+    ]
+  },
+  {
     "id": "jugcraft:concordance/nouveau_arcana_encountered",
     "required_facts": [
       "jugcraft:concordance/nouveau_arcana_encountered"

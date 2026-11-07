@@ -33,7 +33,9 @@ import org.jspecify.annotations.Nullable;
  * ripe Greenwarden crop within {@value #REACH} blocks (and one above or below) into its {@value #SLOTS} slots, for
  * {@value #COST} Verdance a harvest, which it draws (up to {@value #DRAW} at a time, through the shared transfer rules)
  * from a Verdant Heart within {@value #HEART_REACH} blocks that its keeper's party may draw from. It harvests only
- * what all fits, never in a protected town, and never loads a chunk; hoppers and pipes take its harvest out.
+ * what all fits, never in a protected town, and never loads a chunk; hoppers and pipes take its harvest out. Since the
+ * garden cohort (GC-05) its draw from one named Heart ({@link #receiveFrom}) is also how a pact spirit sets Verdance down
+ * in it from a Heart out of its reach.
  */
 public class GleanerBlockEntity extends LivingDeviceBlockEntity implements GeoBlockEntity, WorldlyContainer {
 	public static final int GLEAN_TICKS = 40;
@@ -62,6 +64,21 @@ public class GleanerBlockEntity extends LivingDeviceBlockEntity implements GeoBl
 
 	public Reservoir reservoir() {
 		return new Reservoir(Garden.VERDANCE, verdance, CAPACITY);
+	}
+
+	/** Operators and tests: sets its Verdance (as the Heart's setVerdance). Since the garden cohort (GC-05). */
+	public void setVerdance(long amount) {
+		verdance = Math.clamp(amount, 0L, CAPACITY);
+		setChanged();
+		sync();
+	}
+
+	/**
+	 * GC-05: whether a Heart at {@code at} is within its own draw ({@value #HEART_REACH} across and up or down: the box it
+	 * searches), where it draws by itself.
+	 */
+	public boolean reaches(BlockPos at) {
+		return worldPosition.distChessboard(at) <= HEART_REACH;
 	}
 
 	void serverTick(ServerLevel level) {
@@ -129,16 +146,32 @@ public class GleanerBlockEntity extends LivingDeviceBlockEntity implements GeoBl
 			if (want <= 0) {
 				return;
 			}
-			if (!level.isLoaded(pos) || !(level.getBlockEntity(pos) instanceof VerdantHeartBlockEntity heart)) {
-				continue;
-			}
-			Transfers.Transfer transfer = heart.drawInto(reservoir(), ownership(), actor, want, level);
-			if (transfer.outcome().moved()) {
-				verdance = transfer.target().amount();
-				setChanged();
-				sync();
+			if (level.isLoaded(pos) && level.getBlockEntity(pos) instanceof VerdantHeartBlockEntity heart) {
+				receiveFrom(heart, actor, want, level);
 			}
 		}
+	}
+
+	/**
+	 * Its draw from one named Heart (its own draw's, and since the garden cohort GC-05 a pact spirit's, at any distance in
+	 * this level): up to {@code max}, never more than {@value #DRAW} or its room, through the Heart's drawInto
+	 * (Transfers.move with both devices' ownership, as {@code actor}). The Heart's Verdance falls and its own rises in this
+	 * one call; nothing is on the way. Returns the Verdance received: 0 when nothing moved (switched off, asleep, full,
+	 * another level, an empty Heart, or {@code actor} not trusted by both).
+	 */
+	public long receiveFrom(VerdantHeartBlockEntity heart, UUID actor, long max, ServerLevel level) {
+		long want = Math.min(Math.min(max, DRAW), CAPACITY - verdance);
+		if (want <= 0 || !Garden.enabled() || !awake || heart.isRemoved() || heart.getLevel() != level) {
+			return 0L;
+		}
+		Transfers.Transfer transfer = heart.drawInto(reservoir(), ownership(), actor, want, level);
+		if (!transfer.outcome().moved()) {
+			return 0L;
+		}
+		verdance = transfer.target().amount();
+		setChanged();
+		sync();
+		return transfer.received();
 	}
 
 	/** Whether every stack of {@code harvest} fits in its slots at once. */

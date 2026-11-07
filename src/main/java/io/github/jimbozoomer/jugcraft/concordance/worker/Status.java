@@ -31,7 +31,10 @@ public enum Status {
 	DISABLED("disabled", false),
 	// Concordance Chunk D, D-02: a pact's upkeep (appended; ids are saved).
 	UPKEEP_DUE("upkeep_due", false),
-	UPKEEP_HELD("upkeep_held", false);
+	UPKEEP_HELD("upkeep_held", false),
+	// Concordance garden cohort, GC-05 (GB27, GC-P44): a pact spirit's choice waits on its holder's answer at its perch; it
+	// keeps to the safe course meanwhile (appended; ids are saved).
+	AWAITING_ANSWER("awaiting_answer", false);
 
 	public final String id;
 	/** Whether it is acting (an intent) rather than waiting (a reason). */

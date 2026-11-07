@@ -18,7 +18,7 @@ import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchEngine;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.concordance.sky.Sky;
 import io.github.jimbozoomer.jugcraft.concordance.spire.ConcordSpire;
-import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasRegard;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactRegards;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.Workers;
 import io.github.jimbozoomer.jugcraft.concordance.stages.StageProgress;
 import io.github.jimbozoomer.jugcraft.concordance.starbound.Starbound;
@@ -91,8 +91,9 @@ public final class Journal {
 		contribute("sky", knows(Sky.RESEARCH), (player, out) -> Sky.forecast(Sky.time(player.level()), Sky.FORECAST_DAYS).forEach(out::line));
 		contribute("workers", knows(Workers.RESEARCH), (player, out) -> Workers.list(player, out::line));
 		contribute("logistics", knows(Workers.RESEARCH), (player, out) -> Couriers.list(player, out::line));
-		// Concordance Chunk D, D-03: what Stolas waits for, from the Binding Arts understood (D-07 adds the pacts kept).
-		contribute("pacts", Workers::knows, StolasRegard::report);
+		// Concordance Chunk D, D-03: what Stolas waits for, from the Binding Arts understood (D-07 adds the pacts kept); the
+		// garden cohort, GC-01: every pact spirit's research (PactRegards).
+		contribute("pacts", Workers::knows, PactRegards::report);
 		contribute("relics", knows(Reliquary.RESEARCH), (player, out) -> Reliquary.report(player, out::line));
 		contribute("hexes", knows(Sympathy.RESEARCH).or(Sympathy::touched), (player, out) -> Sympathy.report(player, out::line));
 		contribute("conclave", player -> Starbound.standing(player).member(), (player, out) -> {

@@ -56,6 +56,9 @@ CONVERSIONS = [
     # Concordance Chunk D, D-05 (D-S1): Star-reckoning spends resonance on one recalled attunement, modelled at its cheapest
     # recall (an edge into a node with no way out).
     ("star_reckoning", "astral_resonance", 6, "recalled_attunement", 1),
+    # Concordance garden cohort, GC-08: Bifrons's root-running takes 2 nutrients from a full bed and gives 1 to a hungry one
+    # (spirits/RootRunning.TAKE, GIVE): a nutrient-to-nutrient edge that loses half, so no cycle through it gains.
+    ("root_running", "nutrient", 2, "nutrient", 1),
 ]
 
 # Where each figure lives: (path under concordance/ or data:path, text that must be there).
@@ -90,6 +93,10 @@ ANCHORS = {
                        ("celestial/Calendar.java", "RECALL_TICKS = 2400;"),
                        ("spirits/StarReckoning.java", "AstrolabeItem.recall(player, level, astrolabe, pattern, time, gameTime)"),
                        ("data:concordance/pact/stolas.json", None)],
+    "root_running": [("spirits/RootRunning.java", "TAKE = 2;"), ("spirits/RootRunning.java", "GIVE = 1;"),
+                     ("spirits/RootRunning.java", "if (VerdantBedBlockEntity.CAPACITY - destination.nutrients() < GIVE || !source.take(TAKE)) {"),
+                     ("spirits/RootRunning.java", "int given = destination.give(GIVE);"),
+                     ("data:concordance/pact/bifrons.json", None)],
 }
 
 # Concordance Chunk D, D-05: Stolas's terms as concordance/pact/stolas.json writes them (days), and the recall's figures.
@@ -99,6 +106,12 @@ RECALL_COSTS = (6, 16)  # the cheapest and dearest recall (concordance/pattern/*
 STOLAS_UPKEEP = {"count": 1, "period_days": 7, "grace_days": 1, "cap": 4}
 STOLAS_OFFERINGS = ["jugcraft:stolas_starflower", "jugcraft:ravenquill_lupine", "jugcraft:amethyst_mourningbell",
                     "minecraft:amethyst_shard"]
+# Concordance garden cohort, GC-08: Bifrons's terms as concordance/pact/bifrons.json writes them (days; world-clock hours)
+# and his offerings tag (a tag of tags); a run is CONVERSIONS' root_running.
+ROOT_RUNNING_QUOTA = 24
+ROOT_RUNNING_HOURS = (13_000, 23_000)
+BIFRONS_UPKEEP = {"count": 2, "period_days": 7, "grace_days": 1, "cap": 4}
+BIFRONS_OFFERINGS = ["#minecraft:logs"]
 
 # The figures the anchors must show (checked against the data files by check_economy).
 HASTENED_COST = 1
@@ -255,6 +268,15 @@ def installations():
                  f"{RECKONING_QUOTA} a game day a pact; one recall an occurrence of each pattern, shared with a master's; at most "
                  f"{STOLAS_UPKEEP['cap']} offerings held ahead",
                  "none; an offering paid becomes nothing, and no resonance is made"))
+    # A run as CONVERSIONS models it (none modelled reads as nothing moved, so check_economy names the gap, never a KeyError).
+    run = {key: (amount, made) for key, _, amount, _, made in CONVERSIONS}.get("root_running", (0, 0))
+    rows.append(("Bifrons's pact, kept and served every night",
+                 f"{ROOT_RUNNING_QUOTA * run[0]} nutrients from full Verdant Beds, and {BIFRONS_UPKEEP['count']} logs every "
+                 f"{BIFRONS_UPKEEP['period_days']} game days",
+                 f"{ROOT_RUNNING_QUOTA * run[1]} nutrients in hungry beds, no more",
+                 f"{ROOT_RUNNING_QUOTA} runs a game day a pact, by night only; a source at 24 or more and 3 above a "
+                 "destination with room",
+                 f"{ROOT_RUNNING_QUOTA * (run[0] - run[1])} nutrients lost along the roots; nothing is made and no strain eased"))
     for key, sink in RITUAL_SINKS.items():
         runs = DAY // sink["ticks"]
         rows.append((f"{sink['rite']}, worked again and again at one Lesser Circle",

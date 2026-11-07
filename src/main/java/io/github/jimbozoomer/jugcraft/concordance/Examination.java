@@ -2,6 +2,7 @@ package io.github.jimbozoomer.jugcraft.concordance;
 
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchEngine;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.GardenPacts;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasRegard;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
 import java.util.HashMap;
@@ -24,7 +25,7 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Examining a specimen: sneak and use one ({@code #jugcraft:concordance_specimens}: the luminous specimens First Light
- * learns from, and each later entry's own (Stolas's Regard's among them: a feather or a Styx flower)). The server reads
+ * learns from, and each later entry's own (Stolas's Regard's among them: a feather or a Styx flower; The Garden's Regard's: a garden's produce or chaff)). The server reads
  * the light where the player's eyes are and records an {@link Evidence.Examined}; for a luminous specimen ({@code #jugcraft:luminous_specimens}), in darkness (light
  * {@value #DARK_LIGHT} or less, as in a cave or the open air at night) the glow is the specimen's own. Sneaking keeps eating and other uses of these
  * items (glow berries are food) on the plain use key.
@@ -97,6 +98,9 @@ public final class Examination {
 			} else if (stack.is(StolasRegard.SPECIMENS)) {
 				// Stolas's Regard learns from a thing looked at as closely as Stolas would (Concordance Chunk D, D-03).
 				player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.examine.regard", name));
+			} else if (stack.is(GardenPacts.SPECIMENS)) {
+				// The Garden's Regard learns from what a garden gives (the garden cohort, GC-03).
+				player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.examine.garden_regard", name));
 			} else if (!stack.is(JugcraftConcordance.LUMINOUS)) {
 				// Circle Lore learns from how a thing is made, not from its light.
 				player.sendOverlayMessage(Component.translatable("message.jugcraft.concordance.examine.form", name));
