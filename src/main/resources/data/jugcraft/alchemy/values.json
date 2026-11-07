@@ -73,9 +73,9 @@
       "source": "recipe jugcraft:circuit_assembly/advanced_circuit"
     },
     "jugcraft:advanced_engine": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
+      "numerator": 23113,
+      "denominator": 16,
+      "source": "recipe jugcraft:advanced_engine"
     },
     "jugcraft:advanced_solar_panel": {
       "numerator": 15459,
@@ -8712,6 +8712,16 @@
       "denominator": 2,
       "source": "recipe jugcraft:ceramics_placed_insulators"
     },
+    "jugcraft:cerium_oxide": {
+      "numerator": 1,
+      "denominator": 8,
+      "source": "local rare-earth maximum coproduct allocation"
+    },
+    "jugcraft:cerium_polishing_head": {
+      "numerator": 1417,
+      "denominator": 4,
+      "source": "recipe jugcraft:sands_cerium_polishing_head"
+    },
     "jugcraft:chainsaw": {
       "numerator": 1806,
       "denominator": 1,
@@ -13428,9 +13438,9 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:composite_rotor_assembly": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
+      "numerator": 8699,
+      "denominator": 48,
+      "source": "recipe jugcraft:composite_rotor_assembly"
     },
     "jugcraft:composite_rotor_set": {
       "numerator": 3,
@@ -17828,23 +17838,23 @@
       "source": "recipe jugcraft:drone_t4"
     },
     "jugcraft:drone_t5": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
+      "numerator": 432001,
+      "denominator": 36,
+      "source": "recipe jugcraft:drone_t5"
     },
     "jugcraft:drone_t6": {
-      "numerator": 26189,
-      "denominator": 9,
+      "numerator": 122155,
+      "denominator": 8,
       "source": "recipe jugcraft:drone_t6"
     },
     "jugcraft:drone_t7": {
-      "numerator": 52505,
-      "denominator": 9,
+      "numerator": 145547,
+      "denominator": 8,
       "source": "recipe jugcraft:drone_t7"
     },
     "jugcraft:drone_t8": {
-      "numerator": 102185,
-      "denominator": 9,
+      "numerator": 189707,
+      "denominator": 8,
       "source": "recipe jugcraft:drone_t8"
     },
     "jugcraft:drone_t9": {
@@ -18983,9 +18993,9 @@
       "source": "recipe jugcraft:exhumation_writ_from_grave_dust"
     },
     "jugcraft:exosuit_boots": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
+      "numerator": 2161,
+      "denominator": 16,
+      "source": "recipe jugcraft:exosuit_boots"
     },
     "jugcraft:exosuit_chestplate": {
       "numerator": 26737,
@@ -18998,9 +19008,9 @@
       "source": "recipe jugcraft:exosuit_helmet"
     },
     "jugcraft:exosuit_leggings": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
+      "numerator": 22665,
+      "denominator": 16,
+      "source": "recipe jugcraft:exosuit_leggings"
     },
     "jugcraft:exposed_process_wafer": {
       "numerator": 1,
@@ -26432,10 +26442,25 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:garnet_abrasive_head": {
+      "numerator": 908,
+      "denominator": 3,
+      "source": "recipe jugcraft:sands_garnet_abrasive_head"
+    },
+    "jugcraft:garnet_grit": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:garnet_sand": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:garnet_sanding_block": {
+      "numerator": 57,
+      "denominator": 1,
+      "source": "recipe jugcraft:sands_garnet_sanding_block"
     },
     "jugcraft:garrison_rifle": {
       "numerator": 449,
@@ -50683,14 +50708,14 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:magnet_dynamo": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
+      "numerator": 7415,
+      "denominator": 32,
+      "source": "recipe jugcraft:magnet_dynamo"
     },
     "jugcraft:magnet_motor": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
+      "numerator": 17767,
+      "denominator": 32,
+      "source": "recipe jugcraft:magnet_motor"
     },
     "jugcraft:magnolia_fence": {
       "numerator": 40,
@@ -51553,14 +51578,19 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:neodymium_drone_motor": {
-      "numerator": 1819,
-      "denominator": 6,
+      "numerator": 8363,
+      "denominator": 48,
       "source": "recipe jugcraft:neodymium_drone_motor"
     },
     "jugcraft:neodymium_magnet": {
-      "numerator": 515,
-      "denominator": 4,
-      "source": "recipe jugcraft:alloying/neodymium_magnet_from_ferroboron"
+      "numerator": 2057,
+      "denominator": 32,
+      "source": "recipe jugcraft:alloying/sands_neodymium_magnet"
+    },
+    "jugcraft:neodymium_oxide": {
+      "numerator": 1,
+      "denominator": 8,
+      "source": "local rare-earth maximum coproduct allocation"
     },
     "jugcraft:nereids_hood": {
       "numerator": 193,
@@ -66013,13 +66043,13 @@
       "source": "recipe jugcraft:superconducting_conduit"
     },
     "jugcraft:superconducting_lift_fan": {
-      "numerator": 20429,
-      "denominator": 12,
+      "numerator": 157243,
+      "denominator": 96,
       "source": "recipe jugcraft:superconducting_lift_fan"
     },
     "jugcraft:superconducting_motor": {
-      "numerator": 20345,
-      "denominator": 12,
+      "numerator": 156571,
+      "denominator": 96,
       "source": "recipe jugcraft:superconducting_motor"
     },
     "jugcraft:superconducting_pylon": {
@@ -67958,8 +67988,8 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:tilt_rotor_nacelle": {
-      "numerator": 2863,
-      "denominator": 6,
+      "numerator": 16715,
+      "denominator": 48,
       "source": "recipe jugcraft:tilt_rotor_nacelle"
     },
     "jugcraft:timber_revetment": {
@@ -73711,6 +73741,11 @@
       "numerator": 32,
       "denominator": 1,
       "source": "reference tag minecraft:logs"
+    },
+    "jugcraft:yttrium_oxide": {
+      "numerator": 1,
+      "denominator": 8,
+      "source": "local rare-earth maximum coproduct allocation"
     },
     "jugcraft:yucca_fence": {
       "numerator": 40,

@@ -73,7 +73,8 @@ def build():
                  "fluids": [[fluid, mb] for fluid, mb in recipe.get("fluids", [])],
                  "fluid_results": [[r[0], r[1]] for r in recipe.get("fluid_results", [])],
                  "results": [[item, count] for item, count in recipe.get("results", [])],
-                 "ticks": recipe["ticks"], "tool": recipe.get("tool", ""), "retained_inputs": recipe.get("retained_inputs", [])} for recipe in recipes]
+                 "ticks": recipe["ticks"], "tool": recipe.get("tool", ""), "retained_inputs": recipe.get("retained_inputs", []),
+                 **({'result_chances': recipe['result_chances']} if recipe.get('result_chances') else {})} for recipe in recipes]
         fluid_machines.append({"block": f"{MOD}:{block}", "type": petro.FLUID_MACHINES[block]["recipe_type"],
                                "recipes": rows})
     # Industrial forms run their own capability recipes, so each form is its own category.

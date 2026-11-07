@@ -1079,6 +1079,24 @@
         {
           "in": [
             [
+              "jugcraft:neodymium_oxide",
+              1
+            ],
+            [
+              "jugcraft:ferroboron",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:neodymium_magnet",
+            4
+          ],
+          "extra": [],
+          "ticks": 200
+        },
+        {
+          "in": [
+            [
               "jugcraft:steel_ingot",
               6
             ],
@@ -2691,6 +2709,20 @@
           ],
           "extra": [],
           "ticks": 80
+        },
+        {
+          "in": [
+            [
+              "jugcraft:garnet_sand",
+              1
+            ]
+          ],
+          "out": [
+            "jugcraft:garnet_grit",
+            1
+          ],
+          "extra": [],
+          "ticks": 120
         },
         {
           "in": [
@@ -11171,6 +11203,127 @@
         {
           "items": [
             [
+              "jugcraft:zircon_sand",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:lye",
+              500
+            ],
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:zirconia_powder",
+              1
+            ]
+          ],
+          "ticks": 320,
+          "tool": "",
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "jugcraft:zircon_concentrate",
+              2
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:lye",
+              500
+            ],
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:zirconia_powder",
+              1
+            ]
+          ],
+          "ticks": 320,
+          "tool": "",
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "jugcraft:raw_titanium",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ],
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "minecraft:white_dye",
+              4
+            ]
+          ],
+          "ticks": 240,
+          "tool": "",
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "jugcraft:rare_earth_oxide",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:sulfuric_acid",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:neodymium_oxide",
+              1
+            ],
+            [
+              "jugcraft:cerium_oxide",
+              2
+            ],
+            [
+              "jugcraft:yttrium_oxide",
+              1
+            ]
+          ],
+          "ticks": 240,
+          "tool": "",
+          "retained_inputs": [],
+          "result_chances": [
+            0.5,
+            0.5,
+            0.5
+          ]
+        },
+        {
+          "items": [
+            [
               "jugcraft:lithium_fluoride",
               1
             ],
@@ -15293,6 +15446,25 @@
         {
           "items": [
             [
+              "jugcraft:zirconia_powder",
+              1
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:fired_zirconia_blank",
+              1
+            ]
+          ],
+          "ticks": 320,
+          "tool": "",
+          "energy_per_tick": 80
+        },
+        {
+          "items": [
+            [
               "jugcraft:spodumene",
               1
             ]
@@ -15820,6 +15992,54 @@
           "ticks": 240,
           "tool": "",
           "energy_per_tick": 64
+        },
+        {
+          "items": [
+            [
+              "jugcraft:titanium_sand",
+              2
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:raw_titanium",
+              1
+            ]
+          ],
+          "ticks": 200,
+          "tool": "",
+          "energy_per_tick": 32
+        },
+        {
+          "items": [
+            [
+              "jugcraft:rare_earth_sand",
+              2
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:rare_earth_oxide",
+              1
+            ]
+          ],
+          "ticks": 200,
+          "tool": "",
+          "energy_per_tick": 32
         },
         {
           "items": [
@@ -17435,6 +17655,64 @@
         {
           "items": [
             [
+              "jugcraft:optical_blank",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              125
+            ]
+          ],
+          "fluid_results": [
+            [
+              "minecraft:water",
+              125
+            ]
+          ],
+          "results": [
+            [
+              "jugcraft:polished_lens",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "jugcraft:cerium_polishing_head",
+          "energy_per_tick": 48
+        },
+        {
+          "items": [
+            [
+              "jugcraft:steel_shaft_blank",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              125
+            ]
+          ],
+          "fluid_results": [
+            [
+              "minecraft:water",
+              125
+            ]
+          ],
+          "results": [
+            [
+              "jugcraft:precision_shaft",
+              1
+            ]
+          ],
+          "ticks": 300,
+          "tool": "jugcraft:garnet_abrasive_head",
+          "energy_per_tick": 48
+        },
+        {
+          "items": [
+            [
               "jugcraft:stainless_valve_blank",
               1
             ]
@@ -17844,6 +18122,46 @@
           ],
           "ticks": 200,
           "tool": "jugcraft:soldering_tool",
+          "retained_inputs": [],
+          "energy_per_tick": 0
+        },
+        {
+          "items": [
+            [
+              "minecraft:cut_sandstone",
+              1
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "minecraft:smooth_sandstone",
+              1
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:garnet_sanding_block",
+          "retained_inputs": [],
+          "energy_per_tick": 0
+        },
+        {
+          "items": [
+            [
+              "minecraft:cut_red_sandstone",
+              1
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "minecraft:smooth_red_sandstone",
+              1
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:garnet_sanding_block",
           "retained_inputs": [],
           "energy_per_tick": 0
         }

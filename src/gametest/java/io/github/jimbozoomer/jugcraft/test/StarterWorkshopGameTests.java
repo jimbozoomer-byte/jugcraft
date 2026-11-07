@@ -126,9 +126,25 @@ public class StarterWorkshopGameTests {
 
     @GameTest(structure=ARENA) public void starterWorkshopEveryManualReceiptMatchesPoweredYieldAndApprovedWorkTime(GameTestHelper h) {
         var be=place(h,0); var player=worker(h,be);
-        h.assertTrue(be.catalog().entries().size()==9,"Exactly the nine approved manual recipes");
+        var original=Set.of("iron_plate","copper_plate","tin_plate","zinc_plate","lead_plate","bronze_plate","brass_plate","copper_wire","basic_circuit");
+        var sanding=Set.of("sands_smooth_sandstone","sands_smooth_red_sandstone");
+        var approved=new HashSet<String>(original); approved.addAll(sanding);
+        var actual=new HashSet<String>();
+        for(var entry:be.catalog().entries()) actual.add(entry.id().getPath().substring("starter_workshop/".length()));
+        h.assertTrue(actual.equals(approved) && be.catalog().entries().size()==11,
+            "Exactly the original nine manufacturing recipes plus the two approved sanding operations");
         for (var entry:be.catalog().entries()) {
             var r=entry.recipe(); be.select(entry.id()); be.setItem(5,ItemStack.EMPTY);
+            String name=entry.id().getPath().substring("starter_workshop/".length());
+            if(sanding.contains(name)) {
+                boolean red=name.equals("sands_smooth_red_sandstone");
+                h.assertTrue(r.station()==0 && r.time()==200 && !r.heated() && !r.highHeat()
+                    && r.parts().size()==1 && r.parts().getFirst().count()==1
+                    && r.parts().getFirst().ingredient().test(new ItemStack(red?Items.CUT_RED_SANDSTONE:Items.CUT_SANDSTONE))
+                    && ItemStack.matches(r.result().create(),new ItemStack(red?Items.SMOOTH_RED_SANDSTONE:Items.SMOOTH_SANDSTONE))
+                    && ItemStack.matches(r.toolStack(),stack("jugcraft:garnet_sanding_block",1)),
+                    "Sanding is a one-for-one, 200-tick manual receipt with its retained garnet tool: "+entry.id());
+            }
             for(int i=0;i<3;i++) be.setItem(i,ItemStack.EMPTY);
             for(int i=0;i<r.parts().size();i++) { var p=r.parts().get(i); be.setItem(i,new ItemStack(p.ingredient().items().findFirst().orElseThrow(),p.count())); }
             be.setItem(3,r.toolStack()); be.setItem(4,new ItemStack(Items.COAL));
@@ -136,12 +152,14 @@ public class StarterWorkshopGameTests {
             tick(h,be,player,r.time()-1); h.assertTrue(be.getItem(5).isEmpty() && be.progress()==r.time()-1,"Exact active work cost");
             tick(h,be,player,1); h.assertTrue(ItemStack.matches(be.getItem(5),r.result().create()),"Same approved yield "+entry.id());
             h.assertTrue(ItemStack.matches(be.getItem(3),r.toolStack()),"Tool must remain unchanged");
-            var powered=h.getLevel().getServer().getRecipeManager().getRecipes().stream().filter(holder -> {
-                if(holder.value() instanceof MachineRecipe m) return ItemStack.matches(m.output().create(),r.result().create()) && m.time()==r.time();
-                if(holder.value() instanceof MultiMachineRecipe m) return ItemStack.matches(m.output().create(),r.result().create()) && m.time()==r.time();
-                return false;
-            }).findFirst();
-            h.assertTrue(powered.isPresent(),"Must correspond to existing powered recipe");
+            if(original.contains(name)) {
+                var powered=h.getLevel().getServer().getRecipeManager().getRecipes().stream().filter(holder -> {
+                    if(holder.value() instanceof MachineRecipe m) return ItemStack.matches(m.output().create(),r.result().create()) && m.time()==r.time();
+                    if(holder.value() instanceof MultiMachineRecipe m) return ItemStack.matches(m.output().create(),r.result().create()) && m.time()==r.time();
+                    return false;
+                }).findFirst();
+                h.assertTrue(powered.isPresent(),"Original manufacturing receipt must preserve its powered recipe yield and time");
+            }
             be.release(player);
         }
         h.succeed();

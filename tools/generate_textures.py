@@ -1588,6 +1588,8 @@ def main():
 
     import ceramics_art
     ceramics_art.draw_all(save)
+    import mineral_sand_processing
+    mineral_sand_processing.draw_all(save)
 
     import structural_alloys_art
     structural_alloys_art.draw_all(save)

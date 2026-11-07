@@ -124,7 +124,7 @@ public class FormMachineMenu extends AbstractContainerMenu {
 			});
 		}
 		for (int slot = 0; slot < form.itemOutputs(); slot++) {
-			addSlot(new Slot(container, form.firstOutputSlot() + slot, MachineMenu.fluidItemOutputX(spec, slot), MachineMenu.SLOT_Y) {
+			addSlot(new Slot(container, form.firstOutputSlot() + slot, MachineMenu.fluidItemOutputX(spec, slot), MachineMenu.fluidItemOutputY(spec, slot)) {
 				@Override
 				public boolean mayPlace(ItemStack stack) {
 					return false;

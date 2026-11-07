@@ -1,6 +1,8 @@
 {
   "values": [
     "jugcraft:abrasive_head",
-    "jugcraft:polishing_head"
+    "jugcraft:polishing_head",
+    "jugcraft:cerium_polishing_head",
+    "jugcraft:garnet_abrasive_head"
   ]
 }

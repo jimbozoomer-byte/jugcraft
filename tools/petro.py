@@ -309,7 +309,7 @@ FLUID_MACHINES = {
     "advanced_engine": {"inputs": [8_000, 4_000], "outputs": [], "item_inputs": 1, "item_outputs": 0, "recipe_type": None},
     # Sulfur + water -> sulfuric acid; bauxite + lye -> alumina; phosphate + acid -> fertilizer (batch 5). Batch 24:
     # also the mixing jobs (brine, fracking fluid), replacing the chemical mixer. 96 JE/t.
-    "chemical_reactor": {"inputs": [8_000, 8_000, 1_000], "outputs": [8_000], "item_inputs": 2, "item_outputs": 1,
+    "chemical_reactor": {"inputs": [8_000, 8_000, 1_000], "outputs": [8_000], "item_inputs": 2, "item_outputs": 3,
                          "recipe_type": "chemical_reaction"},
     # Electronics (batch 7): a wafer and copper wire etched with sulfuric acid into microchips. 192 JE/t.
     "lithography_station": {"inputs": [4_000], "outputs": [], "item_inputs": 2, "item_outputs": 1,
@@ -670,6 +670,8 @@ def fluid_recipe_files(condition):
                                          for r in recipe["fluid_results"]]
             if recipe.get("results"):
                 data["results"] = [{"id": item, "count": count} for item, count in recipe["results"]]
+            if recipe.get("result_chances"):
+                data["result_chances"] = recipe["result_chances"]
             if recipe.get("tool"): data["tool"] = recipe["tool"]
             data["time"] = recipe["ticks"]
             yield kind, recipe["name"], data
@@ -707,6 +709,10 @@ ITEMS.update({k: v for k, v in FLUORO_ITEMS.items() if k not in ITEMS})
 
 from ceramics import ITEMS as CERAMIC_ITEMS
 ITEMS.update(CERAMIC_ITEMS)
+
+import mineral_sand_processing
+ITEMS.update(mineral_sand_processing.ITEMS)
+FLUID_RECIPES['chemical_reactor'].extend(mineral_sand_processing.REACTOR_RECIPES)
 
 from structural_alloys import ITEMS as ALLOY_ITEMS
 ITEMS.update(ALLOY_ITEMS)

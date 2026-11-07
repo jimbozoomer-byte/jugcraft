@@ -924,6 +924,9 @@ def machine_recipes():
     import ceramics
     for machine, additions in ceramics.MACHINE_RECIPES.items():
         recipes[machine] = recipes[machine] + additions
+    import mineral_sand_processing
+    for machine, additions in mineral_sand_processing.MACHINE_RECIPES.items():
+        recipes[machine] = recipes[machine] + additions
     import structural_alloys
     for machine, additions in structural_alloys.MACHINE_RECIPES.items():
         recipes[machine] = recipes[machine] + additions

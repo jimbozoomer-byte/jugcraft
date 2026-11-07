@@ -77,7 +77,7 @@ public enum MachineKind implements StringRepresentable {
 	ELECTROLYTIC_CELL("electrolytic_cell", 60_000, 1_024, 0, 256, 3),
 	// A 2x2x2 acid-proof reactor: sulfur + water -> sulfuric acid; later bauxite digestion and fertilizer, and (batch
 	// 24) the mixing jobs: brine and fracking fluid.
-	CHEMICAL_REACTOR("chemical_reactor", 30_000, 512, 0, 96, 3),
+	CHEMICAL_REACTOR("chemical_reactor", 30_000, 512, 0, 96, 5),
 	// Nitrogen chemistry (batch 12): a 2x2x6 cold box drawing nitrogen and oxygen out of the air (no recipes), and a
 	// 3x4x2 high-pressure converter making ammonia (Haber-Bosch) and nitric acid (Ostwald).
 	AIR_SEPARATION_UNIT("air_separation_unit", 40_000, 512, 0, 64, 0),
@@ -452,7 +452,7 @@ public enum MachineKind implements StringRepresentable {
 			case SYNTHESIS_CONVERTER -> new FluidMachineSpec(List.of(CONVERTER_TANK, CONVERTER_TANK, CONVERTER_TANK),
 					List.of(CONVERTER_TANK), 0, 0);
 			case CHEMICAL_REACTOR -> new FluidMachineSpec(List.of(CHEM_REACTOR_TANK, CHEM_REACTOR_TANK, 1000),
-					List.of(CHEM_REACTOR_TANK), 2, 1).migratedFrom(0, 1, 0, 3);
+					List.of(CHEM_REACTOR_TANK), 2, 3).migratedFrom(0, 1, 0, 3);
 			case LITHOGRAPHY_STATION -> new FluidMachineSpec(List.of(LITHOGRAPHY_TANK), List.of(), 2, 1);
 			case AMMONIA_CHILLER -> new FluidMachineSpec(List.of(CHILLER_AMMONIA_TANK, CHILLER_WATER_TANK), List.of(), 1, 1);
 			case CRYOGENIC_LIQUEFIER -> new FluidMachineSpec(List.of(LIQUEFIER_TANK), List.of(LIQUEFIER_TANK), 0, 0);
