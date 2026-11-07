@@ -103,4 +103,31 @@ public final class JimtaIndustrialGearGameTests {
             h.assertTrue(p.hasEffect(net.minecraft.world.effect.MobEffects.NIGHT_VISION),"The exosuit leaves night vision it did not give");
         }finally{h.getLevel().getServer().getPlayerList().remove(p);}h.succeed();});
     }
+    @GameTest(maxTicks=200)
+    public void potionMergedIntoTheGogglesVisionIsNeitherBilledNorRemoved(GameTestHelper h){
+        // Vanilla merges a new night vision into the existing instance in place (MobEffectInstance.update), so the helmet's
+        // instance identity alone cannot prove ownership. A potion drunk over the goggles' vision makes it the potion's:
+        // the goggles must stop paying for it and must not take it away when they come off.
+        var p=JimtaRobotGameTests.player(h);darkCell(h,p);var vision=net.minecraft.world.effect.MobEffects.NIGHT_VISION;
+        var goggles=gear("industrial_night_vision_goggles",10_000);p.setItemSlot(EquipmentSlot.HEAD,goggles);
+        h.runAfterDelay(60,()->{try{
+            var own=p.getEffect(vision);
+            h.assertTrue(dark(p)&&own!=null&&own.isAmbient(),"The goggles' own ambient vision is on");
+            p.addEffect(new net.minecraft.world.effect.MobEffectInstance(vision,3600,0));
+            var merged=p.getEffect(vision);
+            h.assertTrue(merged!=null&&!merged.isAmbient()&&merged.getDuration()>3000,"The potion merged into the effect and lengthened it: "+merged);
+            long before=Chargeable.energy(p.getItemBySlot(EquipmentSlot.HEAD));
+            for(int i=0;i<3;i++)io.github.jimbozoomer.jugcraft.gear.Exosuit.tick(p);
+            h.assertTrue(Chargeable.energy(p.getItemBySlot(EquipmentSlot.HEAD))==before,"The goggles do not pay while the potion's vision is on");
+            p.setItemSlot(EquipmentSlot.HEAD,ItemStack.EMPTY);io.github.jimbozoomer.jugcraft.gear.Exosuit.tick(p);
+            var kept=p.getEffect(vision);
+            h.assertTrue(kept!=null&&kept.getDuration()>3000,"Taking the goggles off keeps the potion's vision: "+kept);
+            // Once the potion's vision is gone, the goggles own and pay for their vision again.
+            p.removeEffect(vision);p.setItemSlot(EquipmentSlot.HEAD,goggles);
+            h.runAfterDelay(5,()->{try{
+                var again=p.getEffect(vision);
+                h.assertTrue(again!=null&&again.isAmbient(),"The goggles give their own vision again after the potion: "+again);
+            }finally{h.getLevel().getServer().getPlayerList().remove(p);}h.succeed();});
+        }catch(RuntimeException|AssertionError e){h.getLevel().getServer().getPlayerList().remove(p);throw e;}});
+    }
 }
