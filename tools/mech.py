@@ -37,6 +37,12 @@ DRILL_MAX_HARDNESS = 50
 PUNCH_DAMAGE = 12
 PUNCH_KNOCKBACK = 1.0
 PUNCH_COOLDOWN = 16
+# The fist's box: its middle this many blocks ahead of the walker, reaching this far out each way (the pilot's telegraph
+# draws the same box, docs/features/walker-cockpit.md).
+PUNCH_REACH = 2.2
+PUNCH_SPREAD = 1.6
+# How far back the third-person camera sits from the pilot, in blocks (vanilla's 4 is inside the hull).
+CAMERA_DISTANCE = 7.0
 # Fuel in mB: the tank, what a bucket adds and what walking or drilling burns a second.
 FUEL_TANK = 4000
 FUEL_PER_BUCKET = 1000
@@ -153,6 +159,18 @@ def export():
             "walker_drill_bit": tiled_quads(drill_bit())}
 
 
+# The pilot's gauges (docs/features/walker-cockpit.md), shown by WalkerCockpitClient.
+HUD = {
+    "fuel": "Fuel", "hull": "Hull",
+    "no_shells": "No heavy shells", "reloading": "Reloading %s", "laying": "Laying the gun",
+    "on_target": "On target", "cannon_ready": "Cannon ready", "shells": "Shells: %s",
+    "drill_ready": "Drill: in reach", "drill_none": "Drill: nothing in reach",
+    "fist_ready": "Fist ready", "fist_cooling": "Fist swinging back",
+    "ram_ready": "Ram ready", "ram_cooling": "Ram recoiling",
+    "stomp_ready": "Stomp ready", "stomp_cooling": "Stomp settling",
+}
+
+
 def write_all(write, assets, data, lang, condition):
     for item, name in ITEMS.items():
         lang[f"item.{MOD}.{item}"] = name
@@ -162,7 +180,8 @@ def write_all(write, assets, data, lang, condition):
     for key, text in TOOLTIPS.items():
         lang[f"tooltip.{MOD}.{key}"] = text
     lang[f"entity.{MOD}.diesel_walker"] = "Diesel Walker"
-    lang[f"message.{MOD}.walker.fuel"] = "Fuel: %s%%"
+    for key, text in HUD.items():
+        lang[f"hud.{MOD}.walker.{key}"] = text
     lang[f"message.{MOD}.walker.empty"] = "Out of fuel"
     lang[f"message.{MOD}.walker.full"] = "The fuel tank is full"
     lang[f"message.{MOD}.walker.refuelled"] = "Refuelled: %s%%"

@@ -54,6 +54,17 @@ PISTON = (24, 49, 6)
 PISTON_STROKE = 10
 # Where the cannon's muzzle is, in pixels.
 MUZZLE = (0, 56, 29)
+# The pilot's seat in the roof hatch, in pixels: their eye, 16.32 pixels over it, is a third of a block over the roof
+# (72), so the pilot looks out over the hull (docs/features/walker-cockpit.md).
+SEAT = (0, 61.68, -3.2)
+ROOF = 72
+# A seated pilot's eye over their seat, in pixels (vanilla's 0.6-block ride offset under its 1.62-block eye).
+EYE = 16.32
+# How far the pilot's look is followed to find what the cannon is laid on, and the steepest it lobs down and up.
+CANNON_REACH = 96
+CANNON_MIN_PITCH = -30.0
+CANNON_MAX_PITCH = 70.0
+CAMERA_DISTANCE = 7.5
 
 
 def hull():
@@ -67,7 +78,7 @@ def hull():
         for z0, z1 in ((-15, -12), (12, 15)):
             m.append(box((x0, 37, z0), (x1, 67, z1), DARK))
     m.append(box((-16, 68, -13), (16, 71, 13), {"*": PLATE, "up": DARK}))
-    m.append(box((-13, 71, -10), (13, 72, 10), DARK))
+    m.append(box((-13, ROOF - 1, -10), (13, ROOF, 10), DARK))
     # A belt of plate round the bottom of the hull, 0.25 px below the hull's own underside so the two never share a
     # plane (they are drawn in different textures).
     m.append(box((-15.5, 35.75, -16.5), (15.5, 40, 16.5), SEAM))

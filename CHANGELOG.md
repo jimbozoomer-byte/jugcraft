@@ -8,6 +8,21 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
+### Unmerged: the walker cockpit (all three walkers)
+- **The view from the seat:**
+  - The Armoured Walker's pilot stands up in the roof hatch, and the Howitzer Walker's sits in a commander's seat over the roof. Before, both looked out from inside their hulls.
+  - Pilots' hands are hidden in every walker.
+  - Turning with left/right turns the view with the hull (for the Howitzer, only while turning by hand).
+  - Third person sits back past each hull.
+- **Telegraphs**, drawn in the world for the pilot:
+  - the Armoured cannon's and the Howitzer's arc and landing ring, with the Howitzer's laying shown against a crosshair mark;
+  - the fist's, ram's and stomp's reach, with what they would hit outlined;
+  - the drill's block.
+- **The Armoured Walker's cannon** now lands on what the crosshair is on (raised for its fall, up to 96 blocks), with no spread.
+- **Gauges** at the top left: fuel, hull wear, reload and shells, and whether the attack is ready. They replace the fuel message every two seconds.
+- Record: [walker-cockpit.md](docs/features/walker-cockpit.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
+
 ### Unmerged: Harvest Festival Grounds, part 4 (Harvest Bunting and the Sack-Race Sack)
 - **Harvest Bunting**: a new strand for the String Light Hooks, a twine cord hung with leaf-shaped pennants, a red maple leaf, a gold aspen leaf and a hessian pennant in turn.
 - **Sack-Race Sack**: a hessian sack worn on the legs. In it you walk at two fifths of your speed, can't step up a block without hopping, and jump a little higher, though not over a fence.

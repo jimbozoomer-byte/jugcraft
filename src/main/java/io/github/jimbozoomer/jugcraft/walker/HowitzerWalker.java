@@ -19,12 +19,9 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
@@ -45,8 +42,9 @@ import org.jspecify.annotations.Nullable;
  * landing hurts and throws everything within {@value #STOMP_RADIUS} blocks: {@value #STOMP_DAMAGE} damage, counted as
  * the pilot's attack. It never breaks a block.</li>
  * </ul>
-	 * The pilot's model is hidden inside the cockpit. The client draws its walk, shot and jump from the curves in
- * tools/howitzer_walker.py, the same curves its Blockbench clips are sampled from.
+ * The pilot's model is hidden; the pilot looks out from a commander's seat by the roof hoops, clear of the gun
+ * (docs/features/walker-cockpit.md), and sees the shell's arc and landing before firing. The client draws its walk,
+ * shot and jump from the curves in tools/howitzer_walker.py, the same curves its Blockbench clips are sampled from.
  */
 public class HowitzerWalker extends DieselWalker {
 	public static final int GUN_COOLDOWN = 80;
@@ -70,8 +68,13 @@ public class HowitzerWalker extends DieselWalker {
 	public static final Vec3 TRUNNION = new Vec3(-0.4375, 4.375, 0.25);
 	/** From the trunnion to the muzzle along the barrel, in blocks. */
 	public static final double BARREL = 2.25;
-	/** The roof hatch the pilot sits in, head out (the hatch ring in tools/howitzer_walker.py). */
-	private static final Vec3 HATCH = new Vec3(-0.5, 3.8, -0.4375);
+	/**
+	 * The pilot's seat (SEAT in tools/howitzer_walker.py, over 16): the commander's place by the roof hoops, so their
+	 * eye (1.02 blocks over it) looks out over the roof with the gun on their right, never from inside the hull or
+	 * along the barrel. The pilot's model stays hidden there, as in the enclosed cockpit.
+	 */
+	private static final Vec3 SEAT = new Vec3(0.3125, 4.48, -0.3125);
+	public static final float CAMERA_DISTANCE = 9.0F;
 	/** Ticks a crouch may wait for the ground before it is called off (it ran out of fuel, or stepped off an edge). */
 	private static final int CROUCH_LIMIT = CROUCH_TICKS + 4;
 	/** Ticks in the air before a landing thuds. */
@@ -183,7 +186,7 @@ public class HowitzerWalker extends DieselWalker {
 		firing = use;
 		Vec3 pivot = pivot();
 		BlockPos mark = Spotting.own(level, pilot);
-		Vec3 target = mark != null ? Vec3.atCenterOf(mark).add(0, 0.5, 0) : lookedAt(level, pilot);
+		Vec3 target = mark != null ? Vec3.atCenterOf(mark).add(0, 0.5, 0) : WalkerAim.lookedAt(level, pilot, AIM_REACH);
 		if (mark != null && use && !wasLaying) {
 			pilot.sendOverlayMessage(Component.translatable("message.jugcraft.howitzer_walker.on_mark"));
 		}
@@ -228,6 +231,35 @@ public class HowitzerWalker extends DieselWalker {
 		return Math.abs(turn) > 0.05F;
 	}
 
+	/** Client side: the muzzle in the world this frame, from the barrel's eased elevation. */
+	public Vec3 muzzle(float partialTick) {
+		return getPosition(partialTick).add(TRUNNION.yRot(-getYRot(partialTick) * Mth.DEG_TO_RAD)).add(barrel(partialTick).scale(BARREL));
+	}
+
+	/** Client side: the way the barrel points this frame. */
+	public Vec3 barrel(float partialTick) {
+		return Vec3.directionFromRotation(-elevation(partialTick), getYRot(partialTick));
+	}
+
+	/** The stomp reaches what stands within {@value #STOMP_RADIUS} blocks of its feet (the shockwave's test). */
+	@Override
+	public boolean attackReaches(LivingEntity target) {
+		Vec3 away = target.position().subtract(position());
+		return away.horizontalDistance() <= STOMP_RADIUS && away.y >= -1 && away.y <= 3;
+	}
+
+	@Override
+	public AABB attackArea(Vec3 heading) {
+		Vec3 centre = position();
+		return new AABB(centre.x - STOMP_RADIUS, centre.y - 1, centre.z - STOMP_RADIUS, centre.x + STOMP_RADIUS, centre.y + 3,
+				centre.z + STOMP_RADIUS);
+	}
+
+	@Override
+	public float cameraDistance() {
+		return CAMERA_DISTANCE;
+	}
+
 	/** The trunnion in the world. */
 	private Vec3 pivot() {
 		return position().add(TRUNNION.yRot(-getYRot() * Mth.DEG_TO_RAD));
@@ -238,28 +270,6 @@ public class HowitzerWalker extends DieselWalker {
 		double yaw = Math.toRadians(getYRot());
 		double pitch = Math.toRadians(elevation());
 		return new Vec3(-Math.sin(yaw) * Math.cos(pitch), Math.sin(pitch), Math.cos(yaw) * Math.cos(pitch));
-	}
-
-	/**
-	 * The point on the block the pilot looks at, up to {@value #AIM_REACH} blocks, or null if there is none. The look is
-	 * traced a chunk at a time and stops at the first chunk that is not loaded, so aiming never loads one.
-	 */
-	private @Nullable Vec3 lookedAt(ServerLevel level, ServerPlayer pilot) {
-		Vec3 from = pilot.getEyePosition();
-		// Use the rotation vanilla receives from the mounted player's camera, not the animated head yaw.
-		Vec3 look = Vec3.directionFromRotation(pilot.getXRot(), pilot.getYRot());
-		for (int travelled = 0; travelled < AIM_REACH; travelled += 16) {
-			Vec3 to = from.add(look.scale(16));
-			if (!level.isLoaded(BlockPos.containing(to))) {
-				return null;
-			}
-			BlockHitResult hit = level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, pilot));
-			if (hit.getType() == HitResult.Type.BLOCK) {
-				return hit.getLocation();
-			}
-			from = to;
-		}
-		return null;
 	}
 
 	/** The yaw and elevation that land a Heavy Shell on {@code point}, low arc first, or null if it is out of reach. */
@@ -347,7 +357,7 @@ public class HowitzerWalker extends DieselWalker {
 	}
 
 	@Override
-	protected int attackCooldown() {
+	public int attackCooldown() {
 		return STOMP_COOLDOWN;
 	}
 
@@ -365,12 +375,11 @@ public class HowitzerWalker extends DieselWalker {
 	private void shockwave(ServerLevel level) {
 		Vec3 centre = position();
 		if (getFirstPassenger() instanceof ServerPlayer pilot) {
-			AABB area = new AABB(centre.x - STOMP_RADIUS, centre.y - 1, centre.z - STOMP_RADIUS,
-					centre.x + STOMP_RADIUS, centre.y + 3, centre.z + STOMP_RADIUS);
+			AABB area = attackArea(heading());
 			for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, area, e -> e.isAlive() && e.getRootVehicle() != this)) {
 				Vec3 away = target.position().subtract(centre);
 				double distance = away.horizontalDistance();
-				if (distance > STOMP_RADIUS || !target.hurtServer(level, level.damageSources().playerAttack(pilot), STOMP_DAMAGE)) {
+				if (!attackReaches(target) || !target.hurtServer(level, level.damageSources().playerAttack(pilot), STOMP_DAMAGE)) {
 					continue;
 				}
 				double push = distance < 0.01 ? 0 : STOMP_KNOCKBACK / distance;
@@ -410,7 +419,7 @@ public class HowitzerWalker extends DieselWalker {
 
 	@Override
 	protected Vec3 seat() {
-		return HATCH;
+		return SEAT;
 	}
 
 	@Override

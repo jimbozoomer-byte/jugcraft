@@ -1111,9 +1111,10 @@ def check_walker():
     java = (JAVA_ROOT / "walker" / "DieselWalker.java").read_text(encoding="utf-8")
     for const in ("WALK_SPEED", "TURN", "JUMP", "DRILL_REACH", "DRILL_TICKS_PER_HARDNESS", "DRILL_MIN_TICKS",
                   "DRILL_MAX_HARDNESS", "PUNCH_DAMAGE", "PUNCH_KNOCKBACK", "PUNCH_COOLDOWN", "FUEL_TANK",
-                  "FUEL_PER_BUCKET", "FUEL_PER_SECOND", "HEALTH", "WIDTH", "HEIGHT"):
+                  "FUEL_PER_BUCKET", "FUEL_PER_SECOND", "HEALTH", "WIDTH", "HEIGHT", "PUNCH_REACH", "PUNCH_SPREAD",
+                  "CAMERA_DISTANCE"):
         value = getattr(mech, const)
-        literal = f"{value}F" if const in ("TURN", "WIDTH", "HEIGHT") else str(value)
+        literal = f"{value}F" if const in ("TURN", "WIDTH", "HEIGHT", "CAMERA_DISTANCE") else str(value)
         if f" {const} = {literal};" not in java:
             err(f"DieselWalker.{const} differs from tools/mech.py ({literal})")
     renderer = (ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
@@ -1131,15 +1132,21 @@ def check_armoured_walker():
     """walker/ArmouredWalker.java against tools/armoured_walker.py: the cannon, ram, toughness and size, the muzzle, and the
     joints its renderers draw the parts at."""
     java = (JAVA_ROOT / "walker" / "ArmouredWalker.java").read_text(encoding="utf-8")
+    floats = ("WIDTH", "HEIGHT", "CANNON_MIN_PITCH", "CANNON_MAX_PITCH", "CAMERA_DISTANCE")
     for const in ("CANNON_COOLDOWN", "CANNON_SPEED", "RAM_DAMAGE", "RAM_KNOCKBACK", "RAM_REACH", "RAM_COOLDOWN", "HEALTH",
-                  "WIDTH", "HEIGHT"):
+                  "WIDTH", "HEIGHT", "CANNON_REACH", *floats[2:]):
         value = getattr(armoured_walker, const)
-        literal = f"{value}F" if const in ("WIDTH", "HEIGHT") else str(value)
+        literal = f"{value}F" if const in floats else str(value)
         if f" {const} = {literal};" not in java:
             err(f"ArmouredWalker.{const} differs from tools/armoured_walker.py ({literal})")
     mx, my, mz = (v / 16 for v in armoured_walker.MUZZLE)
     if f"MUZZLE = new Vec3({mx:g}, {my:g}, {mz:g});" not in java.replace(".0,", ",").replace(".0)", ")"):
         err(f"ArmouredWalker.MUZZLE differs from tools/armoured_walker.py ({mx}, {my}, {mz})")
+    sx, sy, sz = (v / 16 for v in armoured_walker.SEAT)
+    if f"SEAT = new Vec3({sx:g}, {sy:g}, {sz:g});" not in java.replace(".0,", ",").replace(".0)", ")"):
+        err(f"ArmouredWalker.SEAT differs from tools/armoured_walker.py ({sx:g}, {sy:g}, {sz:g})")
+    if armoured_walker.SEAT[1] + armoured_walker.EYE <= armoured_walker.ROOF:
+        err("tools/armoured_walker.py: the pilot's eye (SEAT + EYE) is not over the ROOF, so they would look out from inside")
     client = ROOT / "src" / "client" / "java" / "io" / "github" / "jimbozoomer" / "jugcraft" / "client"
     joints = [*armoured_walker.HIPS.values(), armoured_walker.SHOULDER, armoured_walker.PISTON]
     for name in ("ArmouredWalkerParts.java",):
@@ -1162,10 +1169,10 @@ def check_howitzer_walker():
     java_path = JAVA_ROOT / "walker" / "HowitzerWalker.java"
     java = java_path.read_text(encoding="utf-8") if java_path.is_file() else ""
     hw = howitzer_walker
-    floats = ("LAY_RATE", "MIN_ELEVATION", "MAX_ELEVATION", "REST_ELEVATION", "WIDTH", "HEIGHT")
+    floats = ("LAY_RATE", "MIN_ELEVATION", "MAX_ELEVATION", "REST_ELEVATION", "WIDTH", "HEIGHT", "CAMERA_DISTANCE")
     for const in ("GUN_COOLDOWN", "LAY_RATE", "MIN_ELEVATION", "MAX_ELEVATION", "REST_ELEVATION", "AIM_REACH", "LEAP",
                   "CROUCH_TICKS", "STOMP_HOP", "SLAM", "STOMP_DAMAGE", "STOMP_RADIUS", "STOMP_KNOCKBACK", "STOMP_COOLDOWN",
-                  "HEALTH", "WIDTH", "HEIGHT"):
+                  "HEALTH", "WIDTH", "HEIGHT", "CAMERA_DISTANCE"):
         value = getattr(hw, const)
         literal = f"{value}F" if const in floats else str(value)
         if f" {const} = {literal};" not in java:
@@ -1176,8 +1183,8 @@ def check_howitzer_walker():
     flat = java.replace(".0,", ",").replace(".0)", ")")
     if f"TRUNNION = {vec(hw.TRUNNION)};" not in flat:
         err(f"HowitzerWalker.TRUNNION differs from tools/howitzer_walker.py ({vec(hw.TRUNNION)})")
-    if f"HATCH = {vec(hw.HATCH)};" not in flat:
-        err(f"HowitzerWalker.HATCH differs from tools/howitzer_walker.py ({vec(hw.HATCH)})")
+    if f"SEAT = {vec(hw.SEAT)};" not in flat:
+        err(f"HowitzerWalker.SEAT differs from tools/howitzer_walker.py ({vec(hw.SEAT)})")
     barrel = hw.BARREL_END[2] / 16
     if f" BARREL = {barrel:g};" not in java:
         err(f"HowitzerWalker.BARREL differs from tools/howitzer_walker.py's barrel ({barrel:g} blocks)")
