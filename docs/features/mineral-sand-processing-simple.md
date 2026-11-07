@@ -139,3 +139,26 @@ For this local verification, generated runtime resources were staged and byte-ch
 Owner survival-cost/balance acceptance and a two-human dedicated-server playtest remain manual checks. Automated client/server tests do not substitute for those. Nothing has been deployed to the owner's personal profile, live server or public update channel.
 
 Related source records: [machine consolidation](machine-consolidation-playtest.md), [ceramics and precision](advanced-ceramics-and-precision.md), [existing deposit behavior](regional-mineral-sands.md), [machine recipe definitions](../../tools/machines.py), [chemistry recipes](../../tools/petro.py), and [current zircon recipes](../../tools/ceramics.py).
+
+## Port onto main 8075c6d58b (7 November 2026, Claude Code)
+
+The PR was written on `f82f88c5a`. It is merged onto current main as branch `claude/nov7-4-mineral-sands`, whose merge commit keeps the PR's own commit.
+
+**Merging:**
+- The Java, resources and tests merged without conflicts.
+- Main has since made the Chemical Reactor keep its fluid when broken. Only `jugcraft:stored_fluid` travels with it; its items drop. The two-input, three-output slot change does not touch that path, and the tank layout is unchanged.
+- **Conflicts resolved:**
+  - `check_mod_data.py` and `test_alchemy_values.py`: both sides' rules and tests kept.
+  - `docs/TODO.md`: both sections kept.
+
+**Generated files:**
+- **`alchemy/values.json`:** merged item by item against the base. This PR's own entries are taken: its seven new items and the cheaper magnet route's cascade. For 25 items both sides recomputed, main's newer regeneration is kept. Regenerate with `tools/build_alchemy_values.py --minecraft-jar …` to confirm.
+- **`docs/audits` survival snapshots:** main's are kept. Main's checked-in snapshots are already stale (a fresh `tools/audit_survival_recipes.py --write` changes about 44,000 lines on main alone), so the refresh belongs in a change of its own. The audit tests rebuild the report live.
+
+**Review:**
+- No defect found in the chanced rolls, the reserve-then-commit completion, the work identity, the form refusal or the old three-slot save migration. The reactor has no upgrade or process-tool slots, so the migration covers every saved slot.
+
+**What ran:**
+- Python: `test_alchemy_values`, `test_survival_recipes`, `test_recipe_conflicts` and `test_starter_workshop`, 29 tests, pass.
+- `tools/check_mod_data.py` on the merged tree passes: 15,336 material IDs, data files and the recipe audit. That is main's count plus this PR's seven items; the art check has no unlisted findings.
+- The Java parses. Game tests were not run here.
