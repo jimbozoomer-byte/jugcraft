@@ -49,14 +49,26 @@ public class PoweredToolItem extends Item implements Chargeable {
         return Math.max(1, cost / 100 * percent + (cost % 100 * percent + 99) / 100);
     }
 
+	/**
+	 * JE for breaking this block. The same as {@link #energyPerBlock(ItemStack)} unless the price depends on the block (the
+	 * chainsaw's leaf clearing). Machines that drive a tool without a block in view pay {@link #energyPerBlock(ItemStack)}.
+	 */
+	public long energyPerBlock(ItemStack stack, BlockState state) {
+		return energyPerBlock(stack);
+	}
+
 	protected boolean charged(ItemStack stack) {
 		return Chargeable.energy(stack) >= energyPerBlock(stack);
+	}
+
+	protected boolean charged(ItemStack stack, BlockState state) {
+		return Chargeable.energy(stack) >= energyPerBlock(stack, state);
 	}
 
 	/** Each overclock module adds half the base speed again. */
 	@Override
 	public float getDestroySpeed(ItemStack stack, BlockState state) {
-		if (!charged(stack)) {
+		if (!charged(stack, state)) {
 			return 1.0F;
 		}
 		float speed = super.getDestroySpeed(stack, state);
@@ -65,13 +77,13 @@ public class PoweredToolItem extends Item implements Chargeable {
 
 	@Override
 	public boolean isCorrectToolForDrops(ItemStack stack, BlockState state) {
-		return charged(stack) && super.isCorrectToolForDrops(stack, state);
+		return charged(stack, state) && super.isCorrectToolForDrops(stack, state);
 	}
 
 	@Override
 	public boolean mineBlock(ItemStack stack, Level level, BlockState state, BlockPos pos, LivingEntity miner) {
 		if (level instanceof ServerLevel serverLevel && state.getDestroySpeed(level, pos) != 0.0F) {
-			boolean paid = Chargeable.drain(stack, energyPerBlock(stack));
+			boolean paid = Chargeable.drain(stack, energyPerBlock(stack, state));
 			if (paid && !breakingExtra && miner instanceof ServerPlayer player) {
 				breakingExtra = true;
 				try {
@@ -93,7 +105,7 @@ public class PoweredToolItem extends Item implements Chargeable {
 		BlockState state = level.getBlockState(pos);
 		if (!level.hasChunkAt(pos) || state.isAir() || state.hasBlockEntity() || state.getDestroySpeed(level, pos) < 0
 				|| !io.github.jimbozoomer.jugcraft.concordance.Authority.mayChange(level, player, pos)
-				|| !charged(stack) || !isCorrectToolForDrops(stack, state)) {
+				|| !charged(stack, state) || !isCorrectToolForDrops(stack, state)) {
 			return false;
 		}
 		return player.gameMode.destroyBlock(pos);

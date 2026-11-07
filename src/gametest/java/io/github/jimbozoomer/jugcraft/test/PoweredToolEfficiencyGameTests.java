@@ -38,7 +38,10 @@ public final class PoweredToolEfficiencyGameTests {
             var d=tool(JugcraftTools.MINING_DRILL,10000,o,e);var s=tool(JugcraftTools.CHAINSAW,10000,o,e);
             h.assertTrue(((PoweredToolItem)d.getItem()).energyPerBlock(d)==drill[o][e],"Drill price differs from agreed table");
             h.assertTrue(((PoweredToolItem)s.getItem()).energyPerBlock(s)==saw[o][e],"Chainsaw price differs from agreed table");
-            EquipmentSettings.setNumber(s,"saw_mode",2);h.assertTrue(((PoweredToolItem)s.getItem()).energyPerBlock(s)==leaves[o][e],"Leaf price was discounted twice or rounded down");
+            EquipmentSettings.setNumber(s,"saw_mode",2);var sawItem=(PoweredToolItem)s.getItem();
+            h.assertTrue(sawItem.energyPerBlock(s,Blocks.OAK_LEAVES.defaultBlockState())==leaves[o][e],"Leaf price was discounted twice or rounded down");
+            // Machines price a tool without a block in view; leaf mode must not make logs or dirt leaf-priced for them.
+            h.assertTrue(sawItem.energyPerBlock(s)==saw[o][e]&&sawItem.energyPerBlock(s,Blocks.OAK_LOG.defaultBlockState())==saw[o][e],"Leaf mode priced a non-leaf at the leaf rate");
             var plain=tool(JugcraftTools.MINING_DRILL,10000,o,0);
             h.assertTrue(d.getDestroySpeed(Blocks.STONE.defaultBlockState())==plain.getDestroySpeed(Blocks.STONE.defaultBlockState()),"Efficiency changed mining speed");
         }h.succeed();
