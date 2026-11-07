@@ -66,3 +66,26 @@ Local Gradle commands use the cached JDK and offline dependency cache. A local i
 Only the first command installs the `jugcraft-test:powered_equipment_game_tests_*` filter. The final server run has no feature/test filter. Packaging reuses that successful full test run and omits the optional source archive; remaining build checks still run. Playable JAR packaging result: **passed** (`BUILD SUCCESSFUL in 9m 35s`), including 79 offline updater and 393 scheduling assertions. Final archive integrity passed across 189,061 ZIP entries; four edited runtime resources match the final source bytes, required runtime classes match the compiled bytes, embedded libraries are present, and the test class is excluded. The verified playable JAR is 344,280,433 bytes; SHA-256: `da615a0bd4f89e7b08a56aca85346088940b52eba0392939a6b4f5f94af8e37b`.
 
 No human multiplayer, production-load benchmark, live-world migration or full client-gallery result is claimed. Existing dependencies and the live server installation were not changed.
+
+## Review follow-up (7 November 2026, Claude Code)
+
+An independent review of this PR, in its own branch on top of it.
+
+**Fixes:**
+- **Chainsaw leaf price only for leaves.** In leaf-clearing mode the leaf price was the chainsaw's price for any block. Machines that drive the saw without seeing the block were therefore under-billed for logs and dirt: robots, terraforming, transport devices, civil workshops and computers. `PoweredToolItem.energyPerBlock(stack, state)` now prices by block, and machines pay the felling price.
+- **Drill face.** A lagged, delayed destroy of an earlier block no longer clears the face latched for the next one.
+- **Electric Hoe.** The client predicts the till. It no longer also triggers the Shift mode toggle or the off-hand item on the same click.
+- **Scanners:**
+  - A finished survey never replaces a screen opened since; the result is saved and Shift-use shows it.
+  - A scanner dropped with Q cancels its survey, unpaid.
+  - The area/coverage line is drawn for the scanners only.
+  - History's title follows the survey shown.
+
+**Tests:**
+- Server game tests for the 7 November goggles report, run in a dark cell with the real tick callbacks.
+- A potion's night vision merged into the helmet's own effect is neither billed nor removed.
+- A Q-dropped scanner cancels its survey.
+
+**Left as found:** the Leaf Blower's Shift+Sprint strength toggle is read only on the server. The client can't see the sprint key from shared code, so it starts using the blower while the server toggles. A fix needs a gesture choice.
+
+**Not run:** none of this has been compiled or run here; the build hosts are unreachable from this environment.
