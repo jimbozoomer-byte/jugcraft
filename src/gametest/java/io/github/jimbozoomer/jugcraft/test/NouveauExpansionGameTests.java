@@ -58,6 +58,41 @@ public final class NouveauExpansionGameTests {
     private static NouveauWorkshop station(GameTestHelper h,ServerPlayer p,String name,BlockPos at){h.setBlock(at,NouveauCatalog.block(name));var b=(NouveauWorkshop)h.getLevel().getBlockEntity(h.absolutePos(at));b.placedBy(p);return b;}
     @GameTest(maxTicks=20)
     public void sourcePaymentIsAtomicAndOwnerBound(GameTestHelper h){var p=player(h);var consumer=station(h,p,"imbuement_chamber",new BlockPos(1,1,1));var jar=station(h,p,"source_jar",new BlockPos(2,1,1));jar.fill(7);h.assertTrue(!NouveauSource.pay(h.getLevel(),p,consumer,8)&&jar.ley()==7,"Insufficient charge leaves every donor intact");h.assertTrue(NouveauSource.pay(h.getLevel(),p,consumer,5)&&jar.ley()==2,"Payment draws exactly the stated charge");consumer.fill(3);var stranger=player(h);h.assertTrue(!NouveauSource.pay(h.getLevel(),stranger,consumer,1)&&consumer.ley()==3&&jar.ley()==2,"Another owner's nearby jar cannot be drained");h.succeed();}
+    @GameTest(maxTicks=300)
+    public void imbuementChamberLoadsLapisByHandAndImbuesSourceGems(GameTestHelper h){
+        // The reported path: right-clicking the chamber while holding lapis. The block must load it, and the station's own
+        // tick must imbue it through the shipped c:gems/lapis recipe, one lapis for one Source Gem.
+        var p=player(h);var chamber=station(h,p,"imbuement_chamber",new BlockPos(1,1,1));var jar=station(h,p,"source_jar",new BlockPos(2,1,1));jar.fill(50);
+        h.assertTrue(NouveauRecipes.forStation("imbuement_chamber").stream().anyMatch(r->r.id().endsWith("/imbuement_lapis")),"The lapis Source Gem recipe is loaded");
+        h.assertTrue(NouveauRecipes.imbues(new ItemStack(Items.LAPIS_LAZULI)),"Lapis is an imbuement input through c:gems/lapis");
+        var hand=net.minecraft.world.InteractionHand.MAIN_HAND;var at=chamber.getBlockPos();
+        p.setItemInHand(hand,new ItemStack(Items.LAPIS_LAZULI,3));
+        var result=h.getLevel().getBlockState(at).useItemOn(p.getMainHandItem(),h.getLevel(),p,hand,new net.minecraft.world.phys.BlockHitResult(Vec3.atCenterOf(at),net.minecraft.core.Direction.UP,at,false));
+        h.assertTrue(result.consumesAction(),"Right-clicking with lapis is handled by the chamber, not passed on: "+result);
+        h.assertTrue(chamber.getItem(0).is(Items.LAPIS_LAZULI)&&chamber.getItem(0).getCount()==3&&p.getMainHandItem().isEmpty(),"All three lapis are loaded into the first input slot");
+        h.succeedWhen(()->{
+            var gem=chamber.getItem(NouveauWorkshop.OUTPUT);
+            h.assertTrue(gem.is(NouveauCatalog.item("source_gem")),"No Source Gem yet; chamber status: "+chamber.status());
+            h.assertTrue(gem.getCount()+chamber.getItem(0).getCount()==3,"Each Source Gem takes exactly one lapis");
+        });
+    }
+    @GameTest(maxTicks=20)
+    public void imbuementChamberTakesLapisFromMenuAndHopperButLeavesOtherItems(GameTestHelper h){
+        var p=player(h);var chamber=station(h,p,"imbuement_chamber",new BlockPos(1,1,1));var hand=net.minecraft.world.InteractionHand.MAIN_HAND;
+        // Shift-clicking lapis from the hotbar in the chamber's menu moves it into the input slots.
+        p.getInventory().setItem(0,new ItemStack(Items.LAPIS_LAZULI,5));
+        var menu=new NouveauWorkshopMenu(1,p.getInventory(),chamber);menu.quickMoveStack(p,NouveauWorkshopMenu.PLAYER+27);
+        h.assertTrue(chamber.getItem(0).is(Items.LAPIS_LAZULI)&&chamber.getItem(0).getCount()==5&&p.getInventory().getItem(0).isEmpty(),"The menu loads lapis into the inputs");
+        h.assertTrue(chamber.canPlaceItemThroughFace(1,new ItemStack(Items.LAPIS_LAZULI),net.minecraft.core.Direction.UP),"A hopper above may insert lapis into an input slot");
+        // An item no imbuement takes keeps its ordinary use (a block still places against the chamber).
+        p.setItemInHand(hand,new ItemStack(Items.COBBLESTONE,4));
+        h.assertTrue(NouveauWorkshopInteractions.use(p,chamber,hand)==net.minecraft.world.InteractionResult.PASS&&p.getMainHandItem().getCount()==4,"Cobblestone is not loaded");
+        // Full inputs refuse the lapis without consuming any.
+        for(int i=0;i<NouveauWorkshop.INPUTS;i++)chamber.setItem(i,new ItemStack(Items.AMETHYST_SHARD,64));
+        p.setItemInHand(hand,new ItemStack(Items.LAPIS_LAZULI,2));
+        h.assertTrue(NouveauWorkshopInteractions.use(p,chamber,hand)==net.minecraft.world.InteractionResult.FAIL&&p.getMainHandItem().getCount()==2,"Full inputs leave the lapis in hand");
+        h.succeed();
+    }
     @GameTest(maxTicks=20)
     public void potionJarRejectsMixingAndOverfill(GameTestHelper h){var p=player(h);var jar=station(h,p,"potion_jar",new BlockPos(1,1,1));var water=new net.minecraft.world.item.alchemy.PotionContents(net.minecraft.world.item.alchemy.Potions.WATER);var healing=new net.minecraft.world.item.alchemy.PotionContents(net.minecraft.world.item.alchemy.Potions.HEALING);h.assertTrue(jar.fillPotion(healing,99),"Jar accepts real doses");h.assertTrue(!jar.fillPotion(water,1)&&!jar.fillPotion(healing,2)&&jar.doses()==99,"No mixed or excess doses consumed");h.assertTrue(!jar.drainPotion(100)&&jar.drainPotion(2)&&jar.doses()==97,"Drain is bounded and exact");h.succeed();}
     @GameTest(maxTicks=20)

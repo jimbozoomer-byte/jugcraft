@@ -33,6 +33,14 @@ public final class NouveauRecipes extends SimpleJsonResourceReloadListener<JsonE
     }
     public record Match(Working recipe,int[] used,List<ItemStack> after,ItemStack output) {}
     public static List<Working> forStation(String station){return recipes.stream().filter(r->r.accepts(station)).toList();}
+    /**
+     * Whether an Imbuement Chamber recipe takes this stack as the item it imbues (its input). Pedestal catalysts are not
+     * counted: they belong on the pedestals, and many are blocks a player places (torches, dirt, buttons).
+     */
+    public static boolean imbues(ItemStack stack){
+        for(var recipe:forStation("imbuement_chamber"))for(var need:recipe.ingredients())if(ingredient(need,stack))return true;
+        return false;
+    }
     public static List<Working> all(){return recipes;}
     /** Crush resolves the supplied output rolls once; the caller consumes one input only after accepting the result. */
     public static java.util.Optional<List<ItemStack>> crush(net.minecraft.server.level.ServerLevel level,ItemStack input){
