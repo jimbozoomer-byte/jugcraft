@@ -82,6 +82,11 @@ public final class IndustrialGear {
         case "hoe"->new Item(p.hoe(JugcraftGear.BRONZE,-2,-1));
         default->new Item(p.sword(JugcraftGear.BRONZE,3,-2.4F));};}
     public static boolean active(ItemStack stack){return !stack.getOrDefault(DataComponents.CUSTOM_DATA,CustomData.EMPTY).copyTag().getBooleanOr("JimtaGearOff",false);}
+    /**
+     * Powered helmets' night vision in the dark: VISION_COST JE buys VISION_DURATION ticks, topped up below VISION_REFRESH,
+     * so one payment lasts 160 ticks as before. Both stay above vanilla's 200-tick window in which night vision flashes.
+     */
+    public static final int VISION_DURATION=370,VISION_REFRESH=210;public static final long VISION_COST=200;
     public static class GearItem extends Item {
         public final String behavior;public final long capacity;
         GearItem(Properties p,String behavior,long capacity){super(p);this.behavior=behavior;this.capacity=capacity;}
@@ -142,7 +147,7 @@ public final class IndustrialGear {
             if(item.behavior.equals("static")&&slot==EquipmentSlot.FEET&&p.tickCount%10==0&&p.onGround()&&p.getDeltaMovement().horizontalDistanceSqr()>.0004)Chargeable.charge(p.getMainHandItem(),1);
             if(slot==EquipmentSlot.HEAD&&(item.behavior.equals("nightvision")||item instanceof PoweredArmor)){
                 if(p.level().getMaxLocalRawBrightness(BlockPos.containing(p.getEyePosition()))<8){var effect=p.getEffect(MobEffects.NIGHT_VISION);
-                    if((effect==null||effect.getDuration()<40)&&Chargeable.drain(stack,200))p.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION,200,0,true,false,true));}
+                    if((effect==null||effect.getDuration()<VISION_REFRESH)&&Chargeable.drain(stack,VISION_COST))p.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION,VISION_DURATION,0,true,false,true));}
                 if(item instanceof PoweredArmor a&&a.family.equals("quantum")&&p.tickCount%20==0){
                     if(p.getAirSupply()<p.getMaxAirSupply()-20&&Chargeable.drain(stack,100))p.setAirSupply(Math.min(p.getMaxAirSupply(),p.getAirSupply()+100));
                     if(p.hasEffect(MobEffects.POISON)&&Chargeable.drain(stack,10000))p.removeEffect(MobEffects.POISON);

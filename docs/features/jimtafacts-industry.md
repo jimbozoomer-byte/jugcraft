@@ -289,6 +289,31 @@ families; these entries do not establish full source parity.
 
 The latest inventory resolves duplicate `BCTransportItems` aliases to the same implemented pipe definitions. `obsidianFluid` is an unused declaration: the supplied `preInit` never constructs it, and no corresponding texture/collector exists. The inventory distinguishes that from a missing real feature. Native fluid/RT heat, superheated steam, reactor vessels, table lasers and gate parameters/expansions are local, but this does not claim complete source energy/transport parity. Unregistered decorative/obsolete textures remain preserved rather than becoming inert inventory clutter.
 
+## November 7 correction: Industrial Night Vision Goggles
+
+**Report.** The goggles spent their charge but gave no night vision.
+
+**Cause.** The exosuit's helmet tick runs for every player. When it is not giving vision, it removed any ambient, particle-free night vision of 260 ticks or less, which is exactly what the goggles add (200 ticks). Both callbacks run at the end of each server tick, so every tick:
+- the goggles paid 200 JE and added vision;
+- the exosuit took it away again.
+
+The same affected the nano and quantum helmets, which share the goggles' path.
+
+**A second defect.** A 200-tick effect sits inside vanilla's flashing window (200 ticks or less left), so even unstripped vision pulsed.
+
+**Fix:**
+- **`Exosuit`:** removes only the effect instance it gave (see [exosuit.md](exosuit.md)).
+- **Powered helmets** (`IndustrialGear`):
+  - give 370 ticks and top up below 210;
+  - stay above the flashing window;
+  - still cost 200 JE per 160 dark ticks, as before.
+- **Unchanged:** capacities, recipes and other gear.
+- **Relation to PR609:** it replaces this path with a single `PoweredNightVision` owner. This correction is the minimal fix on `main` and is compatible with that later rewrite.
+
+**Tests** (in `JimtaIndustrialGearGameTests`; not run here, because this environment cannot build the mod). Both seal the player in a dark stone cell, so the real server-tick callbacks act:
+- `nightVisionGogglesKeepTheirVisionBesideTheExosuitTick`: steady vision after 100 ticks, at most 400 JE spent.
+- `exosuitTakesAwayOnlyItsOwnNightVision`: the suit removes its own effect when its helmet comes off, and leaves an alike effect it did not give.
+
 ## Deferred validation
 
 Written but not run: industrial processor batches/heat, robot conservation/claims/persistence, powered gear and flight, gate/filter behavior, crop genetics/anchors/claims, fluid-cell transactions and denied access, compact reactor fuel depletion/cooling/chamber removal/redstone/buffer pause, matter-output economy, canning/bottling conservation, civil machine claims/drop conservation, charge pad/teleporter safety, and source-byte/UV/recipe tests. Combined compilation, resource audit, server tests, original-model client rendering, two-player protections and owner playtest remain required before release. Nothing here is deployed or merged.

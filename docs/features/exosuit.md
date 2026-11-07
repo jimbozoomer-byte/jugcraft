@@ -66,6 +66,9 @@ Design inspiration:
 - Powers run on the server (`ServerTickEvents.END_SERVER_TICK`, every player).
   - Bonuses are transient attribute modifiers, added while a piece works and removed the tick it stops. Nothing is saved on the player.
   - The suit's night vision is ambient and particle-free; it is removed when the helmet stops providing it. A potion's night vision is left alone.
+  - **Only its own** (corrected 7 November 2026). The suit remembers the exact effect it gave and removes only that one.
+    - **Before:** it removed any ambient, particle-free night vision of 260 ticks or less. That also stripped the vision of the Industrial Night Vision Goggles, the nano and quantum helmets, the Jimtafacts goggles accessory, the glowing flower crown and the hood of darkness.
+    - **After a relog:** a suit effect left over from before a relog is no longer recognised, so it simply runs out within 13 seconds.
 - Energy is the existing `jugcraft:energy` item component. The jetpack uses the existing rocket-pack thrust packet, rate-limited per player.
 - Recipes follow the `machines` feature switch.
 

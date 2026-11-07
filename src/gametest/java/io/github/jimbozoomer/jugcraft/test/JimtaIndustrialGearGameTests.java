@@ -69,4 +69,39 @@ public final class JimtaIndustrialGearGameTests {
             wrench.getItem().useOn(ctx);h.assertTrue(h.getBlockState(at).getValue(MachineBlock.FACING)!=facing&&Chargeable.energy(wrench)==100,"Authorized turn pays once");
         }finally{h.getLevel().getServer().getPlayerList().remove(p);}h.succeed();
     }
+    /** Seals the player in a stone cell (feet at 1,2,1, eyes at 1,3,1) so the server's light falls to 0 at their eyes. */
+    private static void darkCell(GameTestHelper h,net.minecraft.server.level.ServerPlayer p){
+        for(int x=0;x<3;x++)for(int y=1;y<5;y++)for(int z=0;z<3;z++)if(x!=1||z!=1||y==1||y==4)h.setBlock(x,y,z,net.minecraft.world.level.block.Blocks.STONE);
+        p.snapTo(Vec3.atBottomCenterOf(h.absolutePos(new BlockPos(1,2,1))));
+    }
+    private static boolean dark(net.minecraft.server.level.ServerPlayer p){return p.level().getMaxLocalRawBrightness(BlockPos.containing(p.getEyePosition()))<8;}
+    @GameTest(maxTicks=200)
+    public void nightVisionGogglesKeepTheirVisionBesideTheExosuitTick(GameTestHelper h){
+        // Reported: the goggles spent charge but gave no vision. The exosuit's helmet tick (which runs for every player) took
+        // away any ambient night vision it had not given, so each tick the goggles paid again and lost it again. Here both
+        // real server-tick callbacks run in their real order.
+        var p=JimtaRobotGameTests.player(h);darkCell(h,p);p.setItemSlot(EquipmentSlot.HEAD,gear("industrial_night_vision_goggles",10_000));
+        h.runAfterDelay(100,()->{try{
+            h.assertTrue(dark(p),"The sealed cell is dark at the player's eyes");
+            var effect=p.getEffect(net.minecraft.world.effect.MobEffects.NIGHT_VISION);
+            h.assertTrue(effect!=null&&effect.getDuration()>200,"The goggles give steady night vision, above the 200-tick flashing window: "+effect);
+            long spent=10_000-Chargeable.energy(p.getItemBySlot(EquipmentSlot.HEAD));
+            h.assertTrue(spent>=IndustrialGear.VISION_COST&&spent<=2*IndustrialGear.VISION_COST,"One 200 JE payment buys 160 ticks of vision; spent "+spent+" JE");
+        }finally{h.getLevel().getServer().getPlayerList().remove(p);}h.succeed();});
+    }
+    @GameTest(maxTicks=200)
+    public void exosuitTakesAwayOnlyItsOwnNightVision(GameTestHelper h){
+        var p=JimtaRobotGameTests.player(h);darkCell(h,p);
+        var helmet=new ItemStack(io.github.jimbozoomer.jugcraft.gear.JugcraftExosuit.piece(io.github.jimbozoomer.jugcraft.gear.ExosuitItem.Style.VANGUARD,net.minecraft.world.item.equipment.ArmorType.HELMET));
+        Chargeable.setEnergy(helmet,10_000);p.setItemSlot(EquipmentSlot.HEAD,helmet);
+        h.runAfterDelay(60,()->{try{
+            h.assertTrue(dark(p)&&p.hasEffect(net.minecraft.world.effect.MobEffects.NIGHT_VISION),"The exosuit helmet gives night vision in the dark");
+            p.setItemSlot(EquipmentSlot.HEAD,ItemStack.EMPTY);io.github.jimbozoomer.jugcraft.gear.Exosuit.tick(p);
+            h.assertTrue(!p.hasEffect(net.minecraft.world.effect.MobEffects.NIGHT_VISION),"Taking the helmet off takes its own night vision away");
+            // An alike effect from another provider (the goggles' ambient, particle-free vision) is left alone.
+            p.addEffect(new net.minecraft.world.effect.MobEffectInstance(net.minecraft.world.effect.MobEffects.NIGHT_VISION,IndustrialGear.VISION_DURATION,0,true,false,true));
+            io.github.jimbozoomer.jugcraft.gear.Exosuit.tick(p);
+            h.assertTrue(p.hasEffect(net.minecraft.world.effect.MobEffects.NIGHT_VISION),"The exosuit leaves night vision it did not give");
+        }finally{h.getLevel().getServer().getPlayerList().remove(p);}h.succeed();});
+    }
 }

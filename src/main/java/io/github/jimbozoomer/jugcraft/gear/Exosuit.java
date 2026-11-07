@@ -2,6 +2,8 @@ package io.github.jimbozoomer.jugcraft.gear;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.tools.Chargeable;
+import java.util.Map;
+import java.util.WeakHashMap;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
@@ -72,6 +74,12 @@ public final class Exosuit {
 		modifier(player, Attributes.FALL_DAMAGE_MULTIPLIER, FALL, boots ? -1 : 0, AttributeModifier.Operation.ADD_MULTIPLIED_TOTAL);
 	}
 
+	/**
+	 * The night vision each player's suit helmet last gave them, by identity. The suit takes away only that one, never
+	 * the ambient night vision of the industrial goggles, a glowing crown or an accessory, which look alike.
+	 */
+	private static final Map<ServerPlayer, MobEffectInstance> OWN_VISION = new WeakHashMap<>();
+
 	private static void helmet(ServerPlayer player, ItemStack head) {
 		BlockPos eyes = BlockPos.containing(player.getEyePosition());
 		boolean dark = player.level().getMaxLocalRawBrightness(eyes) < DARK_BELOW;
@@ -80,10 +88,13 @@ public final class Exosuit {
 			if (current == null || current.getDuration() < NIGHT_VISION_REFRESH) {
 				// Ambient and without particles: the suit's own night vision, which it may take away again.
 				player.addEffect(new MobEffectInstance(MobEffects.NIGHT_VISION, NIGHT_VISION_DURATION, 0, true, false, true));
+				OWN_VISION.put(player, player.getEffect(MobEffects.NIGHT_VISION));
 			}
-		} else if (current != null && current.isAmbient() && !current.isVisible()
-				&& current.getDuration() <= NIGHT_VISION_DURATION) {
-			player.removeEffect(MobEffects.NIGHT_VISION);
+		} else {
+			MobEffectInstance own = OWN_VISION.remove(player);
+			if (current != null && current == own) {
+				player.removeEffect(MobEffects.NIGHT_VISION);
+			}
 		}
 	}
 
