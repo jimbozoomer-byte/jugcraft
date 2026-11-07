@@ -146,6 +146,19 @@ public class PoweredEquipmentGameTests {
         p.setItemInHand(InteractionHand.MAIN_HAND,ItemStack.EMPTY);
         h.runAtTickTime(10,()->{h.assertTrue(Chargeable.energy(stack)==10_000 && SurveyPayload.saved(stack,h.getLevel().registryAccess())==null,"Cancelled scan spent energy or produced a result");h.succeed();});
     }
+    @GameTest(maxTicks=30) public void droppedScannerCancelsItsSurvey(GameTestHelper h) {
+        // Q-drop splits the held stack: the hand keeps the same stack object, now empty. The survey must stop unpaid and
+        // free the player's survey slot rather than run on under an empty hand.
+        ServerPlayer p=player(h);ItemStack stack=new ItemStack(IndustrialGear.ITEMS.get("jimta_ore_scanner"));
+        Chargeable.setEnergy(stack,10_000);p.setItemInHand(InteractionHand.MAIN_HAND,stack);stack.getItem().use(h.getLevel(),p,InteractionHand.MAIN_HAND);
+        ItemStack dropped=stack.split(1);
+        h.assertTrue(p.getMainHandItem()==stack&&stack.isEmpty()&&Chargeable.energy(dropped)==10_000,"The emptied original stays in hand, as after a Q-drop");
+        h.runAtTickTime(10,()->{
+            ItemStack other=new ItemStack(IndustrialGear.ITEMS.get("jimta_ore_scanner"));p.setItemInHand(InteractionHand.MAIN_HAND,other);p.setShiftKeyDown(true);
+            h.assertTrue(other.getItem().use(h.getLevel(),p,InteractionHand.MAIN_HAND)!=net.minecraft.world.InteractionResult.FAIL,"The dropped scanner's survey still holds the player's survey slot");
+            h.assertTrue(Chargeable.energy(dropped)==10_000&&SurveyPayload.saved(dropped,h.getLevel().registryAccess())==null,"The dropped scanner was charged or given a result");
+            h.succeed();});
+    }
     @GameTest(maxTicks=100) public void shieldSpendsOneThousandAndKeepsPaidProtectionWhenFlat(GameTestHelper h) {
         ServerPlayer p=player(h);ItemStack chest=suit(ArmorType.CHESTPLATE,1000);p.setItemSlot(EquipmentSlot.CHEST,chest);
         h.succeedWhen(()->{

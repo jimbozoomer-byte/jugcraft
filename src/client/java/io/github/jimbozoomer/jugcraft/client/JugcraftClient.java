@@ -294,8 +294,13 @@ public final class JugcraftClient implements ClientModInitializer {
 		// The Jugcraft Encyclopedia: its key, its inventory button and its screen (Concordance Chunk A, A-04).
 		EncyclopediaClient.register();
         CraftingChoicesClient.register();
-		ClientPlayNetworking.registerGlobalReceiver(SurveyPayload.TYPE,
-				(payload, context) -> Minecraft.getInstance().gui.setScreen(new ProspectorScreen(payload)));
+		ClientPlayNetworking.registerGlobalReceiver(SurveyPayload.TYPE, (payload, context) -> {
+			// Surveys finish seconds after the click: never replace a screen opened since (a chest, chat). The result is saved
+			// on the scanner, which shows it again on Shift-use (Shift+Sprint for the advanced one).
+			var client = Minecraft.getInstance();
+			if (client.gui.screen() == null) client.gui.setScreen(new ProspectorScreen(payload));
+			else if (client.player != null) client.player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Survey complete: Shift-use the scanner to view it"));
+		});
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.CARVED_PUMPKIN_ENTITY, CarvedPumpkinRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.GIANT_PUMPKIN_ENTITY, GiantPumpkinRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SCARECROW_ENTITY, ScarecrowRenderer::new);
