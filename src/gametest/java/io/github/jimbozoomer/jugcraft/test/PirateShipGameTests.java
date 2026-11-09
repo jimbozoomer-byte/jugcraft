@@ -562,4 +562,55 @@ public class PirateShipGameTests {
 			helper.succeed();
 		});
 	}
+
+	/**
+	 * Protection holds at impact: with an operator region laid over the ship where it already floats, or only over the
+	 * cells where the shots strike, neither another ship's crew (judged as the unprivileged pirate identity) nor a player
+	 * dents the hull; with the region gone, the same shot does.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 80, skyAccess = true)
+	public void protectionAtTheShipOrTheImpactShieldsItFromCannonFire(GameTestHelper helper) {
+		pool(helper);
+		ServerLevel level = helper.getLevel();
+		PirateShip ship = ship(helper, false);
+		level.addFreshEntity(ship);
+		ServerPlayer op = helper.makeMockServerPlayerInLevel();
+		String name = "pirate_" + op.getUUID().toString().replace("-", "");
+		OwnerPlunderer[] enemy = {null};
+		ServerPlayer[] gunner = {null};
+		helper.runAfterDelay(3, () -> {
+			enemy[0] = helper.spawnWithNoFreeWill(OwnerPlunderer.TYPE, helper.relativeVec(ship.position().add(10.0, 6.0, 0.0)));
+			PirateShipTesting.link(enemy[0], java.util.UUID.randomUUID(), 2);
+			gunner[0] = helper.makeMockServerPlayerInLevel();
+			gunner[0].setGameMode(GameType.SURVIVAL);
+			// A one-block region over the ship's own place, laid while it floats there.
+			BlockPos at = ship.blockPosition();
+			protect(helper, op, "protect pos1", at);
+			protect(helper, op, "protect pos2", at);
+			protect(helper, op, "protect create " + name, at);
+			PirateShipTesting.fire(level, enemy[0], ship.position().add(3.4, 0.6, 2.5), new Vec3(-1.8, 0.0, 0.0));
+			PirateShipTesting.fire(level, gunner[0], ship.position().add(3.4, 0.6, -2.0), new Vec3(-1.8, 0.0, 0.0));
+		});
+		helper.runAfterDelay(12, () -> {
+			helper.assertTrue(ship.damage() == 0.0F, "A region over the ship shields it from enemy and player fire, but it took " + ship.damage());
+			protect(helper, op, "protect remove " + name, ship.blockPosition());
+			// Now a region only over the port side, where the shots strike, not over the ship's own place.
+			protect(helper, op, "protect pos1", BlockPos.containing(ship.position().add(2.0, -1.0, -4.0)));
+			protect(helper, op, "protect pos2", BlockPos.containing(ship.position().add(4.0, 2.0, 7.0)));
+			protect(helper, op, "protect create " + name, ship.blockPosition());
+			PirateShipTesting.fire(level, enemy[0], ship.position().add(3.4, 0.6, 5.0), new Vec3(-1.8, 0.0, 0.0));
+			PirateShipTesting.fire(level, gunner[0], ship.position().add(3.4, 0.6, -4.0), new Vec3(-1.8, 0.0, 0.0));
+		});
+		helper.runAfterDelay(22, () -> {
+			helper.assertTrue(ship.damage() == 0.0F, "A region over the impact shields it too, but it took " + ship.damage());
+			protect(helper, op, "protect remove " + name, ship.blockPosition());
+			PirateShipTesting.fire(level, enemy[0], ship.position().add(3.4, 0.6, 5.0), new Vec3(-1.8, 0.0, 0.0));
+		});
+		helper.runAfterDelay(32, () -> {
+			helper.assertTrue(ship.damage() > 0.0F, "With the region gone the same enemy shot dents the hull");
+			enemy[0].discard();
+			ship.discard();
+			helper.succeed();
+		});
+	}
 }

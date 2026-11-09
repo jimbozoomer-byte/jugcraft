@@ -482,10 +482,17 @@ public class PirateShip extends Entity implements CrewedVessel {
 	}
 
 	/**
-	 * Hull damage, on the server: from a player (melee, arrows, cannonballs), only where that player may change things
-	 * (land claims and town or operator protection, as for any build), or from another pirate ship's crew (cannon fire in
-	 * a sea fight). Its own crew, galleon plunderers and everything else do nothing. An operator in creative striking it
-	 * by hand removes it outright.
+	 * Hull damage, on the server, judged by the shared protection rules at the ship and at the point of impact (where the
+	 * shot struck, for a projectile), so a claim, town or operator region laid over a ship that is already there shields it:
+	 * <ul>
+	 * <li>from a player (by hand, arrows or cannonballs): only where that player may build (land claims; town and operator
+	 * protection), as for a Zeppelin;</li>
+	 * <li>from another pirate ship's crew (cannon fire in a sea fight): only where the unprivileged pirate identity
+	 * ({@link io.github.jimbozoomer.jugcraft.concordance.Authority#pirateCrewActor}) may change things, the identity its crew
+	 * already fight under, with no claim or town exemption;</li>
+	 * <li>from its own crew, a galleon plunderer or anything else: never.</li>
+	 * </ul>
+	 * An operator in creative striking it by hand (where they may build) removes it outright.
 	 */
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
@@ -493,10 +500,16 @@ public class PirateShip extends Entity implements CrewedVessel {
 			return false;
 		}
 		Entity attacker = source.getEntity();
+		List<BlockPos> struck = new ArrayList<>(List.of(blockPosition()));
+		if (source.getDirectEntity() != null && source.getDirectEntity() != attacker) {
+			struck.add(source.getDirectEntity().blockPosition());
+		}
 		if (attacker instanceof Player player) {
-			if (!io.github.jimbozoomer.jugcraft.finance.LandRegistry.mayBuild(player, level, blockPosition())
-					|| io.github.jimbozoomer.jugcraft.town.TownProtection.denies(player, level, blockPosition())) {
-				return false;
+			for (BlockPos at : struck) {
+				if (!io.github.jimbozoomer.jugcraft.finance.LandRegistry.mayBuild(player, level, at)
+						|| io.github.jimbozoomer.jugcraft.town.TownProtection.denies(player, level, at)) {
+					return false;
+				}
 			}
 			if (player.getAbilities().instabuild && source.getDirectEntity() == player) {
 				Containers.dropContents(level, this, hold);
@@ -504,7 +517,14 @@ public class PirateShip extends Entity implements CrewedVessel {
 				discard();
 				return true;
 			}
-		} else if (!(attacker instanceof OwnerPlunderer crew) || crew.shipLink() == null || crew.shipLink().equals(getUUID())) {
+		} else if (attacker instanceof OwnerPlunderer crew && crew.shipLink() != null && !crew.shipLink().equals(getUUID())) {
+			Player pirates = io.github.jimbozoomer.jugcraft.concordance.Authority.pirateCrewActor(level);
+			for (BlockPos at : struck) {
+				if (!io.github.jimbozoomer.jugcraft.concordance.Authority.mayChange(level, pirates, at)) {
+					return false;
+				}
+			}
+		} else {
 			return false;
 		}
 		damage += amount;
