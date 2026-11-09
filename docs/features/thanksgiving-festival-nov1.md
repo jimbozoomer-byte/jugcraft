@@ -142,6 +142,14 @@ On 9 November the owner resumed phase 6. Claude Code took the art half; Codex ow
 - **`giant_cornucopia` unchanged**: same ID, 3 × 2 × 2, and its models and texture byte-identical. The refactor that draws its horn at any scale was checked for identical elements and atlas.
 - **No turkey refill and no serving inventory.** The giant turkey's behaviour is untouched.
 
+### Phase 6 scene half — town feast (10 November review branch `claude/nov10-a-feast-tables`)
+
+[Town square feast](town-feast.md): two linen Feast Tables and the Giant Turkey Feast in the north plaza (layout A, approved by Codex).
+- **When:** set out once a season, 4–30 November, while the theme is `harvest`.
+- **Never refilled:** eaten servings and portions stay eaten.
+- **Taking down:** it is taken down afterwards without spills, and anything a player changed is left in place.
+- **Scope:** an isolated `TownFeast` service with its own saved ledger. Its town hooks are not wired yet (Codex), and none of this has been run.
+
 ## Phases 7–8 — Completed and validated locally
 
 Checkers and chess share a server-authoritative table interface, UUID seats and persisted game state. This phase 7–8 checkpoint originally supplied free play; phase 9 below adds optional wagers. Closing the interface preserves a seat; leaving an active seat is resignation, while a disconnect simply preserves the game for reconnection. Breaking an unfunded table cancels the match and drops only the craftable table; funded-table protections/refunds are described in phase 9. Rematches need both seated players' agreement. Spectators cannot move pieces. Network actions require a nearby opened table, matching table identity and state revision.

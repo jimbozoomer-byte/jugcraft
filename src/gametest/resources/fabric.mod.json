@@ -29,6 +29,7 @@
       "io.github.jimbozoomer.jugcraft.test.JimtaIndustryGameTests",
       "io.github.jimbozoomer.jugcraft.test.JimtaRobotGameTests",
       "io.github.jimbozoomer.jugcraft.test.JimtaIndustrialGearGameTests",
+      "io.github.jimbozoomer.jugcraft.test.TownFeastGameTests",
       "io.github.jimbozoomer.jugcraft.test.JimtaAutomationGameTests",
       "io.github.jimbozoomer.jugcraft.test.JimtaTransportGameTests",
       "io.github.jimbozoomer.jugcraft.test.JimtaCropGameTests",
