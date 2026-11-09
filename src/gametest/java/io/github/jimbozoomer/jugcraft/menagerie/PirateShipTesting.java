@@ -39,6 +39,11 @@ public final class PirateShipTesting {
 		crew.link(ship.getUUID(), station);
 	}
 
+	/** Links {@code crew} to some other ship (by id), as an enemy crew would be. */
+	public static void link(OwnerPlunderer crew, java.util.UUID ship, int station) {
+		crew.link(ship, station);
+	}
+
 	/** A cannonball fired by {@code owner} from {@code from} at {@code velocity} (blocks a tick), added to the level. */
 	public static OwnerCannonball fire(ServerLevel level, net.minecraft.world.entity.Entity owner, Vec3 from, Vec3 velocity) {
 		OwnerCannonball ball = new OwnerCannonball(OwnerCannon.BALL, level);

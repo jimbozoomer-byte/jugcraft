@@ -58,7 +58,8 @@ import org.jspecify.annotations.Nullable;
  * at y 1.0 and players and boarders stand on it.</li>
  * <li><b>Hold.</b> {@value #HOLD_SLOTS} slots, empty until the crew are beaten ({@link PirateCrew#defeated}); then rolled
  * once from the galleon chest's loot table and never again, saved with the ship. Only a ship the spawner crewed rolls.</li>
- * <li><b>Damage.</b> Only players (and their shots) harm it; {@value #HEALTH} points sink it. A sinking ship spills its
+ * <li><b>Damage.</b> Players (by hand, arrows or cannonballs, where they may build) and other pirate ships' crews
+ * harm it; its own crew never do; {@value #HEALTH} points sink it. A sinking ship spills its
  * hold where it lies, settles for {@value #SINK_TICKS} ticks and is gone. A beaten ship whose hold is empty and which no
  * player has come near for {@value #DERELICT_TICKS} ticks sinks on its own.</li>
  * </ul>
@@ -480,17 +481,31 @@ public class PirateShip extends Entity implements CrewedVessel {
 		return false;
 	}
 
+	/**
+	 * Hull damage, on the server: from a player (melee, arrows, cannonballs), only where that player may change things
+	 * (land claims and town or operator protection, as for any build), or from another pirate ship's crew (cannon fire in
+	 * a sea fight). Its own crew, galleon plunderers and everything else do nothing. An operator in creative striking it
+	 * by hand removes it outright.
+	 */
 	@Override
 	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
-		if (isRemoved() || sunk() || !(source.getEntity() instanceof Player player) || amount <= 0 || !Float.isFinite(amount)) {
+		if (isRemoved() || sunk() || amount <= 0 || !Float.isFinite(amount)) {
 			return false;
 		}
-		if (player.getAbilities().instabuild) {
-			// An operator in creative removes it outright, hold and all.
-			Containers.dropContents(level, this, hold);
-			hold.clearContent();
-			discard();
-			return true;
+		Entity attacker = source.getEntity();
+		if (attacker instanceof Player player) {
+			if (!io.github.jimbozoomer.jugcraft.finance.LandRegistry.mayBuild(player, level, blockPosition())
+					|| io.github.jimbozoomer.jugcraft.town.TownProtection.denies(player, level, blockPosition())) {
+				return false;
+			}
+			if (player.getAbilities().instabuild && source.getDirectEntity() == player) {
+				Containers.dropContents(level, this, hold);
+				hold.clearContent();
+				discard();
+				return true;
+			}
+		} else if (!(attacker instanceof OwnerPlunderer crew) || crew.shipLink() == null || crew.shipLink().equals(getUUID())) {
+			return false;
 		}
 		damage += amount;
 		if (damage >= HEALTH) {

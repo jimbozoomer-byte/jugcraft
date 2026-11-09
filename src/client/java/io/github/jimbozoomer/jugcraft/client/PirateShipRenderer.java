@@ -44,14 +44,16 @@ public class PirateShipRenderer extends EntityRenderer<PirateShip, PirateShipRen
 	/** Degrees the wheel turns at full helm, and the rudder. */
 	private static final float WHEEL_TURN = 120.0F;
 	private static final float RUDDER_TURN = 25.0F;
-	/** Pivots used until the rig says otherwise (pixels): from the agreed layout, masts at z 1 and z 5. */
+	/** Pivots used where the rig lacks a key (pixels): tools/pirate_ship.py's PIVOTS (ee2c719051). */
 	private static final Map<String, float[]> DEFAULT_PIVOTS = Map.of(
-			"pirate_ship_sail_fore", new float[] {0, 128, 80},
-			"pirate_ship_sail_main", new float[] {0, 144, 16},
-			"pirate_ship_jib", new float[] {0, 96, 128},
-			FLAG, new float[] {0, 192, 16},
-			WHEEL, new float[] {0, 26, -104},
-			RUDDER, new float[] {0, 0, -128});
+			"pirate_ship_sail_fore", new float[] {0, 109.5F, 84.5F},
+			"pirate_ship_sail_main", new float[] {0, 135.5F, 21},
+			"pirate_ship_jib", new float[] {0, 50, 124},
+			FLAG, new float[] {0, 180, 5},
+			WHEEL, new float[] {0, 40, -83.2F},
+			RUDDER, new float[] {0, 0, -117});
+	/** How far the cannon's muzzle face lies forward of its trunnion (pixels; tools/pirate_ship.py). */
+	private static final float BARREL = 8.2F;
 	private static @Nullable Rig rig;
 
 	public static final class State extends EntityRenderState {
@@ -112,8 +114,8 @@ public class PirateShipRenderer extends EntityRenderer<PirateShip, PirateShipRen
 		float age = state.ageInTicks;
 		pose.pushPose();
 		pose.rotateDegrees(Axis.YP, -state.yRot);
-		// The swell: a slow roll and pitch; a sinking ship lists hard to port.
-		pose.rotateDegrees(Axis.ZP, Mth.sin(age * 0.05F) * 1.2F + (state.sunk ? 14.0F : 0.0F));
+		// The swell: a slow roll and pitch; a sinking ship lists hard to port (+x: a negative turn about Z).
+		pose.rotateDegrees(Axis.ZP, Mth.sin(age * 0.05F) * 1.2F - (state.sunk ? 14.0F : 0.0F));
 		pose.rotateDegrees(Axis.XP, Mth.sin(age * 0.037F + 1.0F) * 0.6F);
 		draw(HULL, pose, collector, state);
 		float sway = Mth.sin(age * 0.08F) * (1.0F + 2.0F * state.headway);
@@ -125,7 +127,8 @@ public class PirateShipRenderer extends EntityRenderer<PirateShip, PirateShipRen
 			drawAt(FLAG, rig, pose, collector, state, Axis.YP, Mth.sin(age * 0.2F) * 8.0F);
 		}
 		drawAt(WHEEL, rig, pose, collector, state, Axis.ZP, state.rudder * WHEEL_TURN);
-		drawAt(RUDDER, rig, pose, collector, state, Axis.YP, -state.rudder * RUDDER_TURN);
+		// A positive rudder is a turn to starboard (yaw increasing); the blade's trailing edge swings to starboard (-x).
+		drawAt(RUDDER, rig, pose, collector, state, Axis.YP, state.rudder * RUDDER_TURN);
 		QuadModel cannon = DecorQuads.get(CANNON);
 		if (cannon != null) {
 			int gun = 0;
@@ -133,8 +136,7 @@ public class PirateShipRenderer extends EntityRenderer<PirateShip, PirateShipRen
 				if (station.role() != CrewedVessel.Role.GUNNER) {
 					continue;
 				}
-				float[] at = gun < rig.cannons().length ? rig.cannons()[gun]
-						: new float[] {(float) station.muzzle().x * 16.0F, (float) station.muzzle().y * 16.0F, (float) station.muzzle().z * 16.0F};
+				float[] at = gun < rig.cannons().length ? rig.cannons()[gun] : trunnion(station);
 				gun++;
 				pose.pushPose();
 				pose.translate(at[0] / 16.0F, at[1] / 16.0F, at[2] / 16.0F);
@@ -146,6 +148,13 @@ public class PirateShipRenderer extends EntityRenderer<PirateShip, PirateShipRen
 		}
 		pose.popPose();
 		super.submit(state, pose, collector, camera);
+	}
+
+	/** Without a rig entry: the trunnion behind the station's muzzle by the barrel's length, along its facing. */
+	private static float[] trunnion(CrewedVessel.Station station) {
+		double turn = -station.facing() * Mth.DEG_TO_RAD;
+		return new float[] {(float) (station.muzzle().x * 16.0 - Math.sin(turn) * BARREL), (float) (station.muzzle().y * 16.0),
+				(float) (station.muzzle().z * 16.0 - Math.cos(turn) * BARREL)};
 	}
 
 	private static void draw(String name, PoseStack pose, SubmitNodeCollector collector, State state) {

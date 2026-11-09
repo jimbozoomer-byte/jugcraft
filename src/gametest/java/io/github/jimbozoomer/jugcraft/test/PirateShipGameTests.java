@@ -462,27 +462,26 @@ public class PirateShipGameTests {
 	}
 
 	/**
-	 * Its own broadside never hits its own hull: a crew member's cannonball fired straight across the real deck, at hull
-	 * height, from the port muzzle passes over the deck squares and out the starboard side, harming nothing; a player's
-	 * ball on the same line is stopped by the hull at once. (OwnerCannonball's own damage applies only to living targets,
-	 * so the player's ball stops without denting the hull; players hole ships by hand or with arrows.)
+	 * Cannon fire and the real hull: a crew member's own cannonball, fired straight across its own deck at hull height from
+	 * the port muzzle, passes over the deck squares and out the starboard side, harming nothing; a player's ball on the
+	 * same line is stopped by the hull and dents it; so is a ball from another ship's crew (a sea fight).
 	 */
 	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 60, skyAccess = true)
-	public void itsOwnBroadsideNeverHitsItsOwnHull(GameTestHelper helper) {
+	public void cannonFireSparesItsOwnHullAndDentsAnEnemys(GameTestHelper helper) {
 		pool(helper);
 		ServerLevel level = helper.getLevel();
 		PirateShip ship = ship(helper, false);
 		level.addFreshEntity(ship);
-		OwnerPlunderer[] crew = {null};
-		OwnerCannonball[] balls = {null, null};
-		double[] farthest = {Double.MAX_VALUE, Double.MAX_VALUE};
+		OwnerPlunderer[] crew = {null, null};
+		OwnerCannonball[] balls = {null, null, null};
+		double[] farthest = {Double.MAX_VALUE, Double.MAX_VALUE, Double.MAX_VALUE};
+		float[] dent = {0.0F};
 		helper.runAfterDelay(3, () -> {
 			helper.assertTrue(ship.decks().size() == PirateShipDeck.KEEL.length, "The real deck should be laid");
 			crew[0] = helper.spawnWithNoFreeWill(OwnerPlunderer.TYPE, helper.relativeVec(ship.position().add(10.0, 6.0, 0.0)));
 			PirateShipTesting.link(crew[0], ship, 2);
 			// Across the beam at hull height, inside the deck squares' boxes, from the port muzzle (+x) toward starboard.
-			Vec3 from = ship.position().add(3.4, 0.6, 2.5);
-			balls[0] = PirateShipTesting.fire(level, crew[0], from, new Vec3(-1.8, 0.0, 0.0));
+			balls[0] = PirateShipTesting.fire(level, crew[0], ship.position().add(3.4, 0.6, 2.5), new Vec3(-1.8, 0.0, 0.0));
 		});
 		helper.onEachTick(() -> {
 			for (int i = 0; i < balls.length; i++) {
@@ -492,18 +491,27 @@ public class PirateShipGameTests {
 			}
 		});
 		helper.runAfterDelay(12, () -> {
-			helper.assertTrue(farthest[0] < ship.getX() - PirateWaters.HALF_BEAM, "The crew's ball should cross the deck and leave the"
-					+ " starboard side, but got no farther than x " + farthest[0] + " (the hull's starboard side is " + (ship.getX() - PirateWaters.HALF_BEAM) + ")");
+			helper.assertTrue(farthest[0] < ship.getX() - PirateWaters.HALF_BEAM, "The crew's own ball should cross the deck and leave"
+					+ " the starboard side, but got no farther than x " + farthest[0] + " (the starboard side is " + (ship.getX() - PirateWaters.HALF_BEAM) + ")");
 			helper.assertTrue(ship.damage() == 0.0F && !ship.sunk(), "Its own ball harms nothing");
 			ServerPlayer player = helper.makeMockServerPlayerInLevel();
 			player.setGameMode(GameType.SURVIVAL);
-			Vec3 from = ship.position().add(3.4, 0.6, -2.0);
-			balls[1] = PirateShipTesting.fire(level, player, from, new Vec3(-1.8, 0.0, 0.0));
+			balls[1] = PirateShipTesting.fire(level, player, ship.position().add(3.4, 0.6, -2.0), new Vec3(-1.8, 0.0, 0.0));
 		});
 		helper.runAfterDelay(18, () -> {
-			helper.assertTrue(balls[1].isRemoved() && farthest[1] > ship.getX(), "A player's ball on the same line should be stopped by"
-					+ " the hull before the keel, but reached x " + farthest[1]);
+			helper.assertTrue(balls[1].isRemoved() && farthest[1] > ship.getX(), "A player's ball should be stopped by the hull, but reached x "
+					+ farthest[1]);
+			helper.assertTrue(ship.damage() > 0.0F, "A player's cannonball should dent the hull");
+			dent[0] = ship.damage();
+			crew[1] = helper.spawnWithNoFreeWill(OwnerPlunderer.TYPE, helper.relativeVec(ship.position().add(-10.0, 6.0, 0.0)));
+			PirateShipTesting.link(crew[1], java.util.UUID.randomUUID(), 2);
+			balls[2] = PirateShipTesting.fire(level, crew[1], ship.position().add(3.4, 0.6, 5.0), new Vec3(-1.8, 0.0, 0.0));
+		});
+		helper.runAfterDelay(24, () -> {
+			helper.assertTrue(balls[2].isRemoved() && farthest[2] > ship.getX(), "Another ship's crew's ball should be stopped by the hull");
+			helper.assertTrue(ship.damage() > dent[0], "Another ship's crew's cannonball should dent the hull (a sea fight)");
 			crew[0].discard();
+			crew[1].discard();
 			ship.discard();
 			helper.succeed();
 		});

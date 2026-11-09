@@ -27,18 +27,29 @@ public final class OwnerCannonball extends ThrowableItemProjectile {
             for(int i=0;i<=8;i++){var p=BlockPos.containing(position().lerp(end,i/8D));if(!level().hasChunkAt(p)||!level().getWorldBorder().isWithinBounds(p)){discard();return;}}
         }super.tick();
     }
-    // A pirate ship's own gunners (ship-linked plunderers) never hit a pirate ship's hull or deck, nor their shipmates
-    // (docs/features/pirate-ship-crews.md); players' and galleon crews' shots hit as before.
-    private static final net.minecraft.resources.Identifier SHIP=io.github.jimbozoomer.jugcraft.Jugcraft.id("pirate_ship"),DECK=io.github.jimbozoomer.jugcraft.Jugcraft.id("pirate_ship_deck");
+    // A pirate ship's own gunners (ship-linked plunderers) never hit their own ship's hull or deck, nor their shipmates
+    // (docs/features/pirate-ship-crews.md); another pirate ship's hull is fair game. Players' and galleon crews' shots hit
+    // as before.
     @Override protected boolean canHitEntity(Entity target){
         if(getOwner() instanceof OwnerPlunderer crew&&crew.shipLink()!=null){
-            var type=EntityType.getKey(target.getType());
-            if(SHIP.equals(type)||DECK.equals(type)||target instanceof OwnerPlunderer mate&&crew.shipLink().equals(mate.shipLink()))return false;
+            var own=crew.shipLink();
+            Entity hull=target instanceof PirateShipDeck deck?deck.ship():target;
+            if(target instanceof PirateShipDeck&&hull==null)return false;
+            if(hull instanceof PirateShip ship&&own.equals(ship.getUUID()))return false;
+            if(target instanceof OwnerPlunderer mate&&own.equals(mate.shipLink()))return false;
         }
         return super.canHitEntity(target);
     }
     @Override protected void onHitEntity(EntityHitResult hit){
         if(!(level() instanceof ServerLevel level))return;
+        if(hit.getEntity() instanceof PirateShipDeck||hit.getEntity() instanceof PirateShip){
+            // A pirate ship's hull (its deck squares pass the blow on): server-side damage from a player or another ship's
+            // crew; PirateShip.hurtServer judges claims, towns and its own crew.
+            if(getOwner() instanceof ServerPlayer||getOwner() instanceof OwnerPlunderer){
+                hit.getEntity().hurtServer(level,damageSources().thrown(this,getOwner()),(float)Math.min(getOwner() instanceof ServerPlayer?40:24,6*getDeltaMovement().lengthSqr()));
+            }
+            discard();return;
+        }
         if(getOwner() instanceof ServerPlayer actor&&hit.getEntity() instanceof LivingEntity target&&ConcordanceEffects.mayHarm(actor,target)&&TwoHanded.allowed(actor,level,target)){
             target.hurtServer(level,damageSources().thrown(this,actor),(float)Math.min(40,6*getDeltaMovement().lengthSqr()));
         }else if(getOwner() instanceof OwnerPlunderer crew&&hit.getEntity() instanceof LivingEntity target&&crew.canAttack(target)){
