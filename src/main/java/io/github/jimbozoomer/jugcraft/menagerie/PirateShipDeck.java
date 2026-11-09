@@ -13,6 +13,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LinearInterpolationHandler;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.Vec3;
@@ -76,6 +77,12 @@ public class PirateShipDeck extends Entity {
 	@Override
 	public boolean isPushable() {
 		return false;
+	}
+
+	/** Pistons never move it (its ship sets it in place every tick). */
+	@Override
+	public PushReaction getPistonPushReaction() {
+		return PushReaction.IGNORE_ENTITY;
 	}
 
 	@Override

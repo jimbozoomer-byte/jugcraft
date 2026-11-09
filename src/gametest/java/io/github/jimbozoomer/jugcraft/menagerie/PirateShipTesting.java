@@ -26,6 +26,11 @@ public final class PirateShipTesting {
 		ship.setWaypoint(waypoint);
 	}
 
+	/** Starts it sinking, as a final blow does. */
+	public static void sink(ServerLevel level, PirateShip ship) {
+		ship.beginSinking(level);
+	}
+
 	public static boolean mayRoll(PirateShip ship) {
 		return ship.mayRollHold();
 	}

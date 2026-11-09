@@ -6,8 +6,10 @@ import io.github.jimbozoomer.jugcraft.town.Town;
 import io.github.jimbozoomer.jugcraft.walker.WalkerAim;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.BubbleColumnBlock;
+import net.minecraft.world.level.block.TallSeagrassBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -19,7 +21,9 @@ import org.jspecify.annotations.Nullable;
  * only and loads none, and none of them changes the world.
  *
  * <p>The ship's footprint is its 6 x 16 hull turned to its yaw, enclosed by an axis-aligned box: a conservative
- * superset, so a ship turned 45 degrees asks for a little more open water than it covers.
+ * superset, so a ship turned 45 degrees asks for a little more open water than it covers. Above the water the wider rig's
+ * box is used, from the waterline row up (the bow's stem rises through the top of the waterline row a little ahead of
+ * the hull's 16 blocks).
  */
 public final class PirateWaters {
 	/** Half the ship's beam and half its length, in blocks (the hull is 6 x 16: PirateCrew's frame). */
@@ -38,6 +42,8 @@ public final class PirateWaters {
 	public static final double RIG_CORNER = Math.sqrt(RIG_HALF_BEAM * RIG_HALF_BEAM + Math.max(RIG_STERN * RIG_STERN, RIG_BOW * RIG_BOW));
 	/** Blocks of water the keel needs under the waterline block, and the clear air the masts need above it. */
 	public static final int DEPTH = 2;
+	/** How far the keel reaches under the waterline (tools/pirate_ship.py's keel_y), for a sinking ship's checks. */
+	public static final double KEEL = 1.625;
 	public static final int MAST = 13;
 	/** How far up its top water block a ship's waterline sits (a source block's surface is at 8/9). */
 	public static final double WATERLINE = 0.875;
@@ -47,15 +53,15 @@ public final class PirateWaters {
 
 	/**
 	 * Whether a ship may be at {@code at} facing {@code yaw}. Two volumes, each turned to the yaw: the hull under the
-	 * water (6 x 16: the waterline block and {@value #DEPTH} more must be water with nothing solid; kelp and seagrass pass,
-	 * ice and blocks do not) and the rig above it ({@link #rigFootprint}: {@value #MAST} blocks clear of anything solid or
-	 * liquid). Both inside the world border, every chunk under them loaded, no block entity in either, and nothing in
-	 * either protected ({@link #unprotected}).
+	 * water (6 x 16: the waterline block and {@value #DEPTH} more must be {@link #openWater}: plain water or a natural
+	 * water plant, never ice, a block or any other waterlogged block) and the rig ({@link #rigFootprint}): in the waterline
+	 * row open water or air, and the {@value #MAST} blocks above it air and nothing else. Both inside the world border,
+	 * every chunk under them loaded, and nothing in either protected ({@link #unprotected}).
 	 */
 	public static boolean clear(ServerLevel level, Vec3 at, float yaw) {
 		int surface = Mth.floor(at.y);
 		return clearVolumes(level, footprint(at, yaw, surface - DEPTH, surface + 1),
-				rigFootprint(at, yaw, surface + 1, surface + MAST + 1), surface);
+				rigFootprint(at, yaw, surface, surface + MAST + 1), surface);
 	}
 
 	/**
@@ -71,14 +77,15 @@ public final class PirateWaters {
 		double hullSwing = CORNER * turn, rigSwing = RIG_CORNER * turn;
 		AABB hull = footprint(from, fromYaw, surface - DEPTH, surface + 1)
 				.minmax(footprint(to, toYaw, surface - DEPTH, surface + 1)).inflate(hullSwing, 0.0, hullSwing);
-		AABB rig = rigFootprint(from, fromYaw, surface + 1, surface + MAST + 1)
-				.minmax(rigFootprint(to, toYaw, surface + 1, surface + MAST + 1)).inflate(rigSwing, 0.0, rigSwing);
+		AABB rig = rigFootprint(from, fromYaw, surface, surface + MAST + 1)
+				.minmax(rigFootprint(to, toYaw, surface, surface + MAST + 1)).inflate(rigSwing, 0.0, rigSwing);
 		return clearVolumes(level, hull, rig, surface);
 	}
 
 	/**
-	 * {@link #clear}'s rules for a hull box (water: its blocks from {@code surface - DEPTH} to {@code surface}) and a rig
-	 * box (air: from {@code surface + 1} to {@code surface + MAST}), every block of every column in each.
+	 * {@link #clear}'s rules for a hull box (its blocks from {@code surface - DEPTH} to {@code surface} open water) and a
+	 * rig box (from {@code surface}: the waterline row open water or air, then air up to {@code surface + MAST}), every
+	 * block of every column in each.
 	 */
 	static boolean clearVolumes(ServerLevel level, AABB hull, AABB rig, int surface) {
 		AABB both = hull.minmax(rig);
@@ -86,30 +93,70 @@ public final class PirateWaters {
 				|| surface + MAST > level.getMaxY()) {
 			return false;
 		}
-		return blocks(level, hull, surface - DEPTH, surface, true) && blocks(level, rig, surface + 1, surface + MAST, false)
-				&& unprotected(level, hull) && unprotected(level, rig);
+		return blocks(level, hull, surface - DEPTH, surface, Room.WATER) && blocks(level, rig, surface, surface, Room.WATER_OR_AIR)
+				&& blocks(level, rig, surface + 1, surface + MAST, Room.AIR) && unprotected(level, hull) && unprotected(level, rig);
 	}
 
-	/** Every block of {@code box}'s columns from {@code low} to {@code high}: water with nothing solid, or open air. */
-	private static boolean blocks(ServerLevel level, AABB box, int low, int high, boolean water) {
+	/** What a block of a volume may be. */
+	enum Room {
+		/** {@link #openWater} only (the hull under the waterline). */
+		WATER,
+		/** Open water or air (the rig's waterline row; a sinking ship's way down). */
+		WATER_OR_AIR,
+		/** Air only (the rig above the water): no torch, rail, flower, vine or fire either. */
+		AIR;
+
+		boolean admits(BlockState state) {
+			return switch (this) {
+				case WATER -> openWater(state);
+				case WATER_OR_AIR -> state.isAir() || openWater(state);
+				case AIR -> state.isAir();
+			};
+		}
+	}
+
+	/**
+	 * Water a hull may float in: plain water, still or flowing, a bubble column (natural over magma and soul sand), or a
+	 * natural water plant (kelp, seagrass). Never any other waterlogged block (a slab, a fence, a rail, a sign).
+	 */
+	public static boolean openWater(BlockState state) {
+		return state.is(Blocks.WATER) || state.is(Blocks.KELP) || state.is(Blocks.KELP_PLANT) || state.is(Blocks.SEAGRASS)
+				|| state.getBlock() instanceof TallSeagrassBlock || state.getBlock() instanceof BubbleColumnBlock;
+	}
+
+	/** Every block of {@code box}'s columns from {@code low} to {@code high} is one {@code room} admits. */
+	private static boolean blocks(ServerLevel level, AABB box, int low, int high, Room room) {
 		int x0 = Mth.floor(box.minX), x1 = Mth.floor(box.maxX - 1.0E-7);
 		int z0 = Mth.floor(box.minZ), z1 = Mth.floor(box.maxZ - 1.0E-7);
 		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 		for (int x = x0; x <= x1; x++) {
 			for (int z = z0; z <= z1; z++) {
 				for (int y = low; y <= high; y++) {
-					pos.set(x, y, z);
-					BlockState state = level.getBlockState(pos);
-					if (state.hasBlockEntity() || !state.getCollisionShape(level, pos).isEmpty()) {
-						return false;
-					}
-					if (water ? !state.getFluidState().is(FluidTags.WATER) : !state.getFluidState().isEmpty()) {
+					if (!room.admits(level.getBlockState(pos.set(x, y, z)))) {
 						return false;
 					}
 				}
 			}
 		}
 		return true;
+	}
+
+	/**
+	 * Whether a sinking ship whose waterline was in row {@code surface}, at {@code at} facing {@code yaw}, may settle to
+	 * height {@code nextY}: no lower than the hull's checked depth ({@code surface - DEPTH}), and the rig's box from the
+	 * keel's new row ({@value #KEEL} under {@code nextY}) up to the waterline row only open water or air (never terrain or
+	 * a block), loaded, inside the border, and, keel to masthead, unprotected. Loads nothing.
+	 */
+	public static boolean maySink(ServerLevel level, Vec3 at, float yaw, double nextY, int surface) {
+		if (nextY < surface - DEPTH) {
+			return false;
+		}
+		int keel = Mth.floor(nextY - KEEL);
+		AABB box = rigFootprint(at, yaw, keel, surface + MAST + 1);
+		if (keel < level.getMinY() || !level.getWorldBorder().isWithinBounds(box) || !loaded(level, box)) {
+			return false;
+		}
+		return blocks(level, box, keel, surface, Room.WATER_OR_AIR) && unprotected(level, box);
 	}
 
 	/**
@@ -194,7 +241,7 @@ public final class PirateWaters {
 	public static @Nullable Vec3 waterline(ServerLevel level, double x, double z) {
 		int top = level.getSeaLevel() - 1;
 		BlockPos at = BlockPos.containing(x, top, z);
-		if (!level.hasChunkAt(at) || !level.getFluidState(at).is(FluidTags.WATER) || !level.getBlockState(at.above()).isAir()) {
+		if (!level.hasChunkAt(at) || !openWater(level.getBlockState(at)) || !level.getBlockState(at.above()).isAir()) {
 			return null;
 		}
 		return new Vec3(x, top + WATERLINE, z);

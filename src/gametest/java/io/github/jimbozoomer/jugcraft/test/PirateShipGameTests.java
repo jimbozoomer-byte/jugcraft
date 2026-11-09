@@ -10,8 +10,10 @@ import io.github.jimbozoomer.jugcraft.menagerie.PirateShipTesting;
 import io.github.jimbozoomer.jugcraft.menagerie.PirateShips;
 import io.github.jimbozoomer.jugcraft.menagerie.PirateWaters;
 import io.github.jimbozoomer.jugcraft.town.Town;
+import io.github.jimbozoomer.jugcraft.town.TownData;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
@@ -28,6 +30,9 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.piston.PistonBaseBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.phys.AABB;
@@ -613,6 +618,218 @@ public class PirateShipGameTests {
 		helper.runAfterDelay(32, () -> {
 			helper.assertTrue(ship.damage() > 0.0F, "With the region gone the same enemy shot dents the hull");
 			enemy[0].discard();
+			ship.discard();
+			helper.succeed();
+		});
+	}
+
+	/** A block state by its id, checked to exist (a misspelt id parses to air). */
+	private static BlockState state(GameTestHelper helper, String id) {
+		BlockState state = TownData.parse(id);
+		helper.assertTrue(!state.isAir(), "The block state " + id + " should exist");
+		return state;
+	}
+
+	/**
+	 * Pistons never move the ship or its deck: a piston whose head extends into the ship's box and two deck squares
+	 * leaves the ship exactly where it was (only its own checked sailing moves it).
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 60, skyAccess = true)
+	public void pistonsNeverMoveTheShipOrItsDeck(GameTestHelper helper) {
+		pool(helper);
+		PirateShip ship = ship(helper, false);
+		helper.getLevel().addFreshEntity(ship);
+		Vec3 start = ship.position();
+		helper.assertTrue(ship.getPistonPushReaction() == PushReaction.IGNORE_ENTITY, "Pistons should ignore the ship");
+		// Above the water at the starboard rail, facing west: the head reaches x 24, inside the ship's box (x 19 to 25)
+		// and the deck squares (x 19.5 to 24.5) at z 21, where the second and third squares meet.
+		BlockPos piston = new BlockPos(25, SURFACE + 1, 21);
+		helper.runAfterDelay(2, () -> {
+			for (PirateShipDeck deck : ship.decks()) {
+				helper.assertTrue(deck.getPistonPushReaction() == PushReaction.IGNORE_ENTITY, "Pistons should ignore a deck square");
+			}
+			helper.setBlock(piston.east(), Blocks.REDSTONE_BLOCK);
+			helper.setBlock(piston, state(helper, "minecraft:piston[facing=west]"));
+		});
+		helper.runAfterDelay(14, () -> {
+			helper.assertTrue(helper.getBlockState(piston).getValue(PistonBaseBlock.EXTENDED), "The piston should have extended");
+			helper.assertTrue(ship.position().equals(start), "The piston must not move the ship from " + start + " to " + ship.position());
+			for (int i = 0; i < PirateShipDeck.KEEL.length; i++) {
+				Vec3 keel = start.add(0.0, 0.0, PirateShipDeck.KEEL[i]);
+				helper.assertTrue(ship.decks().get(i).position().distanceTo(keel) < 1.0E-6,
+						"Deck square " + i + " should be at " + keel + ", not " + ship.decks().get(i).position());
+			}
+			ship.discard();
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * What cannot be seen counts as settled: a place beside a chunk that is not loaded, within the clearance, raises no
+	 * ship, and asking loads nothing. (Villages are looked for at the waterline and above it; see PirateSeas.)
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 20, skyAccess = true)
+	public void anUnloadedChunkInTheClearanceRaisesNoShip(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		BlockPos centre = helper.absolutePos(new BlockPos(22, SURFACE, 22));
+		int cx = centre.getX() >> 4, cz = centre.getZ() >> 4;
+		Integer unloaded = null;
+		for (int i = 1; i <= 4_096 && unloaded == null; i++) {
+			if (!level.hasChunkAt(new BlockPos((cx + i) << 4, centre.getY(), cz << 4))) {
+				unloaded = cx + i;
+			}
+		}
+		helper.assertTrue(unloaded != null, "Some chunk east of the test should be unloaded");
+		BlockPos edge = new BlockPos(unloaded << 4, centre.getY(), cz << 4);
+		// 12 blocks short of it, in the loaded chunk before it: well within the 48-block clearance.
+		Vec3 beside = new Vec3(edge.getX() - 12 + 0.5, centre.getY() + PirateWaters.WATERLINE, centre.getZ() + 0.5);
+		helper.assertTrue(level.hasChunkAt(BlockPos.containing(beside)), "The place itself is loaded");
+		String why = PirateSeas.settlementNear(level, beside);
+		helper.assertTrue(why != null && why.startsWith("unloaded"), "An unloaded chunk in the clearance should refuse a ship: " + why);
+		helper.assertTrue(PirateSeas.raise(level, beside, 0.0F, level.getGameTime()) == null, "No ship is raised there");
+		helper.assertTrue(!level.hasChunkAt(edge), "Asking must not load the unloaded chunk");
+		helper.succeed();
+	}
+
+	/**
+	 * The bow's stem rises through the top of the waterline row a quarter block ahead of the hull's 16 blocks, so the
+	 * rig's box is checked from the waterline row: a block in that row just ahead of the hull box (but within the rig's
+	 * reach) blocks the place, while one below the waterline beside the hull still does not.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 40, skyAccess = true)
+	public void theBowsStemNeedsTheWaterlineRowClear(GameTestHelper helper) {
+		pool(helper);
+		ServerLevel level = helper.getLevel();
+		Vec3 at = helper.absoluteVec(CENTRE);
+		helper.assertTrue(PirateWaters.clear(level, at, 0.0F), "The pool's centre starts clear");
+		// The hull box ends at z 30.0; the stem reaches 30.25 in the waterline row.
+		BlockPos stem = new BlockPos(22, SURFACE, 30);
+		helper.setBlock(stem, Blocks.STONE);
+		helper.assertTrue(!PirateWaters.clear(level, at, 0.0F), "A block in the waterline row just ahead of the bow should block it");
+		helper.assertTrue(!PirateWaters.sweep(level, at, 0.0F, at.add(0.0, 0.0, PirateShip.SPEED), 0.0F), "Nor may it sail into it");
+		helper.setBlock(stem, Blocks.WATER);
+		helper.assertTrue(PirateWaters.clear(level, at, 0.0F), "With the water back it is clear again");
+		helper.succeed();
+	}
+
+	/**
+	 * Clutter: above the water the rig needs air, so a torch at rail height blocks the place; under it the hull needs open
+	 * water, so a waterlogged slab, fence or rail blocks it, while kelp and seagrass (the sea's own plants) do not.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 40, skyAccess = true)
+	public void onlyAirAboveAndOpenWaterBelow(GameTestHelper helper) {
+		pool(helper);
+		ServerLevel level = helper.getLevel();
+		Vec3 at = helper.absoluteVec(CENTRE);
+		BlockPos torch = new BlockPos(25, SURFACE + 1, 22);
+		helper.setBlock(torch, Blocks.TORCH);
+		helper.assertTrue(!PirateWaters.clear(level, at, 0.0F), "A torch in the rig's way should block it");
+		helper.setBlock(torch, Blocks.AIR);
+		// The sea's own plants, each on a stone footing below the hull's water rows.
+		for (BlockPos footing : List.of(new BlockPos(20, 1, 20), new BlockPos(23, 1, 25), new BlockPos(24, 1, 15), new BlockPos(21, 1, 18))) {
+			helper.setBlock(footing, Blocks.STONE);
+		}
+		helper.setBlock(new BlockPos(20, 2, 20), Blocks.KELP_PLANT);
+		helper.setBlock(new BlockPos(20, 3, 20), Blocks.KELP);
+		helper.setBlock(new BlockPos(23, 2, 25), Blocks.SEAGRASS);
+		helper.setBlock(new BlockPos(24, 2, 15), state(helper, "minecraft:tall_seagrass[half=lower]"));
+		helper.setBlock(new BlockPos(24, 3, 15), state(helper, "minecraft:tall_seagrass[half=upper]"));
+		helper.assertTrue(PirateWaters.clear(level, at, 0.0F), "Kelp and seagrass under the hull should not block it");
+		List<BlockPos> spots = List.of(new BlockPos(21, 3, 24), new BlockPos(23, 2, 17), new BlockPos(21, 2, 18));
+		List<String> waterlogged = List.of("minecraft:oak_slab[type=bottom,waterlogged=true]", "minecraft:oak_fence[waterlogged=true]",
+				"minecraft:rail[waterlogged=true]");
+		for (int i = 0; i < spots.size(); i++) {
+			helper.setBlock(spots.get(i), state(helper, waterlogged.get(i)));
+			helper.assertTrue(!PirateWaters.clear(level, at, 0.0F), "A " + waterlogged.get(i) + " in the hull's water should block it");
+			helper.setBlock(spots.get(i), Blocks.WATER);
+			helper.assertTrue(PirateWaters.clear(level, at, 0.0F), "With the water back it is clear again");
+		}
+		helper.succeed();
+	}
+
+	/**
+	 * A sinking ship settles no lower than the hull's checked depth (its waterline row less {@value PirateWaters#DEPTH}),
+	 * here in water deep enough that nothing else would stop it.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 160, skyAccess = true)
+	public void aSinkingShipSettlesNoLowerThanItsCheckedDepth(GameTestHelper helper) {
+		pool(helper);
+		int deep = SURFACE + 4;
+		// A walled basin over the pool, deep enough under the whole rig that the keel never meets the floor.
+		for (int x = 17; x <= 27; x++) {
+			for (int z = 11; z <= 35; z++) {
+				boolean wall = x == 17 || x == 27 || z == 11 || z == 35;
+				for (int y = FLOOR + 1; y <= deep; y++) {
+					helper.setBlock(new BlockPos(x, y, z), wall ? Blocks.STONE : Blocks.WATER);
+				}
+			}
+		}
+		ServerLevel level = helper.getLevel();
+		Vec3 at = helper.absoluteVec(new Vec3(22.0, deep + PirateWaters.WATERLINE, 22.0));
+		PirateShip ship = PirateShips.SHIP.create(level, EntitySpawnReason.EVENT);
+		ship.snapTo(at.x, at.y, at.z, 0.0F, 0.0F);
+		ship.launch(at, false);
+		level.addFreshEntity(ship);
+		double floor = helper.absolutePos(new BlockPos(0, deep - PirateWaters.DEPTH, 0)).getY();
+		helper.runAfterDelay(2, () -> PirateShipTesting.sink(level, ship));
+		helper.onEachTick(() -> helper.assertTrue(ship.isRemoved() || ship.getY() >= floor - 1.0E-9,
+				"A sinking ship must stay at or above " + floor + ", not " + ship.getY()));
+		helper.runAfterDelay(140, () -> {
+			helper.assertTrue(ship.sunk() && ship.getY() >= floor - 1.0E-9 && ship.getY() < floor + PirateShip.SINK_STEP + 1.0E-6,
+					"It should have settled to its checked depth, " + floor + ", and no lower: " + ship.getY());
+			ship.discard();
+			helper.succeed();
+		});
+	}
+
+	/** A sinking ship never settles into an operator region laid under it: its keel stops above the region. */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 80, skyAccess = true)
+	public void aSinkingShipStopsAboveAnOperatorRegion(GameTestHelper helper) {
+		pool(helper);
+		ServerLevel level = helper.getLevel();
+		PirateShip ship = ship(helper, false);
+		level.addFreshEntity(ship);
+		ServerPlayer op = helper.makeMockServerPlayerInLevel();
+		String name = "pirate_" + op.getUUID().toString().replace("-", "");
+		// One row of water under the hull, two rows below the waterline, made an operator region after the ship is there.
+		protect(helper, op, "protect pos1", helper.absolutePos(new BlockPos(19, SURFACE - 2, 14)));
+		protect(helper, op, "protect pos2", helper.absolutePos(new BlockPos(24, SURFACE - 2, 29)));
+		protect(helper, op, "protect create " + name, helper.absolutePos(new BlockPos(19, SURFACE - 2, 14)));
+		double regionTop = helper.absolutePos(new BlockPos(0, SURFACE - 1, 0)).getY();
+		double start = ship.getY();
+		helper.runAfterDelay(2, () -> PirateShipTesting.sink(level, ship));
+		helper.onEachTick(() -> helper.assertTrue(ship.isRemoved() || ship.getY() - PirateWaters.KEEL >= regionTop - 1.0E-9,
+				"The keel must stay above the region's top, " + regionTop + ", not " + (ship.getY() - PirateWaters.KEEL)));
+		helper.runAfterDelay(60, () -> {
+			double keel = ship.getY() - PirateWaters.KEEL;
+			protect(helper, op, "protect remove " + name, helper.absolutePos(new BlockPos(19, SURFACE - 2, 14)));
+			helper.assertTrue(ship.sunk() && ship.getY() < start && keel >= regionTop - 1.0E-9 && keel < regionTop + PirateShip.SINK_STEP + 1.0E-6,
+					"It should settle until its keel is just above the region (" + regionTop + "), not at " + keel);
+			ship.discard();
+			helper.succeed();
+		});
+	}
+
+	/** A ship added without a launch (a /summon, no anchor saved) anchors its patrol where it first floats, and saves it. */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 40, skyAccess = true)
+	public void aSummonedShipAnchorsWhereItFloats(GameTestHelper helper) {
+		pool(helper);
+		ServerLevel level = helper.getLevel();
+		Vec3 at = helper.absoluteVec(CENTRE);
+		var server = level.getServer();
+		String command = String.format(Locale.ROOT, "summon jugcraft:pirate_ship %.4f %.4f %.4f", at.x, at.y, at.z);
+		try {
+			server.getCommands().getDispatcher().execute(command, server.createCommandSourceStack().withLevel(level).withSuppressedOutput());
+		} catch (Exception e) {
+			helper.fail("/" + command + " failed: " + e.getMessage());
+		}
+		List<PirateShip> found = level.getEntitiesOfClass(PirateShip.class, new AABB(at, at).inflate(1.0));
+		helper.assertTrue(found.size() == 1, "One summoned ship, not " + found.size());
+		PirateShip ship = found.getFirst();
+		helper.runAfterDelay(3, () -> {
+			helper.assertTrue(ship.anchor().distanceTo(ship.position()) < 1.0E-6 && ship.anchor().distanceTo(at) < 1.0E-3,
+					"A summoned ship should anchor where it floats, " + ship.position() + ", not at " + ship.anchor());
+			helper.assertTrue(copy(helper, ship).anchor().equals(ship.anchor()), "And its anchor is saved");
 			ship.discard();
 			helper.succeed();
 		});
