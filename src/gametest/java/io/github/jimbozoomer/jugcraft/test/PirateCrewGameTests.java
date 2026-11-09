@@ -17,6 +17,7 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
@@ -35,8 +36,8 @@ import net.minecraft.world.phys.Vec3;
  * The crew of a moving pirate ship (docs/features/pirate-ship-crews.md), on the test-only stub vessel
  * ({@link TestVessels}): provisioning, seats turned once with the ship (feet on the deck), save and reload without
  * duplicates, waiting for an unloaded ship without loading it and giving up a destroyed one, boarding and the deck
- * fight, victory by the roster (never by absence), the tether, sinking, targets, claims, damage-only finite gunnery,
- * and unlinked (galleon) plunderers unchanged.
+ * fight, victory by the roster (deaths only, never absence or discards), the tether, sinking, targets, claims,
+ * damage-only finite gunnery, and unlinked (galleon) plunderers unchanged.
  */
 public class PirateCrewGameTests {
 	private static final String ARENA = "jugcraft-test:arms_arena";
@@ -208,10 +209,10 @@ public class PirateCrewGameTests {
 					"The deck crew close and strike a boarder on the deck, where no path runs, by direct movement");
 			var all = linked(level, ship);
 			OwnerPlunderer last = all.stream().filter(c -> c.shipStation() == 6).findFirst().orElseThrow();
-			all.stream().filter(c -> c != last).forEach(Entity::discard);
+			all.stream().filter(c -> c != last).forEach(c -> c.kill(level));
 			h.assertTrue(!PirateCrew.defeated(ship), "One rostered crew member still alive keeps the ship undefeated");
 			last.hurtServer(level, level.damageSources().genericKill(), Float.MAX_VALUE);
-			h.assertTrue(PirateCrew.defeated(ship), "With every rostered crew member killed or removed, the ship is defeated: its loot trigger");
+			h.assertTrue(PirateCrew.defeated(ship), "With every rostered crew member killed, the ship is defeated: its loot trigger");
 			cleanup(level, ship);
 			player.discard();
 			h.succeed();
@@ -238,7 +239,7 @@ public class PirateCrewGameTests {
 		unloaded.saveWithoutId(save);
 		CompoundTag unloadedTag = save.buildResult();
 		unloaded.remove(Entity.RemovalReason.UNLOADED_TO_CHUNK);
-		all.stream().filter(c -> c != bait && c != unloaded).forEach(Entity::discard);
+		all.stream().filter(c -> c != bait && c != unloaded).forEach(c -> c.kill(level));
 		h.assertTrue(ship.getPassengers().isEmpty(), "Setup: nobody is aboard");
 		h.assertTrue(!PirateCrew.defeated(ship), "A crew member alive 80 blocks off, and one unloaded, keep the ship undefeated");
 		var roster = PirateCrew.Roster.get(level);
@@ -260,6 +261,41 @@ public class PirateCrewGameTests {
 		back.discard();
 		ship.discard();
 		h.assertTrue(!PirateCrew.Roster.get(level).knows(shipId) && !PirateCrew.defeated(ship), "A destroyed ship is forgotten");
+		h.succeed();
+	}
+
+	@GameTest(structure = ARENA)
+	public void onlyDeathsDefeatAShipNeverDiscards(GameTestHelper h) {
+		ServerLevel level = h.getLevel();
+		// Every crew member discarded, as Peaceful's despawn (or an admin) does: unaccounted for, never defeated.
+		StubVessel discarded = ship(h, 0.0F, 4.5);
+		PirateCrew.provision(level, discarded);
+		level.addFreshEntityWithPassengers(discarded);
+		crew(discarded).forEach(Entity::discard);
+		h.assertTrue(discarded.getPassengers().isEmpty() && PirateCrew.Roster.get(level).knows(discarded.getUUID()),
+				"Setup: the discarded crew are gone, the ship still on the roster");
+		h.assertTrue(!PirateCrew.defeated(discarded), "A ship whose crew were all discarded, not killed, is not defeated: no treasure in Peaceful");
+		// Nine killed and one discarded: still not defeated.
+		StubVessel mixed = ship(h, 0.0F, 12.5);
+		PirateCrew.provision(level, mixed);
+		level.addFreshEntityWithPassengers(mixed);
+		List<OwnerPlunderer> mixedCrew = crew(mixed);
+		mixedCrew.getFirst().discard();
+		mixedCrew.subList(1, mixedCrew.size()).forEach(c -> c.kill(level));
+		h.assertTrue(mixedCrew.size() == 10 && !PirateCrew.defeated(mixed), "Nine killed and one discarded is not defeated");
+		// Every crew member killed: defeated.
+		StubVessel killed = ship(h, 0.0F, 8.5);
+		PirateCrew.provision(level, killed);
+		level.addFreshEntityWithPassengers(killed);
+		List<OwnerPlunderer> killedCrew = crew(killed);
+		killedCrew.forEach(c -> c.kill(level));
+		h.assertTrue(killedCrew.size() == 10 && killedCrew.stream().noneMatch(Entity::isAlive) && PirateCrew.defeated(killed),
+				"A ship whose crew were all killed is defeated");
+		for (StubVessel ship : List.of(discarded, mixed, killed)) {
+			cleanup(level, ship);
+		}
+		mixedCrew.forEach(Entity::discard);
+		killedCrew.forEach(Entity::discard);
 		h.succeed();
 	}
 
