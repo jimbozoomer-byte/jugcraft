@@ -171,6 +171,13 @@ None.
 | `aPlayersOwnFoodIsNeverMistakenForTheTowns` | A stamped serving is eaten like any other. The owner's plain identical food can't merge into a stamped dish. A dish refilled with it below the laid count makes the table preserved, through a save and reload of the table and the ledger, and cleanup leaves the owner's food in place. |
 | `onlyAPositivelyManagedNeighbourMayStandInAMargin` | An owner's feast table in E2's margin skips E2 (and T, whose cell it stands on). Once it is gone, E2 and the turkey are set out side by side, each accepting the other. |
 
+`TownFeastClientTests` is a rendered client fixture, also not run. It drives the same service on a flat floor laid as the north plaza.
+- **Stand-ins** sit at their true town positions: the church's front wall with its doorway, the quartz church door path, and the north-west and north-east stalls.
+- **Clear lanes:** it asserts the door path, the doorway and both stalls' front and side lanes stay clear.
+- **Screenshots:** three, at eye height (`town_feast_church_door_path`, `town_feast_nw_stall_access`, `town_feast_ne_stall_access`).
+- **Eating:** three servings and five turkey portions, through `mayPublicEat` with both hands empty.
+- **No refill:** after three re-runs, three ledger reloads, and closing and reopening the world, no count ever rises.
+
 `scripts/tests/test_town_feast_layout.py` checks the layout against the blueprint: the cells, the decor sites and places, and every clearance above.
 
 ## World and event applicability

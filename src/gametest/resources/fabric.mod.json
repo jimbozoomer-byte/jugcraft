@@ -511,6 +511,7 @@
       "io.github.jimbozoomer.jugcraft.test.HauntedMidwayClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.FrontYardClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.PartyTableClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.TownFeastClientTests",
       "io.github.jimbozoomer.jugcraft.test.ClockworkClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.HarvestFestivalClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.CarvingClientGameTests",
