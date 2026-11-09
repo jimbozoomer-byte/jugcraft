@@ -162,6 +162,13 @@ class PirateShipArtTests(unittest.TestCase):
                 self.assertEqual(image.size, (16, 16), name)
                 self.assertEqual(image.convert("RGBA").getextrema()[3], (255, 255), name)
 
+    def test_courses_sway_clear_of_their_masts(self):
+        self.assertEqual(pirate_ship.SWING["pirate_ship_sail_main"], ("x", 3.0))
+        self.assertEqual(pirate_ship.SWING["pirate_ship_sail_fore"], ("x", 3.0))
+        for frm, to in pirate_ship.lower_masts():
+            self.assertIn(pirate_ship.box(frm, to, pirate_ship.SPAR_Y), pirate_ship.masts())
+        self.assertEqual(pirate_ship.sail_clear(self.quads), [])
+
     def test_drawn_ship_stays_inside_the_clearance_boxes(self):
         c = waters_constants()
         (alo, ahi), (blo, bhi) = (([v / 16 for v in lo], [v / 16 for v in hi]) for lo, hi in pirate_ship.envelope(self.quads))
