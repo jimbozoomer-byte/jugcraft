@@ -252,7 +252,11 @@ public class PirateCrewGameTests {
 		unloaded.saveWithoutId(save);
 		CompoundTag unloadedTag = save.buildResult();
 		unloaded.remove(Entity.RemovalReason.UNLOADED_TO_CHUNK);
-		all.stream().filter(c -> c != bait && c != unloaded).forEach(c -> c.kill(level));
+		// Killed for real; a dying mob stays seated until its death animation ends, so the dead are taken off at once.
+		all.stream().filter(c -> c != bait && c != unloaded).forEach(c -> {
+			c.kill(level);
+			c.stopRiding();
+		});
 		h.assertTrue(ship.getPassengers().isEmpty(), "Setup: nobody is aboard");
 		h.assertTrue(!PirateCrew.defeated(ship), "A crew member alive 80 blocks off, and one unloaded, keep the ship undefeated");
 		var roster = PirateCrew.Roster.get(level);
