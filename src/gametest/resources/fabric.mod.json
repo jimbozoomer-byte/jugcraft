@@ -10,7 +10,11 @@
     "main": [
       "io.github.jimbozoomer.jugcraft.test.TestForms",
       "io.github.jimbozoomer.jugcraft.test.MockPlayerChannels",
-      "io.github.jimbozoomer.jugcraft.test.StorageCrateMultiplayerHarness"
+      "io.github.jimbozoomer.jugcraft.test.StorageCrateMultiplayerHarness",
+      "io.github.jimbozoomer.jugcraft.test.TestVessels"
+    ],
+    "client": [
+      "io.github.jimbozoomer.jugcraft.test.TestVesselsClient"
     ],
     "fabric-gametest": [
       "io.github.jimbozoomer.jugcraft.test.FestivalRegressionGameTests",
@@ -345,6 +349,7 @@
       "io.github.jimbozoomer.jugcraft.test.FluorochemistryGameTests",
       "io.github.jimbozoomer.jugcraft.test.MachineConsolidationGameTests",
       "io.github.jimbozoomer.jugcraft.test.MineralSandGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PirateCrewGameTests",
       "io.github.jimbozoomer.jugcraft.test.TechSevenGameTests",
       "io.github.jimbozoomer.jugcraft.test.DarkMatterGameTests",
       "io.github.jimbozoomer.jugcraft.test.ElementalAlchemyGameTests",
