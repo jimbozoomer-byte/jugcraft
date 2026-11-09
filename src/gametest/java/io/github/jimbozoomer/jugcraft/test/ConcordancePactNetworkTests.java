@@ -134,7 +134,7 @@ public final class ConcordancePactNetworkTests implements FabricClientGameTest {
 					InProcessServerConfigs.beforeAdditionalClient(server);
 					peer = launchPeer(server.computeOnServer(MinecraftServer::getPort));
 					Process joining = peer;
-					PeerClientStartup.await(() -> context.waitTicks(1), joining, coordination());
+					PeerClientStartup.await(() -> context.waitTicks(1), joining, CLIENT.coordination());
 					server.waitFor(minecraft -> {
 						if (!joining.isAlive()) {
 							throw failure("The second client exited before joining: " + joining.exitValue());
