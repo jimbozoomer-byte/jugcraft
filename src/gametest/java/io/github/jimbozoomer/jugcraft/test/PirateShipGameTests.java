@@ -565,8 +565,9 @@ public class PirateShipGameTests {
 
 	/**
 	 * Protection holds at impact: with an operator region laid over the ship where it already floats, or only over the
-	 * cells where the shots strike, neither another ship's crew (judged as the unprivileged pirate identity) nor a player
-	 * dents the hull; with the region gone, the same shot does.
+	 * column of cells where real balls fired from outside it strike (not where they were the tick before), neither another
+	 * ship's crew (judged as the unprivileged pirate identity) nor a player dents the hull; with the region gone, the same
+	 * shot does.
 	 */
 	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 80, skyAccess = true)
 	public void protectionAtTheShipOrTheImpactShieldsItFromCannonFire(GameTestHelper helper) {
@@ -594,17 +595,23 @@ public class PirateShipGameTests {
 		helper.runAfterDelay(12, () -> {
 			helper.assertTrue(ship.damage() == 0.0F, "A region over the ship shields it from enemy and player fire, but it took " + ship.damage());
 			protect(helper, op, "protect remove " + name, ship.blockPosition());
-			// Now a region only over the port side, where the shots strike, not over the ship's own place.
-			protect(helper, op, "protect pos1", BlockPos.containing(ship.position().add(2.0, -1.0, -4.0)));
-			protect(helper, op, "protect pos2", BlockPos.containing(ship.position().add(4.0, 2.0, 7.0)));
+			// Now a region over only the one column of cells where the shots strike the port side (x + 2.8, inside the deck
+			// squares' reach), not over the ship's own place nor where the balls are the tick before they strike (x + 3.2):
+			// real balls fired from outside it (x + 5.0) fly across its boundary into the hull. ThrowableProjectile.tick sets
+			// a ball at its hit's location before the hit is applied (26.3 bytecode), so the ball's own place is the impact.
+			BlockPos impact = BlockPos.containing(ship.position().add(2.8, 0.0, 0.0));
+			helper.assertTrue(impact.getX() != BlockPos.containing(ship.position().add(3.2, 0.0, 0.0)).getX(),
+					"The impact cell and the tick-before cell should differ for this test to tell them apart");
+			protect(helper, op, "protect pos1", new BlockPos(impact.getX(), impact.getY() - 1, impact.getZ() - 6));
+			protect(helper, op, "protect pos2", new BlockPos(impact.getX(), impact.getY() + 2, impact.getZ() + 7));
 			protect(helper, op, "protect create " + name, ship.blockPosition());
-			PirateShipTesting.fire(level, enemy[0], ship.position().add(3.4, 0.6, 5.0), new Vec3(-1.8, 0.0, 0.0));
-			PirateShipTesting.fire(level, gunner[0], ship.position().add(3.4, 0.6, -4.0), new Vec3(-1.8, 0.0, 0.0));
+			PirateShipTesting.fire(level, enemy[0], ship.position().add(5.0, 0.6, 5.0), new Vec3(-1.8, 0.0, 0.0));
+			PirateShipTesting.fire(level, gunner[0], ship.position().add(5.0, 0.6, -4.0), new Vec3(-1.8, 0.0, 0.0));
 		});
 		helper.runAfterDelay(22, () -> {
-			helper.assertTrue(ship.damage() == 0.0F, "A region over the impact shields it too, but it took " + ship.damage());
+			helper.assertTrue(ship.damage() == 0.0F, "A region over only the impact shields it too, but it took " + ship.damage());
 			protect(helper, op, "protect remove " + name, ship.blockPosition());
-			PirateShipTesting.fire(level, enemy[0], ship.position().add(3.4, 0.6, 5.0), new Vec3(-1.8, 0.0, 0.0));
+			PirateShipTesting.fire(level, enemy[0], ship.position().add(5.0, 0.6, 5.0), new Vec3(-1.8, 0.0, 0.0));
 		});
 		helper.runAfterDelay(32, () -> {
 			helper.assertTrue(ship.damage() > 0.0F, "With the region gone the same enemy shot dents the hull");
