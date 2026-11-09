@@ -2956,6 +2956,8 @@ for machine, recipes in mineral_sand_processing.FORM_RECIPES.items():
 HANDBOOK.update(ceramics.HANDBOOK)
 HANDBOOK['alumina_calciner'].append('Also fires porcelain, alumina and zirconia blanks and calcines zirconia precursor. The solution tank must be empty for dry firing. Use Recipes to select a ceramic job; old calcination, drying and PTFE recipes remain supported.')
 HANDBOOK['mineral_conditioner'].append('Also prepares ceramic powder charges with water and recovers trace zircon from sand. See Ceramics and Precision in the Handbook for the whole route. Clear incompatible fluids and lock the desired job when switching.')
+for machine, notes in mineral_sand_processing.HANDBOOK.items():
+    HANDBOOK[machine].extend(notes)
 TANK_NAMES.update(ceramics.TANK_NAMES)
 MODELS.update(ceramics_models.MODELS)
 ROTORS.update(ceramics_models.ROTORS)

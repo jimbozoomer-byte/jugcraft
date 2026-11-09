@@ -818,12 +818,13 @@ def ores_page():
                      "Deposits never replenish. Ordinary iron shortcuts require the legacy configuration option.")
         lines.append(line)
     from mineral_sands import SANDS
+    from mineral_sand_processing import FIRST_STEPS
     for name, info in SANDS.items():
         lines.append(f"{info['display']}: shallow beds in {biome_names(info['biomes'])}. "
                      "Look for surface streaks, then shovel the buried bed or use the prospector and powered Ore Drill. "
                      "Each mineral-sand block is one finite feed unit; Fortune does not increase it. "
-                     "The Ore Drill leaves ordinary sand. Stockpile this feed for future separation/refining; "
-                     "the Deposit Drill and generic ore-doubling recipes do not process it.")
+                     f"The Ore Drill leaves ordinary sand. First step: {FIRST_STEPS[name]}; see Mineral Sand Processing. "
+                     "The Deposit Drill and generic ore-doubling recipes do not process it.")
     return {"title": "Ores", "icon": f"{MOD}:tin_ore",
             "text": ["Jugcraft ores appear in Overworld stone and deepslate. Regional exceptions are listed below:"] + lines}
 
@@ -1261,7 +1262,7 @@ def build():
                      "pages": ceramics.GUIDE_PAGES + [form_page('precision_finisher')]})
     import mineral_sand_processing
     chapters.append({'title': 'Mineral Sand Processing', 'icon': 'jugcraft:rare_earth_sand',
-                     'pages': mineral_sand_processing.GUIDE_PAGES})
+                     'pages': [mineral_sand_processing.start_page(biome_names)] + mineral_sand_processing.GUIDE_PAGES})
     import structural_alloys
     chapters.append({"title": "Stainless and Structural Alloys", "icon": "jugcraft:stainless_steel_ingot",
                      "pages": structural_alloys.GUIDE_PAGES})

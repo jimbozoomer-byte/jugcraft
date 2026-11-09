@@ -863,10 +863,10 @@
             "Chromite: Y -32 to 64.",
             "Cobaltite: Y -48 to 32.",
             "Quartz: Y -16 to 96.",
-            "Titanium-rich Mineral Sand: shallow beds in the Dune Beach, the Overgrown Beach and Beach. Look for surface streaks, then shovel the buried bed or use the prospector and powered Ore Drill. Each mineral-sand block is one finite feed unit; Fortune does not increase it. The Ore Drill leaves ordinary sand. Stockpile this feed for future separation/refining; the Deposit Drill and generic ore-doubling recipes do not process it.",
-            "Zircon-rich Mineral Sand: shallow beds in the Outback, the Lush Desert, the Dry River, Desert and Badlands. Look for surface streaks, then shovel the buried bed or use the prospector and powered Ore Drill. Each mineral-sand block is one finite feed unit; Fortune does not increase it. The Ore Drill leaves ordinary sand. Stockpile this feed for future separation/refining; the Deposit Drill and generic ore-doubling recipes do not process it.",
-            "Rare-earth-rich Mineral Sand: shallow beds in the Basin, the Lake District, the Lush River and River. Look for surface streaks, then shovel the buried bed or use the prospector and powered Ore Drill. Each mineral-sand block is one finite feed unit; Fortune does not increase it. The Ore Drill leaves ordinary sand. Stockpile this feed for future separation/refining; the Deposit Drill and generic ore-doubling recipes do not process it.",
-            "Garnet-rich Mineral Sand: shallow beds in the Gravel Beach, the Highland, the Shield, Stony Shore and Windswept Gravelly Hills. Look for surface streaks, then shovel the buried bed or use the prospector and powered Ore Drill. Each mineral-sand block is one finite feed unit; Fortune does not increase it. The Ore Drill leaves ordinary sand. Stockpile this feed for future separation/refining; the Deposit Drill and generic ore-doubling recipes do not process it."
+            "Titanium-rich Mineral Sand: shallow beds in the Dune Beach, the Overgrown Beach and Beach. Look for surface streaks, then shovel the buried bed or use the prospector and powered Ore Drill. Each mineral-sand block is one finite feed unit; Fortune does not increase it. The Ore Drill leaves ordinary sand. First step: the Mineral Conditioning Station turns two sand and 500 mB water into one Raw Titanium for the existing Chemical Reactor and Arc Furnace titanium route; see Mineral Sand Processing. The Deposit Drill and generic ore-doubling recipes do not process it.",
+            "Zircon-rich Mineral Sand: shallow beds in the Outback, the Lush Desert, the Dry River, Desert and Badlands. Look for surface streaks, then shovel the buried bed or use the prospector and powered Ore Drill. Each mineral-sand block is one finite feed unit; Fortune does not increase it. The Ore Drill leaves ordinary sand. First step: the Chemical Reactor turns four sand, 500 mB lye and 250 mB water into one Zirconia Powder for the Industrial Oven and Precision Finishing Station; see Mineral Sand Processing. The Deposit Drill and generic ore-doubling recipes do not process it.",
+            "Rare-earth-rich Mineral Sand: shallow beds in the Basin, the Lake District, the Lush River and River. Look for surface streaks, then shovel the buried bed or use the prospector and powered Ore Drill. Each mineral-sand block is one finite feed unit; Fortune does not increase it. The Ore Drill leaves ordinary sand. First step: the Mineral Conditioning Station turns two sand and 500 mB water into one mixed Rare Earth Oxide, from which the Chemical Reactor recovers named oxides; see Mineral Sand Processing. The Deposit Drill and generic ore-doubling recipes do not process it.",
+            "Garnet-rich Mineral Sand: shallow beds in the Gravel Beach, the Highland, the Shield, Stony Shore and Windswept Gravelly Hills. Look for surface streaks, then shovel the buried bed or use the prospector and powered Ore Drill. Each mineral-sand block is one finite feed unit; Fortune does not increase it. The Ore Drill leaves ordinary sand. First step: the Pulverizer turns one sand into one Garnet Grit for a reusable sanding block or abrasive head; see Mineral Sand Processing. The Deposit Drill and generic ore-doubling recipes do not process it."
           ]
         },
         {
@@ -4860,6 +4860,7 @@
             "Three wide, four deep and three tall. Two hydroxide -> two existing Alumina + 250 mB recovered water, 200 ticks at 64 JE/t. Reuse this water with the press water. Enclosed ceramic kiln, guarded drive, insulated service hood and front charge door; all heating is paid electricity. Alumina keeps its existing catalyst and metal consumers.",
             "Power: lower front left socket. Left/right descriptions use the view from the front. Rear: recovered water midway up at the left, alumina in the right hatch. Solid inputs are front-right hatches and solid outputs rear-right hatches. Each pipe is physically routed into its vessel, pump or collection tray. Use existing pipes, tanks, cylinders, cables and conveyors; earlier steel/copper/ceramics supply all crafting bills.",
             "Also fires porcelain, alumina and zirconia blanks and calcines zirconia precursor. The solution tank must be empty for dry firing. Use Recipes to select a ceramic job; old calcination, drying and PTFE recipes remain supported.",
+            "Also fires one Zirconia Powder directly into one Fired Zirconia Blank, 320 ticks at 80 JE/t, for the short zircon-sand line.",
             "Also dries Wet Superphosphate, returning water, and prepares Washed Gypsum into the existing Gypsum Binder. Empty incompatible stored outputs before switching jobs."
           ],
           "craft": {
@@ -4959,6 +4960,7 @@
             "Drain old tanks before switching recipes. Settle 500 mB spent wash into one existing salt and 250 mB water for 120 ticks at 16 JE/t; the rest is evaporation/loss in game accounting. The same station treats titanium-distillation wash. Neither wash nor ordinary salt brine supplies magnesium.",
             "Power socket: lower front-left. Solid feed hatches: front-right, bottom to top. Solid outputs: rear-right, bottom to top. Liquid inputs: rear middle height, left to right viewed from the front. Liquid outputs: rear bottom, left to right. Read JEI for exact materials. All tubes terminate at the parts they serve; machines share existing pipes, cables and automation. Game quantities are not real manufacturing instructions.",
             "Also prepares ceramic powder charges with water and recovers trace zircon from sand. See Ceramics and Precision in the Handbook for the whole route. Clear incompatible fluids and lock the desired job when switching.",
+            "Also conditions mineral sand: two Titanium-rich Mineral Sand make one Raw Titanium, and two Rare-earth-rich Mineral Sand make one mixed Rare Earth Oxide, each with 500 mB water in 200 ticks at 32 JE/t. See Mineral Sand Processing.",
             "Also washes regional chromite: two minerals and 250 mB water make two concentrate. The Arc Furnace reduces two concentrate with one Coke into two Ferrochromium Ingots for stainless alloying.",
             "Also prepares organic fertilizer carriers from compost or digestate fibre, and washes gypsum-rich residue with water. The gypsum route requires room for Spent Mineral Wash.",
             "Also prepares primary cobalt stock and treats wafer waste with calcite and lye. Treated water and recovery concentrate require separate outlets; concentrate can be stabilized with clay. No acid or solvent is recovered from the fungible mixture."
@@ -5348,6 +5350,7 @@
             "Each job takes one blank and 125 mB water, runs for 200 ticks at 48 JE/t before upgrades, and returns all 125 mB to its separate outlet. Both the product drawer and water outlet must fit. Pipe the return into the feed to reuse coolant; a full outlet pauses production rather than destroying it.",
             "Front lower left: power. Front right: blank input. Rear left, middle height: water inlet; directly below: returned water. Rear right: finished part. The visible splash tray, drain and coolant line serve those ports.",
             "Use Recipes to preview costs and required tools, then Lock recipe. Alumina blanks have two jobs: plates or bearing balls. Automatic defaults to the alphabetically first compatible job, so lock the product before automating. A running batch keeps its reserved inputs when you change the next job.",
+            "A Garnet Abrasive Head finishes steel shaft blanks only, in 300 ticks; a Cerium Polishing Head polishes optical blanks into lenses in 160 ticks. Neither machines hard fired ceramics. See Mineral Sand Processing.",
             "Finish an assembled Stainless Valve with the Felt Polishing Head: 240 ticks at 48 JE/t, returning the same 125 mB cooling water. Its alternate vessel recipes feed existing chemical equipment."
           ],
           "craft": {
@@ -6370,6 +6373,7 @@
             "Each job takes one blank and 125 mB water, runs for 200 ticks at 48 JE/t before upgrades, and returns all 125 mB to its separate outlet. Both the product drawer and water outlet must fit. Pipe the return into the feed to reuse coolant; a full outlet pauses production rather than destroying it.",
             "Front lower left: power. Front right: blank input. Rear left, middle height: water inlet; directly below: returned water. Rear right: finished part. The visible splash tray, drain and coolant line serve those ports.",
             "Use Recipes to preview costs and required tools, then Lock recipe. Alumina blanks have two jobs: plates or bearing balls. Automatic defaults to the alphabetically first compatible job, so lock the product before automating. A running batch keeps its reserved inputs when you change the next job.",
+            "A Garnet Abrasive Head finishes steel shaft blanks only, in 300 ticks; a Cerium Polishing Head polishes optical blanks into lenses in 160 ticks. Neither machines hard fired ceramics. See Mineral Sand Processing.",
             "Finish an assembled Stainless Valve with the Felt Polishing Head: 240 ticks at 48 JE/t, returning the same 125 mB cooling water. Its alternate vessel recipes feed existing chemical equipment."
           ],
           "craft": {
@@ -6394,6 +6398,15 @@
       "title": "Mineral Sand Processing",
       "icon": "jugcraft:rare_earth_sand",
       "pages": [
+        {
+          "title": "Start here: find and choose a sand",
+          "icon": "jugcraft:prospector",
+          "text": [
+            "Each family forms shallow beds with visible surface streaks in its own regions: titanium in the Dune Beach, the Overgrown Beach and Beach; zircon in the Outback, the Lush Desert, the Dry River, Desert and Badlands; rare earths in the Basin, the Lake District, the Lush River and River; garnet in the Gravel Beach, the Highland, the Shield, Stony Shore and Windswept Gravelly Hills. Beds appear only in newly generated chunks. The Prospector names each family; dig with any shovel or the powered Ore Drill. Every block is one finite feed unit and never regrows.",
+            "Garnet is the earliest line: a Pulverizer turns each sand into grit for a reusable sanding block or abrasive head. Titanium and rare earths start in the Mineral Conditioning Station with water; zircon starts in the Chemical Reactor with lye and water. Later steps reuse the Chemical Reactor, Industrial Oven, Arc Furnace, Alloy Smelter and Precision Finishing Station. No extra machine is needed.",
+            "Prepare reagents first: water for every line, chlorine and Coke for titanium sponge, lye for zirconia, and sulfuric acid for rare-earth recovery or white pigment. In multi-job stations open Recipes and lock the sand job before automating. Ordinary and red sand never gain these recipes. Saved Zircon Concentrate, zirconia precursor, charges and blanks still finish through their original recipes; concentrate can also enter the short zirconia recipe."
+          ]
+        },
         {
           "title": "Four sands, familiar machines",
           "icon": "jugcraft:titanium_sand",

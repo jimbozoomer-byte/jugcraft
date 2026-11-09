@@ -143,6 +143,45 @@ GUIDE_PAGES = [
         'All added heads are retained tools. There is no routine replacement, extra machine or abrasive refill. Existing machine recipe locks and blocked-output protections apply.']),
 ]
 
+# The first processing step for each finite feed, quoted on the Handbook's Ores page.
+FIRST_STEPS = {
+    'titanium_sand': 'the Mineral Conditioning Station turns two sand and 500 mB water into one Raw Titanium '
+                     'for the existing Chemical Reactor and Arc Furnace titanium route',
+    'zircon_sand': 'the Chemical Reactor turns four sand, 500 mB lye and 250 mB water into one Zirconia Powder '
+                   'for the Industrial Oven and Precision Finishing Station',
+    'rare_earth_sand': 'the Mineral Conditioning Station turns two sand and 500 mB water into one mixed '
+                       'Rare Earth Oxide, from which the Chemical Reactor recovers named oxides',
+    'garnet_sand': 'the Pulverizer turns one sand into one Garnet Grit for a reusable sanding block or abrasive head',
+}
+
+# Machine-page notes: each station's own Handbook page names its sand jobs.
+HANDBOOK = {
+    'mineral_conditioner': ['Also conditions mineral sand: two Titanium-rich Mineral Sand make one Raw Titanium, and two Rare-earth-rich Mineral Sand make one mixed Rare Earth Oxide, each with 500 mB water in 200 ticks at 32 JE/t. See Mineral Sand Processing.'],
+    'alumina_calciner': ['Also fires one Zirconia Powder directly into one Fired Zirconia Blank, 320 ticks at 80 JE/t, for the short zircon-sand line.'],
+    'precision_finisher': ['A Garnet Abrasive Head finishes steel shaft blanks only, in 300 ticks; a Cerium Polishing Head polishes optical blanks into lenses in 160 ticks. Neither machines hard fired ceramics. See Mineral Sand Processing.'],
+}
+
+
+def start_page(biome_names):
+    """The chapter's first page: where each sand forms, which line to start and what to prepare."""
+    from mineral_sands import SANDS
+    where = '; '.join(f'{family} in {biome_names(SANDS[name]["biomes"])}' for family, name in [
+        ('titanium', 'titanium_sand'), ('zircon', 'zircon_sand'),
+        ('rare earths', 'rare_earth_sand'), ('garnet', 'garnet_sand')])
+    return dict(title='Start here: find and choose a sand', icon='jugcraft:prospector', text=[
+        f'Each family forms shallow beds with visible surface streaks in its own regions: {where}. '
+        'Beds appear only in newly generated chunks. The Prospector names each family; dig with any shovel or the '
+        'powered Ore Drill. Every block is one finite feed unit and never regrows.',
+        'Garnet is the earliest line: a Pulverizer turns each sand into grit for a reusable sanding block or '
+        'abrasive head. Titanium and rare earths start in the Mineral Conditioning Station with water; zircon starts '
+        'in the Chemical Reactor with lye and water. Later steps reuse the Chemical Reactor, Industrial Oven, Arc '
+        'Furnace, Alloy Smelter and Precision Finishing Station. No extra machine is needed.',
+        'Prepare reagents first: water for every line, chlorine and Coke for titanium sponge, lye for zirconia, and '
+        'sulfuric acid for rare-earth recovery or white pigment. In multi-job stations open Recipes and lock the sand '
+        'job before automating. Ordinary and red sand never gain these recipes. Saved Zircon Concentrate, zirconia '
+        'precursor, charges and blanks still finish through their original recipes; concentrate can also enter the '
+        'short zirconia recipe.'])
+
 
 def draw_all(save):
     import item_icons

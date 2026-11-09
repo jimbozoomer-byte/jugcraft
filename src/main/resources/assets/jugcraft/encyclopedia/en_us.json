@@ -346,7 +346,7 @@
         {
           "title": "Mineral Sand Processing",
           "icon": "jugcraft:rare_earth_sand",
-          "text": "Four sands, familiar machines, Short zirconia tooling, Independent rare-earth recovery and more",
+          "text": "Start here: find and choose a sand, Four sands, familiar machines, Short zirconia tooling and more",
           "link": {
             "type": "handbook",
             "chapter": 20,
