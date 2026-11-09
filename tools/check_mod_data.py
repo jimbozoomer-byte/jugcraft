@@ -24177,11 +24177,19 @@ def check_garden_pacts(co, root, lang, registered, research):
             or keeping.count("Transaction.openOuter()") != 1 or keeping.count(".extract(") != 1 or keeping.count(".commit()") != 1:
         err("GraftKeeping.spend: one outer transaction, one extraction of exactly one donor, committed only then, nothing else "
             "inside it, and no other transaction in the service (GC-P82, GC-P85)")
-    for banned in (".setGraft(", ".consume(", "getInventory()", ".insert(", "ItemStack", "Garden.sample(", ".habitat(level)",
+    for banned in (".setGraft(", ".consume(", "getInventory()", ".insert(", "ItemStack", "Garden.sample(",
                    "forgetSample(", "sendParticles(", "CourierLedger", "Logistics.", "getPlayer(record.holder()).getInventory"):
         if banned in keeping:
             err(f"spirits/GraftKeeping.java: never {banned} (the graft is Grafting.apply's, the donor the store's in its "
                 "transaction; no inventory, no sample, never cargo: no courier ledger, reservation or transit; GC-07, GC-P85)")
+    # The garden pacts' review (10 November 2026): his one sample, a ripe host's bed with no reading, through the bed's own
+    # budgeted reading, at most one a think (foras-pact.md, "A ripe host after a restart").
+    if keeping.count(".habitat(level)") != 1 or "host.bed().habitat(level) == null ? null : helps(level, host)" \
+            not in _java_body(keeping, "static @Nullable Boolean firstReading(") \
+            or "if (helps == null && !sampled && ripe(level, host)) {" not in step or step.count("sampled = true;") != 1 \
+            or step.count("firstReading(level, host)") != 1 or "block.isMaxAge(crop)" not in _java_body(keeping, "static boolean ripe("):
+        err("spirits/GraftKeeping.java: his only sample is a ripe host's bed with no reading, through VerdantBedBlockEntity.habitat "
+            "(the level's allowance), at most one a think (the garden pacts' review, 10 November 2026)")
     landed = _java_body(keeping, "private static Status grafted(")
     order = [landed.find(n) for n in ("memory.grafted(graft);", "holder.taskDone(level, now);",
                                       "foras.attendWork(graft.crop(), ForasEntity.Gesture.WORK.ticks, now);",

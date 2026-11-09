@@ -160,10 +160,10 @@ As built; none of it has yet been seen in a game.
   "Gain nothing or worse: 3, nearest x, y, z. Graft anyway?", with two plates, **Where it helps** and **Graft every
   host**; the roster and Jade say he awaits your answer at the perch. Until you answer he keeps to Where it helps and
   grafts the hosts it helps; answered Graft every host, he grafts those too, even where a host fares worse. Answered, with
-  no such host now, the page asks it in general ("Graft hosts that gain nothing?"). A host whose bed holds no reading yet
-  he leaves until it has one: its crop's growth reads it, but a ripe crop no longer grows and a reading is not saved, so
-  after a restart or a chunk reload a ripe host waits until it is replanted or read by hand (using its bed or its crop,
-  the Inspect page, a Habitat Gauge, or Jade on the bed).
+  no such host now, the page asks it in general ("Graft hosts that gain nothing?"). A growing host whose bed holds no
+  reading yet he leaves until its own growth reads it. A ripe crop no longer grows and a reading is not saved, so after a
+  restart or a chunk reload nothing else reads a ripe host's bed: since the garden pacts' review (10 November 2026) he
+  reads it himself, one such bed a think, within the level's sampling allowance ([below](#a-ripe-host-after-a-restart)).
 - One honeycomb every 7 game days (up to 4 weeks paid ahead); a missed week is warned and he grafts on through a game
   day's grace, then the pact is suspended with nothing lost; an offering resumes it. Your first task: graft a host crop
   with its donor by hand in his area while the pact is active.
@@ -207,8 +207,9 @@ As built; none of it has yet been seen in a game.
   invite him) and whose bed carries no graft the rules know; his stores the plain containers touching the perch (at most 16, read with
   the beds in one pass, refreshed every 200 ticks, never loading a chunk).
 - **Where it helps (GC-P84):** unanswered or answered Where it helps, only hosts the graft would improve by the bed's
-  cached habitat (the grafted niche no worse on any factor and better on one); he never samples a bed himself. Answered
-  Graft every host, every host.
+  cached habitat (the grafted niche no worse on any factor and better on one); he samples no bed himself but a ripe
+  host's that holds no reading, one a think ([below](#a-ripe-host-after-a-restart)). Answered Graft every host, every
+  host.
 - **Asked at the graft:** the host's crop and bed, and the store, through `GardenPacts.target` (serves there, a
   beneficiary's, the holder near, the holder's own hands), each place once and at most 8 places a think; a place
   refused for itself is skipped until his index is read again, and a store read without the host's donor is not asked
@@ -256,7 +257,8 @@ weekly honeycomb goes on (the cohort's checkpoint question 2; Jade says "Nothing
   index is (at most 200 ticks); a host the holder may not change by hand, another's or a stranger's bed, or a store the
   holder could not open: skipped until his index is read again, nothing spent; a graft the rules know:
   never replaced; an extraction the store refuses or cannot fill: nothing spent, no transaction left open; unanswered or
-  an unknown answer: only where it helps; a bed with no reading: left until it has one; holder away, dead, in another level
+  an unknown answer: only where it helps; a growing host's bed with no reading: left until its growth reads it; a ripe
+  host's: read by him, one a think, when the level's allowance has a sample left; holder away, dead, in another level
   or more than 64 blocks off: he waits (no stand-in); suspended or held: nothing; his day's grafts spent: he stops until
   the next game day; a missed offering warns, gives a day's grace (he works on), then suspends with nothing lost; ending
   returns what was paid ahead once; switched off, everything waits.
@@ -531,6 +533,29 @@ front 8.75 px ahead, eyes 1.55; GC-P149), his chest north of the perch is emptie
 host unanswered, graft nothing answered PRUDENT and graft with one Dewmoss answered ALWAYS; the garden load card answers
 both holders' Foras ALWAYS. His words, sounds, service and tests are otherwise unchanged.
 
+## A ripe host after a restart
+
+The garden pacts' review of 10 November 2026 ([the cohort's record](concordance-garden-cohort.md#the-garden-pacts-review-10-november-2026))
+closes the known limit units 4 to 7 left open ("any change to the shared sampling is unit 7's"; unit 7 made none). A
+bed's reading is never saved (`VerdantBedBlockEntity`'s area sample is memory only: GB14, `theGardenGroundworkSavesNothing`)
+and a ripe crop is not randomly ticked, so its growth never reads its bed again. After a restart or a chunk reload a
+ripe host's bed held no reading, and under his safe course (`prudent`, also what an unanswered matter means) he left it
+for good: no graft, no matter, Jade's "hosts waiting for a reading" forever.
+
+- **The rule:** in `GraftKeeping.keep`, a host whose bed holds no reading and whose crop is ripe (`ripe`:
+  `OrganismCropBlock.isMaxAge`) is read through the bed's own reading (`firstReading`: `VerdantBedBlockEntity.habitat`,
+  one area sample only if the level's allowance, `Garden.budget`, 16 a tick, has one left; nothing read when it has not,
+  and he tries again at a later think). At most one bed a think; a growing host's bed is never sampled by him (its growth
+  reads it). The reading is then judged as every other (`helps`, `Grafting.gains`): a host it would help joins his
+  hosts, one it would not becomes his matter. Under Graft every host nothing changes (he grafts unread hosts already).
+- **Cost:** at most one area sample (a 5x5 area, `Sampler`) a think of his, from the shared allowance, and only while a
+  ripe host's bed holds no reading; once read, the bed keeps its sample until the next unload.
+- **Held by:** `check_garden_pacts` (one `.habitat(level)` in the class, inside `firstReading`, behind `ripe` and one
+  `sampled` flag a think; `Garden.sample(` still banned) and the game test `forasReadsARipeHostThatLostItsReading`
+  (`ConcordanceGardenLifecycleGameTests`): a ripe Sunpetal in full sky with its reading forgotten (as a loaded bed starts)
+  is read and named as his matter; a growing host's bed is not sampled; nothing grafted or spent. Written, not compiled or
+  run: Gradle and game tests cannot run in the session that wrote it.
+
 ## World and event applicability
 
 Overworld, Nether and End alike (a perch, its store and the beds in one level; his area never crosses levels). No
@@ -543,10 +568,9 @@ merged into the cohort, not merged into main. Open: a dispatch of every client c
 this record given their "Seen" column; his line is
 merged after unit 3's (Marax), as the cohort's order 3, 4, 5, 6 asks. Known limits: nearly idle once his hosts are
 grafted, while his weekly honeycomb goes on (the cohort's checkpoint question 2); his count is an action-bar line, not a
-voiced one; a host whose bed holds no reading waits until it has one (he never samples): its crop's growth reads it, but
-a reading is not saved and a ripe crop no longer grows, so after a restart or a chunk reload a ripe host waits until it
-is replanted or read by hand (using its bed or its crop, the Inspect page, a Habitat Gauge, or Jade on the bed; any
-change to the shared sampling is unit 7's); a donor put in a store he read without one is found when his index is next
+voiced one; a ripe host after a restart or a chunk reload, which waited for good until it was replanted or read by hand,
+is read by him since the garden pacts' review ([below](#a-ripe-host-after-a-restart); written, not yet compiled or run);
+a donor put in a store he read without one is found when his index is next
 read (at most 200 ticks); his body is built rather than the owner's (no owner rig is a tall elder; the cohort's
 checkpoint question 1); his sign is Jugcraft's Acorn (`jugcraft:acorn`, the squirrels' item), what a long keeping starts
 from (GC-P91); his brief was not approved by the owner (the checkpoint's first question).

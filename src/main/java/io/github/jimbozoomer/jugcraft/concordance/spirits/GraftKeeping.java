@@ -25,6 +25,7 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.level.block.state.BlockState;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -36,8 +37,10 @@ import org.jspecify.annotations.Nullable;
  * 64, nearest the perch first) whose crop is the host of a known graft with a donor item (Grafting.graftFor) and stands
  * in his area too (a bed on its top layer has its crop above it), and that carry no graft the rules know
  * (Grafting.holds). Under his default, {@link #PRUDENT} (also what an unanswered or unknown accord means), only those
- * the graft would improve by the bed's cached habitat (VerdantBedBlockEntity.cachedHabitat: he never takes a sample
- * himself; Grafting.gains: no factor's fit worse, one better); answered {@link #ALWAYS}, every host.
+ * the graft would improve by the bed's cached habitat (VerdantBedBlockEntity.cachedHabitat; Grafting.gains: no factor's
+ * fit worse, one better); answered {@link #ALWAYS}, every host. He takes a sample only for a ripe host whose bed holds no
+ * reading, one a think at most, within the level's allowance ({@link #firstReading}): nothing else reads a ripe crop's bed
+ * after a restart or a chunk reload, so without it such a host would wait until replanted or read by hand.
  * Hosts the graft would not improve are his matter (the logician's objection), raised once a presence with his inspect
  * gesture; while it waits unanswered his presence says AWAITING_ANSWER instead of his step's status (PactSpiritEntity's
  * serve, GC-P47), his step meanwhile keeping to the safe course.</li>
@@ -126,12 +129,18 @@ public final class GraftKeeping {
 		List<Host> hosts = new ArrayList<>();
 		List<BlockPos> useless = new ArrayList<>();
 		int unread = 0;
+		boolean sampled = false;
 		for (VerdantBedBlockEntity bed : reach.beds(level, now)) {
 			Host host = host(level, bed);
 			if (host == null || !inArea(level, record, host.crop())) {
 				continue; // no host, or a bed on his area's top layer, its crop above the area
 			}
 			Boolean helps = helps(level, host);
+			if (helps == null && !sampled && ripe(level, host)) {
+				// A ripe host's bed with no reading (none since a restart or a chunk reload): read once, at most one a think.
+				sampled = true;
+				helps = firstReading(level, host);
+			}
 			if (Boolean.FALSE.equals(helps)) {
 				useless.add(host.crop());
 			}
@@ -274,6 +283,26 @@ public final class GraftKeeping {
 		return habitat == null ? null : Grafting.gains(host.bed(), host.organism(), host.graft(), habitat);
 	}
 
+	/**
+	 * Whether {@code host}'s crop is ripe. A ripe crop no longer grows (OrganismCropBlock is not randomly ticked at its last
+	 * age), so its growth never reads its bed again; a growing host's next growth does. Reads only.
+	 */
+	static boolean ripe(ServerLevel level, Host host) {
+		BlockState crop = level.getBlockState(host.crop());
+		return crop.getBlock() instanceof OrganismCropBlock block && block.isMaxAge(crop);
+	}
+
+	/**
+	 * The garden pacts' review of 10 November 2026 (docs/features/foras-pact.md, "A ripe host after a restart"): a ripe host's
+	 * bed that holds no reading is read through the bed's own reading (VerdantBedBlockEntity.habitat: one area sample, taken
+	 * only if the level's allowance, Garden.budget, has one left this tick; a reading is never saved), then judged as
+	 * {@link #helps} judges it; null when the allowance is spent this tick (he tries again at a later think). The caller
+	 * reads at most one bed a think, and only a ripe host's. Reads the world; changes only the bed's unsaved sample.
+	 */
+	static @Nullable Boolean firstReading(ServerLevel level, Host host) {
+		return host.bed().habitat(level) == null ? null : helps(level, host);
+	}
+
 	/** Whether a crop of a known graft's host stands on {@code bed}, grafted or not (his invitation). Reads only. */
 	static boolean knownHost(ServerLevel level, VerdantBedBlockEntity bed) {
 		BlockPos crop = bed.getBlockPos().above();
@@ -403,7 +432,7 @@ public final class GraftKeeping {
 			return useless;
 		}
 
-		/** How many hosts at his last think stood on a bed that holds no reading yet (he waits for it: no sample of his). */
+		/** How many hosts at his last think stood on a bed that holds no reading yet (he waits for it; a ripe one he reads, one a think). */
 		public int unread() {
 			return unread;
 		}
