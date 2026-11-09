@@ -41,7 +41,7 @@ public final class OwnerPlunderer extends AbstractIllager implements InventoryCa
  @Override protected void defineSynchedData(SynchedEntityData.Builder b){super.defineSynchedData(b);b.define(SPY,false);b.define(STATION,-1);}
  public boolean usingSpyglass(){return entityData.get(SPY);}
  @Override protected void registerGoals(){
-  goalSelector.addGoal(0,new FloatGoal(this));goalSelector.addGoal(1,new CrewGoal());goalSelector.addGoal(1,new PirateCrew.StationGoal(this));goalSelector.addGoal(2,new PirateCrew.ReturnGoal(this));goalSelector.addGoal(3,new MeleeAttackGoal(this,1,false));goalSelector.addGoal(7,new RandomStrollGoal(this,.6));goalSelector.addGoal(8,new LookAtPlayerGoal(this,Player.class,16));goalSelector.addGoal(9,new RandomLookAroundGoal(this));targetSelector.addGoal(1,new HurtByTargetGoal(this));targetSelector.addGoal(2,new NearestAttackableTargetGoal<>(this,Player.class,true));
+  goalSelector.addGoal(0,new FloatGoal(this));goalSelector.addGoal(1,new CrewGoal());goalSelector.addGoal(1,new PirateCrew.StationGoal(this));goalSelector.addGoal(2,new PirateCrew.ReturnGoal(this));goalSelector.addGoal(2,new PirateCrew.DeckFightGoal(this));goalSelector.addGoal(3,new MeleeAttackGoal(this,1,false));goalSelector.addGoal(7,new RandomStrollGoal(this,.6));goalSelector.addGoal(8,new LookAtPlayerGoal(this,Player.class,16));goalSelector.addGoal(9,new RandomLookAroundGoal(this));targetSelector.addGoal(1,new HurtByTargetGoal(this));targetSelector.addGoal(2,new NearestAttackableTargetGoal<>(this,Player.class,true));
  }
  // The owner's town rule permits pillagers alone to attack villagers. This crew is not a raid wave.
  // A ship's crew fight only players, never inside a claim or settlement (PirateCrew.fair).
@@ -63,6 +63,12 @@ public final class OwnerPlunderer extends AbstractIllager implements InventoryCa
  int gunCooldown(){return gunCooldown;}
  void gunCooldown(int ticks){gunCooldown=ticks;}
  @Override public void tick(){super.tick();PirateCrew.face(this);}
+ /** A blow at a target in reach, as MeleeAttackGoal's (PirateCrew.DeckFightGoal, on a ship's deck where no path runs). */
+ void strike(ServerLevel l,LivingEntity target){swingForAttack(InteractionHand.MAIN_HAND);doHurtTarget(l,target);}
+ // A ship's crew member killed or removed for good is lost on its ship's roster (PirateCrew.defeated); unloading or
+ // changing dimension never counts.
+ @Override public void die(DamageSource source){super.die(source);if(ship!=null&&level() instanceof ServerLevel l)PirateCrew.lost(l,ship,getUUID());}
+ @Override public void remove(RemovalReason reason){if(ship!=null&&reason.shouldDestroy()&&level() instanceof ServerLevel l)PirateCrew.lost(l,ship,getUUID());super.remove(reason);}
  @Override public SpawnGroupData finalizeSpawn(ServerLevelAccessor l,DifficultyInstance d,EntitySpawnReason reason,SpawnGroupData group){var result=super.finalizeSpawn(l,d,reason,group);setItemSlot(EquipmentSlot.MAINHAND,new ItemStack(Items.GOLDEN_SWORD));setItemSlot(EquipmentSlot.OFFHAND,new ItemStack(Items.SPYGLASS));return result;}
  @Override protected SoundEvent getAmbientSound(){return OwnerSupplementaries.SOUNDS.get("plunderer_idle");}@Override protected SoundEvent getHurtSound(DamageSource d){return OwnerSupplementaries.SOUNDS.get("plunderer_hurt");}@Override protected SoundEvent getDeathSound(){return OwnerSupplementaries.SOUNDS.get("plunderer_death");}@Override public SoundEvent getCelebrateSound(){return OwnerSupplementaries.SOUNDS.get("plunderer_celebrate");}
  @Override protected void customServerAiStep(ServerLevel l){super.customServerAiStep(l);if(gunCooldown>0)gunCooldown--;if(spyTicks>0)spyTicks--;var target=getTarget();if(target!=null&&distanceToSqr(target)>144&&hasLineOfSight(target)&&tickCount%100==0)spyTicks=30;entityData.set(SPY,spyTicks>0);}

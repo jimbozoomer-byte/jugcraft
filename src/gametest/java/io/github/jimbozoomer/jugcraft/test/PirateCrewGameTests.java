@@ -15,12 +15,13 @@ import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Mth;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
@@ -32,9 +33,10 @@ import net.minecraft.world.phys.Vec3;
 
 /**
  * The crew of a moving pirate ship (docs/features/pirate-ship-crews.md), on the test-only stub vessel
- * ({@link TestVessels}): provisioning, seats turned once with the ship, save and reload without duplicates, waiting for
- * an unloaded ship without loading it, boarding, defeat, sinking, targets, claims, damage-only finite gunnery, and
- * unlinked (galleon) plunderers unchanged.
+ * ({@link TestVessels}): provisioning, seats turned once with the ship (feet on the deck), save and reload without
+ * duplicates, waiting for an unloaded ship without loading it and giving up a destroyed one, boarding and the deck
+ * fight, victory by the roster (never by absence), the tether, sinking, targets, claims, damage-only finite gunnery,
+ * and unlinked (galleon) plunderers unchanged.
  */
 public class PirateCrewGameTests {
 	private static final String ARENA = "jugcraft-test:arms_arena";
@@ -75,9 +77,10 @@ public class PirateCrewGameTests {
 			for (OwnerPlunderer crew : crew(ship)) {
 				var station = PirateCrew.STATIONS.get(crew.shipStation());
 				Vec3 expected = ship.position().add(station.seat().yRot(-90.0F * Mth.DEG_TO_RAD));
-				h.assertTrue(Math.abs(crew.getX() - expected.x) < 1.0E-3 && Math.abs(crew.getZ() - expected.z) < 1.0E-3
-						&& Math.abs(crew.getY() - expected.y) < 1.0, "Station " + crew.shipStation()
-						+ " is its seat turned once by the ship's 90° yaw: " + crew.position() + " vs " + expected);
+				h.assertTrue(Math.abs(crew.getX() - expected.x) < 1.0E-3 && Math.abs(crew.getZ() - expected.z) < 1.0E-3,
+						"Station " + crew.shipStation() + " is its seat turned once by the ship's 90° yaw: " + crew.position() + " vs " + expected);
+				h.assertTrue(Math.abs(crew.getY() - expected.y) < 1.0E-3, "Station " + crew.shipStation()
+						+ " stands with its feet at the seat's height (deck 1.0, crow's nest 9.5), not its hips: " + crew.getY() + " vs " + expected.y);
 				h.assertTrue(Math.abs(Mth.wrapDegrees(crew.yBodyRot - (90.0F + station.facing()))) < 0.01F,
 						"Station " + crew.shipStation() + " faces the ship's yaw plus its facing");
 			}
@@ -109,7 +112,11 @@ public class PirateCrewGameTests {
 			identities.add(crew.getUUID());
 		}
 		UUID shipId = ship.getUUID();
-		cleanup(level, ship);
+		unload(ship);
+		var roster = PirateCrew.Roster.get(level);
+		h.assertTrue(roster.knows(shipId) && !roster.defeated(shipId), "Unloading loses no crew member and forgets no ship");
+		var reread = PirateCrew.Roster.CODEC.parse(NbtOps.INSTANCE, PirateCrew.Roster.CODEC.encodeStart(NbtOps.INSTANCE, roster).getOrThrow()).getOrThrow();
+		h.assertTrue(reread.knows(shipId) && !reread.defeated(shipId), "The roster comes back from its save with the ship's crew");
 		// Restore as the game's recursive load does: the ship, then each saved passenger forced back onto it.
 		StubVessel restored = TestVessels.STUB.create(level, EntitySpawnReason.LOAD);
 		restored.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), shipTag));
@@ -134,24 +141,39 @@ public class PirateCrewGameTests {
 	}
 
 	@GameTest(structure = ARENA, maxTicks = 300)
-	public void offShipCrewWaitForAnUnloadedShipAndGiveUpAGoneOne(GameTestHelper h) {
+	public void offShipCrewWaitForAnUnloadedShipAndGiveUpADestroyedOne(GameTestHelper h) {
 		ServerLevel level = h.getLevel();
+		floor(h, 0, 15, 0, 15);
 		BlockPos far = h.absolutePos(new BlockPos(8, 1, 8)).offset(4096, 0, 4096);
 		h.assertTrue(!level.hasChunkAt(far), "Setup: the far ship position is in a chunk that is not loaded");
-		floor(h, 2, 6, 2, 13);
-		OwnerPlunderer waiting = plunderer(h, new Vec3(3.5, 1.0, 3.5));
-		waiting.link(UUID.randomUUID(), 6);
+		// A ship that sailed out of loaded range, leaving a crew member ashore.
+		StubVessel away = ship(h, 0.0F, 4.5);
+		PirateCrew.provision(level, away);
+		level.addFreshEntityWithPassengers(away);
+		OwnerPlunderer waiting = station(away, 6);
+		waiting.stopRiding();
+		Vec3 ashore = h.absoluteVec(new Vec3(0.5, 2.0, 0.5));
+		waiting.snapTo(ashore.x, ashore.y, ashore.z, 0.0F, 0.0F);
 		waiting.sawShip(far);
-		OwnerPlunderer stranded = plunderer(h, new Vec3(5.5, 1.0, 12.5));
-		stranded.link(UUID.randomUUID(), 7);
-		stranded.sawShip(h.absolutePos(new BlockPos(5, 1, 8)));
+		unload(away);
+		// A ship destroyed under its crew.
+		StubVessel wrecked = ship(h, 0.0F, 12.5);
+		PirateCrew.provision(level, wrecked);
+		level.addFreshEntityWithPassengers(wrecked);
+		List<OwnerPlunderer> survivors = crew(wrecked);
+		wrecked.discard();
 		h.runAfterDelay(200, () -> {
-			h.assertTrue(waiting.shipLink() != null && waiting.shipStation() == 6, "A crew member whose ship is out of loaded range waits for it");
+			h.assertTrue(waiting.isAlive() && waiting.shipLink() != null && waiting.shipStation() == 6,
+					"A crew member whose ship is out of loaded range waits for it, linked, however long");
 			h.assertTrue(!level.hasChunkAt(far), "Waiting never loads the ship's chunk");
-			h.assertTrue(stranded.shipLink() == null && stranded.shipStation() == -1,
-					"A ship missing from its own loaded place is given up: the crew member fights on unlinked");
+			h.assertTrue(PirateCrew.Roster.get(level).knows(away.getUUID()) && !PirateCrew.defeated(away),
+					"An unloaded ship stays on the roster, undefeated");
+			h.assertTrue(!PirateCrew.Roster.get(level).knows(wrecked.getUUID()), "A destroyed ship is forgotten");
+			h.assertTrue(survivors.size() == 10 && survivors.stream().allMatch(c -> c.isAlive() && !c.isPassenger()
+					&& c.shipLink() == null && c.shipStation() == -1), "A destroyed ship's crew give it up and fight on unlinked");
 			waiting.discard();
-			stranded.discard();
+			PirateCrew.forget(level, away.getUUID());
+			survivors.forEach(Entity::discard);
 			h.succeed();
 		});
 	}
@@ -159,12 +181,14 @@ public class PirateCrewGameTests {
 	@GameTest(structure = ARENA, maxTicks = 200)
 	public void boardingHeavesToAndSendsDeckCrewToFightUntilDefeated(GameTestHelper h) {
 		ServerLevel level = h.getLevel();
-		floor(h, 6, 10, 1, 15);
+		floor(h, 5, 11, 0, 15);
 		StubVessel ship = ship(h, 0.0F, 8.5);
 		PirateCrew.provision(level, ship);
 		level.addFreshEntityWithPassengers(ship);
 		var player = h.makeMockServerPlayerInLevel();
 		player.setGameMode(GameType.SURVIVAL);
+		player.getAttribute(Attributes.MAX_HEALTH).setBaseValue(200.0); // Struck, not killed, by four deck crew.
+		player.setHealth(200.0F);
 		Vec3 onDeck = h.absoluteVec(new Vec3(8.5, 2.0, 12.5));
 		player.snapTo(onDeck.x, onDeck.y, onDeck.z, 180.0F, 0.0F);
 		h.assertTrue(ship.deckBounds().contains(player.position()), "Setup: the player stands on the ship's deck");
@@ -174,11 +198,103 @@ public class PirateCrewGameTests {
 			var all = linked(level, ship);
 			var deck = all.stream().filter(c -> PirateCrew.STATIONS.get(c.shipStation()).role() == Role.DECK).toList();
 			h.assertTrue(deck.size() == 4 && deck.stream().noneMatch(Entity::isPassenger), "All four deck crew go over to fight, still linked");
+			h.assertTrue(deck.stream().allMatch(c -> ship.deckBounds().inflate(0.5).contains(c.position())),
+					"They step off their stations onto the deck, not wherever the ship would set a rider down");
 			h.assertTrue(all.stream().filter(c -> !deck.contains(c)).allMatch(Entity::isPassenger), "Helm, lookout and gunners keep their stations");
 			h.assertTrue(!PirateCrew.defeated(ship), "A ship with crew alive is not defeated");
-			all.forEach(Entity::discard);
-			loadAround(level, ship);
-			h.assertTrue(PirateCrew.defeated(ship), "With every crew member gone the ship is defeated: its loot trigger");
+		});
+		h.runAfterDelay(50, () -> {
+			h.assertTrue(player.getHealth() < player.getMaxHealth(),
+					"The deck crew close and strike a boarder on the deck, where no path runs, by direct movement");
+			var all = linked(level, ship);
+			OwnerPlunderer last = all.stream().filter(c -> c.shipStation() == 6).findFirst().orElseThrow();
+			all.stream().filter(c -> c != last).forEach(Entity::discard);
+			h.assertTrue(!PirateCrew.defeated(ship), "One rostered crew member still alive keeps the ship undefeated");
+			last.hurtServer(level, level.damageSources().genericKill(), Float.MAX_VALUE);
+			h.assertTrue(PirateCrew.defeated(ship), "With every rostered crew member killed or removed, the ship is defeated: its loot trigger");
+			cleanup(level, ship);
+			player.discard();
+			h.succeed();
+		});
+	}
+
+	@GameTest(structure = ARENA, maxTicks = 100)
+	public void victoryCountsTheRosterAndNeverAbsence(GameTestHelper h) {
+		ServerLevel level = h.getLevel();
+		StubVessel ship = ship(h, 0.0F, 8.5);
+		PirateCrew.provision(level, ship);
+		level.addFreshEntityWithPassengers(ship);
+		UUID shipId = ship.getUUID();
+		List<OwnerPlunderer> all = crew(ship);
+		// The bait: lured 80 blocks off, beyond any search around the ship, and alive.
+		OwnerPlunderer bait = station(ship, 6);
+		bait.stopRiding();
+		Vec3 lured = ship.position().add(80.0, 1.0, 0.0);
+		bait.snapTo(lured.x, lured.y, lured.z, 0.0F, 0.0F);
+		// Another unloaded with its chunk, as a far chunk unloads: saved, not lost.
+		OwnerPlunderer unloaded = station(ship, 7);
+		unloaded.stopRiding();
+		var save = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		unloaded.saveWithoutId(save);
+		CompoundTag unloadedTag = save.buildResult();
+		unloaded.remove(Entity.RemovalReason.UNLOADED_TO_CHUNK);
+		all.stream().filter(c -> c != bait && c != unloaded).forEach(Entity::discard);
+		h.assertTrue(ship.getPassengers().isEmpty(), "Setup: nobody is aboard");
+		h.assertTrue(!PirateCrew.defeated(ship), "A crew member alive 80 blocks off, and one unloaded, keep the ship undefeated");
+		var roster = PirateCrew.Roster.get(level);
+		var reread = PirateCrew.Roster.CODEC.parse(NbtOps.INSTANCE, PirateCrew.Roster.CODEC.encodeStart(NbtOps.INSTANCE, roster).getOrThrow()).getOrThrow();
+		h.assertTrue(reread.knows(shipId) && !reread.defeated(shipId), "Saved and read back, the roster still counts them alive");
+		bait.hurtServer(level, level.damageSources().genericKill(), Float.MAX_VALUE);
+		h.assertTrue(!bait.isAlive() && !PirateCrew.defeated(ship), "The bait dies far off and is lost; the unloaded one still counts");
+		// The unloaded crew member comes back with its chunk, and is killed.
+		OwnerPlunderer back = OwnerPlunderer.TYPE.create(level, EntitySpawnReason.LOAD);
+		back.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), unloadedTag));
+		h.assertTrue(back.getUUID().equals(unloaded.getUUID()) && shipId.equals(back.shipLink()), "It comes back as itself, still linked");
+		level.addFreshEntity(back);
+		h.assertTrue(!PirateCrew.defeated(ship), "Back, and alive: still undefeated");
+		back.hurtServer(level, level.damageSources().genericKill(), Float.MAX_VALUE);
+		h.assertTrue(PirateCrew.defeated(ship), "Every rostered crew member lost, wherever each died: defeated");
+		reread = PirateCrew.Roster.CODEC.parse(NbtOps.INSTANCE, PirateCrew.Roster.CODEC.encodeStart(NbtOps.INSTANCE, roster).getOrThrow()).getOrThrow();
+		h.assertTrue(reread.defeated(shipId), "A defeat survives the roster's save");
+		bait.discard();
+		back.discard();
+		ship.discard();
+		h.assertTrue(!PirateCrew.Roster.get(level).knows(shipId) && !PirateCrew.defeated(ship), "A destroyed ship is forgotten");
+		h.succeed();
+	}
+
+	@GameTest(structure = ARENA, maxTicks = 100)
+	public void crewOffTheShipFightOnlyWithinTheTether(GameTestHelper h) {
+		ServerLevel level = h.getLevel();
+		floor(h, 0, 15, 0, 15);
+		StubVessel ship = ship(h, 0.0F, 8.5);
+		PirateCrew.provision(level, ship);
+		level.addFreshEntityWithPassengers(ship);
+		OwnerPlunderer gunner = station(ship, 2);
+		OwnerPlunderer deckhand = station(ship, 6);
+		deckhand.stopRiding();
+		Vec3 onDeck = h.absoluteVec(new Vec3(9.5, 2.0, 13.5));
+		deckhand.snapTo(onDeck.x, onDeck.y, onDeck.z, 0.0F, 0.0F);
+		var player = h.makeMockServerPlayerInLevel();
+		player.setGameMode(GameType.SURVIVAL);
+		Vec3 near = h.absoluteVec(new Vec3(13.5, 2.0, 8.5));
+		player.snapTo(near.x, near.y, near.z, 90.0F, 0.0F);
+		h.assertTrue(deckhand.canAttack(player), "Within the tether a crew member off the ship may fight");
+		// 4 blocks beyond the tether, off the stern; the test (never the crew) loads that chunk so the answer is the tether's.
+		Vec3 beyond = new Vec3(ship.getX(), ship.getY() + 1.0, ship.deckBounds().minZ - 28.0);
+		level.getChunk(BlockPos.containing(beyond));
+		player.snapTo(beyond.x, beyond.y, beyond.z, 0.0F, 0.0F);
+		h.assertTrue(gunner.canAttack(player), "Setup: the far spot is open to a fight; a gunner aboard may still lay on it");
+		h.assertTrue(!deckhand.canAttack(player), "A target beyond 24 blocks of the deck is given up by crew off the ship");
+		player.snapTo(near.x, near.y, near.z, 90.0F, 0.0F);
+		deckhand.snapTo(beyond.x, beyond.y, beyond.z, 0.0F, 0.0F);
+		h.assertTrue(!deckhand.canAttack(player), "A crew member drawn beyond the tether fights nobody until it is back");
+		deckhand.snapTo(onDeck.x, onDeck.y, onDeck.z, 0.0F, 0.0F);
+		player.snapTo(beyond.x, beyond.y, beyond.z, 0.0F, 0.0F);
+		deckhand.setTarget(player);
+		h.runAfterDelay(40, () -> {
+			h.assertTrue(deckhand.getVehicle() == ship && deckhand.shipLink() != null,
+					"With its target beyond the tether, the crew member goes back aboard to its station");
 			cleanup(level, ship);
 			player.discard();
 			h.succeed();
@@ -233,7 +349,7 @@ public class PirateCrewGameTests {
 		level.addFreshEntityWithPassengers(ship);
 		var player = h.makeMockServerPlayerInLevel();
 		player.setGameMode(GameType.SURVIVAL);
-		Vec3 at = h.absoluteVec(new Vec3(13.5, 1.0, 8.5));
+		Vec3 at = h.absoluteVec(new Vec3(13.5, 2.0, 8.5));
 		player.snapTo(at.x, at.y, at.z, 90.0F, 0.0F);
 		OwnerPlunderer helm = crew(ship).stream().filter(c -> c.shipStation() == 0).findFirst().orElseThrow();
 		h.assertTrue(helm.canAttack(player), "Outside any claim or settlement the crew may fight a survival player");
@@ -262,7 +378,7 @@ public class PirateCrewGameTests {
 		level.addFreshEntityWithPassengers(ship);
 		var player = h.makeMockServerPlayerInLevel();
 		player.setGameMode(GameType.SURVIVAL);
-		Vec3 at = h.absoluteVec(new Vec3(13.5, 1.0, 11.5));
+		Vec3 at = h.absoluteVec(new Vec3(13.5, 2.0, 11.5));
 		player.snapTo(at.x, at.y, at.z, 90.0F, 0.0F);
 		OwnerPlunderer gunner = crew(ship).stream().filter(c -> c.shipStation() == 2).findFirst().orElseThrow();
 		gunner.setTarget(player);
@@ -347,14 +463,15 @@ public class PirateCrewGameTests {
 		return total;
 	}
 
-	/** The test, not the crew, loads every chunk in defeated()'s reach, so its answer is known rather than "not yet". */
-	private static void loadAround(ServerLevel level, Entity ship) {
-		AABB reach = ship.getBoundingBox().inflate(64.0);
-		for (int x = Mth.floor(reach.minX) >> 4; x <= Mth.floor(reach.maxX) >> 4; x++) {
-			for (int z = Mth.floor(reach.minZ) >> 4; z <= Mth.floor(reach.maxZ) >> 4; z++) {
-				level.getChunk(x, z);
-			}
-		}
+	private static OwnerPlunderer station(Entity ship, int index) {
+		return crew(ship).stream().filter(c -> c.shipStation() == index).findFirst().orElseThrow();
+	}
+
+	/** As a chunk unloading does: the ship and its crew leave the level, saved, neither lost nor destroyed. */
+	private static void unload(Entity ship) {
+		List<Entity> riders = List.copyOf(ship.getPassengers());
+		ship.remove(Entity.RemovalReason.UNLOADED_TO_CHUNK);
+		riders.forEach(rider -> rider.remove(Entity.RemovalReason.UNLOADED_TO_CHUNK));
 	}
 
 	private static void cleanup(ServerLevel level, Entity ship) {

@@ -27,6 +27,16 @@ public final class OwnerCannonball extends ThrowableItemProjectile {
             for(int i=0;i<=8;i++){var p=BlockPos.containing(position().lerp(end,i/8D));if(!level().hasChunkAt(p)||!level().getWorldBorder().isWithinBounds(p)){discard();return;}}
         }super.tick();
     }
+    // A pirate ship's own gunners (ship-linked plunderers) never hit a pirate ship's hull or deck, nor their shipmates
+    // (docs/features/pirate-ship-crews.md); players' and galleon crews' shots hit as before.
+    private static final net.minecraft.resources.Identifier SHIP=io.github.jimbozoomer.jugcraft.Jugcraft.id("pirate_ship"),DECK=io.github.jimbozoomer.jugcraft.Jugcraft.id("pirate_ship_deck");
+    @Override protected boolean canHitEntity(Entity target){
+        if(getOwner() instanceof OwnerPlunderer crew&&crew.shipLink()!=null){
+            var type=EntityType.getKey(target.getType());
+            if(SHIP.equals(type)||DECK.equals(type)||target instanceof OwnerPlunderer mate&&crew.shipLink().equals(mate.shipLink()))return false;
+        }
+        return super.canHitEntity(target);
+    }
     @Override protected void onHitEntity(EntityHitResult hit){
         if(!(level() instanceof ServerLevel level))return;
         if(getOwner() instanceof ServerPlayer actor&&hit.getEntity() instanceof LivingEntity target&&ConcordanceEffects.mayHarm(actor,target)&&TwoHanded.allowed(actor,level,target)){

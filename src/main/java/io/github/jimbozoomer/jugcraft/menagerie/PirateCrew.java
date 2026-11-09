@@ -1,6 +1,8 @@
 package io.github.jimbozoomer.jugcraft.menagerie;
 
-import com.mojang.authlib.GameProfile;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.artillery.Ballistics;
 import io.github.jimbozoomer.jugcraft.concordance.Authority;
 import io.github.jimbozoomer.jugcraft.menagerie.CrewedVessel.Role;
@@ -8,10 +10,14 @@ import io.github.jimbozoomer.jugcraft.menagerie.CrewedVessel.Station;
 import io.github.jimbozoomer.jugcraft.town.Town;
 import io.github.jimbozoomer.jugcraft.walker.WalkerAim;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
-import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
@@ -25,6 +31,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.saveddata.SavedDataType;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
@@ -42,8 +50,12 @@ import org.jspecify.annotations.Nullable;
  * stepped flight ({@link WalkerAim#flight}) reaches the target through loaded chunks. Each shot spends one gunpowder
  * and one cannonball from the gunner's own finite supplies; the cannonball is damage-only.</li>
  * <li><b>Boarding.</b> A player who comes within {@value #BOARDING_REACH} blocks of the deck in a vehicle, or onto the
- * deck, makes the helm heave to; the deck crew then go over to fight hand to hand. With nobody to fight for
- * {@value #RELEASE_TICKS} ticks the helm lets the ship go and the crew go back to their stations.</li>
+ * deck, makes the helm heave to; the deck crew then go over to fight hand to hand, stepping straight at their target
+ * on the deck (an entity deck has no path). Off the ship a crew member fights only within {@value #TETHER} blocks of
+ * its deck; beyond that it goes back. With nobody to fight for {@value #RELEASE_TICKS} ticks and no crew over the
+ * side, the helm lets the ship go.</li>
+ * <li><b>Victory.</b> The {@link Roster} keeps every ship's crew by identity; a crew member killed or removed for good is
+ * lost there. A ship is {@link #defeated} once all its rostered crew are lost: never because one is merely absent.</li>
  * <li><b>Limits.</b> The crew fight players only: never villagers or townsfolk, and nowhere a claim or a town's
  * protection refuses an unprivileged pirate identity. Nothing here reads or loads an unloaded chunk.</li>
  * </ul>
@@ -83,18 +95,22 @@ public final class PirateCrew {
 	static final int CANNONBALLS = 8;
 	/** How close (blocks) a shot must pass the target's middle to be fired at all. */
 	static final double SHOT_MARGIN = 2.0;
-	/** How far from its ship a crew member off it still counts as its crew for {@link #defeated}, in blocks. */
-	static final double CREW_REACH = 64.0;
+	/**
+	 * How far from its ship's deck, in blocks, a crew member off the ship may chase and fight; beyond it, it gives its
+	 * target up and goes back aboard. Well inside a gun's {@value #MAX_RANGE}.
+	 */
+	static final double TETHER = 24.0;
+	/** A crew member on the deck strikes a target within this many blocks, once every {@value #STRIKE_COOLDOWN} ticks. */
+	static final double STRIKE_REACH = 2.0;
+	static final int STRIKE_COOLDOWN = 20;
+	/** How near its deck, in blocks, a crew member must come to climb back aboard. */
+	static final double CLIMB_REACH = 3.0;
 	/** How near the deck, in blocks, a player must come for the crew to heave to and board. */
 	static final double BOARDING_REACH = 12.0;
 	/** Ticks with nobody to fight before the helm lets the ship go again. */
 	static final int RELEASE_TICKS = 200;
-	/** Ticks a crew member off its ship waits, with the ship's last place loaded and no ship there, before giving it up. */
-	static final int GONE_TICKS = 100;
 	/** How far a crew member's head turns from its station's facing (RaiderCrew's). */
 	static final float HEAD_TURN = 75.0F;
-	/** The unprivileged identity whose protection answers say where the crew may fight (as Authority's Tiny TNT). */
-	private static final GameProfile STAND_IN = new GameProfile(new UUID(0L, 0x5049524154L), "[Pirate crew]");
 
 	private PirateCrew() {
 	}
@@ -139,8 +155,8 @@ public final class PirateCrew {
 	/**
 	 * Crews a new ship: one plunderer for each station, linked to it and seated as its passenger. Call once, on the
 	 * server, before the ship is in the world; the caller then adds it with {@code addFreshEntityWithPassengers}, so
-	 * each crew member is added once, saved inside the ship and never duplicated. Returns how many were seated; a ship
-	 * that already carries crew gets none.
+	 * each crew member is added once, saved inside the ship and never duplicated. Each seated crew member goes on the
+	 * {@link Roster} under the ship. Returns how many were seated; a ship that already carries crew gets none.
 	 */
 	public static int provision(ServerLevel level, Entity vessel) {
 		if (!(vessel instanceof CrewedVessel ship)) {
@@ -152,6 +168,7 @@ public final class PirateCrew {
 			}
 		}
 		Item cannonball = OwnerSupplementaries.ITEMS.get("cannonball");
+		Roster roster = Roster.get(level);
 		int seated = 0;
 		for (int index = 0; index < ship.stations().size(); index++) {
 			OwnerPlunderer crew = OwnerPlunderer.TYPE.create(level, EntitySpawnReason.STRUCTURE);
@@ -168,6 +185,7 @@ public final class PirateCrew {
 				crew.getInventory().addItem(new ItemStack(cannonball, CANNONBALLS));
 			}
 			if (crew.startRiding(vessel, true, true)) {
+				roster.enlist(vessel.getUUID(), crew.getUUID());
 				seated++;
 			} else {
 				crew.discard();
@@ -177,12 +195,12 @@ public final class PirateCrew {
 	}
 
 	/**
-	 * The ship's loot trigger: whether its crew are all gone, with none aboard and none of its own alive within
-	 * {@value #CREW_REACH} blocks. Server side. Cheap enough to call every tick: the entity search runs only once no crew
-	 * member is aboard, and reads loaded entities only. It answers false, not yet known, while any chunk in that reach is
-	 * unloaded, so a ship just loaded from disk (its passengers already restored) cannot count a crew member as gone merely
-	 * because that crew member's own chunk has not loaded yet. The ship rolls its hold once when this first becomes true;
-	 * the crew code rolls, gives and drops no hold loot.
+	 * The ship's loot trigger: whether every crew member the {@link Roster} holds for it is lost, killed or removed for
+	 * good. Server side, and cheap enough to call every tick: a scan of the ship's passengers (any living crew member
+	 * aboard answers false at once), then one lookup. Absence is never death: a crew member unloaded in a far chunk, or
+	 * gone to another dimension, still counts as alive, so a ship just loaded from disk can never be defeated by a crew
+	 * member that has not loaded yet. A ship with no roster (never provisioned, or forgotten) is never defeated. The ship
+	 * rolls its hold once when this first becomes true; the crew code rolls, gives and drops no hold loot.
 	 */
 	public static boolean defeated(Entity vessel) {
 		for (Entity passenger : vessel.getPassengers()) {
@@ -190,12 +208,21 @@ public final class PirateCrew {
 				return false;
 			}
 		}
-		AABB reach = vessel.getBoundingBox().inflate(CREW_REACH);
-		if (!(vessel.level() instanceof ServerLevel level) || !WalkerAim.loadedIn(level, reach)) {
-			return false;
-		}
-		return level.getEntitiesOfClass(OwnerPlunderer.class, reach,
-				crew -> crew.isAlive() && vessel.getUUID().equals(crew.shipLink())).isEmpty();
+		return vessel.level() instanceof ServerLevel level && Roster.get(level).defeated(vessel.getUUID());
+	}
+
+	/**
+	 * Takes a destroyed ship's crew off the {@link Roster}. The ship calls this from {@code remove} when the reason
+	 * destroys it ({@code reason.shouldDestroy()}), never when it is only unloaded. Crew who outlive their ship give up
+	 * their link and fight on as ordinary plunderers.
+	 */
+	public static void forget(ServerLevel level, UUID ship) {
+		Roster.get(level).forget(ship);
+	}
+
+	/** Records a linked crew member as lost: killed, or removed for good (OwnerPlunderer's {@code die} and {@code remove}). */
+	static void lost(ServerLevel level, UUID ship, UUID member) {
+		Roster.get(level).lose(ship, member);
 	}
 
 	/** {@link #LOCAL_DECK} turned with the ship: the world box that encloses it (exact at multiples of 90°). */
@@ -244,14 +271,44 @@ public final class PirateCrew {
 		if (!level.hasChunkAt(pos) || Town.isProtected(level, pos)) {
 			return false;
 		}
-		return Authority.mayChange(level, FakePlayer.get(level, STAND_IN), pos);
+		return Authority.mayChange(level, Authority.pirateCrewActor(level), pos);
 	}
 
-	/** Whether a linked crew member may fight {@code target}: a survival or adventure player, both of them where fighting is allowed. */
+	/**
+	 * Whether a linked crew member may fight {@code target}: a survival or adventure player, both of them where fighting
+	 * is allowed, and, for a crew member off its ship, both within {@value #TETHER} blocks of its deck.
+	 */
 	static boolean fair(OwnerPlunderer crew, LivingEntity target) {
 		return target instanceof Player player && !player.isCreative() && !player.isSpectator()
-				&& crew.level() instanceof ServerLevel level && mayFight(level, crew.blockPosition())
-				&& mayFight(level, target.blockPosition());
+				&& crew.level() instanceof ServerLevel level && (aboard(crew) || tethered(level, crew, target))
+				&& mayFight(level, crew.blockPosition()) && mayFight(level, target.blockPosition());
+	}
+
+	/** Whether a crew member rides its own ship. */
+	static boolean aboard(OwnerPlunderer crew) {
+		Entity vehicle = crew.getVehicle();
+		return vehicle != null && vehicle.getUUID().equals(crew.shipLink());
+	}
+
+	/** Its ship, if it is loaded (a loaded-entity lookup only), or null. */
+	static @Nullable Entity ship(ServerLevel level, OwnerPlunderer crew) {
+		Entity found = crew.shipLink() == null ? null : level.getEntity(crew.shipLink());
+		return found instanceof CrewedVessel && !found.isRemoved() ? found : null;
+	}
+
+	/**
+	 * Whether a crew member off its ship and {@code target} are both within {@value #TETHER} blocks of its ship's deck,
+	 * or, while the ship is not loaded, of the place it was last seen. A crew member with neither stays out of fights.
+	 */
+	static boolean tethered(ServerLevel level, OwnerPlunderer crew, Entity target) {
+		Entity found = ship(level, crew);
+		BlockPos last = crew.lastShipPos();
+		AABB home = found instanceof CrewedVessel ship ? ship.deckBounds() : last != null ? new AABB(last) : null;
+		if (home == null) {
+			return false;
+		}
+		AABB reach = home.inflate(TETHER);
+		return reach.contains(crew.position()) && reach.contains(target.position());
 	}
 
 	/** Whether {@code target} is within boarding reach of the ship's deck. */
@@ -328,6 +385,12 @@ public final class PirateCrew {
 		return -1;
 	}
 
+	/** Whether any of the ship's living crew are off it near its deck (loaded entities only), so the helm waits for them. */
+	static boolean overSide(ServerLevel level, Entity vessel, CrewedVessel ship) {
+		return !level.getEntitiesOfClass(OwnerPlunderer.class, ship.deckBounds().inflate(TETHER + 8.0),
+				crew -> crew.isAlive() && !crew.isPassenger() && vessel.getUUID().equals(crew.shipLink())).isEmpty();
+	}
+
 	/**
 	 * A crew member at its station: faces it, and by its role steers the boarding (helm), fires its cannon (gunner) or
 	 * goes over the side to fight (deck crew, once the ship has hove to). A sinking ship's crew abandon it.
@@ -383,7 +446,7 @@ public final class PirateCrew {
 						if (!ship.heaveTo()) {
 							ship.setHeaveTo(true);
 						}
-					} else if (ship.heaveTo() && ++quiet >= RELEASE_TICKS) {
+					} else if (ship.heaveTo() && ++quiet >= RELEASE_TICKS && crew.tickCount % 20 == 0 && !overSide(level, vessel, ship)) {
 						quiet = 0;
 						ship.setHeaveTo(false);
 					}
@@ -396,7 +459,9 @@ public final class PirateCrew {
 				case DECK -> {
 					if (fair && (ship.heaveTo() || !helmManned(vessel)) && near(ship, target)) {
 						crew.sawShip(vessel.blockPosition());
+						Vec3 seat = world(vessel, station.seat());
 						crew.stopRiding();
+						crew.setPos(seat); // Steps off its station onto the deck, wherever the ship would set a rider down.
 					}
 				}
 				case LOOKOUT -> {
@@ -406,14 +471,15 @@ public final class PirateCrew {
 	}
 
 	/**
-	 * A crew member off its ship with nobody to fight goes back aboard to its own station. It looks its ship up among
-	 * loaded entities only: while the ship's last place is in an unloaded chunk it waits; once that place is loaded and
-	 * the ship is not there for {@value #GONE_TICKS} ticks, or the ship has sunk, it gives the ship up and fights on as
-	 * an ordinary plunderer.
+	 * A crew member off its ship with nobody to fight (or its target beyond the tether) goes back aboard to its own
+	 * station: by path where the ground allows, else straight at its seat, and it climbs aboard within
+	 * {@value #CLIMB_REACH} blocks of the deck. It looks its ship up among loaded entities only. While the ship is not
+	 * loaded it waits, loading nothing, for as long as the {@link Roster} still holds the ship; once the ship has been
+	 * destroyed (forgotten there) or has sunk, it gives up its link and fights on as an ordinary plunderer.
 	 */
 	static final class ReturnGoal extends Goal {
 		private final OwnerPlunderer crew;
-		private int gone;
+		private @Nullable Vec3 straight;
 
 		ReturnGoal(OwnerPlunderer crew) {
 			this.crew = crew;
@@ -430,26 +496,39 @@ public final class PirateCrew {
 		}
 
 		@Override
+		public boolean requiresUpdateEveryTick() {
+			return true;
+		}
+
+		@Override
 		public void stop() {
+			straight = null;
 			crew.getNavigation().stop();
 		}
 
 		@Override
 		public void tick() {
-			if (!(crew.level() instanceof ServerLevel level) || crew.tickCount % 20 != 0 || crew.shipLink() == null) {
+			if (!(crew.level() instanceof ServerLevel level) || crew.shipLink() == null) {
 				return;
 			}
-			Entity found = level.getEntity(crew.shipLink());
-			if (!(found instanceof CrewedVessel ship) || found.isRemoved()) {
-				BlockPos last = crew.lastShipPos();
-				if (last != null && !level.hasChunkAt(last)) {
-					gone = 0; // Its ship may be out there in an unloaded chunk: wait, without loading anything.
-				} else if ((gone += 20) >= GONE_TICKS) {
-					crew.unlink();
+			if (crew.tickCount % 20 == 0) {
+				plan(level);
+			}
+			if (straight != null) {
+				crew.getMoveControl().setWantedPosition(straight.x, straight.y, straight.z, 1.0);
+			}
+		}
+
+		private void plan(ServerLevel level) {
+			straight = null;
+			Entity found = ship(level, crew);
+			if (!(found instanceof CrewedVessel ship)) {
+				crew.getNavigation().stop();
+				if (!Roster.get(level).knows(crew.shipLink())) {
+					crew.unlink(); // Its ship was destroyed: it fights on unlinked.
 				}
-				return;
+				return; // Otherwise its ship is out of loaded range: wait for it, without loading anything.
 			}
-			gone = 0;
 			if (ship.sunk()) {
 				crew.unlink();
 				return;
@@ -461,13 +540,146 @@ public final class PirateCrew {
 				return;
 			}
 			Vec3 seat = world(found, station.seat());
-			if (ship.deckBounds().inflate(3.0).contains(crew.position())) {
+			if (ship.deckBounds().inflate(CLIMB_REACH).contains(crew.position())) {
 				if (mayBoard(found, crew)) {
 					crew.getNavigation().stop();
 					crew.startRiding(found, true, true);
 				}
-			} else if (WalkerAim.loadedIn(level, new AABB(crew.position(), seat).inflate(1.0))) {
-				crew.getNavigation().moveTo(seat.x, seat.y, seat.z, 1.0);
+			} else if (WalkerAim.loadedIn(level, new AABB(crew.position(), seat).inflate(1.0))
+					&& !crew.getNavigation().moveTo(seat.x, seat.y, seat.z, 1.0)) {
+				straight = seat; // No path to a seat on an entity deck: head straight for it.
+			}
+		}
+	}
+
+	/**
+	 * A crew member off its station but on its ship's deck fights its target there by direct movement: the deck is an
+	 * entity, which paths ignore, so it steps straight at the target and strikes within {@value #STRIKE_REACH} blocks
+	 * (MeleeAttackGoal does the fighting off the ship, where paths work). It runs only while the target is fair, which
+	 * includes the tether.
+	 */
+	static final class DeckFightGoal extends Goal {
+		private final OwnerPlunderer crew;
+		private int cooldown;
+
+		DeckFightGoal(OwnerPlunderer crew) {
+			this.crew = crew;
+			setFlags(EnumSet.of(Flag.MOVE, Flag.LOOK));
+		}
+
+		@Override
+		public boolean canUse() {
+			if (crew.shipLink() == null || crew.isPassenger() || !(crew.level() instanceof ServerLevel level)) {
+				return false;
+			}
+			LivingEntity target = crew.getTarget();
+			return target != null && target.isAlive() && crew.canAttack(target)
+					&& ship(level, crew) instanceof CrewedVessel ship && ship.deckBounds().inflate(1.0).contains(crew.position());
+		}
+
+		@Override
+		public boolean requiresUpdateEveryTick() {
+			return true;
+		}
+
+		@Override
+		public void start() {
+			crew.getNavigation().stop();
+			crew.setAggressive(true);
+		}
+
+		@Override
+		public void stop() {
+			crew.setAggressive(false);
+		}
+
+		@Override
+		public void tick() {
+			LivingEntity target = crew.getTarget();
+			if (target == null || !(crew.level() instanceof ServerLevel level)) {
+				return;
+			}
+			crew.getLookControl().setLookAt(target, 30.0F, 30.0F);
+			crew.getMoveControl().setWantedPosition(target.getX(), target.getY(), target.getZ(), 1.0);
+			if (cooldown > 0) {
+				cooldown--;
+			} else if (crew.distanceToSqr(target) <= STRIKE_REACH * STRIKE_REACH && crew.hasLineOfSight(target)) {
+				crew.strike(level, target);
+				cooldown = STRIKE_COOLDOWN;
+			}
+		}
+	}
+
+	/**
+	 * Every pirate ship's crew by identity, in the overworld's saved data (one record for the server, whatever the
+	 * dimension): who was provisioned for each ship, and which of them are lost, killed or removed for good. A crew
+	 * member unloaded with its chunk or gone to another dimension is not lost. {@link #defeated} counts losses here and
+	 * never takes an absence for a death; {@link #forget} drops a destroyed ship.
+	 */
+	public static final class Roster extends SavedData {
+		record Entry(UUID ship, List<UUID> crew, List<UUID> lost) {
+			static final Codec<Entry> CODEC = RecordCodecBuilder.create(i -> i.group(
+					UUIDUtil.CODEC.fieldOf("ship").forGetter(Entry::ship),
+					UUIDUtil.CODEC.listOf().fieldOf("crew").forGetter(Entry::crew),
+					UUIDUtil.CODEC.listOf().fieldOf("lost").forGetter(Entry::lost)).apply(i, Entry::new));
+		}
+
+		/** The roster's saved form. */
+		public static final Codec<Roster> CODEC = Entry.CODEC.listOf().xmap(Roster::new, Roster::entries);
+		private static final SavedDataType<Roster> TYPE = new SavedDataType<>(Jugcraft.id("pirate_crews"),
+				() -> new Roster(List.of()), CODEC, null);
+		private final Map<UUID, Set<UUID>> crew = new HashMap<>();
+		private final Map<UUID, Set<UUID>> lost = new HashMap<>();
+
+		private Roster(List<Entry> saved) {
+			for (Entry entry : saved) {
+				Set<UUID> members = new HashSet<>(entry.crew());
+				Set<UUID> gone = new HashSet<>(entry.lost());
+				gone.retainAll(members);
+				crew.put(entry.ship(), members);
+				lost.put(entry.ship(), gone);
+			}
+		}
+
+		/** The server's roster (the overworld's saved data). */
+		public static Roster get(ServerLevel level) {
+			return level.getServer().overworld().getDataStorage().computeIfAbsent(TYPE);
+		}
+
+		private List<Entry> entries() {
+			return crew.entrySet().stream().map(entry -> new Entry(entry.getKey(), List.copyOf(entry.getValue()),
+					List.copyOf(lost.getOrDefault(entry.getKey(), Set.of())))).toList();
+		}
+
+		/** Whether the roster holds this ship: provisioned, and not destroyed since. */
+		public boolean knows(@Nullable UUID ship) {
+			return ship != null && crew.containsKey(ship);
+		}
+
+		/** Whether this ship had a crew and every one of them is lost. */
+		public boolean defeated(UUID ship) {
+			Set<UUID> members = crew.get(ship);
+			return members != null && !members.isEmpty() && lost.getOrDefault(ship, Set.of()).containsAll(members);
+		}
+
+		void enlist(UUID ship, UUID member) {
+			if (crew.computeIfAbsent(ship, id -> new HashSet<>()).add(member)) {
+				lost.computeIfAbsent(ship, id -> new HashSet<>());
+				setDirty();
+			}
+		}
+
+		void lose(UUID ship, UUID member) {
+			Set<UUID> members = crew.get(ship);
+			if (members != null && members.contains(member) && lost.computeIfAbsent(ship, id -> new HashSet<>()).add(member)) {
+				setDirty();
+			}
+		}
+
+		void forget(UUID ship) {
+			boolean had = crew.remove(ship) != null;
+			if (lost.remove(ship) != null || had) {
+				setDirty();
 			}
 		}
 	}

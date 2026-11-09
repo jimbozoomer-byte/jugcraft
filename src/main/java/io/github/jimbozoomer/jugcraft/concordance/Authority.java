@@ -125,6 +125,14 @@ public final class Authority {
 		return FakePlayer.get(level, new GameProfile(new UUID(0, 46123), "[Tiny TNT]"));
 	}
 
+	/**
+	 * A moving pirate ship's crew ask where they may fight as an unprivileged identity (menagerie/PirateCrew); like
+	 * unowned TNT, it gains no claim or town exemption.
+	 */
+	public static ServerPlayer pirateCrewActor(ServerLevel level) {
+		return FakePlayer.get(level, new GameProfile(new UUID(0L, 0x5049524154L), "[Pirate crew]"));
+	}
+
 	/** A stand-in may answer protection questions but must not acquire personal progression or payment state. */
 	public static boolean isStandIn(Player actor) {
 		return actor instanceof FakePlayer;

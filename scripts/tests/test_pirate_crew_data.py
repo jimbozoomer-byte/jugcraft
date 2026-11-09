@@ -1,20 +1,22 @@
 """Data regressions for the pirate ship crew (docs/features/pirate-ship-crews.md).
 
 The static galleon stays byte-for-byte as it is, the standard ten stations keep the layout the ship's art and
-renderer are built to, and the crew's server tests and test-only stub vessel are registered. Runtime behavior is
-covered by PirateCrewGameTests.
+renderer are built to, the crew's server tests and test-only stub vessel are registered, the crew ask Authority's
+stand-in, and their cannonballs spare pirate hulls. Runtime behavior is covered by PirateCrewGameTests.
 """
 import hashlib
 import json
 from pathlib import Path
 import re
+import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / 'src/main/resources/data/jugcraft'
 CREW = ROOT / 'src/main/java/io/github/jimbozoomer/jugcraft/menagerie/PirateCrew.java'
 # The 36 static-galleon data files (17 templates, structure, structure set, 10 pools, processor list, 6 loot tables)
-# as of origin/main 8075c6d58b. Moving pirate ships must not change them.
+# as of origin/main 8075c6d58b. Moving pirate ships must not change them. JSON is hashed with LF line endings, so a
+# Windows (CRLF) checkout of unchanged files matches; NBT and anything else binary is hashed raw.
 GALLEON_DIGEST = 'f89a28a6a6b62fad028c07a737b83738c65afa16433f5a3e18381491c66af799'
 
 
@@ -24,6 +26,11 @@ def galleon_files():
                    *DATA.glob('worldgen/template_pool/supps_galleon/*.json'),
                    DATA / 'worldgen/processor_list/supps_galleon_data.json',
                    *DATA.glob('loot_table/supps_loot/galleon/*.json')])
+
+
+def content(path):
+    data = path.read_bytes()
+    return data.replace(b'\r\n', b'\n') if path.suffix == '.json' else data
 
 
 def stations():
@@ -43,8 +50,20 @@ class PirateCrewDataTests(unittest.TestCase):
         digest = hashlib.sha256()
         for path in files:
             digest.update((path.relative_to(DATA).as_posix() + ' '
-                           + hashlib.sha256(path.read_bytes()).hexdigest() + '\n').encode())
+                           + hashlib.sha256(content(path)).hexdigest() + '\n').encode())
         self.assertEqual(GALLEON_DIGEST, digest.hexdigest())
+
+    def test_crlf_json_hashes_as_lf_and_nbt_stays_raw(self):
+        source = DATA / 'worldgen/structure/supps_galleon.json'
+        nbt = sorted(DATA.glob('structure/supps_galleon/*.nbt'))[0]
+        with tempfile.TemporaryDirectory() as folder:
+            crlf = Path(folder) / 'supps_galleon.json'
+            crlf.write_bytes(source.read_bytes().replace(b'\r\n', b'\n').replace(b'\n', b'\r\n'))
+            self.assertIn(b'\r\n', crlf.read_bytes())
+            self.assertEqual(hashlib.sha256(content(source)).hexdigest(), hashlib.sha256(content(crlf)).hexdigest())
+            raw = Path(folder) / 'template.nbt'
+            raw.write_bytes(nbt.read_bytes() + b'\r\n')
+            self.assertEqual(nbt.read_bytes() + b'\r\n', content(raw), 'Binary files are hashed exactly as they are')
 
     def test_standard_stations_keep_the_agreed_layout(self):
         rows = stations()
@@ -73,6 +92,14 @@ class PirateCrewDataTests(unittest.TestCase):
         for forbidden in ('LootTable', 'loot_table', 'dropContents', 'raiders.'):
             self.assertNotIn(forbidden, text)
         self.assertNotIn('pirate', ' '.join(p.name.lower() for p in (ROOT / 'src/main/java/io/github/jimbozoomer/jugcraft/town').glob('*.java')))
+
+    def test_crew_asks_authority_and_spares_its_own_hull(self):
+        text = CREW.read_text(encoding='utf-8')
+        self.assertNotIn('FakePlayer', text, 'Only concordance/Authority makes stand-ins')
+        self.assertIn('Authority.pirateCrewActor(level)', text)
+        ball = (CREW.parent / 'OwnerCannonball.java').read_text(encoding='utf-8')
+        for name in ('"pirate_ship"', '"pirate_ship_deck"'):
+            self.assertIn(name, ball, 'Crew cannonballs never hit a pirate ship hull or deck')
 
 
 if __name__ == '__main__':
