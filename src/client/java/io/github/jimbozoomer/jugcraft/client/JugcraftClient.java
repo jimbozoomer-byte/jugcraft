@@ -134,6 +134,8 @@ public final class JugcraftClient implements ClientModInitializer {
 		BroomstickClient.register();
 		BalloonClient.register();
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.airship.JugcraftAirships.ZEPPELIN, ZeppelinRenderer::new);
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.menagerie.PirateShips.SHIP, PirateShipRenderer::new);
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.menagerie.PirateShips.DECK, net.minecraft.client.renderer.entity.NoopRenderer::new);
 		// The raider faction (batch 57): infantry in uniform, the walker and blimp in raider paint, and their bombs.
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRUNT, RaiderRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRENADIER, RaiderRenderer::new);

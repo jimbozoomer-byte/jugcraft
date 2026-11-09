@@ -32919,5 +32919,9 @@
   "item.jugcraft.aquatic_tin_can": "Discarded Fishing Tin",
   "item.jugcraft.jugtania_ender_dagger": "Ender Dagger",
   "item.jugcraft.jugtania_record_gaia_1": "Scathed Music Disc — I",
-  "item.jugcraft.jugtania_record_gaia_2": "Scathed Music Disc — II"
+  "item.jugcraft.jugtania_record_gaia_2": "Scathed Music Disc — II",
+  "entity.jugcraft.pirate_ship": "Pirate Ship",
+  "entity.jugcraft.pirate_ship_deck": "Pirate Ship",
+  "container.jugcraft.pirate_ship_hold": "Pirate Ship's Hold",
+  "message.jugcraft.pirate_ship.crewed": "The crew still hold this ship. Beat them to open the hold."
 }

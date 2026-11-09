@@ -1,0 +1,40 @@
+# Moving pirate ships
+
+Owner scope, 10 November 2026 (relayed by Codex): genuinely moving ocean ships with visible crews; bounded patrols in loaded water; boarding encounters; saved ship and crew identities; no forced chunk loading; player claims and settlements preserved; villagers never targeted; no sea raids on towns. The static galleon (`OwnerGalleon`, `supps_galleon`) and every existing `supps_*` ID are unchanged.
+
+This record covers the ship itself. The crew, their stations and boarding are in [pirate-ship-crews.md](pirate-ship-crews.md); the model and textures come from `tools/pirate_ship.py`.
+
+## Status
+
+Implemented on the review branch `claude/nov10-pirate-ship` (based on the crew branch). It has not been compiled or run here (no Gradle or Minecraft in the cloud environment). The hull art is a separate branch; until it lands, the renderer draws nothing and logs that `pirate_ship_quads.json` is missing.
+
+## What exists
+
+- **`jugcraft:pirate_ship`** (`menagerie/PirateShip`): a 6 x 16 brig in the frame of `CrewedVessel` (x to port, y up from the waterline, z to the bow; deck at y 1.0). It implements `CrewedVessel` with the ten standard stations of `PirateCrew`.
+- **Walkable deck** (`jugcraft:pirate_ship_deck`, `PirateShipDeck`): an entity's box cannot turn, so the deck is four 5 x 5 squares along the keel (local z −5.5, −2, 2, 5.5), one block tall from the waterline, so their tops are the deck. Players, boarders and dropped crew stand on them. They are never saved; the ship makes them again when it loads, and they go when it goes. Hitting or using one hits or uses the ship. At yaws between the right angles a square's corner reaches up to half a block past the hull.
+- **Patrol.** Within 64 blocks of the place it was raised (its anchor, saved), waypoint to waypoint (each 16-64 blocks from the anchor, one candidate tried a tick). Top speed 0.12 blocks a tick, turning 1 degree a tick, server-authoritative and eased on clients (`SmoothFlight`). It makes way only while a crew member holds the helm (`PirateCrew.helmManned`), the crew have not hove to, it is afloat, and no player stands on its deck. The water 3 blocks ahead is checked every 10 ticks; where it is not clear, or not loaded, or would take it past its radius, it stops and chooses another heading.
+- **Where it may be** (`PirateWaters.clear`): the hull's footprint (6 x 16 turned to its yaw, enclosed by an axis-aligned box: a conservative superset) inside the world border and on loaded chunks only; under the waterline block and 2 more, water with nothing solid (kelp and seagrass pass); 13 blocks above clear of anything solid or liquid; no block entity; no town, operator region or land claim. Nothing in it loads a chunk or changes the world. Codex's local `PirateWaters` draft has the same signatures (`clear`, `footprint`, `loaded`); either may replace the other.
+- **Natural ships** (`PirateSeas`, saved with the overworld as `jugcraft:pirate_seas`):
+  - every 1,200 ticks, at most 4 players tried, each with a 1 in 4 chance; players in creative or spectator are skipped, and nothing spawns on Peaceful or with `spawn_mobs`/`spawn_monsters` off;
+  - the ship is raised 48-96 blocks from the player over ocean (`#is_ocean`) at sea level, only where the water is clear, with no town, claim or village within 48 blocks (villages read only in loaded chunks);
+  - at most 3 ships afloat and crewed, counted from the saved ledger, so an unloaded ship still counts; one ship per 512-block region; a region rests 3 days (72,000 ticks) after its ship is beaten, sunk or removed;
+  - a ship unseen for 7 days is forgotten (its region then rests); if its chunk loads again it is recorded again;
+  - the crew are seated (`PirateCrew.provision`) before the ship is added, and ship and crew are added together once (`addFreshEntityWithPassengers`).
+- **Hold and loot.** 27 slots, saved. Empty while the crew hold out. When `PirateCrew.defeated` first answers true for a ship the spawner crewed, the hold is filled once from the static galleon's own chest table (`jugcraft:supps_loot/galleon/chest`, read, not changed), with a seed fixed by the ship's UUID; the ship heaves to and its flag is struck. It is never rolled again: not on reload, not after it is emptied. A ship nobody crewed (summoned by an operator) never rolls. The crew code rolls, gives and drops no hold loot. Use a beaten ship (its deck) to open the hold; a crewed one refuses.
+- **Damage and sinking.** Only players and their shots harm it (300 points); an operator in creative removes it outright, spilling the hold. A sinking ship spills its hold where it lies, ejects its crew (who fight on unlinked), settles for 200 ticks and is gone. A beaten ship with an empty hold that no player comes within 48 blocks of for 6,000 ticks sinks on its own.
+- **Renderer** (`client/PirateShipRenderer`): the hull from `pirate_ship_quads.json` (via `DecorQuads`), turned to the yaw and rocking slowly; sails swaying with headway; the flag fluttering (not drawn once beaten); wheel and rudder turned by the synced helm; a cannon at each gunner station turned to its broadside. Pivots and cannon trunnions come from `pirate_ship_rig.json` (ship-local pixels; culling box in blocks), with defaults from the agreed layout where the file or a key is missing.
+
+## Saved state
+
+On the ship: `AnchorX/Y/Z`, `HasWaypoint`, `WaypointX/Z`, `Natural`, `Crewed`, `LootRolled`, `HeaveTo`, `Sunk`, `Damage`, `Sinking`, `Idle` and the hold's `Items`. The crew ride as passengers, saved inside the ship by vanilla. In `jugcraft:pirate_seas`: each natural ship's UUID, region, anchor, state (active or defeated) and when its chunk last held it, and each resting region's end time.
+
+## Tests
+
+`PirateShipGameTests` (server; registered): clear water and its refusals, including an unloaded place that stays unloaded; the deck's height and a pig standing on it, the squares following a turn; sailing only when helmed, stopping dead without a helmsman, hove to, or with a player aboard; the hold rolled exactly once (equal to the table's roll for the ship's seed) and never refilled through more ticks and a reload; saving; sinking by players only, with the hold spilt; the spawn ledger's region, cap, rest, stale and save rules. The ship's questions to its crew are answered by the test (`PirateShipTesting`, test code only), so these tests do not depend on crew behaviour.
+
+## Not done
+
+- No rendered client check yet: it needs the hull art.
+- Own-broadside: crew cannonballs must not hit their own hull's deck squares; the crew branch is adding that filter, and a real-hull test follows on this branch once it lands.
+- The crew roster for victory (death notifications rather than absence) is being added on the crew branch; the ship will call its `forget` when it is removed.
+- Balance (health, speed, spawn rate, cap) is a first choice for owner review.

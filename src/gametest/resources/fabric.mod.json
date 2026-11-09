@@ -350,6 +350,7 @@
       "io.github.jimbozoomer.jugcraft.test.MachineConsolidationGameTests",
       "io.github.jimbozoomer.jugcraft.test.MineralSandGameTests",
       "io.github.jimbozoomer.jugcraft.test.PirateCrewGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PirateShipGameTests",
       "io.github.jimbozoomer.jugcraft.test.TechSevenGameTests",
       "io.github.jimbozoomer.jugcraft.test.DarkMatterGameTests",
       "io.github.jimbozoomer.jugcraft.test.ElementalAlchemyGameTests",

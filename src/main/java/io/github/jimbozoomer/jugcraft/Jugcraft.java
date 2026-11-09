@@ -198,6 +198,7 @@ public final class Jugcraft implements ModInitializer {
         io.github.jimbozoomer.jugcraft.aquatic.OwnerAquaculture.register();
         io.github.jimbozoomer.jugcraft.ribbits.OwnerRibbits.register();
         io.github.jimbozoomer.jugcraft.menagerie.OwnerSupplementaries.register();
+        io.github.jimbozoomer.jugcraft.menagerie.PirateShips.register();
         io.github.jimbozoomer.jugcraft.menagerie.OwnerAmendments.register();
         io.github.jimbozoomer.jugcraft.botany.Jugtania.register();
         io.github.jimbozoomer.jugcraft.arcane.ForbiddenArcane.register();
