@@ -602,6 +602,32 @@ public final class TownFeast {
 		return site != null && ledger.isFor(origin) && !ledger.placed(site.id()).isEmpty();
 	}
 
+	/**
+	 * Whether {@code pos} holds the feast exactly as this town set it out, for checks that compare the town with its
+	 * blueprint: not air, a cell of a site the town's ledger has {@value #PLACED}, and that whole site still passing the
+	 * identity check the town takes it down by ({@link #removable}: linen tables along x holding only the town's stamped
+	 * servings, no more than were laid; the turkey whole, facing as set). Anything else at a feast cell (an owner's block,
+	 * added or refilled food, a changed table, a preserved or skipped site) is not.
+	 */
+	public static boolean authored(ServerLevel level, BlockPos pos) {
+		BlockPos origin = TownState.get(level).origin();
+		return origin != null && authored(ledger(level), origin, level, pos);
+	}
+
+	/** {@link #authored(ServerLevel, BlockPos)} against a given ledger and origin. */
+	public static boolean authored(Ledger ledger, BlockPos origin, ServerLevel level, BlockPos pos) {
+		Site site = siteAt(origin, pos);
+		if (site == null || !ledger.isFor(origin) || level.getBlockState(pos).isAir()) {
+			return false;
+		}
+		for (Ledger.Entry entry : ledger.placed(site.id())) {
+			if (removable(level, origin, site, entry) == null) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** {@link #mayPublicEat(ServerLevel, BlockPos, Player)} against a given ledger and origin (claims still apply: AND). */
 	public static boolean mayPublicEat(Ledger ledger, BlockPos origin, ServerLevel level, BlockPos pos, Player player) {
 		Site site = siteAt(origin, pos);

@@ -115,6 +115,8 @@ Nothing calls these yet:
 | `TownFeast.mayPublicEat(ServerLevel, BlockPos, Player)` | `TownProtection.useBlock`, before `publicBlock` | Whether the town lets a player eat there now: a managed cell, both hands empty, not sneaking, and on a table length only the town's own stamped food. |
 | `TownFeast.report(ServerLevel, boolean dryRun)` | a `/jugcraft town feast` (and `feast dryrun`) subcommand | Lines to print: the ledger, and with `dryRun` what a run would do now, changing nothing. |
 
+**Checks against the blueprint.** `TownFeast.authored(ServerLevel, BlockPos)` says whether a cell holds the feast exactly as the town set it out: not air, a cell of a site the ledger has `placed`, and that whole site passing the same identity check as taking down. `TownGameTests.testTownIsBuiltAndKept` uses it, so its block-by-block and drift comparisons accept the town's own feast cells in season and still fail on any other difference, including a feast site an owner has changed.
+
 **Claims stay in force.** `mayPublicEat` is never an alternative to the land claim check. The caller requires both, `mayPublicEat(...) && LandRegistry.mayBuild(player, level, pos)`, so a managed cell never bypasses a claim. When both hold, it runs only the block's own empty-hand use (`useWithoutItem`); otherwise it refuses, with no fallback to an item's use.
 
 **Permissions.** No `#jugcraft:town_usable` entry and no `TownProtection` change is made here. Owner Feast Tables in town stay private, and `FeastTableBlock` is unchanged.
@@ -161,14 +163,14 @@ None.
 
 | Test | What it checks |
 | --- | --- |
-| `setsOutTheWholeFeastOnceWithExactlyItsServings` | A dry run changes nothing. Every table length and dish, 80 servings, the turkey's 18 parts at 24 portions, and nothing dropped. |
+| `setsOutTheWholeFeastOnceWithExactlyItsServings` | A dry run changes nothing. Every table length and dish, 80 servings, the turkey's 18 parts at 24 portions, and nothing dropped. All 28 cells are `authored`; a cell outside the layout, or one a ledger never set out, is not. |
 | `eatenServingsAreNeverRefilledOnAnyReEntry` | After eating, nothing is refilled through a re-run, a dry run, a reload of the saved ledger, another blueprint revision, or a theme flip and back. |
 | `consumedStaysConsumedAndIsStillTakenDown` | An empty dish and an eaten-out turkey stay so, are still taken down without spills, and the next November brings a new feast. |
 | `anOwnerOrFixtureChangeSkipsTheWholeSite` | An owner block in the margin, casino furniture within two blocks, or an owner mark skips that whole site. It is set out once the ground is clear. |
 | `takingDownSpillsNothingAndKeepsPlayersFoodAndCloth` | A player's bread and a player's runner keep their sites; the partly eaten turkey is taken down; nothing is spilled. |
 | `theTurkeyGoesMasterFirst` | The service drops nothing. Removing a part first drops one packed feast, which is why the order matters. |
 | `onlyManagedFeastCellsArePubliclyEdible` | Through `managed` and `mayPublicEat`, both hands empty: eating at a managed table and at the turkey is allowed. Refused: an item in the offhand, an item in the main hand, sneaking, a length refilled with the player's own same food, a length with other food added, and an owner's table. Nothing is managed after take-down. |
-| `aPlayersOwnFoodIsNeverMistakenForTheTowns` | A stamped serving is eaten like any other. The owner's plain identical food can't merge into a stamped dish. A dish refilled with it below the laid count makes the table preserved, through a save and reload of the table and the ledger, and cleanup leaves the owner's food in place. |
+| `aPlayersOwnFoodIsNeverMistakenForTheTowns` | A stamped serving is eaten like any other. The owner's plain identical food can't merge into a stamped dish. A dish refilled with it below the laid count makes the table preserved, through a save and reload of the table and the ledger, and cleanup leaves the owner's food in place. A site with the owner's food on it is no longer `authored`. |
 | `onlyAPositivelyManagedNeighbourMayStandInAMargin` | An owner's feast table in E2's margin skips E2 (and T, whose cell it stands on). Once it is gone, E2 and the turkey are set out side by side, each accepting the other. |
 
 `TownFeastClientTests` is a rendered client fixture, also not run. It drives the same service on a flat floor laid as the north plaza.

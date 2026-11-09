@@ -225,6 +225,17 @@ public final class TownFeastGameTests {
 					&& state.getValue(GiantTurkeyFeastBlock.REMAINING) == GiantTurkeyFeastBlock.PORTIONS, "Turkey part " + part + ": " + state);
 		}
 		h.assertTrue(drops(h) == 0, "Setting out drops nothing");
+		// Every one of the 28 cells is the town's own feast, as a check against the blueprint recognises it.
+		int authored = 0;
+		for (TownFeast.Site site : TownFeast.LAYOUT) {
+			for (BlockPos cell : site.cells()) {
+				authored += TownFeast.authored(ledger, origin(h), h.getLevel(), world(h, cell)) ? 1 : 0;
+			}
+		}
+		h.assertTrue(authored == 28, "All 28 feast cells are recognised as the town's own: " + authored);
+		h.assertTrue(!TownFeast.authored(ledger, origin(h), h.getLevel(), world(h, new BlockPos(84, 1, 89)))
+				&& !TownFeast.authored(new TownFeast.Ledger(), origin(h), h.getLevel(), world(h, site("W1").cells().getFirst())),
+				"A cell outside the layout, or a ledger that never set it out, is not");
 		h.succeed();
 	}
 
@@ -466,6 +477,9 @@ public final class TownFeastGameTests {
 		FeastTableBlockEntity cranberry = table(h, "W1", 2);
 		cranberry.clear(0);
 		h.assertTrue(cranberry.serve(0, plain("W1", 4, 2), true) == 2, "The owner's own cranberry sauce is laid");
+		h.assertTrue(!TownFeast.authored(ledger, origin(h), level, first) && !TownFeast.authored(ledger, origin(h), level, world(h, site("W1").cells().get(2)))
+				&& TownFeast.authored(ledger, origin(h), level, world(h, site("E2").cells().getFirst())),
+				"A site with the owner's food on it is no longer recognised as the town's own; the others still are");
 		// The table and the ledger both survive a save and reload.
 		reloadTable(h, "W1", 0);
 		reloadTable(h, "W1", 2);
