@@ -34,6 +34,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ChestMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.storage.loot.LootParams;
@@ -81,6 +82,8 @@ public class PirateShip extends Entity implements CrewedVessel {
 	public static final int HOLD_SLOTS = 27;
 	public static final float HEALTH = 300.0F;
 	public static final int SINK_TICKS = 200;
+	/** How far a sinking ship settles each tick, at most. */
+	public static final double SINK_STEP = 0.03;
 	public static final int DERELICT_TICKS = 6_000;
 	/** Players closer than this keep a beaten ship from sinking on its own. */
 	public static final double DERELICT_WATCH = 48.0;
@@ -103,6 +106,8 @@ public class PirateShip extends Entity implements CrewedVessel {
 	};
 	private final List<PirateShipDeck> decks = new ArrayList<>();
 	private Vec3 anchor = Vec3.ZERO;
+	/** Whether {@link #anchor} has been set: by {@link #launch}, from its save, or else from where it first ticks. */
+	private boolean anchored;
 	private @Nullable Vec3 waypoint;
 	private boolean natural;
 	private boolean crewed;
@@ -154,6 +159,7 @@ public class PirateShip extends Entity implements CrewedVessel {
 	/** Sets the anchor its patrol keeps to, and whether {@link PirateSeas} raised it. Before it is added. */
 	public void launch(Vec3 anchor, boolean natural) {
 		this.anchor = anchor;
+		this.anchored = true;
 		this.natural = natural;
 	}
 
@@ -245,6 +251,11 @@ public class PirateShip extends Entity implements CrewedVessel {
 		super.tick();
 		if (!(level() instanceof ServerLevel level)) {
 			return;
+		}
+		if (!anchored) {
+			// Added without launch (a /summon, say, with no anchor saved): its patrol keeps to where it first floats.
+			anchor = position();
+			anchored = true;
 		}
 		if (sunk()) {
 			sink(level);
@@ -433,9 +444,17 @@ public class PirateShip extends Entity implements CrewedVessel {
 		level.playSound(null, getX(), getY(), getZ(), SoundEvents.GENERIC_EXPLODE.value(), SoundSource.NEUTRAL, 1.5F, 0.6F);
 	}
 
+	/**
+	 * One tick of settling: down {@value #SINK_STEP} a tick, but never below the hull's checked depth (the waterline row
+	 * the anchor floats in, less {@link PirateWaters#DEPTH}), and only while the way down is open water or air, loaded,
+	 * and unprotected ({@link PirateWaters#maySink}): it never settles into the seabed, a block or an operator region.
+	 */
 	private void sink(ServerLevel level) {
 		ejectPassengers();
-		setPos(getX(), getY() - 0.03, getZ());
+		double next = getY() - SINK_STEP;
+		if (PirateWaters.maySink(level, position(), getYRot(), next, Mth.floor(anchor.y))) {
+			setPos(getX(), next, getZ());
+		}
 		placeDecks(level);
 		if (++sinking >= SINK_TICKS) {
 			discard();
@@ -473,6 +492,12 @@ public class PirateShip extends Entity implements CrewedVessel {
 		player.openMenu(new SimpleMenuProvider((id, inventory, p) -> ChestMenu.threeRows(id, inventory, hold),
 				Component.translatable("container.jugcraft.pirate_ship_hold")));
 		return InteractionResult.SUCCESS;
+	}
+
+	/** Pistons never move it: it goes only where its own checks let it ({@link PirateWaters#sweep}). */
+	@Override
+	public PushReaction getPistonPushReaction() {
+		return PushReaction.IGNORE_ENTITY;
 	}
 
 	/** The entity box is not hit; its deck squares are, and pass the blow here. */
@@ -592,7 +617,10 @@ public class PirateShip extends Entity implements CrewedVessel {
 
 	@Override
 	protected void readAdditionalSaveData(ValueInput input) {
-		anchor = new Vec3(input.getDoubleOr("AnchorX", getX()), input.getDoubleOr("AnchorY", getY()), input.getDoubleOr("AnchorZ", getZ()));
+		double anchorX = input.getDoubleOr("AnchorX", Double.NaN);
+		anchored = !Double.isNaN(anchorX);
+		// Without a saved anchor (a /summon reads its tag before it is placed), the first tick anchors it where it floats.
+		anchor = anchored ? new Vec3(anchorX, input.getDoubleOr("AnchorY", getY()), input.getDoubleOr("AnchorZ", getZ())) : Vec3.ZERO;
 		waypoint = input.getBooleanOr("HasWaypoint", false)
 				? new Vec3(input.getDoubleOr("WaypointX", anchor.x), anchor.y, input.getDoubleOr("WaypointZ", anchor.z)) : null;
 		natural = input.getBooleanOr("Natural", false);

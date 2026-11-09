@@ -34,7 +34,8 @@ import org.jspecify.annotations.Nullable;
  * quietly, without its hold.
  *
  * <p>Ships appear naturally on their own: now and then, out of sight in loaded ocean near a player in survival or
- * adventure, never near a town, claim, operator region or village, at most {@value #MAX_SHIPS} afloat and at most one per
+ * adventure, never near a town, claim, operator region or village, nor where any chunk that near is not loaded (what
+ * cannot be seen counts as settled), at most {@value #MAX_SHIPS} afloat and at most one per
  * {@value #REGION_SIZE}-block region, which then rests {@value #COOLDOWN} ticks after its ship is beaten or gone.
  */
 public final class PirateSeas extends SavedData {
@@ -55,8 +56,14 @@ public final class PirateSeas extends SavedData {
 	/** How far from the player a ship is raised: past their sight of the hull, inside loaded chunks. */
 	public static final int MIN_DISTANCE = 48;
 	public static final int MAX_DISTANCE = 96;
-	/** No ship is raised with a town, claim or village this close. */
+	/** No ship is raised with a town, claim or village this close, or with a chunk this close not loaded. */
 	public static final int SETTLEMENT_CLEARANCE = 48;
+	/**
+	 * Heights above the waterline at which villages are looked for in each chunk round the place. Each look reaches one
+	 * section (16 blocks) up and down, so these cover from 16 blocks under the waterline to 80 above it: a village on the
+	 * shore or on the cliffs over it.
+	 */
+	static final int[] VILLAGE_HEIGHTS = {0, 32, 64};
 
 	/** Where a ship stands in the ledger: still crewed, or beaten (it keeps its hold until it sinks or is removed). */
 	public enum State {
@@ -260,7 +267,7 @@ public final class PirateSeas extends SavedData {
 		PirateSeas seas = get(level);
 		long region = region(at.x, at.z);
 		if (seas.active(now) >= MAX_SHIPS || !seas.regionFree(region, now) || !PirateWaters.clear(level, at, yaw)
-				|| nearSettlement(level, at)) {
+				|| settlementNear(level, at) != null) {
 			return null;
 		}
 		PirateShip ship = PirateShips.SHIP.create(level, EntitySpawnReason.NATURAL);
@@ -284,26 +291,39 @@ public final class PirateSeas extends SavedData {
 	}
 
 	/**
-	 * Whether a town, a land claim, an operator region or a village lies within {@value #SETTLEMENT_CLEARANCE} blocks of the
-	 * ship's place (its whole height, keel to mast). Towns, claims and operator regions are saved data, tested exactly
-	 * ({@link PirateWaters#unprotected}); villages are read from their meeting points only where the chunk is loaded.
+	 * Why no ship may be raised at {@code at}, or null when one may: a chunk within {@value #SETTLEMENT_CLEARANCE} blocks not
+	 * loaded (what cannot be seen counts as settled, so a village there is never missed), a town, land claim or operator
+	 * region within it (its whole height, keel to mast: saved data, tested exactly by {@link PirateWaters#unprotected}), or
+	 * a village within it, from its meeting points, beds and workstations ({@link ServerLevel#isVillage}) looked for in every
+	 * chunk at the waterline and above it ({@link #VILLAGE_HEIGHTS}). Loads nothing.
 	 */
-	static boolean nearSettlement(ServerLevel level, Vec3 at) {
+	public static @Nullable String settlementNear(ServerLevel level, Vec3 at) {
 		int r = SETTLEMENT_CLEARANCE;
 		int surface = Mth.floor(at.y);
-		AABB around = new AABB(at.x - r, surface - PirateWaters.DEPTH, at.z - r, at.x + r, surface + PirateWaters.MAST + 1, at.z + r);
-		if (!PirateWaters.unprotected(level, around)) {
-			return true;
-		}
 		BlockPos centre = BlockPos.containing(at);
-		for (int cx = (centre.getX() - r) >> 4; cx <= (centre.getX() + r) >> 4; cx++) {
-			for (int cz = (centre.getZ() - r) >> 4; cz <= (centre.getZ() + r) >> 4; cz++) {
-				BlockPos pos = new BlockPos((cx << 4) + 8, centre.getY(), (cz << 4) + 8);
-				if (level.hasChunkAt(pos) && level.isVillage(pos)) {
-					return true;
+		int cx0 = (centre.getX() - r) >> 4, cx1 = (centre.getX() + r) >> 4;
+		int cz0 = (centre.getZ() - r) >> 4, cz1 = (centre.getZ() + r) >> 4;
+		for (int cx = cx0; cx <= cx1; cx++) {
+			for (int cz = cz0; cz <= cz1; cz++) {
+				if (!level.hasChunkAt(new BlockPos(cx << 4, surface, cz << 4))) {
+					return "unloaded chunk " + cx + ", " + cz;
 				}
 			}
 		}
-		return false;
+		AABB around = new AABB(at.x - r, surface - PirateWaters.DEPTH, at.z - r, at.x + r, surface + PirateWaters.MAST + 1, at.z + r);
+		if (!PirateWaters.unprotected(level, around)) {
+			return "town, claim or operator region";
+		}
+		for (int cx = cx0; cx <= cx1; cx++) {
+			for (int cz = cz0; cz <= cz1; cz++) {
+				for (int height : VILLAGE_HEIGHTS) {
+					BlockPos pos = new BlockPos((cx << 4) + 8, surface + height, (cz << 4) + 8);
+					if (!level.isOutsideBuildHeight(pos) && level.isVillage(pos)) {
+						return "village by chunk " + cx + ", " + cz;
+					}
+				}
+			}
+		}
+		return null;
 	}
 }
