@@ -1,6 +1,6 @@
 # Powered armor sound and night vision fixes
 
-The industrial billing implementation and price verification below were superseded by the [night-vision metering correction](night-vision-metering.md) after the owner reported faster real-world drain. This record retains the original build's test evidence.
+The industrial billing implementation and price verification below were superseded by the [night-vision metering correction](night-vision-metering.md) after the owner reported faster real-world drain. The effect-ownership rule was later tightened by [powered night vision ownership](powered-night-vision.md). This record retains the original build's test evidence.
 
 Owner-directed correction, November 3, 2026. Implemented with OpenAI Codex (GPT-6), extending the existing powered-equipment balance on the working branch based on `235524e0c8`. Earlier equipment, scanner, charging-station, tree-detection and held-model changes are preserved.
 

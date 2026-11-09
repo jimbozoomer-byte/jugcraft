@@ -84,6 +84,7 @@ An independent review of this PR, in its own branch on top of it.
 **Tests:**
 - Server game tests for the 7 November goggles report, run in a dark cell with the real tick callbacks.
 - A potion's night vision merged into the helmet's own effect is neither billed nor removed.
+  - **Follow-up (10 November):** [powered night vision ownership](powered-night-vision.md) closes the alike-effect and endless-effect cases the ownership check still let through. It adds `PoweredNightVisionGameTests`.
 - A Q-dropped scanner cancels its survey.
 
 **Left as found:** the Leaf Blower's Shift+Sprint strength toggle is read only on the server. The client can't see the sprint key from shared code, so it starts using the blower while the server toggles. A fix needs a gesture choice.

@@ -69,6 +69,8 @@ Design inspiration:
 - Powers run on the server (`ServerTickEvents.END_SERVER_TICK`, every player).
   - Bonuses are transient attribute modifiers, added while a piece works and removed the tick it stops. Nothing is saved on the player.
   - The suit's night vision is ambient and particle-free; it is removed when the helmet stops providing it. A potion's night vision is left alone.
+  - **Only its own** (10 November 2026). The helmet's vision comes from `PoweredNightVision`, shared with the industrial helmets. It removes only the instance it added, and only while nothing else has merged into it; see [powered night vision ownership](powered-night-vision.md).
+    - **Before:** on `main` the suit removed any ambient, particle-free night vision of 260 ticks or less. That stripped the industrial goggles' vision every tick, along with the nano and quantum helmets, the Jimtafacts accessory goggles, the glowing flower crown and the hood of darkness.
 - Energy is the existing `jugcraft:energy` item component. The jetpack uses the existing rocket-pack thrust packet, rate-limited per player.
 - Recipes follow the `machines` feature switch.
 
@@ -87,7 +89,7 @@ No new dependencies. Art is drawn by `tools/exosuit_art.py`, and the 3D part box
   - `liveryRepaintsAndKeepsCharge`: the smithing recipe turns a charged Vanguard helmet Ronin with its charge.
 - Client screenshots: `jugcraft_exosuit_vanguard` (front), `jugcraft_exosuit_vanguard_back`, `jugcraft_exosuit_ronin`.
 - Not run:
-  - the helmet's night vision in real darkness (not covered by a test);
+  - the helmet's night vision in real darkness, now covered by `PoweredNightVisionGameTests` (written, not yet run);
   - client play, flying, two players.
 
 ## World and event applicability
@@ -95,5 +97,5 @@ Not applicable.
 
 ## Rollout and open questions
 - A module system (choosing which powers each piece has) is not included; each piece has one fixed power.
-- The night vision cannot be switched off except by taking the helmet off or standing in light.
+- The night vision can be switched off with Shift-use on the held helmet ([powered equipment rebalance](powered-equipment-rebalance.md)), as well as by taking the helmet off or standing in light.
 - The 3D steel Pickelhaube spike could reuse this render layer if the owner wants it.

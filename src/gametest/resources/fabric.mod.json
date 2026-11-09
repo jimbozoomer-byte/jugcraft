@@ -16,6 +16,7 @@
     "fabric-gametest": [
       "io.github.jimbozoomer.jugcraft.test.FestivalRegressionGameTests",
       "io.github.jimbozoomer.jugcraft.test.PoweredArmorGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PoweredNightVisionGameTests",
       "io.github.jimbozoomer.jugcraft.test.ChainsawTreeGameTests",
       "io.github.jimbozoomer.jugcraft.test.DrillFaceGameTests",
       "io.github.jimbozoomer.jugcraft.test.PoweredToolEfficiencyGameTests",
