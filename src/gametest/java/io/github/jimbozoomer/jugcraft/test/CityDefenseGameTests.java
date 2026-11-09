@@ -94,7 +94,10 @@ public class CityDefenseGameTests {
 
     @GameTest
     public void artilleryCanReach250AndBankHasUsableEnderChest(GameTestHelper h) {
-        h.assertTrue(Ballistics.solve(JugcraftArtillery.HEAVY_SPEED,JugcraftArtillery.HEAVY_GRAVITY,245,0,true,45,85)!=null,"Heavy shells can reach 250 including barrel");
+        // Real flight (gravity, then drag, then the move): a Heavy Shell throws furthest, about 254 blocks, low at about 36
+        // degrees, and the guns with a low arc aim it first. A mortar, which cannot go below 45 degrees, lobs about 243.
+        h.assertTrue(Ballistics.solve(JugcraftArtillery.HEAVY_SPEED,JugcraftArtillery.HEAVY_GRAVITY,245,0,false,-5,45)!=null,"Heavy shells can reach 250 including barrel");
+        h.assertTrue(Ballistics.solve(JugcraftArtillery.HEAVY_SPEED,JugcraftArtillery.HEAVY_GRAVITY,240,0,true,45,89)!=null,"Heavy mortars can lob 240");
         h.assertTrue(Ballistics.solve(JugcraftArtillery.FLAK_SPEED,JugcraftArtillery.FLAK_GRAVITY,247,0,false,-5,85)!=null,"Flak has a 250-block solution");
         double travel=0,speed=JugcraftArtillery.FLAK_SPEED;
         for(int t=0;t<JugcraftArtillery.FLAK_FUSE;t++){travel+=speed;speed*=.99;}
