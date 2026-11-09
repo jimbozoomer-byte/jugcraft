@@ -3291,7 +3291,12 @@ session (no Minecraft or Fabric downloads), so every test below is written and n
 port adds appears in a garden commit of the cohort; the other 152 commits in `8075c6d58b..1a85f13929` (Chunks B to D,
 their merges and main's) add nothing main lacks, since #494 brought Chunks B to D to main. The port's own resolutions:
 both test JVMs at 6G, and the two-client tests launching through `SecondClient` with main's
-`PeerClientStartup.HEAP_OPTION` and `await`.
+`PeerClientStartup.HEAP_OPTION` and `await`. One resolution did not compile (found by the owner's local compile):
+`ConcordancePactNetworkTests` passed main's `coordination()` to `PeerClientStartup.await`, a helper the GC-P146 refactor
+had moved into `SecondClient`; it now passes `CLIENT.coordination()`, as `ConcordanceGardenNetworkTests` does. By
+inspection (no compiler here), no other gametest calls `coordination(`, `launchPeer(`, `mark(`, `marked(`, `read(`,
+`failure(`, `awaitPeer(`, `awaitMark(` or `heap(` without its class defining or statically importing it, and every class
+the gametest `fabric.mod.json` registers exists.
 
 **Incomplete gameplay as recorded, and what the review did:**
 
