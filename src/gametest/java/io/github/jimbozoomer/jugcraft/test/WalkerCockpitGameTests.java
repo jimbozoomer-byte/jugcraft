@@ -196,6 +196,31 @@ public class WalkerCockpitGameTests {
 	}
 
 	/**
+	 * Aiming never loads a chunk: a path whose two ends are in loaded chunks (0, 0) and (1, 1) but which cuts across the
+	 * corner of chunk (1, 0) on the way counts that chunk, so the look or a shell's flight stops there instead of
+	 * {@code Level.clip} loading it. A chunk the path does not cross, (0, 1), doesn't stop it, and with every chunk loaded
+	 * the path runs on: then the look and the flight clip exactly as before.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 20)
+	public void aimingStopsAtAnUnloadedChunkOnItsPath(GameTestHelper helper) {
+		Vec3 from = new Vec3(14.0, 70.0, 14.0);
+		Vec3 to = new Vec3(18.0, 70.0, 17.0); // crosses x = 16 at z = 15.5, in chunk (1, 0), before z = 16
+		helper.assertTrue(!WalkerAim.chunksLoadedAlong(from, to, (x, z) -> !(x == 1 && z == 0)),
+				"A path crossing the unloaded chunk (1, 0) between loaded ends must count it");
+		helper.assertTrue(!WalkerAim.chunksLoadedAlong(to, from, (x, z) -> !(x == 1 && z == 0)), "and the same the other way");
+		helper.assertTrue(WalkerAim.chunksLoadedAlong(from, to, (x, z) -> !(x == 0 && z == 1)),
+				"A chunk the path does not cross, (0, 1), must not stop it");
+		helper.assertTrue(WalkerAim.chunksLoadedAlong(from, to, (x, z) -> true), "With every chunk loaded the path runs on");
+		helper.assertTrue(!WalkerAim.chunksLoadedAlong(new Vec3(31.5, 70.0, 8.0), new Vec3(48.5, 70.0, 8.0), (x, z) -> x != 2),
+				"A straight path through a whole unloaded chunk, (2, 0), must count it");
+		// The clip's block walk starts a little behind its start (by a ten-millionth of its length), so a path starting
+		// that close to a chunk's edge may read the block over it.
+		helper.assertTrue(!WalkerAim.chunksLoadedAlong(new Vec3(15.9999999, 70.0, 8.0), new Vec3(10.0, 70.0, 8.0), (x, z) -> x != 1),
+				"A path starting a hair short of a chunk's edge counts the chunk over the edge");
+		helper.succeed();
+	}
+
+	/**
 	 * Getting out, a pilot steps off on the ground beside the walker, clear of its hull, and takes no fall: the Howitzer's
 	 * pilot (the tallest walker, 5.4 blocks) to its left, and the Armoured Walker's to its right when its left is walled
 	 * off. Vanilla's default would set them on top of the hull and drop them through it.
