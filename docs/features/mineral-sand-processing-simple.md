@@ -162,3 +162,54 @@ The PR was written on `f82f88c5a`. It is merged onto current main as branch `cla
 - Python: `test_alchemy_values`, `test_survival_recipes`, `test_recipe_conflicts` and `test_starter_workshop`, 29 tests, pass.
 - `tools/check_mod_data.py` on the merged tree passes: 15,336 material IDs, data files and the recipe audit. That is main's count plus this PR's seven items; the art check has no unlisted findings.
 - The Java parses. Game tests were not run here.
+
+## Audit and completion (10 November 2026, Claude Code)
+
+Branch `claude/nov10-b-mineral-sands`, continuing the port above. Integration base: main `8075c6d58b`. Every file in the branch diff belongs to this feature; the only unrelated content found was ten drifted alchemy records, removed below.
+
+### The four lines, end to end
+
+| Sand | Acquisition | Processing (existing machines) | Outputs | Consumers |
+| --- | --- | --- | --- | --- |
+| Titanium | Beach beds (Dune Beach, Overgrown Beach, Beach); shovel or Ore Drill; block drops itself | Mineral Conditioning Station (2 sand + water) -> Chemical Reactor (+ Coke, chlorine) -> Arc Furnace | Raw Titanium, Titanium Sponge, titanium ingot; or 4 White Dye from the reactor | Titanium tools, armor, plates and components; dyes |
+| Zircon | Desert beds (Outback, Lush Desert, Dry River, Desert, Badlands) | Chemical Reactor (4 sand or 2 saved concentrate + lye, water) -> Industrial Oven -> Precision Finishing Station (diamond head) | Zirconia Powder, Fired Zirconia Blank, 2 cutting inserts | Polymer molds and extrusion dies |
+| Rare earth | River-bank beds (Basin, Lake District, Lush River, forested River) | Mineral Conditioning Station (2 sand + water) -> Chemical Reactor (+ sulfuric acid), three independent 50% rolls | Mixed oxide; Neodymium, Cerium, Yttrium Oxide | Alloy Smelter magnets; Cerium Polishing Head (lenses); alternate Efficiency Upgrade |
+| Garnet | Stony beds (Gravel Beach, Highland, Shield, Stony Shore, Windswept Gravelly Hills) | Pulverizer | Garnet Grit | Garnet Sanding Block (Workshop Bench smooth sandstone); Garnet Abrasive Head (precision shafts) |
+
+All steps, reagents and machines were already reachable on main; no recipe, loot table, tag or generation hook was missing. New checks keep it that way (below).
+
+### Fixed
+
+- **Unrelated alchemy drift removed.** The port's `values.json` carried ten records from the PR's older regeneration that have nothing to do with sands: `advanced_engine`, `composite_rotor_assembly`, `drone_t5`–`drone_t8`, `exosuit_boots`, `exosuit_leggings`, `magnet_dynamo` and `magnet_motor`. They are back to main's values. Two of them made the Ronin livery smithing conversions mint essence.
+- **Remaining sand records, 17 in all.** Seven new items; the cheaper-magnet cascade (`neodymium_magnet`, `neodymium_drone_motor`, `tilt_rotor_nacelle`, `superconducting_motor`, `superconducting_lift_fan`), recomputed from main's values with the builder's own rule, propagating only from the changed items, and identical to the port's numbers; and five zirconia records below.
+- **Zirconia essence loop removed.** Finishing turns one Fired Zirconia Blank into two inserts, but fluid-machine products keep the one-essence fallback, so each finish minted one essence. This predates the PR (old ceramics route) and is the last step of the short zircon line. `tools/build_alchemy_values.py` now prices the precursor, powder, charge, unfired blank and fired blank at two inserts ("local zirconia finishing accounting", like the rare-earth allocation). Every producer spends at least that much (two concentrate, four sand, or the previous form), and no derived record consumes these items, so nothing else moves.
+- **Stale player guidance.** The Handbook's Ores page still told players to stockpile the sands "for future separation/refining". It now names each family's first processing step. A new first page, "Start here: find and choose a sand", gives where each family forms, which line to start, which machine each step uses, reagents to prepare, recipe locking, and what saved intermediates still do. The Mineral Conditioning Station, Industrial Oven and Precision Finishing Station pages name their sand jobs. The deposit record no longer calls processing future work.
+
+### Hand-computed essence records
+
+The builder needs the Minecraft jar, which was not available. With the builder's rule (sum of each slot's cheapest ingredient, divided by the output count):
+
+| Record | Value | Derivation |
+| --- | --- | --- |
+| Neodymium, Cerium, Yttrium Oxide | 1/8 each | Mixed oxide 1/2 divided by 4 (all-success allocation) |
+| Garnet Grit | 1 | Fallback: pulverizing is not a builder edge |
+| Garnet Sanding Block | 57 | Grit 1 + cheapest wool 48 + cheapest planks 8 |
+| Garnet Abrasive Head | 908/3 | 4 grit + iron ingot 256 + copper wire 128/3 |
+| Cerium Polishing Head | 1417/4 | 2 x 1/8 + Felt Polishing Head 354 |
+| Neodymium Magnet | 2057/32 | (1/8 + ferroboron 257) / 4 |
+| Neodymium Drone Motor, Tilt-Rotor Nacelle, Superconducting Drone Motor, Superconducting Lift Fan | 8363/48, 16715/48, 156571/96, 157243/96 | Their own recipes at the new magnet value |
+| Zirconia precursor, powder, charge, unfired and fired blank | 2 each | Two cutting inserts at 1 |
+
+### Loops checked
+
+Every recipe that consumes a sand-line item was priced at its maximum output, chanced coproducts included: none returns more essence than it spends. The only item cycle through a sand-line item is the existing nine-for-one Raw Titanium storage block, which conserves count. No recipe or byproduct produces any of the four sands, and no item tag contains them. Pre-existing gains outside this feature were found and left alone: crushing titanium or monazite ore (a one-essence ore gives two units), the magnesium titanium-sponge retort, and insulation molding.
+
+### Compatibility
+
+No item, block or recipe ID was removed or renamed. Old recipes stay: trace and regional zircon recovery, precursor, calcining, charge preparation, pressing, firing, finishing, both older magnet recipes, the alumina Efficiency Upgrade and the compact titanium route. Saved Zircon Concentrate, precursor, powder, charges, blanks, mixed oxide, Raw Titanium and sponge all keep a consuming recipe; concentrate also feeds the short zirconia recipe. The reactor's three-slot save migration is the port's, unchanged.
+
+### Tests added
+
+- `scripts/tests/test_mineral_sand_processing.py`, 8 tests: acquisition (self-drop loot, generated beds, biome tags); each chain step with exact IDs, machines and counts; consumers for every product; old routes and saved intermediates; no recreated sand or generic-sand feed; the essence audit; the item-cycle audit; the hand-computed records; and the Handbook guidance.
+- `tools/check_mod_data.py`: every sand has a recipe naming its exact ID, and no recipe result or byproduct recreates one.
+- `MineralSandProcessingGameTests`, three server tests: the White Dye route and saved concentrate in the compact reactor (including a lone leftover that must not start a batch); saved precursor, charge and unfired blank through their original machines; and exact per-sand recipe sets in the reactor family, with ordinary and red sand gaining none.

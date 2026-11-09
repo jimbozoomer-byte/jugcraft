@@ -97,6 +97,7 @@ The owner requested fewer steps and **no new machines**. The [replacement proces
 - [x] Garnet: Pulverizer -> useful grit; craft reusable tools for the existing Workshop Bench and Precision Finisher.
 - [x] Validate short routes, complete input costs, conservative alchemy values, existing machine layouts, saved work, recipe guidance and automated client synchronization. No new machine, extraction system or mandatory waste line.
 - [ ] Owner survival-cost/balance acceptance and two-human multiplayer playtest; keep this separate from automated server/client checks.
+- [ ] Regenerate `alchemy/values.json` with `tools/build_alchemy_values.py --minecraft-jar` and confirm the hand-computed sand records (10 November audit), then run the new sand game tests in a Gradle build.
 
 ## Local cosmetic costume — October 26
 
