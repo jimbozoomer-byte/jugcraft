@@ -3278,6 +3278,87 @@ Candidate: `dd71438c92` on `claude/garden-cohort`. In runs 41571742158 and 41576
 **Next proposed chunk**
 CI on the cohort head and these pictures looked at, then the cohort you choose. Its main risk is main's red checks holding every dispatch short of green.
 
+## The garden pacts' review (10 November 2026)
+
+A review of the port of this cohort onto main (`1a85f13929`: main's `8075c6d58b` merged with PR #526's head
+`6cc906b6fa`), made on branch `claude/nov10-c-garden-pacts` with Claude Opus 5.5. It finishes the gameplay this record
+and the spirits' records leave incomplete where that needs no new art, checks the whole pact lifecycle against the code,
+and adds one server test class for it. Nothing in it was compiled or run: Gradle and game tests could not run in the
+session (no Minecraft or Fabric downloads), so every test below is written and not yet run.
+
+**The port against PR #526.** The garden Java under `concordance/` is byte for byte PR #526's head, and the port's
+322 changed paths are the same as PR #526's own diff against main at its last main merge (`dcf6b249f`). Every line the
+port adds appears in a garden commit of the cohort; the other 152 commits in `8075c6d58b..1a85f13929` (Chunks B to D,
+their merges and main's) add nothing main lacks, since #494 brought Chunks B to D to main. The port's own resolutions:
+both test JVMs at 6G, and the two-client tests launching through `SecondClient` with main's
+`PeerClientStartup.HEAP_OPTION` and `await`.
+
+**Incomplete gameplay as recorded, and what the review did:**
+
+| Recorded as | Where | Done |
+|---|---|---|
+| Foras: a ripe host with no reading waits for good after a restart or a chunk reload ("any change to the shared sampling is unit 7's"; unit 7 made none) | [foras-pact.md](foras-pact.md#a-ripe-host-after-a-restart) | Implemented: he reads one ripe host's bed a think, within the level's sampling allowance (`GraftKeeping.ripe`, `firstReading`); `check_garden_pacts` holds it to one sample; tested |
+| Marax: Jade's short form of his note waits for the magic interfaces' unit 2 | [marax-pact.md](marax-pact.md#rollout-and-open-questions) | Already on this line (the glance key and `MagicGlance`'s hourglass); his record corrected |
+| Bifrons: a slept night does not reset his quota | [bifrons-pact.md](bifrons-pact.md#known-limits) | Reviewed, not changed: every pact's quota counts game days (`Pacts.done`, D-S1) so that turning the clock never resets it, and his hours read the world clock; changing that rule is shared with all seven spirits and is the owner's (checkpoint question 2) |
+| Bifrons: Jade's note a think stale; one Offer plate per kind of log (GC-P147) | [bifrons-pact.md](bifrons-pact.md#known-limits) | Unchanged: decided and recorded as limits |
+| Pictures, poses, loops, bodies, sounds; the two-client run | each spirit's record; [unit 7](#unit-7-as-built-and-its-evidence) | Out of this review's reach (no new art; no client can run here) |
+
+**The lifecycle, as the code enforces it** (lines at the review's head):
+
+- **Summon and bind.** The perch is placed only by a player in person where they may build (`PactPerchBlock.mayPlace`,
+  `spirits/PactPerchBlock.java:71`) and records its owner (`:78`). A visitor comes only for the perch's owner with the
+  spirit's research understood and its service's needs met (`PactMenu.invitable`, `PactMenu.java:216`). Sealing is
+  refused with one reason before anything is spent (`AgreementHolder.seal`, `AgreementHolder.java:258`;
+  `Pacts.refusal`, `worker/Pacts.java:92`): never a stand-in, only where the player could change the block, only the
+  perch's owner (`maySeal`, `AgreementHolder.java:242`). The visitor becomes the presence, bound to the holder
+  (`PactPerchBlockEntity.call`, `PactPerchBlockEntity.java:180`).
+- **Benefit.** A presence serves only verified at its own perch, its pact serving and its holder near
+  (`PactSpiritEntity.think`/`decide`, `PactSpiritEntity.java:301`, `:329`); each change is asked of
+  `GardenPacts.target` (`GardenPacts.java:62`): the pact serves there, a beneficiary's bed, the holder within 64 blocks
+  (`:75`), and the holder's own hands (`Authority.mayChange`, `:79`).
+- **Upkeep.** The perch looks once a second (`PactPerchBlockEntity.serverTick`, `:245`; `PactKeeping.tick`,
+  `PactKeeping.java:44`; `AgreementHolder.look`, `AgreementHolder.java:505`): an offering paid ahead is taken when due;
+  none, a warning and the grace, through which the spirit works on; then held for upkeep (`Pacts.due`,
+  `worker/Pacts.java:215`), when `Pacts.serves` (`:414`) refuses every change (UPKEEP_HELD). Nothing is lost while held
+  and nothing accrues; an offering paid by the holder in person resumes it with a whole period
+  (`AgreementHolder.deposit`, `AgreementHolder.java:532`).
+- **Unbind.** Only its living holder, in person (`AgreementHolder.end`, `AgreementHolder.java:553`, `:572`;
+  `PactKeeping.end`, `PactKeeping.java:202`): the record released once, the escrow back once, the presence struck off
+  the roster and departing, the departure kept. Breaking the perch never ends a pact (`broken`, `:680`).
+- **Save and reload.** The record and escrow live in the world's Bound Wills (`BoundWills.CODEC`,
+  `BoundWills.java:84`); the perch saves its owner, terms and presence and never a visitor
+  (`PactPerchBlockEntity.saveAdditional`/`loadAdditional`, `:276`, `:265`; `AgreementHolder.save`/`load`, `:854`,
+  `:848`). A presence unloaded stays on the roster (`PactSpiritEntity.remove`, `PactSpiritEntity.java:561`), so no
+  second is called; a loaded copy that is not the perch's presence leaves (`decide`, `:361`, `:372`).
+
+**Ownership and claims.** Every holder action asks for the record's holder in person: end, suspend and resume (also by
+record, the roster's way: `AgreementHolder.toggle`, `AgreementHolder.java:475`), deposit, recall (`:423`), the page
+(`PactKeeping.mine`, `PactKeeping.java:146`) and a matter's answer (`PactAccords.resolve`, `PactAccords.java:117`). A
+party benefits under a party pact but holds nothing. Claims are Jugcraft's own: `Authority.mayChange`
+(`concordance/Authority.java:137`) asks Fabric's break event, where `LandProtection` (`finance/LandProtection.java:39`)
+answers with `LandRegistry.mayBuild` (`finance/LandRegistry.java:235`): owner, controlling shareholder, trusted
+players, an explicitly shared party, or an operator. No stand-in ever answers for a garden service (`GardenPacts.target`
+uses `presentNear`, never `answering`), so a spirit never acts for an absent holder.
+
+**Research.** Pacts are not behind equipment research. The perch's recipe (`data/jugcraft/recipe/pact_perch.json`)
+carries only the Concordance's feature condition; placing and opening a perch asks no research
+(`thePerchNeedsNoResearchOnlyTheSpiritsOwn`). A spirit asks only its own research, The Garden's Regard (the Binding
+Arts and Verdant Husbandry understood; `PactMenu.knows`, `PactMenu.java:278`), and no service step asks any research.
+
+**Tests added** (`src/gametest/.../ConcordanceGardenLifecycleGameTests.java`, registered as a `fabric-gametest`
+entrypoint; `check_garden_pacts` names them in `NOV10_LIFECYCLE_TESTS`; written, not yet run):
+
+| Test | Proves |
+|---|---|
+| `bindingBuerAtThePerchEasesTheHoldersBed` | Bound through the perch's own screen once (one record, compact spent, the holder's Buer on their roster); by day he eases the holder's bed and moves nothing else |
+| `anUnpaidUpkeepStopsTheServiceUntilItIsPaid` | An offering paid ahead is taken; unpaid, warned, he works through the grace; past it held, tending nothing, nothing accrued, taken or lost; paid, resumed with a whole period, working again |
+| `endingTheGardenPactReturnsTheEscrowOnceAndBuerLeaves` | Ended by its holder: record gone, escrow back once, one departure kept, the perch empty, Buer off the roster and departed; a second end does nothing |
+| `onlyTheHolderMayBindEndPayOrCommandTheirSpirit` | A stranger cannot bind at, end, suspend, pay into, recall, answer or read the holder's pact, at the perch, by record or through the screen; a party member benefits but cannot end or suspend it |
+| `aRealLandClaimKeepsBuerOffANeighboursGround` | A neighbour's real `LandRegistry` claim over the holder's bed: `BLOCKED_BY_ACCESS`, the bed untouched; the chunk passed to the holder, he eases it; the claim lifted after |
+| `aGardenPactSurvivesASaveAndReloadWithNothingDuplicated` | Bound Wills and the roster through their codecs; the perch and Buer through their saves; one Buer, one roster entry, one pact after the perch's looks and the holder's screen; a copied save leaves; the reloaded Buer serves once |
+| `forasReadsARipeHostThatLostItsReading` | The review's fix: a ripe host's lost reading is read and judged; a growing host's is not sampled by him; nothing spent |
+| `thePerchNeedsNoResearchOnlyTheSpiritsOwn` | A player with no research may place and open a perch; its notes are only the spirit's own requirements |
+
 ## Where to resume
 
 Units 1 to 7 are built, recorded and pushed on `claude/garden-cohort` (head `dd71438c92`), in draft pull request
@@ -3309,7 +3390,8 @@ run (step 5): it waits for a shard with heap to spare, or for main's out-of-memo
    assent picture, the pylon road not photographed ([his record](bathin-pact.md#rollout-and-open-questions)); the
    journey's Buer steps writing his numbers as literals; Marax's astir loop and his reading's sign, his two kept-page
    states estimated over budget ([his record](marax-pact.md#rollout-and-open-questions)); Foras's astir loop, his count
-   an action-bar line, a ripe host with no reading ([his record](foras-pact.md#rollout-and-open-questions)); Bifrons's
+   an action-bar line ([his record](foras-pact.md#rollout-and-open-questions); his ripe host with no reading is closed by
+   [the garden pacts' review](#the-garden-pacts-review-10-november-2026)); Bifrons's
    astir loop, a slept night not resetting his quota, his Jade note a think stale, finding 11 kept (GC-P147;
    [his record](bifrons-pact.md#known-limits)); Amdusias's open questions
    ([his record](amdusias-pact.md#rollout-and-open-questions)); GB18 (Gutenberg's record); the pictures of run

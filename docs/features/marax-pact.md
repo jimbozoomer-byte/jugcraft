@@ -483,5 +483,6 @@ Ships with the garden cohort's unit 3 (GC-06), behind the Concordance's switch; 
 merged into the cohort, not merged into main. Open: his pictures to be looked at; his body is built rather than
 the owner's (no owner rig fits; the cohort's checkpoint question 1); whether a reading a day or two is the right measure
 (question 2); the two kept-page states estimated over budget; Jade's short form of his note ("Proud beds: %1$s", the
-hourglass) waits for the merge of the magic interfaces' unit 2, whose short-form tables are not on this line; his reading's
+hourglass) is on this line since the magic interfaces' unit 2 merged (`screen.jugcraft.glance.tooltip.jugcraft.concordance.jade.pact.note.habitat_reading.proud`
+and `MagicGlance`'s hourglass mark; found by the garden pacts' review of 10 November 2026, not photographed); his reading's
 sign is the shared work sign, not particles of his own; his astir loop is not photographed.

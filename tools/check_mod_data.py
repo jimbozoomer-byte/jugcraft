@@ -24190,6 +24190,11 @@ def check_garden_pacts(co, root, lang, registered, research):
             or step.count("firstReading(level, host)") != 1 or "block.isMaxAge(crop)" not in _java_body(keeping, "static boolean ripe("):
         err("spirits/GraftKeeping.java: his only sample is a ripe host's bed with no reading, through VerdantBedBlockEntity.habitat "
             "(the level's allowance), at most one a think (the garden pacts' review, 10 November 2026)")
+    for cls, names in NOV10_LIFECYCLE_TESTS.items():
+        source = (tests / f"{cls}.java").read_text(encoding="utf-8") if (tests / f"{cls}.java").is_file() else ""
+        for name in names:
+            if not re.search(rf"public void {name}\(GameTestHelper \w+\)", source):
+                err(f"{cls}: missing the garden pacts' review game test {name} (10 November 2026)")
     landed = _java_body(keeping, "private static Status grafted(")
     order = [landed.find(n) for n in ("memory.grafted(graft);", "holder.taskDone(level, now);",
                                       "foras.attendWork(graft.crop(), ForasEntity.Gesture.WORK.ticks, now);",
@@ -28965,6 +28970,15 @@ GC06_TESTS = {
 }
 # GC-07 unit 4
 # Concordance garden cohort, GC-07 (check_garden_pacts): the graft extracted, the bed index's stores, Foras's service.
+# The garden pacts' review (10 November 2026): a garden pact's whole lifecycle, the real land claim, a save and reload with
+# nothing duplicated, the perch's freedom from research, and Foras's ripe host after a reload (check_garden_pacts).
+NOV10_LIFECYCLE_TESTS = {
+    "ConcordanceGardenLifecycleGameTests": [
+        "bindingBuerAtThePerchEasesTheHoldersBed", "anUnpaidUpkeepStopsTheServiceUntilItIsPaid",
+        "endingTheGardenPactReturnsTheEscrowOnceAndBuerLeaves", "onlyTheHolderMayBindEndPayOrCommandTheirSpirit",
+        "aRealLandClaimKeepsBuerOffANeighboursGround", "aGardenPactSurvivesASaveAndReloadWithNothingDuplicated",
+        "forasReadsARipeHostThatLostItsReading", "thePerchNeedsNoResearchOnlyTheSpiritsOwn"],
+}
 GC07_GRAFT_TESTS = {
     "ConcordanceGardenGameTests": ["theGraftGestureBehavesAsBefore", "aGraftGainsOnlyWhereEveryFitIsNoWorseAndOneBetter",
                                    "theGardenReachIndexesStoresTouchingThePerch"],
