@@ -249,6 +249,8 @@ def assets():
     raiders.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import zeppelin
     zeppelin.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import pirate_ship
+    pirate_ship.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import mech
     mech.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import landship
