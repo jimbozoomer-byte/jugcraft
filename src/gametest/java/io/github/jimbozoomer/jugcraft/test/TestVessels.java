@@ -24,7 +24,8 @@ import net.minecraft.world.phys.Vec3;
 /**
  * A test-only stand-in for the pirate ship (docs/features/pirate-ship-crews.md), registered by the test mod and never
  * shipped: {@code jugcraft-test:stub_vessel} holds still, uses the standard ten stations and deck, seats its crew
- * through {@link PirateCrew} exactly as the real ship's overrides do, and saves its heave-to flag. Crew tests use it so
+ * through {@link PirateCrew} exactly as the real ship's overrides do, saves its heave-to flag and, destroyed, takes its
+ * crew off the roster ({@link PirateCrew#forget}). Crew tests use it so
  * they do not depend on the ship's movement.
  */
 public final class TestVessels implements ModInitializer {
@@ -92,6 +93,15 @@ public final class TestVessels implements ModInitializer {
 		@Override
 		public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
 			return false;
+		}
+
+		/** As the real ship's: destroyed (not merely unloaded), it takes its crew off the roster. */
+		@Override
+		public void remove(RemovalReason reason) {
+			if (reason.shouldDestroy() && level() instanceof ServerLevel level) {
+				PirateCrew.forget(level, getUUID());
+			}
+			super.remove(reason);
 		}
 
 		@Override

@@ -1,19 +1,21 @@
 # Pirate ship crews and boarding
 
-Status: crew and boarding code implemented on branch `claude/nov10-b-pirate-crew` (Claude Code, Agent B), 10 November 2026. Not compiled, and no game test has run; see Verification. The moving ship itself (`PirateShip`: movement, patrol, spawning, persistence, hold and loot, renderer) is a separate change by the coordinator, built against the interface here. The art is a separate change by Agent C. Scope follows the owner's decisions of 10 November 2026, relayed by Codex.
+Status: crew and boarding code implemented on branch `claude/nov10-b-pirate-crew` (Claude Code, Agent B), 10 November 2026, with the review follow-ups of the same day (victory by roster, tether, own broadside, deck fighting). Not compiled, and no game test has run; see Verification. The moving ship itself (`PirateShip`: movement, patrol, spawning, persistence, hold and loot, renderer) is a separate change by the coordinator, built against the interface here. The art is a separate change by Agent C. Scope follows the owner's decisions of 10 November 2026, relayed by Codex.
 
 ## What the player meets
 
 A pirate ship carries a visible crew of ten plunderers: a helmsman at the wheel, a lookout in the crow's nest, four gunners at broadside cannon (two a side) and four deck crew.
 
-- **Gunnery.** Gunners lay their guns on a player within their arc (±45° of their side) and 5 to 40 blocks away. They fire only if the shell's flight reaches the player through loaded chunks. Each shot spends one gunpowder and one cannonball from the gunner's own supplies (8 of each, never refilled), with an 80-tick cooldown. Cannonballs from crew damage players only and never break blocks.
-- **Boarding.** A player within 12 blocks of the deck who is in a boat or other vehicle, or who stands on the deck, makes the helm heave to. The deck crew then go over to fight hand to hand. With nobody to fight for 200 ticks, the helm lets the ship go and the crew walk back to their stations.
-- **Defeat.** With every crew member dead, the ship is defeated. The ship rolls its finite hold once; the crew code adds no loot.
-- **Sinking.** When the ship sinks, its crew leave it and fight on as ordinary plunderers.
+- **Gunnery.** Gunners lay their guns on a player within their arc (±45° of their side) and 5 to 40 blocks away. They fire only if the shell's flight reaches the player through loaded chunks. Each shot spends one gunpowder and one cannonball from the gunner's own supplies (8 of each, never refilled), with an 80-tick cooldown. Cannonballs from crew damage players only and never break blocks. They never hit a pirate ship's hull (`jugcraft:pirate_ship`) or deck (`jugcraft:pirate_ship_deck`), nor the gunner's shipmates; players' cannonballs are unaffected.
+- **Boarding.** A player within 12 blocks of the deck who is in a boat or other vehicle, or who stands on the deck, makes the helm heave to. The deck crew step off their stations onto the deck and fight hand to hand. On the deck they move straight at the target and strike within 2 blocks, every 20 ticks, because paths do not run on an entity deck. Off the ship, the ordinary melee goal fights.
+- **Tether.** Off its ship, a crew member fights only while it and its target are both within 24 blocks of the deck (of the ship's last seen place while the ship is not loaded). Beyond that it gives the target up and goes back aboard: by path where the ground allows, else straight at its seat, climbing aboard within 3 blocks of the deck. Crew aboard (gunners) are not tethered.
+- **Release.** With nobody to fight for 200 ticks and none of its crew off the ship near the deck, the helm lets the ship go.
+- **Defeat.** A ship is defeated once every crew member on its roster is lost: killed, or removed for good. The ship rolls its finite hold once; the crew code adds no loot.
+- **Sinking.** When the ship sinks, its crew leave it and fight on as ordinary plunderers. A destroyed ship's surviving crew do the same.
 
 ## Contract with the ship
 
-`menagerie/CrewedVessel` holds the stations, deck bounds, `sunk` and the saved heave-to flag. `menagerie/PirateCrew` holds `STATIONS`, `LOCAL_DECK`, `seat`, `mayBoard`, `helmManned`, `provision`, `defeated` and `deckBounds`.
+`menagerie/CrewedVessel` holds the stations, deck bounds, `sunk` and the saved heave-to flag. `menagerie/PirateCrew` holds `STATIONS`, `LOCAL_DECK`, `seat`, `mayBoard`, `helmManned`, `provision`, `defeated`, `forget`, `deckBounds` and the `Roster`.
 
 - **Frame.** Ship-local blocks from the entity position: x to port, y up from the waterline, z to the bow. Offsets turn with the ship as `local.yRot(-yaw * DEG_TO_RAD)`, as `Zeppelin`, `Landship` and `RaiderCrew.seat` do. Facing is a Minecraft yaw relative to the ship.
 - **Stations, in this index order:**
@@ -32,6 +34,8 @@ A pirate ship carries a visible crew of ten plunderers: a helmsman at the wheel,
   - Its `canAddPassenger` returns `PirateCrew.mayBoard`: the ship's own crew only, one to a station.
   - It moves only while `helmManned && !heaveTo && !sunk`.
   - Its spawner calls `PirateCrew.provision` once, before `addFreshEntityWithPassengers`.
+  - Its `remove(reason)` calls `PirateCrew.forget(level, getUUID())` when `reason.shouldDestroy()`, never when it is only unloaded.
+  - It rolls its hold once, when `PirateCrew.defeated` first answers true.
   - It never carries the static galleon's `JugcraftGalleon` tag.
 
 ## Saved state and identities
@@ -39,31 +43,38 @@ A pirate ship carries a visible crew of ten plunderers: a helmsman at the wheel,
 Crew ride the ship as passengers, so vanilla saves them inside the ship and brings them back with it: there are no duplicates and no separate ledger.
 
 - **The plunderer** additionally saves `Ship` (UUID), `ShipStation` (int, also synced so both sides seat and face it) and `ShipPos` (where its ship was last seen).
+- **The roster** (`PirateCrew.Roster`, saved data `jugcraft:pirate_crews` in the overworld, one for the server) keeps each ship's crew by UUID and which of them are lost.
+  - `provision` puts each seated crew member on it.
+  - A linked crew member's death, or its removal for good (`KILLED` or `DISCARDED`), marks it lost. Unloading with its chunk or changing dimension never does.
+  - `defeated` is true once the ship's roster is non-empty and every member is lost. A living crew member aboard answers false at once. Absence is never taken for death, so a crew member lured far away, or unloaded in a far chunk, keeps its ship undefeated until it actually dies.
+  - `forget` drops a destroyed ship's entry.
 - **Off the ship** (boarding), a crew member looks its ship up among loaded entities only.
-  - While the ship's last place is in an unloaded chunk, it waits.
-  - Once that place is loaded and the ship has not been there for 100 ticks, or the ship has sunk, it unlinks.
+  - While the roster still holds the ship and it is not loaded, the crew member waits, linked, however long.
+  - Once the ship has been destroyed (forgotten) or has sunk, it unlinks.
 - **The ship** saves only its heave-to flag beyond vanilla.
 - **Galleon plunderers.** A plunderer with no `Ship` field (every static-galleon plunderer) saves, targets and steers boats exactly as before. Its `supps_*` IDs are unchanged.
 
 ## Limits
 
 - **Targets.** Crew target players in survival or adventure only: never villagers (the existing rule) and never townsfolk.
-- **Claims and settlements.** The crew fight only where a town's protection does not cover the spot, and where claim listeners allow an unprivileged pirate identity. This is the same pattern as `Authority`'s Tiny TNT stand-in. It is checked at both the crew member's and the target's positions.
+- **Claims and settlements.** The crew fight only where a town's protection does not cover the spot, and where claim listeners allow an unprivileged pirate identity, `Authority.pirateCrewActor` (made in `concordance/Authority` beside the Tiny TNT stand-in, as the repository's check requires). It is checked at both the crew member's and the target's positions.
 - **No chunk loading.** Ship lookups use loaded entities, aiming steps the flight with `WalkerAim.flight`, and every path check goes through `WalkerAim.loadedIn` (from `claude/nov10-cockpit`). Nothing adds a ticket or reads an unloaded chunk.
-- **Untouched code.** No raider or town file changes.
+- **Untouched code.** No raider or town file changes. Outside `menagerie/`, the only main-code change is the one stand-in method added to `concordance/Authority`.
 
 ## Verification
 
 - **Java.** `javasyntax` parses all changed and new Java files with no errors. Every API used was checked against existing uses in the repository. Nothing was compiled; Gradle cannot run here.
-- **Server GameTests**, `PirateCrewGameTests`, 10 tests on a test-only stub vessel (`jugcraft-test:stub_vessel`, `TestVessels`). Written but **not run**:
+- **Server GameTests**, `PirateCrewGameTests`, 12 tests on a test-only stub vessel (`jugcraft-test:stub_vessel`, `TestVessels`). Written but **not run**:
   - provisioning;
-  - seats turned once at yaw 90;
-  - save and reload without duplicates;
-  - waiting for an unloaded ship and giving up a gone one;
-  - boarding and defeat;
+  - seats turned once at yaw 90, with feet at the seat's height;
+  - save and reload without duplicates, the roster kept through unloading and its own save;
+  - waiting for an unloaded ship and giving up a destroyed one;
+  - boarding, the deck fight by direct movement, and defeat by roster;
+  - victory by roster: a crew member 80 blocks off and one unloaded keep the ship undefeated until each dies;
+  - the tether;
   - sinking;
   - no villagers or townsfolk;
   - claims;
   - one finite, damage-only shot;
   - unlinked plunderers unchanged.
-- **Python** `scripts/tests/test_pirate_crew_data.py`, 4 tests. They check that the 36 galleon data files are byte-identical, the station layout, the registration, and that the crew code adds no loot and stays out of raider and town code.
+- **Python** `scripts/tests/test_pirate_crew_data.py`, 6 tests. They check that the 36 galleon data files are unchanged (JSON compared with LF line endings, so a CRLF checkout matches; NBT byte for byte, with a check of that rule itself), the station layout, the registration, that the crew code adds no loot and stays out of raider and town code, and that the crew ask Authority's stand-in and their cannonballs name the pirate hull and deck types.
