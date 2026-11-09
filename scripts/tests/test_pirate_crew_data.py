@@ -98,9 +98,13 @@ class PirateCrewDataTests(unittest.TestCase):
         text = CREW.read_text(encoding='utf-8')
         self.assertNotIn('FakePlayer', text, 'Only concordance/Authority makes stand-ins')
         self.assertIn('Authority.pirateCrewActor(level)', text)
-        ball = (CREW.parent / 'OwnerCannonball.java').read_text(encoding='utf-8')
-        for name in ('"pirate_ship"', '"pirate_ship_deck"'):
-            self.assertIn(name, ball, 'Crew cannonballs never hit a pirate ship hull or deck')
+        ball = (CREW.parent / 'OwnerCannonball.java').read_text(encoding='utf-8').replace(' ', '')
+        # Own-ship immunity (integration branch): a deck square resolves to its ship, a ball spares the ship whose UUID
+        # is its gunner's own link and its shipmates; another ship's hull is fair game. Real fire is covered at runtime.
+        for needle, why in (('instanceofPirateShipDeckdeck?deck.ship()', 'a deck square resolves to its ship'),
+                            ('own.equals(ship.getUUID())', 'a ball spares its own ship, matched by UUID'),
+                            ('own.equals(mate.shipLink())', 'a ball spares its shipmates')):
+            self.assertIn(needle, ball, 'Crew cannonballs: ' + why)
 
 
 if __name__ == '__main__':
