@@ -3696,6 +3696,21 @@ def check_java():
         placed = load(DATA / MOD / "worldgen" / "placed_feature" / f"ore_{name}.json") or {}
         if placed.get("placement") != [{"type": "minecraft:rarity_filter", "chance": info["rarity"]}]:
             err(f"Mineral sand {name}: rarity or bounded chunk anchor changed")
+    # Simplified processing (tools/mineral_sand_processing.py): every finite feed has a recipe naming its
+    # exact ID, and no recipe result or byproduct recreates a reserve unit.
+    sand_ids = {f"{MOD}:{name}" for name in SANDS}
+    fed = set()
+    for path in sorted((DATA / MOD / "recipe").rglob("*.json")):
+        recipe = load(path) or {}
+        outputs = [recipe.get("result")] + list(recipe.get("results") or []) + list(recipe.get("byproducts") or [])
+        for sand in sorted({o if isinstance(o, str) else o.get("id") for o in outputs if isinstance(o, (str, dict))} & sand_ids):
+            err(f"{path.relative_to(DATA)}: recreates the finite mineral-sand reserve {sand}")
+        for part in [recipe.get("ingredient")] + list(recipe.get("items") or recipe.get("ingredients") or []):
+            ref = part.get("ingredient") if isinstance(part, dict) else part
+            if isinstance(ref, str) and ref in sand_ids:
+                fed.add(ref)
+    for sand in sorted(sand_ids - fed):
+        err(f"Mineral sand {sand} has no processing recipe naming its exact ID")
     if limited and 'Jugcraft.id("has_ore/" + ore[0])' not in worldgen:
         err("JugcraftWorldgen does not place biomeOres by their biome tag jugcraft:has_ore/<name>")
     for placed in limited:

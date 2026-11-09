@@ -308,6 +308,80 @@ public class MineralSandProcessingGameTests {
         h.succeed();
     }
 
+    @GameTest(structure = ARENA)
+    public void titaniumPigmentAndSavedZirconConcentrateUseTheirShortReactorRecipes(GameTestHelper h) {
+        var pigment = fluid(h, "sands_titanium_white_dye");
+        var reactor = compact(h, MachineKind.CHEMICAL_REACTOR);
+        feed(reactor, pigment);
+        runCompact(h, reactor, pigment.time());
+        h.assertTrue(reactor.getItem(2).is(Items.WHITE_DYE) && reactor.getItem(2).getCount() == 4
+            && reactor.getItem(3).isEmpty() && reactor.getItem(4).isEmpty(),
+            "One Raw Titanium with acid and water makes exactly four existing White Dye");
+        h.assertTrue(reactor.getItem(0).isEmpty() && reactor.tanks().input(0).millibuckets() == 0
+            && reactor.tanks().input(1).millibuckets() == 0, "The pigment batch spends its raw mineral, acid and water once");
+        clear(h, reactor);
+        var concentrate = fluid(h, "sands_zirconia_from_concentrate");
+        reactor = compact(h, MachineKind.CHEMICAL_REACTOR);
+        feed(reactor, concentrate);
+        reactor.setItem(0, stack("zircon_concentrate", 3)); // A saved stack larger than one batch.
+        runCompact(h, reactor, concentrate.time());
+        h.assertTrue(reactor.getItem(2).is(stack("zirconia_powder", 1).getItem()) && reactor.getItem(2).getCount() == 1
+            && reactor.getItem(0).getCount() == 1, "Two saved Zircon Concentrate enter the short line as one Zirconia Powder");
+        feed(reactor, concentrate);
+        reactor.setItem(0, stack("zircon_concentrate", 1));
+        runCompact(h, reactor, 20);
+        h.assertTrue(reactor.processingProgress() == 0 && reactor.getItem(2).getCount() == 1
+            && reactor.getItem(0).getCount() == 1, "One leftover concentrate cannot start a half-paid batch");
+        clear(h, reactor);
+        h.succeed();
+    }
+
+    @GameTest(structure = ARENA)
+    public void savedZirconiaIntermediatesStillFinishThroughTheirOriginalRecipes(GameTestHelper h) {
+        var precursor = formBatch(h, IndustrialForms.MINERAL_CONDITIONER, "prepare_zirconia_precursor");
+        h.assertTrue(precursor.is(stack("zirconia_precursor", 1).getItem()), "Saved concentrate still makes the old precursor");
+        var powder = formBatch(h, IndustrialForms.ALUMINA_CALCINER, "calcine_zirconia");
+        h.assertTrue(powder.is(stack("zirconia_powder", 1).getItem()), "Saved precursor calcines into powder for the short oven step");
+        var charge = formBatch(h, IndustrialForms.MINERAL_CONDITIONER, "prepare_zirconia");
+        h.assertTrue(charge.is(stack("zirconia_charge", 1).getItem()), "Old powder-charge preparation remains available");
+        var press = compact(h, MachineKind.METAL_PRESS);
+        press.setItem(0, stack("zirconia_charge", 1));
+        tick(h, press, 100);
+        h.assertTrue(press.getItem(press.kind().outputSlot()).is(stack("zirconia_blank", 1).getItem()),
+            "A saved charge still presses into an unfired blank");
+        clear(h, press);
+        var fired = formBatch(h, IndustrialForms.ALUMINA_CALCINER, "fire_zirconia");
+        h.assertTrue(fired.is(stack("fired_zirconia_blank", 1).getItem()), "A saved unfired blank still fires into finishing feed");
+        h.succeed();
+    }
+
+    @GameTest(structure = ARENA)
+    public void eachRichSandFeedsOnlyItsApprovedRecipesAndOrdinarySandGainsNone(GameTestHelper h) {
+        var server = h.getLevel().getServer();
+        var expected = java.util.Map.of(
+            "titanium_sand", java.util.Set.of("sands_titanium_feed"),
+            "zircon_sand", java.util.Set.of("recover_regional_zircon", "sands_zirconia_powder"),
+            "rare_earth_sand", java.util.Set.of("sands_mixed_rare_earth_oxide"),
+            "garnet_sand", java.util.Set.<String>of());
+        for (var sand : expected.entrySet()) {
+            var found = new java.util.HashSet<String>();
+            for (var entry : FluidRecipes.entries(server, MachineKind.CHEMICAL_REACTOR)) {
+                var items = entry.recipe().items();
+                if (!items.isEmpty() && items.getFirst().ingredient().test(stack(sand.getKey(), 1))) {
+                    String path = entry.id().getPath();
+                    found.add(path.substring(path.lastIndexOf('/') + 1));
+                }
+            }
+            h.assertTrue(found.equals(sand.getValue()), "Exact approved processing for " + sand.getKey() + ": " + found);
+        }
+        for (var plain : List.of(new ItemStack(Items.SAND), new ItemStack(Items.RED_SAND)))
+            for (var entry : FluidRecipes.entries(server, MachineKind.CHEMICAL_REACTOR))
+                if (entry.id().getPath().contains("sands_"))
+                    h.assertTrue(entry.recipe().items().stream().noneMatch(part -> part.ingredient().test(plain)),
+                        "Ordinary and red sand gain no rich-sand recipe: " + entry.id());
+        h.succeed();
+    }
+
     private static void sanding(GameTestHelper h, String name) {
         var block = JugcraftWorkshop.BLOCKS[0];
         var state = block.defaultBlockState();
@@ -420,6 +494,15 @@ public class MineralSandProcessingGameTests {
 
     private static void tick(GameTestHelper h, MachineBlockEntity machine, int count) {
         for (int i = 0; i < count; i++) machine.serverTick(h.getLevel(), machine.getBlockPos(), machine.getBlockState());
+    }
+
+    /** Ticks a compact machine, refilling its buffer like a supply line when a batch costs more than it holds. */
+    private static void runCompact(GameTestHelper h, MachineBlockEntity machine, int count) {
+        for (int i = 0; i < count; i++) {
+            if (machine.energyFor(null).getAmount() < machine.kind().usePerTick)
+                ((SimpleEnergyStorage)machine.energyFor(null)).setAmount(machine.kind().capacity);
+            tick(h, machine, 1);
+        }
     }
 
     private static void reload(GameTestHelper h, MachineBlockEntity machine) {
