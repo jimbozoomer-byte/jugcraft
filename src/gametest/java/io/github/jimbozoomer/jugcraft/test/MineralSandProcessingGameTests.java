@@ -314,7 +314,7 @@ public class MineralSandProcessingGameTests {
         var reactor = compact(h, MachineKind.CHEMICAL_REACTOR);
         feed(reactor, pigment);
         runCompact(h, reactor, pigment.time());
-        h.assertTrue(reactor.getItem(2).is(Items.WHITE_DYE) && reactor.getItem(2).getCount() == 4
+        h.assertTrue(reactor.getItem(2).is(stack("minecraft:white_dye", 1).getItem()) && reactor.getItem(2).getCount() == 4
             && reactor.getItem(3).isEmpty() && reactor.getItem(4).isEmpty(),
             "One Raw Titanium with acid and water makes exactly four existing White Dye");
         h.assertTrue(reactor.getItem(0).isEmpty() && reactor.tanks().input(0).millibuckets() == 0
