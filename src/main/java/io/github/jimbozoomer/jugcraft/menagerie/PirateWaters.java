@@ -27,6 +27,15 @@ public final class PirateWaters {
 	public static final double HALF_LENGTH = 8.0;
 	/** A hull corner's distance from the centre: the most a point of the hull moves for each radian it turns. */
 	public static final double CORNER = Math.sqrt(HALF_BEAM * HALF_BEAM + HALF_LENGTH * HALF_LENGTH);
+	/**
+	 * The rig above the water, wider and longer than the hull (rails, bowsprit, rudder, stern lantern, sails at their
+	 * sway; tools/pirate_ship.py's model, rounded outward): half its breadth, its stern and bow ends (ship-local z), and
+	 * its corner's greatest distance from the centre. Its height is {@link #MAST} blocks above the waterline block.
+	 */
+	public static final double RIG_HALF_BEAM = 4.0;
+	public static final double RIG_STERN = -9.5;
+	public static final double RIG_BOW = 11.75;
+	public static final double RIG_CORNER = Math.sqrt(RIG_HALF_BEAM * RIG_HALF_BEAM + Math.max(RIG_STERN * RIG_STERN, RIG_BOW * RIG_BOW));
 	/** Blocks of water the keel needs under the waterline block, and the clear air the masts need above it. */
 	public static final int DEPTH = 2;
 	public static final int MAST = 13;
@@ -37,55 +46,70 @@ public final class PirateWaters {
 	}
 
 	/**
-	 * Whether a ship may be at {@code at} facing {@code yaw}: its footprint inside the world border and every chunk under it
-	 * loaded; under it, the waterline block and {@value #DEPTH} more are water with nothing solid (kelp and seagrass pass,
-	 * ice and blocks do not); above it, {@value #MAST} blocks clear of anything solid or liquid; no block entity anywhere
-	 * in that volume; and nothing in that volume protected ({@link #unprotected}).
+	 * Whether a ship may be at {@code at} facing {@code yaw}. Two volumes, each turned to the yaw: the hull under the
+	 * water (6 x 16: the waterline block and {@value #DEPTH} more must be water with nothing solid; kelp and seagrass pass,
+	 * ice and blocks do not) and the rig above it ({@link #rigFootprint}: {@value #MAST} blocks clear of anything solid or
+	 * liquid). Both inside the world border, every chunk under them loaded, no block entity in either, and nothing in
+	 * either protected ({@link #unprotected}).
 	 */
 	public static boolean clear(ServerLevel level, Vec3 at, float yaw) {
 		int surface = Mth.floor(at.y);
-		return clearBox(level, footprint(at, yaw, surface - DEPTH, surface + MAST + 1), surface);
+		return clearVolumes(level, footprint(at, yaw, surface - DEPTH, surface + 1),
+				rigFootprint(at, yaw, surface + 1, surface + MAST + 1), surface);
 	}
 
 	/**
-	 * Whether the hull may pass from {@code from} at {@code fromYaw} to {@code to} at {@code toYaw} in one step: the box
-	 * enclosing both footprints, widened by the farthest a hull corner can swing between the two yaws (its distance from
-	 * the centre times the turn in radians), must be clear by {@link #clear}'s rules. So a turn whose stern or bow would
-	 * sweep into a bank, a block or protected water is refused even where the water ahead is open.
+	 * Whether the ship may pass from {@code from} at {@code fromYaw} to {@code to} at {@code toYaw} in one step: for the
+	 * hull and for the rig, the box enclosing both positions' footprints, widened by the farthest a corner of it swings
+	 * between the two yaws (its distance from the centre times the turn in radians), must be clear by {@link #clear}'s
+	 * rules. So a turn whose stern, bowsprit or rail would sweep into a bank, a bridge, a block or protected water or air
+	 * is refused even where the water ahead is open.
 	 */
 	public static boolean sweep(ServerLevel level, Vec3 from, float fromYaw, Vec3 to, float toYaw) {
 		int surface = Mth.floor(to.y);
-		double swing = CORNER * Math.abs(Mth.wrapDegrees(toYaw - fromYaw)) * Mth.DEG_TO_RAD;
-		AABB box = footprint(from, fromYaw, surface - DEPTH, surface + MAST + 1)
-				.minmax(footprint(to, toYaw, surface - DEPTH, surface + MAST + 1)).inflate(swing, 0.0, swing);
-		return clearBox(level, box, surface);
+		double turn = Math.abs(Mth.wrapDegrees(toYaw - fromYaw)) * Mth.DEG_TO_RAD;
+		double hullSwing = CORNER * turn, rigSwing = RIG_CORNER * turn;
+		AABB hull = footprint(from, fromYaw, surface - DEPTH, surface + 1)
+				.minmax(footprint(to, toYaw, surface - DEPTH, surface + 1)).inflate(hullSwing, 0.0, hullSwing);
+		AABB rig = rigFootprint(from, fromYaw, surface + 1, surface + MAST + 1)
+				.minmax(rigFootprint(to, toYaw, surface + 1, surface + MAST + 1)).inflate(rigSwing, 0.0, rigSwing);
+		return clearVolumes(level, hull, rig, surface);
 	}
 
-	/** {@link #clear} for any box over the waterline block {@code surface}: every block of every column in it. */
-	static boolean clearBox(ServerLevel level, AABB box, int surface) {
-		if (!level.getWorldBorder().isWithinBounds(box) || !loaded(level, box) || surface - DEPTH < level.getMinY()
+	/**
+	 * {@link #clear}'s rules for a hull box (water: its blocks from {@code surface - DEPTH} to {@code surface}) and a rig
+	 * box (air: from {@code surface + 1} to {@code surface + MAST}), every block of every column in each.
+	 */
+	static boolean clearVolumes(ServerLevel level, AABB hull, AABB rig, int surface) {
+		AABB both = hull.minmax(rig);
+		if (!level.getWorldBorder().isWithinBounds(both) || !loaded(level, both) || surface - DEPTH < level.getMinY()
 				|| surface + MAST > level.getMaxY()) {
 			return false;
 		}
+		return blocks(level, hull, surface - DEPTH, surface, true) && blocks(level, rig, surface + 1, surface + MAST, false)
+				&& unprotected(level, hull) && unprotected(level, rig);
+	}
+
+	/** Every block of {@code box}'s columns from {@code low} to {@code high}: water with nothing solid, or open air. */
+	private static boolean blocks(ServerLevel level, AABB box, int low, int high, boolean water) {
 		int x0 = Mth.floor(box.minX), x1 = Mth.floor(box.maxX - 1.0E-7);
 		int z0 = Mth.floor(box.minZ), z1 = Mth.floor(box.maxZ - 1.0E-7);
 		BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 		for (int x = x0; x <= x1; x++) {
 			for (int z = z0; z <= z1; z++) {
-				for (int y = surface - DEPTH; y <= surface + MAST; y++) {
+				for (int y = low; y <= high; y++) {
 					pos.set(x, y, z);
 					BlockState state = level.getBlockState(pos);
 					if (state.hasBlockEntity() || !state.getCollisionShape(level, pos).isEmpty()) {
 						return false;
 					}
-					boolean water = state.getFluidState().is(FluidTags.WATER);
-					if (y <= surface ? !water : !state.getFluidState().isEmpty()) {
+					if (water ? !state.getFluidState().is(FluidTags.WATER) : !state.getFluidState().isEmpty()) {
 						return false;
 					}
 				}
 			}
 		}
-		return unprotected(level, box);
+		return true;
 	}
 
 	/**
@@ -132,11 +156,23 @@ public final class PirateWaters {
 	 * (world heights). Exact at multiples of 90 degrees, a superset otherwise.
 	 */
 	public static AABB footprint(Vec3 at, float yaw, double bottom, double top) {
+		return turnedBox(at, yaw, HALF_BEAM, -HALF_LENGTH, HALF_LENGTH, bottom, top);
+	}
+
+	/**
+	 * The axis-aligned box enclosing the above-water rig ({@link #RIG_HALF_BEAM}, {@link #RIG_STERN} to {@link #RIG_BOW})
+	 * at {@code at} turned to {@code yaw}, from {@code bottom} to {@code top}. Exact at multiples of 90 degrees.
+	 */
+	public static AABB rigFootprint(Vec3 at, float yaw, double bottom, double top) {
+		return turnedBox(at, yaw, RIG_HALF_BEAM, RIG_STERN, RIG_BOW, bottom, top);
+	}
+
+	private static AABB turnedBox(Vec3 at, float yaw, double halfBeam, double stern, double bow, double bottom, double top) {
 		double minX = Double.POSITIVE_INFINITY, maxX = Double.NEGATIVE_INFINITY;
 		double minZ = Double.POSITIVE_INFINITY, maxZ = Double.NEGATIVE_INFINITY;
 		for (int sx = -1; sx <= 1; sx += 2) {
-			for (int sz = -1; sz <= 1; sz += 2) {
-				Vec3 corner = new Vec3(sx * HALF_BEAM, 0.0, sz * HALF_LENGTH).yRot(-yaw * Mth.DEG_TO_RAD);
+			for (double z : new double[] {stern, bow}) {
+				Vec3 corner = new Vec3(sx * halfBeam, 0.0, z).yRot(-yaw * Mth.DEG_TO_RAD);
 				minX = Math.min(minX, corner.x);
 				maxX = Math.max(maxX, corner.x);
 				minZ = Math.min(minZ, corner.z);

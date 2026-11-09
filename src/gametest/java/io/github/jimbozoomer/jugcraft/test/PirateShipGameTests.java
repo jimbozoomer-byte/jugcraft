@@ -386,16 +386,17 @@ public class PirateShipGameTests {
 	}
 
 	/**
-	 * The swept hull: with a block (and then a one-block operator region) just off the port quarter, outside the hull and
-	 * outside the water 3 blocks ahead, the ship may hold its place and sail straight on, but may not turn, since its stern
-	 * would swing into it. A helmed ship asked to turn there never lets its hull reach that cell.
+	 * The swept hull and rig: with a block (and then a one-block operator region) just off the port quarter, outside the
+	 * ship and outside the water 3 blocks ahead, the ship may hold its place and sail straight on, but may not turn, since
+	 * its stern would swing into it. A helmed ship asked to turn there never lets its rig reach that cell.
 	 */
 	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 120, skyAccess = true)
 	public void theSternMayNotSwingIntoAnObstacle(GameTestHelper helper) {
 		pool(helper);
 		ServerLevel level = helper.getLevel();
 		Vec3 at = helper.absoluteVec(CENTRE);
-		BlockPos quarter = new BlockPos(25, SURFACE + 1, 14);
+		// Just outside the rig at rest (its port side reaches x 26.0 here), off the port quarter.
+		BlockPos quarter = new BlockPos(26, SURFACE + 1, 13);
 		helper.setBlock(quarter, Blocks.OAK_PLANKS);
 		helper.assertTrue(PirateWaters.clear(level, at, 0.0F), "The hull itself is clear where it lies");
 		helper.assertTrue(PirateWaters.clear(level, at.add(0.0, 0.0, 3.0), 0.0F), "The water 3 blocks ahead is clear too");
@@ -418,13 +419,42 @@ public class PirateShipGameTests {
 		level.addFreshEntity(ship);
 		AABB obstacle = new AABB(helper.absolutePos(quarter));
 		helper.onEachTick(() -> {
-			AABB hull = PirateWaters.footprint(ship.position(), ship.getYRot(), ship.getY() - PirateWaters.DEPTH, ship.getY() + PirateWaters.MAST);
-			helper.assertTrue(!hull.intersects(obstacle), "The hull must never reach the obstacle, but at yaw " + ship.getYRot()
-					+ " it covers " + hull);
+			AABB rig = PirateWaters.rigFootprint(ship.position(), ship.getYRot(), ship.getY(), ship.getY() + PirateWaters.MAST);
+			helper.assertTrue(!rig.intersects(obstacle), "The rig must never reach the obstacle, but at yaw " + ship.getYRot()
+					+ " it covers " + rig);
 		});
 		helper.runAfterDelay(100, () -> {
 			ship.discard();
 			helper.succeed();
 		});
+	}
+
+	/**
+	 * Two envelopes: under the water only the 6 x 16 hull needs water (a block beside it, below the waterline, is no
+	 * matter), but above the water the rig is wider and longer (rails, bowsprit): a block beside the hull at rail height,
+	 * or where the bowsprit reaches, blocks the place.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 40, skyAccess = true)
+	public void theRigAboveTheWaterNeedsMoreRoomThanTheHull(GameTestHelper helper) {
+		pool(helper);
+		ServerLevel level = helper.getLevel();
+		Vec3 at = helper.absoluteVec(CENTRE);
+		BlockPos besideBelow = new BlockPos(25, SURFACE - 1, 22);
+		helper.setBlock(besideBelow, Blocks.STONE);
+		helper.assertTrue(PirateWaters.clear(level, at, 0.0F), "Stone beside the hull, under the water, should not matter");
+		helper.setBlock(besideBelow, Blocks.WATER);
+		BlockPos besideAbove = new BlockPos(25, SURFACE + 1, 22);
+		helper.setBlock(besideAbove, Blocks.OAK_PLANKS);
+		helper.assertTrue(!PirateWaters.clear(level, at, 0.0F), "A block beside the hull at rail height is in the rig's way");
+		helper.setBlock(besideAbove, Blocks.AIR);
+		BlockPos bowsprit = new BlockPos(22, SURFACE + 3, 33);
+		helper.setBlock(bowsprit, Blocks.OAK_PLANKS);
+		helper.assertTrue(!PirateWaters.clear(level, at, 0.0F), "A block where the bowsprit reaches is in the rig's way");
+		helper.setBlock(bowsprit, Blocks.AIR);
+		helper.assertTrue(PirateWaters.clear(level, at, 0.0F), "Cleared, the place is clear again");
+		AABB rig = PirateWaters.rigFootprint(Vec3.ZERO, 0.0F, 0.0, 1.0);
+		helper.assertTrue(rig.minX == -PirateWaters.RIG_HALF_BEAM && rig.maxX == PirateWaters.RIG_HALF_BEAM
+				&& rig.minZ == PirateWaters.RIG_STERN && rig.maxZ == PirateWaters.RIG_BOW, "The rig box at yaw 0 is exactly its envelope: " + rig);
+		helper.succeed();
 	}
 }
