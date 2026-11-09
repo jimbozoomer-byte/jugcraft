@@ -1,29 +1,40 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import io.github.jimbozoomer.jugcraft.concordance.Authority;
+import io.github.jimbozoomer.jugcraft.menagerie.CrewedVessel;
 import io.github.jimbozoomer.jugcraft.menagerie.CrewedVessel.Role;
 import io.github.jimbozoomer.jugcraft.menagerie.OwnerPlunderer;
 import io.github.jimbozoomer.jugcraft.menagerie.OwnerSupplementaries;
 import io.github.jimbozoomer.jugcraft.menagerie.PirateCrew;
 import io.github.jimbozoomer.jugcraft.test.TestVessels.StubVessel;
 import io.github.jimbozoomer.jugcraft.town.JugcraftTown;
+import io.github.jimbozoomer.jugcraft.town.Town;
+import io.github.jimbozoomer.jugcraft.town.TownProtection;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.network.protocol.game.ServerboundPlayerLoadedPacket;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
@@ -186,8 +197,7 @@ public class PirateCrewGameTests {
 		StubVessel ship = ship(h, 0.0F, 8.5);
 		PirateCrew.provision(level, ship);
 		level.addFreshEntityWithPassengers(ship);
-		var player = h.makeMockServerPlayerInLevel();
-		player.setGameMode(GameType.SURVIVAL);
+		ServerPlayer player = boarder(h);
 		player.getAttribute(Attributes.MAX_HEALTH).setBaseValue(200.0); // Struck, not killed, by four deck crew.
 		player.setHealth(200.0F);
 		Vec3 onDeck = h.absoluteVec(new Vec3(8.5, 2.0, 12.5));
@@ -195,7 +205,8 @@ public class PirateCrewGameTests {
 		h.assertTrue(ship.deckBounds().contains(player.position()), "Setup: the player stands on the ship's deck");
 		crew(ship).forEach(crew -> crew.setTarget(player));
 		h.runAfterDelay(10, () -> {
-			h.assertTrue(ship.heaveTo(), "The helm heaves to for a boarder on the deck");
+			OwnerPlunderer helm = linked(level, ship).stream().filter(c -> c.shipStation() == 0).findFirst().orElse(null);
+			h.assertTrue(ship.heaveTo(), "The helm heaves to for a boarder on the deck" + (helm == null ? " [no helm]" : why(level, helm, player)));
 			var all = linked(level, ship);
 			var deck = all.stream().filter(c -> PirateCrew.STATIONS.get(c.shipStation()).role() == Role.DECK).toList();
 			h.assertTrue(deck.size() == 4 && deck.stream().noneMatch(Entity::isPassenger), "All four deck crew go over to fight, still linked");
@@ -206,7 +217,9 @@ public class PirateCrewGameTests {
 		});
 		h.runAfterDelay(50, () -> {
 			h.assertTrue(player.getHealth() < player.getMaxHealth(),
-					"The deck crew close and strike a boarder on the deck, where no path runs, by direct movement");
+					"The deck crew close and strike a boarder on the deck, where no path runs, by direct movement"
+					+ linked(level, ship).stream().filter(c -> !c.isPassenger()).map(c -> " #" + c.shipStation() + " at "
+							+ c.position() + why(level, c, player)).collect(Collectors.joining()));
 			var all = linked(level, ship);
 			OwnerPlunderer last = all.stream().filter(c -> c.shipStation() == 6).findFirst().orElseThrow();
 			all.stream().filter(c -> c != last).forEach(c -> c.kill(level));
@@ -214,7 +227,7 @@ public class PirateCrewGameTests {
 			last.hurtServer(level, level.damageSources().genericKill(), Float.MAX_VALUE);
 			h.assertTrue(PirateCrew.defeated(ship), "With every rostered crew member killed, the ship is defeated: its loot trigger");
 			cleanup(level, ship);
-			player.discard();
+			TestPlayers.leave(player);
 			h.succeed();
 		});
 	}
@@ -311,20 +324,19 @@ public class PirateCrewGameTests {
 		deckhand.stopRiding();
 		Vec3 onDeck = h.absoluteVec(new Vec3(9.5, 2.0, 13.5));
 		deckhand.snapTo(onDeck.x, onDeck.y, onDeck.z, 0.0F, 0.0F);
-		var player = h.makeMockServerPlayerInLevel();
-		player.setGameMode(GameType.SURVIVAL);
+		ServerPlayer player = boarder(h);
 		Vec3 near = h.absoluteVec(new Vec3(13.5, 2.0, 8.5));
 		player.snapTo(near.x, near.y, near.z, 90.0F, 0.0F);
-		h.assertTrue(deckhand.canAttack(player), "Within the tether a crew member off the ship may fight");
+		h.assertTrue(deckhand.canAttack(player), "Within the tether a crew member off the ship may fight" + why(level, deckhand, player));
 		// 4 blocks beyond the tether, off the stern; the test (never the crew) loads that chunk so the answer is the tether's.
 		Vec3 beyond = new Vec3(ship.getX(), ship.getY() + 1.0, ship.deckBounds().minZ - 28.0);
 		level.getChunk(BlockPos.containing(beyond));
 		player.snapTo(beyond.x, beyond.y, beyond.z, 0.0F, 0.0F);
-		h.assertTrue(gunner.canAttack(player), "Setup: the far spot is open to a fight; a gunner aboard may still lay on it");
-		h.assertTrue(!deckhand.canAttack(player), "A target beyond 24 blocks of the deck is given up by crew off the ship");
+		h.assertTrue(gunner.canAttack(player), "Setup: the far spot is open to a fight; a gunner aboard may still lay on it" + why(level, gunner, player));
+		h.assertTrue(!deckhand.canAttack(player), "A target beyond 24 blocks of the deck is given up by crew off the ship" + why(level, deckhand, player));
 		player.snapTo(near.x, near.y, near.z, 90.0F, 0.0F);
 		deckhand.snapTo(beyond.x, beyond.y, beyond.z, 0.0F, 0.0F);
-		h.assertTrue(!deckhand.canAttack(player), "A crew member drawn beyond the tether fights nobody until it is back");
+		h.assertTrue(!deckhand.canAttack(player), "A crew member drawn beyond the tether fights nobody until it is back" + why(level, deckhand, player));
 		deckhand.snapTo(onDeck.x, onDeck.y, onDeck.z, 0.0F, 0.0F);
 		player.snapTo(beyond.x, beyond.y, beyond.z, 0.0F, 0.0F);
 		deckhand.setTarget(player);
@@ -332,7 +344,7 @@ public class PirateCrewGameTests {
 			h.assertTrue(deckhand.getVehicle() == ship && deckhand.shipLink() != null,
 					"With its target beyond the tether, the crew member goes back aboard to its station");
 			cleanup(level, ship);
-			player.discard();
+			TestPlayers.leave(player);
 			h.succeed();
 		});
 	}
@@ -383,20 +395,19 @@ public class PirateCrewGameTests {
 		StubVessel ship = ship(h, 0.0F, 6.5);
 		PirateCrew.provision(level, ship);
 		level.addFreshEntityWithPassengers(ship);
-		var player = h.makeMockServerPlayerInLevel();
-		player.setGameMode(GameType.SURVIVAL);
+		ServerPlayer player = boarder(h);
 		Vec3 at = h.absoluteVec(new Vec3(13.5, 2.0, 8.5));
 		player.snapTo(at.x, at.y, at.z, 90.0F, 0.0F);
 		OwnerPlunderer helm = crew(ship).stream().filter(c -> c.shipStation() == 0).findFirst().orElseThrow();
-		h.assertTrue(helm.canAttack(player), "Outside any claim or settlement the crew may fight a survival player");
+		h.assertTrue(helm.canAttack(player), "Outside any claim or settlement the crew may fight a survival player" + why(level, helm, player));
 		try (var claim = TestClaims.open().block(player.blockPosition(), UUID.randomUUID())) {
-			h.assertTrue(!helm.canAttack(player), "A claim that refuses an unprivileged identity keeps the crew from fighting there");
+			h.assertTrue(!helm.canAttack(player), "A claim that refuses an unprivileged identity keeps the crew from fighting there" + why(level, helm, player));
 		}
-		h.assertTrue(helm.canAttack(player), "Lifting the claim lifts the restriction");
+		h.assertTrue(helm.canAttack(player), "Lifting the claim lifts the restriction" + why(level, helm, player));
 		player.setGameMode(GameType.CREATIVE);
-		h.assertTrue(!helm.canAttack(player), "Creative players are never targets");
+		h.assertTrue(!helm.canAttack(player), "Creative players are never targets" + why(level, helm, player));
 		cleanup(level, ship);
-		player.discard();
+		TestPlayers.leave(player);
 		h.succeed();
 	}
 
@@ -412,8 +423,9 @@ public class PirateCrewGameTests {
 		StubVessel ship = ship(h, 0.0F, 4.5);
 		PirateCrew.provision(level, ship);
 		level.addFreshEntityWithPassengers(ship);
-		var player = h.makeMockServerPlayerInLevel();
-		player.setGameMode(GameType.SURVIVAL);
+		ServerPlayer player = boarder(h);
+		player.getAttribute(Attributes.MAX_HEALTH).setBaseValue(200.0); // Struck, not killed, by the shot.
+		player.setHealth(200.0F);
 		Vec3 at = h.absoluteVec(new Vec3(13.5, 2.0, 11.5));
 		player.snapTo(at.x, at.y, at.z, 90.0F, 0.0F);
 		OwnerPlunderer gunner = crew(ship).stream().filter(c -> c.shipStation() == 2).findFirst().orElseThrow();
@@ -421,7 +433,7 @@ public class PirateCrewGameTests {
 		h.runAfterDelay(40, () -> {
 			h.assertTrue(count(gunner, Items.GUNPOWDER) == 7 && count(gunner, cannonball()) == 7,
 					"The port fore gunner fired exactly once (cooldown), spending one powder and one ball: "
-					+ count(gunner, Items.GUNPOWDER) + "/" + count(gunner, cannonball()));
+					+ count(gunner, Items.GUNPOWDER) + "/" + count(gunner, cannonball()) + ", target " + gunner.getTarget() + why(level, gunner, player));
 			for (int y = 1; y <= 3; y++) {
 				for (int z = 9; z <= 13; z++) {
 					h.assertBlockPresent(Blocks.STONE, new BlockPos(15, y, z));
@@ -429,7 +441,7 @@ public class PirateCrewGameTests {
 			}
 			h.assertBlockPresent(Blocks.STONE, new BlockPos(13, 0, 11));
 			cleanup(level, ship);
-			player.discard();
+			TestPlayers.leave(player);
 			h.succeed();
 		});
 	}
@@ -450,6 +462,47 @@ public class PirateCrewGameTests {
 		h.assertTrue(!tag.contains("Ship") && !tag.contains("ShipStation") && !tag.contains("ShipPos"),
 				"An unlinked plunderer saves exactly as before, with no ship fields");
 		h.succeed();
+	}
+
+	/**
+	 * An ordinary survival player who has finished loading, to be fought. Vanilla's mock player is creative for good
+	 * (its isCreative() always answers true, whatever setGameMode says), and the crew never fight a creative player; a
+	 * player whose client has not reported loaded cannot be hurt.
+	 */
+	private static ServerPlayer boarder(GameTestHelper h) {
+		ServerPlayer player = TestPlayers.survivor(h);
+		player.connection.handleAcceptPlayerLoad(new ServerboundPlayerLoadedPacket());
+		h.assertTrue(!player.isCreative() && !player.isSpectator() && player.connection.hasClientLoaded(),
+				"Fixture: a loaded survival player, not the creative mock");
+		return player;
+	}
+
+	/**
+	 * Every condition the crew member's canAttack weighs against {@code target} (PirateCrew.fair, then the game's own),
+	 * for a failed assertion's message: the target's mode, aboard, the tether, and each protection question the pirate
+	 * identity is asked at both positions.
+	 */
+	private static String why(ServerLevel level, OwnerPlunderer crew, LivingEntity target) {
+		Entity ship = crew.shipLink() == null ? null : level.getEntity(crew.shipLink());
+		boolean aboard = crew.getVehicle() != null && crew.getVehicle().getUUID().equals(crew.shipLink());
+		String tether = ship instanceof CrewedVessel vessel ? "crew " + vessel.deckBounds().inflate(24.0).contains(crew.position())
+				+ ", target " + vessel.deckBounds().inflate(24.0).contains(target.position()) : "ship not loaded";
+		return " [canAttack " + crew.canAttack(target) + ", creative " + (target instanceof Player player && player.isCreative())
+				+ ", spectator " + target.isSpectator() + ", alive " + target.isAlive() + ", difficulty "
+				+ level.getDifficulty() + ", aboard " + aboard + ", tethered (" + tether + "), crew at " + where(level, crew.blockPosition())
+				+ ", target at " + where(level, target.blockPosition()) + "]";
+	}
+
+	/** Each protection question PirateCrew.mayFight asks at {@code pos}, as the pirate identity. */
+	private static String where(ServerLevel level, BlockPos pos) {
+		ServerPlayer actor = Authority.pirateCrewActor(level);
+		return pos.toShortString() + " {loaded " + level.hasChunkAt(pos) + ", town " + Town.isProtected(level, pos)
+				+ ", mayChange " + Authority.mayChange(level, actor, pos) + ", inBounds " + level.isInWorldBounds(pos)
+				+ ", border " + level.getWorldBorder().isWithinBounds(pos) + ", mayInteract " + level.mayInteract(actor, pos)
+				+ ", mayUseItemAt " + actor.mayUseItemAt(pos, Direction.UP, ItemStack.EMPTY) + ", mayBuild " + actor.getAbilities().mayBuild
+				+ ", townDenies " + TownProtection.denies(actor, level, pos) + ", breakAllowed "
+				+ PlayerBlockBreakEvents.BEFORE.invoker().beforeBlockBreak(level, actor, pos, level.getBlockState(pos), level.getBlockEntity(pos))
+				+ "}";
 	}
 
 	private static StubVessel ship(GameTestHelper h, float yaw, double x) {

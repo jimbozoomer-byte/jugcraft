@@ -64,7 +64,7 @@ Crew ride the ship as passengers, so vanilla saves them inside the ship and brin
 ## Verification
 
 - **Java.** `javasyntax` parses all changed and new Java files with no errors. Every API used was checked against existing uses in the repository. Nothing was compiled; Gradle cannot run here.
-- **Server GameTests**, `PirateCrewGameTests`, 13 tests on a test-only stub vessel (`jugcraft-test:stub_vessel`, `TestVessels`). Written but **not run**:
+- **Server GameTests**, `PirateCrewGameTests`, 13 tests on a test-only stub vessel (`jugcraft-test:stub_vessel`, `TestVessels`). In Codex's focused runtime of 10 November, four failed for one fixture reason: vanilla's mock player always answers creative, and the crew never fight a creative player. Those tests now fight a real survival player that has finished loading (`TestPlayers.survivor`), and their messages list every condition the crew's `canAttack` weighs. That fix has **not been re-run**. The tests cover:
   - provisioning;
   - seats turned once at yaw 90, with feet at the seat's height;
   - save and reload without duplicates, the roster kept through unloading and its own save;
