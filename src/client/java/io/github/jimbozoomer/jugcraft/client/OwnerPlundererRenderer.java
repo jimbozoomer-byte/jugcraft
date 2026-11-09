@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.client;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.menagerie.CrewedVessel;
 import io.github.jimbozoomer.jugcraft.menagerie.OwnerPlunderer;
 import net.minecraft.client.model.monster.illager.IllagerModel;
 import net.minecraft.client.model.geom.*;
@@ -7,17 +8,21 @@ import net.minecraft.client.model.geom.builders.*;
 import net.minecraft.client.renderer.entity.*;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.client.renderer.entity.state.IllagerRenderState;
-/** Supplied plunderer geometry/UVs, native walking and sword attack, and spyglass pose. */
+/** Supplied plunderer geometry/UVs, native walking and sword attack, spyglass pose, and a ship's crew standing at their stations. */
 final class OwnerPlundererRenderer extends IllagerRenderer<OwnerPlunderer,OwnerPlundererRenderer.State> {
  OwnerPlundererRenderer(EntityRendererProvider.Context c){super(c,new Model(),.5F);addLayer(new ItemInHandLayer<>(this));}
- static final class State extends IllagerRenderState {boolean spy;}
+ static final class State extends IllagerRenderState {boolean spy,standing;}
  @Override public State createRenderState(){return new State();}
- @Override public void extractRenderState(OwnerPlunderer e,State s,float partial){super.extractRenderState(e,s,partial);s.spy=e.usingSpyglass();}
+ @Override public void extractRenderState(OwnerPlunderer e,State s,float partial){super.extractRenderState(e,s,partial);s.spy=e.usingSpyglass();
+  // A moving pirate ship's crew (passengers of a CrewedVessel) stand at their stations, feet on the seat: no riding pose, legs
+  // straight, skirt shown (docs/features/pirate-ship-crews.md). Plunderers in boats and cannon boats still sit.
+  s.standing=e.getVehicle() instanceof CrewedVessel;if(s.standing)s.isRiding=false;}
  @Override public net.minecraft.resources.Identifier getTextureLocation(State s){return Jugcraft.id("textures/newest/supps/entity/plunderer.png");}
  private static final class Model extends IllagerModel<State> {
-  private final ModelPart skirt,left,right;
-  Model(){super(createMesh().bakeRoot());getHat().visible=true;skirt=root().getChild("body").getChild("skirt");left=root().getChild("left_arm");right=root().getChild("right_arm");}
-  @Override public void setupAnim(State s){super.setupAnim(s);getHat().visible=true;skirt.visible=!s.isRiding;if(s.spy){root().getChild("arms").visible=false;left.visible=right.visible=true;var arm=s.mainArm==net.minecraft.world.entity.HumanoidArm.RIGHT?left:right;arm.xRot=net.minecraft.util.Mth.clamp(getHead().xRot-1.9198622F,-2.4F,3.3F);arm.yRot=getHead().yRot+(arm==left?.2617994F:-.2617994F);}}
+  private final ModelPart skirt,left,right,leftLeg,rightLeg;
+  Model(){super(createMesh().bakeRoot());getHat().visible=true;skirt=root().getChild("body").getChild("skirt");left=root().getChild("left_arm");right=root().getChild("right_arm");leftLeg=root().getChild("left_leg");rightLeg=root().getChild("right_leg");}
+  @Override public void setupAnim(State s){super.setupAnim(s);getHat().visible=true;skirt.visible=!s.isRiding;
+   if(s.standing){leftLeg.xRot=rightLeg.xRot=leftLeg.yRot=rightLeg.yRot=leftLeg.zRot=rightLeg.zRot=0;}if(s.spy){root().getChild("arms").visible=false;left.visible=right.visible=true;var arm=s.mainArm==net.minecraft.world.entity.HumanoidArm.RIGHT?left:right;arm.xRot=net.minecraft.util.Mth.clamp(getHead().xRot-1.9198622F,-2.4F,3.3F);arm.yRot=getHead().yRot+(arm==left?.2617994F:-.2617994F);}}
     public static LayerDefinition createMesh() {
         MeshDefinition meshDefinition = new MeshDefinition();
         PartDefinition partDefinition = meshDefinition.getRoot();

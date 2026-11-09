@@ -326,7 +326,7 @@ public class PirateCrewGameTests {
 		StubVessel ship = ship(h, 0.0F, 8.5);
 		PirateCrew.provision(level, ship);
 		level.addFreshEntityWithPassengers(ship);
-		var villager = EntityType.VILLAGER.create(level, EntitySpawnReason.TRIGGERED);
+		var villager = net.minecraft.world.entity.EntityTypes.VILLAGER.create(level, EntitySpawnReason.TRIGGERED);
 		var townsfolk = JugcraftTown.TOWNSFOLK.create(level, EntitySpawnReason.TRIGGERED);
 		Vec3 near = h.absoluteVec(new Vec3(12.5, 1.0, 8.5));
 		villager.snapTo(near.x, near.y, near.z, 0.0F, 0.0F);
@@ -406,7 +406,7 @@ public class PirateCrewGameTests {
 		plunderer.snapTo(at.x, at.y, at.z, 0.0F, 0.0F);
 		h.assertTrue(plunderer.shipLink() == null && plunderer.shipStation() == -1 && !plunderer.canJoinRaid(),
 				"A galleon plunderer has no ship and never joins raids");
-		var villager = EntityType.VILLAGER.create(level, EntitySpawnReason.TRIGGERED);
+		var villager = net.minecraft.world.entity.EntityTypes.VILLAGER.create(level, EntitySpawnReason.TRIGGERED);
 		h.assertTrue(!plunderer.canAttack(villager), "It still never targets villagers");
 		var out = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
 		plunderer.saveWithoutId(out);
