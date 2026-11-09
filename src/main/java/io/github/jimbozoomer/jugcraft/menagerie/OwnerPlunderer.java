@@ -65,10 +65,10 @@ public final class OwnerPlunderer extends AbstractIllager implements InventoryCa
  @Override public void tick(){super.tick();PirateCrew.face(this);}
  /** A blow at a target in reach, as MeleeAttackGoal's (PirateCrew.DeckFightGoal, on a ship's deck where no path runs). */
  void strike(ServerLevel l,LivingEntity target){swingForAttack(InteractionHand.MAIN_HAND);doHurtTarget(l,target);}
- // A ship's crew member killed or removed for good is lost on its ship's roster (PirateCrew.defeated); unloading or
- // changing dimension never counts.
+ // A ship's crew member that dies (die, or removal as KILLED) is lost on its ship's roster (PirateCrew.defeated).
+ // A discard (Peaceful's despawn, an admin's), unloading or changing dimension never counts: no treasure without a fight.
  @Override public void die(DamageSource source){super.die(source);if(ship!=null&&level() instanceof ServerLevel l)PirateCrew.lost(l,ship,getUUID());}
- @Override public void remove(RemovalReason reason){if(ship!=null&&reason.shouldDestroy()&&level() instanceof ServerLevel l)PirateCrew.lost(l,ship,getUUID());super.remove(reason);}
+ @Override public void remove(RemovalReason reason){if(ship!=null&&reason==RemovalReason.KILLED&&level() instanceof ServerLevel l)PirateCrew.lost(l,ship,getUUID());super.remove(reason);}
  @Override public SpawnGroupData finalizeSpawn(ServerLevelAccessor l,DifficultyInstance d,EntitySpawnReason reason,SpawnGroupData group){var result=super.finalizeSpawn(l,d,reason,group);setItemSlot(EquipmentSlot.MAINHAND,new ItemStack(Items.GOLDEN_SWORD));setItemSlot(EquipmentSlot.OFFHAND,new ItemStack(Items.SPYGLASS));return result;}
  @Override protected SoundEvent getAmbientSound(){return OwnerSupplementaries.SOUNDS.get("plunderer_idle");}@Override protected SoundEvent getHurtSound(DamageSource d){return OwnerSupplementaries.SOUNDS.get("plunderer_hurt");}@Override protected SoundEvent getDeathSound(){return OwnerSupplementaries.SOUNDS.get("plunderer_death");}@Override public SoundEvent getCelebrateSound(){return OwnerSupplementaries.SOUNDS.get("plunderer_celebrate");}
  @Override protected void customServerAiStep(ServerLevel l){super.customServerAiStep(l);if(gunCooldown>0)gunCooldown--;if(spyTicks>0)spyTicks--;var target=getTarget();if(target!=null&&distanceToSqr(target)>144&&hasLineOfSight(target)&&tickCount%100==0)spyTicks=30;entityData.set(SPY,spyTicks>0);}

@@ -10,7 +10,7 @@ A pirate ship carries a visible crew of ten plunderers: a helmsman at the wheel,
 - **Boarding.** A player within 12 blocks of the deck who is in a boat or other vehicle, or who stands on the deck, makes the helm heave to. The deck crew step off their stations onto the deck and fight hand to hand. On the deck they move straight at the target and strike within 2 blocks, every 20 ticks, because paths do not run on an entity deck. Off the ship, the ordinary melee goal fights.
 - **Tether.** Off its ship, a crew member fights only while it and its target are both within 24 blocks of the deck (of the ship's last seen place while the ship is not loaded). Beyond that it gives the target up and goes back aboard: by path where the ground allows, else straight at its seat, climbing aboard within 3 blocks of the deck. Crew aboard (gunners) are not tethered.
 - **Release.** With nobody to fight for 200 ticks and none of its crew off the ship near the deck, the helm lets the ship go.
-- **Defeat.** A ship is defeated once every crew member on its roster is lost: killed, or removed for good. The ship rolls its finite hold once; the crew code adds no loot.
+- **Defeat.** A ship is defeated once every crew member on its roster has died. The ship rolls its finite hold once; the crew code adds no loot. Crew that vanish without dying (Peaceful's despawn, an admin's discard) leave the ship undefeated, so it never gives up its hold without a fight.
 - **Sinking.** When the ship sinks, its crew leave it and fight on as ordinary plunderers. A destroyed ship's surviving crew do the same.
 
 ## Contract with the ship
@@ -45,8 +45,8 @@ Crew ride the ship as passengers, so vanilla saves them inside the ship and brin
 - **The plunderer** additionally saves `Ship` (UUID), `ShipStation` (int, also synced so both sides seat and face it) and `ShipPos` (where its ship was last seen).
 - **The roster** (`PirateCrew.Roster`, saved data `jugcraft:pirate_crews` in the overworld, one for the server) keeps each ship's crew by UUID and which of them are lost.
   - `provision` puts each seated crew member on it.
-  - A linked crew member's death, or its removal for good (`KILLED` or `DISCARDED`), marks it lost. Unloading with its chunk or changing dimension never does.
-  - `defeated` is true once the ship's roster is non-empty and every member is lost. A living crew member aboard answers false at once. Absence is never taken for death, so a crew member lured far away, or unloaded in a far chunk, keeps its ship undefeated until it actually dies.
+  - Only a linked crew member's death marks it lost: its `die`, or removal as `KILLED`. A discard (`DISCARDED`: Peaceful's despawn, an admin's discard), unloading with its chunk, changing dimension or any other removal never does; that member stays unaccounted for.
+  - `defeated` is true once the ship's roster is non-empty and every member is lost. A living crew member aboard answers false at once. Absence is never taken for death, so a crew member lured far away, or unloaded in a far chunk, keeps its ship undefeated until it actually dies. A ship with even one discarded crew member is never defeated and never rolls its hold.
   - `forget` drops a destroyed ship's entry.
 - **Off the ship** (boarding), a crew member looks its ship up among loaded entities only.
   - While the roster still holds the ship and it is not loaded, the crew member waits, linked, however long.
@@ -64,13 +64,14 @@ Crew ride the ship as passengers, so vanilla saves them inside the ship and brin
 ## Verification
 
 - **Java.** `javasyntax` parses all changed and new Java files with no errors. Every API used was checked against existing uses in the repository. Nothing was compiled; Gradle cannot run here.
-- **Server GameTests**, `PirateCrewGameTests`, 12 tests on a test-only stub vessel (`jugcraft-test:stub_vessel`, `TestVessels`). Written but **not run**:
+- **Server GameTests**, `PirateCrewGameTests`, 13 tests on a test-only stub vessel (`jugcraft-test:stub_vessel`, `TestVessels`). Written but **not run**:
   - provisioning;
   - seats turned once at yaw 90, with feet at the seat's height;
   - save and reload without duplicates, the roster kept through unloading and its own save;
   - waiting for an unloaded ship and giving up a destroyed one;
   - boarding, the deck fight by direct movement, and defeat by roster;
   - victory by roster: a crew member 80 blocks off and one unloaded keep the ship undefeated until each dies;
+  - only deaths defeat a ship: all discarded (as Peaceful's despawn) or 9 killed and 1 discarded is not defeated, all killed is;
   - the tether;
   - sinking;
   - no villagers or townsfolk;

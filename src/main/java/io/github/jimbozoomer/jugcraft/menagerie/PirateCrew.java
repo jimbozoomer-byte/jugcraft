@@ -54,8 +54,8 @@ import org.jspecify.annotations.Nullable;
  * on the deck (an entity deck has no path). Off the ship a crew member fights only within {@value #TETHER} blocks of
  * its deck; beyond that it goes back. With nobody to fight for {@value #RELEASE_TICKS} ticks and no crew over the
  * side, the helm lets the ship go.</li>
- * <li><b>Victory.</b> The {@link Roster} keeps every ship's crew by identity; a crew member killed or removed for good is
- * lost there. A ship is {@link #defeated} once all its rostered crew are lost: never because one is merely absent.</li>
+ * <li><b>Victory.</b> The {@link Roster} keeps every ship's crew by identity; a crew member that dies is lost there.
+ * A ship is {@link #defeated} once all its rostered crew have died: never because one is absent or was discarded.</li>
  * <li><b>Limits.</b> The crew fight players only: never villagers or townsfolk, and nowhere a claim or a town's
  * protection refuses an unprivileged pirate identity. Nothing here reads or loads an unloaded chunk.</li>
  * </ul>
@@ -195,12 +195,14 @@ public final class PirateCrew {
 	}
 
 	/**
-	 * The ship's loot trigger: whether every crew member the {@link Roster} holds for it is lost, killed or removed for
-	 * good. Server side, and cheap enough to call every tick: a scan of the ship's passengers (any living crew member
-	 * aboard answers false at once), then one lookup. Absence is never death: a crew member unloaded in a far chunk, or
-	 * gone to another dimension, still counts as alive, so a ship just loaded from disk can never be defeated by a crew
-	 * member that has not loaded yet. A ship with no roster (never provisioned, or forgotten) is never defeated. The ship
-	 * rolls its hold once when this first becomes true; the crew code rolls, gives and drops no hold loot.
+	 * The ship's loot trigger: whether every crew member the {@link Roster} holds for it has died (its {@code die}, or
+	 * removal as {@code KILLED}). Server side, and cheap enough to call every tick: a scan of the ship's passengers (any
+	 * living crew member aboard answers false at once), then one lookup. Only deaths count. A crew member unloaded in a
+	 * far chunk or gone to another dimension still counts as alive, so a ship just loaded from disk can never be defeated
+	 * by a crew member that has not loaded yet. A crew member discarded (Peaceful's despawn, an admin's discard) or removed
+	 * for any other reason is never lost: it stays unaccounted for, so that ship is never defeated and never rolls its
+	 * hold. A ship with no roster (never provisioned, or forgotten) is never defeated. The ship rolls its hold once when
+	 * this first becomes true; the crew code rolls, gives and drops no hold loot.
 	 */
 	public static boolean defeated(Entity vessel) {
 		for (Entity passenger : vessel.getPassengers()) {
@@ -220,7 +222,7 @@ public final class PirateCrew {
 		Roster.get(level).forget(ship);
 	}
 
-	/** Records a linked crew member as lost: killed, or removed for good (OwnerPlunderer's {@code die} and {@code remove}). */
+	/** Records a linked crew member as lost because it died (OwnerPlunderer's {@code die}, or {@code remove} as {@code KILLED}). */
 	static void lost(ServerLevel level, UUID ship, UUID member) {
 		Roster.get(level).lose(ship, member);
 	}
@@ -612,9 +614,9 @@ public final class PirateCrew {
 
 	/**
 	 * Every pirate ship's crew by identity, in the overworld's saved data (one record for the server, whatever the
-	 * dimension): who was provisioned for each ship, and which of them are lost, killed or removed for good. A crew
-	 * member unloaded with its chunk or gone to another dimension is not lost. {@link #defeated} counts losses here and
-	 * never takes an absence for a death; {@link #forget} drops a destroyed ship.
+	 * dimension): who was provisioned for each ship, and which of them have died. A crew member unloaded with its chunk,
+	 * gone to another dimension, or discarded (Peaceful's despawn, an admin's discard) is not lost. {@link #defeated}
+	 * counts deaths here and never takes an absence or a discard for one; {@link #forget} drops a destroyed ship.
 	 */
 	public static final class Roster extends SavedData {
 		record Entry(UUID ship, List<UUID> crew, List<UUID> lost) {
