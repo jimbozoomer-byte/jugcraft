@@ -276,6 +276,12 @@ public final class JugcraftClient implements ClientModInitializer {
 				lines.add(net.minecraft.network.chat.Component.translatable("tooltip.jugcraft.plating.repair")
 						.withStyle(net.minecraft.ChatFormatting.GRAY));
 			}
+			// The hydroponic bay runs on nutrient solution only; piped water is refused (docs/features/hydroponics.md).
+			if (stack.is(io.github.jimbozoomer.jugcraft.machine.JugcraftMachines.MACHINES
+					.get(io.github.jimbozoomer.jugcraft.machine.MachineKind.HYDROPONIC_BAY).asItem())) {
+				lines.add(net.minecraft.network.chat.Component.translatable("tooltip.jugcraft.hydroponic_bay")
+						.withStyle(net.minecraft.ChatFormatting.GRAY));
+			}
 		});
 		EngineersHandbookItem.openScreen = () -> Minecraft.getInstance().gui.setScreen(new HandbookScreen());
 		// Gear traits' descriptions show while Shift is held (gear/TraitTooltips.java, docs/features/trait-details.md).

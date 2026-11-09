@@ -62,7 +62,24 @@ No new dependencies. Model (dieselpunk: a two-tier grow rack under violet grow l
   - a bay with nutrient solution grows wheat and gives the seed back;
   - it refuses plain water;
   - a bay with no solution grows nothing.
+- `HydroponicBayFluidGameTests` (CI; added for the 8 November 2026 report below), all on the full 3x2x3 bay:
+  - an electric pump on a tank of nutrient solution fills it through three bronze pipes ending on a dummy part, with nothing lost;
+  - pumped water is refused and all of it stays in the pump;
+  - a bay 50 mB short of full takes exactly 50 mB and the rest stays in the pump;
+  - all 42 outward faces of an east-facing bay feed the one tank, taking nutrient solution and refusing water;
+  - a nutrient solution bucket on a dummy part pours in; a water bucket, or a bucket that does not fit, is kept, with the screen shut and nothing spilled;
+  - every one-fluid machine tank takes the fluid its screen names.
 - Not run: client play, many bays together.
+
+## 8 November 2026: "will not accept water from an electric pump and pipes"
+- Traced pump → pipe network → bay in the source. The fluid lookup is registered on every block of the machine and resolves to the master. The pipe network finds dummy parts as endpoints, and the inlet's transactions roll back cleanly. No step refuses nutrient solution. Water is refused only because the bay takes nutrient solution alone, as designed above. The new game tests exercise this path; they have not been run yet.
+- The owner's direction (via Codex): keep that requirement and make it clear. The bay's screen and books told players nothing, and its gauge was drawn water-blue:
+  - the tank gauge now has nutrient solution's colour, and its tooltip names the fluid ("Nutrient Solution: 0 / 8,000 mB");
+  - while the tank holds less than a harvest, the status pane says to pipe or pour in nutrient solution and that water is refused;
+  - the bay item's tooltip and the handbook page say the same;
+  - a water bucket used on the bay says "The Hydroponic Bay takes only Nutrient Solution, not Water" instead of opening the screen. A nutrient solution bucket that does not fit says the tank has no room. The bucket is kept either way.
+- The one-fluid machines' fluid now comes from `MachineKind.tankFluid()`, which their inlets and screens share. The other machines take the same fluids as before. Their gauges are now drawn in their fluid's colour, so the electroplating bath's gauge shows acid instead of water blue.
+- Not compiled or run where it was written (no Minecraft or Fabric download there): the new tests and the screen changes need a local or CI run.
 
 ## World and event applicability
 Not applicable.

@@ -81,7 +81,10 @@ ABOUT = {
                            "again with the same metal to repair; a different metal is refused.",
     "hydroponic_bay": "Grows a seed or cutting in nutrient solution under grow lights: no soil, sunlight or farmland, "
                       "so it works underground, in the Nether or the End. A harvest every 30 seconds uses 100 mB of "
-                      "solution (a fertilizer in a bucket of water, in the chemical reactor) and gives the seed back.",
+                      "solution and gives the seed back. It takes only Nutrient Solution, never plain water: dissolve a "
+                      "fertilizer in a bucket of water in the chemical reactor (1,000 mB, ten harvests), then pump it "
+                      "through pipes into any block of the bay, or pour in a Nutrient Solution Bucket. Water sent to it "
+                      "is refused and stays in the pump or bucket.",
     "crop_harvester": "Two blocks tall. Harvests the ripe crops in the 9x9 field in front of it, starting the block in "
                       "front: one crop a second at 24 JE/t. It keeps the drops and plants one of the seeds again, and "
                       "waits when its three result slots are full. Crops on farmland sit at its own height.",

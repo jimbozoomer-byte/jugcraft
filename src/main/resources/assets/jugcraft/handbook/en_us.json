@@ -6131,7 +6131,7 @@
           "title": "Hydroponic Bay",
           "icon": "jugcraft:hydroponic_bay",
           "text": [
-            "Grows a seed or cutting in nutrient solution under grow lights: no soil, sunlight or farmland, so it works underground, in the Nether or the End. A harvest every 30 seconds uses 100 mB of solution (a fertilizer in a bucket of water, in the chemical reactor) and gives the seed back.",
+            "Grows a seed or cutting in nutrient solution under grow lights: no soil, sunlight or farmland, so it works underground, in the Nether or the End. A harvest every 30 seconds uses 100 mB of solution and gives the seed back. It takes only Nutrient Solution, never plain water: dissolve a fertilizer in a bucket of water in the chemical reactor (1,000 mB, ten harvests), then pump it through pipes into any block of the bay, or pour in a Nutrient Solution Bucket. Water sent to it is refused and stays in the pump or bucket.",
             "Uses 12 JE/t while working. Holds 20,000 JE."
           ],
           "craft": {

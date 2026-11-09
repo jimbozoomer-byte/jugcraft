@@ -201,6 +201,10 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	/** mB in the machine's tank: water for the steam generator and ore washer, lava for the geothermal generator. Saved as "water". */
 	private int tank;
 	int companionTankAmount(){return tank;}
+	/** mB in the machine's {@link MachineKind#tankCapacity()} tank, which holds only {@link MachineKind#tankFluid()}. */
+	public int tankAmount() {
+		return tank;
+	}
 	/** Processors: which faces take input or give output, and whether results are pushed out. */
 	private final SideConfig sides;
 	/** Ore drill: the next block to check, counted from the top layer below the drill (see {@link OreDrilling}). */
@@ -299,12 +303,9 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			default -> null;
 		};
 		this.inlet = switch (kind) {
-			case STEAM_GENERATOR -> new TankInlet(Fluids.WATER, MachineKind.STEAM_TANK);
-			case LARGE_STEAM_ENGINE -> new TankInlet(Fluids.WATER, MachineKind.LARGE_ENGINE_TANK);
-			case GEOTHERMAL_GENERATOR -> new TankInlet(Fluids.LAVA, MachineKind.GEOTHERMAL_TANK);
-			case ORE_WASHER -> new TankInlet(Fluids.WATER, MachineKind.WASHER_TANK);
-			case HYDROPONIC_BAY -> new TankInlet(PetroFluids.NUTRIENT_SOLUTION.source(), MachineKind.HYDROPONIC_TANK);
-			case ELECTROPLATING_BATH -> new TankInlet(PetroFluids.SULFURIC_ACID.source(), Electroplating.TANK);
+			// One-fluid tanks: the fluid and size come from MachineKind, which the screen's gauge reads too.
+			case STEAM_GENERATOR, LARGE_STEAM_ENGINE, GEOTHERMAL_GENERATOR, ORE_WASHER, HYDROPONIC_BAY, ELECTROPLATING_BATH ->
+					new TankInlet(kind.tankFluid(), kind.tankCapacity());
 			case STEEL_FOUNDRY -> new TankInlet(PetroFluids.OXYGEN.fluid(), MachineKind.BOOST_TANK);
 			case ARC_FURNACE -> new TankInlet(PetroFluids.ARGON.fluid(), MachineKind.BOOST_TANK);
 			default -> null;

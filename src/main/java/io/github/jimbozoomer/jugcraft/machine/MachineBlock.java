@@ -146,7 +146,34 @@ public class MachineBlock extends BaseEntityBlock implements EnergyConnectable {
 		if (tank != null && FluidStorageUtil.interactWithFluidStorage(tank, player, hand)) {
 			return InteractionResult.SUCCESS;
 		}
+		if (machine != null && kind == MachineKind.HYDROPONIC_BAY && explainRefusedFluid(machine, player, hand)) {
+			return InteractionResult.SUCCESS;
+		}
 		return super.useItemOn(stack, state, level, pos, player, hand, hit);
+	}
+
+	/**
+	 * A fluid container the hydroponic bay could not take from: say which fluid it wants (plain water is the usual
+	 * mistake) or that its tank has no room, instead of opening its screen as if the click had missed. The container
+	 * keeps its fluid: the failed interaction above changed nothing. False when the hand holds no fluid.
+	 */
+	private static boolean explainRefusedFluid(MachineBlockEntity machine, Player player, InteractionHand hand) {
+		net.minecraft.world.level.material.Fluid wanted = machine.kind().tankFluid();
+		Storage<FluidVariant> held = net.fabricmc.fabric.api.transfer.v1.context.ContainerItemContext
+				.forPlayerInteraction(player, hand).find(net.fabricmc.fabric.api.transfer.v1.fluid.FluidStorage.ITEM);
+		FluidVariant fluid = held == null ? null : net.fabricmc.fabric.api.transfer.v1.storage.StorageUtil.findStoredResource(held);
+		if (wanted == null || fluid == null || fluid.isBlank()) {
+			return false;
+		}
+		if (!player.level().isClientSide()) {
+			var name = machine.getBlockState().getBlock().getName();
+			var wantedName = net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes.getName(FluidVariant.of(wanted));
+			player.sendOverlayMessage(fluid.isOf(wanted)
+					? net.minecraft.network.chat.Component.translatable("message.jugcraft.machine.tank_full", name, wantedName)
+					: net.minecraft.network.chat.Component.translatable("message.jugcraft.machine.wrong_fluid", name, wantedName,
+							net.fabricmc.fabric.api.transfer.v1.fluid.FluidVariantAttributes.getName(fluid)));
+		}
+		return true;
 	}
 
 	@Override
