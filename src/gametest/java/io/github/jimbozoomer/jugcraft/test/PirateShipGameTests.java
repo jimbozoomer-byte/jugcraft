@@ -2,6 +2,7 @@ package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.menagerie.OwnerCannonball;
 import io.github.jimbozoomer.jugcraft.menagerie.OwnerPlunderer;
+import io.github.jimbozoomer.jugcraft.menagerie.PirateCrew;
 import io.github.jimbozoomer.jugcraft.menagerie.PirateSeas;
 import io.github.jimbozoomer.jugcraft.menagerie.PirateShip;
 import io.github.jimbozoomer.jugcraft.menagerie.PirateShipDeck;
@@ -504,6 +505,52 @@ public class PirateShipGameTests {
 					+ " the hull before the keel, but reached x " + farthest[1]);
 			crew[0].discard();
 			ship.discard();
+			helper.succeed();
+		});
+	}
+
+	/**
+	 * The real thing, with no stand-ins: a ship crewed by PirateCrew.provision (ten linked plunderers, seated and on its
+	 * roster) holds out while any of them lives, rolls its hold only when the roster has recorded every death, rolls it
+	 * from the galleon table's own roll for its seed, lies still, and forgets its roster when it is removed.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 160, skyAccess = true)
+	public void realCrewDeathsBeatTheShipAndOpenItsHold(GameTestHelper helper) {
+		pool(helper);
+		ServerLevel level = helper.getLevel();
+		PirateShip ship = ship(helper, false);
+		int seated = PirateCrew.provision(level, ship);
+		ship.setCrewed(seated > 0);
+		level.addFreshEntityWithPassengers(ship);
+		helper.assertTrue(seated == PirateCrew.STATIONS.size() && ship.getPassengers().size() == seated,
+				"Provisioning should seat a crew member at each of the " + PirateCrew.STATIONS.size() + " stations, not " + seated);
+		helper.assertTrue(PirateCrew.Roster.get(level).knows(ship.getUUID()), "The crew should be on the roster");
+		List<OwnerPlunderer> crew = new ArrayList<>();
+		for (var passenger : ship.getPassengers()) {
+			crew.add((OwnerPlunderer) passenger);
+		}
+		helper.runAfterDelay(5, () -> {
+			for (int i = 0; i < crew.size() - 1; i++) {
+				crew.get(i).kill(level);
+			}
+		});
+		helper.runAfterDelay(50, () -> {
+			helper.assertTrue(!PirateCrew.defeated(ship) && !ship.lootRolled() && ship.hold().isEmpty(),
+					"With one crew member alive the ship holds out and its hold stays shut");
+			crew.get(crew.size() - 1).kill(level);
+		});
+		helper.runAfterDelay(80, () -> {
+			helper.assertTrue(PirateCrew.defeated(ship), "With every death on the roster the crew are beaten");
+			helper.assertTrue(ship.lootRolled() && ship.beaten() && ship.heaveTo(), "Beaten, the ship rolls its hold and lies still");
+			var expected = PirateShipTesting.expectedHold(level, ship, ship.position());
+			for (int slot = 0; slot < PirateShip.HOLD_SLOTS; slot++) {
+				helper.assertTrue(ItemStack.matches(ship.hold().getItem(slot), expected.getItem(slot)),
+						"Hold slot " + slot + " should be the table's roll for this ship, " + expected.getItem(slot) + ", not " + ship.hold().getItem(slot));
+			}
+			ship.discard();
+		});
+		helper.runAfterDelay(82, () -> {
+			helper.assertTrue(!PirateCrew.Roster.get(level).knows(ship.getUUID()), "Removed for good, the ship's roster is forgotten");
 			helper.succeed();
 		});
 	}
