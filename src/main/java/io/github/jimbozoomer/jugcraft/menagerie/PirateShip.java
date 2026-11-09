@@ -508,8 +508,12 @@ public class PirateShip extends Entity implements CrewedVessel {
 		if (level() instanceof ServerLevel level) {
 			decks.forEach(Entity::discard);
 			decks.clear();
-			if (reason.shouldDestroy() && natural) {
-				PirateSeas.get(level).gone(getUUID(), level.getGameTime());
+			if (reason.shouldDestroy()) {
+				// Gone for good: its crew's roster goes (they fight on unlinked), and a natural ship's record is tombstoned.
+				PirateCrew.forget(level, getUUID());
+				if (natural) {
+					PirateSeas.get(level).gone(getUUID(), level.getGameTime());
+				}
 			}
 		}
 		super.remove(reason);

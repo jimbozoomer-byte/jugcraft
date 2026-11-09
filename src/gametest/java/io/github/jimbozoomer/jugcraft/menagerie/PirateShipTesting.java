@@ -34,6 +34,21 @@ public final class PirateShipTesting {
 		ship.rollHold(level);
 	}
 
+	/** Links {@code crew} to {@code ship} at a station, as provisioning does (without seating it). */
+	public static void link(OwnerPlunderer crew, PirateShip ship, int station) {
+		crew.link(ship.getUUID(), station);
+	}
+
+	/** A cannonball fired by {@code owner} from {@code from} at {@code velocity} (blocks a tick), added to the level. */
+	public static OwnerCannonball fire(ServerLevel level, net.minecraft.world.entity.Entity owner, Vec3 from, Vec3 velocity) {
+		OwnerCannonball ball = new OwnerCannonball(OwnerCannon.BALL, level);
+		ball.setOwner(owner);
+		ball.setPos(from);
+		ball.setDeltaMovement(velocity);
+		level.addFreshEntity(ball);
+		return ball;
+	}
+
 	/** What the ship's one roll puts in its hold: the same table, place and seed, into a fresh container. */
 	public static SimpleContainer expectedHold(ServerLevel level, PirateShip ship, Vec3 rolledAt) {
 		SimpleContainer expected = new SimpleContainer(PirateShip.HOLD_SLOTS);
