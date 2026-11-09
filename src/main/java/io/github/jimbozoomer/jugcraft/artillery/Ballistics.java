@@ -4,12 +4,12 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * Works out the elevation that lands a shell on a target, by stepping a shell's flight exactly as a thrown projectile
- * moves each tick (move by its speed, lose 1% to drag, then fall by its gravity) and searching between the gun's
- * elevation limits. High arcs (mortars) search down from the highest elevation;
+ * moves each tick (ThrowableProjectile.tick: fall by its gravity, lose 1% to drag, then move by that speed; the drag is
+ * the game's float 0.99F) and searching between the gun's elevation limits. High arcs (mortars) search down from the highest elevation;
  * direct fire searches upward from the lowest, including steep shots at aircraft.
  */
 public final class Ballistics {
-	private static final double DRAG = 0.99;
+	private static final double DRAG = 0.99F;
 	private static final int MAX_TICKS = 1200;
 
 	private Ballistics() {
@@ -58,8 +58,9 @@ public final class Ballistics {
     public static double heightAtDistance(double speed,double gravity,float pitch,double distance) {
         double rad=Math.toRadians(pitch),vx=speed*Math.cos(rad),vy=speed*Math.sin(rad),x=0,y=0;
         for(int tick=0;tick<MAX_TICKS;tick++) {
+            vx*=DRAG;vy=(vy-gravity)*DRAG;
             if(x+vx>=distance) return y+vy*(distance-x)/vx;
-            x+=vx;y+=vy;vx*=DRAG;vy=vy*DRAG-gravity;
+            x+=vx;y+=vy;
             if(vx<1e-6) break;
         }
         return Double.NEGATIVE_INFINITY;
@@ -73,6 +74,8 @@ public final class Ballistics {
 		double x = 0;
 		double y = 0;
 		for (int tick = 0; tick < MAX_TICKS; tick++) {
+			vx *= DRAG;
+			vy = (vy - gravity) * DRAG;
 			double nx = x + vx;
 			double ny = y + vy;
 			if (vy < 0 && ny <= rise) {
@@ -81,8 +84,6 @@ public final class Ballistics {
 			}
 			x = nx;
 			y = ny;
-			vx *= DRAG;
-			vy = vy * DRAG - gravity;
 		}
 		return 0;
 	}

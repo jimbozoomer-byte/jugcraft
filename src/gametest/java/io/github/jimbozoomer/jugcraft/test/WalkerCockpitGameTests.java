@@ -1,15 +1,15 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import io.github.jimbozoomer.jugcraft.artillery.ArtilleryShell;
+import io.github.jimbozoomer.jugcraft.artillery.Ballistics;
 import io.github.jimbozoomer.jugcraft.artillery.JugcraftArtillery;
 import io.github.jimbozoomer.jugcraft.walker.ArmouredWalker;
 import io.github.jimbozoomer.jugcraft.walker.DieselWalker;
 import io.github.jimbozoomer.jugcraft.walker.HowitzerWalker;
 import io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers;
 import io.github.jimbozoomer.jugcraft.walker.WalkerAim;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.ArrayList;
+import java.util.List;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
@@ -33,6 +33,16 @@ public class WalkerCockpitGameTests {
 	/** The tops of the Armoured and Howitzer Walkers' hulls, in blocks (tools/armoured_walker.py ROOF; the Howitzer's hatch ring). */
 	private static final double ARMOURED_ROOF = 72 / 16.0;
 	private static final double HOWITZER_ROOF = 81.5 / 16.0;
+	/**
+	 * How near the shell's own resting place must be to the landing the telegraph showed, in blocks. The game moves a shell
+	 * onto the point it hits before it bursts, and the telegraph and the gun aim from the same muzzle at the same velocity,
+	 * so the two differ by rounding only (the gun shoots at the float of its speed); a tick's flight is over two blocks.
+	 */
+	private static final double LANDING_TOLERANCE = 0.01;
+	/** How near a real shell must be, each tick, to where the shared flight math puts it, in blocks. */
+	private static final double STEP_TOLERANCE = 1.0E-6;
+	/** How many of a real shell's ticks are checked against the shared flight math. */
+	private static final int STEPS = 5;
 
 	private static void floor(GameTestHelper helper, int size) {
 		for (int x = 0; x < size; x++) {
@@ -74,7 +84,9 @@ public class WalkerCockpitGameTests {
 	/**
 	 * The Armoured Walker's cannon lands on what the pilot looks at, low on the ground 28 blocks ahead: the arc the pilot's
 	 * telegraph draws ({@link WalkerAim#flight} from {@link ArmouredWalker#cannonVelocity}) comes down there, the shell
-	 * fired comes down where the arc does, and its burst hurts the pig standing by.
+	 * fired comes down where the arc does, and its burst hurts the pig standing by. The shell itself is kept: once it has
+	 * burst, its place is the point it hit (the game moves it there before it bursts), and that is held to
+	 * {@value #LANDING_TOLERANCE} blocks of the telegraph's landing, not to a tick's flight.
 	 */
 	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 120, skyAccess = true)
 	public void armouredCannonLandsWhereItsArcShows(GameTestHelper helper) {
@@ -87,8 +99,7 @@ public class WalkerCockpitGameTests {
 		Mob pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, new BlockPos(10, 1, 34));
 		Vec3 aim = helper.absoluteVec(new Vec3(8.5, 1.0, 34.5));
 		Vec3[] predicted = {null};
-		Map<UUID, Vec3> flying = new HashMap<>();
-		Vec3[] landed = {null};
+		List<ArtilleryShell> fired = new ArrayList<>();
 		AABB area = new AABB(helper.absolutePos(BlockPos.ZERO)).expandTowards(44, 26, 44);
 		int[] tick = {0};
 		helper.onEachTick(() -> {
@@ -103,24 +114,70 @@ public class WalkerCockpitGameTests {
 				predicted[0] = flight.impact();
 			}
 			walker.steer(pilot, 0, 0, 0, predicted[0] != null ? 1 : 0, 0);
-			Map<UUID, Vec3> seen = new HashMap<>();
 			for (ArtilleryShell shell : helper.getLevel().getEntitiesOfClass(ArtilleryShell.class, area)) {
-				seen.put(shell.getUUID(), shell.position());
-			}
-			for (Map.Entry<UUID, Vec3> last : flying.entrySet()) {
-				if (!seen.containsKey(last.getKey())) {
-					landed[0] = last.getValue();
+				if (!fired.contains(shell)) {
+					fired.add(shell);
 				}
 			}
-			flying.clear();
-			flying.putAll(seen);
 		});
 		helper.succeedWhen(() -> {
-			helper.assertTrue(landed[0] != null, "The shell should have come down");
-			// Its last place before it burst is less than a tick's flight short of where it came down.
-			helper.assertTrue(landed[0].distanceTo(predicted[0]) < ArmouredWalker.CANNON_SPEED + 1.0,
-					"The shell should come down where the telegraph showed (" + predicted[0] + "), but was last at " + landed[0]);
+			helper.assertTrue(fired.size() == 1, "The cannon should have fired its one shell, not " + fired.size());
+			ArtilleryShell shell = fired.get(0);
+			helper.assertTrue(shell.isRemoved(), "The shell should have come down");
+			// Where the burst shell is now is where it hit: ThrowableProjectile.tick sets it there before onHit bursts it.
+			Vec3 landed = shell.position();
+			helper.assertTrue(landed.distanceTo(predicted[0]) < LANDING_TOLERANCE, "The shell should come down where the telegraph showed ("
+					+ predicted[0] + "), but came down at " + landed + ", " + landed.distanceTo(predicted[0]) + " blocks off");
 			helper.assertTrue(!pig.isAlive() || pig.getHealth() < pig.getMaxHealth(), "The burst should hurt the pig by the crosshair");
+		});
+	}
+
+	/**
+	 * A real Heavy Shell, shot as the walkers' guns shoot it, is where the shared flight math puts it after each of its
+	 * first {@value #STEPS} ticks: {@link WalkerAim#flight}'s points, and {@link Ballistics#heightAtDistance} at the
+	 * distance it has come. A thrown projectile's tick goes gravity, then drag, then the move, so even its first step is
+	 * the fallen, dragged one; a model that moves first and drags after is 0.05 blocks off by the end of that first tick.
+	 * The first step is also worked out here by hand, in the game's order, and must be WalkerAim's to the last bit.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 40, skyAccess = true)
+	public void realShellStepsWhereTheSharedFlightMathPutsIt(GameTestHelper helper) {
+		double pitch = 30.0;
+		float speed = (float) ArmouredWalker.CANNON_SPEED;
+		double gravity = JugcraftArtillery.HEAVY_GRAVITY;
+		// High in the empty structure, flying up and away along +z: nothing to hit in the ticks checked.
+		Vec3 start = helper.absoluteVec(new Vec3(22.5, 8.0, 4.5));
+		ArtilleryShell shell = new ArtilleryShell(JugcraftArtillery.HEAVY_SHELL, helper.getLevel());
+		shell.setPos(start);
+		shell.shoot(0.0, Math.sin(Math.toRadians(pitch)), Math.cos(Math.toRadians(pitch)), speed, 0.0F);
+		Vec3 shot = shell.getDeltaMovement();
+		WalkerAim.Flight flight = WalkerAim.flight(helper.getLevel(), start, shot, gravity, null);
+		helper.assertTrue(flight.points().size() > STEPS, "The flight should run at least " + STEPS + " ticks in the open, not "
+				+ (flight.points().size() - 1));
+		Vec3 first = start.add(shot.x * WalkerAim.DRAG, (shot.y - gravity) * WalkerAim.DRAG, shot.z * WalkerAim.DRAG);
+		helper.assertTrue(flight.points().get(1).equals(first),
+				"WalkerAim's first step should be gravity, then drag, then the move (" + first + "), not " + flight.points().get(1));
+		helper.getLevel().addFreshEntity(shell);
+		boolean[] checked = new boolean[STEPS + 1];
+		helper.onEachTick(() -> {
+			int ticks = shell.tickCount;
+			if (shell.isRemoved() || ticks < 1 || ticks > STEPS || checked[ticks]) {
+				return;
+			}
+			checked[ticks] = true;
+			Vec3 at = shell.position();
+			Vec3 expected = flight.points().get(ticks);
+			helper.assertTrue(at.distanceTo(expected) < STEP_TOLERANCE, "After " + ticks + " ticks the shell should be at " + expected
+					+ " (WalkerAim.flight), but is at " + at + ", " + at.distanceTo(expected) + " blocks off");
+			double across = at.subtract(start).horizontalDistance();
+			double height = Ballistics.heightAtDistance(speed, gravity, (float) pitch, across);
+			helper.assertTrue(Math.abs(at.y - start.y - height) < STEP_TOLERANCE, "After " + ticks + " ticks and " + across
+					+ " blocks, the shell should have risen " + height + " (Ballistics), but rose " + (at.y - start.y));
+		});
+		helper.succeedWhen(() -> {
+			for (int tick = 1; tick <= STEPS; tick++) {
+				helper.assertTrue(checked[tick], "The shell's tick " + tick + " should have been checked");
+			}
+			shell.discard();
 		});
 	}
 

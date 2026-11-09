@@ -21,8 +21,11 @@ import org.jspecify.annotations.Nullable;
 public final class WalkerAim {
 	/** How far a shell's flight is followed, in ticks. */
 	public static final int FLIGHT_TICKS = 200;
-	/** Drag a tick, as a thrown projectile's (and {@link io.github.jimbozoomer.jugcraft.artillery.Ballistics}'). */
-	public static final double DRAG = 0.99;
+	/**
+	 * Drag a tick, as a thrown projectile's (and {@link io.github.jimbozoomer.jugcraft.artillery.Ballistics}'): the game's
+	 * air drag is the float {@code 0.99F}, which its inertia step scales the speed by as a double (0.9900000095...).
+	 */
+	public static final double DRAG = 0.99F;
 
 	private WalkerAim() {
 	}
@@ -102,10 +105,12 @@ public final class WalkerAim {
 	}
 
 	/**
-	 * A shell's flight from {@code start} at {@code velocity} (blocks a tick), each tick moving by its speed, losing
-	 * {@value #DRAG} to drag and falling by {@code gravity}, as {@link io.github.jimbozoomer.jugcraft.artillery.Ballistics}
-	 * models it; it comes down on the first block it meets, and stops where its next tick would read a chunk that is not
-	 * loaded (where it ends, or one it crosses on the way: {@link #loadedAlong}).
+	 * A shell's flight from {@code start} at {@code velocity} (blocks a tick, as the shell is shot). Each tick goes as a
+	 * thrown projectile's does (ThrowableProjectile.tick: gravity, then inertia, then the move): its speed falls by
+	 * {@code gravity}, loses {@link #DRAG} to drag, and only then does it move by that speed; so its first step is already
+	 * the slowed, fallen one. {@link io.github.jimbozoomer.jugcraft.artillery.Ballistics} models it the same way. It comes
+	 * down on the first block it meets (where the game puts a shell that hits, before it bursts), and stops where its next
+	 * tick would read a chunk that is not loaded (where it ends, or one it crosses on the way: {@link #loadedAlong}).
 	 */
 	public static Flight flight(Level level, Vec3 start, Vec3 velocity, double gravity, @Nullable Entity shooter) {
 		List<Vec3> points = new ArrayList<>();
@@ -113,6 +118,7 @@ public final class WalkerAim {
 		Vec3 v = velocity;
 		points.add(at);
 		for (int tick = 0; tick < FLIGHT_TICKS; tick++) {
+			v = new Vec3(v.x * DRAG, (v.y - gravity) * DRAG, v.z * DRAG);
 			Vec3 next = at.add(v);
 			if (!level.isLoaded(BlockPos.containing(next)) || next.y < level.getMinY() || !loadedAlong(level, at, next)) {
 				return new Flight(points, null);
@@ -125,7 +131,6 @@ public final class WalkerAim {
 			}
 			at = next;
 			points.add(at);
-			v = new Vec3(v.x * DRAG, v.y * DRAG - gravity, v.z * DRAG);
 		}
 		return new Flight(points, null);
 	}
