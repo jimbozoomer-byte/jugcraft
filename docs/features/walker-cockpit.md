@@ -25,6 +25,7 @@ Ray traces through each model's exported quads checked these eyes. The script wa
   - Turning the Diesel or Armoured Walker with left/right turns the pilot's view with it, as a turret sight would, so the crosshair stays where it was on the walker. The mouse aims from there.
   - The Howitzer Walker's view follows only while left/right is held. Its hull also turns by itself to lay the gun where the pilot looks, and following that would chase the look round.
 - **Third person sits back past the hull:** 7 blocks for the Diesel Walker, 7.5 for the Armoured and 9 for the Howitzer. Vanilla's 4 blocks put the camera inside the hull. This uses the aircraft's camera mixin.
+- **Getting out** (10 November 2026): the pilot steps off on the ground beside the walker, clear of its hull, to its left, else its right, behind or in front, on its own level or up to two blocks up a slope (`DieselWalker.getDismountLocationForPassenger`). Before, vanilla's default set them on top of the hull, 4.25 to 5.4 blocks up, and they fell through it and took fall damage. A walker boxed in on every side falls back to that default.
 
 ### Telegraphs: where the attack will go
 The telegraphs are drawn in the world on the pilot's own client and show through blocks. Each is worked out once a client tick from the same calls the server uses, so what is shown is what happens.
@@ -74,7 +75,7 @@ They replace the "Fuel: n%" message that was sent every two seconds and pushed t
 - **New synced data:** the walker's fuel (an int) and wear (a float), set each server tick only when they change, and the Armoured Walker's last shot (for the reload gauge). None is saved; fuel is saved as before.
 - **Aiming loads no chunk:** the look and the shell's flight stop at the first chunk that is not loaded.
 - **Bounded work on the pilot's client:** at most 200 steps of flight, one look trace and one entity query a tick. Nothing runs for anyone who is not piloting.
-- **Seats:** the new seats move only where a mounted pilot sits. No saved data changes, and a pilot dismounts as before.
+- **Seats:** the new seats move only where a mounted pilot sits. No saved data changes. A pilot now dismounts beside the walker on the ground (see "Getting out"); the server picks the spot.
 - Not verified with two players or on a dedicated server.
 
 ## Dependencies and assets
@@ -96,6 +97,7 @@ They replace the "Fuel: n%" message that was sent every two seconds and pushed t
   - `howitzerArcComesDownOnTheCrosshairOnceLaid`: once laid, the arc drawn from the barrel comes down within 2.5 blocks of the crosshair;
   - `theDrawnReachIsWhatIsStruck`: the fist's box takes in the pig in front and not the one behind, and strikes only the one in front; the stomp's ring takes in the pig beside it and not one six blocks off;
   - `theGaugesReadTheWalker`: the fuel gauge reads a quarter tank, and a hit shows as wear.
+  - `pilotsStepOffBesideTheirWalkers` (10 November 2026): the Howitzer's pilot steps off to its left on the ground, and the Armoured Walker's pilot to its right with its left walled off, outside the hull, unhurt.
 - Client game test `WalkerCockpitClientGameTests`, for each walker:
   - the view from the seat, with the telegraphs and gauges, and an arc landing for the two guns;
   - holding left turns the hull and the view together;

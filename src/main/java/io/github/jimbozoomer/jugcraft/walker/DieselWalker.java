@@ -80,6 +80,12 @@ public class DieselWalker extends Entity {
 	public static final double PUNCH_SPREAD = 1.6;
 	/** How far back the third-person camera sits from the pilot (vanilla's is 4, inside a walker's hull). */
 	public static final float CAMERA_DISTANCE = 7.0F;
+	/** Getting out, how far past the hull's side the pilot steps off, and how far down a spot must have ground under it. */
+	public static final double DISMOUNT_CLEARANCE = 0.3;
+	public static final double DISMOUNT_SUPPORT = 0.5;
+	/** Getting out, how far past the hull's side the pilot steps off, and how far down a spot must have ground under it. */
+	public static final double DISMOUNT_CLEARANCE = 0.3;
+	public static final double DISMOUNT_SUPPORT = 0.5;
 
 	private int fuel;
 	public io.github.jimbozoomer.jugcraft.vehiclebay.VehicleFitout fitout = io.github.jimbozoomer.jugcraft.vehiclebay.VehicleFitout.STANDARD;
@@ -422,6 +428,30 @@ public class DieselWalker extends Entity {
 	@Override
 	protected Vec3 getPassengerAttachmentPoint(Entity passenger, EntityDimensions dimensions, float scale) {
 		return seat().yRot(-getYRot() * Mth.DEG_TO_RAD);
+	}
+
+	/**
+	 * Getting out, the pilot climbs down and steps off on the ground beside the walker (docs/features/walker-cockpit.md),
+	 * not onto the top of the hull. Vanilla's default does that, and since the hull doesn't hold them up they would fall
+	 * the walker's whole height. The spot is out past the hull to the walker's left, then its right, then behind it, then in
+	 * front of it, on its own level or up to two blocks up a slope: clear of blocks with something under it. With no such
+	 * spot (a walker boxed in), it falls back to vanilla's.
+	 */
+	@Override
+	public Vec3 getDismountLocationForPassenger(LivingEntity passenger) {
+		Vec3 heading = heading();
+		Vec3 left = new Vec3(heading.z, 0.0, -heading.x);
+		double out = getBbWidth() / 2.0 + passenger.getBbWidth() / 2.0 + DISMOUNT_CLEARANCE;
+		for (Vec3 side : new Vec3[] {left, left.reverse(), heading.reverse(), heading}) {
+			for (int up = 0; up <= 2; up++) {
+				Vec3 spot = position().add(side.scale(out)).add(0.0, up, 0.0);
+				AABB box = passenger.getBoundingBox().move(spot.subtract(passenger.position()));
+				if (level().noCollision(passenger, box) && !level().noCollision(passenger, box.move(0.0, -DISMOUNT_SUPPORT, 0.0))) {
+					return spot;
+				}
+			}
+		}
+		return super.getDismountLocationForPassenger(passenger);
 	}
 
 	@Override

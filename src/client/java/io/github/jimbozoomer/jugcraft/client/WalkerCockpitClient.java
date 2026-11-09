@@ -41,8 +41,8 @@ import org.jspecify.annotations.Nullable;
  * with a marker where the pilot looks so they can watch the gun lay onto it); the reach of the fist, ram or stomp, with
  * every creature it would hit outlined; and the block the Diesel Walker's drill would cut. Each uses the server's own
  * test or aim ({@link WalkerAim}, {@link DieselWalker#attackReaches}), worked out once a tick.</li>
- * <li><b>Gauges</b> above the hotbar: fuel, the hull's wear, the weapon's reload and shells, and whether the fist, ram or
- * stomp is ready.</li>
+ * <li><b>Gauges</b> at the top left, where the aircraft's instruments are: fuel, the hull's wear, the weapon's reload and
+ * shells, and whether the fist, ram or stomp is ready.</li>
  * </ul>
  * Presentation only: nothing here decides anything.
  */

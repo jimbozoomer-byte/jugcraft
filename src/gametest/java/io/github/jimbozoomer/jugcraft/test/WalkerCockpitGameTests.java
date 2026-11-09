@@ -194,4 +194,55 @@ public class WalkerCockpitGameTests {
 			helper.succeed();
 		});
 	}
+
+	/**
+	 * Getting out, a pilot steps off on the ground beside the walker, clear of its hull, and takes no fall: the Howitzer's
+	 * pilot (the tallest walker, 5.4 blocks) to its left, and the Armoured Walker's to its right when its left is walled
+	 * off. Vanilla's default would set them on top of the hull and drop them through it.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 60)
+	public void pilotsStepOffBesideTheirWalkers(GameTestHelper helper) {
+		floor(helper, 16);
+		ServerPlayer open = helper.makeMockServerPlayerInLevel();
+		ServerPlayer walled = helper.makeMockServerPlayerInLevel();
+		open.setGameMode(GameType.SURVIVAL);
+		walled.setGameMode(GameType.SURVIVAL);
+		HowitzerWalker tall = piloted(helper, JugcraftWalkers.HOWITZER_WALKER, new Vec3(4.5, 1, 4.5), open);
+		ArmouredWalker boxed = piloted(helper, JugcraftWalkers.ARMOURED_WALKER, new Vec3(11.5, 1, 10.5), walled);
+		helper.runAfterDelay(3, () -> {
+			// A wall four blocks high along the Armoured Walker's left, a block out from its hull.
+			Vec3 heading = boxed.heading();
+			Vec3 wall = boxed.position().add(left(boxed).scale(boxed.getBbWidth() / 2.0 + 1.0));
+			for (int along = -2; along <= 2; along++) {
+				for (int up = 0; up <= 3; up++) {
+					helper.getLevel().setBlockAndUpdate(BlockPos.containing(wall.add(heading.scale(along))).above(up), Blocks.STONE.defaultBlockState());
+				}
+			}
+			open.stopRiding();
+			walled.stopRiding();
+		});
+		helper.runAfterDelay(25, () -> {
+			steppedOff(helper, open, tall, 1.0);
+			steppedOff(helper, walled, boxed, -1.0);
+			helper.succeed();
+		});
+	}
+
+	/** The walker's left, flat. */
+	private static Vec3 left(DieselWalker walker) {
+		Vec3 heading = walker.heading();
+		return new Vec3(heading.z, 0, -heading.x);
+	}
+
+	/** The pilot is out, on the ground beside the walker clear of its hull, on its left ({@code side} 1) or right (-1), unhurt. */
+	private static void steppedOff(GameTestHelper helper, ServerPlayer pilot, DieselWalker walker, double side) {
+		String name = walker.getClass().getSimpleName();
+		Vec3 away = pilot.position().subtract(walker.position()).multiply(1, 0, 1);
+		helper.assertTrue(pilot.getVehicle() == null, "The " + name + "'s pilot is still aboard");
+		helper.assertTrue(Math.abs(pilot.getY() - walker.getY()) < 0.6,
+				"The " + name + "'s pilot should stand on the ground beside it, but is " + (pilot.getY() - walker.getY()) + " blocks up");
+		helper.assertTrue(away.length() > walker.getBbWidth() / 2.0, "The " + name + "'s pilot stepped off inside its hull, " + away.length() + " out");
+		helper.assertTrue(away.dot(left(walker)) * side > 0, "The " + name + "'s pilot stepped off on the wrong side: " + away);
+		helper.assertTrue(pilot.getHealth() >= pilot.getMaxHealth(), "The " + name + "'s pilot was hurt getting out: " + pilot.getHealth());
+	}
 }
