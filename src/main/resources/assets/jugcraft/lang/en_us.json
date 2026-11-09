@@ -9045,6 +9045,7 @@
   "container.jugcraft.ore_washer": "Ore Washer",
   "container.jugcraft.pact_perch": "Pact Perch",
   "container.jugcraft.pattern": "Reusable pattern plate",
+  "container.jugcraft.pirate_ship_hold": "Pirate Ship's Hold",
   "container.jugcraft.polymerization_reactor": "Polymerization Reactor",
   "container.jugcraft.pulverizer": "Pulverizer",
   "container.jugcraft.pumpjack": "Pumpjack",
@@ -9610,6 +9611,8 @@
   "entity.jugcraft.phantom_shadow": "Emerald Phantom",
   "entity.jugcraft.pibal": "Pibal",
   "entity.jugcraft.pinata": "Piñata",
+  "entity.jugcraft.pirate_ship": "Pirate Ship",
+  "entity.jugcraft.pirate_ship_deck": "Pirate Ship",
   "entity.jugcraft.poison_brew": "Poison Brew",
   "entity.jugcraft.pumpkin_barge": "Pumpkin Barge",
   "entity.jugcraft.pumpkin_king": "The Pumpkin King",
@@ -13222,6 +13225,7 @@
   "message.jugcraft.pinata.filled": "Into the piñata: %s",
   "message.jugcraft.pinata.full": "The piñata is full",
   "message.jugcraft.pinata.no_room": "A piñata needs two clear blocks below what it hangs from",
+  "message.jugcraft.pirate_ship.crewed": "The crew still hold this ship. Beat them to open the hold.",
   "message.jugcraft.pixel_hollows_map.found": "Pixel Hollows marked on the map, around Y %s",
   "message.jugcraft.pixel_hollows_map.none": "No Pixel Hollows within %s blocks of here",
   "message.jugcraft.planter.full": "Every spot in it is planted",
@@ -32919,9 +32923,5 @@
   "item.jugcraft.aquatic_tin_can": "Discarded Fishing Tin",
   "item.jugcraft.jugtania_ender_dagger": "Ender Dagger",
   "item.jugcraft.jugtania_record_gaia_1": "Scathed Music Disc — I",
-  "item.jugcraft.jugtania_record_gaia_2": "Scathed Music Disc — II",
-  "entity.jugcraft.pirate_ship": "Pirate Ship",
-  "entity.jugcraft.pirate_ship_deck": "Pirate Ship",
-  "container.jugcraft.pirate_ship_hold": "Pirate Ship's Hold",
-  "message.jugcraft.pirate_ship.crewed": "The crew still hold this ship. Beat them to open the hold."
+  "item.jugcraft.jugtania_record_gaia_2": "Scathed Music Disc — II"
 }

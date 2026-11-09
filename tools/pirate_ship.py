@@ -89,7 +89,9 @@ DECK_PX, RAIL_PX = 16, 32
 SLICES = [(-128, -120, 38), (-120, -112, 44), (-112, -96, 47), (-96, 48, 48), (48, 64, 47), (64, 80, 44),
           (80, 96, 38), (96, 104, 32), (104, 112, 26), (112, 120, 18), (120, 128, 10)]
 # Below the waterline the hull narrows and its ends rake in: (bottom, top, share of the deck width, aft end, fore end).
-UNDERWATER = [(-12, 0, 0.8, -128, 120), (-24, -12, 0.45, -116, 108)]
+# Everything at or under the waterline stays inside x -3..3, z -8..8 even on the swell (PirateWaters' hull box): the
+# rudder hangs under the overhanging stern and the stem post starts above the water.
+UNDERWATER = [(-12, 0, 0.8, -114, 120), (-24, -12, 0.45, -108, 108)]
 KEEL_PX = -26
 # The castles' raised rails (art only, outside the walkable deck's ends).
 STERN_RAIL, BOW_RAIL = 40, 36
@@ -106,7 +108,7 @@ MAIN_Z, FORE_Z = MAIN_MAST[0] * PX, FORE_MAST[0] * PX
 MAIN_TOP_FLOOR = STATIONS[1][1][1] * PX  # 152: the lookout's seat is the main top's floor
 MAIN_HEAD, FORE_HEAD = MAIN_MAST[1] * PX, FORE_MAST[1] * PX  # 192, 160
 WHEEL_HUB = (0.0, 40.0, -83.2)
-RUDDER_HINGE = (0.0, 0.0, -131.0)
+RUDDER_HINGE = (0.0, 0.0, -117.0)
 FLAG_PIVOT = (0.0, 180.0, 5.0)
 # The bowsprit: foot (y, z), length and rise (degrees about x; negative lifts it); the forestay runs from its tip.
 BOWSPRIT_FOOT, BOWSPRIT_LENGTH, BOWSPRIT_ANGLE = (26.0, 112.0), 66.0, -15.7
@@ -166,14 +168,14 @@ def hull_body():
     for y0, y1, scale, z_min, z_max in UNDERWATER:
         for z0, z1, half in _layer_slices(scale, z_min, z_max):
             m.append(box((-half, y0, z0), (half, y1, z1), TAR))
-    m.append(box((-2, KEEL_PX, -131), (2, -24, 114), TAR))
+    m.append(box((-2, KEEL_PX, -117), (2, -24, 114), TAR))
     # The stem, raked forward step by step, and its gold finial.
-    for y0, y1, z0, z1 in ((-24, -12, 108, 114), (-12, 0, 120, 126), (0, 38, 128, 132)):
+    for y0, y1, z0, z1 in ((-24, -12, 108, 114), (-12, 0, 120, 126), (2, 38, 128, 132)):
         m.append(box((-2, y0, z0), (2, y1, z1), {"*": TAR if y1 <= 0 else HULL, "up": TRIM}))
     m.append(box((-1.5, 38, 128.5), (1.5, 41, 131.5), GOLD))
-    # The deadwood and sternpost the rudder hangs on.
-    m.append(box((-2.5, -24, -128), (2.5, -12, -116), TAR))
-    m.append(box((-2.5, -24, -131), (2.5, 18, -128), {"*": TAR, "up": TRIM}))
+    # The deadwood and sternpost the rudder hangs on, under the overhanging stern.
+    m.append(box((-2.5, -24, -114), (2.5, -12, -108), TAR))
+    m.append(box((-2.5, -24, -117), (2.5, 0, -114), TAR))
     return m
 
 
@@ -428,10 +430,11 @@ def helm_wheel():
 
 
 def rudder():
-    """The rudder about its hinge on the sternpost (turning about y): a blade wider below, iron pintle straps."""
-    m = [box((-1.5, -22, -11), (1.5, -4, 0), {"*": HULL, "down": TAR}),
-         box((-1.5, -4, -7), (1.5, 14, 0), {"*": HULL, "up": TRIM})]
-    for y in (-16, -4, 8):
+    """The rudder about its hinge on the sternpost (turning about y): a blade wider below, under the overhanging stern
+    (its head reaches up into the hull), with iron pintle straps."""
+    m = [box((-1.5, -22, -10.5), (1.5, -4, 0), {"*": HULL, "down": TAR}),
+         box((-1.5, -4, -7), (1.5, 2, 0), HULL)]
+    for y in (-16, -7):
         m.append(box((-2, y, -3), (2, y + 1.5, 0), IRON))
     return m
 
@@ -589,6 +592,57 @@ def standing_clear(quads=None, eps=0.01):
     return problems
 
 
+# The renderer's motion (client/PirateShipRenderer): the most each part swings about its pivot (axis, degrees either
+# way), and the swell's roll about z and pitch about x of the whole ship. The 14 degree list of a sinking ship is left
+# out: navigation does not need it.
+SWING = {"pirate_ship_sail_fore": ("x", 3.0), "pirate_ship_sail_main": ("x", 3.0), "pirate_ship_jib": ("x", 3.0),
+         "pirate_ship_flag": ("y", 8.0), "pirate_ship_wheel": ("z", 120.0), "pirate_ship_rudder": ("y", 25.0)}
+ROLL, PITCH = 1.2, 0.6
+
+
+def _turn(points, axis, degrees):
+    """Points (an n x 3 array) turned as PoseStack.rotateDegrees(Axis.XP/YP/ZP, degrees) turns them (right-handed)."""
+    import numpy as np
+    a = math.radians(degrees)
+    c, s = math.cos(a), math.sin(a)
+    x, y, z = points[:, 0], points[:, 1], points[:, 2]
+    if axis == "x":
+        return np.stack([x, y * c - z * s, y * s + z * c], 1)
+    if axis == "y":
+        return np.stack([x * c + z * s, y, z * c - x * s], 1)
+    return np.stack([x * c - y * s, x * s + y * c, z], 1)
+
+
+def envelope(quads=None, step=1.0):
+    """How far the drawn ship reaches, ship-local pixels, unturned by yaw: every vertex as the renderer places it (parts
+    at their pivots, the gun at each trunnion turned by -facing), at every swing of the parts (each `step` degrees, ends
+    included) and on the swell (roll then pitch, as pose.rotateDegrees(ZP, roll) then (XP, pitch) apply).
+    Returns ((lo, hi) of the vertices above the waterline, (lo, hi) of those at or below it)."""
+    import numpy as np
+    quads = quads or export()
+    placed = []
+    for part, pivot, yaw in placements():
+        points = np.array([v[:3] for q in quads[part] for v in q["vertices"]], dtype=float)
+        axis, limit = SWING.get(part, (None, 0.0))
+        angles = sorted(set(np.arange(-limit, limit, step).tolist() + [limit])) if axis else [0.0]
+        for angle in angles:
+            p = _turn(points, axis, angle) if axis else points
+            if yaw:
+                p = _turn(p, "y", -yaw)
+            placed.append(p + np.array(pivot))
+    every = np.concatenate(placed)
+    above = [np.full(3, np.inf), np.full(3, -np.inf)]
+    below = [np.full(3, np.inf), np.full(3, -np.inf)]
+    for roll in (-ROLL, -ROLL / 2, 0.0, ROLL / 2, ROLL):
+        for pitch in (-PITCH, -PITCH / 2, 0.0, PITCH / 2, PITCH):
+            p = _turn(_turn(every, "x", pitch), "z", roll)
+            for box_, mask in ((above, p[:, 1] > 0), (below, p[:, 1] <= 0)):
+                if mask.any():
+                    box_[0] = np.minimum(box_[0], p[mask].min(0))
+                    box_[1] = np.maximum(box_[1], p[mask].max(0))
+    return tuple((lo.tolist(), hi.tolist()) for lo, hi in (above, below))
+
+
 def rig(quads=None):
     """pirate_ship_rig.json, as client/PirateShipRenderer reads it: "pivots" and "cannons" in pixels and "culling" in
     blocks, ship-local and unrotated; then, for the crew and the checks, the stations (PirateCrew.STATIONS), the walkable
@@ -628,7 +682,40 @@ def rig(quads=None):
 
 # ------------------------------------------------------------------ data
 
+# The ship's names and messages, as the game shows them (menagerie/PirateShip, PirateShipDeck).
+LANG = {
+    f"entity.{MOD}.pirate_ship": "Pirate Ship",
+    f"entity.{MOD}.pirate_ship_deck": "Pirate Ship",
+    f"container.{MOD}.pirate_ship_hold": "Pirate Ship's Hold",
+    f"message.{MOD}.pirate_ship.crewed": "The crew still hold this ship. Beat them to open the hold.",
+}
+
+
+def merge_lang(text):
+    """en_us.json's text with LANG in it, as a full regeneration lays it out: generate_material_data writes the base
+    keys sorted (LANG goes in through write_all's lang), so a new key goes at its sorted place in that leading sorted
+    block, a key already there keeps its place; everything else is unchanged (indent 2, ensure_ascii off, a final
+    newline)."""
+    import bisect
+    pairs = json.loads(text, object_pairs_hook=list)
+    if json.dumps(dict(pairs), indent=2, ensure_ascii=False) + "\n" != text:
+        raise ValueError("en_us.json is not in the generators' layout")
+    keys = [k for k, v in pairs]
+    for key, value in LANG.items():
+        if key in keys:
+            pairs[keys.index(key)] = [key, value]
+            continue
+        sorted_end = 1
+        while sorted_end < len(keys) and keys[sorted_end - 1] < keys[sorted_end]:
+            sorted_end += 1
+        at = bisect.bisect_left(keys, key, 0, sorted_end)
+        pairs.insert(at, [key, value])
+        keys.insert(at, key)
+    return json.dumps(dict(pairs), indent=2, ensure_ascii=False) + "\n"
+
+
 def write_all(write, assets, data, lang, condition):
+    lang.update(LANG)
     quads = export()
     # Written compact: it is thousands of quads.
     (assets / "pirate_ship_quads.json").write_text(json.dumps(quads, separators=(",", ":")) + "\n", encoding="utf-8")
@@ -901,5 +988,11 @@ if __name__ == "__main__":
         img.save(path, optimize=True)
     draw_all(save)
     write_all(None, root, None, {}, None)
-    for problem in standing_clear(json.loads((root / "pirate_ship_quads.json").read_text(encoding="utf-8"))):
+    language = root / "lang" / "en_us.json"
+    language.write_text(merge_lang(language.read_text(encoding="utf-8")), encoding="utf-8")
+    quads = json.loads((root / "pirate_ship_quads.json").read_text(encoding="utf-8"))
+    for problem in standing_clear(quads):
         print("in a standing crewman:", *problem)
+    (alo, ahi), (blo, bhi) = envelope(quads)
+    print("above the waterline, blocks:", [round(v / PX, 4) for v in alo], [round(v / PX, 4) for v in ahi])
+    print("at or below it, blocks:", [round(v / PX, 4) for v in blo], [round(v / PX, 4) for v in bhi])
