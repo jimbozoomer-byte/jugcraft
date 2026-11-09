@@ -233,13 +233,17 @@ def bulwarks():
     return m
 
 
+def lower_masts():
+    """The main and fore lower masts (from, to), pixels: square spars from the deck to their tops."""
+    return [((-3.5, DECK_PX, MAIN_Z - 3.5), (3.5, MAIN_TOP_FLOOR - 4, MAIN_Z + 3.5)),
+            ((-3.0, DECK_PX, FORE_Z - 3.0), (3.0, 120, FORE_Z + 3.0))]
+
+
 def masts():
     """Two masts of stripped birch: lower masts with tops on trestles and topmasts stepped aft of their heads, the
     main top a railed crow's nest round the lookout's seat, and the yards the sails hang from."""
-    def mast(cz, half, y0, y1):
-        return [box((-half, y0, cz - half), (half, y1, cz + half), SPAR_Y)]
     floor = MAIN_TOP_FLOOR
-    m = mast(MAIN_Z, 3.5, DECK_PX, floor - 4)
+    m = [box(*lower_masts()[0], SPAR_Y)]
     m.append(box((-4, floor - 10, 2), (4, floor - 4, 23), HULL))  # trestle trees under the top
     m.append(box((-12, floor - 4, 2), (12, floor, 30), {"*": HULL, "up": DECK}))
     rail = {"*": HULL, "up": TRIM}
@@ -249,7 +253,7 @@ def masts():
     m.append(box((-10, floor, 2), (10, floor + 8, 4), rail))
     m.append(box((-2, floor - 8, 3), (2, MAIN_HEAD - 2, 7), SPAR_Y))  # main topmast
     m.append(box((-2.5, MAIN_HEAD - 2, 2.5), (2.5, MAIN_HEAD, 7.5), GOLD))  # its truck, at y 12
-    m += mast(FORE_Z, 3, DECK_PX, 120)
+    m.append(box(*lower_masts()[1], SPAR_Y))
     m.append(box((-3.5, 116, 70), (3.5, 120, 86), HULL))
     m.append(box((-9, 120, 70), (9, 123, 88), {"*": HULL, "up": DECK}))
     m.append(box((-1.75, 118, 72.5), (1.75, FORE_HEAD - 2, 76), SPAR_Y))  # fore topmast
@@ -342,17 +346,18 @@ def hull():
 
 # The sails: each hangs from its yard (from, to) in pieces of (top, bottom, half-width, front z, texture), pieces lower
 # down bellied further forward, overlapping the piece above so the sail stays one closed shape; patches are placed
-# wear sewn on the front. The pivot is the yard's middle.
+# wear sewn on the front. The pivot is the yard's middle. A course's lowest piece stands far enough forward that at its
+# full sway aft (SWING) it stays clear of its mast (sail_clear).
 SAILS = {
     "main": {"yard": ((-46, 134, 19.5), (46, 137, 22.5)),
              "pieces": [(136, 120, 42, 22.4, CANVAS), (120, 104, 42, 23.0, CANVAS), (104, 88, 42, 23.6, CANVAS_RED),
-                        (88, 72, 42, 23.2, CANVAS)],
+                        (88, 72, 42, 24.0, CANVAS)],
              "patch": ((-22, 106), (-12, 116), PATCH_CYAN)},
     "main_top": {"yard": ((-32, 186, 7), (32, 188.5, 9.5)),
                  "pieces": [(188, 178, 28, 9.0, CANVAS_LIGHT), (178, 168, 31, 9.6, CANVAS_LIGHT)],
                  "patch": ((8, 170), (16, 176), PATCH_BROWN)},
     "fore": {"yard": ((-40, 108, 83), (40, 111, 86)),
-             "pieces": [(110, 96, 36, 85.6, CANVAS), (96, 80, 36, 86.4, CANVAS_RED), (80, 64, 36, 86.0, CANVAS)],
+             "pieces": [(110, 96, 36, 85.6, CANVAS), (96, 80, 36, 86.4, CANVAS_RED), (80, 64, 36, 86.6, CANVAS)],
              "patch": ((14, 98), (24, 106), PATCH_GREEN)},
     "fore_top": {"yard": ((-28, 152, 76), (28, 154.5, 78.5)),
                  "pieces": [(154, 142, 22, 77.9, CANVAS_LIGHT), (142, 128, 25, 78.5, CANVAS_LIGHT)]},
@@ -583,12 +588,33 @@ def standing_clear(quads=None, eps=0.01):
         lo, hi = [v + eps for v in lo], [v - eps for v in hi]
         for part, pivot, yaw in placements():
             for quad in quads[part]:
-                poly = [place(v, pivot, yaw) for v in quad["vertices"]]
-                for axis in range(3):
-                    poly = _clip(poly, axis, lo[axis], True)
-                    poly = _clip(poly, axis, hi[axis], False) if poly else poly
-                if len(poly) >= 3 and _area(poly) > 1e-6:
+                if _reaches_inside([place(v, pivot, yaw) for v in quad["vertices"]], lo, hi):
                     problems.append((STATION_NAMES[index], part, quad["texture"]))
+    return problems
+
+
+def _reaches_inside(poly, lo, hi):
+    """Whether a quad (its corners) has area inside the box lo..hi."""
+    for axis in range(3):
+        poly = _clip(poly, axis, lo[axis], True)
+        poly = _clip(poly, axis, hi[axis], False) if poly else poly
+    return len(poly) >= 3 and _area(poly) > 1e-6
+
+
+def sail_clear(quads=None, eps=0.01, steps=6):
+    """[(part, degrees, texture)] for every quad of a course that reaches into a lower mast anywhere in its sway
+    (SWING, either way): empty when both courses swing clear."""
+    import numpy as np
+    quads = quads or export()
+    problems = []
+    for part in ("pirate_ship_sail_main", "pirate_ship_sail_fore"):
+        axis, limit = SWING[part]
+        for angle in np.linspace(-limit, limit, 2 * steps + 1):
+            for quad in quads[part]:
+                poly = _turn(np.array([v[:3] for v in quad["vertices"]], dtype=float), axis, angle) + np.array(PIVOTS[part])
+                for lo, hi in lower_masts():
+                    if _reaches_inside([tuple(p) for p in poly], [v + eps for v in lo], [v - eps for v in hi]):
+                        problems.append((part, round(float(angle), 2), quad["texture"]))
     return problems
 
 
