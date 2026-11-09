@@ -95,6 +95,28 @@ Four prize show vegetables at a show's sizes, each one block. Each stands facing
   - Taken off, all three are as they were. It gives no armor and doesn't wear out.
   - **Recipe**: three flax and a string.
 
+### Part 5: the Harvest Centerpiece (9 November 2026)
+The town square's November centrepiece, the art half of Thanksgiving phase 6 ([thanksgiving-festival-nov1.md](thanksgiving-festival-nov1.md)). Placing it in town is the town scene's work, not this block's.
+- **Block `jugcraft:harvest_centerpiece`**: five blocks across, three up and five deep, placed and broken as one (`HarvestCenterpieceBlock`, a `MultiDecorationBlock`).
+  - It has no block entity and keeps nothing.
+  - Properties: `facing`, `lit` and `part` 0 to 74, numbered `part = right + 5 × (up + 3 × away)` from the root, which is the block the placer aimed at. Its front faces the placer.
+  - It fits the town square's 7 × 13 × 7 centrepiece site with a block to spare on every side.
+- **What it shows**: the Giant Cornucopia's horn and harvest, the same thing half as big again (its mouth 1.9 m), its mouth to the west.
+  - **In front**:
+    - a show pumpkin with a butternut on it, a second big pumpkin and a white pumpkin;
+    - acorn squashes, striped gourds and pears;
+    - a heap of fourteen apples, red, green and gold;
+    - ears of corn fanned on the ground, and fallen maple and aspen leaves.
+  - **Front corners**: a roped straw bale with corn and a lantern on it, and a lantern standing on the ground.
+  - **Behind**: two corn shocks 2.8 m tall, each with a pumpkin at its feet, and a second roped bale with a lantern, pumpkins, gourds and a squash about it.
+- **Lanterns**: brass, with amber glass, 1.3 times the Amber Jar Lantern's height.
+  - Using any block puts all three out or lights them again.
+  - While lit, the five blocks that hold a lantern's glass (parts 0, 4, 5, 62 and 67) give light 13 and draw the glass glowing. Out, it is dark amber.
+- **Breaking**: breaking any block breaks it all.
+  - It drops once, from the root.
+  - Removing the root first drops it and takes the other blocks away without drops.
+- **Recipe**: a Giant Cornucopia, two lanterns, two pumpkins, an ear of corn and three hay bales. The Giant Cornucopia itself (`giant_cornucopia`, 3 × 2 × 2) is unchanged.
+
 ## How it is drawn (docs/ART_DIRECTION.md, docs/NATURAL_TEXTURES.md)
 - Built from boxes at real size, one texel to a model pixel (`tools/harvest_festival_data.py`), in the Pumpkin Patch Market's manner. It shares that set's pumpkin stem and cut, and the Haunted Midway's pumpkin orange.
 - **Willow** (the horn) is basket weave:

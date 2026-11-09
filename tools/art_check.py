@@ -934,6 +934,11 @@ DRAWN_TOGETHER = {
     "deep_drilling_assembly": [("deep_drilling_assembly", (0, 0, 0)), ("deep_drilling_assembly_upper", (0, 16, 0))],
     "farm_stand": [("farm_stand_0", (0, 0, 0)), ("farm_stand_1", (-16, 0, 0))],
     "harvest_effigy": [(f"harvest_effigy_{i}", (0, 16 * i, 0)) for i in range(3)],
+    # The Harvest Centerpiece (5 x 3 x 5, MultiDecorationBlock's part order: across to the placer's right, up, away),
+    # its lanterns out and lit (the blocks holding a lantern's glass drawn by their _lit model).
+    "harvest_centerpiece": [(f"harvest_centerpiece_{p}", (16 * (4 - p % 5), 16 * (p // 5 % 3), 16 * (p // 15))) for p in range(75)],
+    "harvest_centerpiece (lit)": [(f"harvest_centerpiece_{p}" + ("_lit" if p in (0, 4, 5, 62, 67) else ""),
+                                   (16 * (4 - p % 5), 16 * (p // 5 % 3), 16 * (p // 15))) for p in range(75)],
 }
 
 

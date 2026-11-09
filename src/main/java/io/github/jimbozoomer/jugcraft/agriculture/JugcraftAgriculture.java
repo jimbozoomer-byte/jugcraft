@@ -3224,7 +3224,8 @@ public final class JugcraftAgriculture {
 	 * The Harvest Festival Grounds (decor set 10; tools/harvest_festival.py): part 1's Giant Cornucopia; part 2's Giant
 	 * Vegetable Show (a Giant Cabbage, Marrow, Turnip and Carrot, each with its entry card) and the Prize Ribbon Board;
 	 * part 3's Steam Traction Engine, its firebox a block entity on its first block, and the Hay Wagon; part 4's Harvest
-	 * Bunting, a strand for the String Light Hooks, and the Sack-Race Sack, worn on the legs.
+	 * Bunting, a strand for the String Light Hooks, and the Sack-Race Sack, worn on the legs; and part 5's Harvest
+	 * Centerpiece, five by three by five, the town square's November centrepiece.
 	 */
 	private static void registerHarvestFestival() {
 		Block cornucopia = registerBlock("giant_cornucopia", GiantCornucopiaBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
@@ -3258,6 +3259,13 @@ public final class JugcraftAgriculture {
 			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
 					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}
+		// Part 5: the Harvest Centerpiece, the town square's November centrepiece (no block entity); its lantern blocks
+		// light while lit.
+		Block centerpiece = registerBlock("harvest_centerpiece", HarvestCenterpieceBlock::new, BlockBehaviour.Properties.of()
+				.mapColor(MapColor.WOOD).strength(1.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava()
+				.lightLevel(HarvestCenterpieceBlock::light).pushReaction(PushReaction.IMMOVEABLE));
+		registerItem("harvest_centerpiece", props -> new BlockItem(centerpiece, props), new Item.Properties().useBlockDescriptionPrefix(),
+				BUILDING_TAB);
 		// Part 4: the bunting, and the sack (tools/harvest_festival.py SACK): worn on the legs, it slows its wearer, takes
 		// away their step so they hop up every block, and lifts their jump a little, short of clearing a fence.
 		registerItem("harvest_bunting", props -> new StringLightsItem(props, StringLightHookBlockEntity.Strand.HARVEST), new Item.Properties(),

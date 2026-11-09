@@ -196,8 +196,45 @@ HORN_Z = 17.0
 RIM_X = 2.0
 
 
+class Frame:
+    """Where a modelled piece is drawn: `s` times its own size, its frame's corner at `at` in the frame it is drawn in.
+    Its boxes and their turns' centres are moved and scaled with it and their angles kept, so it is the same thing,
+    bigger (docs/ART_DIRECTION.md); each side is painted afresh at its new size, a texel to a model pixel, as the fall
+    fair is drawn. Frame(sc) draws it as modelled."""
+    def __init__(self, sc, s=1.0, at=(0.0, 0.0, 0.0)):
+        self.sc, self.s, self.at = sc, s, at
+
+    def p(self, v):
+        return tuple(self.at[k] + self.s * v[k] for k in range(3))
+
+    def panel(self, name, painter, lo, hi, turn=None, **over):
+        """ppd.panel of the box lo..hi, turned by `turn` (its centre, axis and angle) if given."""
+        rot = fa.rotation(self.p(turn[0]), turn[1], turn[2]) if turn else None
+        return panel(self.sc, name, painter, self.p(lo), self.p(hi), rot=rot, **over)
+
+    def crossed_x(self, name, painter, x0, x1, cy, cz, d, turn=None, **kw):
+        """crossed_x, in this frame."""
+        r, c = d / 2, round(d / 5 * 2) / 2
+        return [self.panel(name, painter, (x0, cy - r, cz - r + c), (x1, cy + r, cz + r - c), turn=turn, **kw),
+                self.panel(name, painter, (x0, cy - r + c, cz - r), (x1, cy + r - c, cz + r), turn=turn, **kw)]
+
+    def crossed_y(self, name, painter, cx, cz, d, y0, y1, **kw):
+        """crossed_y, in this frame."""
+        r, c = d / 2, round(d / 5 * 2) / 2
+        return [self.panel(name, painter, (cx - r + c, y0, cz - r), (cx + r - c, y1, cz + r), **kw),
+                self.panel(name, painter, (cx - r, y0, cz - r + c), (cx + r, y1, cz + r - c), **kw)]
+
+
 def giant_cornucopia():
-    """The Giant Cornucopia, facing north, in its frame (48 across, 32 up, 32 deep; its mouth to the west).
+    """The Giant Cornucopia, facing north, in its frame (48 across, 32 up, 32 deep; its mouth to the west): the horn of
+    plenty (horn_of_plenty) as modelled."""
+    sc = Sculpt(hf.CORNUCOPIA["block"], 3301, 128)
+    sc.models["whole"] = horn_of_plenty(Frame(sc))
+    return sc
+
+
+def horn_of_plenty(f):
+    """The Giant Cornucopia's horn and its harvest, drawn in Frame `f`, facing north (its mouth to the west).
     - The horn: its mouth 1.25 m across, four willow walls round its opening behind a braided rim; behind it, lengths of
       willow narrowing to the east; then its tail curling up off the ground, rising, standing up and turning back west
       over it to a tip (each length turned as a block model's turns allow, 22.5 or 45 degrees).
@@ -206,7 +243,6 @@ def giant_cornucopia():
       of corn in their husks leaning out over the rim, a bunch of grapes hanging over it, a third pumpkin, two gourds and
       four apples rolled out over the ground."""
     spec = hf.CORNUCOPIA
-    sc = Sculpt(spec["block"], 3301, 128)
     weave, inside, rim = wicker(), wicker(shadowed=True), braid()
     z = HORN_Z
     el = []
@@ -216,59 +252,58 @@ def giant_cornucopia():
     for x0, x1, paint, wall, name in ((RIM_X + 1, HORN[0][0], weave, t, "mouth"), (RIM_X, RIM_X + 2, rim, 2.0, "rim")):
         grow = 1.0 if name == "rim" else 0.0
         rr = r + grow
-        el += [panel(sc, name, paint, (x0, cy + rr - wall, z - rr + cut), (x1, cy + rr, z + rr - cut), down=inside if name == "mouth" else paint),
-               panel(sc, name, paint, (x0, cy - rr, z - rr + cut), (x1, cy - rr + wall, z + rr - cut), up=inside if name == "mouth" else paint),
-               panel(sc, name, paint, (x0, cy - rr + cut, z - rr), (x1, cy + rr - cut, z - rr + wall), south=inside if name == "mouth" else paint),
-               panel(sc, name, paint, (x0, cy - rr + cut, z + rr - wall), (x1, cy + rr - cut, z + rr), north=inside if name == "mouth" else paint)]
+        el += [f.panel(name, paint, (x0, cy + rr - wall, z - rr + cut), (x1, cy + rr, z + rr - cut), down=inside if name == "mouth" else paint),
+               f.panel(name, paint, (x0, cy - rr, z - rr + cut), (x1, cy - rr + wall, z + rr - cut), up=inside if name == "mouth" else paint),
+               f.panel(name, paint, (x0, cy - rr + cut, z - rr), (x1, cy + rr - cut, z - rr + wall), south=inside if name == "mouth" else paint),
+               f.panel(name, paint, (x0, cy - rr + cut, z + rr - wall), (x1, cy + rr - cut, z + rr), north=inside if name == "mouth" else paint)]
         diagonal = cut * 1.41421356
         for sy, sz in ((1, -1), (1, 1), (-1, -1), (-1, 1)):
             # Each corner's outer face on the octagon's edge, its ends meeting the flat walls' outer faces.
             inset = rr - cut / 2 - wall / (2 * 1.41421356)
             my, mz = cy + sy * inset, z + sz * inset
-            el.append(panel(sc, name, paint, (x0, my - wall / 2, mz - diagonal / 2), (x1, my + wall / 2, mz + diagonal / 2),
-                            rot=fa.rotation((x0, my, mz), "x", 45.0 * sy * sz)))
+            el.append(f.panel(name, paint, (x0, my - wall / 2, mz - diagonal / 2), (x1, my + wall / 2, mz + diagonal / 2),
+                              turn=((x0, my, mz), "x", 45.0 * sy * sz)))
     # The horn narrowing behind it, round, its first length's west face the dark inside seen through the mouth.
     for i, (x0, x1, d) in enumerate(HORN):
         over = {"west": inside} if i == 0 else {}
-        el += crossed_x(sc, "horn", weave, x0, x1, 0.5 + d / 2, z, d, **over)
+        el += f.crossed_x("horn", weave, x0, x1, 0.5 + d / 2, z, d, **over)
     # The tail curling up: rising off the ground, then steeply, standing up, and turning back west over the horn to its tip.
-    el += crossed_x(sc, "tail", weave, 35.0, 39.0, 4.5, z, 7.0, rot=fa.rotation((35.0, 4.5, z), "z", 22.5))
-    el += crossed_x(sc, "tail", weave, 38.0, 42.0, 7.0, z, 6.0, rot=fa.rotation((38.0, 7.0, z), "z", 45.0))
-    el += crossed_y(sc, "tail", weave, 42.5, z, 5.0, 9.0, 18.0)
-    el.append(panel(sc, "tail", weave, (38.0, 15.5, z - 2.0), (42.0, 19.5, z + 2.0), rot=fa.rotation((42.0, 17.5, z), "z", -45.0)))
-    el.append(panel(sc, "tail", weave, (35.0, 20.0, z - 1.5), (38.0, 23.0, z + 1.5), rot=fa.rotation((38.0, 21.5, z), "z", -22.5)))
+    el += f.crossed_x("tail", weave, 35.0, 39.0, 4.5, z, 7.0, turn=((35.0, 4.5, z), "z", 22.5))
+    el += f.crossed_x("tail", weave, 38.0, 42.0, 7.0, z, 6.0, turn=((38.0, 7.0, z), "z", 45.0))
+    el += f.crossed_y("tail", weave, 42.5, z, 5.0, 9.0, 18.0)
+    el.append(f.panel("tail", weave, (38.0, 15.5, z - 2.0), (42.0, 19.5, z + 2.0), turn=((42.0, 17.5, z), "z", -45.0)))
+    el.append(f.panel("tail", weave, (35.0, 20.0, z - 1.5), (38.0, 23.0, z + 1.5), turn=((38.0, 21.5, z), "z", -22.5)))
     # The harvest.
     pumpkin, stem = rind(), lengthwise(STEM)
-    el += crossed_y(sc, "pumpkin", pumpkin, 4.5, 12.0, 8.0, 0.5, 7.5)
-    el += crossed_y(sc, "pumpkin", pumpkin, 7.0, 21.0, 6.0, 2.5, 7.5)
-    el += crossed_y(sc, "pumpkin", pumpkin, 14.5, 3.5, 5.0, 0.5, 5.0)
-    el += [panel(sc, "stem", stem, (4.0, 7.5, 13.75), (5.0, 9.0, 14.75)),
-           panel(sc, "stem", stem, (14.0, 5.0, 3.0), (15.0, 6.5, 4.0))]
+    el += f.crossed_y("pumpkin", pumpkin, 4.5, 12.0, 8.0, 0.5, 7.5)
+    el += f.crossed_y("pumpkin", pumpkin, 7.0, 21.0, 6.0, 2.5, 7.5)
+    el += f.crossed_y("pumpkin", pumpkin, 14.5, 3.5, 5.0, 0.5, 5.0)
+    el += [f.panel("stem", stem, (4.0, 7.5, 13.75), (5.0, 9.0, 14.75)),
+           f.panel("stem", stem, (14.0, 5.0, 3.0), (15.0, 6.5, 4.0))]
     butternut = produce(BUTTERNUT)
-    el += [panel(sc, "butternut", butternut, (0.0, 7.5, 10.5), (3.0, 10.5, 13.5)),
-           panel(sc, "butternut", butternut, (3.0, 8.0, 11.0), (6.0, 10.0, 13.0))]
-    el.append(panel(sc, "acorn_squash", acorn_squash(), (5.0, 7.5, 19.0), (9.0, 10.5, 23.0)))
+    el += [f.panel("butternut", butternut, (0.0, 7.5, 10.5), (3.0, 10.5, 13.5)),
+           f.panel("butternut", butternut, (3.0, 8.0, 11.0), (6.0, 10.0, 13.0))]
+    el.append(f.panel("acorn_squash", acorn_squash(), (5.0, 7.5, 19.0), (9.0, 10.5, 23.0)))
     # The sheaf of wheat standing in the mouth, its stalks bound, its ears above.
-    el += [panel(sc, "sheaf", lengthwise(WHEAT), (4.0, 9.0, 13.0), (7.0, 16.0, 16.0)),
-           panel(sc, "sheaf_band", lengthwise(STEM), (3.75, 11.0, 12.75), (7.25, 12.0, 16.25)),
-           panel(sc, "ears", ears(), (3.5, 16.0, 12.5), (7.5, 18.5, 16.5))]
+    el += [f.panel("sheaf", lengthwise(WHEAT), (4.0, 9.0, 13.0), (7.0, 16.0, 16.0)),
+           f.panel("sheaf_band", lengthwise(STEM), (3.75, 11.0, 12.75), (7.25, 12.0, 16.25)),
+           f.panel("ears", ears(), (3.5, 16.0, 12.5), (7.5, 18.5, 16.5))]
     # Three ears of corn leaning out over the rim, each over its husk.
     corn, husk = kernels(), lengthwise(HUSK)
     for cy, cz in ((10.0, 17.5), (11.5, 20.5), (10.5, 23.0)):
-        turn = fa.rotation((4.0, cy, cz), "z", -22.5)
-        el.append(panel(sc, "corn", corn, (-1.0, cy, cz - 0.5), (4.0, cy + 1.0, cz + 0.5), rot=turn))
-        el.append(panel(sc, "husk", husk, (0.0, cy - 0.5, cz - 1.0), (4.0, cy, cz + 1.0), rot=turn))
+        turn = ((4.0, cy, cz), "z", -22.5)
+        el.append(f.panel("corn", corn, (-1.0, cy, cz - 0.5), (4.0, cy + 1.0, cz + 0.5), turn=turn))
+        el.append(f.panel("husk", husk, (0.0, cy - 0.5, cz - 1.0), (4.0, cy, cz + 1.0), turn=turn))
     # The grapes hanging over the rim, their stalk up to it.
-    el += [panel(sc, "grapes", grapes(), (0.5, 3.0, 22.5), (3.0, 6.0, 25.0)),
-           panel(sc, "grape_stalk", lengthwise(STEM), (1.5, 6.0, 23.5), (2.0, 8.0, 24.0))]
+    el += [f.panel("grapes", grapes(), (0.5, 3.0, 22.5), (3.0, 6.0, 25.0)),
+           f.panel("grape_stalk", lengthwise(STEM), (1.5, 6.0, 23.5), (2.0, 8.0, 24.0))]
     # Gourds and apples rolled out over the ground.
-    el += [panel(sc, "gourd", gourd(), (8.0, 0.5, 3.0), (10.0, 2.5, 5.0)),
-           panel(sc, "gourd", gourd(), (10.5, 0.5, 7.0), (12.5, 2.5, 9.0))]
+    el += [f.panel("gourd", gourd(), (8.0, 0.5, 3.0), (10.0, 2.5, 5.0)),
+           f.panel("gourd", gourd(), (10.5, 0.5, 7.0), (12.5, 2.5, 9.0))]
     apple = produce(APPLE, glint=True)
     for ax, az in ((1.0, 5.0), (3.0, 2.5), (6.5, 1.5), (10.5, 3.5)):
-        el.append(panel(sc, "apple", apple, (ax, 0.5, az), (ax + 1.0, 1.5, az + 1.0)))
-    sc.models["whole"] = el
-    return sc
+        el.append(f.panel("apple", apple, (ax, 0.5, az), (ax + 1.0, 1.5, az + 1.0)))
+    return el
 
 
 # ---------------------------------------------------------------- part 2: the Giant Vegetable Show
@@ -1068,14 +1103,206 @@ def bunting_assets(root, write, lang):
     write(root / "equipment" / f"{hf.SACK['item']}.json", {"layers": {"humanoid_leggings": [{"texture": rid(hf.SACK["item"])}]}})
 
 
+# ---------------------------------------------------------------- part 5: the Harvest Centerpiece
+
+# A corn shock's dried stalks, and its dry leaves.
+STALK = pal("6e5428", "8e7038", "ac8c4c", "c6a866", "dcc286")
+LEAF_DRY = pal("6e5a2e", "8c7640", "a89254")
+
+
+def amber_unlit():
+    """A lantern's amber glass with its candle out: its own deep tone, a tone lighter in a band round its middle where the
+    candle stands behind it, its top row lit."""
+    import thanksgiving_decor_data as tdd
+
+    def paint(p):
+        for y in range(p.h):
+            t = y / max(1, p.h - 1)
+            k = 3 if y == 0 else 2 if 0.3 <= t <= 0.6 else 1
+            for x in range(p.w):
+                p.put(x, y, shade(tdd.AMBER_GLASS, k))
+    paint.tag = repr(("amber_unlit",))
+    return paint
+
+
+def lantern(sc, cx, cz, y0, s=1.3):
+    """A brass lantern with amber glass standing at (cx, y0, cz), `s` times its 13 pixels: a brass foot, the glass between
+    four brass corner posts, a brass cap and a bail over it. Returns its pieces and its glass two ways: out (dark amber)
+    and lit (the Amber Jar Lantern's glowing glass, thanksgiving_decor_data.glass_glow, full-bright)."""
+    import thanksgiving_decor_data as tdd
+    g = Frame(sc, s, (cx, y0, cz))
+    brass = ppd.flat(BRASS)
+    lo, hi = (-2.5, 1.0, -2.5), (2.5, 8.0, 2.5)
+    out = [g.panel("glass", amber_unlit(), lo, hi)]
+    lit = tdd.lit([g.panel("glass_lit", tdd.glass_glow(), lo, hi)])
+    el = [g.panel("lantern_foot", brass, (-3.5, 0.0, -3.5), (3.5, 1.0, 3.5))]
+    for sx in (-1, 1):
+        for sz in (-1, 1):
+            x, z = sx * 2.5, sz * 2.5
+            el.append(g.panel("lantern_post", brass, (x - 0.5, 1.0, z - 0.5), (x + 0.5, 8.0, z + 0.5)))
+    el += [g.panel("lantern_cap", brass, (-3.5, 8.0, -3.5), (3.5, 9.0, 3.5)),
+           g.panel("lantern_top", brass, (-2.0, 9.0, -2.0), (2.0, 10.5, 2.0)),
+           g.panel("bail", brass, (-1.75, 10.5, -0.25), (-1.25, 12.5, 0.25)),
+           g.panel("bail", brass, (1.25, 10.5, -0.25), (1.75, 12.5, 0.25)),
+           g.panel("bail", brass, (-1.75, 12.5, -0.25), (1.75, 13.0, 0.25))]
+    return el, out, lit
+
+
+def straw_bale(f, x0, x1, z0, z1, h):
+    """A straw bale lying along x on the ground, `h` high, its straw along it (ppd.hay), roped round with two twine bands
+    a quarter pixel proud, each a quarter of its length in from its ends."""
+    el = [f.panel("bale", ppd.hay(), (x0, 0.0, z0), (x1, h, z1))]
+    for at in (x0 + (x1 - x0) / 4, x1 - (x1 - x0) / 4):
+        el.append(f.panel("bale_twine", ppd.flat(TWINE), (at - 0.5, 0.0, z0 - 0.25), (at + 0.5, h + 0.25, z1 + 0.25)))
+    return el
+
+
+# A corn shock's stalks from the ground up, gathered like a tent: (across, from, to) in pixels; the twine round its
+# waist; and its pale tassels on top.
+SHOCK = ((16.0, 0.0, 5.0), (14.0, 5.0, 11.0), (12.0, 11.0, 17.0), (10.0, 17.0, 22.0), (8.5, 22.0, 26.0),
+         (9.5, 28.0, 32.0), (11.5, 32.0, 37.0))
+SHOCK_TIE = (9.5, 26.0, 28.0)
+SHOCK_TASSELS = ((10.0, 37.0, 41.0), (6.0, 41.0, 45.0))
+
+
+def corn_shock(f, cx, cz):
+    """A corn shock standing at (cx, cz) in Frame `f`, 45 pixels (2.8 m) tall: the dried stalks gathered wide at their
+    feet like a tent, tied with twine at their waist and flaring above it to their pale tassels, dry leaves hanging out
+    from it to either side and drooping at the front, and an ear of corn in its husk leaning back on its front."""
+    stalk = lengthwise(STALK)
+    el = []
+    for d, y0, y1 in SHOCK:
+        el += f.crossed_y("shock", stalk, cx, cz, d, y0, y1)
+    el += f.crossed_y("shock_tie", lengthwise(TWINE), cx, cz, *SHOCK_TIE)
+    for d, y0, y1 in SHOCK_TASSELS:
+        el += f.crossed_y("tassel", ppd.hay(HUSK), cx, cz, d, y0, y1)
+    leaf = lengthwise(LEAF_DRY)
+    el += [f.panel("shock_leaf", leaf, (cx + 5.0, 33.0, cz - 0.25), (cx + 11.0, 34.0, cz + 0.25), turn=((cx + 5.0, 33.5, cz), "z", -22.5)),
+           f.panel("shock_leaf", leaf, (cx - 11.0, 30.0, cz - 0.25), (cx - 5.0, 31.0, cz + 0.25), turn=((cx - 5.0, 30.5, cz), "z", 22.5)),
+           f.panel("shock_leaf", leaf, (cx - 0.25, 34.0, cz - 11.0), (cx + 0.25, 35.0, cz - 5.5), turn=((cx, 34.5, cz - 5.5), "x", -22.5))]
+    turn = ((cx + 2.5, 0.0, cz - 8.5), "x", 22.5)
+    el += [f.panel("corn", kernels(), (cx + 1.5, 0.0, cz - 9.5), (cx + 3.5, 8.0, cz - 7.5), turn=turn),
+           f.panel("husk", lengthwise(HUSK), (cx + 1.25, 0.0, cz - 7.5), (cx + 3.75, 6.0, cz - 7.0), turn=turn)]
+    return el
+
+
+def pear(f, cx, cz):
+    """A pear standing on the ground at (cx, cz): its round body, its narrower neck and its stalk."""
+    import thanksgiving_decor_data as tdd
+    skin = produce(tdd.PEAR)
+    return [f.panel("pear", skin, (cx - 1.5, 0.0, cz - 1.5), (cx + 1.5, 3.0, cz + 1.5)),
+            f.panel("pear", skin, (cx - 1.0, 3.0, cz - 1.0), (cx + 1.0, 5.0, cz + 1.0)),
+            f.panel("stalk", lengthwise(STEM), (cx - 0.25, 5.0, cz - 0.25), (cx + 0.25, 6.0, cz + 0.25))]
+
+
+def ear_lying(f, x0, y0, z0, length, turn=None):
+    """An ear of corn lying along x from x0, its kernels bare at the front and its husk peeled back behind it; `turn`d
+    about its middle's foot if given (an angle about y)."""
+    t = ((x0 + length / 2, y0, z0 + 1.25), "y", turn) if turn else None
+    return [f.panel("corn", kernels(), (x0, y0, z0 + 0.25), (x0 + length, y0 + 2.0, z0 + 2.25), turn=t),
+            f.panel("husk", lengthwise(HUSK), (x0 + length, y0 + 0.25, z0), (x0 + length + 3.0, y0 + 1.75, z0 + 2.5), turn=t)]
+
+
+def apple_heap(f, cx, cz, palettes):
+    """A heap of apples on the ground about (cx, cz): nine in a square, four on them, one on top, each two pixels across,
+    its colours taken from `palettes` in turn."""
+    el, k = [], 0
+    for layer, n in enumerate((3, 2, 1)):
+        y = 2.0 * layer
+        start = -n + 0.0
+        for i in range(n):
+            for j in range(n):
+                x, z = cx + start + 2.0 * i, cz + start + 2.0 * j
+                skin = produce(palettes[k % len(palettes)], glint=True)
+                k += 1
+                el.append(f.panel("apple", skin, (x, y, z), (x + 2.0, y + 2.0, z + 2.0)))
+    return el
+
+
+def fallen_leaf(f, palette, cx, cz, angle):
+    """An autumn leaf fallen flat on the ground at (cx, cz), three pixels across, turned `angle` about its middle."""
+    return [f.panel("fallen_leaf", produce(palette), (cx - 1.5, 0.0, cz - 1.5), (cx + 1.5, 0.25, cz + 1.5),
+                    turn=((cx, 0.0, cz), "y", angle) if angle else None)]
+
+
+# The lanterns: (across, deep, standing at): on the front bale, on the ground at the front west corner, on the back bale.
+LANTERNS = ((68.0, 7.0, 10.0), (5.5, 8.5, 0.0), (40.0, 68.0, 10.0))
+
+
+def harvest_centerpiece():
+    """The Harvest Centerpiece, facing north, in its frame (80 across, 48 up, 80 deep). The Giant Cornucopia's horn and
+    harvest (horn_of_plenty) half as big again, its mouth to the west, standing across the middle; and set out round it:
+    - before it, spilling on from the horn's own harvest: a show pumpkin before the mouth and a second big pumpkin, a
+      white pumpkin, acorn and butternut squashes, striped gourds, pears, a heap of apples red, green and gold, ears of
+      corn fanned on the ground and fallen maple and aspen leaves;
+    - at its front east corner a straw bale roped with twine, two ears of corn and a lantern on it; at its front west
+      corner a lantern standing on the ground;
+    - behind it two corn shocks at the back corners, each with a pumpkin at its feet, a second roped bale between them
+      with a lantern on it, and pumpkins and gourds about the bale.
+    The three lanterns are brass with amber glass (lantern), 1.3 times the Amber Jar Lantern's height. Models: `whole`
+    (their candles out) and `whole_lit` (their glass glowing), every other piece the same in both."""
+    import thanksgiving_decor_data as tdd
+    spec = hf.CENTERPIECE
+    sc = Sculpt(spec["block"], 3305, 128)
+    f = Frame(sc)
+    el = horn_of_plenty(Frame(sc, spec["scale"], spec["horn_at"]))
+    pumpkin, stem, squash, stripes = rind(), lengthwise(STEM), acorn_squash(), gourd()
+    butternut = produce(BUTTERNUT)
+    # Before the mouth: the show pumpkin with a butternut on it, a second big pumpkin, a white pumpkin and squashes.
+    el += f.crossed_y("show_pumpkin", pumpkin, 15.0, 8.5, 13.0, 0.0, 10.5)
+    el += [f.panel("stem", stem, (14.25, 10.5, 7.75), (15.75, 12.5, 9.25)),
+           f.panel("butternut", butternut, (17.5, 10.0, 4.0), (21.5, 13.0, 7.0)),
+           f.panel("butternut", butternut, (21.5, 10.5, 4.5), (25.0, 12.5, 6.5))]
+    el += f.crossed_y("pumpkin", pumpkin, 28.0, 11.0, 10.0, 0.0, 8.0)
+    el += [f.panel("stem", stem, (27.5, 8.0, 10.5), (28.5, 9.5, 11.5))]
+    el += f.crossed_y("white_pumpkin", tdd.ribbed(tdd.WHITE_PUMPKIN), 39.0, 7.0, 9.0, 0.0, 7.0)
+    el += [f.panel("stem", stem, (38.5, 7.0, 6.5), (39.5, 8.5, 7.5))]
+    el += [f.panel("acorn_squash", squash, (21.0, 0.0, 15.5), (25.5, 3.5, 20.0)),
+           f.panel("acorn_squash", squash, (33.0, 0.0, 13.0), (37.5, 3.5, 17.5)),
+           f.panel("acorn_squash", squash, (44.5, 0.0, 11.5), (49.0, 3.5, 16.0))]
+    for gx, gz in ((24.0, 2.0), (35.0, 2.5), (57.0, 15.0), (31.5, 18.5)):
+        el.append(f.panel("gourd", stripes, (gx, 0.0, gz), (gx + 2.5, 2.5, gz + 2.5)))
+    el += pear(f, 46.0, 3.5) + pear(f, 49.5, 5.5) + pear(f, 42.5, 16.5)
+    el += apple_heap(f, 53.5, 8.0, (APPLE, tdd.GREEN_APPLE, tdd.GOLD_APPLE, APPLE))
+    # Corn fanned on the ground before the bale, and leaves fallen about.
+    el += ear_lying(f, 47.0, 0.0, 0.5, 6.0, 22.5) + ear_lying(f, 56.0, 0.0, 13.0, 5.5, -22.5)
+    for palette, cx, cz, angle in ((MAPLE, 12.0, 17.5, 22.5), (ASPEN, 32.0, 6.0, 45.0), (MAPLE, 42.0, 1.75, 0.0),
+                                   (ASPEN, 60.0, 15.0, -22.5), (MAPLE, 9.0, 2.0, 45.0), (ASPEN, 20.0, 19.5, 0.0),
+                                   (MAPLE, 30.0, 60.0, 22.5), (ASPEN, 58.0, 62.0, -45.0), (MAPLE, 46.0, 77.0, 0.0)):
+        el += fallen_leaf(f, palette, cx, cz, angle)
+    # The front east corner: a roped bale, two ears of corn on it beside its lantern.
+    el += straw_bale(f, 60.0, 76.0, 2.0, 12.0, 10.0)
+    el += ear_lying(f, 60.75, 10.0, 2.75, 4.0) + ear_lying(f, 70.5, 10.0, 8.75, 2.5)
+    # The back: two corn shocks at the corners, each with a pumpkin at its feet; a roped bale between them, pumpkins and
+    # gourds about it.
+    el += corn_shock(f, 11.0, 68.0) + corn_shock(f, 69.0, 68.0)
+    el += f.crossed_y("pumpkin", pumpkin, 19.0, 59.0, 7.0, 0.0, 5.5) + f.crossed_y("pumpkin", pumpkin, 61.0, 59.0, 7.0, 0.0, 5.5)
+    el += straw_bale(f, 32.0, 48.0, 63.0, 73.0, 10.0)
+    el += f.crossed_y("pumpkin", pumpkin, 26.0, 70.0, 8.0, 0.0, 6.5)
+    el += [f.panel("stem", stem, (25.5, 6.5, 69.5), (26.5, 8.0, 70.5))]
+    el += f.crossed_y("pumpkin", pumpkin, 53.5, 67.0, 6.0, 0.0, 5.0)
+    el += [f.panel("gourd", stripes, (50.5, 0.0, 74.0), (53.0, 2.5, 76.5)),
+           f.panel("gourd", stripes, (28.5, 0.0, 75.0), (31.0, 2.5, 77.5)),
+           f.panel("acorn_squash", squash, (36.0, 0.0, 74.0), (40.5, 3.5, 78.5))]
+    out, lit = [], []
+    for cx, cz, y0 in LANTERNS:
+        body, dark, glowing = lantern(sc, cx, cz, y0)
+        el += body
+        out += dark
+        lit += glowing
+    sc.models["whole"] = el + out
+    sc.models["whole_lit"] = el + lit
+    return sc
+
+
 # ---------------------------------------------------------------- building and files
 
 _built = {}
 BUILDERS = {hf.CORNUCOPIA["block"]: giant_cornucopia, hf.SHOW["cabbage"]["block"]: giant_cabbage, hf.SHOW["marrow"]["block"]: giant_marrow,
             hf.SHOW["turnip"]["block"]: giant_turnip, hf.SHOW["carrot"]["block"]: giant_carrot, hf.RIBBON_BOARD["block"]: ribbon_board,
-            hf.ENGINE["block"]: traction_engine, hf.WAGON["block"]: hay_wagon}
+            hf.ENGINE["block"]: traction_engine, hf.WAGON["block"]: hay_wagon, hf.CENTERPIECE["block"]: harvest_centerpiece}
 # The atlas each is packed into.
-ATLAS = {hf.CORNUCOPIA["block"]: 128, hf.ENGINE["block"]: 128, hf.WAGON["block"]: 128}
+ATLAS = {hf.CORNUCOPIA["block"]: 128, hf.ENGINE["block"]: 128, hf.WAGON["block"]: 128, hf.CENTERPIECE["block"]: 128}
 
 
 def build(block):
@@ -1163,6 +1390,42 @@ def assets(root, write, lang):
     multiblock(root, write, models, spec, build(spec["block"]), 1 / 4)
     # Part 4.
     bunting_assets(root, write, lang)
+    # Part 5.
+    centerpiece_assets(root, write, models, lang)
+
+
+_centerpiece_parts = []
+
+
+def centerpiece_parts():
+    """The Harvest Centerpiece's part models cut from its whole (MultiDecorationBlock's part order), its lanterns out and
+    lit, and the parts whose lit model differs: the ones holding a lantern's glass, which give light while lit
+    (HarvestCenterpieceBlock.LANTERNS)."""
+    if not _centerpiece_parts:
+        sc, size = build(hf.CENTERPIECE["block"]), hf.CENTERPIECE["size"]
+        out, lit = ppd.cut(sc.models["whole"], size), ppd.cut(sc.models["whole_lit"], size)
+        _centerpiece_parts.append((out, lit, [p for p in range(len(out)) if lit[p] != out[p]]))
+    return _centerpiece_parts[0]
+
+
+def centerpiece_assets(root, write, models, lang):
+    """The Harvest Centerpiece: its blocks' models cut from its whole; each block holding a lantern's glass also lit
+    (`<part>_lit`), drawn while `lit` is on; its blockstate by facing, `lit` and part; and its item, the whole at a fifth
+    of its size with its lanterns out."""
+    spec = hf.CENTERPIECE
+    block = spec["block"]
+    lang[f"block.{MOD}.{block}"] = spec["display"]
+    out, lit, lanterns = centerpiece_parts()
+    for part, elements in enumerate(out):
+        write(models / f"{block}_{part}.json", fa.model(block, elements))
+    for part in lanterns:
+        write(models / f"{block}_{part}_lit.json", fa.model(block, lit[part]))
+    write(root / "blockstates" / f"{block}.json", {"variants": {
+        f"facing={f},lit={on},part={p}": {"model": rid(f"block/{block}_{p}" + ("_lit" if on == "true" and p in lanterns else "")),
+                                          **({"y": FACINGS[f]} if FACINGS[f] else {})}
+        for f in FACINGS for on in ("false", "true") for p in range(len(out))}})
+    write(root / "models" / "item" / f"{block}.json", fa.model(block, item_model(build(block).models["whole"], spec["size"], 1 / 5), DISPLAY))
+    write(root / "items" / f"{block}.json", {"model": {"type": "minecraft:model", "model": rid(f"item/{block}")}})
 
 
 # The engine's moving parts, drawn by client/SteamTractionEngineRenderer from harvest_festival_quads.json
@@ -1188,8 +1451,8 @@ def multiblock(root, write, models, spec, sc, scale, extra=()):
 def loot(out, write):
     """The cornucopia drops itself, from its first block only (its other blocks break with it, dropping nothing); each
     show vegetable drops itself; the Prize Ribbon Board drops itself and every ribbon hanging on it, from its lower
-    half (its upper breaks with it), its ribbons even in an explosion; and the engine and the wagon drop themselves,
-    each from its first block."""
+    half (its upper breaks with it), its ribbons even in an explosion; and the engine, the wagon and the Harvest
+    Centerpiece drop themselves, each from its first block."""
     block = hf.CORNUCOPIA["block"]
     write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{"condition": {"type": "minecraft:all_of", "terms": [
         {"type": "minecraft:survives_explosion"},
@@ -1209,7 +1472,7 @@ def loot(out, write):
         pools.append({"condition": {"type": "minecraft:match_block", "blocks": rid(block), "state": {"half": "lower", kind: "true"}},
                       "entries": [{"type": "minecraft:item", "name": rid(ribbon)}], "rolls": 1})
     write(out / f"{block}.json", {"type": "minecraft:block", "pools": pools, "random_sequence": rid(f"blocks/{block}")})
-    for block in (hf.ENGINE["block"], hf.WAGON["block"]):
+    for block in (hf.ENGINE["block"], hf.WAGON["block"], hf.CENTERPIECE["block"]):
         write(out / f"{block}.json", {"type": "minecraft:block", "pools": [{"condition": {"type": "minecraft:all_of", "terms": [
             {"type": "minecraft:survives_explosion"},
             {"type": "minecraft:match_block", "blocks": rid(block), "state": {"part": "0"}}]},

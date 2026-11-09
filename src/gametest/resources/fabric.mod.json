@@ -340,6 +340,7 @@
       "io.github.jimbozoomer.jugcraft.test.BiorefineryGameTests",
       "io.github.jimbozoomer.jugcraft.test.AcidFactoryGameTests",
       "io.github.jimbozoomer.jugcraft.test.MachineConnectionGameTests",
+      "io.github.jimbozoomer.jugcraft.test.HarvestCenterpieceGameTests",
       "io.github.jimbozoomer.jugcraft.test.StarterChemistryGameTests",
       "io.github.jimbozoomer.jugcraft.test.PolymerGameTests",
       "io.github.jimbozoomer.jugcraft.test.FluorochemistryGameTests",

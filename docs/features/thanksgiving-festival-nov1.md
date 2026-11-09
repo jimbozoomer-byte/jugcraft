@@ -126,6 +126,22 @@ Prepared design: a larger woven cornucopia centered on the existing square site,
 
 Future implementation checklist: inspect the actual Halloween calendar end and current saved city; snapshot the existing scene; use TownDecor's saved compare-and-set ownership ledger; skip and report every owner-modified cell rather than overwrite it; preserve church slot machines and all unrelated placed blocks; stage a dry-run report before mutation; test interrupted/repeated upgrades, loaded/unloaded chunks and owner overrides. Switch only after Halloween is done, retain the harvest scene through November, and hand back to the December scene on December 1. No chunk regeneration. Any later live restart still requires the owner's separate confirmation and 30-second warning.
 
+### Phase 6 art half — November 9 review branch (`claude/nov9-harvest-centerpiece`)
+
+On 9 November the owner resumed phase 6. Claude Code took the art half; Codex owns the scene placement, migration and calendar. No town files are touched here: not TownDecor, TownCommand, TownUpgrades, `tools/town_decor.py` or `town.json.gz`.
+- **New block `jugcraft:harvest_centerpiece`**, `HarvestCenterpieceBlock`, an existing `MultiDecorationBlock`.
+  - Five across, three up and five deep, 75 parts: `part = right + 5 × (up + 3 × away)`, from the root block the placer aimed at, its front facing them. Properties `facing`, `lit` and `part`.
+  - Part (r, u, a) stands at `root + r·facing.getCounterClockWise() + u·up + a·facing.getOpposite()`. It fits the 7 × 13 × 7 centrepiece site: facing north, root at (site + 5, floor, site + 1), cells (5 − r, 1 + u, 1 + a).
+  - No block entity, no inventory and no refill. Placeable from its item.
+  - Breaking any block breaks it all and drops it once, from the root; removing the root first leaves no other drops.
+  - Its three lanterns light or go out together on use. While lit, the five blocks that hold their glass (parts 0, 4, 5, 62 and 67) give light 13.
+- **Art**: the Giant Cornucopia's own horn and harvest (`horn_of_plenty`), the same thing half as big again, each piece repainted at its new size at a texel to a model pixel.
+  - Round it: a show pumpkin, a second pumpkin and a white one, squashes, gourds, pears, an apple heap, corn and fallen leaves in front.
+  - Two corn shocks behind, two roped straw bales, and three brass and amber lanterns.
+  - Details are in the [Harvest Festival Grounds record](harvest-festival-grounds.md#part-5-the-harvest-centerpiece-9-november-2026).
+- **`giant_cornucopia` unchanged**: same ID, 3 × 2 × 2, and its models and texture byte-identical. The refactor that draws its horn at any scale was checked for identical elements and atlas.
+- **No turkey refill and no serving inventory.** The giant turkey's behaviour is untouched.
+
 ## Phases 7–8 — Completed and validated locally
 
 Checkers and chess share a server-authoritative table interface, UUID seats and persisted game state. This phase 7–8 checkpoint originally supplied free play; phase 9 below adds optional wagers. Closing the interface preserves a seat; leaving an active seat is resignation, while a disconnect simply preserves the game for reconnection. Breaking an unfunded table cancels the match and drops only the craftable table; funded-table protections/refunds are described in phase 9. Rematches need both seated players' agreement. Spectators cannot move pieces. Network actions require a nearby opened table, matching table identity and state revision.

@@ -1,0 +1,83 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "p": "jugcraft:block/harvest_centerpiece",
+    "particle": "jugcraft:block/harvest_centerpiece"
+  },
+  "elements": [
+    {
+      "from": [
+        15.5,
+        13.25,
+        0
+      ],
+      "to": [
+        16,
+        15.5,
+        16
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            10.625,
+            14.375,
+            12.625,
+            14.75
+          ],
+          "texture": "#p"
+        },
+        "up": {
+          "uv": [
+            12.25,
+            0.125,
+            12.3125,
+            2.125
+          ],
+          "texture": "#p"
+        },
+        "down": {
+          "uv": [
+            13.5,
+            0.125,
+            13.5625,
+            2.125
+          ],
+          "texture": "#p"
+        }
+      }
+    },
+    {
+      "from": [
+        14.0,
+        14.0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            8.0625,
+            14.5,
+            10.0625,
+            14.75
+          ],
+          "texture": "#p"
+        },
+        "down": {
+          "uv": [
+            9.0,
+            0.3125,
+            9.25,
+            2.3125
+          ],
+          "texture": "#p"
+        }
+      }
+    }
+  ]
+}

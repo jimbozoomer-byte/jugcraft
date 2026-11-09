@@ -27502,6 +27502,11 @@
       "denominator": 2,
       "source": "recipe jugcraft:harvest_bunting"
     },
+    "jugcraft:harvest_centerpiece": {
+      "numerator": 15517,
+      "denominator": 9,
+      "source": "recipe jugcraft:harvest_centerpiece"
+    },
     "jugcraft:harvest_crown": {
       "numerator": 4315,
       "denominator": 1,
