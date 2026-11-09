@@ -592,9 +592,13 @@ public class PirateShip extends Entity implements CrewedVessel {
 
 	@Override
 	protected void addAdditionalSaveData(ValueOutput output) {
-		output.putDouble("AnchorX", anchor.x);
-		output.putDouble("AnchorY", anchor.y);
-		output.putDouble("AnchorZ", anchor.z);
+		// Only an anchor that has been set: a ship saved before its first tick (summoned, never ticked) anchors where it
+		// is next placed, not at the world's origin.
+		if (anchored) {
+			output.putDouble("AnchorX", anchor.x);
+			output.putDouble("AnchorY", anchor.y);
+			output.putDouble("AnchorZ", anchor.z);
+		}
 		output.putBoolean("HasWaypoint", waypoint != null);
 		if (waypoint != null) {
 			output.putDouble("WaypointX", waypoint.x);

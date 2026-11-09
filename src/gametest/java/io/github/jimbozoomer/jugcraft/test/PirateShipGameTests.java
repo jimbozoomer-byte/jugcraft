@@ -834,4 +834,51 @@ public class PirateShipGameTests {
 			helper.succeed();
 		});
 	}
+
+	/**
+	 * A ship saved before its first tick, never launched (a /summon whose chunk is saved before it ticks), saves no
+	 * anchor, and reloaded it anchors where it is placed on its first tick, not at the world's origin; that anchor is
+	 * then saved. An anchored save is kept as it was: reloaded, the ship keeps its saved anchor, not where it floats.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 40, skyAccess = true)
+	public void anUnanchoredSaveAnchorsWhereItIsReloaded(GameTestHelper helper) {
+		pool(helper);
+		ServerLevel level = helper.getLevel();
+		Vec3 at = helper.absoluteVec(CENTRE);
+		PirateShip unticked = PirateShips.SHIP.create(level, EntitySpawnReason.COMMAND);
+		unticked.snapTo(at.x, at.y, at.z, 0.0F, 0.0F);
+		TagValueOutput out = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		unticked.saveWithoutId(out);
+		var unanchored = out.buildResult();
+		helper.assertTrue(!unanchored.contains("AnchorX") && !unanchored.contains("AnchorY") && !unanchored.contains("AnchorZ"),
+				"A ship saved before its first tick should save no anchor: " + unanchored);
+		PirateShip reloaded = PirateShips.SHIP.create(level, EntitySpawnReason.LOAD);
+		reloaded.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), unanchored));
+		helper.assertTrue(reloaded.position().distanceTo(at) < 1.0E-6, "It reloads where it was saved, " + at);
+		level.addFreshEntity(reloaded);
+		// An anchored save: launched with its anchor 8 blocks off to port of where it floats.
+		Vec3 anchor = at.add(8.0, 0.0, 0.0);
+		PirateShip launched = ship(helper, false);
+		launched.launch(anchor, false);
+		out = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
+		launched.saveWithoutId(out);
+		var anchored = out.buildResult();
+		helper.assertTrue(anchored.contains("AnchorX") && anchored.contains("AnchorY") && anchored.contains("AnchorZ"),
+				"A launched ship should save its anchor: " + anchored);
+		helper.runAfterDelay(3, () -> {
+			helper.assertTrue(reloaded.anchor().distanceTo(at) < 1.0E-6,
+					"On its first tick the reloaded ship should anchor where it was placed, " + at + ", not at " + reloaded.anchor());
+			helper.assertTrue(copy(helper, reloaded).anchor().distanceTo(at) < 1.0E-6, "That anchor is then saved");
+			reloaded.discard();
+			PirateShip kept = PirateShips.SHIP.create(level, EntitySpawnReason.LOAD);
+			kept.load(TagValueInput.create(ProblemReporter.DISCARDING, level.registryAccess(), anchored));
+			level.addFreshEntity(kept);
+			helper.runAfterDelay(3, () -> {
+				helper.assertTrue(kept.position().distanceTo(at) < 1.0E-6 && kept.anchor().distanceTo(anchor) < 1.0E-6,
+						"A reloaded anchored ship should keep its saved anchor, " + anchor + ", not " + kept.anchor());
+				kept.discard();
+				helper.succeed();
+			});
+		});
+	}
 }
