@@ -137,6 +137,18 @@ def build(jar):
             values[item] = mixed_oxide / 4
             origins[item] = 'local rare-earth maximum coproduct allocation'
             locked.add(item)
+    # Fluid-machine recipes are not derived above, so every zirconia form would keep
+    # the one-essence fallback while finishing turns one fired blank into two inserts.
+    # Price each form at its two-insert yield: finishing, firing, conditioning and the
+    # short sand/concentrate routes then spend at least the value they return.
+    insert = values.get('jugcraft:zirconia_insert', Fraction(1))
+    for material in ('zirconia_precursor', 'zirconia_powder', 'zirconia_charge',
+                     'zirconia_blank', 'fired_zirconia_blank'):
+        item = 'jugcraft:' + material
+        if item in local_items:
+            values[item] = 2 * insert
+            origins[item] = 'local zirconia finishing accounting'
+            locked.add(item)
     propagate()
     # Every local item definition has a value, including uncraftable decorative assets.
     for key in local_items:

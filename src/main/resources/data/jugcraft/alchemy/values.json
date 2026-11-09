@@ -73,9 +73,9 @@
       "source": "recipe jugcraft:circuit_assembly/advanced_circuit"
     },
     "jugcraft:advanced_engine": {
-      "numerator": 23113,
-      "denominator": 16,
-      "source": "recipe jugcraft:advanced_engine"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:advanced_solar_panel": {
       "numerator": 15459,
@@ -13438,9 +13438,9 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:composite_rotor_assembly": {
-      "numerator": 8699,
-      "denominator": 48,
-      "source": "recipe jugcraft:composite_rotor_assembly"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:composite_rotor_set": {
       "numerator": 3,
@@ -17838,23 +17838,23 @@
       "source": "recipe jugcraft:drone_t4"
     },
     "jugcraft:drone_t5": {
-      "numerator": 432001,
-      "denominator": 36,
-      "source": "recipe jugcraft:drone_t5"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:drone_t6": {
-      "numerator": 122155,
-      "denominator": 8,
+      "numerator": 26189,
+      "denominator": 9,
       "source": "recipe jugcraft:drone_t6"
     },
     "jugcraft:drone_t7": {
-      "numerator": 145547,
-      "denominator": 8,
+      "numerator": 52505,
+      "denominator": 9,
       "source": "recipe jugcraft:drone_t7"
     },
     "jugcraft:drone_t8": {
-      "numerator": 189707,
-      "denominator": 8,
+      "numerator": 102185,
+      "denominator": 9,
       "source": "recipe jugcraft:drone_t8"
     },
     "jugcraft:drone_t9": {
@@ -18993,9 +18993,9 @@
       "source": "recipe jugcraft:exhumation_writ_from_grave_dust"
     },
     "jugcraft:exosuit_boots": {
-      "numerator": 2161,
-      "denominator": 16,
-      "source": "recipe jugcraft:exosuit_boots"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:exosuit_chestplate": {
       "numerator": 26737,
@@ -19008,9 +19008,9 @@
       "source": "recipe jugcraft:exosuit_helmet"
     },
     "jugcraft:exosuit_leggings": {
-      "numerator": 22665,
-      "denominator": 16,
-      "source": "recipe jugcraft:exosuit_leggings"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:exposed_process_wafer": {
       "numerator": 1,
@@ -20808,9 +20808,9 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:fired_zirconia_blank": {
-      "numerator": 1,
+      "numerator": 2,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local zirconia finishing accounting"
     },
     "jugcraft:firedrake": {
       "numerator": 3685,
@@ -50708,14 +50708,14 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:magnet_dynamo": {
-      "numerator": 7415,
-      "denominator": 32,
-      "source": "recipe jugcraft:magnet_dynamo"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:magnet_motor": {
-      "numerator": 17767,
-      "denominator": 32,
-      "source": "recipe jugcraft:magnet_motor"
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:magnolia_fence": {
       "numerator": 40,
@@ -73838,14 +73838,14 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:zirconia_blank": {
-      "numerator": 1,
+      "numerator": 2,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local zirconia finishing accounting"
     },
     "jugcraft:zirconia_charge": {
-      "numerator": 1,
+      "numerator": 2,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local zirconia finishing accounting"
     },
     "jugcraft:zirconia_insert": {
       "numerator": 1,
@@ -73853,14 +73853,14 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:zirconia_powder": {
-      "numerator": 1,
+      "numerator": 2,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local zirconia finishing accounting"
     },
     "jugcraft:zirconia_precursor": {
-      "numerator": 1,
+      "numerator": 2,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local zirconia finishing accounting"
     },
     "jugcraft:zucchini": {
       "numerator": 1,
