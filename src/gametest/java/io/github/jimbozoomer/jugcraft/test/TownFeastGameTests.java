@@ -130,21 +130,39 @@ public final class TownFeastGameTests {
 		return new BlockHitResult(new Vec3(world.getX() + along, world.getY() + 0.8, world.getZ() + 0.5), Direction.UP, world, false);
 	}
 
+	/**
+	 * A survival player beside the square with BOTH hands explicitly empty. Joining can hand a new player something (a
+	 * starter book lands in the selected hotbar slot), and the eat rule needs an empty main hand and offhand.
+	 */
 	private static ServerPlayer diner(GameTestHelper h) {
 		ServerPlayer player = TestPlayers.survivor(h);
 		player.snapTo(h.absoluteVec(new Vec3(16.5, 2, 13.5)));
+		emptyHands(player);
+		h.assertTrue(player.getMainHandItem().isEmpty() && player.getOffhandItem().isEmpty() && !player.isSecondaryUseActive(),
+				"The diner starts with both hands empty, standing" + hands(player));
 		return player;
 	}
 
+	private static void emptyHands(ServerPlayer player) {
+		player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+		player.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
+	}
+
+	/** What {@code player} holds and whether they sneak, for every eat-rule diagnostic. */
+	static String hands(ServerPlayer player) {
+		return " [main hand: " + player.getMainHandItem() + ", offhand: " + player.getOffhandItem() + ", sneaking: "
+				+ player.isSecondaryUseActive() + "]";
+	}
+
 	/**
-	 * Eats one serving or portion at a cell the way the town's eat-only hook lets a player: hungry, with an empty hand (a
-	 * bowl meal's bowl lands in the empty main-hand slot, so it is put aside after each serving).
+	 * Eats one serving or portion at a cell the way the town's eat-only hook lets a player: hungry, with both hands empty
+	 * (a bowl meal's bowl lands in the empty main-hand slot, so both hands are emptied again after each serving).
 	 */
 	private static void eat(GameTestHelper h, ServerPlayer player, BlockPos world, double along) {
-		player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+		emptyHands(player);
 		player.getFoodData().setFoodLevel(2);
 		h.getLevel().getBlockState(world).useWithoutItem(h.getLevel(), player, hit(world, along));
-		player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
+		emptyHands(player);
 	}
 
 	/** The food laid at a site's dish slot, as a plain stack of {@code count} (what a player's own would be). */
@@ -224,8 +242,8 @@ public final class TownFeastGameTests {
 		for (int i = 0; i < 5; i++) {
 			eat(h, player, master, 0.5);
 		}
-		h.assertTrue(servings(h) == 77 && table(h, "W1", 0).dish(0).getCount() == 1, "Three servings eaten: " + servings(h));
-		h.assertTrue(turkey(h).getValue(GiantTurkeyFeastBlock.REMAINING) == 19, "Five portions eaten: " + turkey(h));
+		h.assertTrue(servings(h) == 77 && table(h, "W1", 0).dish(0).getCount() == 1, "Three servings eaten: " + servings(h) + hands(player));
+		h.assertTrue(turkey(h).getValue(GiantTurkeyFeastBlock.REMAINING) == 19, "Five portions eaten: " + turkey(h) + hands(player));
 		// Every way back in: a re-run, a dry run, a reload of the saved ledger, a town revision upgrade (another blueprint).
 		run(h, ledger, TownFeast.THEME, OPEN);
 		TownFeast.run(h.getLevel(), origin(h), TownFeast.THEME, OPEN, blueprint(Set.of()), ledger, true);
@@ -389,26 +407,26 @@ public final class TownFeastGameTests {
 		BlockPos master = world(h, site("T").cells().getFirst());
 		h.assertTrue(TownFeast.managed(ledger, origin, length) && TownFeast.managed(ledger, origin, master) && !TownFeast.managed(ledger, origin, owners),
 				"Only the feast's own cells are managed");
-		h.assertTrue(TownFeast.mayPublicEat(ledger, origin, level, length, player), "An empty hand may eat at a managed table");
-		h.assertTrue(TownFeast.mayPublicEat(ledger, origin, level, master, player), "and at the turkey");
-		h.assertTrue(!TownFeast.mayPublicEat(ledger, origin, level, owners, player), "but not at the owner's table");
+		h.assertTrue(TownFeast.mayPublicEat(ledger, origin, level, length, player), "Both hands empty may eat at a managed table" + hands(player));
+		h.assertTrue(TownFeast.mayPublicEat(ledger, origin, level, master, player), "and at the turkey" + hands(player));
+		h.assertTrue(!TownFeast.mayPublicEat(ledger, origin, level, owners, player), "but not at the owner's table" + hands(player));
 		// What the protection hook does when it may: the table's own eating, one serving.
 		eat(h, player, length, 0.25);
-		h.assertTrue(table(h, "W1", 0).dish(0).getCount() == TownFeast.SERVINGS - 1, "Eating takes one serving");
+		h.assertTrue(table(h, "W1", 0).dish(0).getCount() == TownFeast.SERVINGS - 1, "Eating takes one serving: " + table(h, "W1", 0).dish(0) + hands(player));
 		player.setShiftKeyDown(true);
 		h.assertTrue(!TownFeast.mayPublicEat(ledger, origin, level, length, player) && !TownFeast.mayPublicEat(ledger, origin, level, master, player),
-				"Sneaking (taking a dish, packing the turkey) is refused");
+				"Sneaking (taking a dish, packing the turkey) is refused" + hands(player));
 		player.setShiftKeyDown(false);
 		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.BREAD));
 		h.assertTrue(!TownFeast.mayPublicEat(ledger, origin, level, length, player) && !TownFeast.mayPublicEat(ledger, origin, level, master, player),
-				"An item in the main hand (serving onto the table) is refused");
+				"An item in the main hand (serving onto the table) is refused" + hands(player));
 		player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
 		player.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(Items.BREAD));
 		h.assertTrue(!TownFeast.mayPublicEat(ledger, origin, level, length, player) && !TownFeast.mayPublicEat(ledger, origin, level, master, player),
-				"An item in the offhand is refused");
+				"An item in the offhand is refused" + hands(player));
 		player.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
 		h.assertTrue(TownFeast.mayPublicEat(ledger, origin, level, length, player) && TownFeast.mayPublicEat(ledger, origin, level, master, player),
-				"Both hands empty again: allowed at the table and the turkey");
+				"Both hands empty again: allowed at the table and the turkey" + hands(player));
 		// A length someone refilled with their own food (even the same food, below the laid count) is no longer the town's.
 		BlockPos second = world(h, site("W1").cells().get(1));
 		FeastTableBlockEntity refilled = table(h, "W1", 1);
@@ -416,15 +434,15 @@ public final class TownFeastGameTests {
 		refilled.clear(0);
 		h.assertTrue(refilled.serve(0, plain("W1", 2, 3), true) == 3, "but can be laid on a dish they emptied");
 		h.assertTrue(!TownFeast.mayPublicEat(ledger, origin, level, second, player) && TownFeast.mayPublicEat(ledger, origin, level, length, player),
-				"Only the refilled length turns private");
+				"Only the refilled length turns private" + hands(player));
 		BlockPos third = world(h, site("W1").cells().get(2));
 		FeastTableBlockEntity added = table(h, "W1", 2);
 		added.clear(1);
 		added.serve(1, new ItemStack(Items.BREAD, 2), true);
-		h.assertTrue(!TownFeast.mayPublicEat(ledger, origin, level, third, player), "A length with other food added turns private");
+		h.assertTrue(!TownFeast.mayPublicEat(ledger, origin, level, third, player), "A length with other food added turns private" + hands(player));
 		run(h, ledger, TownFeast.THEME, CLOSED);
 		h.assertTrue(!TownFeast.managed(ledger, origin, master) && !TownFeast.mayPublicEat(ledger, origin, level, master, player),
-				"Once taken down, nothing is managed");
+				"Once taken down, nothing is managed" + hands(player));
 		h.succeed();
 	}
 
@@ -440,7 +458,7 @@ public final class TownFeastGameTests {
 		player.getFoodData().setFoodLevel(2);
 		eat(h, player, first, 0.25);
 		h.assertTrue(table(h, "W1", 0).dish(0).getCount() == TownFeast.SERVINGS - 1 && player.getFoodData().getFoodLevel() > 2,
-				"A stamped serving is eaten like any other: " + player.getFoodData().getFoodLevel());
+				"A stamped serving is eaten like any other: " + player.getFoodData().getFoodLevel() + hands(player));
 		// The owner adds one plain serving of the same food: it cannot merge into the town's stamped dish.
 		h.assertTrue(table(h, "W1", 0).serve(0, plain("W1", 0, 1), true) == 0 && table(h, "W1", 0).dish(0).getCount() == TownFeast.SERVINGS - 1,
 				"Plain food of the same kind does not join the town's servings");

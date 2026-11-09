@@ -4,6 +4,7 @@ import com.mojang.blaze3d.platform.InputConstants;
 import io.github.jimbozoomer.jugcraft.agriculture.FeastTableBlockEntity;
 import io.github.jimbozoomer.jugcraft.agriculture.GiantTurkeyFeastBlock;
 import io.github.jimbozoomer.jugcraft.agriculture.HarvestFestival;
+import io.github.jimbozoomer.jugcraft.town.TownData;
 import io.github.jimbozoomer.jugcraft.town.TownFeast;
 import java.time.LocalDate;
 import java.util.List;
@@ -195,7 +196,7 @@ public class TownFeastClientTests implements FabricClientGameTest {
 			for (int x = x0; x <= x0 + 6; x++) {
 				for (int z = 88; z <= 92; z++) {
 					set(level, origin, x, 1, z, Blocks.SPRUCE_PLANKS);
-					set(level, origin, x, 3, z, Blocks.ORANGE_WOOL);
+					set(level, origin, x, 3, z, TownData.parse("minecraft:orange_wool").getBlock());
 					if ((x == x0 || x == x0 + 6) && (z == 88 || z == 92)) {
 						set(level, origin, x, 2, z, Blocks.OAK_FENCE);
 					}
