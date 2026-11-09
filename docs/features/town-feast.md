@@ -119,7 +119,15 @@ Nothing calls these yet:
 
 **Claims stay in force.** `mayPublicEat` is never an alternative to the land claim check. The caller requires both, `mayPublicEat(...) && LandRegistry.mayBuild(player, level, pos)`, so a managed cell never bypasses a claim. When both hold, it runs only the block's own empty-hand use (`useWithoutItem`); otherwise it refuses, with no fallback to an item's use.
 
-**Permissions.** No `#jugcraft:town_usable` entry and no `TownProtection` change is made here. Owner Feast Tables in town stay private, and `FeastTableBlock` is unchanged.
+**Permissions.** No `#jugcraft:town_usable` entry and no `TownProtection` change is made here, and `FeastTableBlock` is unchanged. Inside the protected town (decided 10 November):
+
+| Block | Who may use it | Still refused |
+| --- | --- | --- |
+| Giant turkey, anyone's | Everyone may eat with an empty hand, through the existing `publicBlock` rule: the turkey has no block entity, so it is a public non-container interaction, as the owner asked. | Packing it up (sneaking), breaking it, and the held item's own use, such as carving with a knife. As with any public block, a click while holding something runs only the turkey's own eating. |
+| Managed feast table (W1, E2) | Everyone may eat, one serving per click, through `TownFeast.mayPublicEat` with both hands empty, ANDed with the claim check. | An item in either hand (including serving onto it), sneaking (taking a dish), refilled or added food, and another's claim. |
+| An owner's feast table | Private: its block entity keeps it out of `publicBlock`. | Everything, for anyone who may not build there. |
+
+The town's own turkey is also a managed cell, so the feast hook answers for it first, with the stricter rule: both hands empty, not sneaking.
 
 **Testing.** The core (`TownFeast.run`, `preflight`, `removable`, and the ledger-taking `managed` and `mayPublicEat`) takes the town origin, theme, date, a `Baseline` and a ledger, so it can be tested without a built town.
 
@@ -178,6 +186,13 @@ None.
 - **Clear lanes:** it asserts the door path, the doorway and both stalls' front and side lanes stay clear.
 - **Screenshots:** three, at eye height (`town_feast_church_door_path`, `town_feast_nw_stall_access`, `town_feast_ne_stall_access`).
 - **Eating:** three servings and five turkey portions, through `mayPublicEat` with both hands empty.
+- **The real use path (needs Codex's `TownProtection` wiring; meant for the integrated tree, it fails on this branch alone):** survival right-clicks through `ServerPlayerGameMode.useItemOn`, the method the use-item-on packet handler calls, where Fabric's `UseBlockCallback` and so `TownProtection.useBlock` run first. The town origin is set for that one server task and forgotten before it ends, so no town tick acts on the test world.
+  - With both hands empty, a click eats exactly one serving at E2's table and exactly one portion at the turkey.
+  - On another's claim, both are refused although `mayPublicEat` alone would allow them. A visitor with no permissions makes these clicks, since claims never bind an admin and the world's host is an operator.
+  - Food in the main hand, at the table and the turkey, is refused. So is food in the offhand, for either hand's click.
+  - Sneaking is refused at both: no dish is taken and the turkey is not packed.
+  - An owner's feast table elsewhere in town is refused.
+  - After E2's first dish is eaten out one click at a time, food can't be served onto it.
 - **No refill:** after three re-runs, three ledger reloads, and closing and reopening the world, no count ever rises.
 
 `scripts/tests/test_town_feast_layout.py` checks the layout against the blueprint: the cells, the decor sites and places, and every clearance above.
