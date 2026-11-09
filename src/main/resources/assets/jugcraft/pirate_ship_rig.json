@@ -1,0 +1,311 @@
+{
+  "pivots": {
+    "pirate_ship_sail_fore": [
+      0.0,
+      109.5,
+      84.5
+    ],
+    "pirate_ship_sail_main": [
+      0.0,
+      135.5,
+      21.0
+    ],
+    "pirate_ship_jib": [
+      0.0,
+      50.0,
+      124.0
+    ],
+    "pirate_ship_flag": [
+      0.0,
+      180.0,
+      5.0
+    ],
+    "pirate_ship_wheel": [
+      0.0,
+      40.0,
+      -83.2
+    ],
+    "pirate_ship_rudder": [
+      0.0,
+      0.0,
+      -131.0
+    ]
+  },
+  "cannons": [
+    [
+      43.0,
+      25.6,
+      40.0
+    ],
+    [
+      43.0,
+      25.6,
+      -32.0
+    ],
+    [
+      -43.0,
+      25.6,
+      40.0
+    ],
+    [
+      -43.0,
+      25.6,
+      -32.0
+    ]
+  ],
+  "culling": [
+    -3.898,
+    -2.125,
+    -9.375,
+    3.898,
+    12.5,
+    11.513
+  ],
+  "frame": "ship-local: +x port, +y up from the waterline, +z bow; origin the entity position at the hull's middle on the waterline; yaw 0 faces +z; facing 0 bow, +90 starboard, -90 port; unrotated (turn by -yaw). pivots and cannons are in pixels (16 a block); culling, stations, local_deck and hull in blocks. Each part in pirate_ship_quads.json is in pixels about its pivot; pirate_ship_cannon about its trunnion, pointing +z.",
+  "cannon": {
+    "muzzle_from_trunnion": 8.2,
+    "points": "+z",
+    "turn": "-facing about y"
+  },
+  "stations": [
+    {
+      "index": 0,
+      "name": "helm",
+      "role": "HELM",
+      "seat": [
+        0.0,
+        1.0,
+        -6.0
+      ],
+      "facing": 0.0,
+      "arc": 0.0,
+      "muzzle": [
+        0.0,
+        1.0,
+        -6.0
+      ]
+    },
+    {
+      "index": 1,
+      "name": "lookout",
+      "role": "LOOKOUT",
+      "seat": [
+        0.0,
+        9.5,
+        1.0
+      ],
+      "facing": 0.0,
+      "arc": 180.0,
+      "muzzle": [
+        0.0,
+        9.5,
+        1.0
+      ]
+    },
+    {
+      "index": 2,
+      "name": "gunner_port_fore",
+      "role": "GUNNER",
+      "seat": [
+        2.0,
+        1.0,
+        2.5
+      ],
+      "facing": -90.0,
+      "arc": 45.0,
+      "muzzle": [
+        3.2,
+        1.6,
+        2.5
+      ]
+    },
+    {
+      "index": 3,
+      "name": "gunner_port_aft",
+      "role": "GUNNER",
+      "seat": [
+        2.0,
+        1.0,
+        -2.0
+      ],
+      "facing": -90.0,
+      "arc": 45.0,
+      "muzzle": [
+        3.2,
+        1.6,
+        -2.0
+      ]
+    },
+    {
+      "index": 4,
+      "name": "gunner_starboard_fore",
+      "role": "GUNNER",
+      "seat": [
+        -2.0,
+        1.0,
+        2.5
+      ],
+      "facing": 90.0,
+      "arc": 45.0,
+      "muzzle": [
+        -3.2,
+        1.6,
+        2.5
+      ]
+    },
+    {
+      "index": 5,
+      "name": "gunner_starboard_aft",
+      "role": "GUNNER",
+      "seat": [
+        -2.0,
+        1.0,
+        -2.0
+      ],
+      "facing": 90.0,
+      "arc": 45.0,
+      "muzzle": [
+        -3.2,
+        1.6,
+        -2.0
+      ]
+    },
+    {
+      "index": 6,
+      "name": "deck_port_fore",
+      "role": "DECK",
+      "seat": [
+        1.0,
+        1.0,
+        5.5
+      ],
+      "facing": 0.0,
+      "arc": 0.0,
+      "muzzle": [
+        1.0,
+        1.0,
+        5.5
+      ]
+    },
+    {
+      "index": 7,
+      "name": "deck_starboard_fore",
+      "role": "DECK",
+      "seat": [
+        -1.0,
+        1.0,
+        5.5
+      ],
+      "facing": 0.0,
+      "arc": 0.0,
+      "muzzle": [
+        -1.0,
+        1.0,
+        5.5
+      ]
+    },
+    {
+      "index": 8,
+      "name": "deck_port_aft",
+      "role": "DECK",
+      "seat": [
+        1.0,
+        1.0,
+        -3.5
+      ],
+      "facing": 0.0,
+      "arc": 0.0,
+      "muzzle": [
+        1.0,
+        1.0,
+        -3.5
+      ]
+    },
+    {
+      "index": 9,
+      "name": "deck_starboard_aft",
+      "role": "DECK",
+      "seat": [
+        -1.0,
+        1.0,
+        -3.5
+      ],
+      "facing": 0.0,
+      "arc": 0.0,
+      "muzzle": [
+        -1.0,
+        1.0,
+        -3.5
+      ]
+    }
+  ],
+  "local_deck": [
+    -2.5,
+    1.0,
+    -7.5,
+    2.5,
+    3.0,
+    7.5
+  ],
+  "hull": {
+    "beam": 6,
+    "length": 16,
+    "deck_y": 1.0,
+    "rail_y": 2.0,
+    "keel_y": -1.625,
+    "main_mast": {
+      "z": 1.0,
+      "top": 12.0
+    },
+    "fore_mast": {
+      "z": 5.0,
+      "top": 10.0
+    },
+    "gun_ports": [
+      {
+        "side": "port",
+        "z": [
+          2.125,
+          2.875
+        ],
+        "y": [
+          1.4,
+          1.9
+        ]
+      },
+      {
+        "side": "port",
+        "z": [
+          -2.375,
+          -1.625
+        ],
+        "y": [
+          1.4,
+          1.9
+        ]
+      },
+      {
+        "side": "starboard",
+        "z": [
+          2.125,
+          2.875
+        ],
+        "y": [
+          1.4,
+          1.9
+        ]
+      },
+      {
+        "side": "starboard",
+        "z": [
+          -2.375,
+          -1.625
+        ],
+        "y": [
+          1.4,
+          1.9
+        ]
+      }
+    ]
+  }
+}

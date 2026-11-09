@@ -1381,6 +1381,8 @@ def machines():
     trenchworks.draw_all(save)
     import zeppelin
     zeppelin.draw_all(save)
+    import pirate_ship
+    pirate_ship.draw_all(save)
     import mech
     mech.draw_all(save)
     import landship
