@@ -27,7 +27,6 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.level.storage.TagValueOutput;
@@ -268,8 +267,8 @@ public class PirateShipGameTests {
 		ServerLevel level = helper.getLevel();
 		helper.assertTrue(!ship.hurtServer(level, level.damageSources().generic(), 1000.0F) && ship.damage() == 0.0F,
 				"A blow that is not a player's should not harm the hull");
-		ServerPlayer player = helper.makeMockServerPlayerInLevel();
-		player.setGameMode(GameType.SURVIVAL);
+		// A real survival player (vanilla's mock stays creative, which would remove the ship outright instead).
+		ServerPlayer player = TestPlayers.survivor(helper);
 		helper.assertTrue(ship.hurtServer(level, level.damageSources().playerAttack(player), PirateShip.HEALTH), "A player's blow lands");
 		helper.assertTrue(ship.sunk() && ship.hold().isEmpty(), "Enough of them sink it and empty the hold");
 		helper.assertTrue(!level.getEntitiesOfClass(ItemEntity.class, ship.getBoundingBox().inflate(4.0),
@@ -494,8 +493,7 @@ public class PirateShipGameTests {
 			helper.assertTrue(farthest[0] < ship.getX() - PirateWaters.HALF_BEAM, "The crew's own ball should cross the deck and leave"
 					+ " the starboard side, but got no farther than x " + farthest[0] + " (the starboard side is " + (ship.getX() - PirateWaters.HALF_BEAM) + ")");
 			helper.assertTrue(ship.damage() == 0.0F && !ship.sunk(), "Its own ball harms nothing");
-			ServerPlayer player = helper.makeMockServerPlayerInLevel();
-			player.setGameMode(GameType.SURVIVAL);
+			ServerPlayer player = TestPlayers.survivor(helper);
 			balls[1] = PirateShipTesting.fire(level, player, ship.position().add(3.4, 0.6, -2.0), new Vec3(-1.8, 0.0, 0.0));
 		});
 		helper.runAfterDelay(18, () -> {
@@ -582,8 +580,7 @@ public class PirateShipGameTests {
 		helper.runAfterDelay(3, () -> {
 			enemy[0] = helper.spawnWithNoFreeWill(OwnerPlunderer.TYPE, helper.relativeVec(ship.position().add(10.0, 6.0, 0.0)));
 			PirateShipTesting.link(enemy[0], java.util.UUID.randomUUID(), 2);
-			gunner[0] = helper.makeMockServerPlayerInLevel();
-			gunner[0].setGameMode(GameType.SURVIVAL);
+			gunner[0] = TestPlayers.survivor(helper);
 			// A one-block region over the ship's own place, laid while it floats there.
 			BlockPos at = ship.blockPosition();
 			protect(helper, op, "protect pos1", at);
