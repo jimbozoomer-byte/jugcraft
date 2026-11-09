@@ -66,6 +66,12 @@ public class PirateShipRenderer extends EntityRenderer<PirateShip, PirateShipRen
 	record Rig(Map<String, float[]> pivots, float[][] cannons, @Nullable AABB culling) {
 	}
 
+	/** Forgets the rig on every client resource reload (F3+T, a resource pack change), so new pivots are read again. */
+	public static void register() {
+		net.fabricmc.fabric.api.resource.v1.ResourceLoader.get(net.minecraft.server.packs.PackType.CLIENT_RESOURCES).registerReloadListener(
+				Jugcraft.id("pirate_ship_rig"), (net.minecraft.server.packs.resources.ResourceManagerReloadListener) resources -> rig = null);
+	}
+
 	public PirateShipRenderer(EntityRendererProvider.Context context) {
 		super(context);
 		shadowRadius = 0.0F;
@@ -164,7 +170,10 @@ public class PirateShipRenderer extends EntityRenderer<PirateShip, PirateShipRen
 		pose.popPose();
 	}
 
-	/** The rig, read once from assets/jugcraft/pirate_ship_rig.json; the defaults where the file or a key is missing. */
+	/**
+	 * The rig, read from assets/jugcraft/pirate_ship_rig.json on first use after each resource reload ({@link #register});
+	 * the defaults where the file or a key is missing.
+	 */
 	static Rig rig() {
 		if (rig == null) {
 			rig = load();

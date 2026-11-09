@@ -51,8 +51,9 @@ import org.jspecify.annotations.Nullable;
  *
  * <ul>
  * <li><b>Sailing.</b> Within {@value #PATROL_RADIUS} blocks of its anchor, waypoint to waypoint, only while a crew member
- * holds the helm, the crew have not hove to, it is afloat and no player stands on its deck; and only where
- * {@link PirateWaters#clear} allows, in loaded water. It never loads a chunk: where the way ahead is unloaded it waits.</li>
+ * holds the helm, the crew have not hove to, it is afloat and no player stands on its deck; and each step (turn and move)
+ * only where the hull's whole swept volume is clear ({@link PirateWaters#sweep}), in loaded water. It never loads a
+ * chunk: where the way is unloaded it waits.</li>
  * <li><b>Deck.</b> Four {@link PirateShipDeck} squares along the keel, one block tall from the waterline, so the deck is
  * at y 1.0 and players and boarders stand on it.</li>
  * <li><b>Hold.</b> {@value #HOLD_SLOTS} slots, empty until the crew are beaten ({@link PirateCrew#defeated}); then rolled
@@ -74,9 +75,6 @@ public class PirateShip extends Entity implements CrewedVessel {
 	public static final double SPEED = 0.12;
 	public static final double ACCELERATION = 0.004;
 	public static final float TURN = 1.0F;
-	/** How far ahead the water is checked, and how often (ticks). */
-	public static final double LOOKAHEAD = 3.0;
-	public static final int LOOKAHEAD_TICKS = 10;
 	/** Ticks spent on one waypoint before choosing another. */
 	public static final int LEG_TICKS = 2_400;
 	public static final int HOLD_SLOTS = 27;
@@ -113,7 +111,8 @@ public class PirateShip extends Entity implements CrewedVessel {
 	private int idle;
 	private int legTicks;
 	private double speed;
-	private boolean wayAhead = true;
+	/** Whether this natural ship has asked {@link PirateSeas} since it was loaded (not saved: every load asks again). */
+	private boolean ledgerChecked;
 	/** For game tests only, never saved: stands in for the crew's answer to "is the helm manned" and "are they beaten". */
 	@Nullable Boolean testHelm;
 	@Nullable Boolean testBeaten;
@@ -174,7 +173,6 @@ public class PirateShip extends Entity implements CrewedVessel {
 	void setWaypoint(@Nullable Vec3 waypoint) {
 		this.waypoint = waypoint;
 		legTicks = 0;
-		wayAhead = true;
 	}
 
 	public boolean natural() {
@@ -251,6 +249,14 @@ public class PirateShip extends Entity implements CrewedVessel {
 			sink(level);
 			return;
 		}
+		if (natural && (!ledgerChecked || tickCount % REPORT_TICKS == 0)) {
+			ledgerChecked = true;
+			if (!PirateSeas.get(level).seen(getUUID(), PirateSeas.region(anchor.x, anchor.z), BlockPos.containing(anchor), lootRolled,
+					level.getGameTime())) {
+				vanish();
+				return;
+			}
+		}
 		if (tickCount % 20 == 0 && mayRollHold()) {
 			rollHold(level);
 		}
@@ -265,18 +271,17 @@ public class PirateShip extends Entity implements CrewedVessel {
 		if (lootRolled && tickCount % 20 == 0) {
 			watchDerelict(level);
 		}
-		if (natural && tickCount % REPORT_TICKS == 0) {
-			PirateSeas.get(level).seen(getUUID(), PirateSeas.region(anchor.x, anchor.z), BlockPos.containing(anchor), lootRolled,
-					level.getGameTime());
-		}
 	}
 
-	/** One tick of the patrol: steer for the waypoint and make way, if the water ahead is clear and loaded. */
+	/**
+	 * One tick of the patrol: steer for the waypoint and make way. The step (the turn and the move together) is taken
+	 * only if the hull's whole swept volume is clear ({@link PirateWaters#sweep}): nothing solid, protected, unloaded or
+	 * outside the border where any part of the hull, stern included, would pass. Otherwise it stops and chooses again.
+	 */
 	private void sail(ServerLevel level) {
 		if (waypoint == null || ++legTicks > LEG_TICKS) {
 			waypoint = chooseWaypoint(level, getRandom());
 			legTicks = 0;
-			wayAhead = true;
 			if (waypoint == null) {
 				speed = 0.0;
 				entityData.set(RUDDER, 0.0F);
@@ -286,25 +291,20 @@ public class PirateShip extends Entity implements CrewedVessel {
 		float wanted = (float) Math.toDegrees(Math.atan2(-(waypoint.x - getX()), waypoint.z - getZ()));
 		float diff = Mth.wrapDegrees(wanted - getYRot());
 		float turn = Mth.clamp(diff, -TURN, TURN);
-		setYRot(getYRot() + turn);
-		entityData.set(RUDDER, turn / TURN);
+		float yaw = getYRot() + turn;
 		double target = Math.abs(diff) < 30.0F ? SPEED : SPEED / 3.0;
-		speed += Mth.clamp(target - speed, -ACCELERATION, ACCELERATION);
-		Vec3 heading = heading();
-		if (tickCount % LOOKAHEAD_TICKS == 0 || !wayAhead) {
-			wayAhead = PirateWaters.clear(level, position().add(heading.scale(LOOKAHEAD)), getYRot());
-		}
-		Vec3 next = position().add(heading.scale(speed));
-		if (!wayAhead || next.subtract(anchor).horizontalDistance() > PATROL_RADIUS) {
-			// Something in the way, unloaded water or the end of its beat: stop and choose another heading.
+		double nextSpeed = speed + Mth.clamp(target - speed, -ACCELERATION, ACCELERATION);
+		Vec3 next = position().add(heading(yaw).scale(nextSpeed));
+		if (next.subtract(anchor).horizontalDistance() > PATROL_RADIUS || !PirateWaters.sweep(level, position(), getYRot(), next, yaw)) {
+			// Something in the hull's way (ahead, beside or astern), unloaded or protected water, or the end of its beat.
 			speed = 0.0;
+			entityData.set(RUDDER, 0.0F);
 			waypoint = null;
 			return;
 		}
-		if (!PirateWaters.loaded(level, PirateWaters.footprint(next, getYRot(), next.y - PirateWaters.DEPTH, next.y + PirateWaters.MAST))) {
-			speed = 0.0;
-			return;
-		}
+		speed = nextSpeed;
+		setYRot(yaw);
+		entityData.set(RUDDER, turn / TURN);
 		setPos(next);
 		if (next.subtract(waypoint).horizontalDistanceSqr() < 9.0) {
 			waypoint = null;
@@ -328,8 +328,12 @@ public class PirateShip extends Entity implements CrewedVessel {
 
 	/** Its heading: yaw 0 sails +z, the convention of every Jugcraft vehicle. */
 	public Vec3 heading() {
-		double yaw = Math.toRadians(getYRot());
-		return new Vec3(-Math.sin(yaw), 0.0, Math.cos(yaw));
+		return heading(getYRot());
+	}
+
+	static Vec3 heading(float yaw) {
+		double radians = Math.toRadians(yaw);
+		return new Vec3(-Math.sin(radians), 0.0, Math.cos(radians));
 	}
 
 	/** Keeps the four deck squares under the hull; makes them again after a load or if one went. */
@@ -402,6 +406,17 @@ public class PirateShip extends Entity implements CrewedVessel {
 		} else if ((idle += 20) >= DERELICT_TICKS) {
 			beginSinking(level);
 		}
+	}
+
+	/**
+	 * A stale copy of a ship already removed for good (its id is tombstoned: an older chunk save, a restored backup): it
+	 * and its crew go quietly, with no loot rolled and nothing spilt, so the removed ship never sails twice.
+	 */
+	private void vanish() {
+		for (Entity passenger : getPassengers()) {
+			passenger.discard();
+		}
+		discard();
 	}
 
 	/** Holed below the waterline: the crew abandon it ({@link CrewedVessel#sunk}), and the hold spills where it lies. */

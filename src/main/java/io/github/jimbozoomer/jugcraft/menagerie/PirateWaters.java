@@ -25,27 +25,44 @@ public final class PirateWaters {
 	/** Half the ship's beam and half its length, in blocks (the hull is 6 x 16: PirateCrew's frame). */
 	public static final double HALF_BEAM = 3.0;
 	public static final double HALF_LENGTH = 8.0;
+	/** A hull corner's distance from the centre: the most a point of the hull moves for each radian it turns. */
+	public static final double CORNER = Math.sqrt(HALF_BEAM * HALF_BEAM + HALF_LENGTH * HALF_LENGTH);
 	/** Blocks of water the keel needs under the waterline block, and the clear air the masts need above it. */
 	public static final int DEPTH = 2;
 	public static final int MAST = 13;
 	/** How far up its top water block a ship's waterline sits (a source block's surface is at 8/9). */
 	public static final double WATERLINE = 0.875;
-	/** Blocks between protection samples across the footprint (towns and operator regions extend past their walls). */
-	private static final int SAMPLE = 4;
 
 	private PirateWaters() {
 	}
 
 	/**
 	 * Whether a ship may be at {@code at} facing {@code yaw}: its footprint inside the world border and every chunk under it
-	 * loaded; under it, the
-	 * waterline block and {@value #DEPTH} more are water with nothing solid (kelp and seagrass pass, ice and blocks do
-	 * not); above it, {@value #MAST} blocks clear of anything solid or liquid; no block entity anywhere in that volume;
-	 * and no town, operator region or land claim under any part of it.
+	 * loaded; under it, the waterline block and {@value #DEPTH} more are water with nothing solid (kelp and seagrass pass,
+	 * ice and blocks do not); above it, {@value #MAST} blocks clear of anything solid or liquid; no block entity anywhere
+	 * in that volume; and nothing in that volume protected ({@link #unprotected}).
 	 */
 	public static boolean clear(ServerLevel level, Vec3 at, float yaw) {
 		int surface = Mth.floor(at.y);
-		AABB box = footprint(at, yaw, surface - DEPTH, surface + MAST + 1);
+		return clearBox(level, footprint(at, yaw, surface - DEPTH, surface + MAST + 1), surface);
+	}
+
+	/**
+	 * Whether the hull may pass from {@code from} at {@code fromYaw} to {@code to} at {@code toYaw} in one step: the box
+	 * enclosing both footprints, widened by the farthest a hull corner can swing between the two yaws (its distance from
+	 * the centre times the turn in radians), must be clear by {@link #clear}'s rules. So a turn whose stern or bow would
+	 * sweep into a bank, a block or protected water is refused even where the water ahead is open.
+	 */
+	public static boolean sweep(ServerLevel level, Vec3 from, float fromYaw, Vec3 to, float toYaw) {
+		int surface = Mth.floor(to.y);
+		double swing = CORNER * Math.abs(Mth.wrapDegrees(toYaw - fromYaw)) * Mth.DEG_TO_RAD;
+		AABB box = footprint(from, fromYaw, surface - DEPTH, surface + MAST + 1)
+				.minmax(footprint(to, toYaw, surface - DEPTH, surface + MAST + 1)).inflate(swing, 0.0, swing);
+		return clearBox(level, box, surface);
+	}
+
+	/** {@link #clear} for any box over the waterline block {@code surface}: every block of every column in it. */
+	static boolean clearBox(ServerLevel level, AABB box, int surface) {
 		if (!level.getWorldBorder().isWithinBounds(box) || !loaded(level, box) || surface - DEPTH < level.getMinY()
 				|| surface + MAST > level.getMaxY()) {
 			return false;
@@ -68,34 +85,43 @@ public final class PirateWaters {
 				}
 			}
 		}
-		return unprotected(level, box, surface);
+		return unprotected(level, box);
 	}
 
-	/** Whether no town, operator region or land claim lies under {@code box} (loaded chunks only; the caller checked). */
-	static boolean unprotected(ServerLevel level, AABB box, int y) {
+	/**
+	 * Whether no part of {@code box} (its blocks, every height included) is protected: no land claim on any chunk it
+	 * touches (claims are whole chunk columns), no operator region sharing a block with it (an exact cuboid test, so a
+	 * one-block region or one at bridge height over the water counts), and no town-protected column within the town's
+	 * protected heights (every column of the box is tested at a height inside both). Saved data only: no chunk is read.
+	 */
+	public static boolean unprotected(ServerLevel level, AABB box) {
 		int x0 = Mth.floor(box.minX), x1 = Mth.floor(box.maxX - 1.0E-7);
+		int y0 = Mth.floor(box.minY), y1 = Mth.floor(box.maxY - 1.0E-7);
 		int z0 = Mth.floor(box.minZ), z1 = Mth.floor(box.maxZ - 1.0E-7);
 		for (int cx = x0 >> 4; cx <= x1 >> 4; cx++) {
 			for (int cz = z0 >> 4; cz <= z1 >> 4; cz++) {
-				// Claims are whole chunks: an owner of null may build only where nobody has claimed (LandRegistry.mayBuildFor).
-				BlockPos inChunk = new BlockPos(Mth.clamp(cx << 4, x0, x1), y, Mth.clamp(cz << 4, z0, z1));
-				if (!LandRegistry.mayBuildFor(null, level, inChunk)) {
+				// An owner of null may build only where nobody has claimed (LandRegistry.mayBuildFor).
+				if (!LandRegistry.mayBuildFor(null, level, new BlockPos(cx << 4, y0, cz << 4))) {
 					return false;
 				}
 			}
 		}
-		for (int x = x0; ; x = Math.min(x + SAMPLE, x1)) {
-			for (int z = z0; ; z = Math.min(z + SAMPLE, z1)) {
-				BlockPos pos = new BlockPos(x, y, z);
-				if (Town.isProtected(level, pos) || OperatorRegions.protects(level, pos)) {
-					return false;
+		if (OperatorRegions.intersects(level, x0, y0, z0, x1, y1, z1)) {
+			return false;
+		}
+		BlockPos origin = Town.origin(level);
+		if (origin != null) {
+			int low = Math.max(y0, origin.getY() - Town.PROTECT_BELOW);
+			int high = Math.min(y1, origin.getY() + Town.PROTECT_ABOVE);
+			if (low <= high) {
+				BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+				for (int x = x0; x <= x1; x++) {
+					for (int z = z0; z <= z1; z++) {
+						if (Town.isProtected(level, pos.set(x, low, z))) {
+							return false;
+						}
+					}
 				}
-				if (z == z1) {
-					break;
-				}
-			}
-			if (x == x1) {
-				break;
 			}
 		}
 		return true;

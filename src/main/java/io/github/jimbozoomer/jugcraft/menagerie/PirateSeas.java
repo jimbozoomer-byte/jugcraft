@@ -3,8 +3,6 @@ package io.github.jimbozoomer.jugcraft.menagerie;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
-import io.github.jimbozoomer.jugcraft.finance.LandRegistry;
-import io.github.jimbozoomer.jugcraft.town.Town;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -23,13 +21,17 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
  * The pirate ships at sea (docs/features/pirate-ships.md): which ships exist, where they were raised, and when each
  * stretch of sea may raise another. Saved with the overworld, so a ship whose chunks are unloaded still counts: it holds
- * its spawn region and its place under the cap until it is defeated, sunk or removed, and reloading never makes a second.
+ * its spawn region (and, while crewed, its place under the cap) for as long as it exists, however long it stays
+ * unloaded. Only a positive end releases it: the ship sunk, beaten and gone, or removed. A removed ship's id is kept
+ * as a tombstone, so a stale copy of it (an older chunk save, a restored backup) never comes back to life: it goes again,
+ * quietly, without its hold.
  *
  * <p>Ships appear naturally on their own: now and then, out of sight in loaded ocean near a player in survival or
  * adventure, never near a town, claim, operator region or village, at most {@value #MAX_SHIPS} afloat and at most one per
@@ -43,8 +45,8 @@ public final class PirateSeas extends SavedData {
 	private static final int REGION_SHIFT = 9;
 	/** Ticks a region rests after its ship is defeated, sunk or removed (three days). */
 	public static final long COOLDOWN = 72_000L;
-	/** A ship unseen this long (its chunks never loaded again: seven days) no longer holds its region or a place under the cap. */
-	public static final long STALE = 168_000L;
+	/** Tombstones kept for removed ships (the oldest is forgotten first). */
+	public static final int TOMBSTONES = 1_024;
 	/** Ticks between spawn passes, and the most players tried in one pass. */
 	public static final int PASS_TICKS = 1_200;
 	public static final int MAX_ATTEMPTS = 4;
@@ -83,22 +85,25 @@ public final class PirateSeas extends SavedData {
 
 	public static final Codec<PirateSeas> CODEC = RecordCodecBuilder.create(i -> i.group(
 			Ship.CODEC.listOf().optionalFieldOf("ships", List.of()).forGetter(s -> List.copyOf(s.ships.values())),
-			Rest.CODEC.listOf().optionalFieldOf("rests", List.of()).forGetter(PirateSeas::rests)).apply(i, PirateSeas::new));
+			Rest.CODEC.listOf().optionalFieldOf("rests", List.of()).forGetter(PirateSeas::rests),
+			UUIDUtil.CODEC.listOf().optionalFieldOf("gone", List.of()).forGetter(s -> List.copyOf(s.tombstones))).apply(i, PirateSeas::new));
 	private static final SavedDataType<PirateSeas> TYPE = new SavedDataType<>(Jugcraft.id("pirate_seas"), PirateSeas::new, CODEC, null);
 
 	private final Map<UUID, Ship> ships = new HashMap<>();
 	private final Map<Long, Long> rests = new HashMap<>();
+	private final java.util.LinkedHashSet<UUID> tombstones = new java.util.LinkedHashSet<>();
 
 	public PirateSeas() {
 	}
 
-	private PirateSeas(List<Ship> ships, List<Rest> rests) {
+	private PirateSeas(List<Ship> ships, List<Rest> rests, List<UUID> gone) {
 		for (Ship ship : ships) {
 			this.ships.put(ship.id(), ship);
 		}
 		for (Rest rest : rests) {
 			this.rests.merge(rest.region(), rest.until(), Math::max);
 		}
+		tombstones.addAll(gone);
 	}
 
 	private List<Rest> rests() {
@@ -122,28 +127,33 @@ public final class PirateSeas extends SavedData {
 		return ships.get(id);
 	}
 
-	/** Ships afloat and crewed that still hold a place under the cap. */
+	/** Ships afloat and crewed, loaded or not, however long unseen: each holds a place under the cap until it is beaten or gone. */
 	public int active(long now) {
 		int count = 0;
 		for (Ship ship : ships.values()) {
-			if (ship.state() == State.ACTIVE && now - ship.seen() < STALE) {
+			if (ship.state() == State.ACTIVE) {
 				count++;
 			}
 		}
 		return count;
 	}
 
-	/** Whether a region may raise a ship now: no live ship of its own, beaten or not, and not resting. */
+	/** Whether a region may raise a ship now: no ship of its own still exists (beaten or not), and it is not resting. */
 	public boolean regionFree(long region, long now) {
 		if (now < rests.getOrDefault(region, Long.MIN_VALUE)) {
 			return false;
 		}
 		for (Ship ship : ships.values()) {
-			if (ship.region() == region && now - ship.seen() < STALE) {
+			if (ship.region() == region) {
 				return false;
 			}
 		}
 		return true;
+	}
+
+	/** Whether a ship with this id was removed for good (a copy of it must not sail again). */
+	public boolean tombstoned(UUID id) {
+		return tombstones.contains(id);
 	}
 
 	/** Records a ship just raised. */
@@ -153,14 +163,19 @@ public final class PirateSeas extends SavedData {
 	}
 
 	/**
-	 * A ship's chunk holds it now: refreshes its record, or records it again if it had gone stale (its region and place
-	 * come back with it). Called by natural ships only, every few seconds while loaded.
+	 * A natural ship's chunk holds it now. False for a tombstoned ship, which must go (it is a stale copy of one already
+	 * removed); otherwise its record is refreshed, or, if the ledger lost it (an edited or replaced save), recorded again,
+	 * since the ship plainly exists. Called when the ship loads and every few seconds while it is loaded.
 	 */
-	public void seen(UUID id, long region, BlockPos anchor, boolean defeated, long now) {
+	public boolean seen(UUID id, long region, BlockPos anchor, boolean defeated, long now) {
+		if (tombstones.contains(id)) {
+			return false;
+		}
 		Ship old = ships.get(id);
 		State state = defeated || old != null && old.state() == State.DEFEATED ? State.DEFEATED : State.ACTIVE;
 		ships.put(id, new Ship(id, old == null ? region : old.region(), old == null ? anchor : old.anchor(), state, now));
 		setDirty();
+		return true;
 	}
 
 	/** The ship's crew are beaten: it leaves the cap, and its region starts to rest. */
@@ -174,30 +189,24 @@ public final class PirateSeas extends SavedData {
 		setDirty();
 	}
 
-	/** The ship is sunk or removed for good: its record goes, and its region rests. */
+	/** The ship is sunk or removed for good: its record goes, its region rests, and its id is tombstoned. */
 	public void gone(UUID id, long now) {
 		Ship old = ships.remove(id);
 		if (old != null) {
 			rest(old.region(), now);
-			setDirty();
 		}
+		if (tombstones.add(id) && tombstones.size() > TOMBSTONES) {
+			tombstones.remove(tombstones.iterator().next());
+		}
+		setDirty();
 	}
 
 	private void rest(long region, long now) {
 		rests.merge(region, now + COOLDOWN, Math::max);
 	}
 
-	/** Forgets ships unseen past {@link #STALE} (their regions rest) and rests that are over. */
+	/** Forgets rests that are over. Ships are never forgotten for being unseen: only a positive end releases one. */
 	public void expire(long now) {
-		List<UUID> stale = new ArrayList<>();
-		for (Ship ship : ships.values()) {
-			if (now - ship.seen() >= STALE) {
-				stale.add(ship.id());
-			}
-		}
-		for (UUID id : stale) {
-			gone(id, now);
-		}
 		if (rests.values().removeIf(until -> until <= now)) {
 			setDirty();
 		}
@@ -275,17 +284,22 @@ public final class PirateSeas extends SavedData {
 	}
 
 	/**
-	 * Whether a town, a land claim or a village lies within {@value #SETTLEMENT_CLEARANCE} blocks. Towns and claims are
-	 * saved data and need no chunk; villages are read from their meeting points only where the chunk is loaded.
+	 * Whether a town, a land claim, an operator region or a village lies within {@value #SETTLEMENT_CLEARANCE} blocks of the
+	 * ship's place (its whole height, keel to mast). Towns, claims and operator regions are saved data, tested exactly
+	 * ({@link PirateWaters#unprotected}); villages are read from their meeting points only where the chunk is loaded.
 	 */
 	static boolean nearSettlement(ServerLevel level, Vec3 at) {
 		int r = SETTLEMENT_CLEARANCE;
+		int surface = Mth.floor(at.y);
+		AABB around = new AABB(at.x - r, surface - PirateWaters.DEPTH, at.z - r, at.x + r, surface + PirateWaters.MAST + 1, at.z + r);
+		if (!PirateWaters.unprotected(level, around)) {
+			return true;
+		}
 		BlockPos centre = BlockPos.containing(at);
 		for (int cx = (centre.getX() - r) >> 4; cx <= (centre.getX() + r) >> 4; cx++) {
 			for (int cz = (centre.getZ() - r) >> 4; cz <= (centre.getZ() + r) >> 4; cz++) {
 				BlockPos pos = new BlockPos((cx << 4) + 8, centre.getY(), (cz << 4) + 8);
-				if (!LandRegistry.mayBuildFor(null, level, pos) || Town.isProtected(level, pos)
-						|| level.hasChunkAt(pos) && level.isVillage(pos)) {
+				if (level.hasChunkAt(pos) && level.isVillage(pos)) {
 					return true;
 				}
 			}

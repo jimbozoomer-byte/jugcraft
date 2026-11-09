@@ -275,8 +275,8 @@ public class PirateShipGameTests {
 	}
 
 	/**
-	 * The spawn ledger: one ship per region, a cap on ships afloat (loaded or not), a rest after a ship is beaten or gone,
-	 * stale records forgotten, and all of it saved. Pure ledger logic: no ship is raised.
+	 * The spawn ledger: one ship per region, a cap on ships afloat (loaded or not, however long unloaded), a rest after a
+	 * ship is beaten or gone, tombstones for removed ships, and all of it saved. Pure ledger logic: no ship is raised.
 	 */
 	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 20)
 	public void theSeasKeepOneShipPerRegionUnderTheCap(GameTestHelper helper) {
@@ -303,11 +303,128 @@ public class PirateShipGameTests {
 		PirateSeas reloaded = PirateSeas.CODEC.parse(NbtOps.INSTANCE, saved).getOrThrow();
 		helper.assertTrue(reloaded.active(now) == PirateSeas.MAX_SHIPS - 1 && !reloaded.regionFree(first, now + 1),
 				"The ledger saves its ships and rests");
-		long later = now + PirateSeas.STALE;
+		// Unloaded far longer than a week (no report at all): still counted, still holding its region.
+		long later = now + 10L * 168_000L;
 		reloaded.expire(later);
-		helper.assertTrue(reloaded.active(later) == 0, "Ships unseen past the stale time are forgotten");
-		helper.assertTrue(!reloaded.regionFree(PirateSeas.region(PirateSeas.REGION_SIZE, 0), later),
-				"Their regions rest once they are forgotten");
+		long second = PirateSeas.region(PirateSeas.REGION_SIZE, 0);
+		helper.assertTrue(reloaded.active(later) == PirateSeas.MAX_SHIPS - 1 && !reloaded.regionFree(second, later),
+				"A ship unloaded for weeks still holds its place under the cap and its region");
+		helper.assertTrue(reloaded.seen(ids.get(1), second, new BlockPos(PirateSeas.REGION_SIZE, 63, 0), false, later)
+				&& reloaded.active(later) == PirateSeas.MAX_SHIPS - 1, "When it loads again it is the same record, not a second ship");
+		reloaded.gone(ids.get(1), later);
+		helper.assertTrue(reloaded.tombstoned(ids.get(1)) && !reloaded.seen(ids.get(1), second, BlockPos.ZERO, false, later + 1)
+				&& reloaded.active(later + 1) == PirateSeas.MAX_SHIPS - 2, "A removed ship is tombstoned: a stale copy is refused, not recorded again");
+		PirateSeas again = PirateSeas.CODEC.parse(NbtOps.INSTANCE, PirateSeas.CODEC.encodeStart(NbtOps.INSTANCE, reloaded).getOrThrow()).getOrThrow();
+		helper.assertTrue(again.tombstoned(ids.get(1)), "Tombstones are saved");
 		helper.succeed();
+	}
+
+	/**
+	 * A stale copy of a removed natural ship (its id tombstoned: an older chunk save, a restored backup) goes on its first
+	 * tick, with its crew, rolling no loot and spilling nothing.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 40, skyAccess = true)
+	public void aRemovedShipsStaleCopyNeverSailsAgain(GameTestHelper helper) {
+		pool(helper);
+		ServerLevel level = helper.getLevel();
+		PirateShip ship = ship(helper, true);
+		ship.setCrewed(true);
+		PirateShipTesting.beaten(ship, true);
+		PirateSeas.get(level).gone(ship.getUUID(), level.getGameTime());
+		level.addFreshEntity(ship);
+		helper.runAfterDelay(5, () -> {
+			helper.assertTrue(ship.isRemoved(), "The tombstoned copy should be gone");
+			helper.assertTrue(!ship.lootRolled() && ship.hold().isEmpty(), "It rolls no loot");
+			helper.assertTrue(level.getEntitiesOfClass(ItemEntity.class, ship.getBoundingBox().inflate(8.0)).isEmpty(), "It spills nothing");
+			helper.assertTrue(PirateSeas.get(level).ship(ship.getUUID()) == null, "And it is not recorded again");
+			helper.succeed();
+		});
+	}
+
+	/** Runs an operator command as a mock operator standing at {@code at} (absolute); /protect takes its corners from there. */
+	private static void protect(GameTestHelper helper, ServerPlayer op, String command, BlockPos at) {
+		op.snapTo(at.getX(), at.getY(), at.getZ(), 0.0F, 0.0F);
+		var server = helper.getLevel().getServer();
+		try {
+			server.getCommands().getDispatcher().execute(command, server.createCommandSourceStack().withEntity(op).withSuppressedOutput());
+		} catch (Exception e) {
+			helper.fail("/" + command + " failed: " + e.getMessage());
+		}
+	}
+
+	/**
+	 * Protection is tested exactly, every block of the volume: a one-block operator region in the water between where a
+	 * coarser sampling would look, and one at bridge height over the water across the masts' way, each make the place
+	 * unclear; a region wholly above the masts' reach does not.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 40, skyAccess = true)
+	public void operatorRegionsAnywhereInTheHullsVolumeBlockIt(GameTestHelper helper) {
+		pool(helper);
+		ServerLevel level = helper.getLevel();
+		Vec3 at = helper.absoluteVec(CENTRE);
+		ServerPlayer op = helper.makeMockServerPlayerInLevel();
+		String name = "pirate_" + op.getUUID().toString().replace("-", "");
+		helper.assertTrue(PirateWaters.clear(level, at, 0.0F), "The pool's centre starts clear");
+		BlockPos one = helper.absolutePos(new BlockPos(21, SURFACE, 20));
+		protect(helper, op, "protect pos1", one);
+		protect(helper, op, "protect pos2", one);
+		protect(helper, op, "protect create " + name, one);
+		helper.assertTrue(!PirateWaters.clear(level, at, 0.0F), "A one-block region in the hull's water should block it");
+		protect(helper, op, "protect remove " + name, one);
+		helper.assertTrue(PirateWaters.clear(level, at, 0.0F), "Removed, the place is clear again");
+		protect(helper, op, "protect pos1", helper.absolutePos(new BlockPos(POOL_MIN, SURFACE + 5, 24)));
+		protect(helper, op, "protect pos2", helper.absolutePos(new BlockPos(POOL_MAX, SURFACE + 6, 25)));
+		protect(helper, op, "protect create " + name, one);
+		helper.assertTrue(!PirateWaters.clear(level, at, 0.0F), "A region at bridge height across the masts' way should block it");
+		protect(helper, op, "protect remove " + name, one);
+		protect(helper, op, "protect pos1", helper.absolutePos(new BlockPos(POOL_MIN, SURFACE + PirateWaters.MAST + 1, 24)));
+		protect(helper, op, "protect pos2", helper.absolutePos(new BlockPos(POOL_MAX, SURFACE + PirateWaters.MAST + 2, 25)));
+		protect(helper, op, "protect create " + name, one);
+		helper.assertTrue(PirateWaters.clear(level, at, 0.0F), "A region wholly above the masts' reach does not");
+		protect(helper, op, "protect remove " + name, one);
+		helper.succeed();
+	}
+
+	/**
+	 * The swept hull: with a block (and then a one-block operator region) just off the port quarter, outside the hull and
+	 * outside the water 3 blocks ahead, the ship may hold its place and sail straight on, but may not turn, since its stern
+	 * would swing into it. A helmed ship asked to turn there never lets its hull reach that cell.
+	 */
+	@GameTest(structure = "jugcraft-test:drone_tower", maxTicks = 120, skyAccess = true)
+	public void theSternMayNotSwingIntoAnObstacle(GameTestHelper helper) {
+		pool(helper);
+		ServerLevel level = helper.getLevel();
+		Vec3 at = helper.absoluteVec(CENTRE);
+		BlockPos quarter = new BlockPos(25, SURFACE + 1, 14);
+		helper.setBlock(quarter, Blocks.OAK_PLANKS);
+		helper.assertTrue(PirateWaters.clear(level, at, 0.0F), "The hull itself is clear where it lies");
+		helper.assertTrue(PirateWaters.clear(level, at.add(0.0, 0.0, 3.0), 0.0F), "The water 3 blocks ahead is clear too");
+		helper.assertTrue(PirateWaters.sweep(level, at, 0.0F, at.add(0.0, 0.0, PirateShip.SPEED), 0.0F), "Straight on is allowed");
+		helper.assertTrue(!PirateWaters.sweep(level, at, 0.0F, at, PirateShip.TURN), "Turning would swing the stern into the block");
+		helper.setBlock(quarter, Blocks.AIR);
+		helper.assertTrue(PirateWaters.sweep(level, at, 0.0F, at, PirateShip.TURN), "With the block gone it may turn");
+		ServerPlayer op = helper.makeMockServerPlayerInLevel();
+		String name = "pirate_" + op.getUUID().toString().replace("-", "");
+		BlockPos cell = helper.absolutePos(quarter);
+		protect(helper, op, "protect pos1", cell);
+		protect(helper, op, "protect pos2", cell);
+		protect(helper, op, "protect create " + name, cell);
+		helper.assertTrue(!PirateWaters.sweep(level, at, 0.0F, at, PirateShip.TURN), "Nor may it swing into protected air");
+		protect(helper, op, "protect remove " + name, cell);
+		helper.setBlock(quarter, Blocks.OAK_PLANKS);
+		PirateShip ship = ship(helper, false);
+		PirateShipTesting.helm(ship, true);
+		PirateShipTesting.waypoint(ship, at.add(-10.0, 0.0, 4.0));
+		level.addFreshEntity(ship);
+		AABB obstacle = new AABB(helper.absolutePos(quarter));
+		helper.onEachTick(() -> {
+			AABB hull = PirateWaters.footprint(ship.position(), ship.getYRot(), ship.getY() - PirateWaters.DEPTH, ship.getY() + PirateWaters.MAST);
+			helper.assertTrue(!hull.intersects(obstacle), "The hull must never reach the obstacle, but at yaw " + ship.getYRot()
+					+ " it covers " + hull);
+		});
+		helper.runAfterDelay(100, () -> {
+			ship.discard();
+			helper.succeed();
+		});
 	}
 }
