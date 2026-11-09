@@ -18,6 +18,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.resources.Identifier;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -26,6 +28,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.TagValueInput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -144,6 +147,18 @@ public final class TownFeastGameTests {
 		player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
 	}
 
+	/** The food laid at a site's dish slot, as a plain stack of {@code count} (what a player's own would be). */
+	private static ItemStack plain(String site, int slot, int count) {
+		return new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.parse(site(site).dishes().get(slot))), count);
+	}
+
+	/** Saves a table length's block entity and reads it back in place, as a chunk reload does. */
+	private static void reloadTable(GameTestHelper h, String site, int length) {
+		FeastTableBlockEntity table = table(h, site, length);
+		var saved = table.saveWithoutMetadata(h.getLevel().registryAccess());
+		table.loadWithComponents(TagValueInput.create(ProblemReporter.DISCARDING, h.getLevel().registryAccess(), saved));
+	}
+
 	private static TownFeast.Ledger reload(TownFeast.Ledger ledger) {
 		var saved = TownFeast.Ledger.CODEC.encodeStart(NbtOps.INSTANCE, ledger).getOrThrow();
 		return TownFeast.Ledger.CODEC.parse(NbtOps.INSTANCE, saved).getOrThrow();
@@ -174,6 +189,8 @@ public final class TownFeastGameTests {
 					String wanted = site.dishes().get(i * FeastTableBlockEntity.DISHES + dish);
 					h.assertTrue(BuiltInRegistries.ITEM.getKey(laid.getItem()).toString().equals(wanted) && laid.getCount() == TownFeast.SERVINGS,
 							id + " length " + i + " dish " + dish + " holds four " + wanted + ": " + laid);
+					h.assertTrue(ItemStack.isSameItemSameComponents(laid, TownFeast.stamped(new ItemStack(laid.getItem()), SEASON, id))
+							&& !ItemStack.isSameItemSameComponents(laid, new ItemStack(laid.getItem())), id + " servings carry the town's mark");
 				}
 			}
 		}
@@ -383,16 +400,91 @@ public final class TownFeastGameTests {
 				"Sneaking (taking a dish, packing the turkey) is refused");
 		player.setShiftKeyDown(false);
 		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.BREAD));
-		h.assertTrue(!TownFeast.mayPublicEat(ledger, origin, level, length, player), "A full hand (serving onto the table) is refused");
+		h.assertTrue(!TownFeast.mayPublicEat(ledger, origin, level, length, player) && !TownFeast.mayPublicEat(ledger, origin, level, master, player),
+				"An item in the main hand (serving onto the table) is refused");
 		player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
-		// A length holding food someone added is no longer the town's to share.
+		player.setItemInHand(InteractionHand.OFF_HAND, new ItemStack(Items.BREAD));
+		h.assertTrue(!TownFeast.mayPublicEat(ledger, origin, level, length, player) && !TownFeast.mayPublicEat(ledger, origin, level, master, player),
+				"An item in the offhand is refused");
+		player.setItemInHand(InteractionHand.OFF_HAND, ItemStack.EMPTY);
+		h.assertTrue(TownFeast.mayPublicEat(ledger, origin, level, length, player) && TownFeast.mayPublicEat(ledger, origin, level, master, player),
+				"Both hands empty again: allowed at the table and the turkey");
+		// A length someone refilled with their own food (even the same food, below the laid count) is no longer the town's.
 		BlockPos second = world(h, site("W1").cells().get(1));
-		table(h, "W1", 1).serve(0, new ItemStack(BuiltInRegistries.ITEM.getValue(net.minecraft.resources.Identifier.parse(site("W1").dishes().get(2))), 3), true);
+		FeastTableBlockEntity refilled = table(h, "W1", 1);
+		h.assertTrue(refilled.serve(0, plain("W1", 2, 1), true) == 0, "A player's plain food does not merge into the town's stamped dish");
+		refilled.clear(0);
+		h.assertTrue(refilled.serve(0, plain("W1", 2, 3), true) == 3, "but can be laid on a dish they emptied");
 		h.assertTrue(!TownFeast.mayPublicEat(ledger, origin, level, second, player) && TownFeast.mayPublicEat(ledger, origin, level, length, player),
-				"Only the length with added food turns private");
+				"Only the refilled length turns private");
+		BlockPos third = world(h, site("W1").cells().get(2));
+		FeastTableBlockEntity added = table(h, "W1", 2);
+		added.clear(1);
+		added.serve(1, new ItemStack(Items.BREAD, 2), true);
+		h.assertTrue(!TownFeast.mayPublicEat(ledger, origin, level, third, player), "A length with other food added turns private");
 		run(h, ledger, TownFeast.THEME, CLOSED);
 		h.assertTrue(!TownFeast.managed(ledger, origin, master) && !TownFeast.mayPublicEat(ledger, origin, level, master, player),
 				"Once taken down, nothing is managed");
+		h.succeed();
+	}
+
+	@GameTest(structure = ARENA)
+	public void aPlayersOwnFoodIsNeverMistakenForTheTowns(GameTestHelper h) {
+		square(h);
+		ServerLevel level = h.getLevel();
+		TownFeast.Ledger ledger = new TownFeast.Ledger();
+		run(h, ledger, TownFeast.THEME, OPEN);
+		ServerPlayer player = diner(h);
+		// Eat one stamped serving: it is ordinary food to the eater.
+		BlockPos first = world(h, site("W1").cells().getFirst());
+		player.getFoodData().setFoodLevel(2);
+		eat(h, player, first, 0.25);
+		h.assertTrue(table(h, "W1", 0).dish(0).getCount() == TownFeast.SERVINGS - 1 && player.getFoodData().getFoodLevel() > 2,
+				"A stamped serving is eaten like any other: " + player.getFoodData().getFoodLevel());
+		// The owner adds one plain serving of the same food: it cannot merge into the town's stamped dish.
+		h.assertTrue(table(h, "W1", 0).serve(0, plain("W1", 0, 1), true) == 0 && table(h, "W1", 0).dish(0).getCount() == TownFeast.SERVINGS - 1,
+				"Plain food of the same kind does not join the town's servings");
+		// The owner takes back another dish and refills it, below the laid count, with plain food of the same kind.
+		FeastTableBlockEntity cranberry = table(h, "W1", 2);
+		cranberry.clear(0);
+		h.assertTrue(cranberry.serve(0, plain("W1", 4, 2), true) == 2, "The owner's own cranberry sauce is laid");
+		// The table and the ledger both survive a save and reload.
+		reloadTable(h, "W1", 0);
+		reloadTable(h, "W1", 2);
+		ledger = reload(ledger);
+		h.assertTrue(table(h, "W1", 2).dish(0).getCount() == 2
+				&& ItemStack.isSameItemSameComponents(table(h, "W1", 2).dish(0), plain("W1", 4, 1)), "The owner's plain food is still plain after reload");
+		h.assertTrue(ItemStack.isSameItemSameComponents(table(h, "W1", 0).dish(0), TownFeast.stamped(plain("W1", 0, 1), SEASON, "W1")),
+				"The town's servings keep their mark after reload");
+		run(h, ledger, TownFeast.THEME, CLOSED);
+		h.assertTrue(status(ledger, SEASON, "W1").equals(TownFeast.PRESERVED) && ledger.get(SEASON, "W1").reason().contains("food added"),
+				"The table with the owner's refill is preserved: " + ledger.get(SEASON, "W1"));
+		h.assertTrue(table(h, "W1", 2).dish(0).getCount() == 2 && table(h, "W1", 0).dish(0).getCount() == TownFeast.SERVINGS - 1,
+				"Cleanup leaves the owner's food (and the table) in place");
+		h.assertTrue(status(ledger, SEASON, "E2").equals(TownFeast.REMOVED) && status(ledger, SEASON, "T").equals(TownFeast.REMOVED)
+				&& drops(h) == 0, "The untouched sites go, spilling nothing");
+		h.succeed();
+	}
+
+	@GameTest(structure = ARENA)
+	public void onlyAPositivelyManagedNeighbourMayStandInAMargin(GameTestHelper h) {
+		square(h);
+		ServerLevel level = h.getLevel();
+		TownFeast.Ledger ledger = new TownFeast.Ledger();
+		// The owner's own feast table on one of the turkey's cells, inside E2's margin, before anything is set out.
+		BlockPos owners = world(h, new BlockPos(104, 1, 89));
+		level.setBlock(owners, JugcraftAgriculture.block("feast_table").defaultBlockState().setValue(FeastTableBlock.RUNNER, FeastTableBlock.Runner.LINEN), 3);
+		List<String> lines = run(h, ledger, TownFeast.THEME, OPEN);
+		h.assertTrue(status(ledger, SEASON, "E2").equals(TownFeast.SKIPPED) && ledger.get(SEASON, "E2").reason().contains("changed from the blueprint"),
+				"An owner's feast table in E2's margin is not taken for a neighbour: " + lines);
+		h.assertTrue(status(ledger, SEASON, "T").equals(TownFeast.SKIPPED) && allAir(h, "E2"), "Nothing is set out beside it: " + lines);
+		h.assertTrue(status(ledger, SEASON, "W1").equals(TownFeast.PLACED), "W1, away from it, is set out");
+		h.assertTrue(level.getBlockState(owners).getBlock() instanceof FeastTableBlock, "The owner's table is untouched");
+		// Gone again, the turkey and E2 are set out side by side: each accepts the other, the ledger's own, in its margin.
+		level.setBlock(owners, Blocks.AIR.defaultBlockState(), 3);
+		lines = run(h, ledger, TownFeast.THEME, OPEN);
+		h.assertTrue(status(ledger, SEASON, "E2").equals(TownFeast.PLACED) && status(ledger, SEASON, "T").equals(TownFeast.PLACED),
+				"The managed neighbour does not stop the other: " + lines);
 		h.succeed();
 	}
 }

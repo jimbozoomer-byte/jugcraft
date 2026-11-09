@@ -30,6 +30,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
@@ -52,7 +53,8 @@ import org.jspecify.annotations.Nullable;
  * </ul>
  * The core ({@link #run}) takes the town's origin, theme, date, {@link Baseline} and ledger as parameters so it can be
  * tested without a built town; {@link #tick}, {@link #report}, {@link #managed} and {@link #mayPublicEat} read the live
- * town and are what the town's tick, command and protection call. Nothing here registers itself.
+ * town and are what the town's tick, command and protection call. Nothing here registers itself. Eating at a managed
+ * cell needs {@link #mayPublicEat} AND the land claim check: a managed cell never bypasses a claim.
  */
 public final class TownFeast {
 	/** The logical theme the feast belongs to (a later centrepiece layout does not change it). */
@@ -65,6 +67,11 @@ public final class TownFeast {
 	public static final int MARGIN = 2;
 	/** How often (server ticks) the live wrapper looks. */
 	public static final int CHECK_TICKS = 100;
+	/**
+	 * The private mark on every serving the town lays ({@link #stamped}): its season and site. A player's own food of the
+	 * same kind has no mark, so it never merges with the town's on a dish and is never mistaken for it.
+	 */
+	public static final String MARK = "jugcraft_town_feast";
 	/** A preflight problem worth only waiting for (a chunk not loaded, someone standing in the way). */
 	private static final String WAIT = "waiting: ";
 
@@ -180,9 +187,14 @@ public final class TownFeast {
 	}
 
 	/**
-	 * Whether a player the town's protection would otherwise refuse may eat at this managed feast cell now: an empty main
-	 * hand, not sneaking (sneaking would take a dish away or pack the turkey), and only the town's own food (a length
-	 * holding food someone else added stays private). Call it from TownProtection.useBlock, before publicBlock.
+	 * Whether a player the town's protection would otherwise refuse may eat at this managed feast cell now: both hands
+	 * empty, not sneaking (sneaking would take a dish away or pack the turkey), and only the town's own food (a length
+	 * holding food someone else added or refilled stays private).
+	 * <p>
+	 * This is one condition, never a way round the others: the caller (TownProtection.useBlock, before publicBlock) must
+	 * still require the land claim check too, {@code mayPublicEat(...) && LandRegistry.mayBuild(player, level, pos)}, so a
+	 * managed cell never bypasses a claim. When both hold it runs only the block's own empty-hand use
+	 * ({@code useWithoutItem}), never an item's use; otherwise it refuses, with no fallback.
 	 */
 	public static boolean mayPublicEat(ServerLevel level, BlockPos pos, Player player) {
 		BlockPos origin = TownState.get(level).origin();
@@ -263,6 +275,7 @@ public final class TownFeast {
 				ledger.reset(origin);
 			}
 		}
+		// First take down what is due everywhere, so a neighbour's leftovers never stand in a site's margin.
 		for (Site site : LAYOUT) {
 			for (Ledger.Entry entry : ledger.placed(site.id())) {
 				if (open && entry.season() == season) {
@@ -284,18 +297,20 @@ public final class TownFeast {
 					lines.add(entry.season() + " " + site.id() + ": preserved, " + problem);
 				}
 			}
+		}
+		for (Site site : LAYOUT) {
 			if (!open) {
-				continue;
+				break;
 			}
 			Ledger.Entry done = ledger.get(season, site.id());
 			if (done != null && !done.status().equals(SKIPPED)) {
 				lines.add(season + " " + site.id() + ": " + done.status() + " this season; never set out again");
 				continue;
 			}
-			String problem = preflight(level, origin, site, baseline);
+			String problem = preflight(level, origin, site, baseline, ledger, season);
 			if (problem == null) {
 				if (!dryRun) {
-					ledger.put(new Ledger.Entry(season, site.id(), PLACED, "", place(level, origin, site)));
+					ledger.put(new Ledger.Entry(season, site.id(), PLACED, "", place(level, origin, site, season)));
 				}
 				lines.add(season + " " + site.id() + ": " + (dryRun ? "would set out" : "set out"));
 			} else if (problem.startsWith(WAIT)) {
@@ -346,8 +361,11 @@ public final class TownFeast {
 	 * loads a chunk. Every cell of the site and of the ground {@value #MARGIN} blocks round it, from the floor below to
 	 * a block above, must be loaded and still the blueprint's; the site's own cells must be open blueprint air on solid
 	 * floor, without a block entity, an owner mark or casino furniture within two blocks, and nothing standing in them.
+	 * Where the margin covers a neighbouring feast site, that site's blocks are accepted only when it is positively the
+	 * town's own: set out this season by the {@code ledger}, and still exactly what was set out, less what was eaten
+	 * ({@link #removable}). Any other feast table or turkey there is a change like any other.
 	 */
-	public static @Nullable String preflight(ServerLevel level, BlockPos origin, Site site, Baseline baseline) {
+	public static @Nullable String preflight(ServerLevel level, BlockPos origin, Site site, Baseline baseline, Ledger ledger, int season) {
 		List<String> problems = new ArrayList<>();
 		if (site.kind() == Kind.TABLE && menu(site, problems) == null) {
 			return problems.getFirst();
@@ -400,10 +418,11 @@ public final class TownFeast {
 				return "no solid floor under " + relative;
 			}
 		}
-		Set<BlockPos> feast = new HashSet<>();
+		Set<BlockPos> neighbours = new HashSet<>();
 		for (Site other : LAYOUT) {
-			if (other != site) {
-				feast.addAll(other.cells());
+			Ledger.Entry entry = other == site ? null : ledger.get(season, other.id());
+			if (entry != null && entry.status().equals(PLACED) && removable(level, origin, other, entry) == null) {
+				neighbours.addAll(other.cells());
 			}
 		}
 		for (BlockPos relative : area) {
@@ -412,9 +431,9 @@ public final class TownFeast {
 			if (baseline.preserved(world)) {
 				return "owner override recorded at " + relative;
 			}
-			// The neighbouring feast site may already be set out there (E2 and T share their margins); anything else is not.
+			// A managed neighbour may already be set out there (E2 and T share their margins); nothing else may.
 			BlockState actual = level.getBlockState(world);
-			if (feast.contains(relative) && (actual.getBlock() instanceof FeastTableBlock || actual.is(HarvestFestival.GIANT_TURKEY))) {
+			if (neighbours.contains(relative)) {
 				continue;
 			}
 			if (expected != null && actual != expected) {
@@ -430,7 +449,7 @@ public final class TownFeast {
 	}
 
 	/** Sets the site out; returns what was laid on each dish ("item*count"), for the removal check. */
-	private static List<String> place(ServerLevel level, BlockPos origin, Site site) {
+	private static List<String> place(ServerLevel level, BlockPos origin, Site site, int season) {
 		List<BlockPos> cells = site.cells();
 		List<String> laid = new ArrayList<>();
 		if (site.kind() == Kind.TURKEY) {
@@ -447,7 +466,7 @@ public final class TownFeast {
 			FeastTableBlockEntity table = (FeastTableBlockEntity) level.getBlockEntity(world);
 			for (int dish = 0; dish < FeastTableBlockEntity.DISHES; dish++) {
 				Item item = menu.get(i * FeastTableBlockEntity.DISHES + dish);
-				int served = table == null ? 0 : table.serve(dish, new ItemStack(item, SERVINGS), true);
+				int served = table == null ? 0 : table.serve(dish, stamped(new ItemStack(item, SERVINGS), season, site.id()), true);
 				laid.add(BuiltInRegistries.ITEM.getKey(item) + "*" + served);
 			}
 		}
@@ -507,7 +526,20 @@ public final class TownFeast {
 		return null;
 	}
 
-	/** Whether {@code dish} is the town's own: empty, or no more of the same food than was laid at {@code slot}. */
+	/**
+	 * A serving the town lays: the food with the private {@value #MARK} mark naming the season and site. The mark changes
+	 * nothing else: it eats like any other serving, and a stamped serving taken anywhere is still only food. Because
+	 * a Feast Table merges a dish only with the same item and components, a player's plain food never joins it.
+	 */
+	public static ItemStack stamped(ItemStack food, int season, String site) {
+		CustomData.update(DataComponents.CUSTOM_DATA, food, tag -> tag.putString(MARK, season + "/" + site));
+		return food;
+	}
+
+	/**
+	 * Whether {@code dish} is the town's own: empty, or only the stamped serving laid at {@code slot}, no more of it than
+	 * was laid. Unstamped food (a player's own, even of the same kind and below the laid count) is not.
+	 */
 	private static boolean managedDish(ItemStack dish, Ledger.Entry entry, int slot) {
 		if (dish.isEmpty()) {
 			return true;
@@ -519,7 +551,8 @@ public final class TownFeast {
 		int star = laid.lastIndexOf('*');
 		Item item = BuiltInRegistries.ITEM.getValue(Identifier.parse(laid.substring(0, star)));
 		int count = Integer.parseInt(laid.substring(star + 1));
-		return ItemStack.isSameItemSameComponents(dish, new ItemStack(item)) && dish.getCount() <= count;
+		return ItemStack.isSameItemSameComponents(dish, stamped(new ItemStack(item), entry.season(), entry.site()))
+				&& dish.getCount() <= count;
 	}
 
 	/**
@@ -569,10 +602,11 @@ public final class TownFeast {
 		return site != null && ledger.isFor(origin) && !ledger.placed(site.id()).isEmpty();
 	}
 
-	/** {@link #mayPublicEat(ServerLevel, BlockPos, Player)} against a given ledger and origin. */
+	/** {@link #mayPublicEat(ServerLevel, BlockPos, Player)} against a given ledger and origin (claims still apply: AND). */
 	public static boolean mayPublicEat(Ledger ledger, BlockPos origin, ServerLevel level, BlockPos pos, Player player) {
 		Site site = siteAt(origin, pos);
-		if (site == null || !ledger.isFor(origin) || player.isSecondaryUseActive() || !player.getMainHandItem().isEmpty()) {
+		if (site == null || !ledger.isFor(origin) || player.isSecondaryUseActive() || !player.getMainHandItem().isEmpty()
+				|| !player.getOffhandItem().isEmpty()) {
 			return false;
 		}
 		List<Ledger.Entry> placed = ledger.placed(site.id());
