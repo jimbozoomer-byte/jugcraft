@@ -46,33 +46,22 @@ public final class WalkerAim {
 	}
 
 	/**
-	 * Whether every chunk the straight path from {@code a} to {@code b} may cross is loaded. On a server,
-	 * {@link Level#clip} reads each block along its path, and reading a block in a chunk that is not loaded loads (or
-	 * generates) it. So a path's ends being loaded is not enough: a path across a chunk's corner passes through a
-	 * neighbour. The path is walked in steps of at most a block, each counting the chunks its own little box spans (a hair
-	 * past the path's ends). That covers every chunk the path touches, and a chunk it misses is counted only when the path
-	 * passes within a block of that chunk's corner.
+	 * Whether every chunk in the x/z rectangle of the straight path from {@code a} to {@code b} is loaded, the path's ends
+	 * and a hair past them included. On a server, {@link Level#clip} reads each block along its path, and reading a block
+	 * in a chunk that is not loaded loads (or generates) it. So a path's ends being loaded is not enough: a path across a
+	 * chunk's corner passes through a neighbour, however short the crossing. Every chunk the path can touch lies in the
+	 * rectangle, so this is a plain superset: it may also count a corner chunk the path misses. The paths here are short
+	 * (a look is clipped 16 blocks at a time, a shell a tick at a time), so the rectangle is at most three chunks a side.
 	 */
 	public static boolean chunksLoadedAlong(Vec3 a, Vec3 b, ChunkLoaded loaded) {
-		Vec3 path = b.subtract(a);
-		double length = path.length();
-		Vec3 edge = length > 0 ? path.scale(PATH_EDGE / length) : Vec3.ZERO;
-		Vec3 start = a.subtract(edge);
-		Vec3 span = b.add(edge).subtract(start);
-		int steps = Math.max(1, (int) Math.ceil(length));
-		Vec3 previous = start;
-		for (int step = 1; step <= steps; step++) {
-			Vec3 next = start.add(span.scale(step / (double) steps));
-			int x0 = Math.min(Mth.floor(previous.x), Mth.floor(next.x)) >> 4, x1 = Math.max(Mth.floor(previous.x), Mth.floor(next.x)) >> 4;
-			int z0 = Math.min(Mth.floor(previous.z), Mth.floor(next.z)) >> 4, z1 = Math.max(Mth.floor(previous.z), Mth.floor(next.z)) >> 4;
-			for (int x = x0; x <= x1; x++) {
-				for (int z = z0; z <= z1; z++) {
-					if (!loaded.test(x, z)) {
-						return false;
-					}
+		int x0 = Mth.floor(Math.min(a.x, b.x) - PATH_EDGE) >> 4, x1 = Mth.floor(Math.max(a.x, b.x) + PATH_EDGE) >> 4;
+		int z0 = Mth.floor(Math.min(a.z, b.z) - PATH_EDGE) >> 4, z1 = Mth.floor(Math.max(a.z, b.z) + PATH_EDGE) >> 4;
+		for (int x = x0; x <= x1; x++) {
+			for (int z = z0; z <= z1; z++) {
+				if (!loaded.test(x, z)) {
+					return false;
 				}
 			}
-			previous = next;
 		}
 		return true;
 	}

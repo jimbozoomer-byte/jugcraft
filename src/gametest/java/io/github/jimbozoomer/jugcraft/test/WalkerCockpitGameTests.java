@@ -196,10 +196,17 @@ public class WalkerCockpitGameTests {
 	}
 
 	/**
-	 * Aiming never loads a chunk: a path whose two ends are in loaded chunks (0, 0) and (1, 1) but which cuts across the
-	 * corner of chunk (1, 0) on the way counts that chunk, so the look or a shell's flight stops there instead of
-	 * {@code Level.clip} loading it. A chunk the path does not cross, (0, 1), doesn't stop it, and with every chunk loaded
-	 * the path runs on: then the look and the flight clip exactly as before.
+	 * Aiming never loads a chunk. Every chunk in a path's x/z rectangle must be loaded (WalkerAim.chunksLoadedAlong), so the
+	 * look or a shell's flight stops before {@code Level.clip} could load one:
+	 * <ul>
+	 * <li>a path from loaded (0, 0) to loaded (1, 1) that crosses unloaded (1, 0) stops, both ways;</li>
+	 * <li>one that only grazes the corner of unloaded (0, 1), about a thousandth of a block inside it, stops too;</li>
+	 * <li>an unloaded start or end chunk stops it;</li>
+	 * <li>the rectangle is a plain superset: a corner chunk inside it that the path misses also stops it;</li>
+	 * <li>a path inside one loaded chunk runs on whatever its neighbours are;</li>
+	 * <li>a path starting a hair short of a chunk's edge counts the chunk over the edge.</li>
+	 * </ul>
+	 * With every chunk loaded, the look and the flight clip exactly as before.
 	 */
 	@GameTest(structure = "jugcraft-test:drone_depot", maxTicks = 20)
 	public void aimingStopsAtAnUnloadedChunkOnItsPath(GameTestHelper helper) {
@@ -208,9 +215,17 @@ public class WalkerCockpitGameTests {
 		helper.assertTrue(!WalkerAim.chunksLoadedAlong(from, to, (x, z) -> !(x == 1 && z == 0)),
 				"A path crossing the unloaded chunk (1, 0) between loaded ends must count it");
 		helper.assertTrue(!WalkerAim.chunksLoadedAlong(to, from, (x, z) -> !(x == 1 && z == 0)), "and the same the other way");
-		helper.assertTrue(WalkerAim.chunksLoadedAlong(from, to, (x, z) -> !(x == 0 && z == 1)),
-				"A chunk the path does not cross, (0, 1), must not stop it");
 		helper.assertTrue(WalkerAim.chunksLoadedAlong(from, to, (x, z) -> true), "With every chunk loaded the path runs on");
+		// Crosses z = 16 at x = 15.999 and x = 16 at z = 16.001: about a thousandth of a block inside chunk (0, 1).
+		Vec3 graze = new Vec3(15.0, 70.0, 15.0), grazeTo = new Vec3(17.0, 70.0, 17.002);
+		helper.assertTrue(!WalkerAim.chunksLoadedAlong(graze, grazeTo, (x, z) -> !(x == 0 && z == 1)),
+				"A path grazing the corner of the unloaded chunk (0, 1) must count it");
+		helper.assertTrue(!WalkerAim.chunksLoadedAlong(graze, grazeTo, (x, z) -> !(x == 0 && z == 0)), "An unloaded start chunk must stop it");
+		helper.assertTrue(!WalkerAim.chunksLoadedAlong(graze, grazeTo, (x, z) -> !(x == 1 && z == 1)), "An unloaded end chunk must stop it");
+		helper.assertTrue(!WalkerAim.chunksLoadedAlong(from, to, (x, z) -> !(x == 0 && z == 1)),
+				"The rectangle is a superset: the corner chunk (0, 1), inside it though the path misses it, also stops it");
+		helper.assertTrue(WalkerAim.chunksLoadedAlong(new Vec3(2.5, 70.0, 8.0), new Vec3(13.5, 70.0, 3.0), (x, z) -> x == 0 && z == 0),
+				"A path inside one loaded chunk runs on, whatever its neighbours are");
 		helper.assertTrue(!WalkerAim.chunksLoadedAlong(new Vec3(31.5, 70.0, 8.0), new Vec3(48.5, 70.0, 8.0), (x, z) -> x != 2),
 				"A straight path through a whole unloaded chunk, (2, 0), must count it");
 		// The clip's block walk starts a little behind its start (by a ten-millionth of its length), so a path starting
