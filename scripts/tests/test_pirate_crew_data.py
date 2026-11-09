@@ -1,7 +1,7 @@
 """Data regressions for the pirate ship crew (docs/features/pirate-ship-crews.md).
 
 The static galleon stays byte-for-byte as it is, the standard ten stations keep the layout the ship's art and
-renderer are built to, the crew's server tests and test-only stub vessel are registered, the crew ask Authority's
+renderer are built to, the crew's server and client tests and test-only stub vessel are registered, the crew ask Authority's
 stand-in, and their cannonballs spare pirate hulls. Runtime behavior is covered by PirateCrewGameTests.
 """
 import hashlib
@@ -86,6 +86,7 @@ class PirateCrewDataTests(unittest.TestCase):
         self.assertEqual(1, entry['fabric-gametest'].count('io.github.jimbozoomer.jugcraft.test.PirateCrewGameTests'))
         self.assertIn('io.github.jimbozoomer.jugcraft.test.TestVessels', entry['main'])
         self.assertIn('io.github.jimbozoomer.jugcraft.test.TestVesselsClient', entry['client'])
+        self.assertEqual(1, entry['fabric-client-gametest'].count('io.github.jimbozoomer.jugcraft.test.PirateCrewClientGameTests'))
 
     def test_crew_code_adds_no_loot_and_stays_out_of_city_raid_and_town_code(self):
         text = CREW.read_text(encoding='utf-8')

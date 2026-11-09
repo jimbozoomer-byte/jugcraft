@@ -685,6 +685,7 @@
       "io.github.jimbozoomer.jugcraft.test.FluorochemistryClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.MachineConsolidationClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.MineralSandClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.PirateCrewClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.TechSevenClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.AlchemicalGearClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.DarkMatterClientGameTests",
