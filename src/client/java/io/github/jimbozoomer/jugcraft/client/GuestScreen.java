@@ -7,6 +7,7 @@ import io.github.jimbozoomer.jugcraft.town.guests.GuestFavors;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestMenu;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestRoster;
 import java.util.EnumMap;
+import java.util.List;
 import java.util.Map;
 import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.Button;
@@ -15,6 +16,7 @@ import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import org.jspecify.annotations.Nullable;
 
@@ -30,6 +32,10 @@ import org.jspecify.annotations.Nullable;
  * may not marry, a neutral note and no proposal controls; otherwise a proposal (asked, then confirmed naming the
  * diamond it costs, or cancelled), marriage status on both sides, divorce (asked, then confirmed or cancelled) and both
  * remarriage waits. A guest that is unknown or pending shows only that it is not receiving visitors.
+ *
+ * <p>The Gifts key (top right) opens a gift list in place of the rest: the guest's favourites, labelled as a game
+ * preference with their bonus, every gift any guest accepts with its value (the hovered one named), and the daily
+ * limits, all read from {@link GuestFavors}. It is display only: opening or closing it sends nothing.
  */
 public final class GuestScreen extends AbstractContainerScreen<GuestMenu> implements ScreenKit.Fitted {
 	private static final int WIDTH = 300, HEIGHT = 214;
@@ -37,7 +43,13 @@ public final class GuestScreen extends AbstractContainerScreen<GuestMenu> implem
 	private static final int SETTLE_TICKS = 20;
 	private static final int BAR_BACK = 0xFF171E21;
 
+	/** The gift list's panel, from the body's corner; the gift grid's columns, column width and row height. */
+	private static final int LIST_X = 8, LIST_Y = 34, LIST_W = 284, LIST_H = 174, GRID_X = 14, GRID_Y = 84, COLUMNS = 12,
+			COLUMN = 23, ROW = 30;
+
 	private final Map<GuestMenu.Action, Plate> keys = new EnumMap<>(GuestMenu.Action.class);
+	private @Nullable Plate giftListKey;
+	private boolean giftList;
 	private int sentRevision = -1;
 	private int settling;
 
@@ -60,6 +72,12 @@ public final class GuestScreen extends AbstractContainerScreen<GuestMenu> implem
 		key(GuestMenu.Action.DIVORCE, 10, 172, 136, ui("divorce", "Divorce"));
 		key(GuestMenu.Action.DIVORCE_CONFIRM, 10, 172, 136, ui("divorce_confirm", "Confirm divorce"));
 		key(GuestMenu.Action.DIVORCE_CANCEL, 150, 172, 70, ui("cancel", "Cancel"));
+		giftListKey = addRenderableWidget(new Plate(leftPos + 236, topPos + 4, 56, 14, ui("gift_list", "Gifts").getString(), Plate.Kind.WOOD,
+				b -> {
+					// Display only: nothing is sent.
+					giftList = !giftList;
+					updateKeys();
+				}));
 		updateKeys();
 	}
 
@@ -96,7 +114,12 @@ public final class GuestScreen extends AbstractContainerScreen<GuestMenu> implem
 
 	private void updateKeys() {
 		boolean open = available() && !settling();
-		boolean shown = available();
+		boolean shown = available() && !giftList;
+		if (giftListKey != null) {
+			giftListKey.visible = available();
+			giftListKey.active = available();
+			giftListKey.setMessage(giftList ? ui("gift_list.close", "Back") : ui("gift_list", "Gifts"));
+		}
 		boolean mayMarry = menu.get(GuestMenu.MAY_MARRY) == 1;
 		boolean ours = menu.get(GuestMenu.PLAYER_SPOUSE) == GuestMenu.EACH_OTHER;
 		boolean proposing = menu.get(GuestMenu.PROPOSAL_PENDING) == 1;
@@ -143,6 +166,27 @@ public final class GuestScreen extends AbstractContainerScreen<GuestMenu> implem
 		return !available();
 	}
 
+	/** The key that opens and closes the gift list; null before the screen is laid out. */
+	public @Nullable Button giftListKey() {
+		return giftListKey;
+	}
+
+	/** Whether the gift list is shown. */
+	public boolean showsGiftList() {
+		return giftList && available();
+	}
+
+	/** The favourites the gift list shows (none while it is closed). */
+	public List<Item> shownFavourites() {
+		GuestRoster.Guest guest = menu.guest();
+		return showsGiftList() && guest != null ? GuestFavors.favourites(guest.id()) : List.of();
+	}
+
+	/** Where the gift list is drawn, in GUI pixels. */
+	public ScreenRectangle giftListArea() {
+		return new ScreenRectangle(leftPos + LIST_X, topPos + LIST_Y, LIST_W, LIST_H);
+	}
+
 	// ---------------------------------------------------------------- drawing
 
 	@Override
@@ -155,7 +199,9 @@ public final class GuestScreen extends AbstractContainerScreen<GuestMenu> implem
 	public void extractBackground(GuiGraphicsExtractor g, int mx, int my, float delta) {
 		TradeLook.frame(g, leftPos, topPos, leftPos + imageWidth, topPos + imageHeight);
 		TradeLook.rule(g, leftPos + 8, topPos + 30, leftPos + 292);
-		if (available()) {
+		if (showsGiftList()) {
+			TradeLook.tray(g, leftPos + LIST_X, topPos + LIST_Y, leftPos + LIST_X + LIST_W, topPos + LIST_Y + LIST_H);
+		} else if (available()) {
 			TradeLook.tray(g, leftPos + 154, topPos + 34, leftPos + 292, topPos + 126);
 			TradeLook.rule(g, leftPos + 8, topPos + 132, leftPos + 292);
 		}
@@ -164,8 +210,8 @@ public final class GuestScreen extends AbstractContainerScreen<GuestMenu> implem
 	@Override
 	protected void extractLabels(GuiGraphicsExtractor g, int mx, int my) {
 		GuestRoster.Guest guest = menu.guest();
-		String name = guest != null ? guest.name() : title.getString();
-		g.text(font, ScreenKit.fit(font, name, 170), 10, 8, TradeLook.GOLD, false);
+		String name = ScreenKit.fit(font, guest != null ? guest.name() : title.getString(), 150);
+		g.text(font, name, 10, 8, TradeLook.GOLD, false);
 		if (guest == null || !guest.available()) {
 			int y = 60;
 			for (FormattedCharSequence line : font.split(ui("unavailable", "This guest is not receiving visitors."), 270)) {
@@ -176,11 +222,16 @@ public final class GuestScreen extends AbstractContainerScreen<GuestMenu> implem
 		}
 		String series = guest.origin() == GuestRoster.Origin.REAL_PERSON || guest.series().isEmpty()
 				? ui("real_person", "Real person").getString() : guest.series();
-		series = ScreenKit.fit(font, series, 110);
-		g.text(font, series, 290 - font.width(series), 8, TradeLook.TAN, false);
+		// The series sits between the name and the Gifts key.
+		series = ScreenKit.fit(font, series, Math.max(0, 230 - (18 + font.width(name))));
+		g.text(font, series, 230 - font.width(series), 8, TradeLook.TAN, false);
 		GuestAppearances.Appearance look = GuestAppearances.of(guest.id());
 		Component note = look == null ? GuestAppearances.note() : look.note();
 		g.text(font, ScreenKit.fit(font, capitalised(note.getString()), 280), 10, 19, TradeLook.DIM, false);
+		if (giftList) {
+			giftList(g, guest, mx - leftPos, my - topPos);
+			return;
+		}
 
 		// Affection and gifts.
 		int affection = menu.get(GuestMenu.AFFECTION), most = Math.max(1, menu.get(GuestMenu.MAX_AFFECTION));
@@ -264,6 +315,57 @@ public final class GuestScreen extends AbstractContainerScreen<GuestMenu> implem
 			g.text(font, hintLine, 10, y, TradeLook.DIM, false);
 			y += 10;
 		}
+	}
+
+	/**
+	 * The gift list, over the body under the header: the guest's favourites (a game preference, with their bonus), every
+	 * gift guests accept with its value, the one under the mouse named, and the daily limits. {@code mx}, {@code my}: the
+	 * mouse, from the body's corner.
+	 */
+	private void giftList(GuiGraphicsExtractor g, GuestRoster.Guest guest, int mx, int my) {
+		List<Item> favourites = GuestFavors.favourites(guest.id());
+		int left = LIST_X + 6, width = LIST_W - 12;
+		g.text(font, ScreenKit.fit(font, ui("gift_list.favourites", "Favourite gifts (game preference, +%s affection)",
+				GuestFavors.FAVOURITE_BONUS).getString(), width), left, LIST_Y + 4, TradeLook.GOLD, false);
+		for (int i = 0; i < favourites.size(); i++) {
+			ItemStack stack = new ItemStack(favourites.get(i));
+			int x = left + i * 92;
+			TradeLook.slot(g, x, LIST_Y + 16);
+			g.item(stack, x, LIST_Y + 16);
+			g.text(font, ScreenKit.fit(font, stack.getHoverName().getString(), 70), x + 20, LIST_Y + 20, TradeLook.CREAM, false);
+		}
+		g.text(font, ui("gift_list.accepted", "Accepted gifts"), left, LIST_Y + 38, TradeLook.TAN, false);
+		Component hovered = null;
+		for (int i = 0; i < GuestFavors.GIFTS.size(); i++) {
+			GuestFavors.Gift gift = GuestFavors.GIFTS.get(i);
+			int x = GRID_X + (i % COLUMNS) * COLUMN, y = GRID_Y + (i / COLUMNS) * ROW;
+			boolean favourite = favourites.contains(gift.item());
+			if (favourite) {
+				g.outline(x - 2, y - 2, 20, 20, TradeLook.GOLD);
+			}
+			ItemStack stack = new ItemStack(gift.item());
+			g.item(stack, x, y);
+			String value = "+" + gift.value();
+			g.text(font, value, x + 8 - font.width(value) / 2, y + 18, favourite ? TradeLook.GOLD : TradeLook.DIM, false);
+			if (mx >= x - 2 && mx < x + COLUMN - 2 && my >= y - 2 && my < y + ROW - 2) {
+				hovered = favourite
+						? ui("gift_list.item_favourite", "%s: +%s affection, +%s more as a favourite", stack.getHoverName(), gift.value(),
+								GuestFavors.FAVOURITE_BONUS)
+						: ui("gift_list.item", "%s: +%s affection", stack.getHoverName(), gift.value());
+			}
+		}
+		int y = GRID_Y + ((GuestFavors.GIFTS.size() + COLUMNS - 1) / COLUMNS) * ROW;
+		g.text(font, ScreenKit.fit(font, (hovered != null ? hovered : ui("gift_list.point", "Point at a gift for its name.")).getString(), width),
+				left, y, hovered != null ? TradeLook.CREAM : TradeLook.DIM, false);
+		y += 14;
+		for (FormattedCharSequence line : font.split(ui("gift_list.limits",
+				"Each day, for each guest: up to %s gifts and %s affection (gifts and the errand together).", GuestFavors.GIFTS_PER_DAY,
+				GuestFavors.DAILY_AFFECTION_CAP), width)) {
+			g.text(font, line, left, y, TradeLook.TAN, false);
+			y += 10;
+		}
+		g.text(font, ScreenKit.fit(font, ui("gift_list.hand", "Give one at a time, held in your main hand.").getString(), width), left, y + 4,
+				TradeLook.DIM, false);
 	}
 
 	private static Component proposalConfirmLabel() {
