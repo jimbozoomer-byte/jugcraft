@@ -656,6 +656,11 @@ public class Townsfolk extends PathfinderMob {
 		}
 
 		private int slack() {
+			// A guest held by an activity walks straight to its place instead of strolling there.
+			if (guest != null && level() instanceof ServerLevel server
+					&& io.github.jimbozoomer.jugcraft.town.guests.GuestActivity.anchor(server, Townsfolk.this) != null) {
+				return 1;
+			}
 			return places() == null ? 4 : 3;
 		}
 

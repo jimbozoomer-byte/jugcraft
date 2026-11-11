@@ -20,8 +20,8 @@ public final class GuestCityPlacement {
     private GuestCityPlacement() {}
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-        dispatcher.register(Commands.literal("guests").requires(CustomNpcs::isOperator)
-                .then(Commands.literal("city")
+        dispatcher.register(Commands.literal("guests")
+                .then(Commands.literal("city").requires(CustomNpcs::isOperator)
                         .then(Commands.literal("preview").executes(c -> run(c.getSource(), false)))
                         .then(Commands.literal("place").executes(c -> run(c.getSource(), true)))));
     }

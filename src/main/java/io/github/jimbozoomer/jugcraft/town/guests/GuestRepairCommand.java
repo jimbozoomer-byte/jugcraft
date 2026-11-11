@@ -49,7 +49,7 @@ public final class GuestRepairCommand {
 	}
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-		dispatcher.register(Commands.literal("guests").requires(GuestRepairCommand::allowed)
+		dispatcher.register(Commands.literal("guests")
 				.then(Commands.literal("state").requires(GuestRepairCommand::allowed)
 						.then(Commands.literal("guest").then(guestArgument()
 								.executes(c -> guestState(c.getSource(), StringArgumentType.getString(c, "guest")))))

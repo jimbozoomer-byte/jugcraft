@@ -83,7 +83,7 @@ public final class GuestPlacement {
 
 	/** Adds {@code place} and {@code roster} under {@code /guests}. Called once from {@link GuestService}. */
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-		dispatcher.register(Commands.literal("guests").requires(CustomNpcs::isOperator)
+		dispatcher.register(Commands.literal("guests")
 				.then(Commands.literal("place").requires(CustomNpcs::isOperator)
 						.then(guestId()
 								.executes(c -> place(c.getSource(), StringArgumentType.getString(c, "id"), c.getSource().getPosition(),

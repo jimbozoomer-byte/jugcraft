@@ -498,7 +498,10 @@ public final class CustomNpcs {
 
 		private @Nullable Data patrolling() {
 			Data data = npc.custom();
-			return data != null && (!data.patrol.isEmpty() || data.wander == 0) && !npc.isPassenger() && npc.getTarget() == null && !npc.isSleeping() ? data : null;
+			// A town guest held by an activity (an outing, a visit, a ceremony) follows the activity, not its patrol or post.
+			return data != null && (!data.patrol.isEmpty() || data.wander == 0) && !npc.isPassenger() && npc.getTarget() == null && !npc.isSleeping()
+					&& !(npc.level() instanceof ServerLevel level && io.github.jimbozoomer.jugcraft.town.guests.GuestActivity.anchor(level, npc) != null)
+					? data : null;
 		}
 
 		@Override
