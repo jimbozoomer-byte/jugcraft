@@ -210,11 +210,13 @@ public final class GuestFavors {
 		int gain = Math.min(value, Math.min(DAILY_AFFECTION_CAP - today.affection(), GuestBalance.MAX_AFFECTION - before));
 		Component given = hand.getHoverName();
 		boolean favourite = favourites(guest).contains(hand.getItem());
+		ItemStack gift = hand.copyWithCount(1);
 		// Exactly one, from the very stack in the hand.
 		hand.shrink(1);
 		player.getInventory().setChanged();
 		int added = Math.max(0, ledger.addAffection(me, guest, gain) - before);
 		state.put(me, guest, today.withGift(added), day);
+		GuestEvents.GIFT_GIVEN.invoker().given(player, npc, guest, gift, favourite, added);
 		return favourite
 				? GuestResult.done("message.jugcraft.guest.gift.favourite", "You gave %s one %s, a favourite: +%s affection.", name, given, added)
 				: GuestResult.done("message.jugcraft.guest.gift.given", "You gave %s one %s: +%s affection.", name, given, added);
@@ -340,7 +342,37 @@ public final class GuestFavors {
 		take(player, item, count);
 		int added = Math.max(0, ledger.addAffection(me, guest, gain) - before);
 		state.put(me, guest, today.withTurnIn(added), day);
+		GuestEvents.QUEST_TURNED_IN.invoker().turnedIn(player, npc, guest, new ItemStack(item, count), added);
 		return GuestResult.done("message.jugcraft.guest.quest.turned_in", "You brought %s %s %s: +%s affection.", name, count, wanted, added);
+	}
+
+	/**
+	 * The shared daily social-reward budget ({@link GuestRewards#grant}): adds at most {@code amount} affection, within what
+	 * is left of today's {@link #DAILY_AFFECTION_CAP} (the same per player and guest counter gifts and the quest use) and of
+	 * the maximum, and records it against today. Nothing for an unavailable guest or a ledger entry that cannot change.
+	 * Returns what was added.
+	 */
+	static int grantShared(ServerPlayer player, String guest, int amount) {
+		if (amount <= 0 || !available(guest)) {
+			return 0;
+		}
+		MinecraftServer server = player.level().getServer();
+		GuestLedger ledger = GuestLedger.get(server);
+		UUID me = player.getUUID();
+		if (!ledger.canGainAffection(me, guest)) {
+			return 0;
+		}
+		State state = State.get(server);
+		long day = state.effective(me, day(player));
+		Favor today = state.today(me, guest, day);
+		int before = ledger.affection(me, guest);
+		int gain = Math.min(amount, Math.min(DAILY_AFFECTION_CAP - today.affection(), GuestBalance.MAX_AFFECTION - before));
+		if (gain <= 0) {
+			return 0;
+		}
+		int added = Math.max(0, ledger.addAffection(me, guest, gain) - before);
+		state.put(me, guest, today.withAffection(today.affection() + added), day);
+		return added;
 	}
 
 	/** Today's quest: NONE for an unknown or pending guest, else OFFERED, ACTIVE or DONE. */

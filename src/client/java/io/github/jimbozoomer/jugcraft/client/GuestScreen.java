@@ -4,8 +4,10 @@ import io.github.jimbozoomer.jugcraft.client.ExchangeScreen.Plate;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestAppearances;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestBalance;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestFavors;
+import io.github.jimbozoomer.jugcraft.town.guests.GuestFeatures;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestMenu;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestRoster;
+import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +52,14 @@ public final class GuestScreen extends AbstractContainerScreen<GuestMenu> implem
 	private final Map<GuestMenu.Action, Plate> keys = new EnumMap<>(GuestMenu.Action.class);
 	private @Nullable Plate giftListKey;
 	private boolean giftList;
+	/** The Activities panel: feature options ({@link GuestFeatures}), two columns of {@link #OPTION_ROWS}, paged. */
+	private static final int OPTION_ROWS = 6, OPTION_SLOTS = 2 * OPTION_ROWS;
+	private final List<Plate> optionPlates = new ArrayList<>();
+	private final int[] optionAt = new int[OPTION_SLOTS];
+	private @Nullable Plate activitiesKey;
+	private @Nullable Plate pageKey;
+	private boolean activities;
+	private int optionPage;
 	private int sentRevision = -1;
 	private int settling;
 
@@ -76,6 +86,26 @@ public final class GuestScreen extends AbstractContainerScreen<GuestMenu> implem
 				b -> {
 					// Display only: nothing is sent.
 					giftList = !giftList;
+					activities = false;
+					updateKeys();
+				}));
+		optionPlates.clear();
+		for (int slot = 0; slot < OPTION_SLOTS; slot++) {
+			final int at = slot;
+			optionPlates.add(addRenderableWidget(new Plate(leftPos + 10 + (slot % 2) * 142, topPos + 48 + (slot / 2) * 22, 136, 18, "",
+					Plate.Kind.BRASS, b -> sendOption(optionAt[at]))));
+		}
+		activitiesKey = addRenderableWidget(new Plate(leftPos + 232, topPos + 192, 60, 14, ui("activities", "Activities").getString(),
+				Plate.Kind.WOOD, b -> {
+					// Display only: nothing is sent.
+					activities = !activities;
+					giftList = false;
+					optionPage = 0;
+					updateKeys();
+				}));
+		pageKey = addRenderableWidget(new Plate(leftPos + 10, topPos + 192, 60, 14, ui("activities.more", "More").getString(), Plate.Kind.WOOD,
+				b -> {
+					optionPage++;
 					updateKeys();
 				}));
 		updateKeys();
@@ -98,6 +128,29 @@ public final class GuestScreen extends AbstractContainerScreen<GuestMenu> implem
 		updateKeys();
 	}
 
+	/** Sends a feature option's click with the revision the server last synced; nothing else. */
+	private void sendOption(int index) {
+		if (minecraft == null || minecraft.gameMode == null || settling() || index < 0) {
+			return;
+		}
+		int revision = menu.get(GuestMenu.REVISION);
+		minecraft.gameMode.handleInventoryButtonClick(menu.containerId, GuestMenu.option(index, revision));
+		sentRevision = revision;
+		settling = SETTLE_TICKS;
+		updateKeys();
+	}
+
+	/** The options the server offers now, as synced, in registration order. */
+	private List<GuestFeatures.Entry> offered() {
+		List<GuestFeatures.Entry> offered = new ArrayList<>();
+		for (GuestFeatures.Entry entry : GuestFeatures.options()) {
+			if (menu.optionAvailable(entry.index())) {
+				offered.add(entry);
+			}
+		}
+		return offered;
+	}
+
 	/** A click is on its way and the server has not synced a new revision yet. */
 	private boolean settling() {
 		return settling > 0 && menu.get(GuestMenu.REVISION) == sentRevision;
@@ -114,11 +167,38 @@ public final class GuestScreen extends AbstractContainerScreen<GuestMenu> implem
 
 	private void updateKeys() {
 		boolean open = available() && !settling();
-		boolean shown = available() && !giftList;
+		boolean shown = available() && !giftList && !activities;
 		if (giftListKey != null) {
-			giftListKey.visible = available();
-			giftListKey.active = available();
+			giftListKey.visible = available() && !activities;
+			giftListKey.active = available() && !activities;
 			giftListKey.setMessage(giftList ? ui("gift_list.close", "Back") : ui("gift_list", "Gifts"));
+		}
+		List<GuestFeatures.Entry> offered = offered();
+		int pages = Math.max(1, (offered.size() + OPTION_SLOTS - 1) / OPTION_SLOTS);
+		optionPage = Math.floorMod(optionPage, pages);
+		for (int slot = 0; slot < OPTION_SLOTS; slot++) {
+			int at = optionPage * OPTION_SLOTS + slot;
+			Plate plate = optionPlates.size() > slot ? optionPlates.get(slot) : null;
+			if (plate == null) {
+				continue;
+			}
+			boolean visible = available() && activities && at < offered.size();
+			optionAt[slot] = visible ? offered.get(at).index() : -1;
+			plate.visible = visible;
+			plate.active = visible && open;
+			if (visible) {
+				GuestFeatures.Entry entry = offered.get(at);
+				plate.setMessage(Component.literal(ScreenKit.fit(font, entry.feature().label(entry.option()).getString(), 128)));
+			}
+		}
+		if (activitiesKey != null) {
+			activitiesKey.visible = available() && !giftList && !GuestFeatures.options().isEmpty();
+			activitiesKey.active = activitiesKey.visible;
+			activitiesKey.setMessage(activities ? ui("activities.close", "Back") : ui("activities", "Activities"));
+		}
+		if (pageKey != null) {
+			pageKey.visible = available() && activities && pages > 1;
+			pageKey.active = pageKey.visible;
 		}
 		boolean mayMarry = menu.get(GuestMenu.MAY_MARRY) == 1;
 		boolean ours = menu.get(GuestMenu.PLAYER_SPOUSE) == GuestMenu.EACH_OTHER;
@@ -172,6 +252,21 @@ public final class GuestScreen extends AbstractContainerScreen<GuestMenu> implem
 	}
 
 	/** Whether the gift list is shown. */
+	/** The Activities key (it may be hidden). */
+	public @Nullable Button activitiesKey() {
+		return activitiesKey;
+	}
+
+	/** Whether the Activities panel is open. */
+	public boolean showsActivities() {
+		return activities && available();
+	}
+
+	/** The feature option indices the Activities panel shows now, in slot order (-1 for an empty slot). */
+	public int[] shownOptions() {
+		return optionAt.clone();
+	}
+
 	public boolean showsGiftList() {
 		return giftList && available();
 	}
@@ -230,6 +325,17 @@ public final class GuestScreen extends AbstractContainerScreen<GuestMenu> implem
 		g.text(font, ScreenKit.fit(font, capitalised(note.getString()), 280), 10, 19, TradeLook.DIM, false);
 		if (giftList) {
 			giftList(g, guest, mx - leftPos, my - topPos);
+			return;
+		}
+		if (activities) {
+			g.text(font, ui("activities.title", "Things to do together"), 10, 34, TradeLook.TAN, false);
+			if (offered().isEmpty()) {
+				int y = 80;
+				for (FormattedCharSequence line : font.split(ui("activities.none", "Nothing to do together right now."), 270)) {
+					g.text(font, line, (imageWidth - font.width(line)) / 2, y, TradeLook.CREAM, false);
+					y += 11;
+				}
+			}
 			return;
 		}
 

@@ -286,6 +286,12 @@ public class Townsfolk extends PathfinderMob {
 
 	/** Where they belong now: work by day, their gathering in the evening, their bed (or where they rest) at night. */
 	public BlockPos anchor() {
+		// A guest's activity (an outing, a visit, a ceremony) holds it at the activity's place until it ends.
+		BlockPos activity = guest != null && level() instanceof ServerLevel server
+				? io.github.jimbozoomer.jugcraft.town.guests.GuestActivity.anchor(server, this) : null;
+		if (activity != null) {
+			return activity;
+		}
 		if (custom != null) {
 			return CustomNpcs.anchor(this, custom);
 		}
@@ -333,6 +339,10 @@ public class Townsfolk extends PathfinderMob {
 
 	/** How far from their place a role wanders. */
 	public int range() {
+		if (guest != null && level() instanceof ServerLevel server
+				&& io.github.jimbozoomer.jugcraft.town.guests.GuestActivity.anchor(server, this) != null) {
+			return io.github.jimbozoomer.jugcraft.town.guests.GuestActivity.RANGE;
+		}
 		if (custom != null) {
 			return CustomNpcs.range(custom);
 		}
