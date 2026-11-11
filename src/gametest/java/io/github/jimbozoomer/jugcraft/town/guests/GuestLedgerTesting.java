@@ -55,6 +55,15 @@ public final class GuestLedgerTesting {
 		}
 	}
 
+	/**
+	 * Whether the real wall clock and the real game time are in place (tests assert it after each swapped block). Every
+	 * {@link #withClock} and {@link #withGameTime} body is synchronous: it schedules nothing for a later tick, so the real
+	 * ones are back before any tick runs.
+	 */
+	public static boolean realTime() {
+		return GuestLedger.clock == CLOCK && GuestMarriage.gameTime == GAME_TIME;
+	}
+
 	/** The server tick's note of the game time (without reading any request). */
 	public static void observe(MinecraftServer server) {
 		GuestMarriage.observe(server);
