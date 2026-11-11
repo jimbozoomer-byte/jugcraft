@@ -143,7 +143,7 @@ public final class GuestPlacement {
 		GuestLedger ledger = GuestLedger.get(server);
 		if (status(ledger, guest.id()) == Status.PLACED) {
 			return refused(Refusal.PLACED, "placed",
-					"%s is already placed (last seen %s). A guest can be placed again only once the ledger records it as lost.",
+					"%s is already placed (%s). A guest can be placed again only once the ledger records it as lost.",
 					guest.name(), where(ledger.lastSeen(guest.id())));
 		}
 
@@ -270,8 +270,8 @@ public final class GuestPlacement {
 		Component availability = guest.pending() ? text("pending", "pending") : text("available", "available");
 		Component place = switch (status) {
 			case UNPLACED -> text("unplaced", "unplaced");
-			case PLACED -> text("placed", "placed (last seen %s)", where(ledger.lastSeen(guest.id())));
-			case MISSING -> text("missing", "missing: lost, last seen %s", where(ledger.lastSeen(guest.id())));
+			case PLACED -> text("placed", "placed (%s)", where(ledger.lastSeen(guest.id())));
+			case MISSING -> text("missing", "missing: lost (%s)", where(ledger.lastSeen(guest.id())));
 		};
 		Component marriage = guest.mayMarry() ? text("may_marry", "may marry")
 				: guest.pending() ? text("no_marriage_pending", "no marriage while pending")
@@ -289,7 +289,7 @@ public final class GuestPlacement {
 
 	private static Component where(GuestLedger.@Nullable Place place) {
 		return place == null ? Component.translatableWithFallback("message.jugcraft.guest.roster.nowhere", "not seen yet")
-				: Component.translatableWithFallback("message.jugcraft.guest.roster.where", "%s in %s", place.pos().toShortString(),
+				: Component.translatableWithFallback("message.jugcraft.guest.roster.where", "last seen at %s in %s", place.pos().toShortString(),
 						place.dimension().identifier().toString());
 	}
 }
