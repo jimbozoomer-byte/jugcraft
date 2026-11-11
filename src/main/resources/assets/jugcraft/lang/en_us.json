@@ -33037,5 +33037,10 @@
   "message.jugcraft.guest.repair.state.player": "%s%s: spouse %s; cooldown %s; affection: %s; pending: %s.",
   "message.jugcraft.guest.repair.unknown_guest": "There is no guest called %s.",
   "message.jugcraft.guest.repair.unknown_player": "No online player is called %s; give an offline player's UUID.",
-  "message.jugcraft.guest.repair.unreadable_player": "%s's saved record cannot be read; it is kept as written. Repair the town_guests file first."
+  "message.jugcraft.guest.repair.unreadable_player": "%s's saved record cannot be read; it is kept as written. Repair the town_guests file first.",
+  "screen.jugcraft.guest.activities": "Activities",
+  "screen.jugcraft.guest.activities.close": "Back",
+  "screen.jugcraft.guest.activities.more": "More",
+  "screen.jugcraft.guest.activities.title": "Things to do together",
+  "screen.jugcraft.guest.activities.none": "Nothing to do together right now."
 }

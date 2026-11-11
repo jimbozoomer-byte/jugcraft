@@ -56,6 +56,9 @@ import net.minecraft.world.phys.Vec3;
  * (the menu's data sync does): it needs worker B's favors merged and says so if they are still the placeholders.
  */
 public class GuestLedgerGameTests {
+	/** A marriageable game-test guest (the fixtures once used "power", now held out of romance). */
+	private static final String POWER = io.github.jimbozoomer.jugcraft.town.guests.GuestRosterTesting.guest("test_ledger_spouse", true);
+
 	private static final int MAX = GuestBalance.MAX_AFFECTION;
 	private static final long DAY = 24L * 60 * 60 * 1000;
 	private static final long WEEK = GuestBalance.REMARRIAGE_COOLDOWN_MILLIS;
@@ -67,7 +70,7 @@ public class GuestLedgerGameTests {
 	@GameTest(maxTicks = 20)
 	public void theLedgerKeepsOneIdentityPerGuest(GameTestHelper h) {
 		GuestLedger ledger = GuestLedgerTesting.fresh();
-		String guest = "power";
+		String guest = POWER;
 		UUID first = UUID.randomUUID(), second = UUID.randomUUID(), third = UUID.randomUUID();
 		h.assertTrue(ledger.canonical(guest) == null && ledger.verify(guest, first) == Claim.CANONICAL && first.equals(ledger.canonical(guest)),
 				"The first entity to ask binds an unbound guest");
@@ -260,13 +263,13 @@ public class GuestLedgerGameTests {
 		// The same at the ledger itself.
 		GuestLedger alone = GuestLedgerTesting.fresh();
 		UUID a = UUID.randomUUID(), b = UUID.randomUUID();
-		h.assertTrue(alone.bind("pokimane", UUID.randomUUID()) && alone.bind("power", UUID.randomUUID()), "(two guests bound)");
+		h.assertTrue(alone.bind("pokimane", UUID.randomUUID()) && alone.bind(POWER, UUID.randomUUID()), "(two guests bound)");
 		for (UUID player : List.of(a, b)) {
 			alone.addAffection(player, "pokimane", MAX);
-			alone.addAffection(player, "power", MAX);
+			alone.addAffection(player, POWER, MAX);
 		}
-		h.assertTrue(alone.marry(a, "pokimane") && !alone.marry(b, "pokimane") && !alone.marry(a, "power") && alone.marry(b, "power")
-				&& b.equals(alone.spouseOf("power")) && "pokimane".equals(alone.spouseOf(a)), "marry commits one spouse per guest and per player");
+		h.assertTrue(alone.marry(a, "pokimane") && !alone.marry(b, "pokimane") && !alone.marry(a, POWER) && alone.marry(b, POWER)
+				&& b.equals(alone.spouseOf(POWER)) && "pokimane".equals(alone.spouseOf(a)), "marry commits one spouse per guest and per player");
 
 		// Replay after reopening, through the real menu.
 		ServerPlayer four = visitor(h, 5, 4, 1);
@@ -479,7 +482,7 @@ public class GuestLedgerGameTests {
 		floor(h);
 		ServerLevel level = h.getLevel();
 		MinecraftServer server = level.getServer();
-		String guest = "power", rebound = "rei_ayanami";
+		String guest = POWER, rebound = "rei_ayanami";
 		GuestLedgerTesting.reset(server, guest, rebound);
 		GuestLedger ledger = GuestLedger.get(server);
 		Townsfolk npc = placeBound(h, ledger, guest, 1, 1);
@@ -586,7 +589,7 @@ public class GuestLedgerGameTests {
 		AtomicLong clock = new AtomicLong(T0);
 		GuestLedgerTesting.withClock(clock::get, () -> {
 			GuestLedger ledger = GuestLedgerTesting.fresh();
-			String guest = "power";
+			String guest = POWER;
 			UUID player = UUID.randomUUID();
 			h.assertTrue(ledger.bind(guest, UUID.randomUUID()) && ledger.addAffection(player, guest, MAX) == MAX && ledger.marry(player, guest)
 					&& guest.equals(ledger.divorce(player)), "(married and divorced at T0)");
@@ -627,34 +630,34 @@ public class GuestLedgerGameTests {
 			GuestLedger ledger = GuestLedgerTesting.fresh();
 			UUID powerNpc = UUID.randomUUID(), aocNpc = UUID.randomUUID(), emiruOld = UUID.randomUUID(), emiruNpc = UUID.randomUUID();
 			UUID wed = UUID.randomUUID(), fond = UUID.randomUUID(), parted = UUID.randomUUID();
-			h.assertTrue(ledger.bind("power", powerNpc) && ledger.bind("aoc", aocNpc) && ledger.bind("emiru", emiruOld)
+			h.assertTrue(ledger.bind(POWER, powerNpc) && ledger.bind("aoc", aocNpc) && ledger.bind("emiru", emiruOld)
 					&& GuestLedgerTesting.forceBind(ledger, "emiru", emiruNpc), "(bound, one replaced)");
-			ledger.seen("power", powerNpc, Level.OVERWORLD, new BlockPos(10, 64, -3));
+			ledger.seen(POWER, powerNpc, Level.OVERWORLD, new BlockPos(10, 64, -3));
 			ledger.seen("aoc", aocNpc, Level.NETHER, new BlockPos(-7, 40, 2));
 			ledger.lost("aoc", aocNpc);
-			ledger.addAffection(wed, "power", MAX);
+			ledger.addAffection(wed, POWER, MAX);
 			ledger.addAffection(wed, "aoc", 300);
-			ledger.addAffection(fond, "power", 999);
+			ledger.addAffection(fond, POWER, 999);
 			ledger.addAffection(fond, "asa_mitaka", 120);
 			ledger.addAffection(parted, "emiru", MAX);
-			h.assertTrue(ledger.marry(wed, "power") && ledger.marry(parted, "emiru") && "emiru".equals(ledger.divorce(parted)), "(one married, one divorced)");
+			h.assertTrue(ledger.marry(wed, POWER) && ledger.marry(parted, "emiru") && "emiru".equals(ledger.divorce(parted)), "(one married, one divorced)");
 			clock.set(T0 + DAY);
 			h.assertTrue(ledger.cooldownMillis(parted) == WEEK - DAY, "(a day into the cooldown)");
 
 			Tag saved = GuestLedgerTesting.save(ledger);
 			GuestLedger loaded = GuestLedgerTesting.load(saved);
-			h.assertTrue(powerNpc.equals(loaded.canonical("power")) && !loaded.missing("power")
-					&& new GuestLedger.Place(Level.OVERWORLD, new BlockPos(10, 64, -3)).equals(loaded.lastSeen("power")), "Identity and last place come back");
+			h.assertTrue(powerNpc.equals(loaded.canonical(POWER)) && !loaded.missing(POWER)
+					&& new GuestLedger.Place(Level.OVERWORLD, new BlockPos(10, 64, -3)).equals(loaded.lastSeen(POWER)), "Identity and last place come back");
 			h.assertTrue(aocNpc.equals(loaded.canonical("aoc")) && loaded.missing("aoc") && Level.NETHER.equals(loaded.lastSeen("aoc").dimension()),
 					"A lost guest stays lost, last seen in its dimension");
 			h.assertTrue(emiruNpc.equals(loaded.canonical("emiru")) && GuestLedgerTesting.replaced(loaded, "emiru").equals(List.of(emiruOld))
 					&& loaded.verify("emiru", emiruOld) == Claim.DUPLICATE && !loaded.bind("emiru", emiruOld), "A replaced entity stays refused");
-			h.assertTrue(loaded.affection(wed, "power") == MAX && loaded.affection(wed, "aoc") == 300 && loaded.affection(fond, "power") == 999
+			h.assertTrue(loaded.affection(wed, POWER) == MAX && loaded.affection(wed, "aoc") == 300 && loaded.affection(fond, POWER) == 999
 					&& loaded.affection(fond, "asa_mitaka") == 120 && loaded.affection(parted, "emiru") == MAX, "Affection comes back");
-			h.assertTrue("power".equals(loaded.spouseOf(wed)) && wed.equals(loaded.spouseOf("power")) && loaded.spouseOf(parted) == null
+			h.assertTrue(POWER.equals(loaded.spouseOf(wed)) && wed.equals(loaded.spouseOf(POWER)) && loaded.spouseOf(parted) == null
 					&& loaded.spouseOf("emiru") == null, "Marriages come back, both ways");
 			h.assertTrue(loaded.cooldownMillis(parted) == WEEK - DAY && loaded.cooldownMillis("emiru") == WEEK - DAY, "Cooldowns come back");
-			h.assertTrue(loaded.canMarry(fond, "power") == Refusal.NOT_FULL_AFFECTION && loaded.canMarry(parted, "emiru") == Refusal.PLAYER_COOLDOWN,
+			h.assertTrue(loaded.canMarry(fond, POWER) == Refusal.NOT_FULL_AFFECTION && loaded.canMarry(parted, "emiru") == Refusal.PLAYER_COOLDOWN,
 					"and the rules hold on the loaded ledger");
 			h.assertTrue(GuestLedgerTesting.save(loaded).equals(saved), "Saving the loaded ledger writes exactly what was read");
 		});
@@ -667,20 +670,20 @@ public class GuestLedgerGameTests {
 		AtomicLong clock = new AtomicLong(T0);
 		GuestLedgerTesting.withClock(clock::get, () -> {
 			GuestLedger ledger = GuestLedgerTesting.fresh();
-			for (String guest : List.of("power", "aoc", "emiru", "pokimane")) {
+			for (String guest : List.of(POWER, "aoc", "emiru", "pokimane")) {
 				h.assertTrue(ledger.bind(guest, UUID.randomUUID()), "(" + guest + " bound)");
 			}
 			// kept: married to power, whose entry stays readable. named: married to aoc, whose entry will be damaged with its
 			// spouse still legible. unread: affection and a cooldown in an entry that will be damaged. free: concerned by nothing.
 			UUID kept = UUID.randomUUID(), named = UUID.randomUUID(), unread = UUID.randomUUID(), free = UUID.randomUUID();
-			ledger.addAffection(kept, "power", MAX);
+			ledger.addAffection(kept, POWER, MAX);
 			ledger.addAffection(named, "aoc", MAX);
 			ledger.addAffection(named, "emiru", MAX);
 			ledger.addAffection(unread, "pokimane", MAX);
 			ledger.addAffection(unread, "emiru", MAX);
 			ledger.addAffection(free, "emiru", MAX);
 			ledger.addAffection(free, "aoc", MAX);
-			h.assertTrue(ledger.marry(kept, "power") && ledger.marry(named, "aoc") && ledger.marry(unread, "pokimane") && ledger.divorce(unread) != null,
+			h.assertTrue(ledger.marry(kept, POWER) && ledger.marry(named, "aoc") && ledger.marry(unread, "pokimane") && ledger.divorce(unread) != null,
 					"(the marriages and the cooldown)");
 
 			JsonElement json = GuestLedgerTesting.saveJson(ledger);
@@ -692,7 +695,7 @@ public class GuestLedgerGameTests {
 			GuestLedger loaded = GuestLedgerTesting.loadJson(json);
 
 			h.assertTrue(GuestLedgerTesting.unreadable(loaded, "aoc") && GuestLedgerTesting.unreadable(loaded, unread)
-					&& !GuestLedgerTesting.unreadable(loaded, "power") && !GuestLedgerTesting.unreadable(loaded, kept), "Exactly the two damaged entries are unreadable");
+					&& !GuestLedgerTesting.unreadable(loaded, POWER) && !GuestLedgerTesting.unreadable(loaded, kept), "Exactly the two damaged entries are unreadable");
 			h.assertTrue(loaded.canMarry(free, "aoc") == Refusal.NO_MARRIAGE && !loaded.marry(free, "aoc") && loaded.spouseOf("aoc") == null
 					&& loaded.verify("aoc", UUID.randomUUID()) == Claim.UNKNOWN_GUEST && !loaded.bind("aoc", UUID.randomUUID()),
 					"The damaged guest is frozen: no second spouse, no new identity");
@@ -705,7 +708,7 @@ public class GuestLedgerGameTests {
 					&& GuestLedgerTesting.setAffection(loaded, unread, "emiru", 500) == 0 && !loaded.canGainAffection(free, "aoc")
 					&& loaded.addAffection(free, "aoc", -10) == frozenAffection
 					&& loaded.affection(free, "aoc") == frozenAffection, "Damaged parties reject changes without erasing readable affection");
-			h.assertTrue("power".equals(loaded.spouseOf(kept)) && loaded.canMarry(free, "emiru") == null && loaded.marry(free, "emiru"),
+			h.assertTrue(POWER.equals(loaded.spouseOf(kept)) && loaded.canMarry(free, "emiru") == null && loaded.marry(free, "emiru"),
 					"Everyone else is unaffected");
 			JsonObject again = GuestLedgerTesting.saveJson(loaded).getAsJsonObject().getAsJsonObject("data");
 			h.assertTrue(damagedAoc.equals(again.getAsJsonObject("guests").get("aoc"))
