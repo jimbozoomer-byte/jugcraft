@@ -4,6 +4,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.server.MinecraftServer;
@@ -61,6 +62,26 @@ public final class GuestFavorTesting {
 		GuestFavors.State state = GuestFavors.State.get(player.level().getServer());
 		long day = state.effective(player.getUUID(), GuestFavors.day(player));
 		state.put(player.getUUID(), guest, state.today(player.getUUID(), guest, day).withAffection(amount), day);
+	}
+
+	/** {@code player}'s saved favor record with {@code guest} and their high-water day, as text ("null" when none): to check nothing moved on. */
+	public static String record(ServerPlayer player, String guest) {
+		GuestFavors.State state = GuestFavors.State.get(player.level().getServer());
+		Map<String, GuestFavors.Favor> mine = state.players.get(player.getUUID());
+		return (mine == null ? null : mine.get(guest)) + " @ " + state.highWater.get(player.getUUID());
+	}
+
+	/**
+	 * Records today's offered quest for {@code guest} as taken up by {@code player}, without the entry points' checks: for
+	 * a player who could not take it up in place (one standing in another level), so a refused turn-in is meaningful.
+	 */
+	public static void takeUp(ServerPlayer player, String guest) {
+		GuestFavors.State state = GuestFavors.State.get(player.level().getServer());
+		UUID id = player.getUUID();
+		long day = state.effective(id, GuestFavors.day(player));
+		GuestFavors.Quest quest = GuestFavors.offered(guest, id, day);
+		state.put(id, guest, state.today(id, guest, day).withQuest(GuestFavors.QuestState.ACTIVE,
+				BuiltInRegistries.ITEM.getKey(quest.item()).toString(), quest.count()), day);
 	}
 
 	/** The favors' saved data, written with its codec as the game writes it. */
