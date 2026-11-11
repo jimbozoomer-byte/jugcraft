@@ -1,7 +1,6 @@
 package io.github.jimbozoomer.jugcraft.town.guests;
 
 import io.github.jimbozoomer.jugcraft.town.Townsfolk;
-import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
@@ -50,25 +49,24 @@ public final class GuestPlacementTesting {
 	}
 
 	/**
-	 * An available guest that may be placed now (never bound, or lost), not in {@code skip}, taken from the end of the
-	 * roster so as to keep clear of other tests that name guests from its start; null when every guest is placed.
-	 * Tests place it in the same tick they pick it, so two tests never pick the same one.
+	 * The first of {@code candidates}, in order, that is available and may be placed now: one never bound, else one lost;
+	 * null when every candidate is placed. Tests share one server, so each test class names only the guests it owns, and
+	 * a test places the guest in the same tick it picks it.
 	 */
-	public static @Nullable String freeGuest(MinecraftServer server, List<String> skip) {
+	public static @Nullable String freeGuest(MinecraftServer server, List<String> candidates) {
 		GuestLedger ledger = GuestLedger.get(server);
-		List<GuestRoster.Guest> all = new ArrayList<>(GuestRoster.ALL);
-		java.util.Collections.reverse(all);
 		String lost = null;
-		for (GuestRoster.Guest guest : all) {
-			if (!guest.available() || skip.contains(guest.id())) {
+		for (String id : candidates) {
+			GuestRoster.Guest guest = GuestRoster.get(id);
+			if (guest == null || !guest.available()) {
 				continue;
 			}
-			GuestPlacement.Status status = GuestPlacement.status(ledger, guest.id());
+			GuestPlacement.Status status = GuestPlacement.status(ledger, id);
 			if (status == GuestPlacement.Status.UNPLACED) {
-				return guest.id();
+				return id;
 			}
 			if (status == GuestPlacement.Status.MISSING && lost == null) {
-				lost = guest.id();
+				lost = id;
 			}
 		}
 		return lost;

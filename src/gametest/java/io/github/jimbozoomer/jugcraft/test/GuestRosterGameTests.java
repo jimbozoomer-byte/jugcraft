@@ -45,10 +45,18 @@ import org.jspecify.annotations.Nullable;
  * <p>Written for the integrated build. The first two tests stand alone. Every other test reads or writes the guest
  * ledger, so it needs worker A's {@code GuestLedger}; the two menu tests also need worker B's {@code GuestFavors} and
  * worker A's {@code GuestMarriage}, which the menu's synced values read whenever it is opened or clicked. Guests are
- * picked from the end of the roster, only when free to place, and removed again (lost, so placeable again) when each
- * test ends; {@link #placementRefusesAndChangesNothing} leaves one guest bound to an entity that never loads.
+ * picked only when free to place, and removed again (lost, so placeable again) when each
+ * test ends; {@link #placementRefusesAndChangesNothing} leaves one guest bound to an entity that never loads. They bind
+ * only the guests in {@link #MINE}; each picks a free one and places it within the same tick, so they never collide.
  */
 public class GuestRosterGameTests {
+	/**
+	 * The only guests these tests bind (the coordinator's split: workers A and B own others, and tests share one server).
+	 * Pending ids never bind and are used freely for refusals.
+	 */
+	private static final List<String> MINE = List.of("tokai_teio", "agnes_tachyon", "gold_ship", "oguri_cap", "special_week",
+			"asuka_langley", "rem", "rin_ishtar");
+
 	/** Saved ids are unique and well formed; pending guests can be neither placed nor married. */
 	@GameTest(maxTicks = 1)
 	public void theRosterIsUniqueAndPendingGuestsWait(GameTestHelper helper) {
@@ -111,7 +119,7 @@ public class GuestRosterGameTests {
 		floor(h);
 		ServerLevel level = h.getLevel();
 		MinecraftServer server = level.getServer();
-		String id = GuestPlacementTesting.freeGuest(server, List.of());
+		String id = GuestPlacementTesting.freeGuest(server, MINE);
 		h.assertTrue(id != null, "A guest is free to place");
 		GuestRoster.Guest guest = GuestRoster.get(id);
 		Map<BlockPos, BlockState> before = blocks(h);
@@ -180,7 +188,7 @@ public class GuestRosterGameTests {
 		ServerPlayer visitor = TestPlayers.survivor(h);
 		Vec3 aside = centre(h, 6, 6);
 		visitor.snapTo(aside.x, aside.y, aside.z, 0, 0);
-		String id = GuestPlacementTesting.freeGuest(server, List.of());
+		String id = GuestPlacementTesting.freeGuest(server, MINE);
 		h.assertTrue(id != null, "A guest is free to place");
 		try {
 			refused(h, console, "rooni", centre(h, 3, 3), "PENDING");
@@ -194,7 +202,8 @@ public class GuestRosterGameTests {
 			CommandSourceStack personal = visitor.createCommandSourceStack().withSuppressedOutput();
 			h.assertFalse(CustomNpcs.isOperator(personal), "The survivor is not an operator (precondition)");
 			refused(h, personal, id, centre(h, 3, 3), "NOT_OPERATOR");
-			h.assertFalse(dispatcher.getRoot().getChild("guests").canUse(personal), "A player who is not an operator cannot use /guests");
+			h.assertFalse(dispatcher.getRoot().getChild("guests").getChild("place").canUse(personal),
+					"A player who is not an operator cannot use /guests place");
 			boolean thrown = false;
 			try {
 				dispatcher.execute("guests place " + id, personal.withPosition(centre(h, 3, 3)));
@@ -237,7 +246,7 @@ public class GuestRosterGameTests {
 			h.assertFalse(TownProtection.shieldsBlock(level, spot), "The region fixture is gone");
 
 			// Already placed, its canonical entity not loaded anywhere (as when its chunk is unloaded).
-			String held = GuestPlacementTesting.freeGuest(server, List.of(id));
+			String held = GuestPlacementTesting.freeGuest(server, MINE.stream().filter(other -> !other.equals(id)).toList());
 			h.assertTrue(held != null && GuestLedger.get(server).bind(held, UUID.randomUUID()), "The ledger holds an unloaded entity for " + held);
 			refused(h, console, held, centre(h, 3, 3), "PLACED");
 			h.assertTrue(GuestPlacementTesting.status(server, held).equals("PLACED"), "It stays placed");
@@ -263,7 +272,7 @@ public class GuestRosterGameTests {
 		floor(h);
 		ServerLevel level = h.getLevel();
 		MinecraftServer server = level.getServer();
-		String id = GuestPlacementTesting.freeGuest(server, List.of());
+		String id = GuestPlacementTesting.freeGuest(server, MINE);
 		h.assertTrue(id != null, "A guest is free to place");
 		GuestPlacementTesting.Placed placed = GuestPlacementTesting.place(console(h), id, level, centre(h, 3, 3), 0);
 		h.assertTrue(placed.npc() != null, "Placed: " + placed.refusal());
@@ -300,8 +309,16 @@ public class GuestRosterGameTests {
 			CommandDispatcher<CommandSourceStack> dispatcher = server.getCommands().getDispatcher();
 			h.assertTrue(dispatcher.execute("guests roster", console(h)) == GuestRoster.ALL.size(), "/guests roster answers for every entry");
 			ServerPlayer visitor = TestPlayers.survivor(h);
-			h.assertFalse(dispatcher.getRoot().getChild("guests").canUse(visitor.createCommandSourceStack()),
+			CommandSourceStack personal = visitor.createCommandSourceStack().withSuppressedOutput();
+			h.assertFalse(dispatcher.getRoot().getChild("guests").getChild("roster").canUse(personal),
 					"A player who is not an operator cannot read the roster");
+			boolean thrown = false;
+			try {
+				dispatcher.execute("guests roster", personal);
+			} catch (CommandSyntaxException expected) {
+				thrown = true;
+			}
+			h.assertTrue(thrown, "/guests roster by a player who is not an operator is refused");
 		} finally {
 			remove(server, placed.npc());
 		}
@@ -318,7 +335,7 @@ public class GuestRosterGameTests {
 		floor(h);
 		ServerLevel level = h.getLevel();
 		MinecraftServer server = level.getServer();
-		String id = GuestPlacementTesting.freeGuest(server, List.of());
+		String id = GuestPlacementTesting.freeGuest(server, MINE);
 		h.assertTrue(id != null, "A guest is free to place");
 		GuestPlacementTesting.Placed placed = GuestPlacementTesting.place(console(h), id, level, centre(h, 1, 1), 0);
 		Townsfolk npc = placed.npc();
@@ -362,7 +379,7 @@ public class GuestRosterGameTests {
 		floor(h);
 		ServerLevel level = h.getLevel();
 		MinecraftServer server = level.getServer();
-		String id = GuestPlacementTesting.freeGuest(server, List.of());
+		String id = GuestPlacementTesting.freeGuest(server, MINE);
 		h.assertTrue(id != null, "A guest is free to place");
 		GuestPlacementTesting.Placed placed = GuestPlacementTesting.place(console(h), id, level, centre(h, 1, 1), 0);
 		Townsfolk npc = placed.npc();

@@ -12864,6 +12864,7 @@
   "message.jugcraft.guest.gift.favourite": "You gave %s one %s, a favourite: +%s affection.",
   "message.jugcraft.guest.gift.given": "You gave %s one %s: +%s affection.",
   "message.jugcraft.guest.gift.unwanted": "%s does not take %s as a gift.",
+  "message.jugcraft.guest.not_here": "%s is not here to talk to.",
   "message.jugcraft.guest.place.bind_refused": "The guest ledger refused the new %s (another entity holds the identity), so it was removed again.",
   "message.jugcraft.guest.place.blocked": "There is no room there: a guest needs a clear spot the size of a player, and placing never changes a block.",
   "message.jugcraft.guest.place.claimed": "That spot is in land claimed by %s. Place guests only where you may build.",
