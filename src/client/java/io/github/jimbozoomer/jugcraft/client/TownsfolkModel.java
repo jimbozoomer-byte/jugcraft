@@ -31,6 +31,7 @@ public class TownsfolkModel extends HumanoidModel<TownsfolkRenderer.State> {
 
 	/** The arms' classic and slim versions (null in {@link #createLayer()}, which has classic arms only). */
 	private final @Nullable ModelPart rightWide, rightSlim, leftWide, leftSlim;
+	private final @Nullable ModelPart guestEars, guestHorns, guestElfEars, guestMageHat;
 
 	public TownsfolkModel(ModelPart root) {
 		super(root);
@@ -39,6 +40,10 @@ public class TownsfolkModel extends HumanoidModel<TownsfolkRenderer.State> {
 		rightSlim = skinnable ? rightArm.getChild("slim") : null;
 		leftWide = skinnable ? leftArm.getChild("wide") : null;
 		leftSlim = skinnable ? leftArm.getChild("slim") : null;
+        guestEars = head.hasChild("guest_ears") ? head.getChild("guest_ears") : null;
+        guestHorns = head.hasChild("guest_horns") ? head.getChild("guest_horns") : null;
+        guestElfEars = head.hasChild("guest_elf_ears") ? head.getChild("guest_elf_ears") : null;
+        guestMageHat = head.hasChild("guest_mage_hat") ? head.getChild("guest_mage_hat") : null;
 	}
 
 	public static LayerDefinition createLayer() {
@@ -116,12 +121,41 @@ public class TownsfolkModel extends HumanoidModel<TownsfolkRenderer.State> {
 				CubeListBuilder.create().texOffs(16, 48).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, none), PartPose.offset(1.9F, 12.0F, 0.0F));
 		leftLeg.addOrReplaceChild("left_pants",
 				CubeListBuilder.create().texOffs(0, 48).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, outer), PartPose.ZERO);
+        head.addOrReplaceChild("guest_ears", CubeListBuilder.create().texOffs(0, 0)
+                .addBox(-3.5F, -11.5F, -0.5F, 2, 4, 1)
+                .texOffs(0, 0).addBox(1.5F, -11.5F, -0.5F, 2, 4, 1), PartPose.ZERO);
+        head.addOrReplaceChild("guest_horns", CubeListBuilder.create().texOffs(0, 0)
+                .addBox(-3, -10.5F, -2, 1, 3, 1)
+                .texOffs(0, 0).addBox(2, -10.5F, -2, 1, 3, 1), PartPose.ZERO);
+        head.addOrReplaceChild("guest_elf_ears", CubeListBuilder.create().texOffs(0, 0)
+                .addBox(-5, -5, -1, 1, 2, 2)
+                .texOffs(0, 0).addBox(4, -5, -1, 1, 2, 2), PartPose.ZERO);
+        // Tiled closed cubes sample the reserved 8x8 UV island without touching face/hair UVs.
+        CubeListBuilder mageHat = CubeListBuilder.create();
+        for (int tier = 0; tier < 5; tier++) {
+            int width = tier == 0 ? 12 : 10 - tier * 2;
+            float y = tier == 0 ? -9 : -9 - tier * 2;
+            int height = tier == 0 ? 1 : 2;
+            for (int x = -width / 2; x < width / 2; x += 2) {
+                for (int z = -width / 2; z < width / 2; z += 2) {
+                    mageHat.texOffs(tier == 1 ? 24 : 0, 0).addBox(x, y, z, 2, height, 2);
+                }
+            }
+        }
+        head.addOrReplaceChild("guest_mage_hat", mageHat, PartPose.ZERO);
 		return LayerDefinition.create(mesh, 64, 64);
 	}
 
 	@Override
 	public void setupAnim(TownsfolkRenderer.State state) {
 		super.setupAnim(state);
+        if (guestEars != null) {
+            guestEars.visible = java.util.Set.of("guest_tokai_teio", "guest_agnes_tachyon", "guest_gold_ship",
+                    "guest_oguri_cap", "guest_special_week", "guest_miyabi").contains(state.skin) && state.playerSkin == null;
+            guestHorns.visible = (state.skin.equals("guest_power") || state.skin.equals("guest_zero_two")) && state.playerSkin == null;
+            guestElfEars.visible = state.skin.equals("guest_frieren") && state.playerSkin == null;
+            guestMageHat.visible = state.skin.equals("guest_megumin") && state.playerSkin == null;
+        }
 		if (rightWide != null && rightSlim != null && leftWide != null && leftSlim != null) {
 			// Set every frame: one model draws everyone.
 			rightWide.visible = leftWide.visible = !state.slim;

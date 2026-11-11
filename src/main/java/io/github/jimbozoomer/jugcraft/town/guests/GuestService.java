@@ -52,6 +52,7 @@ public final class GuestService {
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 			GuestRepairCommand.register(dispatcher);
 			GuestPlacement.register(dispatcher);
+			GuestCityPlacement.register(dispatcher);
 		});
 		ServerEntityEvents.ENTITY_UNLOAD.register((entity, level) -> {
 			if (entity instanceof Townsfolk npc && npc.guest() != null && entity.getRemovalReason() != null
@@ -92,6 +93,13 @@ public final class GuestService {
 		if (ledger.verify(guest, npc.getUUID()) == GuestLedger.Claim.DUPLICATE) {
 			npc.discard();
 			return true;
+		}
+		// Migrate only our previous stand-ins; preserve an operator-selected custom/player skin.
+		GuestAppearances.Appearance appearance = GuestAppearances.of(guest);
+		if (appearance != null && appearance.finalArt()
+				&& npc.custom() != null && npc.custom().skinName().isEmpty()
+				&& npc.skin().equals(GuestAppearances.legacySkin(guest))) {
+			GuestAppearances.apply(npc, guest);
 		}
 		ledger.seen(guest, npc.getUUID(), level.dimension(), npc.blockPosition());
 		return false;

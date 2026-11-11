@@ -38,7 +38,7 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Town guests (docs/features/jze-town-relationships.md), worker C's server tests: the roster, the placeholder
+ * Town guests (docs/features/jze-town-relationships.md), worker C's server tests: the roster, the character
  * appearances, operator placement and its refusals, {@code /guests roster}, and the guest menu's server side (validity
  * and stale clicks across a reopened menu).
  *
@@ -57,6 +57,23 @@ public class GuestRosterGameTests {
 	private static final List<String> MINE = List.of("tokai_teio", "agnes_tachyon", "gold_ship", "oguri_cap", "special_week",
 			"asuka_langley", "rem", "rin_ishtar");
 
+    @GameTest(maxTicks = 1)
+    public void cityLawnPlacementPreservesStructuresAndOwnerObjects(GameTestHelper h) {
+        BlockPos feet = h.absolutePos(new BlockPos(4, 2, 4));
+        var level = h.getLevel();
+        for (BlockPos cell : BlockPos.betweenClosed(feet.offset(-2,-1,-2), feet.offset(2,2,2))) {
+            level.setBlockAndUpdate(cell, cell.getY() == feet.getY()-1 ? Blocks.GRASS_BLOCK.defaultBlockState() : Blocks.AIR.defaultBlockState());
+        }
+        h.assertTrue(GuestPlacementTesting.clearLawn(level, feet), "Clear grass is eligible");
+        level.setBlockAndUpdate(feet.east(), Blocks.CHEST.defaultBlockState());
+        h.assertTrue(!GuestPlacementTesting.clearLawn(level, feet), "Nearby owner container excludes the whole site");
+        h.assertTrue(level.getBlockState(feet.east()).is(Blocks.CHEST), "The container remains untouched");
+        level.setBlockAndUpdate(feet.east(), Blocks.AIR.defaultBlockState());
+        level.setBlockAndUpdate(feet.below(), Blocks.DIRT_PATH.defaultBlockState());
+        h.assertTrue(!GuestPlacementTesting.clearLawn(level, feet), "Never occupy a street or doorstep");
+        h.succeed();
+    }
+
 	/** Saved ids are unique and well formed; pending guests can be neither placed nor married. */
 	@GameTest(maxTicks = 1)
 	public void theRosterIsUniqueAndPendingGuestsWait(GameTestHelper helper) {
@@ -74,11 +91,11 @@ public class GuestRosterGameTests {
 	}
 
 	/**
-	 * Every available guest has a labelled placeholder from the town's own civilian skins, never final art, varied so
+	 * Every available guest has a unique packaged skin, varied so
 	 * that neighbours in the roster differ; pending guests have none.
 	 */
 	@GameTest(maxTicks = 1)
-	public void everyAppearanceIsALabelledPlaceholderFromTheTownsSkins(GameTestHelper helper) {
+	public void everyAppearanceUsesItsOwnPackagedCharacterSkin(GameTestHelper helper) {
 		Set<String> townSkins = CustomNpcs.townSkins();
 		Set<String> used = new HashSet<>();
 		GuestAppearances.Appearance previous = null;
@@ -89,10 +106,10 @@ public class GuestRosterGameTests {
 				continue;
 			}
 			helper.assertTrue(look != null && look.guest().equals(guest.id()), guest.id() + " has an appearance");
-			helper.assertTrue(!look.finalArt() && look.placeholder(), guest.id() + " is a placeholder, not final art");
-			helper.assertTrue(townSkins.contains(look.townSkin()) && GuestAppearances.PLACEHOLDER_SKINS.contains(look.townSkin()),
+			helper.assertTrue(look.finalArt() && !look.placeholder(), guest.id() + " has authored character art");
+			helper.assertTrue(townSkins.contains(look.townSkin()) && GuestAppearances.skins().contains(look.townSkin()),
 					guest.id() + " wears one of the town's civilian skins: " + look.townSkin());
-			helper.assertTrue(look.note().getString().equals(GuestAppearances.NOTE), guest.id() + " is labelled: " + look.note().getString());
+			helper.assertTrue(look.note().getString().equals("character-inspired skin"), guest.id() + " is labelled: " + look.note().getString());
 			helper.assertTrue(previous == null || !previous.townSkin().equals(look.townSkin()),
 					guest.id() + " looks different from the guest before it in the roster");
 			used.add(look.townSkin());
@@ -102,7 +119,7 @@ public class GuestRosterGameTests {
 			helper.assertTrue(townSkins.contains(skin), "The town has the placeholder skin " + skin);
 			helper.assertTrue(!skin.startsWith("guard") && !Set.of("mayor", "priest", "banker").contains(skin), skin + " is a civilian skin");
 		}
-		helper.assertTrue(used.size() == GuestAppearances.PLACEHOLDER_SKINS.size(), "Every placeholder skin is in use: " + used);
+		helper.assertTrue(used.size() == GuestAppearances.skins().size(), "Every authored skin is in use: " + used);
 		helper.assertTrue(GuestAppearances.PLACEHOLDER_SKINS.contains(GuestPlacementTesting.fallbackSkin("a_future_guest"))
 				&& GuestPlacementTesting.fallbackSkin("a_future_guest").equals(GuestPlacementTesting.fallbackSkin("a_future_guest")),
 				"A guest added later gets a stable placeholder too");
@@ -138,8 +155,23 @@ public class GuestRosterGameTests {
 			h.assertTrue(npc.getUUID().equals(ledger.canonical(id)) && !ledger.missing(id)
 					&& GuestPlacementTesting.status(server, id).equals("PLACED"), "Bound as the guest's canonical entity");
 			GuestAppearances.Appearance look = GuestAppearances.of(id);
-			h.assertTrue(look != null && look.placeholder() && npc.skin().equals(look.townSkin()), "Wearing its labelled placeholder");
+			h.assertTrue(look != null && !look.placeholder() && npc.skin().equals(look.townSkin()), "Wearing its character skin");
 			h.assertTrue(before.equals(blocks(h)), "Placing changed no block");
+            CustomNpcs.setTownSkin(npc, GuestAppearances.legacySkin(id));
+            io.github.jimbozoomer.jugcraft.town.guests.GuestService.tick(level, npc);
+            h.assertTrue(npc.skin().equals(look.townSkin()) && npc.getUUID().equals(ledger.canonical(id)), "Old stand-in migrates without replacing identity");
+            CustomNpcs.setTownSkin(npc, "guest_makima");
+            io.github.jimbozoomer.jugcraft.town.guests.GuestService.tick(level, npc);
+            h.assertTrue(npc.skin().equals("guest_makima"), "Operator-selected named appearance is preserved");
+            CustomNpcs.setTownSkin(npc, "baker");
+            io.github.jimbozoomer.jugcraft.town.guests.GuestService.tick(level, npc);
+            h.assertTrue(npc.skin().equals("baker"), "A different operator-selected town skin is preserved");
+            CustomNpcs.setTownSkin(npc, GuestAppearances.legacySkin(id));
+            io.github.jimbozoomer.jugcraft.town.GuestSkinFixture.pendingPlayerSkin(npc, "Alex");
+            io.github.jimbozoomer.jugcraft.town.guests.GuestService.tick(level, npc);
+            h.assertTrue(npc.custom().skinName().equals("Alex") && npc.skin().equals(GuestAppearances.legacySkin(id)), "Pending player skin is not overwritten by migration");
+
+
 
 			GuestPlacementTesting.Placed again = GuestPlacementTesting.place(console(h), id, level, centre(h, 5, 5), 0);
 			h.assertTrue(again.npc() == null && again.refusal().equals("PLACED") && guests(h).size() == 1,
@@ -291,8 +323,8 @@ public class GuestRosterGameTests {
 					h.assertTrue(line.contains(": pending, unplaced, no marriage while pending; no appearance"), "Pending: " + line);
 				} else {
 					GuestAppearances.Appearance look = GuestAppearances.of(guest.id());
-					h.assertTrue(line.contains(": available, ") && line.contains(GuestAppearances.NOTE + " (town skin " + look.townSkin() + ")"),
-							"Available, with its labelled placeholder: " + line);
+					h.assertTrue(line.contains(": available, ") && line.contains("character-inspired skin" + " (town skin " + look.townSkin() + ")"),
+							"Available, with its character skin: " + line);
 					h.assertTrue(line.contains(guest.mayMarry() ? ", may marry;" : ", companionship only, no marriage;"),
 							"Whether it may marry: " + line);
 				}

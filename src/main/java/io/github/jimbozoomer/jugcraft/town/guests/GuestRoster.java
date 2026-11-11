@@ -34,7 +34,7 @@ public final class GuestRoster {
 		}
 	}
 
-	private static final String REAL = "Real person: generic, respectful lines only; likeness pending reference art.";
+	private static final String REAL = "Real person: generic, respectful lines only; character-inspired Minecraft skin.";
 	private static final String STUDENT = "Companionship without marriage: depicted as a minor or school student in the source work.";
 
 	public static final List<Guest> ALL = List.of(
@@ -42,7 +42,7 @@ public final class GuestRoster {
 			real("lauren_chen", "Lauren Chen", ""),
 			real("brittany_venti", "Brittany Venti", "Confirmed by the owner."),
 			real("aoc", "AOC", ""),
-			real("sarah_stock", "Sarah Stock", "Optional non-gory zombie wedding dress appearance (pending art)."),
+			real("sarah_stock", "Sarah Stock", "Non-gory zombie wedding dress appearance."),
 			real("pokimane", "Pokimane", ""),
 			pending("rooni", "Rooni", Origin.REAL_PERSON, "Pending: described only as a slim Black woman; identity and reference unknown."),
 			fiction("power", "Power", "Chainsaw Man", ""),
@@ -98,11 +98,11 @@ public final class GuestRoster {
 	}
 
 	private static Guest fiction(String id, String name, String series, String note) {
-		return new Guest(id, name, Origin.FICTIONAL, series, false, true, join("Likeness pending reference art.", note));
+		return new Guest(id, name, Origin.FICTIONAL, series, false, true, join("Character-inspired Minecraft skin.", note));
 	}
 
 	private static Guest student(String id, String name, String series, String note) {
-		return new Guest(id, name, Origin.FICTIONAL, series, false, false, join(STUDENT + " Likeness pending reference art.", note));
+		return new Guest(id, name, Origin.FICTIONAL, series, false, false, join(STUDENT + " Character-inspired Minecraft skin.", note));
 	}
 
 	private static Guest pending(String id, String name, Origin origin, String note) {

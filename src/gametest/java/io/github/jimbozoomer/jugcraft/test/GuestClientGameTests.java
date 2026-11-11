@@ -31,6 +31,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Blocks;
 
 /**
@@ -41,7 +42,7 @@ import net.minecraft.world.level.block.Blocks;
  * the Gifts key opens the gift list (the guest's favourites, every accepted gift, the daily limits; display only) and
  * closes it again; and the screen, with the list open, is checked to fit the smallest GUI. A guest that is not available (a stand-in menu for a pending
  * entry) shows only that it is not receiving visitors. Screenshots: {@code guest_menu_*} (among them
- * {@code guest_menu_gift_help}), {@code guest_placeholders}.
+ * {@code guest_menu_gift_help}), {@code guest_character_skins}.
  *
  * <p>Written for the integrated build: it needs worker A's ledger and marriage and worker B's favors (a fresh day
  * offers each player an errand, GuestFavors).
@@ -73,7 +74,7 @@ public class GuestClientGameTests implements FabricClientGameTest {
 				}
 			});
 			String marrying = server.computeOnServer(s -> unplaced(s, true));
-			String companion = server.computeOnServer(s -> unplaced(s, false));
+			String companion = server.computeOnServer(s -> GuestRoster.ALL.stream().filter(g -> g.available() && !g.id().equals(marrying) && GuestPlacementTesting.status(s, g.id()).equals("UNPLACED")).findFirst().orElseThrow().id());
 			check(marrying != null && companion != null, "Two guests are free to place");
 
 			// A guest who may marry: placed by command, talked to, its menu checked, its errand accepted by a click.
@@ -129,19 +130,21 @@ public class GuestClientGameTests implements FabricClientGameTest {
 				check(!screen.showsGiftList() && screen.shownFavourites().isEmpty(), "The gift list closes again");
 				shows(screen, GuestMenu.Action.QUEST_ACCEPT, true, false);
 			});
+			marriageButtons(context, server, marrying);
 			context.runOnClient(mc -> mc.player.closeContainer());
 			context.waitForScreen(null);
 
-			// A guest with companionship only: no proposal controls at all.
+			// Another named guest uses the same nonsexual relationship mechanics.
 			int second = place(server, companion, origin.offset(2, 0, 3));
 			talk(context, server, second);
 			context.runOnClient(mc -> {
 				GuestScreen screen = (GuestScreen) mc.gui.screen();
 				GuestMenu menu = screen.getMenu();
-				check(menu.opening().guest().equals(companion) && menu.get(GuestMenu.MAY_MARRY) == 0 && menu.get(GuestMenu.MAY_PROPOSE) == 0,
-						companion + " has companionship without marriage");
+				check(menu.opening().guest().equals(companion) && menu.get(GuestMenu.MAY_MARRY) == 1 && menu.get(GuestMenu.MAY_PROPOSE) == 0,
+						companion + " has the same relationship eligibility");
 				shows(screen, GuestMenu.Action.GIFT, true, menu.get(GuestMenu.GIFTS_LEFT) > 0 && menu.get(GuestMenu.AFFECTION_LEFT_TODAY) > 0);
-				hidden(screen, GuestMenu.Action.PROPOSE, GuestMenu.Action.PROPOSE_CONFIRM, GuestMenu.Action.PROPOSE_CANCEL,
+				shows(screen, GuestMenu.Action.PROPOSE, true, false);
+				hidden(screen, GuestMenu.Action.PROPOSE_CONFIRM, GuestMenu.Action.PROPOSE_CANCEL,
 						GuestMenu.Action.DIVORCE, GuestMenu.Action.DIVORCE_CONFIRM, GuestMenu.Action.DIVORCE_CANCEL);
 			});
 			context.takeScreenshot("guest_menu_companionship");
@@ -151,7 +154,8 @@ public class GuestClientGameTests implements FabricClientGameTest {
 			// Both guests in the world, wearing their labelled placeholders.
 			context.getInput().lookAt(origin.offset(1, 1, 3));
 			context.waitTicks(10);
-			context.takeScreenshot("guest_placeholders");
+			context.takeScreenshot("guest_character_skins");
+			gallery(context, server, origin, first);
 
 			// A guest that is not available: a stand-in menu for a pending entry shows only that.
 			context.runOnClient(mc -> mc.gui.setScreen(new GuestScreen(new GuestMenu(0, mc.player.getInventory(), new GuestMenu.Opening(-1, "rooni")),
@@ -171,6 +175,73 @@ public class GuestClientGameTests implements FabricClientGameTest {
 				});
 			}
 		}
+	}
+
+    /** Render every packaged skin on an actual NPC, including all head accessories. */
+    private static void gallery(ClientGameTestContext context, TestServerContext server, BlockPos origin, int npcId) {
+        context.runOnClient(mc -> { mc.gui.hud.getChat().clearMessages(true); if (!mc.gui.hud.isHidden()) mc.gui.hud.toggle(); });
+        for (GuestRoster.Guest guest : GuestRoster.ALL) {
+            if (!guest.available()) continue;
+            var look = io.github.jimbozoomer.jugcraft.town.guests.GuestAppearances.of(guest.id());
+            context.runOnClient(mc -> check(mc.getResourceManager().getResource(
+                    io.github.jimbozoomer.jugcraft.Jugcraft.id("textures/entity/townsfolk/" + look.townSkin() + ".png")).isPresent(),
+                    "Packaged skin " + guest.id()));
+            server.runOnServer(s -> {
+                Townsfolk npc = (Townsfolk) s.overworld().getEntity(npcId);
+                check(io.github.jimbozoomer.jugcraft.town.CustomNpcs.setTownSkin(npc, look.townSkin()), "Skin accepted " + guest.id());
+                npc.setNoAi(true);
+                npc.setCustomName(Component.literal(guest.name()));
+            });
+            context.getInput().lookAt(origin.offset(0,1,3));
+            context.waitTicks(3);
+            context.takeScreenshot("guest_skin_" + guest.id());
+        }
+        context.runOnClient(mc -> { if (mc.gui.hud.isHidden()) mc.gui.hud.toggle(); });
+    }
+
+	/** Exercise both confirmations over the real menu packets; only affection and the proposal item are fixture setup. */
+	private static void marriageButtons(ClientGameTestContext context, TestServerContext server, String guest) {
+		server.runOnServer(s -> {
+			ServerPlayer p = s.getPlayerList().getPlayers().getFirst();
+			GuestLedger.get(s).addAffection(p.getUUID(), guest, GuestBalance.MAX_AFFECTION);
+			p.getInventory().setItem(0, new ItemStack(GuestBalance.PROPOSAL_ITEM, GuestBalance.PROPOSAL_COUNT));
+		});
+		context.waitFor(mc -> mc.gui.screen() instanceof GuestScreen screen && screen.key(GuestMenu.Action.PROPOSE).active, 100);
+		context.waitTicks(GuestBalance.ACTION_GAP_TICKS + 2);
+		click(context, GuestMenu.Action.PROPOSE);
+		context.waitFor(mc -> mc.gui.screen() instanceof GuestScreen screen && screen.getMenu().get(GuestMenu.PROPOSAL_PENDING) == 1, 100);
+		context.waitTicks(GuestBalance.ACTION_GAP_TICKS + 2);
+		server.runOnServer(s -> {
+			ServerPlayer p = s.getPlayerList().getPlayers().getFirst();
+			check(GuestLedger.get(s).spouseOf(p.getUUID()) == null && p.getInventory().countItem(GuestBalance.PROPOSAL_ITEM) == GuestBalance.PROPOSAL_COUNT,
+					"Requesting a proposal neither marries nor consumes its item");
+		});
+		context.takeScreenshot("guest_menu_proposal_confirmation");
+		click(context, GuestMenu.Action.PROPOSE_CONFIRM);
+		context.waitFor(mc -> mc.gui.screen() instanceof GuestScreen screen && screen.getMenu().get(GuestMenu.PLAYER_SPOUSE) == GuestMenu.EACH_OTHER, 100);
+		context.waitTicks(GuestBalance.ACTION_GAP_TICKS + 2);
+		server.runOnServer(s -> {
+			ServerPlayer p = s.getPlayerList().getPlayers().getFirst();
+			check(guest.equals(GuestLedger.get(s).spouseOf(p.getUUID())) && p.getInventory().countItem(GuestBalance.PROPOSAL_ITEM) == 0,
+					"The real confirmation packet marries once and consumes the proposal item once");
+		});
+		context.takeScreenshot("guest_menu_married");
+		click(context, GuestMenu.Action.DIVORCE);
+		context.waitFor(mc -> mc.gui.screen() instanceof GuestScreen screen && screen.getMenu().get(GuestMenu.DIVORCE_PENDING) == 1, 100);
+		context.waitTicks(GuestBalance.ACTION_GAP_TICKS + 2);
+		server.runOnServer(s -> check(guest.equals(GuestLedger.get(s).spouseOf(s.getPlayerList().getPlayers().getFirst().getUUID())),
+				"Requesting divorce keeps the marriage until confirmation"));
+		context.takeScreenshot("guest_menu_divorce_confirmation");
+		click(context, GuestMenu.Action.DIVORCE_CONFIRM);
+		context.waitFor(mc -> mc.gui.screen() instanceof GuestScreen screen && screen.getMenu().get(GuestMenu.PLAYER_SPOUSE) == GuestMenu.NOBODY
+				&& screen.getMenu().get(GuestMenu.PLAYER_COOLDOWN_MINUTES) > 0 && screen.getMenu().get(GuestMenu.GUEST_COOLDOWN_MINUTES) > 0, 100);
+		context.waitTicks(GuestBalance.ACTION_GAP_TICKS + 2);
+		context.runOnClient(mc -> {
+			GuestScreen screen = (GuestScreen) mc.gui.screen();
+			shows(screen, GuestMenu.Action.PROPOSE, true, false);
+			hidden(screen, GuestMenu.Action.DIVORCE, GuestMenu.Action.DIVORCE_CONFIRM);
+		});
+		context.takeScreenshot("guest_menu_remarriage_cooldowns");
 	}
 
 	/** An available guest, from the end of the roster, that may (or may not) marry and has never been placed. */

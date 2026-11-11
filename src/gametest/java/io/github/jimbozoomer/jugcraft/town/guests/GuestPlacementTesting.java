@@ -15,6 +15,10 @@ import org.jspecify.annotations.Nullable;
  * place, for {@code GuestRosterGameTests} and {@code GuestClientGameTests}.
  */
 public final class GuestPlacementTesting {
+	public static boolean clearLawn(ServerLevel level, net.minecraft.core.BlockPos feet) {
+		return GuestCityPlacement.clearLawn(level, feet);
+	}
+
 	private GuestPlacementTesting() {
 	}
 

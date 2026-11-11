@@ -700,9 +700,11 @@ public class GuestLedgerGameTests {
 					"Its spouse, named in the damaged entry, counts as married");
 			h.assertTrue(loaded.canMarry(unread, "emiru") == Refusal.PLAYER_COOLDOWN && !loaded.marry(unread, "emiru"),
 					"A player whose own entry is unreadable is refused marriage");
+			int frozenAffection = loaded.affection(free, "aoc");
 			h.assertTrue(!loaded.canGainAffection(unread, "emiru") && loaded.addAffection(unread, "emiru", 10) == 0
 					&& GuestLedgerTesting.setAffection(loaded, unread, "emiru", 500) == 0 && !loaded.canGainAffection(free, "aoc")
-					&& loaded.addAffection(free, "aoc", -10) == 0, "and gains no affection; nor does anyone with the frozen guest");
+					&& loaded.addAffection(free, "aoc", -10) == frozenAffection
+					&& loaded.affection(free, "aoc") == frozenAffection, "Damaged parties reject changes without erasing readable affection");
 			h.assertTrue("power".equals(loaded.spouseOf(kept)) && loaded.canMarry(free, "emiru") == null && loaded.marry(free, "emiru"),
 					"Everyone else is unaffected");
 			JsonObject again = GuestLedgerTesting.saveJson(loaded).getAsJsonObject().getAsJsonObject("data");

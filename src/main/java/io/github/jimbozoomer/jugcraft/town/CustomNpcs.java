@@ -204,6 +204,7 @@ public final class CustomNpcs {
 	/** Town skins an NPC may wear: those the town's own residents wear (every one has a texture). */
 	public static Set<String> townSkins() {
 		Set<String> skins = new HashSet<>(Set.of(DEFAULT_NPC_SKIN, DEFAULT_GUARD_SKIN));
+		skins.addAll(io.github.jimbozoomer.jugcraft.town.guests.GuestAppearances.skins());
 		for (TownData.Spot spot : TownData.get().spots) {
 			skins.add(spot.skin());
 		}
