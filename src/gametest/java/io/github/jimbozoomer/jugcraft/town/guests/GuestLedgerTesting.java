@@ -43,15 +43,22 @@ public final class GuestLedgerTesting {
 		}
 	}
 
-	/** Runs {@code body} with game time read from {@code time}, then puts the real game time and the expiry high-water mark back. */
-	public static void withGameTime(ToLongFunction<MinecraftServer> time, Runnable body) {
+	/**
+	 * Runs {@code body} with game time read from {@code time}, then puts back the real game time, the expiry high-water
+	 * mark and every other player's pending proposals and divorces exactly as they were before the body (a request a
+	 * prune dropped at the swapped time comes back unchanged); only {@code player}'s requests stay as the body left them.
+	 * The body is synchronous: it schedules nothing for a later tick.
+	 */
+	public static void withGameTime(UUID player, ToLongFunction<MinecraftServer> time, Runnable body) {
 		long highest = GuestMarriage.highestGameTime();
+		GuestMarriage.Snapshot pending = GuestMarriage.pendingSnapshot();
 		GuestMarriage.gameTime = time;
 		try {
 			body.run();
 		} finally {
 			GuestMarriage.gameTime = GAME_TIME;
 			GuestMarriage.highestGameTime(highest);
+			GuestMarriage.restorePending(pending, player);
 		}
 	}
 

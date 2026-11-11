@@ -261,6 +261,42 @@ public final class GuestMarriage {
 		highest = value;
 	}
 
+	/** Every pending request at one moment (tests: an opaque copy, for {@link #restorePending}). */
+	static final class Snapshot {
+		private final Map<UUID, Pending> proposals;
+		private final Map<UUID, Pending> divorces;
+
+		private Snapshot(Map<UUID, Pending> proposals, Map<UUID, Pending> divorces) {
+			this.proposals = proposals;
+			this.divorces = divorces;
+		}
+	}
+
+	/** A copy of every pending proposal and divorce (the requests themselves never change, so a shallow copy is whole). */
+	static Snapshot pendingSnapshot() {
+		return new Snapshot(new HashMap<>(PROPOSALS), new HashMap<>(DIVORCES));
+	}
+
+	/**
+	 * Puts every player's pending requests back exactly as in {@code snapshot} (what was removed comes back, what was
+	 * added goes, what changed reverts), except {@code keep}'s, which stay as they are now. Tests only, so a test that
+	 * moved game time changes no other player's requests.
+	 */
+	static void restorePending(Snapshot snapshot, UUID keep) {
+		restore(PROPOSALS, snapshot.proposals, keep);
+		restore(DIVORCES, snapshot.divorces, keep);
+	}
+
+	private static void restore(Map<UUID, Pending> requests, Map<UUID, Pending> saved, UUID keep) {
+		Pending kept = requests.get(keep);
+		requests.clear();
+		requests.putAll(saved);
+		requests.remove(keep);
+		if (kept != null) {
+			requests.put(keep, kept);
+		}
+	}
+
 	/** {@code millis} as days, hours and minutes (rounded up to the minute), for messages. */
 	static String duration(long millis) {
 		long minutes = Math.max(0L, (millis + 59_999L) / 60_000L);
