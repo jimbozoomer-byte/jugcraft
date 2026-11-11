@@ -53,6 +53,10 @@ public class TownsfolkRenderer extends HumanoidMobRenderer<Townsfolk, TownsfolkR
 			skin = "townsfolk_1";
 		}
 		state.skin = skin.matches("[a-z0-9_]{1,40}") ? skin : "townsfolk_1";
+		if (state.playerSkin == null) {
+			// A clearly adult fictional guest's town skin, in any outfit, is drawn on the model's slim arms (GuestBody.SLIM).
+			state.slim = GuestBody.slim(state.skin);
+		}
 		state.activity = townsfolk.activity();
 		state.phase = Math.floorMod(townsfolk.getId() * 37, 100) * 0.63F;
 		if (townsfolk.isSleeping()) {

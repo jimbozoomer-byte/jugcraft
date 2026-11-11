@@ -205,6 +205,7 @@ public final class CustomNpcs {
 	public static Set<String> townSkins() {
 		Set<String> skins = new HashSet<>(Set.of(DEFAULT_NPC_SKIN, DEFAULT_GUARD_SKIN));
 		skins.addAll(io.github.jimbozoomer.jugcraft.town.guests.GuestAppearances.skins());
+		skins.addAll(io.github.jimbozoomer.jugcraft.town.guests.GuestWardrobe.skins());   // their seasonal outfits
 		for (TownData.Spot spot : TownData.get().spots) {
 			skins.add(spot.skin());
 		}

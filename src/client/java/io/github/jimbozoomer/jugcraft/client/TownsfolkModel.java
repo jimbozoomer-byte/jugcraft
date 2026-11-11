@@ -32,6 +32,8 @@ public class TownsfolkModel extends HumanoidModel<TownsfolkRenderer.State> {
 	/** The arms' classic and slim versions (null in {@link #createLayer()}, which has classic arms only). */
 	private final @Nullable ModelPart rightWide, rightSlim, leftWide, leftSlim;
 	private final @Nullable ModelPart guestEars, guestHorns, guestElfEars, guestMageHat;
+	/** A named guest's gown or robe flare ({@link GuestBody}); null in {@link #createLayer()}. */
+	private final GuestBody.@Nullable Flare guestFlare;
 
 	public TownsfolkModel(ModelPart root) {
 		super(root);
@@ -44,6 +46,7 @@ public class TownsfolkModel extends HumanoidModel<TownsfolkRenderer.State> {
         guestHorns = head.hasChild("guest_horns") ? head.getChild("guest_horns") : null;
         guestElfEars = head.hasChild("guest_elf_ears") ? head.getChild("guest_elf_ears") : null;
         guestMageHat = head.hasChild("guest_mage_hat") ? head.getChild("guest_mage_hat") : null;
+		guestFlare = GuestBody.Flare.of(body);
 	}
 
 	public static LayerDefinition createLayer() {
@@ -95,6 +98,7 @@ public class TownsfolkModel extends HumanoidModel<TownsfolkRenderer.State> {
 				CubeListBuilder.create().texOffs(16, 16).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, none), PartPose.ZERO);
 		body.addOrReplaceChild("jacket",
 				CubeListBuilder.create().texOffs(16, 32).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, outer), PartPose.ZERO);
+		GuestBody.addParts(body);
 		PartDefinition rightArm = root.addOrReplaceChild("right_arm", CubeListBuilder.create(), PartPose.offset(-5.0F, 2.0F, 0.0F));
 		rightArm.addOrReplaceChild("wide",
 				CubeListBuilder.create().texOffs(40, 16).addBox(-3.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, none), PartPose.ZERO)
@@ -150,12 +154,16 @@ public class TownsfolkModel extends HumanoidModel<TownsfolkRenderer.State> {
 	public void setupAnim(TownsfolkRenderer.State state) {
 		super.setupAnim(state);
         if (guestEars != null) {
-            guestEars.visible = java.util.Set.of("guest_tokai_teio", "guest_agnes_tachyon", "guest_gold_ship",
-                    "guest_oguri_cap", "guest_special_week", "guest_miyabi").contains(state.skin) && state.playerSkin == null;
-            guestHorns.visible = (state.skin.equals("guest_power") || state.skin.equals("guest_zero_two")) && state.playerSkin == null;
-            guestElfEars.visible = state.skin.equals("guest_frieren") && state.playerSkin == null;
-            guestMageHat.visible = state.skin.equals("guest_megumin") && state.playerSkin == null;
+            // The guest a skin belongs to in any outfit (guest_<id> or guest_<id>_<outfit>); none over a player skin.
+            String guest = state.playerSkin == null ? GuestBody.guest(state.skin) : "";
+            guestEars.visible = GuestBody.EARS.contains(guest);
+            guestHorns.visible = GuestBody.HORNS.contains(guest);
+            guestElfEars.visible = GuestBody.ELF_EARS.contains(guest);
+            guestMageHat.visible = GuestBody.MAGE_HAT.contains(guest);
         }
+		if (guestFlare != null) {
+			guestFlare.setup(state.skin, state.playerSkin != null, body, rightLeg, leftLeg);
+		}
 		if (rightWide != null && rightSlim != null && leftWide != null && leftSlim != null) {
 			// Set every frame: one model draws everyone.
 			rightWide.visible = leftWide.visible = !state.slim;
