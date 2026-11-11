@@ -37,9 +37,11 @@ import net.minecraft.world.level.block.Blocks;
  * Town guests (docs/features/jze-town-relationships.md): the guest menu as a player sees it, in a creative test world.
  * An operator's {@code /guests place} stands two guests in front of the player, one who may marry and one with
  * companionship only; the player talks to each (the server side of right-clicking it) and the {@link GuestScreen}
- * opens with the keys and states its synced values call for. The errand is accepted by clicking the screen's own key,
- * and the screen is checked to fit the smallest GUI. A guest that is not available (a stand-in menu for a pending
- * entry) shows only that it is not receiving visitors. Screenshots: {@code guest_menu_*}, {@code guest_placeholders}.
+ * opens with the keys and states its synced values call for. The errand is accepted by clicking the screen's own key;
+ * the Gifts key opens the gift list (the guest's favourites, every accepted gift, the daily limits; display only) and
+ * closes it again; and the screen, with the list open, is checked to fit the smallest GUI. A guest that is not available (a stand-in menu for a pending
+ * entry) shows only that it is not receiving visitors. Screenshots: {@code guest_menu_*} (among them
+ * {@code guest_menu_gift_help}), {@code guest_placeholders}.
  *
  * <p>Written for the integrated build: it needs worker A's ledger and marriage and worker B's favors (a fresh day
  * offers each player an errand, GuestFavors).
@@ -106,7 +108,27 @@ public class GuestClientGameTests implements FabricClientGameTest {
 				shows(screen, GuestMenu.Action.QUEST_TURN_IN, true, false);
 			});
 			context.takeScreenshot("guest_menu_errand_accepted");
+
+			// The gift list (display only): this guest's favourites, every accepted gift and the daily limits.
+			click(context, mc -> ((GuestScreen) mc.gui.screen()).giftListKey(), "The Gifts key");
+			context.waitTicks(2);
+			context.runOnClient(mc -> {
+				GuestScreen screen = (GuestScreen) mc.gui.screen();
+				check(screen.showsGiftList(), "The gift list is shown");
+				check(screen.shownFavourites().equals(GuestFavors.favourites(marrying)) && screen.shownFavourites().size() == GuestFavors.FAVOURITES,
+						"It shows " + marrying + "'s favourites: " + screen.shownFavourites());
+				hidden(screen, GuestMenu.Action.values());
+				within(screen, screen.giftListArea(), "gift list");
+			});
+			context.takeScreenshot("guest_menu_gift_help");
 			fits(context);
+			click(context, mc -> ((GuestScreen) mc.gui.screen()).giftListKey(), "The Back key");
+			context.waitTicks(2);
+			context.runOnClient(mc -> {
+				GuestScreen screen = (GuestScreen) mc.gui.screen();
+				check(!screen.showsGiftList() && screen.shownFavourites().isEmpty(), "The gift list closes again");
+				shows(screen, GuestMenu.Action.QUEST_ACCEPT, true, false);
+			});
 			context.runOnClient(mc -> mc.player.closeContainer());
 			context.waitForScreen(null);
 
@@ -192,9 +214,14 @@ public class GuestClientGameTests implements FabricClientGameTest {
 
 	/** Clicks the screen's own key for {@code action} with the mouse. */
 	private static void click(ClientGameTestContext context, GuestMenu.Action action) {
+		click(context, mc -> ((GuestScreen) mc.gui.screen()).key(action), action.toString());
+	}
+
+	/** Clicks a key of the open screen with the mouse. */
+	private static void click(ClientGameTestContext context, java.util.function.Function<Minecraft, Button> which, String name) {
 		double[] xy = context.computeOnClient(mc -> {
-			Button key = ((GuestScreen) mc.gui.screen()).key(action);
-			check(key != null && key.visible && key.active, action + " can be pressed");
+			Button key = which.apply(mc);
+			check(key != null && key.visible && key.active, name + " can be pressed");
 			return new double[] {(key.getX() + key.getWidth() / 2.0) / MouseHandler.getScaledXPos(mc.getWindow(), 1),
 					(key.getY() + key.getHeight() / 2.0) / MouseHandler.getScaledYPos(mc.getWindow(), 1)};
 		});
@@ -217,9 +244,10 @@ public class GuestClientGameTests implements FabricClientGameTest {
 		try {
 			context.runOnClient(mc -> {
 				GuestScreen screen = (GuestScreen) mc.gui.screen();
-				ScreenRectangle area = screen.panelArea();
-				check(area.left() >= 0 && area.top() >= 0 && area.right() <= screen.width && area.bottom() <= screen.height,
-						"The guest screen's " + area.width() + " x " + area.height() + " panel fits the " + screen.width + " x " + screen.height + " GUI");
+				within(screen, screen.panelArea(), "panel");
+				if (screen.showsGiftList()) {
+					within(screen, screen.giftListArea(), "gift list");
+				}
 			});
 			context.takeScreenshot("guest_menu_fit_320x240");
 		} finally {
@@ -228,6 +256,15 @@ public class GuestClientGameTests implements FabricClientGameTest {
 			context.runOnClient(Minecraft::resizeGui);
 			context.waitTicks(2);
 		}
+	}
+
+	/** {@code area} lies inside the GUI and, unless it is the panel itself, inside the screen's panel. */
+	private static void within(GuestScreen screen, ScreenRectangle area, String what) {
+		ScreenRectangle panel = screen.panelArea();
+		check(area.left() >= 0 && area.top() >= 0 && area.right() <= screen.width && area.bottom() <= screen.height,
+				"The guest screen's " + area.width() + " x " + area.height() + " " + what + " fits the " + screen.width + " x " + screen.height + " GUI");
+		check(area.left() >= panel.left() && area.top() >= panel.top() && area.right() <= panel.right() && area.bottom() <= panel.bottom(),
+				"The " + what + " stays inside the screen's panel");
 	}
 
 	private static void shows(GuestScreen screen, GuestMenu.Action action, boolean visible, boolean active) {
