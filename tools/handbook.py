@@ -222,8 +222,8 @@ ABOUT = {
     "diesel_engine": "Two wide, two tall and three long. Burns diesel (256 KE a mB) or heavy fuel oil (128) piped into "
                      "its 8-bucket tank and turns a shaft out of the back of its upper right back block: up to "
                      "512 KE/t, twice the large steam engine. It burns only for the rotation the line takes.",
-    "polymerization_reactor": "Two by two and three blocks tall. Polymerizes refinery gas into plastic: a bucket of gas "
-                              "gives four plastic pellets, every 5 seconds. The metal press flattens each pellet "
+    "polymerization_reactor": "Two by two and three blocks tall. Polymerizes refinery gas or naphtha into plastic: a "
+                              "bucket of either gives four plastic pellets, every 5 seconds. The metal press flattens each pellet "
                               "into a plastic sheet.",
     "hydrotreater": "Two by two and three tall, its catalyst built in. Pipe diesel into its first tank and hydrogen "
                     "into its second: 1,000 mB of diesel and 100 mB of hydrogen become 1,000 mB of premium diesel (base) "

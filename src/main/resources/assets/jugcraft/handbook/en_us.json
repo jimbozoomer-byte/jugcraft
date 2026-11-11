@@ -3727,7 +3727,7 @@
           "title": "Polymerization Reactor",
           "icon": "jugcraft:polymerization_reactor",
           "text": [
-            "Two by two and three blocks tall. Polymerizes refinery gas into plastic: a bucket of gas gives four plastic pellets, every 5 seconds. The metal press flattens each pellet into a plastic sheet.",
+            "Two by two and three blocks tall. Polymerizes refinery gas or naphtha into plastic: a bucket of either gives four plastic pellets, every 5 seconds. The metal press flattens each pellet into a plastic sheet.",
             "Uses 96 JE/t while working. Holds 30,000 JE."
           ],
           "craft": {
@@ -5103,7 +5103,7 @@
           "title": "Monomer Preparation Unit",
           "icon": "jugcraft:monomer_preparation_unit",
           "text": [
-            "Refinery gas (1000 mB) yields 500 mB named ethylene. Renewable route: 1000 mB bioethanol yields 500 mB ethylene and 250 mB water, with paid dehydration. All process heat is included in JE use; no manual pressure controls.",
+            "Refinery gas (1000 mB) yields 500 mB named ethylene; naphtha (1000 mB) is cracked to 750 mB. Renewable route: 1000 mB bioethanol yields 500 mB ethylene and 250 mB water, with paid dehydration. All process heat is included in JE use; no manual pressure controls.",
             "500 mB ethylene + 500 mB chlorine -> 1000 mB ethylene dichloride; then 1000 mB dichloride -> 500 mB vinyl chloride and 500 mB hydrogen chloride gas. Absorb recovered HCl in the existing Chemical Reactor. Empty incompatible tank contents before switching jobs. Both outlets must fit; nothing is silently vented. Earlier PVC routes remain available.",
             "Power: lower front-left. Solid feed: front-right. Finished product: rear-right middle; extrusion offcuts: rear-right upper. Fluid feed: rear middle; fluid products: rear bottom. Pause, Cancel, progress, tank levels, energy, tool locks and upgrade slots use the shared factory screen. Recipes are fictional game quantities."
           ],
