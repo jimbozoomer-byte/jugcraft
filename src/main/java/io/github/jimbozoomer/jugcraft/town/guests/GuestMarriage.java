@@ -28,7 +28,8 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>Pending requests are kept per player UUID with the guest, the overworld game time it was asked at, and its expiry
  * ({@code asked + CONFIRM_TICKS}). A request is live only while the game time is at or after the time it was asked and
- * below its expiry: game time moved backwards drops it rather than bringing a lapsed one back. They are held in memory
+ * the highest game time seen since the server started (observed every tick, and on every read) is below its expiry: game
+ * time moved backwards drops it rather than bringing a lapsed one back. They are held in memory
  * and dropped when the server stops ({@link GuestLedger#register}): losing one only means asking again. Each player has
  * at most one pending proposal and one pending divorce. Asking again for the same guest replaces the request (a new
  * explicit request, with a new expiry, and the player is told so); asking for another guest while one is pending is
@@ -42,8 +43,9 @@ import org.jspecify.annotations.Nullable;
  */
 public final class GuestMarriage {
 	private record Pending(String guest, long asked, long expires) {
-		boolean liveAt(long now) {
-			return now >= asked && now < expires;
+		/** Live at game time {@code now}, the highest game time seen being {@code highest} (at least {@code now}). */
+		boolean liveAt(long now, long highest) {
+			return now >= asked && highest < expires;
 		}
 	}
 
@@ -52,6 +54,8 @@ public final class GuestMarriage {
 
 	private static final Map<UUID, Pending> PROPOSALS = new HashMap<>();
 	private static final Map<UUID, Pending> DIVORCES = new HashMap<>();
+	/** The highest game time seen (the expiry's high-water mark): a request that has lapsed stays lapsed. */
+	private static long highest = Long.MIN_VALUE;
 
 	private GuestMarriage() {
 	}
@@ -60,6 +64,12 @@ public final class GuestMarriage {
 	static void clear() {
 		PROPOSALS.clear();
 		DIVORCES.clear();
+		highest = Long.MIN_VALUE;
+	}
+
+	/** Notes the game time (every server tick, from {@link GuestLedger#register}), so a lapse is seen even unread. */
+	static void observe(MinecraftServer server) {
+		now(server);
 	}
 
 	// ---------------------------------------------------------------- proposal
@@ -242,6 +252,15 @@ public final class GuestMarriage {
 		return pending == null ? -1L : pending.expires();
 	}
 
+	/** The expiry high-water mark (tests save it before moving game time, and put it back after). */
+	static long highestGameTime() {
+		return highest;
+	}
+
+	static void highestGameTime(long value) {
+		highest = value;
+	}
+
 	/** {@code millis} as days, hours and minutes (rounded up to the minute), for messages. */
 	static String duration(long millis) {
 		long minutes = Math.max(0L, (millis + 59_999L) / 60_000L);
@@ -261,13 +280,17 @@ public final class GuestMarriage {
 	}
 
 	private static long now(MinecraftServer server) {
-		return gameTime.applyAsLong(server);
+		long now = gameTime.applyAsLong(server);
+		if (now > highest) {
+			highest = now;
+		}
+		return now;
 	}
 
 	/** The player's request if it is live; a lapsed one (or one from a game time now in the future) is dropped. */
 	private static @Nullable Pending live(Map<UUID, Pending> requests, MinecraftServer server, UUID player) {
 		Pending pending = requests.get(player);
-		if (pending != null && !pending.liveAt(now(server))) {
+		if (pending != null && !pending.liveAt(now(server), highest)) {
 			requests.remove(player);
 			return null;
 		}
@@ -277,7 +300,7 @@ public final class GuestMarriage {
 	/** Drops every request that is not live, so the map holds only live ones (at most one per player). */
 	private static void prune(Map<UUID, Pending> requests, MinecraftServer server) {
 		long now = now(server);
-		requests.values().removeIf(pending -> !pending.liveAt(now));
+		requests.values().removeIf(pending -> !pending.liveAt(now, highest));
 	}
 
 	/**

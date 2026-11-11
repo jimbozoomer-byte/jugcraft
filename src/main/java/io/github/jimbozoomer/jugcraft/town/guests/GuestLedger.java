@@ -311,11 +311,13 @@ public final class GuestLedger extends SavedData {
 	}
 
 	/**
-	 * Server hooks: the cooldown clock advances about once a second, and pending proposals and divorces
-	 * ({@link GuestMarriage}, kept in memory) are dropped when the server stops. Called once from {@link GuestService}.
+	 * Server hooks: the cooldown clock advances about once a second; {@link GuestMarriage} notes the game time every tick
+	 * (its expiry high-water mark), and its pending proposals and divorces, kept in memory, are dropped when the server
+	 * stops. Called once from {@link GuestService}.
 	 */
 	public static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
+			GuestMarriage.observe(server);
 			if (++ticks >= CLOCK_TICKS) {
 				ticks = 0;
 				get(server).advance();
