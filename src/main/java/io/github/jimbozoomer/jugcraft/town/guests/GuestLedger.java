@@ -7,10 +7,12 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.concordance.Saved;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.UUID;
 import java.util.function.LongSupplier;
@@ -50,15 +52,25 @@ import org.jspecify.annotations.Nullable;
  * being bound again.)
  *
  * <p><b>The cooldown clock.</b> Cooldowns are kept as real milliseconds remaining, per player and per guest, with the
- * last wall-clock reading. About once a second (the server tick) and on every read the ledger advances: positive time
- * since the last reading is taken off every running cooldown; when the clock has gone backwards nothing is credited and
- * the reading is re-anchored, so moving the clock back never shortens a cooldown. After a load the first advance credits
- * the time since the saved reading, so downtime counts. A wall clock moved forwards cannot be told apart from downtime
- * and is credited too: that is the price of counting real time while the server is down.
+ * wall clock's high-water mark: the latest reading ever seen, saved. About once a second (the server tick) and on every
+ * read the ledger advances: only time beyond the high-water mark is taken off the running cooldowns, and the mark moves
+ * up to the reading. A clock moved backwards credits nothing, and nothing again while it climbs back to the mark, so no
+ * stretch of time is ever credited twice (a clock set back by an hour holds every cooldown still for that hour). After a
+ * load the first advance credits the time from the saved mark, so downtime counts. A wall clock moved forwards cannot
+ * be told apart from downtime and is credited too: that is the price of counting real time while the server is down.
  *
  * <p><b>Damaged saves.</b> A guest's or player's saved entry that cannot be read is kept exactly as written and written
- * back unchanged ({@link Saved#keeping}). A guest whose own entry is unreadable is frozen: nothing binds it, verifies as
- * it or marries it, so damage never quietly frees an identity or a spouse; an operator repairs the file.
+ * back unchanged ({@link Saved#keeping}); nothing ever writes a fresh entry over it. Its parties are refused marriage
+ * until an operator repairs the file, and this is logged when the ledger loads and when a marriage is refused for it:
+ * <ul>
+ * <li>a guest whose own entry is unreadable is frozen: nothing binds it, verifies as it or marries it
+ * ({@link Refusal#NO_MARRIAGE}), so damage never quietly frees an identity or a spouse;</li>
+ * <li>the player named as that guest's spouse, when the damaged entry still names one, counts as married
+ * ({@link Refusal#PLAYER_MARRIED}); when it cannot be told whom it names, every player does;</li>
+ * <li>a player whose own entry is unreadable (affection, cooldown) is refused as cooling down
+ * ({@link Refusal#PLAYER_COOLDOWN}) and gains no affection; when it cannot be told whose entry it is, every player
+ * is.</li>
+ * </ul>
  */
 public final class GuestLedger extends SavedData {
 	/** What a loaded guest entity is to its identity. */
@@ -165,7 +177,7 @@ public final class GuestLedger extends SavedData {
 					.optionalFieldOf("guests", Saved.Kept.<String, GuestRecord>of(Map.of())).forGetter(GuestLedger::savedGuests),
 			Saved.keeping("town_guests", UUIDUtil.STRING_CODEC, PLAYER)
 					.optionalFieldOf("players", Saved.Kept.<UUID, PlayerRecord>of(Map.of())).forGetter(GuestLedger::savedPlayers),
-			Codec.LONG.optionalFieldOf("clock_millis", 0L).forGetter(ledger -> ledger.last)
+			Codec.LONG.optionalFieldOf("clock_high_millis", 0L).forGetter(ledger -> ledger.high)
 	).apply(i, GuestLedger::new));
 	/** The whole ledger, versioned ({@link Saved#versioned}). */
 	public static final Codec<GuestLedger> CODEC = Saved.versioned("town_guests", BODY);
@@ -181,22 +193,31 @@ public final class GuestLedger extends SavedData {
 	private final Map<String, Dynamic<?>> unreadPlayers = new LinkedHashMap<>();
 	/** Player to spouse, built from the guests' records (the one place a marriage is saved). */
 	private final Map<UUID, String> spouses = new HashMap<>();
-	/** The last wall-clock reading (milliseconds); 0 until anchored. */
-	private long last;
+	/** Players named as spouses in unreadable guest entries (to the guest id): they count as married. */
+	private final Map<UUID, String> unreadSpouses = new HashMap<>();
+	/** Players whose own entry is unreadable: no marriage, no new affection, nothing written over it. */
+	private final Set<UUID> unreadablePlayers = new HashSet<>();
+	/** An unreadable guest entry whose spouse cannot be told: anyone may be married. */
+	private boolean unknownSpouse;
+	/** An unreadable player entry whose player cannot be told: anyone's cooldown may be running. */
+	private boolean unknownPlayer;
+	/** The wall clock's high-water mark (milliseconds): the latest reading seen; 0 until anchored. */
+	private long high;
 	/** How many times this ledger has changed (tests read it: {@link #seen} counts a change only when the place changes). */
 	int changes;
 
 	/** A new, empty ledger, its clock anchored now. */
 	GuestLedger() {
-		this.last = clock.getAsLong();
+		this.high = clock.getAsLong();
 	}
 
-	private GuestLedger(Saved.Kept<String, GuestRecord> guests, Saved.Kept<UUID, PlayerRecord> players, long last) {
+	private GuestLedger(Saved.Kept<String, GuestRecord> guests, Saved.Kept<UUID, PlayerRecord> players, long high) {
 		this.guests.putAll(guests.read());
 		this.unreadGuests.putAll(guests.unread());
 		this.players.putAll(players.read());
 		this.unreadPlayers.putAll(players.unread());
-		this.last = last;
+		this.high = high;
+		inspectDamage();
 		for (Map.Entry<String, GuestRecord> entry : this.guests.entrySet()) {
 			UUID spouse = entry.getValue().spouse;
 			if (spouse == null) {
@@ -210,6 +231,63 @@ public final class GuestLedger extends SavedData {
 				setDirty();
 			}
 		}
+	}
+
+	/** Works out whom the unreadable entries concern, and says so loudly. */
+	private void inspectDamage() {
+		unreadGuests.forEach((guest, raw) -> {
+			Jugcraft.LOGGER.error("[guests] {}'s saved record cannot be read; it is kept as written, and {} is frozen (no binding, "
+					+ "no marriage) until an operator repairs the town_guests file", guest, guest);
+			if (raw.getMapValues().result().isEmpty()) {
+				unknownSpouse = true;
+				Jugcraft.LOGGER.error("[guests] {}'s damaged record may name a spouse that cannot be told: every marriage is refused", guest);
+				return;
+			}
+			Optional<String> named = raw.get("spouse").get().result().map(spouse -> spouse.asString().result().orElse(""));
+			if (named.isEmpty()) {
+				return;   // no spouse saved
+			}
+			UUID spouse = uuid(named.get());
+			if (spouse == null) {
+				unknownSpouse = true;
+				Jugcraft.LOGGER.error("[guests] {}'s damaged record names a spouse that cannot be read: every marriage is refused", guest);
+			} else {
+				unreadSpouses.put(spouse, guest);
+				Jugcraft.LOGGER.error("[guests] Player {} counts as married to {} (from its damaged record) and is refused marriage", spouse, guest);
+			}
+		});
+		unreadPlayers.forEach((key, raw) -> {
+			UUID player = uuid(key);
+			if (player == null) {
+				unknownPlayer = true;
+				Jugcraft.LOGGER.error("[guests] A saved player record ({}) cannot be read and names no player: every marriage is refused", key);
+			} else {
+				unreadablePlayers.add(player);
+				Jugcraft.LOGGER.error("[guests] Player {}'s saved record cannot be read; it is kept as written, and they are refused marriage "
+						+ "and new affection until an operator repairs the town_guests file", player);
+			}
+		});
+	}
+
+	private static @Nullable UUID uuid(String text) {
+		try {
+			return UUID.fromString(text);
+		} catch (IllegalArgumentException notUuid) {
+			return null;
+		}
+	}
+
+	/**
+	 * Whether damaged saved data concerns this player: their own entry, or a spouse entry naming them (or naming someone
+	 * who cannot be told). They are refused marriage until an operator repairs the file.
+	 */
+	boolean damaged(UUID player) {
+		return unknownSpouse || unknownPlayer || unreadSpouses.containsKey(player) || unreadablePlayers.contains(player);
+	}
+
+	/** Whether this player's own saved entry is unreadable (kept as written; nothing may be written over it). */
+	boolean unreadable(UUID player) {
+		return unreadablePlayers.contains(player);
 	}
 
 	private Saved.Kept<String, GuestRecord> savedGuests() {
@@ -459,12 +537,19 @@ public final class GuestLedger extends SavedData {
 		if (entry == null || !entry.available()) {
 			return now;   // a pending or unknown guest cannot be befriended
 		}
+		if (unreadable(player)) {
+			Jugcraft.LOGGER.warn("[guests] Affection for {} not added: player {}'s saved record cannot be read", guest, player);
+			return now;
+		}
 		return setAffection(player, guest, (int) Math.clamp((long) now + delta, 0L, (long) GuestBalance.MAX_AFFECTION));
 	}
 
 	/** Sets the player's affection for the guest (operator repair), kept within 0 to the maximum; returns the new value. */
 	int setAffection(UUID player, String guest, int value) {
 		int next = Math.clamp(value, 0, GuestBalance.MAX_AFFECTION);
+		if (unreadable(player)) {
+			return affection(player, guest);   // never write a fresh entry over one kept as written
+		}
 		if (next == affection(player, guest)) {
 			return next;
 		}
@@ -525,14 +610,21 @@ public final class GuestLedger extends SavedData {
 
 	/**
 	 * Why the player may not marry the guest now, or null when they may (items and distance are not the ledger's). The
-	 * first that applies, in the order of {@link Refusal}: a guest with no marriage (pending, or not {@code mayMarry}),
-	 * affection short of full, either side married, either side's cooldown, then no canonical entity in the world.
+	 * first that applies, in the order of {@link Refusal}: a guest with no marriage (pending, not {@code mayMarry}, or its
+	 * record unreadable), affection short of full, either side married, either side's cooldown, then no canonical entity
+	 * in the world. Damaged saved data about the player (see the class notes) refuses them straight after the first.
 	 */
 	public @Nullable Refusal canMarry(UUID player, String guest) {
 		advance();
 		GuestRoster.Guest entry = GuestRoster.get(guest);
 		if (entry == null || !entry.mayMarry() || unreadable(guest)) {
 			return Refusal.NO_MARRIAGE;
+		}
+		if (unknownSpouse || unreadSpouses.containsKey(player)) {
+			return Refusal.PLAYER_MARRIED;   // a damaged guest entry names them (or anyone) as its spouse
+		}
+		if (unknownPlayer || unreadablePlayers.contains(player)) {
+			return Refusal.PLAYER_COOLDOWN;   // their own record (affection, cooldown) cannot be read
 		}
 		if (affection(player, guest) < GuestBalance.MAX_AFFECTION) {
 			return Refusal.NOT_FULL_AFFECTION;
@@ -559,7 +651,11 @@ public final class GuestLedger extends SavedData {
 
 	/** Marries them if {@link #canMarry} allows it, both sides at once; false (nothing changed) otherwise. */
 	public boolean marry(UUID player, String guest) {
-		if (canMarry(player, guest) != null) {
+		Refusal why = canMarry(player, guest);
+		if (why != null) {
+			if (damaged(player) || unreadable(guest)) {
+				Jugcraft.LOGGER.warn("[guests] Marriage of player {} and {} refused ({}): saved data about them cannot be read", player, guest, why);
+			}
 			return false;
 		}
 		guests.get(guest).spouse = player;   // canMarry found the record: a canonical entity is required
@@ -611,7 +707,12 @@ public final class GuestLedger extends SavedData {
 		spouses.remove(player);
 		if (cooldowns) {
 			record.cooldown = GuestBalance.REMARRIAGE_COOLDOWN_MILLIS;
-			players.computeIfAbsent(player, id -> new PlayerRecord()).cooldown = GuestBalance.REMARRIAGE_COOLDOWN_MILLIS;
+			if (unreadable(player)) {
+				// Their own entry is kept as written; they stay refused marriage until it is repaired.
+				Jugcraft.LOGGER.warn("[guests] Player {}'s cooldown not recorded: their saved record cannot be read", player);
+			} else {
+				players.computeIfAbsent(player, id -> new PlayerRecord()).cooldown = GuestBalance.REMARRIAGE_COOLDOWN_MILLIS;
+			}
 		}
 		changed();
 		return player;
@@ -647,23 +748,23 @@ public final class GuestLedger extends SavedData {
 	// ---------------------------------------------------------------- the clock
 
 	/**
-	 * Takes the real time since the last reading off every running cooldown. Time only counts forwards: when the clock
-	 * reads earlier than last time, nothing is credited and the reading is re-anchored. Server thread only.
+	 * Takes the real time beyond the clock's high-water mark off every running cooldown and raises the mark. A reading at
+	 * or below the mark (the clock moved back, or still climbing back) credits nothing. Server thread only.
 	 */
 	void advance() {
 		long now = clock.getAsLong();
-		long elapsed = now - last;
-		if (last <= 0 || elapsed < 0) {
-			last = now;
+		if (high <= 0) {
+			high = now;   // never anchored (a save from before the mark): nothing to measure from
 			if (running()) {
-				changed();   // save the new anchor with the cooldowns it is measured against
+				changed();
 			}
 			return;
 		}
-		if (elapsed == 0) {
+		if (now <= high) {
 			return;
 		}
-		last = now;
+		long elapsed = now - high;
+		high = now;
 		boolean credited = false;
 		for (GuestRecord record : guests.values()) {
 			if (record.cooldown > 0) {

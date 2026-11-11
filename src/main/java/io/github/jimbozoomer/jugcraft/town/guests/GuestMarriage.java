@@ -5,6 +5,7 @@ import io.github.jimbozoomer.jugcraft.town.Townsfolk;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.ToLongFunction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -25,16 +26,29 @@ import org.jspecify.annotations.Nullable;
  * <li>Confirmation is for the same guest the request named; a confirmation for another guest is refused.</li>
  * </ul>
  *
- * <p>Pending requests are kept per player UUID with the guest and an expiry in overworld game time ({@code now +
- * CONFIRM_TICKS}; a request is live while the game time is below it). They are held in memory and dropped when the
- * server stops ({@link GuestLedger#register}): losing one only means asking again. Each player has at most one pending
- * proposal and one pending divorce. Asking again for the same guest replaces the request (a new explicit request, with a
- * new expiry, and the player is told so); asking for another guest while one is pending is refused until it is
- * confirmed, cancelled or lapsed. A confirmation that reaches the re-checks uses its request up, married or not.
+ * <p>Pending requests are kept per player UUID with the guest, the overworld game time it was asked at, and its expiry
+ * ({@code asked + CONFIRM_TICKS}). A request is live only while the game time is at or after the time it was asked and
+ * below its expiry: game time moved backwards drops it rather than bringing a lapsed one back. They are held in memory
+ * and dropped when the server stops ({@link GuestLedger#register}): losing one only means asking again. Each player has
+ * at most one pending proposal and one pending divorce. Asking again for the same guest replaces the request (a new
+ * explicit request, with a new expiry, and the player is told so); asking for another guest while one is pending is
+ * refused until it is confirmed, cancelled or lapsed. A confirmation that reaches the re-checks uses its request up,
+ * married or not.
+ *
+ * <p>The proposal entry points check for themselves, before anything else, what the menu checks too: the player alive,
+ * not a spectator, in the npc's level and within {@link GuestBalance#INTERACT_RANGE} of it; the npc alive, carrying this
+ * guest, and the guest's canonical entity; the guest available and {@code mayMarry}. A call failing any of them reads and
+ * changes nothing (no request, no item, no ledger change).
  */
 public final class GuestMarriage {
-	private record Pending(String guest, long expires) {
+	private record Pending(String guest, long asked, long expires) {
+		boolean liveAt(long now) {
+			return now >= asked && now < expires;
+		}
 	}
+
+	/** The overworld game time. Package-private test seam (to move game time backwards); the mod never changes it. */
+	static ToLongFunction<MinecraftServer> gameTime = server -> server.overworld().getGameTime();
 
 	private static final Map<UUID, Pending> PROPOSALS = new HashMap<>();
 	private static final Map<UUID, Pending> DIVORCES = new HashMap<>();
@@ -51,12 +65,9 @@ public final class GuestMarriage {
 	// ---------------------------------------------------------------- proposal
 
 	public static GuestResult requestProposal(ServerPlayer player, Townsfolk npc, String guest) {
-		GuestRoster.Guest entry = GuestRoster.get(guest);
-		if (entry == null || !entry.mayMarry()) {
-			return noMarriage(guest);
-		}
-		if (!guest.equals(npc.guest())) {
-			return notThisGuest(guest);
+		GuestResult away = beside(player, npc, guest);
+		if (away != null) {
+			return away;
 		}
 		MinecraftServer server = server(player);
 		UUID me = player.getUUID();
@@ -74,7 +85,8 @@ public final class GuestMarriage {
 			return needItem();
 		}
 		prune(PROPOSALS, server);
-		PROPOSALS.put(me, new Pending(guest, now(server) + GuestBalance.CONFIRM_TICKS));
+		long now = now(server);
+		PROPOSALS.put(me, new Pending(guest, now, now + GuestBalance.CONFIRM_TICKS));
 		int seconds = GuestBalance.CONFIRM_TICKS / 20;
 		if (pending != null) {
 			return GuestResult.done("message.jugcraft.guest.propose.renewed",
@@ -86,6 +98,10 @@ public final class GuestMarriage {
 	}
 
 	public static GuestResult confirmProposal(ServerPlayer player, Townsfolk npc, String guest) {
+		GuestResult away = beside(player, npc, guest);
+		if (away != null) {
+			return away;   // the request, if any, is left as it was
+		}
 		MinecraftServer server = server(player);
 		UUID me = player.getUUID();
 		Pending pending = live(PROPOSALS, server, me);
@@ -98,13 +114,6 @@ public final class GuestMarriage {
 					"Your proposal was to %s, not to %s.", name(pending.guest()), name(guest));
 		}
 		PROPOSALS.remove(me);   // from here the request is used up, whether or not the marriage is made
-		GuestRoster.Guest entry = GuestRoster.get(guest);
-		if (entry == null || !entry.mayMarry()) {
-			return noMarriage(guest);
-		}
-		if (!guest.equals(npc.guest())) {
-			return notThisGuest(guest);
-		}
 		GuestLedger ledger = GuestLedger.get(server);
 		GuestLedger.Refusal why = ledger.canMarry(me, guest);
 		if (why != null) {
@@ -169,7 +178,8 @@ public final class GuestMarriage {
 		}
 		Pending pending = live(DIVORCES, server, me);
 		prune(DIVORCES, server);
-		DIVORCES.put(me, new Pending(guest, now(server) + GuestBalance.CONFIRM_TICKS));
+		long now = now(server);
+		DIVORCES.put(me, new Pending(guest, now, now + GuestBalance.CONFIRM_TICKS));
 		int seconds = GuestBalance.CONFIRM_TICKS / 20;
 		if (pending != null) {
 			return GuestResult.done("message.jugcraft.guest.divorce.renewed",
@@ -226,7 +236,7 @@ public final class GuestMarriage {
 		return pending == null ? null : pending.guest();
 	}
 
-	/** The overworld game time at which the player's pending proposal lapses, or -1 when there is none (tests). */
+	/** The game time at which the player's pending proposal lapses, as asked (not checked for being live), or -1 (tests). */
 	static long proposalExpiry(UUID player) {
 		Pending pending = PROPOSALS.get(player);
 		return pending == null ? -1L : pending.expires();
@@ -251,23 +261,45 @@ public final class GuestMarriage {
 	}
 
 	private static long now(MinecraftServer server) {
-		return server.overworld().getGameTime();
+		return gameTime.applyAsLong(server);
 	}
 
-	/** The player's request if it has not lapsed; a lapsed one is dropped. */
+	/** The player's request if it is live; a lapsed one (or one from a game time now in the future) is dropped. */
 	private static @Nullable Pending live(Map<UUID, Pending> requests, MinecraftServer server, UUID player) {
 		Pending pending = requests.get(player);
-		if (pending != null && now(server) >= pending.expires()) {
+		if (pending != null && !pending.liveAt(now(server))) {
 			requests.remove(player);
 			return null;
 		}
 		return pending;
 	}
 
-	/** Drops every lapsed request, so the map holds only live ones (at most one per player). */
+	/** Drops every request that is not live, so the map holds only live ones (at most one per player). */
 	private static void prune(Map<UUID, Pending> requests, MinecraftServer server) {
 		long now = now(server);
-		requests.values().removeIf(pending -> now >= pending.expires());
+		requests.values().removeIf(pending -> !pending.liveAt(now));
+	}
+
+	/**
+	 * Why the player cannot act on this guest through {@code npc} now (the checks the menu makes, made again here), or null
+	 * when they can. Reads nothing but the roster, the two entities and the guest's canonical entity.
+	 */
+	private static @Nullable GuestResult beside(ServerPlayer player, Townsfolk npc, String guest) {
+		GuestRoster.Guest entry = GuestRoster.get(guest);
+		if (entry == null || !entry.available() || !entry.mayMarry()) {
+			return noMarriage(guest);
+		}
+		if (!guest.equals(npc.guest())) {
+			return notThisGuest(guest);
+		}
+		if (!player.isAlive() || player.isSpectator() || !npc.isAlive() || npc.isRemoved() || npc.level() != player.level()
+				|| npc.getBoundingBox().distanceToSqr(player.getEyePosition()) > GuestBalance.INTERACT_RANGE * GuestBalance.INTERACT_RANGE) {
+			return GuestResult.refused("message.jugcraft.guest.marriage.away", "You must be beside %s for that.", name(guest));
+		}
+		if (!npc.getUUID().equals(GuestLedger.get(server(player)).canonical(guest))) {
+			return notThisGuest(guest);   // a duplicate, or an entity no longer the guest
+		}
+		return null;
 	}
 
 	/** How many proposal items the player holds anywhere in their inventory. */
@@ -338,6 +370,10 @@ public final class GuestMarriage {
 
 	/** What the player is told for a ledger's refusal. */
 	static GuestResult refusal(GuestLedger.Refusal why, GuestLedger ledger, UUID player, String guest) {
+		if ((why == GuestLedger.Refusal.PLAYER_MARRIED || why == GuestLedger.Refusal.PLAYER_COOLDOWN) && ledger.damaged(player)) {
+			return GuestResult.refused("message.jugcraft.guest.marriage.damaged",
+					"Your marriage record cannot be read just now. An operator must repair it before any proposal.");
+		}
 		return switch (why) {
 			case NO_MARRIAGE -> noMarriage(guest);
 			case NOT_FULL_AFFECTION -> GuestResult.refused("message.jugcraft.guest.marriage.affection",
