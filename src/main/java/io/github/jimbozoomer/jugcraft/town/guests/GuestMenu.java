@@ -28,9 +28,10 @@ import org.jspecify.annotations.Nullable;
  * is refused. The revision and the gap between actions belong to the player ({@link GuestService#session}), not to this
  * menu. The revision only stops stale and doubled clicks: it wraps, and the client knows it, so it is no security token.
  * Every economic and proposal rule (items, caps, quests done, pending confirmations, cooldowns) is checked against the
- * ledger's and favors' own server state on every action, and reopening a menu resets none of it. Button ids stay within
- * 0 to 127, which the container button packet carries whatever its wire encoding. Guests are public: no land-claim
- * check here.
+ * ledger's and favors' own server state on every action, and reopening a menu resets none of it. The container button
+ * packet carries the id as a VarInt (26.3's ServerboundContainerButtonClickPacket: CONTAINER_ID, then VAR_INT; Codex's
+ * pinned javap evidence, build/nov11-guest-button-packet-review.txt), so the revision has 14 bits, the most the 16-bit
+ * synced field holds as a positive value. Guests are public: no land-claim check here.
  */
 public final class GuestMenu extends AbstractContainerMenu {
 	/** What a player may ask; the ordinal is the low 4 bits of a button id. */
@@ -45,8 +46,8 @@ public final class GuestMenu extends AbstractContainerMenu {
 			FIELDS = 17;
 	/** {@link #GUEST_SPOUSE} and {@link #PLAYER_SPOUSE}: unmarried, married to each other, married to someone else. */
 	public static final int NOBODY = 0, EACH_OTHER = 1, SOMEONE_ELSE = 2;
-	/** Revisions wrap at 3 bits, so a button id (4 bits of action, 3 of revision) stays within 0 to 127. */
-	public static final int REVISIONS = 8;
+	/** Revisions wrap at 14 bits, so the synced field (16 bits) stays positive; a button id is 4 bits of action above them. */
+	public static final int REVISIONS = 1 << 14;
 
 	/** What the client is told when the menu opens: the guest's entity (network id) and roster id. */
 	public record Opening(int entity, String guest) {
@@ -118,7 +119,7 @@ public final class GuestMenu extends AbstractContainerMenu {
 		}
 		int ordinal = id & 15;
 		GuestService.Session session = GuestService.session(owner.getUUID());
-		if (id > 127 || ordinal >= Action.values().length || id >>> 4 != session.revision) {
+		if (ordinal >= Action.values().length || id >>> 4 != session.revision) {
 			return false; // an unknown action, or a stale or replayed click
 		}
 		session.invalidate();
