@@ -33022,5 +33022,20 @@
   "message.jugcraft.guest.propose.none": "There is no proposal to %s waiting to be confirmed (it may have lapsed).",
   "message.jugcraft.guest.propose.other": "Your proposal was to %s, not to %s.",
   "message.jugcraft.guest.propose.renewed": "You asked %s again: this request replaces the earlier one. Confirm within %s seconds, or cancel.",
-  "message.jugcraft.guest.repair.operator": "Only operators can inspect or repair the guest ledger."
+  "message.jugcraft.guest.repair.operator": "Only operators can inspect or repair the guest ledger.",
+  "message.jugcraft.guest.repair.affection": "%s's affection for %s is now %s (was %s).",
+  "message.jugcraft.guest.repair.cooldown_cleared": "%s's cooldown is cleared.",
+  "message.jugcraft.guest.repair.divorce": "%s and %s are divorced (%s).",
+  "message.jugcraft.guest.repair.no_cooldown": "%s has no cooldown.",
+  "message.jugcraft.guest.repair.not_married": "%s is not married.",
+  "message.jugcraft.guest.repair.pending": "%s is pending: nobody can befriend them yet.",
+  "message.jugcraft.guest.repair.rebind": "%s is now the NPC at %s.",
+  "message.jugcraft.guest.repair.rebind.no_target": "No NPC carrying the guest %s in sight or within %s blocks (other than its canonical entity).",
+  "message.jugcraft.guest.repair.rebind.not_lost": "%s's entity %s is not lost. Add force to replace it anyway (it then leaves as a duplicate when it next loads).",
+  "message.jugcraft.guest.repair.rebind.refused": "That NPC cannot become %s: it was replaced before, is another guest's, or too many replaced entities may still exist.",
+  "message.jugcraft.guest.repair.state.guest": "%s (%s, %s): entity %s, last seen %s; spouse %s; cooldown %s; %s replaced entities kept; affection held by %s players.",
+  "message.jugcraft.guest.repair.state.player": "%s%s: spouse %s; cooldown %s; affection: %s; pending: %s.",
+  "message.jugcraft.guest.repair.unknown_guest": "There is no guest called %s.",
+  "message.jugcraft.guest.repair.unknown_player": "No online player is called %s; give an offline player's UUID.",
+  "message.jugcraft.guest.repair.unreadable_player": "%s's saved record cannot be read; it is kept as written. Repair the town_guests file first."
 }
