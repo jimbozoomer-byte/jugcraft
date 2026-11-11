@@ -139,10 +139,10 @@ goes only to players with `notices` on. No relationship is ever broadcast to eve
 ## Commands
 
 `/guests notices on|off`, `/guests notices share on|off`, `/guests ceremony invite <players>`,
-`/guests ceremony cancel`. Registered after the default phase, so they never weaken the coordinator's `/guests`
-root. That root currently requires operator permission, so these player commands need a coordinator patch that moves
-the operator requirement from the root to its operator children (reported with the delivery). The menu options work
-without it.
+`/guests ceremony cancel`. Integration rule (coordinator, 11 November): the `/guests` root is registered with no
+requirement, because Brigadier keeps the requirement of whichever root registration comes first; each subcommand node
+carries its own requirement (here: the source is a player), checked again when it runs. The menu options work without
+the commands.
 
 ## Tests (`GuestMilestoneGameTests`, synthetic `test_d_*` guests)
 
@@ -161,4 +161,3 @@ friendship letters for held guests; entry-point checks.
 - An outing that starts and ends within one second is not observed as an outing.
 - The ceremony walk uses the guest's ordinary goals; a guest that cannot path into the church times out cleanly. Its
   goals may open and close an ordinary wooden door as every resident does; this feature sets no block.
-- The `/guests` player commands need the root-permission patch described above.

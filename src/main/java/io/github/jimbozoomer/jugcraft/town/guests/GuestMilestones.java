@@ -8,12 +8,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
-import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.Identifier;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
@@ -49,8 +47,6 @@ public final class GuestMilestones {
 	public static final int YEAR = 365;
 	/** Ticks between two checks of every online player's milestones (5 seconds). */
 	static final int CHECK_TICKS = 100;
-	/** After the default phase, so this never becomes the {@code /guests} root (see {@link #register}). */
-	private static final Identifier COMMANDS = Jugcraft.id("guest_milestone_commands");
 
 	/** The outings seen held a second ago, by guest. */
 	private static final Map<String, GuestActivity.Activity> OUTINGS = new HashMap<>();
@@ -61,8 +57,9 @@ public final class GuestMilestones {
 
 	/**
 	 * The {@code milestones} guest feature, the event listeners, the server tick, and the player commands
-	 * {@code /guests notices ...} and {@code /guests ceremony ...}. The commands register after the default phase, so the
-	 * coordinator's {@code /guests} root, registered there, keeps its own permission (Brigadier keeps the first root's).
+	 * {@code /guests notices ...} and {@code /guests ceremony ...}. Their {@code /guests} root carries no requirement
+	 * (Brigadier keeps the first root registration's, which would close every other {@code /guests} subcommand); the
+	 * player requirement is on each subcommand node and is checked again when it runs.
 	 */
 	public static void register() {
 		GuestFeatures.register(new GuestMilestoneFeature());
@@ -97,8 +94,7 @@ public final class GuestMilestones {
 			GuestNotices.clear();
 		});
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> safely(() -> GuestCeremonies.left(server, handler.player.getUUID())));
-		CommandRegistrationCallback.EVENT.addPhaseOrdering(Event.DEFAULT_PHASE, COMMANDS);
-		CommandRegistrationCallback.EVENT.register(COMMANDS, (dispatcher, registryAccess, environment) -> {
+		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 			GuestNotices.register(dispatcher);
 			GuestCeremonies.register(dispatcher);
 		});

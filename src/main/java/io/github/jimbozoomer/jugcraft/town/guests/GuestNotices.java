@@ -70,14 +70,23 @@ public final class GuestNotices {
 	private GuestNotices() {
 	}
 
-	/** {@code /guests notices on|off} and {@code /guests notices share on|off}. */
+	/**
+	 * {@code /guests notices on|off} and {@code /guests notices share on|off}: a player command. The {@code /guests} root
+	 * carries no requirement (Brigadier keeps the first root registration's); this subcommand requires a player, checked
+	 * again when it runs.
+	 */
 	static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-		dispatcher.register(Commands.literal("guests").then(Commands.literal("notices")
+		dispatcher.register(Commands.literal("guests").then(Commands.literal("notices").requires(GuestNotices::player)
 				.then(Commands.literal("on").executes(c -> command(c.getSource(), true, null)))
 				.then(Commands.literal("off").executes(c -> command(c.getSource(), false, null)))
 				.then(Commands.literal("share")
 						.then(Commands.literal("on").executes(c -> command(c.getSource(), null, true)))
 						.then(Commands.literal("off").executes(c -> command(c.getSource(), null, false))))));
+	}
+
+	/** A player's command source (the notices and ceremony subcommands' requirement). */
+	static boolean player(CommandSourceStack source) {
+		return source.getPlayer() != null;
 	}
 
 	private static int command(CommandSourceStack source, @Nullable Boolean receive, @Nullable Boolean share) {

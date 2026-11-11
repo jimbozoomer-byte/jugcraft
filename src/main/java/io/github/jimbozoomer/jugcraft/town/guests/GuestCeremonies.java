@@ -119,9 +119,12 @@ public final class GuestCeremonies {
 	private GuestCeremonies() {
 	}
 
-	/** {@code /guests ceremony invite <players>} and {@code /guests ceremony cancel}. */
+	/**
+	 * {@code /guests ceremony invite <players>} and {@code /guests ceremony cancel}: player commands, the requirement on
+	 * this subcommand (never on the shared {@code /guests} root), checked again when they run.
+	 */
 	static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-		dispatcher.register(Commands.literal("guests").then(Commands.literal("ceremony")
+		dispatcher.register(Commands.literal("guests").then(Commands.literal("ceremony").requires(GuestNotices::player)
 				.then(Commands.literal("invite").then(Commands.argument("players", EntityArgument.players())
 						.executes(c -> invite(c.getSource(), EntityArgument.getPlayers(c, "players")))))
 				.then(Commands.literal("cancel").executes(c -> cancelCommand(c.getSource())))));
