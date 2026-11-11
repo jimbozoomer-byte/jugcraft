@@ -32,17 +32,23 @@ import org.jspecify.annotations.Nullable;
  * Gifts and fetch quests (worker B): modest existing survival items, taken from the player's own inventory on the
  * server, exactly once; affection added only through {@link GuestLedger#addAffection}, capped per player and guest per
  * day. No currency is paid or made, and no item is ever given as a reward. Calls come from {@link GuestMenu} buttons
- * that have already passed its distance and revision checks; each re-checks, against the saved state here, what it
- * takes.
+ * that have already passed its distance and revision checks, but each entry point checks again for itself before it
+ * takes or adds anything: the player alive, not a spectator, in the guest's level within
+ * {@link GuestBalance#INTERACT_RANGE} of it (eye to body, as the menu measures); the entity alive, carrying this guest
+ * id, and the ledger's canonical entity for it; the guest in the roster and not pending. A duplicate, remote or stale
+ * call takes no item and adds no affection.
  *
  * <p><b>State.</b> Saved with the overworld as {@code jugcraft:town_guest_favors}: per player and guest, the day it
  * belongs to, the gifts given and affection gained that day, and that day's quest (item, count, state). A record from an
  * earlier day counts as nothing given and a new quest offered (an accepted quest not turned in lapses with its day, and
- * nothing was taken for it); a day that moves backwards resets nothing. Opening, closing or reopening a menu,
- * reconnecting and restarting the server reset none of it.
+ * nothing was taken for it). Each player's high-water day (the latest day any of their records was written for) is
+ * saved too, and the day used is never earlier than it: a game clock moved backwards (an edited or restored world)
+ * neither resets a day nor offers an earlier day's quest again, even after that day's records were tidied away.
+ * Opening, closing or reopening a menu, reconnecting and restarting the server reset none of it.
  *
  * <p><b>The day</b> is the overworld's game time divided by {@link #DAY_TICKS}: game time, not the time of day, so
- * sleeping through the night or {@code /time set} never starts a new day early.
+ * sleeping through the night or {@code /time set} never starts a new day early; never earlier than the player's
+ * high-water day.
  *
  * <p><b>Numbers</b> (first choices for owner review; {@link GuestBalance#MAX_AFFECTION} is 1000):
  * <ul>
@@ -64,7 +70,7 @@ import org.jspecify.annotations.Nullable;
  * left of the day's cap and of the maximum; an action that would add nothing is refused and takes nothing.
  *
  * <p><b>Messages</b> (English fallbacks here; worker C adds them to en_us.json): {@code message.jugcraft.guest.}
- * {@code unavailable}, {@code full_affection}, {@code cap_today}, {@code gift.empty_hand}, {@code gift.unwanted},
+ * {@code unavailable}, {@code not_here}, {@code full_affection}, {@code cap_today}, {@code gift.empty_hand}, {@code gift.unwanted},
  * {@code gift.enough_today}, {@code gift.given}, {@code gift.favourite}, {@code quest.accepted},
  * {@code quest.already_active}, {@code quest.done_today}, {@code quest.not_accepted}, {@code quest.too_few},
  * {@code quest.turned_in}, {@code quest.none}.
@@ -168,8 +174,9 @@ public final class GuestFavors {
 	 */
 	public static GuestResult gift(ServerPlayer player, Townsfolk npc, String guest) {
 		GuestRoster.Guest entry = GuestRoster.get(guest);
-		if (!usable(player, npc, guest, entry)) {
-			return unavailable(npc, entry);
+		GuestResult away = check(player, npc, guest, entry);
+		if (away != null) {
+			return away;
 		}
 		Component name = name(npc, entry);
 		ItemStack hand = player.getMainHandItem();
@@ -183,7 +190,7 @@ public final class GuestFavors {
 		MinecraftServer server = player.level().getServer();
 		State state = State.get(server);
 		UUID me = player.getUUID();
-		long day = day(player);
+		long day = state.effective(me, day(player));
 		Favor today = state.today(me, guest, day);
 		if (today.gifts() >= GIFTS_PER_DAY) {
 			return GuestResult.refused("message.jugcraft.guest.gift.enough_today",
@@ -247,14 +254,15 @@ public final class GuestFavors {
 	/** Takes up today's offered quest (OFFERED to ACTIVE). Refused once taken up or done, or while it could add nothing. */
 	public static GuestResult acceptQuest(ServerPlayer player, Townsfolk npc, String guest) {
 		GuestRoster.Guest entry = GuestRoster.get(guest);
-		if (!usable(player, npc, guest, entry)) {
-			return unavailable(npc, entry);
+		GuestResult away = check(player, npc, guest, entry);
+		if (away != null) {
+			return away;
 		}
 		Component name = name(npc, entry);
 		MinecraftServer server = player.level().getServer();
 		State state = State.get(server);
 		UUID me = player.getUUID();
-		long day = day(player);
+		long day = state.effective(me, day(player));
 		Favor today = state.today(me, guest, day);
 		if (today.quest() == QuestState.ACTIVE) {
 			return GuestResult.refused("message.jugcraft.guest.quest.already_active", "You are already on today's errand for %s.", name);
@@ -279,14 +287,15 @@ public final class GuestFavors {
 	 */
 	public static GuestResult turnIn(ServerPlayer player, Townsfolk npc, String guest) {
 		GuestRoster.Guest entry = GuestRoster.get(guest);
-		if (!usable(player, npc, guest, entry)) {
-			return unavailable(npc, entry);
+		GuestResult away = check(player, npc, guest, entry);
+		if (away != null) {
+			return away;
 		}
 		Component name = name(npc, entry);
 		MinecraftServer server = player.level().getServer();
 		State state = State.get(server);
 		UUID me = player.getUUID();
-		long day = day(player);
+		long day = state.effective(me, day(player));
 		Favor today = state.today(me, guest, day);
 		if (today.quest() == QuestState.DONE) {
 			return GuestResult.refused("message.jugcraft.guest.quest.done_today", "You have done today's errand for %s. Come back tomorrow.", name);
@@ -323,7 +332,8 @@ public final class GuestFavors {
 		if (!available(guest)) {
 			return QuestState.NONE;
 		}
-		return State.get(player.level().getServer()).today(player.getUUID(), guest, day(player)).quest();
+		State state = State.get(player.level().getServer());
+		return state.today(player.getUUID(), guest, state.effective(player.getUUID(), day(player))).quest();
 	}
 
 	/** The item and count today's quest asks for; empty when there is none. */
@@ -331,8 +341,9 @@ public final class GuestFavors {
 		if (!available(guest)) {
 			return ItemStack.EMPTY;
 		}
-		long day = day(player);
-		Favor today = State.get(player.level().getServer()).today(player.getUUID(), guest, day);
+		State state = State.get(player.level().getServer());
+		long day = state.effective(player.getUUID(), day(player));
+		Favor today = state.today(player.getUUID(), guest, day);
 		if (today.quest() == QuestState.OFFERED) {
 			Quest quest = offered(guest, player.getUUID(), day);
 			return new ItemStack(quest.item(), quest.count());
@@ -352,7 +363,8 @@ public final class GuestFavors {
 		if (!available(guest)) {
 			return 0;
 		}
-		Favor today = State.get(player.level().getServer()).today(player.getUUID(), guest, day(player));
+		State state = State.get(player.level().getServer());
+		Favor today = state.today(player.getUUID(), guest, state.effective(player.getUUID(), day(player)));
 		return Math.max(0, GIFTS_PER_DAY - today.gifts());
 	}
 
@@ -362,7 +374,8 @@ public final class GuestFavors {
 			return 0;
 		}
 		MinecraftServer server = player.level().getServer();
-		Favor today = State.get(server).today(player.getUUID(), guest, day(player));
+		State state = State.get(server);
+		Favor today = state.today(player.getUUID(), guest, state.effective(player.getUUID(), day(player)));
 		int toMaximum = GuestBalance.MAX_AFFECTION - GuestLedger.get(server).affection(player.getUUID(), guest);
 		return Math.max(0, Math.min(DAILY_AFFECTION_CAP - today.affection(), toMaximum));
 	}
@@ -377,7 +390,10 @@ public final class GuestFavors {
 
 	// ---------------------------------------------------------------- shared checks
 
-	/** The day the player's limits belong to: the overworld's game time in whole days (or a test's pinned day). */
+	/**
+	 * The clock's day for the player: the overworld's game time in whole days (or a test's pinned day). The day used is
+	 * {@link State#effective} of this: never earlier than the player's high-water day.
+	 */
 	static long day(ServerPlayer player) {
 		Long pinned = PINNED_DAYS.get(player.getUUID());
 		return pinned != null ? pinned : Math.floorDiv(player.level().getServer().overworld().getGameTime(), DAY_TICKS);
@@ -388,15 +404,24 @@ public final class GuestFavors {
 		return entry != null && entry.available();
 	}
 
-	/** The guest exists, is not pending, and the entity spoken to is that guest; the player can act. */
-	private static boolean usable(ServerPlayer player, @Nullable Townsfolk npc, String guest, GuestRoster.@Nullable Guest entry) {
-		return entry != null && entry.available() && npc != null && !npc.isRemoved() && guest.equals(npc.guest())
-				&& player.isAlive() && !player.isSpectator();
-	}
-
-	private static GuestResult unavailable(@Nullable Townsfolk npc, GuestRoster.@Nullable Guest entry) {
-		Component name = npc != null ? npc.getDisplayName() : Component.literal(entry != null ? entry.name() : "?");
-		return GuestResult.refused("message.jugcraft.guest.unavailable", "%s is not receiving visitors yet.", name);
+	/**
+	 * Why the player may not act with this guest now, or null when they may: the guest in the roster and not pending;
+	 * the player alive and not a spectator; the entity alive, not removed, carrying {@code guest}, in the player's level
+	 * within {@link GuestBalance#INTERACT_RANGE} of the player's eyes (as {@link GuestMenu} measures), and the ledger's
+	 * canonical entity for the guest. Every entry point asks this before it takes or adds anything.
+	 */
+	private static @Nullable GuestResult check(ServerPlayer player, @Nullable Townsfolk npc, @Nullable String guest,
+			GuestRoster.@Nullable Guest entry) {
+		if (entry == null || !entry.available() || guest == null) {
+			Component name = npc != null ? npc.getDisplayName() : Component.literal(entry != null ? entry.name() : String.valueOf(guest));
+			return GuestResult.refused("message.jugcraft.guest.unavailable", "%s is not receiving visitors yet.", name);
+		}
+		double reach = GuestBalance.INTERACT_RANGE;
+		boolean here = npc != null && player.isAlive() && !player.isSpectator() && npc.isAlive() && !npc.isRemoved()
+				&& guest.equals(npc.guest()) && npc.level() == player.level()
+				&& npc.getBoundingBox().distanceToSqr(player.getEyePosition()) <= reach * reach
+				&& npc.getUUID().equals(GuestLedger.get(player.level().getServer()).canonical(guest));
+		return here ? null : GuestResult.refused("message.jugcraft.guest.not_here", "%s is not here to talk to.", Component.literal(entry.name()));
 	}
 
 	private static Component name(@Nullable Townsfolk npc, GuestRoster.Guest entry) {
@@ -540,18 +565,28 @@ public final class GuestFavors {
 	static final class State extends SavedData {
 		static final Codec<State> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.unboundedMap(UUIDUtil.STRING_CODEC, Codec.unboundedMap(Codec.STRING, Favor.CODEC))
-						.optionalFieldOf("players", Map.of()).forGetter(State::players)
+						.optionalFieldOf("players", Map.of()).forGetter(State::players),
+				Codec.unboundedMap(UUIDUtil.STRING_CODEC, Codec.LONG).optionalFieldOf("high_water", Map.of()).forGetter(State::highWater)
 		).apply(i, State::new));
 		static final SavedDataType<State> TYPE = new SavedDataType<>(Jugcraft.id("town_guest_favors"), State::new, CODEC, null);
 
 		final Map<UUID, Map<String, Favor>> players = new HashMap<>();
+		/** Per player, the latest day any of their records was written for: the day used never goes below it. */
+		final Map<UUID, Long> highWater = new HashMap<>();
 
 		State() {
-			this(Map.of());
+			this(Map.of(), Map.of());
 		}
 
-		State(Map<UUID, Map<String, Favor>> saved) {
-			saved.forEach((player, guests) -> players.put(player, new LinkedHashMap<>(guests)));
+		State(Map<UUID, Map<String, Favor>> saved, Map<UUID, Long> water) {
+			saved.forEach((player, guests) -> {
+				players.put(player, new LinkedHashMap<>(guests));
+				// Never below a day a record is kept for, even from a save written before the high-water mark.
+				for (Favor favor : guests.values()) {
+					highWater.merge(player, favor.day(), Long::max);
+				}
+			});
+			water.forEach((player, day) -> highWater.merge(player, day, Long::max));
 		}
 
 		static State get(MinecraftServer server) {
@@ -562,17 +597,32 @@ public final class GuestFavors {
 			return players;
 		}
 
-		/** The record for {@code day}: the saved one if it is that day or later (a clock moved back resets nothing), else a fresh day. */
+		Map<UUID, Long> highWater() {
+			return highWater;
+		}
+
+		/** The day the player's limits belong to on the clock's {@code day}: never earlier than their high-water day. */
+		long effective(UUID player, long day) {
+			Long seen = highWater.get(player);
+			return seen == null ? day : Math.max(day, seen);
+		}
+
+		/** The record for {@code day} (an effective day): the saved one if it is that day or later, else a fresh day. */
 		Favor today(UUID player, String guest, long day) {
 			Map<String, Favor> mine = players.get(player);
 			Favor saved = mine == null ? null : mine.get(guest);
 			return saved != null && saved.day() >= day ? saved : Favor.fresh(day);
 		}
 
-		/** Saves {@code favor}, dropping the player's records of days before {@code day} (they count for nothing). */
+		/**
+		 * Saves {@code favor} for the effective {@code day}, raising the player's high-water day to it and dropping their
+		 * records of earlier days, which can never be current again.
+		 */
 		void put(UUID player, String guest, Favor favor, long day) {
+			long current = effective(player, day);
+			highWater.put(player, current);
 			Map<String, Favor> mine = players.computeIfAbsent(player, id -> new LinkedHashMap<>());
-			mine.values().removeIf(old -> old.day() < day);
+			mine.values().removeIf(old -> old.day() < current);
 			mine.put(guest, favor);
 			setDirty();
 		}

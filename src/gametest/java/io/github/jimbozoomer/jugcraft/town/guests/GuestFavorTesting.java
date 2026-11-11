@@ -30,9 +30,20 @@ public final class GuestFavorTesting {
 		GuestFavors.PINNED_DAYS.remove(player);
 	}
 
-	/** The day {@code player}'s limits belong to now. */
+	/** The clock's day for {@code player} (the pinned one, if pinned). */
 	public static long day(ServerPlayer player) {
 		return GuestFavors.day(player);
+	}
+
+	/** The day {@code player}'s limits belong to now: the clock's day, never earlier than their high-water day. */
+	public static long effectiveDay(ServerPlayer player) {
+		return GuestFavors.State.get(player.level().getServer()).effective(player.getUUID(), GuestFavors.day(player));
+	}
+
+	/** The quest {@code guest} offers {@code player} on {@code day}. */
+	public static ItemStack offeredOn(String guest, ServerPlayer player, long day) {
+		GuestFavors.Quest quest = GuestFavors.offered(guest, player.getUUID(), day);
+		return new ItemStack(quest.item(), quest.count());
 	}
 
 	/** The guest's favourite gifts. */
@@ -48,7 +59,7 @@ public final class GuestFavorTesting {
 	/** Records that {@code player} has already gained {@code amount} affection with {@code guest} today (as earlier gifts would). */
 	public static void gainedToday(ServerPlayer player, String guest, int amount) {
 		GuestFavors.State state = GuestFavors.State.get(player.level().getServer());
-		long day = GuestFavors.day(player);
+		long day = state.effective(player.getUUID(), GuestFavors.day(player));
 		state.put(player.getUUID(), guest, state.today(player.getUUID(), guest, day).withAffection(amount), day);
 	}
 
@@ -57,14 +68,15 @@ public final class GuestFavorTesting {
 		return GuestFavors.State.CODEC.encodeStart(NbtOps.INSTANCE, GuestFavors.State.get(server)).getOrThrow();
 	}
 
-	/** Drops {@code player}'s live records, as if they had never been kept. */
+	/** Drops {@code player}'s live records and high-water day, as if they had never been kept. */
 	public static void forget(MinecraftServer server, UUID player) {
 		GuestFavors.State state = GuestFavors.State.get(server);
 		state.players.remove(player);
+		state.highWater.remove(player);
 		state.setDirty();
 	}
 
-	/** Reads {@code saved} back with the codec and puts {@code player}'s records from it into the live data. */
+	/** Reads {@code saved} back with the codec and puts {@code player}'s records and high-water day from it into the live data. */
 	public static void load(MinecraftServer server, Tag saved, UUID player) {
 		GuestFavors.State restored = GuestFavors.State.CODEC.parse(NbtOps.INSTANCE, saved).getOrThrow();
 		GuestFavors.State state = GuestFavors.State.get(server);
@@ -73,6 +85,12 @@ public final class GuestFavorTesting {
 			state.players.remove(player);
 		} else {
 			state.players.put(player, new LinkedHashMap<>(mine));
+		}
+		Long water = restored.highWater.get(player);
+		if (water == null) {
+			state.highWater.remove(player);
+		} else {
+			state.highWater.put(player, water);
 		}
 		state.setDirty();
 	}
