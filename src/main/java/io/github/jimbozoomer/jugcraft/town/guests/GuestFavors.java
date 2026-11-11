@@ -239,8 +239,12 @@ public final class GuestFavors {
 		return 0;
 	}
 
-	/** The guest's favourite gifts: {@link #FAVOURITES} distinct items of {@link #GIFTS}, fixed by the guest id. */
-	static List<Item> favourites(String guest) {
+	/**
+	 * The guest's favourite gifts: {@link #FAVOURITES} distinct items of {@link #GIFTS}, each worth
+	 * {@link #FAVOURITE_BONUS} more. These are gameplay preferences picked deterministically from the gift table by a fixed
+	 * hash of the guest id, not claims about anyone. Pure: no server state, the same on every machine, safe on the client.
+	 */
+	public static List<Item> favourites(String guest) {
 		List<Item> items = new ArrayList<>(GIFTS.size());
 		for (Gift gift : GIFTS) {
 			items.add(gift.item());
