@@ -157,7 +157,7 @@ public final class GuestMenu extends AbstractContainerMenu {
 		return opening;
 	}
 
-	public @Nullable GuestRoster.Guest guest() {
+	public GuestRoster.@Nullable Guest guest() {
 		return GuestRoster.get(opening.guest());
 	}
 
