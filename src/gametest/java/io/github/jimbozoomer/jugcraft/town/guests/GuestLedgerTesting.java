@@ -68,6 +68,32 @@ public final class GuestLedgerTesting {
 		}
 	}
 
+	/**
+	 * Makes the server's ledger treat the player's own entry exactly as if it had failed to read from disk (the state
+	 * the damaged-file path produces): refused marriage and affection, the entry kept as written.
+	 */
+	public static void damagePlayer(MinecraftServer server, UUID player) {
+		GuestLedger.get(server).damage(player);
+	}
+
+	/**
+	 * Makes the server's ledger treat the guest's entry exactly as if it had failed to read from disk: frozen (no
+	 * binding, verifying or marriage), its named spouse counting as married. {@link #reset} undoes it.
+	 */
+	public static void damageGuest(MinecraftServer server, String guest) {
+		GuestLedger.get(server).damage(guest);
+	}
+
+	/** As {@link #damagePlayer}, on a ledger of the test's own. */
+	public static void damage(GuestLedger ledger, UUID player) {
+		ledger.damage(player);
+	}
+
+	/** As {@link #damageGuest}, on a ledger of the test's own. */
+	public static void damage(GuestLedger ledger, String guest) {
+		ledger.damage(guest);
+	}
+
 	public static int changes(GuestLedger ledger) {
 		return ledger.changes;
 	}

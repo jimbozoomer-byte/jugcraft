@@ -21,6 +21,8 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
@@ -233,8 +235,12 @@ public final class GuestLedger extends SavedData {
 		}
 	}
 
-	/** Works out whom the unreadable entries concern, and says so loudly. */
+	/** Works out (again) whom the unreadable entries concern, and says so loudly. */
 	private void inspectDamage() {
+		unreadSpouses.clear();
+		unreadablePlayers.clear();
+		unknownSpouse = false;
+		unknownPlayer = false;
 		unreadGuests.forEach((guest, raw) -> {
 			Jugcraft.LOGGER.error("[guests] {}'s saved record cannot be read; it is kept as written, and {} is frozen (no binding, "
 					+ "no marriage) until an operator repairs the town_guests file", guest, guest);
@@ -532,15 +538,32 @@ public final class GuestLedger extends SavedData {
 		return record == null ? 0 : record.affection.getOrDefault(guest, 0);
 	}
 
-	/** Adds {@code delta} (may be negative), kept within 0 to the maximum; returns the new value. */
+	/**
+	 * Whether a positive {@link #addAffection} would really change the stored value now: the guest is in the roster and
+	 * available (not pending), the guest's own saved entry and the player's are readable (so neither identity nor
+	 * affection is damaged), and the player's affection is below {@link GuestBalance#MAX_AFFECTION}. Anything that takes
+	 * an item for affection (gifts, quests) asks this first, so a damaged ledger or full affection never consumes an item
+	 * for nothing.
+	 */
+	public boolean canGainAffection(UUID player, String guest) {
+		GuestRoster.Guest entry = GuestRoster.get(guest);
+		return entry != null && entry.available() && !unreadable(guest) && !unreadable(player)
+				&& affection(player, guest) < GuestBalance.MAX_AFFECTION;
+	}
+
+	/**
+	 * Adds {@code delta} (may be negative), kept within 0 to the maximum; returns the new value. Nothing changes for an
+	 * unknown or pending guest, or when the guest's or the player's saved entry is unreadable (see
+	 * {@link #canGainAffection}).
+	 */
 	public int addAffection(UUID player, String guest, int delta) {
 		int now = affection(player, guest);
 		GuestRoster.Guest entry = GuestRoster.get(guest);
 		if (entry == null || !entry.available()) {
 			return now;   // a pending or unknown guest cannot be befriended
 		}
-		if (unreadable(player)) {
-			Jugcraft.LOGGER.warn("[guests] Affection for {} not added: player {}'s saved record cannot be read", guest, player);
+		if (unreadable(player) || unreadable(guest)) {
+			Jugcraft.LOGGER.warn("[guests] Affection of player {} for {} not changed: saved data about them cannot be read", player, guest);
 			return now;
 		}
 		return setAffection(player, guest, (int) Math.clamp((long) now + delta, 0L, (long) GuestBalance.MAX_AFFECTION));
@@ -811,10 +834,42 @@ public final class GuestLedger extends SavedData {
 		if (record != null && record.spouse != null) {
 			spouses.remove(record.spouse);
 		}
-		unreadGuests.remove(guest);
+		if (unreadGuests.remove(guest) != null) {
+			inspectDamage();
+		}
 		players.values().forEach(each -> each.affection.remove(guest));
 		players.values().removeIf(PlayerRecord::empty);
 		changed();
+	}
+
+	/**
+	 * Makes the guest's entry unreadable, exactly as a failed read from disk leaves it: its record (or an empty one)
+	 * becomes a raw entry kept as written, with one field that cannot be read, so it stays unreadable across a save and
+	 * load too, and the parties it names are worked out as on loading. Game tests only (GuestLedgerTesting.damageGuest).
+	 */
+	void damage(String guest) {
+		GuestRecord record = guests.remove(guest);
+		if (record != null && record.spouse != null) {
+			spouses.remove(record.spouse);
+		}
+		unreadGuests.put(guest, unreadableCopy(GUEST, record == null ? new GuestRecord() : record));
+		inspectDamage();
+		changed();
+	}
+
+	/** As {@link #damage(String)}, for the player's own entry (GuestLedgerTesting.damagePlayer). */
+	void damage(UUID player) {
+		PlayerRecord record = players.remove(player);
+		unreadPlayers.put(player.toString(), unreadableCopy(PLAYER, record == null ? new PlayerRecord() : record));
+		inspectDamage();
+		changed();
+	}
+
+	/** {@code value} as written, with its cooldown field replaced by text, which no reading accepts. */
+	private static <T> Dynamic<?> unreadableCopy(Codec<T> codec, T value) {
+		CompoundTag written = codec.encodeStart(NbtOps.INSTANCE, value).getOrThrow() instanceof CompoundTag tag ? tag : new CompoundTag();
+		written.putString("cooldown_millis", "unreadable");
+		return new Dynamic<>(NbtOps.INSTANCE, written);
 	}
 
 	private void changed() {
