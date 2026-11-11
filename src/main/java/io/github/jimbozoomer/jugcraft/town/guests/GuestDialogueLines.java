@@ -199,7 +199,7 @@ public final class GuestDialogueLines {
 						say("message.jugcraft.guest.personality.asa_mitaka.banter.2", "I'm up early to study. Nobody can say I'm unprepared. Nobody says anything to me, but still.", Cue.MORNING),
 						say("message.jugcraft.guest.personality.asa_mitaka.banter.3", "Rain is good. Nobody expects you to go out and be cheerful in the rain.", Cue.RAIN),
 						say("message.jugcraft.guest.personality.asa_mitaka.banter.4", "Everyone keeps exchanging presents. I've drafted three possible thank-you speeches.", Cue.DECEMBER),
-						say("message.jugcraft.guest.personality.asa_mitaka.banter.5", "I'm still thinking about your gift. In a normal way. Not over-thinking. Much.", Cue.GIFTED)),
+						say("message.jugcraft.guest.personality.asa_mitaka.banter.5", "I'm still deciding where to keep your gift. I made a shortlist. It's a long shortlist.", Cue.GIFTED)),
 				say("message.jugcraft.guest.personality.asa_mitaka.boast.0", "I have prepared extensively for this. I also have a backup plan. And a backup backup plan.")));
 
 		AUTHORED.put("himeno", new Lines(
@@ -441,7 +441,7 @@ public final class GuestDialogueLines {
 
 		AUTHORED.put("rin_ishtar", new Lines(
 				List.of(
-						say("message.jugcraft.guest.personality.rin_ishtar.favourite.0", "W-well, you have a good eye. I'll accept this. It's not like I'm thrilled. ...I'm a little thrilled."),
+						say("message.jugcraft.guest.personality.rin_ishtar.favourite.0", "Well, you have a good eye. I'll accept this. It's not like I'm thrilled. ...Fine, I'm a little thrilled."),
 						say("message.jugcraft.guest.personality.rin_ishtar.favourite.1", "A gift of real quality! Fine, I admit it, you chose well.")),
 				List.of(
 						say("message.jugcraft.guest.personality.rin_ishtar.ordinary.0", "Thanks. I'll put it somewhere sensible. Not near my gems."),
