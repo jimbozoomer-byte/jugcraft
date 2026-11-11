@@ -175,7 +175,8 @@ public class GuestWardrobeGameTests {
 		Townsfolk npc = place(h, REAL, 2, 2, "guest_lauren_chen");
 		try {
 			h.assertTrue(GuestWardrobeTesting.choose(wardrobe, REAL, "winter"), "(winter chosen)");
-			for (String own : List.of("baker", "guest_makima", "guest_makima_winter")) {
+			// The guard's skin is never a placeholder; another guest's named and seasonal skins are never this guest's.
+			for (String own : List.of(CustomNpcs.DEFAULT_GUARD_SKIN, "guest_makima", "guest_makima_winter")) {
 				h.assertTrue(CustomNpcs.setTownSkin(npc, own), "(an operator gives it " + own + ")");
 				h.assertTrue(!GuestWardrobeTesting.ours(REAL, own) && GuestWardrobeTesting.dress(npc, REAL, false).equals("KEPT_OWN_SKIN")
 						&& npc.skin().equals(own), "An operator's " + own + " is kept");
