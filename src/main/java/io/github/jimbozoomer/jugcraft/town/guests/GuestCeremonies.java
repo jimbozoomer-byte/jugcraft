@@ -58,14 +58,14 @@ public final class GuestCeremonies {
 	public static final String KIND = "ceremony";
 	/** A request must be confirmed within this many ticks (as a proposal must). */
 	public static final int CONFIRM_TICKS = GuestBalance.CONFIRM_TICKS;
-	/** The guest and the player must reach the church within this many ticks of confirming (60 s). */
-	public static final int WALK_TICKS = 1200;
+	/** The guest and the player must reach the church within this many ticks of confirming (2 minutes). */
+	public static final int WALK_TICKS = 2400;
 	/** The priest's lines, and the ticks between them. */
 	public static final int LINES = 5, LINE_TICKS = 60;
-	/** No ceremony lasts longer than this (2 minutes). */
-	public static final int MAX_TICKS = 2400;
+	/** No ceremony lasts longer than this (3 minutes). */
+	public static final int MAX_TICKS = 3600;
 	/** The guest is at the church within this many blocks of the anchor; the player within {@link #ATTEND}. */
-	public static final double ARRIVE = 6.0, ATTEND = 16.0;
+	public static final double ARRIVE = 6.5, ATTEND = 16.0;
 	/** A player farther than this from the anchor has left the ceremony. */
 	public static final double LEAVE = 48.0;
 	/** Invited players within this many blocks of the anchor hear the priest; opted-in players within it may be invited. */

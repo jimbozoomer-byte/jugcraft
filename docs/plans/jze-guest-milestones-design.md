@@ -91,7 +91,7 @@ are read only.
    of the player or guest), then the venue. Kept in memory for `GuestBalance.CONFIRM_TICKS` (30 s).
 2. **Confirm** (`milestones/ceremony_confirm`): every check again, then `GuestActivity.begin(guest, "ceremony")` with
    the venue's anchor. The guest walks there with its usual goals.
-3. **Walk** (up to 60 s): the guest within 6 blocks of the anchor and the player within 16 starts the rite; otherwise
+3. **Walk** (up to 2 minutes): the guest within 6.5 blocks of the anchor and the player within 16 starts the rite; otherwise
    the ceremony ends ("timeout").
 4. **Rite** (5 lines, 3 s apart): the Priest of Notch's original lines, bell and chime sounds, happy-villager, note and
    end-rod particles. Then the ceremony is recorded for this marriage and the bouquet given.
@@ -132,7 +132,7 @@ goes only to players with `notices` on. No relationship is ever broadcast to eve
 | Affection thresholds | 250, 500, 750, 1000 |
 | Meal grant / limit | 8 affection within the shared budget / once per player and guest per game day |
 | Anniversaries | 7, 30, 100, 365 game days, then every 365 |
-| Ceremony | confirm 30 s, walk 60 s, rite 5 lines x 3 s, hard cap 120 s, arrive 6 blocks, start within 16, leave beyond 48, 8 named invitations, nearby invitations 48 blocks |
+| Ceremony | confirm 30 s, walk 2 min, rite 5 lines x 3 s, hard cap 3 min, arrive 6.5 blocks, start within 16, leave beyond 48, 8 named invitations, nearby invitations 48 blocks |
 | Gossip / rivalry notices | every 10 min per receiver / once per guest per 5 min |
 | Notice settings | both off by default |
 
