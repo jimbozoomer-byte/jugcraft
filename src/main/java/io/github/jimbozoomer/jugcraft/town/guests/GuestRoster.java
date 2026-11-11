@@ -11,8 +11,10 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>Every available guest has the same exclusive companionship mechanics: affection, gifts and quests, one companion
  * at a time. Everything is nonsexual for everyone, and real people get generic, respectful lines only: no invented
- * personal facts, quotes or claims about their lives. One hold: guests whose source work depicts them as minors or
- * school students ({@link Guest#marriage()} false) have companionship but no proposal or marriage. Pending entries
+ * personal facts, quotes or claims about their lives. Romance is for unambiguous adults only (owner rule, 11 November
+ * 2026): guests whose source work depicts them as minors or school students, and guests whose source leaves their age
+ * unstated with a youthful presentation, have companionship but no proposal or marriage ({@link Guest#marriage()} false)
+ * and no body-shape changes, until an adult identity is resolved; real people keep their own adult identities. Pending entries
  * (identity or reference unknown) are listed so they are not forgotten; they cannot be placed or befriended until the
  * owner says who they are.
  */
@@ -36,6 +38,7 @@ public final class GuestRoster {
 
 	private static final String REAL = "Real person: generic, respectful lines only; character-inspired Minecraft skin.";
 	private static final String STUDENT = "Companionship without marriage: depicted as a minor or school student in the source work.";
+	private static final String UNCERTAIN = "Companionship without marriage: age not stated in the source work; held until an adult identity is resolved.";
 
 	public static final List<Guest> ALL = List.of(
 			real("emiru", "Emiru", ""),
@@ -45,9 +48,9 @@ public final class GuestRoster {
 			real("sarah_stock", "Sarah Stock", "Non-gory zombie wedding dress appearance."),
 			real("pokimane", "Pokimane", ""),
 			pending("rooni", "Rooni", Origin.REAL_PERSON, "Pending: described only as a slim Black woman; identity and reference unknown."),
-			fiction("power", "Power", "Chainsaw Man", ""),
+			uncertain("power", "Power", "Chainsaw Man"),
 			fiction("makima", "Makima", "Chainsaw Man", ""),
-			fiction("reze", "Reze", "Chainsaw Man", ""),
+			uncertain("reze", "Reze", "Chainsaw Man"),
 			student("asa_mitaka", "Asa Mitaka", "Chainsaw Man", ""),
 			fiction("himeno", "Himeno", "Chainsaw Man", ""),
 			student("tokai_teio", "Tokai Teio", "Uma Musume Pretty Derby", "The owner wrote \"Uma Teio\"."),
@@ -61,7 +64,7 @@ public final class GuestRoster {
 			fiction("frieren", "Frieren", "Frieren: Beyond Journey's End", ""),
 			student("rem", "Rem", "Re:Zero", ""),
 			student("megumin", "Megumin", "KonoSuba", ""),
-			fiction("zero_two", "Zero Two", "Darling in the Franxx", ""),
+			uncertain("zero_two", "Zero Two", "Darling in the Franxx"),
 			student("rin_ishtar", "Rin Tohsaka / Ishtar", "Fate", "One slot for either; the owner chooses which."),
 			fiction("tifa_lockhart", "Tifa Lockhart", "Final Fantasy VII", ""),
 			fiction("yorha_2b", "2B", "NieR:Automata", ""),
@@ -88,9 +91,24 @@ public final class GuestRoster {
 	private GuestRoster() {
 	}
 
+	/** Game-test guests ({@link #test}): never in {@link #ALL}, never made by the mod itself. */
+	private static final Map<String, Guest> TEST = new java.util.concurrent.ConcurrentHashMap<>();
+
 	/** The guest with this id, or null. */
 	public static @Nullable Guest get(@Nullable String id) {
-		return id == null ? null : BY_ID.get(id);
+		return id == null ? null : BY_ID.getOrDefault(id, TEST.get(id));
+	}
+
+	/**
+	 * Game tests only: a synthetic available guest {@code id} (which must start with "test_"), so tests that bind guests
+	 * on the shared test server need not compete for the real ids. The mod never calls this.
+	 */
+	static Guest test(String id, boolean marriage) {
+		if (!id.startsWith("test_") || !id.matches("[a-z][a-z0-9_]{1,31}") || BY_ID.containsKey(id)) {
+			throw new IllegalArgumentException("Not a test guest id: " + id);
+		}
+		return TEST.computeIfAbsent(id, key -> new Guest(key, "Test " + key.substring(5), Origin.FICTIONAL, "Game test", false, marriage,
+				"A game-test guest."));
 	}
 
 	private static Guest real(String id, String name, String note) {
@@ -103,6 +121,10 @@ public final class GuestRoster {
 
 	private static Guest student(String id, String name, String series, String note) {
 		return new Guest(id, name, Origin.FICTIONAL, series, false, false, join(STUDENT + " Character-inspired Minecraft skin.", note));
+	}
+
+	private static Guest uncertain(String id, String name, String series) {
+		return new Guest(id, name, Origin.FICTIONAL, series, false, false, UNCERTAIN + " Character-inspired Minecraft skin.");
 	}
 
 	private static Guest pending(String id, String name, Origin origin, String note) {

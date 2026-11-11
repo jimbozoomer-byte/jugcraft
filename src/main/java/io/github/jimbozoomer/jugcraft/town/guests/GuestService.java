@@ -49,6 +49,11 @@ public final class GuestService {
 		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> SESSIONS.remove(handler.player.getUUID()));
 		GuestLedger.register();
 		GuestFavors.register();
+		// The expansion's features, in this fixed order on both sides (their option indices follow it).
+		GuestWardrobe.register();
+		GuestPersonality.register();
+		GuestOutings.register();
+		GuestMilestones.register();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
 			GuestRepairCommand.register(dispatcher);
 			GuestPlacement.register(dispatcher);
@@ -77,6 +82,7 @@ public final class GuestService {
 			return InteractionResult.SUCCESS;
 		}
 		GuestMenu.open(player, npc, guest.id());
+		GuestEvents.TALKED.invoker().talked(player, npc, guest.id());
 		return InteractionResult.SUCCESS;
 	}
 

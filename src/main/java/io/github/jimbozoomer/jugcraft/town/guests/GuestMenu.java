@@ -36,14 +36,18 @@ import org.jspecify.annotations.Nullable;
 public final class GuestMenu extends AbstractContainerMenu {
 	/** What a player may ask; the ordinal is the low 4 bits of a button id. */
 	public enum Action {
-		GIFT, QUEST_ACCEPT, QUEST_TURN_IN, PROPOSE, PROPOSE_CONFIRM, PROPOSE_CANCEL, DIVORCE, DIVORCE_CONFIRM, DIVORCE_CANCEL
+		GIFT, QUEST_ACCEPT, QUEST_TURN_IN, PROPOSE, PROPOSE_CONFIRM, PROPOSE_CANCEL, DIVORCE, DIVORCE_CONFIRM, DIVORCE_CANCEL,
+		/** A {@link GuestFeature} option: its flattened index is carried above the revision ({@link #option}). */
+		OPTION
 	}
 
 	/** The synced fields (16-bit values). */
 	public static final int AFFECTION = 0, MAX_AFFECTION = 1, GUEST_SPOUSE = 2, PLAYER_SPOUSE = 3, PLAYER_COOLDOWN_MINUTES = 4,
 			GUEST_COOLDOWN_MINUTES = 5, QUEST_STATE = 6, QUEST_ITEM = 7, QUEST_COUNT = 8, QUEST_CARRIED = 9, GIFTS_LEFT = 10,
 			REVISION = 11, DIVORCE_PENDING = 12, MAY_PROPOSE = 13, AFFECTION_LEFT_TODAY = 14, PROPOSAL_PENDING = 15, MAY_MARRY = 16,
-			FIELDS = 17;
+			OPTIONS_AVAILABLE = 17, FIELDS = 17 + GuestFeatures.MAX_OPTIONS / 16;
+	/** Bits of a button id: 4 of action, then {@link #REVISIONS}' 14 of revision, then (for {@link Action#OPTION}) the option. */
+	private static final int REVISION_SHIFT = 4, OPTION_SHIFT = 18;
 	/** {@link #GUEST_SPOUSE} and {@link #PLAYER_SPOUSE}: unmarried, married to each other, married to someone else. */
 	public static final int NOBODY = 0, EACH_OTHER = 1, SOMEONE_ELSE = 2;
 	/** Revisions wrap at 14 bits, so the synced field (16 bits) stays positive; a button id is 4 bits of action above them. */
@@ -97,7 +101,17 @@ public final class GuestMenu extends AbstractContainerMenu {
 
 	/** The button id for {@code action} at {@code revision} (the client sends the revision it last saw). */
 	public static int button(Action action, int revision) {
-		return action.ordinal() | (Math.floorMod(revision, REVISIONS) << 4);
+		return action.ordinal() | (Math.floorMod(revision, REVISIONS) << REVISION_SHIFT);
+	}
+
+	/** The button id for feature option {@code index} ({@link GuestFeatures}) at {@code revision}. */
+	public static int option(int index, int revision) {
+		return button(Action.OPTION, revision) | (index << OPTION_SHIFT);
+	}
+
+	/** Whether option {@code index} is offered now, as last synced. */
+	public boolean optionAvailable(int index) {
+		return index >= 0 && index < GuestFeatures.MAX_OPTIONS && ((data.get(OPTIONS_AVAILABLE + index / 16) & 0xFFFF) >>> (index % 16) & 1) == 1;
 	}
 
 	@Override
@@ -118,8 +132,11 @@ public final class GuestMenu extends AbstractContainerMenu {
 			return false;
 		}
 		int ordinal = id & 15;
+		int optionIndex = id >>> OPTION_SHIFT;
 		GuestService.Session session = GuestService.session(owner.getUUID());
-		if (ordinal >= Action.values().length || id >>> 4 != session.revision) {
+		GuestFeatures.Entry entry = GuestFeatures.option(optionIndex);
+		if (ordinal >= Action.values().length || (id >>> REVISION_SHIFT & (REVISIONS - 1)) != session.revision
+				|| (ordinal == Action.OPTION.ordinal() ? entry == null : optionIndex != 0)) {
 			return false; // an unknown action, or a stale or replayed click
 		}
 		session.invalidate();
@@ -140,6 +157,7 @@ public final class GuestMenu extends AbstractContainerMenu {
 			case DIVORCE -> GuestMarriage.requestDivorce(owner, guest);
 			case DIVORCE_CONFIRM -> GuestMarriage.confirmDivorce(owner, guest);
 			case DIVORCE_CANCEL -> GuestMarriage.cancelDivorce(owner);
+			case OPTION -> entry.feature().act(owner, npc, guest, entry.option());
 		};
 		owner.sendOverlayMessage(result.message());
 		broadcastChanges();
@@ -226,8 +244,31 @@ public final class GuestMenu extends AbstractContainerMenu {
 					GuestRoster.Guest entry = GuestRoster.get(guest);
 					yield entry != null && entry.mayMarry() ? 1 : 0;
 				}
-				default -> 0;
+				default -> field >= OPTIONS_AVAILABLE && field < FIELDS ? optionBits(field - OPTIONS_AVAILABLE) : 0;
 			};
+		}
+
+		/** Which of options {@code 16 * word} to {@code 16 * word + 15} are offered now (a feature that throws offers nothing). */
+		private int optionBits(int word) {
+			int bits = 0;
+			if (npc == null) {
+				return 0;
+			}
+			for (GuestFeatures.Entry entry : GuestFeatures.options()) {
+				if (entry.index() / 16 != word) {
+					continue;
+				}
+				boolean offered;
+				try {
+					offered = entry.feature().available(player, npc, guest, entry.option());
+				} catch (RuntimeException e) {
+					offered = false;
+				}
+				if (offered) {
+					bits |= 1 << (entry.index() % 16);
+				}
+			}
+			return bits;
 		}
 
 		@Override

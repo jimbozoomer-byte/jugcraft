@@ -146,6 +146,7 @@ public final class GuestMarriage {
 					"The %s could not be taken, so nothing changed.", itemName());
 		}
 		DIVORCES.remove(me);
+		GuestEvents.MARRIED.invoker().married(player, npc, guest);
 		return GuestResult.done("message.jugcraft.guest.propose.married", "You and %s are now married.", name(guest));
 	}
 
@@ -214,6 +215,7 @@ public final class GuestMarriage {
 		if (!guest.equals(ledger.spouseOf(me)) || ledger.divorce(me) == null) {
 			return GuestResult.refused("message.jugcraft.guest.divorce.not_married", "You are not married to %s.", name(guest));
 		}
+		GuestEvents.DIVORCED.invoker().divorced(player, guest);
 		return GuestResult.done("message.jugcraft.guest.divorce.done",
 				"You and %s are divorced. Neither of you may marry for %s.", name(guest), duration(GuestBalance.REMARRIAGE_COOLDOWN_MILLIS));
 	}
