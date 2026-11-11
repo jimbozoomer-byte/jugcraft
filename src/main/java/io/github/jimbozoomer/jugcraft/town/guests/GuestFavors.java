@@ -36,7 +36,9 @@ import org.jspecify.annotations.Nullable;
  * takes or adds anything: the player alive, not a spectator, in the guest's level within
  * {@link GuestBalance#INTERACT_RANGE} of it (eye to body, as the menu measures); the entity alive, carrying this guest
  * id, and the ledger's canonical entity for it; the guest in the roster and not pending. A duplicate, remote or stale
- * call takes no item and adds no affection.
+ * call takes no item and adds no affection. Before any item is taken (and before a quest is taken up) the ledger is
+ * asked {@link GuestLedger#canGainAffection}: when a gain would not really be recorded (a damaged or unreadable entry for
+ * the player or the guest, an unavailable guest, full affection) the action is refused and nothing is taken or advanced.
  *
  * <p><b>State.</b> Saved with the overworld as {@code jugcraft:town_guest_favors}: per player and guest, the day it
  * belongs to, the gifts given and affection gained that day, and that day's quest (item, count, state). A record from an
@@ -70,7 +72,7 @@ import org.jspecify.annotations.Nullable;
  * left of the day's cap and of the maximum; an action that would add nothing is refused and takes nothing.
  *
  * <p><b>Messages</b> (English fallbacks here; worker C adds them to en_us.json): {@code message.jugcraft.guest.}
- * {@code unavailable}, {@code not_here}, {@code full_affection}, {@code cap_today}, {@code gift.empty_hand}, {@code gift.unwanted},
+ * {@code unavailable}, {@code not_here}, {@code record_locked}, {@code full_affection}, {@code cap_today}, {@code gift.empty_hand}, {@code gift.unwanted},
  * {@code gift.enough_today}, {@code gift.given}, {@code gift.favourite}, {@code quest.accepted},
  * {@code quest.already_active}, {@code quest.done_today}, {@code quest.not_accepted}, {@code quest.too_few},
  * {@code quest.turned_in}, {@code quest.none}.
@@ -202,6 +204,9 @@ public final class GuestFavors {
 		if (refused != null) {
 			return refused;
 		}
+		if (!ledger.canGainAffection(me, guest)) {
+			return locked(name);   // a damaged or unreadable ledger entry: nothing is taken for a gain it would not record
+		}
 		int gain = Math.min(value, Math.min(DAILY_AFFECTION_CAP - today.affection(), GuestBalance.MAX_AFFECTION - before));
 		Component given = hand.getHoverName();
 		boolean favourite = favourites(guest).contains(hand.getItem());
@@ -270,9 +275,13 @@ public final class GuestFavors {
 		if (today.quest() != QuestState.OFFERED) {
 			return GuestResult.refused("message.jugcraft.guest.quest.done_today", "You have done today's errand for %s. Come back tomorrow.", name);
 		}
-		GuestResult refused = capped(name, today, GuestLedger.get(server).affection(me, guest));
+		GuestLedger ledger = GuestLedger.get(server);
+		GuestResult refused = capped(name, today, ledger.affection(me, guest));
 		if (refused != null) {
 			return refused;
+		}
+		if (!ledger.canGainAffection(me, guest)) {
+			return locked(name);   // the quest does not move on for an entry the ledger would not change
 		}
 		Quest quest = offered(guest, me, day);
 		state.put(me, guest, today.withQuest(QuestState.ACTIVE, BuiltInRegistries.ITEM.getKey(quest.item()).toString(), quest.count()), day);
@@ -318,6 +327,9 @@ public final class GuestFavors {
 		GuestResult refused = capped(name, today, before);
 		if (refused != null) {
 			return refused;
+		}
+		if (!ledger.canGainAffection(me, guest)) {
+			return locked(name);   // a damaged or unreadable ledger entry: nothing is taken for a gain it would not record
 		}
 		int gain = Math.min(QUEST_REWARD, Math.min(DAILY_AFFECTION_CAP - today.affection(), GuestBalance.MAX_AFFECTION - before));
 		// Counted and taken with the same test in one server tick, so exactly the count leaves.
@@ -426,6 +438,12 @@ public final class GuestFavors {
 
 	private static Component name(@Nullable Townsfolk npc, GuestRoster.Guest entry) {
 		return npc != null ? npc.getDisplayName() : Component.literal(entry.name());
+	}
+
+	/** Refused because the ledger would not record a gain for this player and guest (a damaged or unreadable entry). */
+	private static GuestResult locked(Component name) {
+		return GuestResult.refused("message.jugcraft.guest.record_locked",
+				"Your friendship with %s cannot change right now; an operator can check it.", name);
 	}
 
 	/** Why nothing more can be gained now (full affection, or today's cap used), or null when something can. */

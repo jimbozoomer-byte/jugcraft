@@ -6,11 +6,13 @@ import io.github.jimbozoomer.jugcraft.town.guests.GuestBalance;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestFavorTesting;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestFavors;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestLedger;
+import io.github.jimbozoomer.jugcraft.town.guests.GuestLedgerTesting;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestMenu;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestResult;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestRoster;
 import java.util.ArrayList;
 import java.util.List;
+import com.mojang.authlib.GameProfile;
 import java.util.UUID;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
@@ -19,6 +21,8 @@ import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ClientInformation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
@@ -26,6 +30,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.Vec3;
 
@@ -38,7 +43,8 @@ import net.minecraft.world.phys.Vec3;
  * bound in the ledger as their canonical entities (the favors act only beside the canonical guest), with ids no other
  * test here uses, and discards them when it ends, which frees the identities for the next binding. The ids bound:
  * frieren, makima, himeno, reze, zero_two, tifa_lockhart, yorha_2b, misato_katsuragi, lara_croft, ada_wong,
- * nicole_demara, kafka, miyabi, chun_li and megumin.
+ * nicole_demara, kafka, miyabi, chun_li, megumin, rei_ayanami, asuka_langley, gold_ship and oguri_cap. The last two are
+ * left damaged in the ledger by {@link #aDamagedGuestLedgerEntryTakesNothing} (worker A's seam) for the rest of the run.
  */
 public class GuestFavorGameTests {
 	/** The day pinned for each test's player: far from the overworld's own. */
@@ -404,6 +410,7 @@ public class GuestFavorGameTests {
 		UUID me = player.getUUID();
 		String guest = "chun_li";
 		String offering = "megumin";
+		UUID awayId = UUID.randomUUID();
 		List<Townsfolk> made = new ArrayList<>();
 		GuestFavorTesting.pinDay(player, DAY);
 		try {
@@ -445,6 +452,27 @@ public class GuestFavorGameTests {
 			refusedAll(h, player, other, guest, npc, offering, "with a mismatched id");
 			h.assertTrue(Snapshot.of(player, ledger, guest, offering, flower, item).equals(before), "A mismatched id: nothing taken or added");
 
+			// Another level: a player in the Nether at the guest's very coordinates. It is constructed there but never joins
+			// the game, so no chunk is loaded for it; only the level differs.
+			ServerLevel nether = server.getLevel(Level.NETHER);
+			h.assertTrue(nether != null && nether != npc.level(), "The test server has a Nether");
+			ServerPlayer away = new ServerPlayer(server, nether, new GameProfile(awayId, "guest-away"), ClientInformation.createDefault());
+			away.snapTo(npc.getX(), npc.getY(), npc.getZ(), 90.0F, 0.0F);
+			h.assertTrue(away.level() == nether && away.isAlive() && !away.isSpectator()
+					&& npc.getBoundingBox().distanceToSqr(away.getEyePosition()) <= GuestBalance.INTERACT_RANGE * GuestBalance.INTERACT_RANGE,
+					"Precondition: alive, not a spectator, within reach by the numbers, in another level");
+			GuestFavorTesting.pinDay(away, DAY);
+			GuestFavorTesting.takeUp(away, guest);
+			away.getInventory().setItem(9, new ItemStack(item, wanted.getCount() + 2));
+			away.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(flower, 4));
+			h.assertTrue(GuestFavors.questState(away, guest) == GuestFavors.QuestState.ACTIVE
+					&& GuestFavors.questState(away, offering) == GuestFavors.QuestState.OFFERED, "Precondition: an errand active, another offered");
+			Snapshot elsewhere = Snapshot.of(away, ledger, guest, offering, flower, item);
+			refusedAll(h, away, npc, guest, other, offering, "from another level");
+			h.assertTrue(Snapshot.of(away, ledger, guest, offering, flower, item).equals(elsewhere) && away.getMainHandItem().getCount() == 4
+					&& plainCount(away, item) == wanted.getCount() + 2, "Another level: nothing taken or added");
+			h.assertTrue(Snapshot.of(player, ledger, guest, offering, flower, item).equals(before), "and the player beside the guest is untouched");
+
 			// Dead (no health left, not yet removed).
 			npc.setHealth(0.0F);
 			other.setHealth(0.0F);
@@ -468,7 +496,18 @@ public class GuestFavorGameTests {
 		} finally {
 			clear(made);
 			GuestFavorTesting.unpin(me);
+			GuestFavorTesting.unpin(awayId);
 		}
+	}
+
+	@GameTest(maxTicks = 20)
+	public void aDamagedPlayerLedgerEntryTakesNothing(GameTestHelper h) {
+		damagedLedgerTakesNothing(h, "rei_ayanami", "asuka_langley", false);
+	}
+
+	@GameTest(maxTicks = 20)
+	public void aDamagedGuestLedgerEntryTakesNothing(GameTestHelper h) {
+		damagedLedgerTakesNothing(h, "gold_ship", "oguri_cap", true);
 	}
 
 	@GameTest(maxTicks = 100)
@@ -599,6 +638,61 @@ public class GuestFavorGameTests {
 				"When the clock catches up to day 11 there is no fresh errand and no reward" + path);
 		h.assertTrue(GuestFavors.questState(player, a) == GuestFavors.QuestState.DONE && ledger.affection(me, a) == 2 * GuestFavors.QUEST_REWARD,
 				"Days 10 and 11 gave exactly one errand each: " + ledger.affection(me, a) + path);
+	}
+
+	/**
+	 * Codex's cross-worker regression: with the player's ledger entry damaged ({@code guestSide} false) or both guests'
+	 * entries damaged (true), through worker A's seams, the ledger records no gain, so a gift, a turn-in of an active
+	 * errand ({@code guest}) and taking up an offered one ({@code offering}) are all refused: no item taken, no affection
+	 * added, and the favors' saved records (and the high-water day) unchanged.
+	 */
+	private static void damagedLedgerTakesNothing(GameTestHelper h, String guest, String offering, boolean guestSide) {
+		floor(h);
+		MinecraftServer server = h.getLevel().getServer();
+		ServerPlayer player = visitor(h, 4, 3);
+		UUID me = player.getUUID();
+		String side = guestSide ? " with the guests' ledger entries damaged" : " with the player's ledger entry damaged";
+		List<Townsfolk> made = new ArrayList<>();
+		GuestFavorTesting.pinDay(player, DAY);
+		try {
+			Townsfolk npc = place(h, guest, 2, 2, made);
+			Townsfolk other = place(h, offering, 2, 5, made);
+			GuestLedger ledger = GuestLedger.get(server);
+			h.assertTrue(GuestFavors.acceptQuest(player, npc, guest).done(), "Precondition: " + guest + "'s errand is active");
+			ItemStack wanted = GuestFavors.questItem(player, guest);
+			Item item = wanted.getItem();
+			player.getInventory().setItem(9, new ItemStack(item, wanted.getCount() + 2));
+			Item flower = ordinaryGift(guest);
+			player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(flower, 4));
+			h.assertTrue(GuestFavors.questState(player, offering) == GuestFavors.QuestState.OFFERED
+					&& ledger.canGainAffection(me, guest) && ledger.canGainAffection(me, offering),
+					"Precondition: an errand offered, and gains possible before the damage");
+
+			if (guestSide) {
+				GuestLedgerTesting.damageGuest(server, guest);
+				GuestLedgerTesting.damageGuest(server, offering);
+			} else {
+				GuestLedgerTesting.damagePlayer(server, me);
+			}
+			h.assertFalse(ledger.canGainAffection(me, guest) || ledger.canGainAffection(me, offering), "The ledger records no gain" + side);
+			Snapshot before = Snapshot.of(player, ledger, guest, offering, flower, item);
+			String record = GuestFavorTesting.record(player, guest);
+			String otherRecord = GuestFavorTesting.record(player, offering);
+
+			refusedAll(h, player, npc, guest, other, offering, side);
+			h.assertTrue(Snapshot.of(player, ledger, guest, offering, flower, item).equals(before),
+					"No item taken and no affection granted" + side);
+			h.assertTrue(player.getMainHandItem().getCount() == 4 && plainCount(player, item) == wanted.getCount() + 2,
+					"The gift and the errand's items are all still carried" + side);
+			h.assertTrue(record.equals(GuestFavorTesting.record(player, guest)) && otherRecord.equals(GuestFavorTesting.record(player, offering))
+					&& GuestFavors.questState(player, guest) == GuestFavors.QuestState.ACTIVE
+					&& GuestFavors.questState(player, offering) == GuestFavors.QuestState.OFFERED,
+					"The favors did not move on: " + GuestFavorTesting.record(player, guest) + side);
+			h.succeed();
+		} finally {
+			clear(made);
+			GuestFavorTesting.unpin(me);
+		}
 	}
 
 	/** Takes up and turns in today's errand for {@code guest}, with exactly its items; whether both were taken. */
