@@ -22,10 +22,11 @@
  * <li>{@link io.github.jimbozoomer.jugcraft.town.guests.GuestMenu} (coordinator; worker C draws its screen): every
  * player action is a vanilla menu button checked on the server (the player alive, beside the canonical guest within
  * {@link io.github.jimbozoomer.jugcraft.town.guests.GuestBalance#INTERACT_RANGE} in the same level), carrying the
- * player's revision so a stale or replayed click does nothing. The revision and the gap between actions are kept per
- * player across menus ({@link io.github.jimbozoomer.jugcraft.town.guests.GuestService#session}), and every protection
- * (daily caps, quests done, pending confirmations, cooldowns) lives in the ledger or favors, never in a menu: reopening
- * one resets nothing. No land-claim requirement: guests are public.</li>
+ * player's revision (moved on by every click and every menu opened) against stale and doubled clicks. That revision is
+ * no security token: every protection (items, daily caps, quests done, pending confirmations, cooldowns) lives in the
+ * ledger or favors and is checked there on every action; reopening a menu or reconnecting resets none of it. The menu
+ * stays valid only while the guest is available, the entity still is that guest and is its canonical entity. No
+ * land-claim requirement: guests are public.</li>
  * <li>Placement and appearance (worker C): placing never changes a block; an appearance without reference art is a
  * labelled placeholder, never presented as the character.</li>
  * <li>Messages to players use {@code Component.translatableWithFallback}; only worker C edits en_us.json.</li>

@@ -24,10 +24,13 @@ import org.jspecify.annotations.Nullable;
  * <p>Each button id is an {@link Action} and the player's current revision ({@link #button}). The server acts only while
  * the player is alive, not a spectator, in the guest's level within {@link GuestBalance#INTERACT_RANGE} of the guest's
  * canonical entity, and only on a click carrying the current revision; any accepted click, done or refused, moves the
- * revision on, so a stale click (from an older view) or a replayed one does nothing. The revision and the gap between
- * actions belong to the player ({@link GuestService#session}), not to this menu: closing and reopening a menu, or
- * opening another guest's, continues them, and every other protection is kept in the ledger or favors. Guests are
- * public: no land-claim check here.
+ * revision on, and opening any guest menu moves it on too, so a click from an older view, or the same click sent twice,
+ * is refused. The revision and the gap between actions belong to the player ({@link GuestService#session}), not to this
+ * menu. The revision only stops stale and doubled clicks: it wraps, and the client knows it, so it is no security token.
+ * Every economic and proposal rule (items, caps, quests done, pending confirmations, cooldowns) is checked against the
+ * ledger's and favors' own server state on every action, and reopening a menu resets none of it. Button ids stay within
+ * 0 to 127, which the container button packet carries whatever its wire encoding. Guests are public: no land-claim
+ * check here.
  */
 public final class GuestMenu extends AbstractContainerMenu {
 	/** What a player may ask; the ordinal is the low 4 bits of a button id. */
@@ -42,8 +45,8 @@ public final class GuestMenu extends AbstractContainerMenu {
 			FIELDS = 17;
 	/** {@link #GUEST_SPOUSE} and {@link #PLAYER_SPOUSE}: unmarried, married to each other, married to someone else. */
 	public static final int NOBODY = 0, EACH_OTHER = 1, SOMEONE_ELSE = 2;
-	/** Revisions wrap at 11 bits, so a button id stays positive and the field fits 16 bits. */
-	public static final int REVISIONS = 0x800;
+	/** Revisions wrap at 3 bits, so a button id (4 bits of action, 3 of revision) stays within 0 to 127. */
+	public static final int REVISIONS = 8;
 
 	/** What the client is told when the menu opens: the guest's entity (network id) and roster id. */
 	public record Opening(int entity, String guest) {
@@ -72,6 +75,7 @@ public final class GuestMenu extends AbstractContainerMenu {
 
 	/** Opens the conversation with {@code npc}, the guest {@code guest}. Server side. */
 	public static void open(ServerPlayer player, Townsfolk npc, String guest) {
+		GuestService.session(player.getUUID()).invalidate();
 		player.openMenu(new ExtendedMenuProvider<Opening>() {
 			@Override
 			public Opening getScreenOpeningData(ServerPlayer p) {
@@ -100,8 +104,9 @@ public final class GuestMenu extends AbstractContainerMenu {
 		if (owner == null) {
 			return true;
 		}
-		return player == owner && owner.isAlive() && !owner.isSpectator() && npc != null && npc.isAlive() && !npc.isRemoved()
-				&& npc.level() == owner.level()
+		GuestRoster.Guest guest = GuestRoster.get(opening.guest());
+		return player == owner && owner.isAlive() && !owner.isSpectator() && guest != null && guest.available() && npc != null
+				&& npc.isAlive() && !npc.isRemoved() && opening.guest().equals(npc.guest()) && npc.level() == owner.level()
 				&& npc.getBoundingBox().distanceToSqr(owner.getEyePosition()) <= GuestBalance.INTERACT_RANGE * GuestBalance.INTERACT_RANGE
 				&& npc.getUUID().equals(GuestLedger.get(owner.level().getServer()).canonical(opening.guest()));
 	}
@@ -113,10 +118,10 @@ public final class GuestMenu extends AbstractContainerMenu {
 		}
 		int ordinal = id & 15;
 		GuestService.Session session = GuestService.session(owner.getUUID());
-		if (ordinal >= Action.values().length || id >>> 4 != session.revision) {
+		if (id > 127 || ordinal >= Action.values().length || id >>> 4 != session.revision) {
 			return false; // an unknown action, or a stale or replayed click
 		}
-		session.revision = (session.revision + 1) % REVISIONS;
+		session.invalidate();
 		long now = owner.level().getGameTime();
 		if (now - session.lastAction < GuestBalance.ACTION_GAP_TICKS) {
 			broadcastChanges();

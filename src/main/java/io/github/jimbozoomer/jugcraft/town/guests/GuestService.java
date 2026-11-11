@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.menu.v1.ExtendedMenuType;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
@@ -21,12 +22,20 @@ public final class GuestService {
 	public static ExtendedMenuType<GuestMenu, GuestMenu.Opening> MENU;
 	private static final Map<UUID, Session> SESSIONS = new HashMap<>();
 
-	/** A player's place in the menu protocol, kept across menus (in memory: a restart drops every connection too). */
+	/**
+	 * A player's place in the menu protocol, kept across menus while they are connected (in memory, dropped when they
+	 * leave or the server stops: no daily limit or other protection is kept here, so a reconnect resets none).
+	 */
 	public static final class Session {
-		/** The revision the player's next click must carry. */
-		int revision;
+		/** The revision the player's next click must carry; a new session starts at a random one. */
+		int revision = java.util.concurrent.ThreadLocalRandom.current().nextInt(GuestMenu.REVISIONS);
 		/** The game time of the player's last action taken. */
 		long lastAction = -1_000L;
+
+		/** Moves the revision on: every click carrying an earlier one is refused. */
+		void invalidate() {
+			revision = (revision + 1) % GuestMenu.REVISIONS;
+		}
 	}
 
 	private GuestService() {
@@ -37,6 +46,7 @@ public final class GuestService {
 		MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("town_guest"),
 				new ExtendedMenuType<>(GuestMenu::new, GuestMenu.Opening.STREAM_CODEC));
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> SESSIONS.clear());
+		ServerPlayConnectionEvents.DISCONNECT.register((handler, server) -> SESSIONS.remove(handler.player.getUUID()));
 		GuestLedger.register();
 		GuestFavors.register();
 		CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) -> {
