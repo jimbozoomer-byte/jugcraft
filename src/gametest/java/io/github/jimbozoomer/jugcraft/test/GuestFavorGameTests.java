@@ -43,8 +43,8 @@ import net.minecraft.world.phys.Vec3;
  * bound in the ledger as their canonical entities (the favors act only beside the canonical guest), with ids no other
  * test here uses, and discards them when it ends, which frees the identities for the next binding. The ids bound:
  * frieren, makima, himeno, reze, zero_two, tifa_lockhart, yorha_2b, misato_katsuragi, lara_croft, ada_wong,
- * nicole_demara, kafka, miyabi, chun_li, megumin, rei_ayanami, asuka_langley, gold_ship and oguri_cap. The last two are
- * left damaged in the ledger by {@link #aDamagedGuestLedgerEntryTakesNothing} (worker A's seam) for the rest of the run.
+ * nicole_demara, kafka, miyabi, chun_li and megumin (worker B's allocation), each by one test only. yorha_2b is left
+ * damaged in the ledger by {@link #aDamagedGuestLedgerEntryTakesNothing} (worker A's seam) for the rest of the run.
  */
 public class GuestFavorGameTests {
 	/** The day pinned for each test's player: far from the overworld's own. */
@@ -143,49 +143,36 @@ public class GuestFavorGameTests {
 			h.assertFalse(GuestFavors.gift(player, himeno, busy).done(), "One more gift today is refused");
 			h.assertTrue(flowers.getCount() == 8 - GuestFavors.GIFTS_PER_DAY && ledger.affection(me, busy) == given, "and takes nothing");
 
-			// Today's affection cap reached (as earlier gains today would leave it).
+			// Near the day's cap a gift adds only what is left of it; then, at the cap, a gift is refused.
 			String capped = "reze";
 			Townsfolk reze = place(h, capped, 5, 1, made);
-			GuestFavorTesting.gainedToday(player, capped, cap);
+			GuestFavorTesting.gainedToday(player, capped, cap - 2);
 			player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ordinaryGift(capped), 4));
 			ItemStack bunch = player.getMainHandItem();
-			h.assertTrue(GuestFavors.affectionLeftToday(player, capped) == 0 && GuestFavors.giftsLeft(player, capped) == GuestFavors.GIFTS_PER_DAY,
-					"Precondition: today's cap used, gifts left");
+			h.assertTrue(GuestFavorTesting.giftValue(capped, bunch.getItem()) > 2, "Precondition: the gift is worth more than is left");
+			h.assertTrue(GuestFavors.gift(player, reze, capped).done(), "With 2 left today, a gift is still taken");
+			h.assertTrue(bunch.getCount() == 3 && ledger.affection(me, capped) == 2 && GuestFavors.affectionLeftToday(player, capped) == 0,
+					"one item, for exactly what was left of the cap");
+			int giftsAtCap = GuestFavors.giftsLeft(player, capped);
+			h.assertTrue(giftsAtCap == GuestFavors.GIFTS_PER_DAY - 1 && giftsAtCap > 0, "Precondition: today's cap used, gifts left");
 			h.assertFalse(GuestFavors.gift(player, reze, capped).done(), "At the day's cap a gift is refused");
-			h.assertTrue(bunch.getCount() == 4 && ledger.affection(me, capped) == 0 && GuestFavors.giftsLeft(player, capped) == GuestFavors.GIFTS_PER_DAY,
+			h.assertTrue(bunch.getCount() == 3 && ledger.affection(me, capped) == 2 && GuestFavors.giftsLeft(player, capped) == giftsAtCap,
 					"and takes nothing and uses no gift");
 
-			// Near the cap, a gift adds only what is left of it.
-			String nearly = "zero_two";
-			Townsfolk zeroTwo = place(h, nearly, 1, 5, made);
-			GuestFavorTesting.gainedToday(player, nearly, cap - 2);
-			player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ordinaryGift(nearly), 4));
-			ItemStack some = player.getMainHandItem();
-			h.assertTrue(GuestFavorTesting.giftValue(nearly, some.getItem()) > 2, "Precondition: the gift is worth more than is left");
-			h.assertTrue(GuestFavors.gift(player, zeroTwo, nearly).done(), "With 2 left today, a gift is still taken");
-			h.assertTrue(some.getCount() == 3 && ledger.affection(me, nearly) == 2 && GuestFavors.affectionLeftToday(player, nearly) == 0,
-					"one item, for exactly what was left of the cap");
-
-			// Full affection.
+			// One short of full a gift adds just that one; then, at full affection, a gift is refused.
 			String fond = "tifa_lockhart";
 			Townsfolk tifa = place(h, fond, 3, 5, made);
-			ledger.addAffection(me, fond, GuestBalance.MAX_AFFECTION);
-			h.assertTrue(ledger.affection(me, fond) == GuestBalance.MAX_AFFECTION && GuestFavors.affectionLeftToday(player, fond) == 0,
-					"Precondition: full affection");
+			ledger.addAffection(me, fond, GuestBalance.MAX_AFFECTION - 1);
 			player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ordinaryGift(fond), 4));
 			ItemStack posies = player.getMainHandItem();
+			h.assertTrue(GuestFavors.gift(player, tifa, fond).done() && posies.getCount() == 3
+					&& ledger.affection(me, fond) == GuestBalance.MAX_AFFECTION, "One short of full, a gift fills it and takes one item");
+			int giftsAtFull = GuestFavors.giftsLeft(player, fond);
+			h.assertTrue(GuestFavors.affectionLeftToday(player, fond) == 0 && giftsAtFull == GuestFavors.GIFTS_PER_DAY - 1,
+					"Precondition: full affection, gifts left");
 			h.assertFalse(GuestFavors.gift(player, tifa, fond).done(), "At full affection a gift is refused");
-			h.assertTrue(posies.getCount() == 4 && GuestFavors.giftsLeft(player, fond) == GuestFavors.GIFTS_PER_DAY
+			h.assertTrue(posies.getCount() == 3 && GuestFavors.giftsLeft(player, fond) == giftsAtFull
 					&& ledger.affection(me, fond) == GuestBalance.MAX_AFFECTION, "and takes nothing and uses no gift");
-
-			// One short of full: a gift adds just that one.
-			String almost = "yorha_2b";
-			Townsfolk twoB = place(h, almost, 5, 5, made);
-			ledger.addAffection(me, almost, GuestBalance.MAX_AFFECTION - 1);
-			player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(ordinaryGift(almost), 4));
-			ItemStack last = player.getMainHandItem();
-			h.assertTrue(GuestFavors.gift(player, twoB, almost).done() && last.getCount() == 3
-					&& ledger.affection(me, almost) == GuestBalance.MAX_AFFECTION, "One short of full, a gift fills it and takes one item");
 
 			// A pending guest, an unknown one, and a guest who is not the one standing there.
 			Townsfolk rooni = stand(h, "rooni", 1, 3, made);
@@ -193,7 +180,7 @@ public class GuestFavorGameTests {
 			ItemStack offered = player.getMainHandItem();
 			h.assertFalse(GuestFavors.gift(player, rooni, "rooni").done(), "A pending guest takes no gift");
 			h.assertFalse(GuestFavors.gift(player, rooni, "no_such_guest").done(), "An unknown guest takes no gift");
-			h.assertFalse(GuestFavors.gift(player, makima, "chun_li").done(), "A gift is only for the guest spoken to");
+			h.assertFalse(GuestFavors.gift(player, himeno, picky).done(), "A gift is only for the guest spoken to (makima, asked of himeno)");
 			h.assertTrue(offered.getCount() == 4 && player.getMainHandItem() == offered, "and none of them takes anything");
 			h.assertTrue(GuestFavors.giftsLeft(player, "rooni") == 0 && GuestFavors.affectionLeftToday(player, "rooni") == 0
 					&& GuestFavors.questState(player, "rooni") == GuestFavors.QuestState.NONE && GuestFavors.questItem(player, "rooni").isEmpty()
@@ -502,12 +489,12 @@ public class GuestFavorGameTests {
 
 	@GameTest(maxTicks = 20)
 	public void aDamagedPlayerLedgerEntryTakesNothing(GameTestHelper h) {
-		damagedLedgerTakesNothing(h, "rei_ayanami", "asuka_langley", false);
+		damagedLedgerTakesNothing(h, "zero_two", false);
 	}
 
 	@GameTest(maxTicks = 20)
 	public void aDamagedGuestLedgerEntryTakesNothing(GameTestHelper h) {
-		damagedLedgerTakesNothing(h, "gold_ship", "oguri_cap", true);
+		damagedLedgerTakesNothing(h, "yorha_2b", true);
 	}
 
 	@GameTest(maxTicks = 100)
@@ -641,53 +628,59 @@ public class GuestFavorGameTests {
 	}
 
 	/**
-	 * Codex's cross-worker regression: with the player's ledger entry damaged ({@code guestSide} false) or both guests'
-	 * entries damaged (true), through worker A's seams, the ledger records no gain, so a gift, a turn-in of an active
-	 * errand ({@code guest}) and taking up an offered one ({@code offering}) are all refused: no item taken, no affection
-	 * added, and the favors' saved records (and the high-water day) unchanged.
+	 * Codex's cross-worker regression, on one guest: with the player's ledger entry damaged ({@code guestSide} false) or
+	 * the guest's (true), through worker A's seams, the ledger records no gain. A gift and taking up the offered errand are
+	 * refused; then, with an errand recorded as taken up (through the favors' seam, as if before the damage), a turn-in is
+	 * refused. No item is taken, no affection added, and the favors' saved record and high-water day are unchanged by
+	 * every refused call. A damaged guest stays damaged for the run, so no other test here uses these ids.
 	 */
-	private static void damagedLedgerTakesNothing(GameTestHelper h, String guest, String offering, boolean guestSide) {
+	private static void damagedLedgerTakesNothing(GameTestHelper h, String guest, boolean guestSide) {
 		floor(h);
 		MinecraftServer server = h.getLevel().getServer();
-		ServerPlayer player = visitor(h, 4, 3);
+		ServerPlayer player = visitor(h, 4, 2);
 		UUID me = player.getUUID();
-		String side = guestSide ? " with the guests' ledger entries damaged" : " with the player's ledger entry damaged";
+		String side = guestSide ? " with the guest's ledger entry damaged" : " with the player's ledger entry damaged";
 		List<Townsfolk> made = new ArrayList<>();
 		GuestFavorTesting.pinDay(player, DAY);
 		try {
 			Townsfolk npc = place(h, guest, 2, 2, made);
-			Townsfolk other = place(h, offering, 2, 5, made);
 			GuestLedger ledger = GuestLedger.get(server);
-			h.assertTrue(GuestFavors.acceptQuest(player, npc, guest).done(), "Precondition: " + guest + "'s errand is active");
 			ItemStack wanted = GuestFavors.questItem(player, guest);
 			Item item = wanted.getItem();
-			player.getInventory().setItem(9, new ItemStack(item, wanted.getCount() + 2));
+			int carried = wanted.getCount() + 2;
+			player.getInventory().setItem(9, new ItemStack(item, carried));
 			Item flower = ordinaryGift(guest);
 			player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(flower, 4));
-			h.assertTrue(GuestFavors.questState(player, offering) == GuestFavors.QuestState.OFFERED
-					&& ledger.canGainAffection(me, guest) && ledger.canGainAffection(me, offering),
+			ItemStack hand = player.getMainHandItem();
+			h.assertTrue(GuestFavors.questState(player, guest) == GuestFavors.QuestState.OFFERED && ledger.canGainAffection(me, guest),
 					"Precondition: an errand offered, and gains possible before the damage");
 
 			if (guestSide) {
 				GuestLedgerTesting.damageGuest(server, guest);
-				GuestLedgerTesting.damageGuest(server, offering);
 			} else {
 				GuestLedgerTesting.damagePlayer(server, me);
 			}
-			h.assertFalse(ledger.canGainAffection(me, guest) || ledger.canGainAffection(me, offering), "The ledger records no gain" + side);
-			Snapshot before = Snapshot.of(player, ledger, guest, offering, flower, item);
+			h.assertFalse(ledger.canGainAffection(me, guest), "The ledger records no gain" + side);
+			int affection = ledger.affection(me, guest);
 			String record = GuestFavorTesting.record(player, guest);
-			String otherRecord = GuestFavorTesting.record(player, offering);
 
-			refusedAll(h, player, npc, guest, other, offering, side);
-			h.assertTrue(Snapshot.of(player, ledger, guest, offering, flower, item).equals(before),
-					"No item taken and no affection granted" + side);
-			h.assertTrue(player.getMainHandItem().getCount() == 4 && plainCount(player, item) == wanted.getCount() + 2,
-					"The gift and the errand's items are all still carried" + side);
-			h.assertTrue(record.equals(GuestFavorTesting.record(player, guest)) && otherRecord.equals(GuestFavorTesting.record(player, offering))
-					&& GuestFavors.questState(player, guest) == GuestFavors.QuestState.ACTIVE
-					&& GuestFavors.questState(player, offering) == GuestFavors.QuestState.OFFERED,
+			h.assertFalse(GuestFavors.gift(player, npc, guest).done(), "No gift" + side);
+			h.assertFalse(GuestFavors.acceptQuest(player, npc, guest).done(), "No errand taken up" + side);
+			h.assertTrue(player.getMainHandItem() == hand && hand.getCount() == 4 && plainCount(player, item) == carried
+					&& ledger.affection(me, guest) == affection, "No item taken and no affection granted" + side);
+			h.assertTrue(record.equals(GuestFavorTesting.record(player, guest)) && GuestFavors.questState(player, guest) == GuestFavors.QuestState.OFFERED
+					&& GuestFavors.giftsLeft(player, guest) == GuestFavors.GIFTS_PER_DAY,
 					"The favors did not move on: " + GuestFavorTesting.record(player, guest) + side);
+
+			GuestFavorTesting.takeUp(player, guest);
+			record = GuestFavorTesting.record(player, guest);
+			h.assertTrue(GuestFavors.questState(player, guest) == GuestFavors.QuestState.ACTIVE && same(GuestFavors.questItem(player, guest), wanted)
+					&& GuestFavors.carried(player, guest) == carried, "Precondition: the offered errand is recorded as taken up, its items carried");
+			h.assertFalse(GuestFavors.turnIn(player, npc, guest).done(), "No turn-in" + side);
+			h.assertTrue(plainCount(player, item) == carried && hand.getCount() == 4 && ledger.affection(me, guest) == affection,
+					"The turn-in took no item and granted nothing" + side);
+			h.assertTrue(record.equals(GuestFavorTesting.record(player, guest)) && GuestFavors.questState(player, guest) == GuestFavors.QuestState.ACTIVE,
+					"and the errand did not move on" + side);
 			h.succeed();
 		} finally {
 			clear(made);
