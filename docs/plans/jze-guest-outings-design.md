@@ -58,6 +58,7 @@ why a restart ends every outing (below).
 | Completion, `end_outing` / `end_visit` | step; the option (beside the guest, as every option) |
 | Logout | `ServerPlayConnectionEvents.DISCONNECT`; step (player not in the player list, which also covers `TestPlayers.leave`) |
 | Death | `ServerLivingEntityEvents.AFTER_DEATH`; step (not alive) |
+| Spectator mode | step |
 | Dimension change | step (player's level is not the activity's) |
 | Too far | step: player beyond 32 blocks of the guest; after arrival, guest beyond 16 blocks of the anchor |
 | Chunk unload | `ServerEntityEvents.ENTITY_UNLOAD` of the canonical guest (any reason); step: guest not loaded, anchor not loaded |
@@ -90,7 +91,9 @@ with gifts and quests; at most 51 a day from these four if the budget allows.
 The spot is the player's feet block in their current level: standable, free apart from the player, loaded, not shielded
 by the town or an operator region (feet, head and floor), and either in the player's own claim or where they may build
 (`LandRegistry.mayBuildFor`, no admin bypass), and passing `level.mayInteract` and `Authority.mayChange`. Nothing is
-placed. Stored per player (dimension, position) in `GuestOutingState`; revalidated at every invitation.
+placed. Stored per player (dimension, position) in `GuestOutingState`; revalidated at every invitation with the same
+checks except `Authority.mayChange`, which is asked only while the player stands there (one of its listeners judges
+reach from the player).
 
 ## Requested coordinator patches (not made)
 
@@ -101,6 +104,17 @@ placed. Stored per player (dimension, position) in `GuestOutingState`; revalidat
    command callback, so the root becomes usable by players (for `/guests visit`), and every operator child must carry its
    own requirement (place, roster, state, repair already do).
 3. en_us.json: the keys listed in the report.
+4. Optional: `Townsfolk.ReturnToPlaceGoal.slack()` returns 1 while `GuestActivity.anchor(level, this) != null`. With the
+   current slack of 4 a held guest whose place is within 6 blocks only strolls there (about every 10 s on average)
+   rather than walking straight over. Outings work either way (arrival is 6.5 blocks).
+
+## Tests (written, not run)
+
+`GuestOutingGameTests`, ten server tests with synthetic `test_c_*` guests, each within one tick: refusals while busy
+and out of range; begin and end with no block change; the watched walk home (never into a block); logout; unload,
+codec round trip and restart recovery; stuck path; visit spots against claims and protected regions, and
+`/guests visit spot` by a non-operator; the shared budget and once per kind a day; idle and too-far endings; every
+entry-point check, an unbound duplicate included.
 
 ## Open question for the owner
 
