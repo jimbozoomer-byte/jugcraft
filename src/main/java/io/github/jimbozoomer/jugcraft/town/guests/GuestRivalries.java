@@ -1,7 +1,6 @@
 package io.github.jimbozoomer.jugcraft.town.guests;
 
 import io.github.jimbozoomer.jugcraft.town.Townsfolk;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

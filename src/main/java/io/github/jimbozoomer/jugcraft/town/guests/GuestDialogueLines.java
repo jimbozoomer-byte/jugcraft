@@ -355,7 +355,7 @@ public final class GuestDialogueLines {
 						say("message.jugcraft.guest.personality.misato_katsuragi.ordinary.0", "Thanks! I'll put it somewhere safe. Somewhere I'll definitely remember."),
 						say("message.jugcraft.guest.personality.misato_katsuragi.ordinary.1", "Aw, you shouldn't have! But I'm glad you did.")),
 				List.of(
-						say("message.jugcraft.guest.personality.misato_katsuragi.rare.0", "My penguin would love this. I mean, I would. We both would. He's very opinionated.")),
+						say("message.jugcraft.guest.personality.misato_katsuragi.rare.0", "My penguin would be thrilled with this. I mean, I would. We both would. He's very opinionated.")),
 				List.of(
 						say("message.jugcraft.guest.personality.misato_katsuragi.banter.0", "My cooking? It's... an adventure. Bring your own spoon and your own courage."),
 						say("message.jugcraft.guest.personality.misato_katsuragi.banter.1", "Work hard, then relax harder. That's my motto. Mostly the second half."),
