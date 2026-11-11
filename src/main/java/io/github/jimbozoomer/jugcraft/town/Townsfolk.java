@@ -59,6 +59,8 @@ public class Townsfolk extends PathfinderMob {
 	private static final ResolvableProfile NO_PROFILE = ResolvableProfile.createUnresolved("");
 	public static final int DECORATOR_REACH = 96;
 	public static final int DECORATE_TIMEOUT = 900;
+	/** Where a custom NPC's town-guest id is saved. */
+	public static final String GUEST_KEY = "jugcraft_guest";
 
 	private String role = "townsfolk";
 	private String shop = "";
@@ -74,6 +76,8 @@ public class Townsfolk extends PathfinderMob {
 	private @Nullable BlockPos nightRest;
 	/** An operator's custom NPC or guard ({@link CustomNpcs}); null for the town's own residents. */
 	private CustomNpcs.@Nullable Data custom;
+	/** The town guest this custom NPC is ({@code guests.GuestRoster} id, saved as {@code jugcraft_guest}); null if none. */
+	private @Nullable String guest;
 
 	public Townsfolk(EntityType<? extends Townsfolk> type, Level level) {
 		super(type, level);
@@ -208,6 +212,16 @@ public class Townsfolk extends PathfinderMob {
 
 	/** A custom NPC's player skin (synced); meaningful only while {@link #skin()} is {@link CustomNpcs#PLAYER_SKIN}. */
 	public boolean isCustomNpc() { return entityData.get(CUSTOM_NPC); }
+
+	/** The town guest this is (a {@code guests.GuestRoster} id), or null; server side. */
+	public @Nullable String guest() {
+		return guest;
+	}
+
+	/** Marks it as a town guest; only before it is added ({@code CustomNpcs.create}). */
+	void guest(@Nullable String id) {
+		guest = id;
+	}
 
 	public ResolvableProfile profile() {
 		return entityData.get(PROFILE);
@@ -351,6 +365,10 @@ public class Townsfolk extends PathfinderMob {
 		if (custom != null && tickCount % 20 == 0 && CustomNpcs.tick(level, this, custom)) {
 			return;
 		}
+		// A guest whose identity another entity holds is a duplicate and leaves (GuestService.tick).
+		if (guest != null && tickCount % 20 == 10 && io.github.jimbozoomer.jugcraft.town.guests.GuestService.tick(level, this)) {
+			return;
+		}
 		// Asleep only in their own bed and only at night: one loaded asleep in daylight (or whose bed has moved) wakes.
 		if (isSleeping() && (!bedtime(scheduleTime()) || !getSleepingPos().map(at -> at.equals(bed())).orElse(false))) {
 			stopSleeping();
@@ -410,6 +428,10 @@ public class Townsfolk extends PathfinderMob {
         }
         listener = player;
 		listeningUntil = tickCount + 80;
+		// A guest opens its menu; an operator sneaking still selects it for /npc.
+		if (guest != null && !(custom != null && player.isShiftKeyDown() && CustomNpcs.isOperator(server.createCommandSourceStack()))) {
+			return io.github.jimbozoomer.jugcraft.town.guests.GuestService.talk(this, server);
+		}
 		if (custom != null) {
 			return CustomNpcs.talk(this, server, custom);
 		}
@@ -483,6 +505,9 @@ public class Townsfolk extends PathfinderMob {
 		if (custom != null) {
 			output.store(CustomNpcs.SAVE_KEY, CustomNpcs.Data.CODEC, custom);
 		}
+		if (guest != null) {
+			output.putString(GUEST_KEY, guest);
+		}
 	}
 
 	@Override
@@ -495,6 +520,8 @@ public class Townsfolk extends PathfinderMob {
 		home = input.read("home", BlockPos.CODEC).orElse(blockPosition());
 		spot = input.getIntOr("spot", -1);
 		custom = input.read(CustomNpcs.SAVE_KEY, CustomNpcs.Data.CODEC).orElse(null);
+		String savedGuest = input.getStringOr(GUEST_KEY, "");
+		guest = custom == null || savedGuest.isEmpty() ? null : savedGuest;
         entityData.set(CUSTOM_NPC, custom != null);
 		if (custom != null) {
 			CustomNpcs.loaded(this);

@@ -217,6 +217,15 @@ public final class CustomNpcs {
 	 * there: placing one never moves or replaces a block.
 	 */
 	public static @Nullable Townsfolk create(ServerLevel level, Vec3 at, float yaw, String name, String kind, @Nullable UUID creator) {
+		return create(level, at, yaw, name, kind, creator, null);
+	}
+
+	/**
+	 * {@link #create(ServerLevel, Vec3, float, String, String, UUID)}, marked before it is added as the town guest
+	 * {@code guest} (a {@code GuestRoster} id; null for an ordinary NPC). Binding it in the guest ledger is the caller's.
+	 */
+	public static @Nullable Townsfolk create(ServerLevel level, Vec3 at, float yaw, String name, String kind, @Nullable UUID creator,
+			@Nullable String guest) {
 		String shown = clean(name, MAX_NAME);
 		if (shown.isEmpty()) {
 			return null;
@@ -236,6 +245,7 @@ public final class CustomNpcs {
 		Data data = new Data(0, guard ? GUARD : NPC, skin, "", Optional.empty(), List.of(), 0, List.of(), guard ? GUARD_POST_RANGE : 2,
 				Optional.ofNullable(creator));
 		npc.custom(data);
+		npc.guest(guest);
 		if (!level.addFreshEntity(npc)) {
 			return null;
 		}

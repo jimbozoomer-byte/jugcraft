@@ -48,6 +48,9 @@
       "io.github.jimbozoomer.jugcraft.test.CandyCavityGameTests",
       "io.github.jimbozoomer.jugcraft.test.TownLifeGameTests",
       "io.github.jimbozoomer.jugcraft.test.CustomNpcGameTests",
+      "io.github.jimbozoomer.jugcraft.test.GuestRosterGameTests",
+      "io.github.jimbozoomer.jugcraft.test.GuestLedgerGameTests",
+      "io.github.jimbozoomer.jugcraft.test.GuestFavorGameTests",
       "io.github.jimbozoomer.jugcraft.test.TownRoutineGameTests",
       "io.github.jimbozoomer.jugcraft.test.WildenStalkerGameTests",
       "io.github.jimbozoomer.jugcraft.test.ArrowPickupGameTests",
@@ -429,6 +432,7 @@
       "io.github.jimbozoomer.jugcraft.test.JeiStationClientGameTests$WithJei$Probe"
     ],
     "fabric-client-gametest": [
+      "io.github.jimbozoomer.jugcraft.test.GuestClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.EquipmentAccessClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.CraftingChoicesClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.ImportedModelAtlasClientTests",
