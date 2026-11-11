@@ -296,6 +296,14 @@ public final class GuestLedger extends SavedData {
 		return unreadablePlayers.contains(player);
 	}
 
+	/**
+	 * Whether this player's affection may not be changed: their own saved entry is unreadable, or an unreadable entry
+	 * names a player who cannot be told (it might be theirs, so it blocks everyone until an operator repairs the file).
+	 */
+	boolean affectionLocked(UUID player) {
+		return unknownPlayer || unreadablePlayers.contains(player);
+	}
+
 	private Saved.Kept<String, GuestRecord> savedGuests() {
 		Map<String, GuestRecord> kept = new LinkedHashMap<>();
 		guests.forEach((guest, record) -> {
@@ -547,7 +555,7 @@ public final class GuestLedger extends SavedData {
 	 */
 	public boolean canGainAffection(UUID player, String guest) {
 		GuestRoster.Guest entry = GuestRoster.get(guest);
-		return entry != null && entry.available() && !unreadable(guest) && !unreadable(player)
+		return entry != null && entry.available() && !unreadable(guest) && !affectionLocked(player)
 				&& affection(player, guest) < GuestBalance.MAX_AFFECTION;
 	}
 
@@ -562,7 +570,7 @@ public final class GuestLedger extends SavedData {
 		if (entry == null || !entry.available()) {
 			return now;   // a pending or unknown guest cannot be befriended
 		}
-		if (unreadable(player) || unreadable(guest)) {
+		if (affectionLocked(player) || unreadable(guest)) {
 			Jugcraft.LOGGER.warn("[guests] Affection of player {} for {} not changed: saved data about them cannot be read", player, guest);
 			return now;
 		}
@@ -572,8 +580,8 @@ public final class GuestLedger extends SavedData {
 	/** Sets the player's affection for the guest (operator repair), kept within 0 to the maximum; returns the new value. */
 	int setAffection(UUID player, String guest, int value) {
 		int next = Math.clamp(value, 0, GuestBalance.MAX_AFFECTION);
-		if (unreadable(player)) {
-			return affection(player, guest);   // never write a fresh entry over one kept as written
+		if (affectionLocked(player)) {
+			return affection(player, guest);   // never write a fresh entry over one kept as written, or one that might be theirs
 		}
 		if (next == affection(player, guest)) {
 			return next;
