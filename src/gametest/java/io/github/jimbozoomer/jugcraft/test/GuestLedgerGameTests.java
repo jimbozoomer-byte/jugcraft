@@ -416,9 +416,27 @@ public class GuestLedgerGameTests {
 		ledger.addAffection(player.getUUID(), guest, MAX);
 		long asked = server.overworld().getGameTime();
 
+		// The game-time seam leaves every other player's pending requests as they were, even when a prune runs inside it.
+		ServerPlayer bystander = visitor(h, 2, 3, 1);
+		ledger.addAffection(bystander.getUUID(), guest, MAX);
+		h.assertTrue(GuestMarriage.requestProposal(bystander, npc, guest).done() && GuestMarriage.requestProposal(player, npc, guest).done(),
+				"Two players have proposals waiting");
+		long theirs = GuestLedgerTesting.proposalExpiry(bystander);
+		GuestLedgerTesting.withGameTime(player.getUUID(), s -> asked - 5, () -> h.assertTrue(GuestMarriage.requestProposal(player, npc, guest).done(),
+				"Inside a rewind the tested player asks again, pruning every request not live at that time"));
+		h.assertTrue(GuestLedgerTesting.realTime(), "(the real game time is back)");
+		h.assertTrue(guest.equals(GuestMarriage.proposalPending(bystander)) && GuestLedgerTesting.proposalExpiry(bystander) == theirs,
+				"The other player's request is back, unchanged");
+		h.assertTrue(guest.equals(GuestMarriage.proposalPending(player)) && GuestLedgerTesting.proposalExpiry(player) == asked - 5 + GuestBalance.CONFIRM_TICKS,
+				"and the tested player's is what the rewound body left");
+		h.assertTrue(GuestMarriage.confirmProposal(bystander, npc, guest).done() && bystander.getUUID().equals(ledger.spouseOf(guest))
+				&& diamonds(bystander) == 0, "The other player's request is still confirmable");
+		h.assertTrue(GuestMarriage.cancelProposal(player).done() && bystander.getUUID().equals(GuestLedgerTesting.forceDivorce(ledger, guest, false))
+				&& diamonds(player) == 1, "(the tested player cancels, and the guest is freed, without cooldowns, for what follows)");
+
 		// Game time moved back before the asking drops the request.
 		h.assertTrue(GuestMarriage.requestProposal(player, npc, guest).done(), "Asked");
-		GuestLedgerTesting.withGameTime(s -> asked - 5, () -> {
+		GuestLedgerTesting.withGameTime(player.getUUID(), s -> asked - 5, () -> {
 			h.assertTrue(GuestMarriage.proposalPending(player) == null, "Game time moved back before the asking: the request is gone");
 			h.assertTrue(!GuestMarriage.confirmProposal(player, npc, guest).done() && diamonds(player) == 1, "and cannot be confirmed");
 		});
@@ -427,7 +445,7 @@ public class GuestLedgerGameTests {
 		// A lapse the server tick noted stays a lapse when game time moves back, even unread.
 		h.assertTrue(GuestMarriage.requestProposal(player, npc, guest).done(), "Asked again");
 		AtomicLong time = new AtomicLong(asked + GuestBalance.CONFIRM_TICKS + 5);
-		GuestLedgerTesting.withGameTime(s -> time.get(), () -> {
+		GuestLedgerTesting.withGameTime(player.getUUID(), s -> time.get(), () -> {
 			GuestLedgerTesting.observe(server);
 			time.set(asked + 10);
 			h.assertTrue(GuestMarriage.proposalPending(player) == null && !GuestMarriage.confirmProposal(player, npc, guest).done(),
@@ -479,7 +497,7 @@ public class GuestLedgerGameTests {
 				&& !GuestMarriage.confirmDivorce(player, guest).done() && guest.equals(ledger.spouseOf(me)), "Cancelled: nothing to confirm, still married");
 		long asked = server.overworld().getGameTime();
 		h.assertTrue(GuestMarriage.requestDivorce(player, guest).done(), "Asked again");
-		GuestLedgerTesting.withGameTime(s -> asked - 5, () -> h.assertTrue(!GuestMarriage.divorcePending(player)
+		GuestLedgerTesting.withGameTime(me, s -> asked - 5, () -> h.assertTrue(!GuestMarriage.divorcePending(player)
 				&& !GuestMarriage.confirmDivorce(player, guest).done() && guest.equals(ledger.spouseOf(me)), "Game time moved back drops a divorce request"));
 		h.assertTrue(GuestLedgerTesting.realTime(), "(the real game time is back)");
 		h.assertTrue(!GuestMarriage.divorcePending(player), "and it does not come back");
