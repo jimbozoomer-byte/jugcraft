@@ -620,17 +620,22 @@ public final class GuestOutings {
 		if (!npc.getUUID().equals(GuestLedger.get(server).canonical(guest))) {
 			return;
 		}
+		boolean gone = npc.getRemovalReason() != null && npc.getRemovalReason().shouldDestroy();
 		Outing outing = OUTINGS.get(guest);
 		if (outing != null) {
-			boolean gone = npc.getRemovalReason() != null && npc.getRemovalReason().shouldDestroy();
 			Component said = end(server, guest, gone ? Reason.GONE : Reason.UNLOADED, now(server));
 			ServerPlayer online = server.getPlayerList().getPlayer(outing.player);
 			if (said != null && online != null) {
 				online.sendSystemMessage(said);
 			}
 		}
-		if (RETURNS.remove(guest) != null) {
-			RETURN_ON_LOAD.add(guest);
+		// Unloaded: watch its walk home when it loads again. Gone for good: a new entity bound later starts at its post.
+		if (RETURNS.remove(guest) != null || gone) {
+			if (gone) {
+				RETURN_ON_LOAD.remove(guest);
+			} else {
+				RETURN_ON_LOAD.add(guest);
+			}
 		}
 	}
 
