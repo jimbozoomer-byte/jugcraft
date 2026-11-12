@@ -39,9 +39,19 @@ CLOSE_FACES = {
     'jugtania/block/shapes/spreader_scaffolding': tuple((i, 'up') for i in range(10, 14)),
     'supps/block/spring_launcher_head_small': ((1, 'south'),),
     'supps/block/stick_y_tomatoes': ((0, 'up'), (1, 'down')),
+    # Rope tube ends left open for the source's computed knot. The native knot is only set by
+    # shears (OwnerSupplementRopes), so corners and wall-to-hanging joins bared hollow ends. The
+    # caps reuse the source's end-grain UV; where pieces meet, each cap lies inside the other.
+    'supps/block/rope_up': ((0, 'down'),),
+    'supps/block/rope_down': ((0, 'up'),),
+    'supps/block/rope_connection': ((0, 'south'),),
     'supps/special_models/block/books/book_and_quill': ((2, 'up'), (2, 'west')),
     'supps/special_models/block/books/book_enchanted': ((2, 'up'), (2, 'west')),
     **{'supps/special_models/plants/' + n + '_block': ((0, 'down'),) for n in ('cantaloupe', 'honeydew', 'squash')},
+    # The carry handle's top bar (backpack_base element 5, first in every tier's composition) omits
+    # its underside, so the handle loop showed a see-through slot. Close it with its own top face's
+    # UV; the hash-guarded separation record in imported_geometry_repairs.json carries the same face.
+    **{'packworks/block/' + tier: ((5, 'down'),) for tier in TIERS},
 }
 # Narrow release backport: pre-existing separation repairs remain authoritative.
 TARGETS = {name for name in BASKETS if '_hanging' not in name} | CRYSTALS | CLOSE_FACES.keys()

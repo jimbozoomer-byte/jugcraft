@@ -43682,11 +43682,162 @@
     }
   },
   "newest/packworks/block/backpack.json": {
-    "reason": "Separate overlapping surface detail by at most 0.3 model pixels; retain textures, rotations and explicit UVs. Identical overlay boxes remain unchanged.",
+    "reason": "Separate overlapping surface detail by at most 0.3 model pixels; retain textures, rotations and explicit UVs. Identical overlay boxes remain unchanged. Element 5, the carry handle's top bar, gains the down face the source omits (a copy of its own up face, model_writer._closing_face), closing the see-through slot under the handle.",
     "before_sha256": "8c8c60db95b41df8cb0378d49ee52de87c74e029e24c40a65aec7469f1668e97",
-    "after_sha256": "0e788c0d624d39aed1400fd46e25faf53626dec7a2ef11e9c4b692f8d3948634",
+    "after_sha256": "e23ea90cc15c397457aadfe7c4281b779dd12df1ebc37d339573b774ad00d900",
     "max_move": 0.10000000000000009,
     "elements": {
+      "5": {
+        "before": {
+          "name": "top",
+          "from": [
+            5.75,
+            14,
+            7.75
+          ],
+          "to": [
+            10.25,
+            14.5,
+            8.75
+          ],
+          "rotation": {
+            "angle": 0,
+            "axis": "y",
+            "origin": [
+              11.25,
+              8,
+              2
+            ]
+          },
+          "faces": {
+            "north": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "rotation": 180,
+              "texture": "#clips"
+            },
+            "east": {
+              "uv": [
+                5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "south": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "west": {
+              "uv": [
+                2.5,
+                7,
+                3,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "up": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            }
+          }
+        },
+        "after": {
+          "name": "top",
+          "from": [
+            5.75,
+            14,
+            7.75
+          ],
+          "to": [
+            10.25,
+            14.5,
+            8.75
+          ],
+          "rotation": {
+            "angle": 0,
+            "axis": "y",
+            "origin": [
+              11.25,
+              8,
+              2
+            ]
+          },
+          "faces": {
+            "north": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "rotation": 180,
+              "texture": "#clips"
+            },
+            "east": {
+              "uv": [
+                5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "south": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "west": {
+              "uv": [
+                2.5,
+                7,
+                3,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "up": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "down": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            }
+          }
+        }
+      },
       "16": {
         "before": {
           "name": "opening",
@@ -46826,11 +46977,162 @@
     }
   },
   "newest/packworks/block/copper_backpack.json": {
-    "reason": "Separate overlapping surface detail by at most 0.3 model pixels; retain textures, rotations and explicit UVs. Identical overlay boxes remain unchanged.",
+    "reason": "Separate overlapping surface detail by at most 0.3 model pixels; retain textures, rotations and explicit UVs. Identical overlay boxes remain unchanged. Element 5, the carry handle's top bar, gains the down face the source omits (a copy of its own up face, model_writer._closing_face), closing the see-through slot under the handle.",
     "before_sha256": "8c8c60db95b41df8cb0378d49ee52de87c74e029e24c40a65aec7469f1668e97",
-    "after_sha256": "0e788c0d624d39aed1400fd46e25faf53626dec7a2ef11e9c4b692f8d3948634",
+    "after_sha256": "e23ea90cc15c397457aadfe7c4281b779dd12df1ebc37d339573b774ad00d900",
     "max_move": 0.10000000000000009,
     "elements": {
+      "5": {
+        "before": {
+          "name": "top",
+          "from": [
+            5.75,
+            14,
+            7.75
+          ],
+          "to": [
+            10.25,
+            14.5,
+            8.75
+          ],
+          "rotation": {
+            "angle": 0,
+            "axis": "y",
+            "origin": [
+              11.25,
+              8,
+              2
+            ]
+          },
+          "faces": {
+            "north": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "rotation": 180,
+              "texture": "#clips"
+            },
+            "east": {
+              "uv": [
+                5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "south": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "west": {
+              "uv": [
+                2.5,
+                7,
+                3,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "up": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            }
+          }
+        },
+        "after": {
+          "name": "top",
+          "from": [
+            5.75,
+            14,
+            7.75
+          ],
+          "to": [
+            10.25,
+            14.5,
+            8.75
+          ],
+          "rotation": {
+            "angle": 0,
+            "axis": "y",
+            "origin": [
+              11.25,
+              8,
+              2
+            ]
+          },
+          "faces": {
+            "north": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "rotation": 180,
+              "texture": "#clips"
+            },
+            "east": {
+              "uv": [
+                5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "south": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "west": {
+              "uv": [
+                2.5,
+                7,
+                3,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "up": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "down": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            }
+          }
+        }
+      },
       "16": {
         "before": {
           "name": "opening",
@@ -47972,11 +48274,162 @@
     }
   },
   "newest/packworks/block/diamond_backpack.json": {
-    "reason": "Separate overlapping surface detail by at most 0.3 model pixels; retain textures, rotations and explicit UVs. Identical overlay boxes remain unchanged.",
+    "reason": "Separate overlapping surface detail by at most 0.3 model pixels; retain textures, rotations and explicit UVs. Identical overlay boxes remain unchanged. Element 5, the carry handle's top bar, gains the down face the source omits (a copy of its own up face, model_writer._closing_face), closing the see-through slot under the handle.",
     "before_sha256": "8c8c60db95b41df8cb0378d49ee52de87c74e029e24c40a65aec7469f1668e97",
-    "after_sha256": "0e788c0d624d39aed1400fd46e25faf53626dec7a2ef11e9c4b692f8d3948634",
+    "after_sha256": "e23ea90cc15c397457aadfe7c4281b779dd12df1ebc37d339573b774ad00d900",
     "max_move": 0.10000000000000009,
     "elements": {
+      "5": {
+        "before": {
+          "name": "top",
+          "from": [
+            5.75,
+            14,
+            7.75
+          ],
+          "to": [
+            10.25,
+            14.5,
+            8.75
+          ],
+          "rotation": {
+            "angle": 0,
+            "axis": "y",
+            "origin": [
+              11.25,
+              8,
+              2
+            ]
+          },
+          "faces": {
+            "north": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "rotation": 180,
+              "texture": "#clips"
+            },
+            "east": {
+              "uv": [
+                5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "south": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "west": {
+              "uv": [
+                2.5,
+                7,
+                3,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "up": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            }
+          }
+        },
+        "after": {
+          "name": "top",
+          "from": [
+            5.75,
+            14,
+            7.75
+          ],
+          "to": [
+            10.25,
+            14.5,
+            8.75
+          ],
+          "rotation": {
+            "angle": 0,
+            "axis": "y",
+            "origin": [
+              11.25,
+              8,
+              2
+            ]
+          },
+          "faces": {
+            "north": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "rotation": 180,
+              "texture": "#clips"
+            },
+            "east": {
+              "uv": [
+                5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "south": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "west": {
+              "uv": [
+                2.5,
+                7,
+                3,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "up": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "down": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            }
+          }
+        }
+      },
       "16": {
         "before": {
           "name": "opening",
@@ -49118,11 +49571,162 @@
     }
   },
   "newest/packworks/block/gold_backpack.json": {
-    "reason": "Separate overlapping surface detail by at most 0.3 model pixels; retain textures, rotations and explicit UVs. Identical overlay boxes remain unchanged.",
+    "reason": "Separate overlapping surface detail by at most 0.3 model pixels; retain textures, rotations and explicit UVs. Identical overlay boxes remain unchanged. Element 5, the carry handle's top bar, gains the down face the source omits (a copy of its own up face, model_writer._closing_face), closing the see-through slot under the handle.",
     "before_sha256": "8c8c60db95b41df8cb0378d49ee52de87c74e029e24c40a65aec7469f1668e97",
-    "after_sha256": "0e788c0d624d39aed1400fd46e25faf53626dec7a2ef11e9c4b692f8d3948634",
+    "after_sha256": "e23ea90cc15c397457aadfe7c4281b779dd12df1ebc37d339573b774ad00d900",
     "max_move": 0.10000000000000009,
     "elements": {
+      "5": {
+        "before": {
+          "name": "top",
+          "from": [
+            5.75,
+            14,
+            7.75
+          ],
+          "to": [
+            10.25,
+            14.5,
+            8.75
+          ],
+          "rotation": {
+            "angle": 0,
+            "axis": "y",
+            "origin": [
+              11.25,
+              8,
+              2
+            ]
+          },
+          "faces": {
+            "north": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "rotation": 180,
+              "texture": "#clips"
+            },
+            "east": {
+              "uv": [
+                5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "south": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "west": {
+              "uv": [
+                2.5,
+                7,
+                3,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "up": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            }
+          }
+        },
+        "after": {
+          "name": "top",
+          "from": [
+            5.75,
+            14,
+            7.75
+          ],
+          "to": [
+            10.25,
+            14.5,
+            8.75
+          ],
+          "rotation": {
+            "angle": 0,
+            "axis": "y",
+            "origin": [
+              11.25,
+              8,
+              2
+            ]
+          },
+          "faces": {
+            "north": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "rotation": 180,
+              "texture": "#clips"
+            },
+            "east": {
+              "uv": [
+                5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "south": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "west": {
+              "uv": [
+                2.5,
+                7,
+                3,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "up": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "down": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            }
+          }
+        }
+      },
       "16": {
         "before": {
           "name": "opening",
@@ -50264,11 +50868,162 @@
     }
   },
   "newest/packworks/block/iron_backpack.json": {
-    "reason": "Separate overlapping surface detail by at most 0.3 model pixels; retain textures, rotations and explicit UVs. Identical overlay boxes remain unchanged.",
+    "reason": "Separate overlapping surface detail by at most 0.3 model pixels; retain textures, rotations and explicit UVs. Identical overlay boxes remain unchanged. Element 5, the carry handle's top bar, gains the down face the source omits (a copy of its own up face, model_writer._closing_face), closing the see-through slot under the handle.",
     "before_sha256": "8c8c60db95b41df8cb0378d49ee52de87c74e029e24c40a65aec7469f1668e97",
-    "after_sha256": "0e788c0d624d39aed1400fd46e25faf53626dec7a2ef11e9c4b692f8d3948634",
+    "after_sha256": "e23ea90cc15c397457aadfe7c4281b779dd12df1ebc37d339573b774ad00d900",
     "max_move": 0.10000000000000009,
     "elements": {
+      "5": {
+        "before": {
+          "name": "top",
+          "from": [
+            5.75,
+            14,
+            7.75
+          ],
+          "to": [
+            10.25,
+            14.5,
+            8.75
+          ],
+          "rotation": {
+            "angle": 0,
+            "axis": "y",
+            "origin": [
+              11.25,
+              8,
+              2
+            ]
+          },
+          "faces": {
+            "north": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "rotation": 180,
+              "texture": "#clips"
+            },
+            "east": {
+              "uv": [
+                5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "south": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "west": {
+              "uv": [
+                2.5,
+                7,
+                3,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "up": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            }
+          }
+        },
+        "after": {
+          "name": "top",
+          "from": [
+            5.75,
+            14,
+            7.75
+          ],
+          "to": [
+            10.25,
+            14.5,
+            8.75
+          ],
+          "rotation": {
+            "angle": 0,
+            "axis": "y",
+            "origin": [
+              11.25,
+              8,
+              2
+            ]
+          },
+          "faces": {
+            "north": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "rotation": 180,
+              "texture": "#clips"
+            },
+            "east": {
+              "uv": [
+                5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "south": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "west": {
+              "uv": [
+                2.5,
+                7,
+                3,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "up": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "down": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            }
+          }
+        }
+      },
       "16": {
         "before": {
           "name": "opening",
@@ -51410,11 +52165,162 @@
     }
   },
   "newest/packworks/block/netherite_backpack.json": {
-    "reason": "Separate overlapping surface detail by at most 0.3 model pixels; retain textures, rotations and explicit UVs. Identical overlay boxes remain unchanged.",
+    "reason": "Separate overlapping surface detail by at most 0.3 model pixels; retain textures, rotations and explicit UVs. Identical overlay boxes remain unchanged. Element 5, the carry handle's top bar, gains the down face the source omits (a copy of its own up face, model_writer._closing_face), closing the see-through slot under the handle.",
     "before_sha256": "8c8c60db95b41df8cb0378d49ee52de87c74e029e24c40a65aec7469f1668e97",
-    "after_sha256": "0e788c0d624d39aed1400fd46e25faf53626dec7a2ef11e9c4b692f8d3948634",
+    "after_sha256": "e23ea90cc15c397457aadfe7c4281b779dd12df1ebc37d339573b774ad00d900",
     "max_move": 0.10000000000000009,
     "elements": {
+      "5": {
+        "before": {
+          "name": "top",
+          "from": [
+            5.75,
+            14,
+            7.75
+          ],
+          "to": [
+            10.25,
+            14.5,
+            8.75
+          ],
+          "rotation": {
+            "angle": 0,
+            "axis": "y",
+            "origin": [
+              11.25,
+              8,
+              2
+            ]
+          },
+          "faces": {
+            "north": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "rotation": 180,
+              "texture": "#clips"
+            },
+            "east": {
+              "uv": [
+                5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "south": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "west": {
+              "uv": [
+                2.5,
+                7,
+                3,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "up": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            }
+          }
+        },
+        "after": {
+          "name": "top",
+          "from": [
+            5.75,
+            14,
+            7.75
+          ],
+          "to": [
+            10.25,
+            14.5,
+            8.75
+          ],
+          "rotation": {
+            "angle": 0,
+            "axis": "y",
+            "origin": [
+              11.25,
+              8,
+              2
+            ]
+          },
+          "faces": {
+            "north": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "rotation": 180,
+              "texture": "#clips"
+            },
+            "east": {
+              "uv": [
+                5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "south": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "west": {
+              "uv": [
+                2.5,
+                7,
+                3,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "up": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            },
+            "down": {
+              "uv": [
+                2.5,
+                7,
+                5.5,
+                7.5
+              ],
+              "texture": "#clips"
+            }
+          }
+        }
+      },
       "16": {
         "before": {
           "name": "opening",
