@@ -7,7 +7,12 @@ import net.minecraft.server.level.ServerPlayer;
  * repair goes through here, so gifts, quests, chats, errands, rivalries, outings, visits, milestones and meals share
  * one counter per player and guest per day ({@link GuestFavors#DAILY_AFFECTION_CAP}) instead of each granting a cap of
  * its own. Nothing here takes items; a caller takes what it takes first, having checked {@link #left} and
- * {@link GuestLedger#canGainAffection}, so nothing is ever consumed for a gain that would be refused.
+ * {@link GuestLedger#canGainAffection}, so nothing is consumed for a gain that would be refused.
+ *
+ * <p>One stated exception (owner decision, 12 November): the shared meal of a couple the ledger already has married, at
+ * full affection ({@link GuestMilestoneMeals#marriedAtFull}), still takes its one food once a day, grants nothing (this
+ * class is not called) and tells the player plainly that no affection is gained. Nothing else consumes for a zero gain;
+ * an unmarried guest at full affection is still refused before anything is taken.
  */
 public final class GuestRewards {
 	private GuestRewards() {

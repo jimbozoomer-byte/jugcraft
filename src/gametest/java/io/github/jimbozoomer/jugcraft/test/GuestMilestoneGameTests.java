@@ -68,6 +68,10 @@ public class GuestMilestoneGameTests {
 	private static final String OUTING = GuestRosterTesting.guest("test_d_outing", false);
 	private static final String DOOR = GuestRosterTesting.guest("test_d_door", true);
 	private static final String OTHER = GuestRosterTesting.guest("test_d_other", false);
+	private static final String FEAST = GuestRosterTesting.guest("test_d_feast", true);
+	private static final String SINGLE = GuestRosterTesting.guest("test_d_single", true);
+	private static final String SPOUSE = GuestRosterTesting.guest("test_d_spouse", true);
+	private static final String FEAST_HELD = GuestRosterTesting.guest("test_d_feast_held", false);
 	/** The favors day pinned for a test's player: far from the overworld's own. */
 	private static final long DAY = 5_000L;
 	private static final int MAX = GuestBalance.MAX_AFFECTION;
@@ -274,6 +278,111 @@ public class GuestMilestoneGameTests {
 			clear(made);
 			GuestFavorTesting.unpin(me);
 		}
+	}
+
+	/**
+	 * The owner's 12 November exception: a couple the ledger already has married, at full affection, still shares one meal
+	 * a day. Exactly one food is eaten, the day is recorded, no affection is added and the player is told so; a second
+	 * meal that day is refused; a divorce ends the exception.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aMarriedCoupleAtFullAffectionSharesAMealForNoAffection(GameTestHelper h) {
+		floor(h);
+		MinecraftServer server = h.getLevel().getServer();
+		ServerPlayer player = visitor(h, 3, 3);
+		UUID me = player.getUUID();
+		String guest = FEAST;
+		List<Townsfolk> made = new ArrayList<>();
+		GuestFavorTesting.pinDay(player, DAY);
+		try {
+			Townsfolk npc = place(h, guest, 2, 3, made);
+			GuestLedger ledger = GuestLedger.get(server);
+			marry(h, player, npc, guest);
+			h.assertTrue(ledger.affection(me, guest) == MAX && !ledger.canGainAffection(me, guest), "(married, at full affection)");
+			player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.BREAD, 3));
+			ItemStack bread = player.getMainHandItem();
+			int left = GuestRewards.left(player, guest);
+			h.assertTrue(GuestMilestoneTesting.option(player, npc, guest, "meal"), "A married couple at full affection is offered a meal");
+
+			GuestResult shared = GuestMilestoneTesting.act(player, npc, guest, "meal");
+			h.assertTrue(shared.done() && shared.message().getString().contains("no affection"),
+					"It is shared, and says plainly that no affection is gained: " + shared.message().getString());
+			h.assertTrue(player.getMainHandItem() == bread && bread.getCount() == 2, "Exactly one food is eaten, from the hand's stack");
+			h.assertTrue(ledger.affection(me, guest) == MAX && GuestRewards.left(player, guest) == left,
+					"No affection is added and the shared budget is untouched");
+			Long recorded = GuestMilestoneTesting.mealDay(server, me, guest);
+			h.assertTrue(recorded != null && recorded == DAY, "The day is recorded");
+
+			h.assertFalse(GuestMilestoneTesting.option(player, npc, guest, "meal"), "No second meal is offered today");
+			h.assertFalse(GuestMilestoneTesting.act(player, npc, guest, "meal").done(), "A second meal today is refused");
+			h.assertTrue(bread.getCount() == 2 && ledger.affection(me, guest) == MAX, "and takes nothing");
+
+			GuestFavorTesting.pinDay(player, DAY + 1);
+			h.assertTrue(GuestMilestoneTesting.option(player, npc, guest, "meal") && GuestMilestoneTesting.act(player, npc, guest, "meal").done()
+					&& bread.getCount() == 1 && ledger.affection(me, guest) == MAX, "The next day: one more meal, one more food, still no affection");
+
+			h.assertTrue(GuestMarriage.requestDivorce(player, guest).done() && GuestMarriage.confirmDivorce(player, guest).done(), "(divorced)");
+			GuestFavorTesting.pinDay(player, DAY + 2);
+			h.assertTrue(ledger.affection(me, guest) == MAX && ledger.spouseOf(me) == null, "(still at full affection, no longer married)");
+			h.assertFalse(GuestMilestoneTesting.option(player, npc, guest, "meal"), "Divorced at full affection: no meal is offered");
+			h.assertFalse(GuestMilestoneTesting.act(player, npc, guest, "meal").done(), "and none is shared");
+			Long last = GuestMilestoneTesting.mealDay(server, me, guest);
+			h.assertTrue(bread.getCount() == 1 && last != null && last == DAY + 1, "and nothing is taken or recorded for nothing");
+			h.succeed();
+		} finally {
+			clear(made);
+			GuestFavorTesting.unpin(me);
+		}
+	}
+
+	/**
+	 * The exception is for a married couple only: at full affection an unmarried marriage-eligible guest, a guest while
+	 * the player is married to someone else, and a held guest (whom the ledger can never marry) are all refused, and no
+	 * food is taken.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aMealIsNeverTakenForNothingWithAnUnmarriedGuestAtFullAffection(GameTestHelper h) {
+		floor(h);
+		MinecraftServer server = h.getLevel().getServer();
+		ServerPlayer player = visitor(h, 3, 3);
+		UUID me = player.getUUID();
+		List<Townsfolk> made = new ArrayList<>();
+		GuestFavorTesting.pinDay(player, DAY);
+		try {
+			GuestLedger ledger = GuestLedger.get(server);
+			Townsfolk single = place(h, SINGLE, 2, 3, made);
+			Townsfolk held = place(h, FEAST_HELD, 4, 3, made);
+			ledger.addAffection(me, SINGLE, MAX);
+			ledger.addAffection(me, FEAST_HELD, MAX);
+			h.assertTrue(!GuestRoster.get(FEAST_HELD).mayMarry() && ledger.canMarry(me, FEAST_HELD) == GuestLedger.Refusal.NO_MARRIAGE,
+					"(the held guest can never be married)");
+			player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.BREAD, 3));
+			ItemStack bread = player.getMainHandItem();
+
+			unmarriedRefused(h, player, single, SINGLE, bread, "an unmarried guest at full affection");
+			unmarriedRefused(h, player, held, FEAST_HELD, bread, "a held guest at full affection");
+
+			Townsfolk spouse = place(h, SPOUSE, 3, 2, made);
+			marry(h, player, spouse, SPOUSE);
+			h.assertTrue(SPOUSE.equals(ledger.spouseOf(me)), "(the player is married to another guest)");
+			unmarriedRefused(h, player, single, SINGLE, bread, "a guest at full affection while married to another");
+			unmarriedRefused(h, player, held, FEAST_HELD, bread, "a held guest at full affection while married to another");
+			h.succeed();
+		} finally {
+			clear(made);
+			GuestFavorTesting.unpin(me);
+		}
+	}
+
+	/** No meal is offered or shared with {@code guest}, no food is taken, nothing is recorded, and affection stays full. */
+	private static void unmarriedRefused(GameTestHelper h, ServerPlayer player, Townsfolk npc, String guest, ItemStack bread, String why) {
+		MinecraftServer server = player.level().getServer();
+		int count = bread.getCount();
+		h.assertFalse(GuestMilestoneTesting.option(player, npc, guest, "meal"), "No meal is offered with " + why);
+		GuestResult refused = GuestMilestoneTesting.act(player, npc, guest, "meal");
+		h.assertFalse(refused.done(), "No meal is shared with " + why + ": " + refused.message().getString());
+		h.assertTrue(player.getMainHandItem() == bread && bread.getCount() == count && GuestMilestoneTesting.mealDay(server, player.getUUID(), guest) == null
+				&& GuestLedger.get(server).affection(player.getUUID(), guest) == MAX, "Nothing is taken or recorded for nothing: " + why);
 	}
 
 	// ---------------------------------------------------------------- the ceremony
