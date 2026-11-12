@@ -23,7 +23,7 @@ Read the dated continuation entries at the end for current evidence; earlier
   All five were corrected; **58 follow-up tests passed without optional integrations**,
   including all **19 NEWEST regressions**. The earlier thirteen failures were also
   resolved in the full sweep. This is coverage across runs, not one green full run.
-- Full static geometry audit is **not clean**: 708 supplied-art findings remain
+- Full static geometry audit is **not clean**: 708 supplied-art findings remain (historical; the 12 November recount on main reports 0, see TODO P1)
   documented separately from native resource/recipe correctness. No blanket
   suppression or destructive rewriting of original models was used.
 - Everything is local. No commits, PRs, publishing, personal launcher changes,
