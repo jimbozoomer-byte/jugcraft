@@ -7,6 +7,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.town.Townsfolk;
+import java.util.Locale;
 import java.util.StringJoiner;
 import java.util.TreeMap;
 import java.util.UUID;
@@ -79,7 +80,7 @@ public final class GuestRepairCommand {
 	private static RequiredArgumentBuilder<CommandSourceStack, String> guestArgument() {
 		return Commands.argument("guest", StringArgumentType.word()).suggests((context, builder) -> {
 			if (allowed(context.getSource())) {
-				String typed = builder.getRemainingLowerCase();
+				String typed = builder.getRemaining().toLowerCase(Locale.ROOT);
 				for (GuestRoster.Guest guest : GuestRoster.ALL) {
 					if (guest.id().startsWith(typed)) {
 						builder.suggest(guest.id());
@@ -93,7 +94,7 @@ public final class GuestRepairCommand {
 	private static RequiredArgumentBuilder<CommandSourceStack, String> playerArgument() {
 		return Commands.argument("player", StringArgumentType.word()).suggests((context, builder) -> {
 			if (allowed(context.getSource())) {
-				String typed = builder.getRemainingLowerCase();
+				String typed = builder.getRemaining().toLowerCase(Locale.ROOT);
 				for (ServerPlayer player : context.getSource().getServer().getPlayerList().getPlayers()) {
 					String name = player.getName().getString();
 					if (name.toLowerCase(java.util.Locale.ROOT).startsWith(typed)) {

@@ -1,7 +1,7 @@
 package io.github.jimbozoomer.jugcraft.town.guests;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.arguments.FloatArgumentType;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import io.github.jimbozoomer.jugcraft.finance.LandRegistry;
@@ -28,8 +28,8 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Placing town guests (worker C): {@code /guests place <id> [pos] [yaw]} and {@code /guests roster}, operators only
- * (permission level 2, checked by the command tree and again here on the server). Worker A's
+ * Placing town guests (worker C): {@code /guests place <id> [pos] [yaw]} (yaw in whole degrees, -180 to 180) and
+ * {@code /guests roster}, operators only (permission level 2, checked by the command tree and again here on the server). Worker A's
  * {@link GuestRepairCommand} adds {@code /guests ledger} and {@code /guests repair} to the same root; Brigadier merges
  * the two trees.
  *
@@ -91,10 +91,10 @@ public final class GuestPlacement {
 								.then(Commands.argument("pos", BlockPosArgument.blockPos())
 										.executes(c -> place(c.getSource(), StringArgumentType.getString(c, "id"),
 												Vec3.atBottomCenterOf(BlockPosArgument.getLoadedBlockPos(c, "pos")), c.getSource().getRotation().y))
-										.then(Commands.argument("yaw", FloatArgumentType.floatArg(-180.0F, 180.0F))
+										.then(Commands.argument("yaw", IntegerArgumentType.integer(-180, 180))
 												.executes(c -> place(c.getSource(), StringArgumentType.getString(c, "id"),
 														Vec3.atBottomCenterOf(BlockPosArgument.getLoadedBlockPos(c, "pos")),
-														FloatArgumentType.getFloat(c, "yaw")))))))
+														(float) IntegerArgumentType.getInteger(c, "yaw")))))))
 				.then(Commands.literal("roster").requires(CustomNpcs::isOperator).executes(c -> roster(c.getSource()))));
 	}
 

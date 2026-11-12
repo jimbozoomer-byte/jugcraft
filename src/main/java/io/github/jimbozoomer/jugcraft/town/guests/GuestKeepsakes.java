@@ -44,13 +44,12 @@ public final class GuestKeepsakes {
 	}
 
 	/** The pressed flowers (one per guest, by a fixed hash of its id). */
-	static final List<Item> FLOWERS = List.of(Items.POPPY, Items.CORNFLOWER, Items.BLUE_ORCHID, Items.ALLIUM, Items.AZURE_BLUET,
-			Items.OXEYE_DAISY);
+	static final List<Item> FLOWERS = List.of(Items.POPPY, Items.CORNFLOWER, Items.BLUE_ORCHID, Items.DANDELION, Items.PINK_TULIP);
 	/** The keepsake caps' dyes (one per guest). */
 	static final int[] DYES = {0xB02E26, 0x3C44AA, 0x5E7C16, 0xF9801D, 0x8932B8, 0x169C9C, 0xF38BAA, 0xFED83D};
 	/** Every item a reward is ever made of: all modest vanilla items. */
-	public static final List<Item> ITEMS = List.of(Items.WRITTEN_BOOK, Items.POPPY, Items.CORNFLOWER, Items.BLUE_ORCHID, Items.ALLIUM,
-			Items.AZURE_BLUET, Items.OXEYE_DAISY, Items.LEATHER_HELMET, Items.PAPER, Items.LILY_OF_THE_VALLEY);
+	public static final List<Item> ITEMS = List.of(Items.WRITTEN_BOOK, Items.POPPY, Items.CORNFLOWER, Items.BLUE_ORCHID, Items.DANDELION,
+			Items.PINK_TULIP, Items.LEATHER_HELMET, Items.PAPER, Items.LILY_OF_THE_VALLEY);
 	/** The longest title a written book keeps. */
 	private static final int TITLE_MAX = 32;
 

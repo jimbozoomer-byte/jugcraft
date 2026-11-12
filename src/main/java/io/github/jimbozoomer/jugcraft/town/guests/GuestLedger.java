@@ -2,6 +2,7 @@ package io.github.jimbozoomer.jugcraft.town.guests;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.MapLike;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.concordance.Saved;
@@ -23,6 +24,7 @@ import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
@@ -244,16 +246,19 @@ public final class GuestLedger extends SavedData {
 		unreadGuests.forEach((guest, raw) -> {
 			Jugcraft.LOGGER.error("[guests] {}'s saved record cannot be read; it is kept as written, and {} is frozen (no binding, "
 					+ "no marriage) until an operator repairs the town_guests file", guest, guest);
-			if (raw.getMapValues().result().isEmpty()) {
+			// Read as NBT, as saved, with the calls Saved itself makes (convert, getMap, MapLike.get, getStringValue).
+			Tag value = raw.convert(NbtOps.INSTANCE).getValue();
+			Optional<MapLike<Tag>> fields = NbtOps.INSTANCE.getMap(value).result();
+			if (fields.isEmpty()) {
 				unknownSpouse = true;
 				Jugcraft.LOGGER.error("[guests] {}'s damaged record may name a spouse that cannot be told: every marriage is refused", guest);
 				return;
 			}
-			Optional<String> named = raw.get("spouse").get().result().map(spouse -> spouse.asString().result().orElse(""));
-			if (named.isEmpty()) {
+			Tag named = fields.get().get("spouse");
+			if (named == null) {
 				return;   // no spouse saved
 			}
-			UUID spouse = uuid(named.get());
+			UUID spouse = uuid(NbtOps.INSTANCE.getStringValue(named).result().orElse(""));
 			if (spouse == null) {
 				unknownSpouse = true;
 				Jugcraft.LOGGER.error("[guests] {}'s damaged record names a spouse that cannot be read: every marriage is refused", guest);

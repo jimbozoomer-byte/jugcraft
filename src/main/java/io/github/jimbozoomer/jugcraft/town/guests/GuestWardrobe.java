@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -311,7 +312,7 @@ public final class GuestWardrobe extends SavedData {
 	private static RequiredArgumentBuilder<CommandSourceStack, String> guestArgument() {
 		return Commands.argument("guest", StringArgumentType.word()).suggests((context, builder) -> {
 			if (allowed(context.getSource())) {
-				String typed = builder.getRemainingLowerCase();
+				String typed = builder.getRemaining().toLowerCase(Locale.ROOT);
 				if (ALL.startsWith(typed)) {
 					builder.suggest(ALL);
 				}
@@ -328,7 +329,7 @@ public final class GuestWardrobe extends SavedData {
 	private static RequiredArgumentBuilder<CommandSourceStack, String> outfitArgument() {
 		return Commands.argument("outfit", StringArgumentType.word()).suggests((context, builder) -> {
 			if (allowed(context.getSource())) {
-				String typed = builder.getRemainingLowerCase();
+				String typed = builder.getRemaining().toLowerCase(Locale.ROOT);
 				for (String outfit : OUTFITS) {
 					if (outfit.startsWith(typed)) {
 						builder.suggest(outfit);

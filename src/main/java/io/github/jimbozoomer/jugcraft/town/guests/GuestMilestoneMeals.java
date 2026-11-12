@@ -26,7 +26,7 @@ public final class GuestMilestoneMeals {
 	public static final int GRANT = 8;
 	/** The foods a meal may be: plain, modest, cooked or ready to eat; no bowl foods and nothing golden. */
 	public static final List<Item> FOODS = List.of(Items.BREAD, Items.BAKED_POTATO, Items.COOKED_COD, Items.COOKED_SALMON,
-			Items.COOKED_CHICKEN, Items.COOKED_PORKCHOP, Items.COOKED_MUTTON, Items.COOKED_RABBIT, Items.COOKED_BEEF, Items.PUMPKIN_PIE,
+			Items.COOKED_CHICKEN, Items.COOKED_PORKCHOP, Items.COOKED_MUTTON, Items.COOKED_BEEF, Items.PUMPKIN_PIE,
 			Items.COOKIE, Items.APPLE);
 
 	private GuestMilestoneMeals() {
