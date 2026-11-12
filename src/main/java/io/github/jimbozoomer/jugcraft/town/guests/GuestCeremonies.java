@@ -455,15 +455,18 @@ public final class GuestCeremonies {
 		return out;
 	}
 
-	/** The rite is over: recorded once for this marriage, the bouquet given, the activity ended. */
+	/**
+	 * The rite is over: recorded once for this marriage, the activity ended (completed only if it was recorded), the
+	 * bouquet given.
+	 */
 	private static void complete(MinecraftServer server, Running running, ServerLevel level, ServerPlayer player) {
 		RUNNING.remove(running.player);
-		GuestActivity.get(server).end(running.guest, KIND);
+		boolean recorded = GuestMilestoneState.get(server).ceremonyHeld(running.player, running.serial);
+		GuestActivity.get(server).end(running.guest, KIND, recorded);
 		Vec3 at = Vec3.atBottomCenterOf(running.anchor);
 		level.sendParticles(ParticleTypes.END_ROD, at.x, at.y + 1.2, at.z, 24, 1.0, 0.8, 1.0, 0.02);
 		level.playSound(null, running.anchor, SoundEvents.PLAYER_LEVELUP, SoundSource.NEUTRAL, 0.8F, 1.0F);
-		GuestMilestoneState state = GuestMilestoneState.get(server);
-		if (!state.ceremonyHeld(running.player, running.serial)) {
+		if (!recorded) {
 			Jugcraft.LOGGER.warn("[guests] Ceremony of {} and {} finished, but marriage {} is no longer theirs; nothing recorded",
 					running.player, running.guest, running.serial);
 			return;

@@ -2,10 +2,7 @@ package io.github.jimbozoomer.jugcraft.town.guests;
 
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.town.Townsfolk;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
@@ -25,8 +22,9 @@ import org.jspecify.annotations.Nullable;
  * once ({@link GuestKeepsakes}):
  * <ul>
  * <li>{@code first_gift}, {@code first_quest}: from {@link GuestEvents#GIFT_GIVEN} and {@link GuestEvents#QUEST_TURNED_IN};</li>
- * <li>{@code first_outing}: an {@code outing} activity seen in {@link GuestActivity} that has ended (worker C's classes are
- * never called);</li>
+ * <li>{@code first_outing}: {@link GuestEvents#ACTIVITY_ENDED} for an {@code outing} activity ended as completed (a real,
+ * rewarded finish), fired synchronously by the outing's own ending, so even an outing that begins and completes within
+ * one tick is counted, and a cancelled or unrewarded one never is;</li>
  * <li>{@code affection_250}, {@code _500}, {@code _750}, {@code _1000} ({@link #THRESHOLDS}): read from the ledger after a
  * gift, a quest, a talk, a meal, and every {@link #CHECK_TICKS} ticks for online players, so affection other features add
  * through {@link GuestRewards} is noticed too;</li>
@@ -48,8 +46,6 @@ public final class GuestMilestones {
 	/** Ticks between two checks of every online player's milestones (5 seconds). */
 	static final int CHECK_TICKS = 100;
 
-	/** The outings seen held a second ago, by guest. */
-	private static final Map<String, GuestActivity.Activity> OUTINGS = new HashMap<>();
 	private static int ticks;
 
 	private GuestMilestones() {
@@ -85,11 +81,12 @@ public final class GuestMilestones {
 			GuestCeremonies.divorced(server, player.getUUID());
 		}));
 		GuestEvents.TALKED.register((player, npc, guest) -> safely(() -> check(player, guest)));
+		GuestEvents.ACTIVITY_BEGAN.register((server, guest, activity) -> safely(() -> GuestNotices.began(server, guest, activity)));
+		GuestEvents.ACTIVITY_ENDED.register((server, guest, activity, completed) -> safely(() -> ended(server, guest, activity, completed)));
 		ServerTickEvents.END_SERVER_TICK.register(server -> safely(() -> tick(server)));
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> safely(() -> GuestCeremonies.stopping(server)));
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			ticks = 0;
-			OUTINGS.clear();
 			GuestCeremonies.clear();
 			GuestNotices.clear();
 		});
@@ -106,10 +103,8 @@ public final class GuestMilestones {
 		ticks++;
 		GuestCeremonies.tick(server);
 		if (ticks % 20 == 0) {
-			Map<String, GuestActivity.Activity> held = GuestActivity.get(server).all();
-			observe(server, held);
-			GuestCeremonies.recover(server, held);
-			GuestNotices.tick(server, held);
+			GuestCeremonies.recover(server, GuestActivity.get(server).all());
+			GuestNotices.tick(server);
 		}
 		if (ticks % CHECK_TICKS == 0) {
 			for (ServerPlayer player : List.copyOf(server.getPlayerList().getPlayers())) {
@@ -118,25 +113,17 @@ public final class GuestMilestones {
 		}
 	}
 
-	/** Outings held a second ago and not now have ended: each may be the player's first outing with that guest. */
-	static void observe(MinecraftServer server, Map<String, GuestActivity.Activity> held) {
-		List<Map.Entry<String, GuestActivity.Activity>> ended = new ArrayList<>();
-		for (Map.Entry<String, GuestActivity.Activity> was : OUTINGS.entrySet()) {
-			if (!was.getValue().equals(held.get(was.getKey()))) {
-				ended.add(Map.entry(was.getKey(), was.getValue()));
-			}
+	/**
+	 * An activity ended ({@link GuestEvents#ACTIVITY_ENDED}): an outing completed with a reward may be the player's first
+	 * outing with that guest. Anything not completed (cancelled, short, abandoned, recovered) never counts.
+	 */
+	static void ended(MinecraftServer server, String guest, GuestActivity.Activity activity, boolean completed) {
+		if (!completed || !GuestOutings.OUTING.equals(activity.kind())) {
+			return;
 		}
-		OUTINGS.clear();
-		held.forEach((guest, activity) -> {
-			if ("outing".equals(activity.kind())) {
-				OUTINGS.put(guest, activity);
-			}
-		});
-		for (Map.Entry<String, GuestActivity.Activity> outing : ended) {
-			GuestRoster.Guest entry = GuestRoster.get(outing.getKey());
-			if (entry != null && entry.available()) {
-				reach(server, outing.getValue().player(), outing.getKey(), "first_outing");
-			}
+		GuestRoster.Guest entry = GuestRoster.get(guest);
+		if (entry != null && entry.available()) {
+			reach(server, activity.player(), guest, "first_outing");
 		}
 	}
 

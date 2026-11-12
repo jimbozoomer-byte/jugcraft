@@ -63,7 +63,6 @@ public final class GuestNotices {
 
 	private static final Map<UUID, Long> NEXT_GOSSIP = new HashMap<>();
 	private static final Map<String, Long> LAST_RIVALRY = new HashMap<>();
-	private static final Map<String, GuestActivity.Activity> RIVALRIES = new HashMap<>();
 	/** Game tests only: the notices sent to these receivers are kept here. Empty in play. */
 	static final Map<UUID, List<Notice>> RECORDED = new ConcurrentHashMap<>();
 
@@ -254,10 +253,9 @@ public final class GuestNotices {
 
 	// ---------------------------------------------------------------- gossip and rivalries
 
-	/** Once a second: rivalry notices for rivalries just begun, and gossip for receivers whose turn it is. */
-	static void tick(MinecraftServer server, Map<String, GuestActivity.Activity> held) {
+	/** Once a second: gossip for receivers whose turn it is. (Rivalry notices come from {@link #began}, as they begin.) */
+	static void tick(MinecraftServer server) {
 		long now = server.getTickCount();
-		rivalries(server, held, now);
 		for (ServerPlayer player : List.copyOf(server.getPlayerList().getPlayers())) {
 			UUID me = player.getUUID();
 			if (!receives(server, me)) {
@@ -314,37 +312,29 @@ public final class GuestNotices {
 		return keys;
 	}
 
-	/** A rivalry just begun (not seen a second ago) is noticed, naming only its guest, at most once per guest per {@link #RIVALRY_TICKS}. */
-	private static void rivalries(MinecraftServer server, Map<String, GuestActivity.Activity> held, long now) {
-		List<String> begun = new ArrayList<>();
-		held.forEach((guest, activity) -> {
-			if ("rivalry".equals(activity.kind()) && !activity.equals(RIVALRIES.get(guest))) {
-				begun.add(guest);
-			}
-		});
-		RIVALRIES.clear();
-		held.forEach((guest, activity) -> {
-			if ("rivalry".equals(activity.kind())) {
-				RIVALRIES.put(guest, activity);
-			}
-		});
-		for (String guest : begun) {
-			Long last = LAST_RIVALRY.get(guest);
-			if (last != null && now - last < RIVALRY_TICKS || GuestRoster.get(guest) == null) {
-				continue;
-			}
-			LAST_RIVALRY.put(guest, now);
-			Component text = Component.translatableWithFallback("message.jugcraft.guest.notice.rivalry",
-					"Rivalry notice: %s has a friendly rivalry under way in town. Spectators welcome.", GuestMilestones.name(guest));
-			for (ServerPlayer player : List.copyOf(server.getPlayerList().getPlayers())) {
-				deliver(server, player, Set.of(), text);
-			}
+	/**
+	 * An activity began ({@link GuestEvents#ACTIVITY_BEGAN}, fired by the rivalry's own start, so none is missed however
+	 * soon it ends): a rivalry is noticed, naming only its guest, at most once per guest per {@link #RIVALRY_TICKS}.
+	 */
+	static void began(MinecraftServer server, String guest, GuestActivity.Activity activity) {
+		if (!GuestRivalries.KIND.equals(activity.kind()) || GuestRoster.get(guest) == null) {
+			return;
+		}
+		long now = server.getTickCount();
+		Long last = LAST_RIVALRY.get(guest);
+		if (last != null && now - last < RIVALRY_TICKS) {
+			return;
+		}
+		LAST_RIVALRY.put(guest, now);
+		Component text = Component.translatableWithFallback("message.jugcraft.guest.notice.rivalry",
+				"Rivalry notice: %s has a friendly rivalry under way in town. Spectators welcome.", GuestMilestones.name(guest));
+		for (ServerPlayer player : List.copyOf(server.getPlayerList().getPlayers())) {
+			deliver(server, player, Set.of(), text);
 		}
 	}
 
 	static void clear() {
 		NEXT_GOSSIP.clear();
 		LAST_RIVALRY.clear();
-		RIVALRIES.clear();
 	}
 }

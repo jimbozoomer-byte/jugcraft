@@ -524,28 +524,45 @@ public final class GuestOutings {
 	}
 
 	/**
-	 * Ends the guest's outing or visit for {@code reason}: the {@link GuestActivity} (if an outing or visit holds the
-	 * guest; only this feature makes those), the tracking, the reward when completed, and then the return watch. Returns
-	 * what the player is told, or null (nothing was tracked, or nothing to say).
+	 * Ends the guest's outing or visit for {@code reason}: the reward when completed and earned (while it still holds the
+	 * guest), then the {@link GuestActivity} (if an outing or visit holds the guest; only this feature makes those), the
+	 * tracking, and the return watch. The activity ends as {@code completed} only for a rewarded finish: completed at its
+	 * duration, this outing's own activity, the guest arrived and enough time spent together with the player still here
+	 * (so it is marked done for today and its reward granted, even if the shared daily budget leaves that at 0). Every
+	 * other ending is not completed. Returns what the player is told, or null (nothing was tracked, or nothing to say).
 	 */
 	static @Nullable Component end(MinecraftServer server, String guest, Reason reason, long now) {
 		Outing outing = OUTINGS.remove(guest);
 		GuestActivity activities = GuestActivity.get(server);
 		GuestActivity.Activity held = activities.current(guest);
+		boolean holds = held != null && (held.kind().equals(OUTING) || held.kind().equals(VISIT));
+		boolean ours = holds && outing != null && held.kind().equals(outing.kind.activity) && held.player().equals(outing.player);
+		ServerPlayer player = outing == null ? null : server.getPlayerList().getPlayer(outing.player);
+		boolean earned = reason == Reason.COMPLETED && ours && player != null && earned(outing);
+		Component said = outing == null ? null : said(server, outing, reason, earned ? player : null);
 		ResourceKey<Level> where = outing != null ? outing.dimension : null;
-		if (held != null && (held.kind().equals(OUTING) || held.kind().equals(VISIT))) {
-			activities.end(guest, held.kind());
+		if (holds) {
+			activities.end(guest, held.kind(), earned);
 			where = held.dimension();
 		}
 		if (where != null) {
 			watchReturn(server, guest, where, now);
 		}
-		if (outing == null) {
-			return null;
-		}
-		Component name = guestName(guest);
+		return said;
+	}
+
+	/** Whether the outing earned its reward: the guest arrived, and together time is enough of its duration. */
+	private static boolean earned(Outing outing) {
+		return outing.arrived && outing.together * MOST_DENOMINATOR >= (long) outing.kind.duration * MOST_NUMERATOR;
+	}
+
+	/** What the player is told of the outing's ending; for an earned completion ({@code rewarded} set) the reward is granted. */
+	private static @Nullable Component said(MinecraftServer server, Outing outing, Reason reason, @Nullable ServerPlayer rewarded) {
+		Component name = guestName(outing.guest);
 		return switch (reason) {
-			case COMPLETED -> completed(server, outing, name);
+			case COMPLETED -> rewarded != null ? completed(server, outing, rewarded, name)
+					: message("short." + outing.kind.id,
+							"You and %s did not spend enough of the time together, so it earns no affection. You can try again today.", name);
 			case CANCELLED, LOGOUT -> null;
 			case DEATH, AWAY, DIMENSION, TOO_FAR -> message("apart", "You and %s got separated, so your time together is over. They head back to their post.", name);
 			case STRAYED -> message("strayed", "%s wandered away from the outing and heads back to their post.", name);
@@ -556,14 +573,8 @@ public final class GuestOutings {
 		};
 	}
 
-	/** The reward for a completed outing, if earned; what the player is told. */
-	private static Component completed(MinecraftServer server, Outing outing, Component name) {
-		ServerPlayer player = server.getPlayerList().getPlayer(outing.player);
-		boolean earned = outing.arrived && outing.together * MOST_DENOMINATOR >= (long) outing.kind.duration * MOST_NUMERATOR;
-		if (!earned || player == null) {
-			return message("short." + outing.kind.id,
-					"You and %s did not spend enough of the time together, so it earns no affection. You can try again today.", name);
-		}
+	/** The reward for an earned outing: marked done for today, then the grant within the shared budget; what the player is told. */
+	private static Component completed(MinecraftServer server, Outing outing, ServerPlayer player, Component name) {
 		GuestOutingState.get(server).markDone(player.getUUID(), outing.guest, outing.kind.id, day(player));
 		int added = GuestRewards.grant(player, outing.guest, outing.kind.reward);
 		String what = switch (outing.kind) {

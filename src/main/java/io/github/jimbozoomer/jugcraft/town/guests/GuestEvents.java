@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 
@@ -44,6 +45,24 @@ public final class GuestEvents {
 	/** The player opened the guest's menu (talked to it). */
 	public interface Talked {
 		void talked(ServerPlayer player, Townsfolk npc, String guest);
+	}
+
+	/**
+	 * {@code activity} now holds {@code guest}: fired by {@link GuestActivity#begin} itself, once the hold is recorded, so
+	 * no beginning is ever missed however soon it ends. {@code server} is the server whose record it is.
+	 */
+	public interface ActivityBegan {
+		void began(MinecraftServer server, String guest, GuestActivity.Activity activity);
+	}
+
+	/**
+	 * {@code activity} no longer holds {@code guest}: fired by {@link GuestActivity#end} itself, once the hold is removed.
+	 * {@code completed} is true only for a real, successful finish, as the feature that ended it judged it: an outing or
+	 * visit that earned its reward, a ceremony recorded for its marriage, a rivalry played to its end. Every other ending
+	 * (cancelled, abandoned, timed out, recovered after a restart, taken apart) is false.
+	 */
+	public interface ActivityEnded {
+		void ended(MinecraftServer server, String guest, GuestActivity.Activity activity, boolean completed);
 	}
 
 	/**
@@ -91,6 +110,10 @@ public final class GuestEvents {
 			all.each(listener -> listener.divorced(player, guest)));
 	public static final Listeners<Talked> TALKED = new Listeners<Talked>(all -> (player, npc, guest) ->
 			all.each(listener -> listener.talked(player, npc, guest)));
+	public static final Listeners<ActivityBegan> ACTIVITY_BEGAN = new Listeners<ActivityBegan>(all -> (server, guest, activity) ->
+			all.each(listener -> listener.began(server, guest, activity)));
+	public static final Listeners<ActivityEnded> ACTIVITY_ENDED = new Listeners<ActivityEnded>(all -> (server, guest, activity, completed) ->
+			all.each(listener -> listener.ended(server, guest, activity, completed)));
 
 	private GuestEvents() {
 	}

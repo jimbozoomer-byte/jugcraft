@@ -10,13 +10,17 @@ import io.github.jimbozoomer.jugcraft.town.guests.GuestBalance;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestCeremonies;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestFavorTesting;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestFavors;
+import io.github.jimbozoomer.jugcraft.town.guests.GuestFeature;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestKeepsakes;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestLedger;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestMarriage;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestMilestoneMeals;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestMilestoneTesting;
+import io.github.jimbozoomer.jugcraft.town.guests.GuestNotices;
+import io.github.jimbozoomer.jugcraft.town.guests.GuestOutingTesting;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestResult;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestRewards;
+import io.github.jimbozoomer.jugcraft.town.guests.GuestRivalries;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestRoster;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestRosterTesting;
 import java.util.ArrayList;
@@ -68,6 +72,7 @@ public class GuestMilestoneGameTests {
 	private static final String OUTING = GuestRosterTesting.guest("test_d_outing", false);
 	private static final String DOOR = GuestRosterTesting.guest("test_d_door", true);
 	private static final String OTHER = GuestRosterTesting.guest("test_d_other", false);
+	private static final String RIVAL = GuestRosterTesting.guest("test_d_rival", false);
 	private static final String FEAST = GuestRosterTesting.guest("test_d_feast", true);
 	private static final String SINGLE = GuestRosterTesting.guest("test_d_single", true);
 	private static final String SPOUSE = GuestRosterTesting.guest("test_d_spouse", true);
@@ -186,34 +191,69 @@ public class GuestMilestoneGameTests {
 		}
 	}
 
+	/**
+	 * first_outing comes from the outing's own ending ({@code ACTIVITY_ENDED}, completed), at once and with no polling: an
+	 * outing that begins and completes within the same tick fires it exactly once, and a later outing never again. A
+	 * cancelled outing and one that runs its time without earning its reward never fire it.
+	 */
 	@GameTest(maxTicks = 20)
-	public void firstOutingFiresWhenAnOutingEnds(GameTestHelper h) {
+	public void firstOutingFiresOnceWhenAnOutingCompletesInTheSameTick(GameTestHelper h) {
 		floor(h);
-		ServerLevel level = h.getLevel();
-		MinecraftServer server = level.getServer();
+		MinecraftServer server = h.getLevel().getServer();
 		ServerPlayer player = visitor(h, 3, 3);
-		UUID me = player.getUUID();
+		ServerPlayer other = visitor(h, 3, 2);
+		UUID me = player.getUUID(), them = other.getUUID();
 		String guest = OUTING;
-		GuestActivity activity = GuestActivity.get(server);
-		BlockPos at = h.absolutePos(new BlockPos(3, 2, 3));
+		List<Townsfolk> made = new ArrayList<>();
+		GuestFavorTesting.pinDay(player, DAY);
+		GuestFavorTesting.pinDay(other, DAY);
+		GuestMilestoneTesting.recordActivities(guest);
 		try {
-			h.assertTrue(activity.begin(guest, new GuestActivity.Activity("outing", me, level.getGameTime(), level.dimension(), at)),
-					"(an outing holds the test guest, as worker C's would)");
-			GuestMilestoneTesting.observe(server);
-			h.assertTrue(!GuestMilestoneTesting.reached(server, me, guest, "first_outing"), "An outing under way is no milestone yet");
-			h.assertTrue(activity.end(guest, "outing"), "(the outing ends)");
-			GuestMilestoneTesting.observe(server);
+			Townsfolk npc = place(h, guest, 1, 1, made);
+			GuestFeature outings = GuestOutingTesting.feature();
+
+			// Cancelled: never a first outing.
+			h.assertTrue(GuestOutingTesting.invite(other, npc, guest, "fair", 3).done(), "(another player's fair outing begins)");
+			h.assertTrue(outings.act(other, npc, guest, "end_outing").done(), "(and is cancelled)");
+			h.assertTrue(!GuestMilestoneTesting.reached(server, them, guest, "first_outing") && keepsakes(other, "first_outing") == 0,
+					"A cancelled outing is no first outing");
+
+			// Run its time away from the guest, so it earns nothing: never a first outing.
+			h.assertTrue(GuestOutingTesting.invite(other, npc, guest, "fair", 3).done(), "(it is tried again)");
+			Vec3 aside = centre(h, 3, 2).add(20, 0, 0);
+			other.snapTo(aside.x, aside.y, aside.z, 0.0F, 0.0F);
+			GuestOutingTesting.step(server, guest, GuestOutingTesting.now(server) + GuestOutingTesting.duration("fair"));
+			h.assertTrue(GuestActivity.get(server).current(guest) == null && !GuestOutingTesting.done(other, guest, "fair"),
+					"(it ran its time and earned nothing)");
+			h.assertTrue(!GuestMilestoneTesting.reached(server, them, guest, "first_outing") && keepsakes(other, "first_outing") == 0,
+					"An outing short of its reward is no first outing");
+			h.assertTrue(GuestMilestoneTesting.activityEvents(guest).equals(List.of("began:outing", "ended:outing:false", "began:outing",
+					"ended:outing:false")), "Each began once and ended not completed: " + GuestMilestoneTesting.activityEvents(guest));
+
+			// Begun and completed within this one tick: first_outing fires at once, from the completion itself.
+			h.assertTrue(GuestOutingTesting.invite(player, npc, guest, "fair", 3).done(), "A fair outing begins");
+			GuestOutingTesting.step(server, guest, GuestOutingTesting.now(server) + GuestOutingTesting.duration("fair"));
+			h.assertTrue(GuestActivity.get(server).current(guest) == null && GuestOutingTesting.done(player, guest, "fair"),
+					"and completes, rewarded, in the same tick");
 			h.assertTrue(GuestMilestoneTesting.reached(server, me, guest, "first_outing") && keepsakes(player, "first_outing") == 1,
-					"When it ends, first_outing fires and its sketch is handed over");
-			h.assertTrue(activity.begin(guest, new GuestActivity.Activity("outing", me, level.getGameTime() + 1, level.dimension(), at)),
-					"(a second outing)");
-			GuestMilestoneTesting.observe(server);
-			activity.end(guest, "outing");
-			GuestMilestoneTesting.observe(server);
-			h.assertTrue(keepsakes(player, "first_outing") == 1, "A second outing brings no second keepsake");
+					"first_outing fires at once, with no poll in between, and its keepsake is handed over");
+
+			// A second completed outing: no second keepsake.
+			h.assertTrue(GuestOutingTesting.invite(player, npc, guest, "board_game", 3).done(), "A board game begins");
+			GuestOutingTesting.step(server, guest, GuestOutingTesting.now(server) + GuestOutingTesting.duration("board_game"));
+			h.assertTrue(GuestOutingTesting.done(player, guest, "board_game") && keepsakes(player, "first_outing") == 1,
+					"A second completed outing brings no second keepsake");
+			h.assertTrue(GuestMilestoneTesting.activityEvents(guest).equals(List.of("began:outing", "ended:outing:false", "began:outing",
+					"ended:outing:false", "began:outing", "ended:outing:true", "began:outing", "ended:outing:true")),
+					"Each outing fired exactly one beginning and one ending, completed only when rewarded: "
+							+ GuestMilestoneTesting.activityEvents(guest));
+			h.assertTrue(!GuestMilestoneTesting.reached(server, them, guest, "first_outing"), "The other player still has no first outing");
 			h.succeed();
 		} finally {
-			activity.end(guest, "outing");
+			GuestMilestoneTesting.stopRecordingActivities(guest);
+			clear(made);
+			GuestFavorTesting.unpin(me);
+			GuestFavorTesting.unpin(them);
 		}
 	}
 
@@ -666,6 +706,51 @@ public class GuestMilestoneGameTests {
 			for (UUID player : everyone) {
 				GuestMilestoneTesting.stopRecording(player);
 			}
+			clear(made);
+		}
+	}
+
+	/**
+	 * A rivalry is noticed from its own start ({@code ACTIVITY_BEGAN}), at once: one that begins and ends within the same
+	 * tick is still noticed, once, to a player with notices on, naming no player; a second start within
+	 * {@link GuestNotices#RIVALRY_TICKS} is not; and no other activity is a rivalry notice.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aRivalryIsNoticedTheMomentItBegins(GameTestHelper h) {
+		floor(h);
+		ServerLevel level = h.getLevel();
+		MinecraftServer server = level.getServer();
+		ServerPlayer reader = visitor(h, 3, 3);
+		UUID me = reader.getUUID();
+		String guest = RIVAL;
+		List<Townsfolk> made = new ArrayList<>();
+		GuestActivity activity = GuestActivity.get(server);
+		UUID someone = UUID.randomUUID();
+		BlockPos at = h.absolutePos(new BlockPos(3, 2, 3));
+		GuestMilestoneTesting.record(me);
+		try {
+			Townsfolk npc = place(h, guest, 2, 3, made);
+			h.assertTrue(GuestMilestoneTesting.act(reader, npc, guest, "notices_toggle").done() && GuestMilestoneTesting.receives(server, me),
+					"(the reader turns notices on)");
+			h.assertTrue(activity.begin(guest, new GuestActivity.Activity(GuestRivalries.KIND, someone, level.getGameTime(), level.dimension(), at))
+					&& activity.end(guest, GuestRivalries.KIND), "(a rivalry begins and ends within one tick)");
+			var sent = GuestMilestoneTesting.recorded(me);
+			h.assertTrue(sent.size() == 1 && sent.getFirst().named().isEmpty()
+					&& sent.getFirst().text().getString().contains(GuestRoster.get(guest).name()),
+					"It is noticed at once, naming the guest and no player: " + sent);
+
+			h.assertTrue(activity.begin(guest, new GuestActivity.Activity(GuestRivalries.KIND, someone, level.getGameTime(), level.dimension(), at))
+					&& activity.end(guest, GuestRivalries.KIND), "(another rivalry with the same guest at once)");
+			h.assertTrue(GuestMilestoneTesting.recorded(me).size() == 1, "is not noticed again so soon");
+			h.assertTrue(activity.begin(guest, new GuestActivity.Activity("outing", someone, level.getGameTime(), level.dimension(), at))
+					&& activity.end(guest, "outing"), "(an outing)");
+			h.assertTrue(GuestMilestoneTesting.recorded(me).size() == 1, "and no other activity is a rivalry notice");
+			h.succeed();
+		} finally {
+			GuestMilestoneTesting.setNotices(server, me, false, false);
+			GuestMilestoneTesting.stopRecording(me);
+			activity.end(guest, GuestRivalries.KIND);
+			activity.end(guest, "outing");
 			clear(made);
 		}
 	}

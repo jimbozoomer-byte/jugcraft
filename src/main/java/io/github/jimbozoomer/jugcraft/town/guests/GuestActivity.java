@@ -25,6 +25,11 @@ import org.jspecify.annotations.Nullable;
  * recovery after a restart); nothing else may. While one holds a guest, {@code Townsfolk.anchor()} is the activity's
  * anchor in its level (wander range {@link #RANGE}), so the guest walks there by its usual goals and back to its post
  * when the activity ends. Nothing here loads a chunk, moves a block or moves the entity itself.
+ *
+ * <p>Every beginning and ending fires {@link GuestEvents#ACTIVITY_BEGAN} and {@link GuestEvents#ACTIVITY_ENDED}
+ * synchronously, here, after the record has changed: whoever needs to know (milestones, notices) listens to these
+ * instead of polling {@link #all}, which would miss an activity that begins and ends between two polls. The ending says
+ * whether it was a real, successful finish; only the feature that ends it can tell, so it passes {@code completed}.
  */
 public final class GuestActivity extends SavedData {
 	/** How far a guest wanders from an activity's anchor. */
@@ -45,6 +50,8 @@ public final class GuestActivity extends SavedData {
 	static final SavedDataType<GuestActivity> TYPE = new SavedDataType<>(Jugcraft.id("town_guest_activity"), GuestActivity::new, CODEC, null);
 
 	private final Map<String, Activity> activities = new HashMap<>();
+	/** The server this record belongs to, set by {@link #get}, for the events; never saved. */
+	private @Nullable MinecraftServer server;
 
 	public GuestActivity() {
 	}
@@ -54,7 +61,9 @@ public final class GuestActivity extends SavedData {
 	}
 
 	public static GuestActivity get(MinecraftServer server) {
-		return server.overworld().getDataStorage().computeIfAbsent(TYPE);
+		GuestActivity activity = server.overworld().getDataStorage().computeIfAbsent(TYPE);
+		activity.server = server;
+		return activity;
 	}
 
 	/** What holds the guest now, or null when it is free. */
@@ -67,13 +76,19 @@ public final class GuestActivity extends SavedData {
 		return Map.copyOf(activities);
 	}
 
-	/** Holds the guest for {@code activity}; false (nothing changed) when anything already holds it. */
+	/**
+	 * Holds the guest for {@code activity}; false (nothing changed) when anything already holds it. Then
+	 * {@link GuestEvents#ACTIVITY_BEGAN} fires.
+	 */
 	public boolean begin(String guest, Activity activity) {
 		if (activities.containsKey(guest) || GuestRoster.get(guest) == null) {
 			return false;
 		}
 		activities.put(guest, activity);
 		setDirty();
+		if (server != null) {
+			GuestEvents.ACTIVITY_BEGAN.invoker().began(server, guest, activity);
+		}
 		return true;
 	}
 
@@ -88,14 +103,29 @@ public final class GuestActivity extends SavedData {
 		return true;
 	}
 
-	/** Ends the holder's activity; false unless an activity of {@code kind} holds the guest. */
+	/**
+	 * Ends the holder's activity as anything but a successful finish (cancelled, abandoned, timed out, recovered): as
+	 * {@link #end(String, String, boolean)} with {@code completed} false.
+	 */
 	public boolean end(String guest, String kind) {
+		return end(guest, kind, false);
+	}
+
+	/**
+	 * Ends the holder's activity; false (nothing changed, nothing fired) unless an activity of {@code kind} holds the
+	 * guest. Then {@link GuestEvents#ACTIVITY_ENDED} fires with {@code completed}: true only when the feature ending it
+	 * judged it a real, successful finish.
+	 */
+	public boolean end(String guest, String kind, boolean completed) {
 		Activity held = activities.get(guest);
 		if (held == null || !held.kind().equals(kind)) {
 			return false;
 		}
 		activities.remove(guest);
 		setDirty();
+		if (server != null) {
+			GuestEvents.ACTIVITY_ENDED.invoker().ended(server, guest, held, completed);
+		}
 		return true;
 	}
 

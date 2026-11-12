@@ -2,8 +2,11 @@ package io.github.jimbozoomer.jugcraft.town.guests;
 
 import io.github.jimbozoomer.jugcraft.town.Townsfolk;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
@@ -17,7 +20,8 @@ import org.jspecify.annotations.Nullable;
 /**
  * Worker D's test seams (GuestMilestoneGameTests only; nothing here is reachable in play): the milestone state and its
  * codec, a stand-in church per test guest, a running ceremony aged and stepped on demand, the notices a receiver was
- * sent, and the ledger's cooldowns cleared so a divorced test couple may marry again.
+ * sent, the activity events a guest's activities fired, and the ledger's cooldowns cleared so a divorced test couple
+ * may marry again.
  */
 public final class GuestMilestoneTesting {
 	private GuestMilestoneTesting() {
@@ -64,9 +68,43 @@ public final class GuestMilestoneTesting {
 		return out;
 	}
 
-	/** One poll of the activities, as the tick makes it once a second (outings ended, rivalries begun). */
-	public static void observe(MinecraftServer server) {
-		GuestMilestones.observe(server, GuestActivity.get(server).all());
+	// ---------------------------------------------------------------- activity events
+
+	/** The activity events recorded per guest ({@link #recordActivities}), as "began:kind" and "ended:kind:completed". */
+	private static final Map<String, List<String>> ACTIVITY_EVENTS = new ConcurrentHashMap<>();
+	private static boolean listening;
+
+	/**
+	 * Keeps every {@link GuestEvents#ACTIVITY_BEGAN} and {@link GuestEvents#ACTIVITY_ENDED} for {@code guest} from now
+	 * on, as they fire. The recorder registers once; it records only guests named here, so other tests are untouched.
+	 */
+	public static synchronized void recordActivities(String guest) {
+		if (!listening) {
+			listening = true;
+			GuestEvents.ACTIVITY_BEGAN.register((server, held, activity) -> {
+				List<String> kept = ACTIVITY_EVENTS.get(held);
+				if (kept != null) {
+					kept.add("began:" + activity.kind());
+				}
+			});
+			GuestEvents.ACTIVITY_ENDED.register((server, held, activity, completed) -> {
+				List<String> kept = ACTIVITY_EVENTS.get(held);
+				if (kept != null) {
+					kept.add("ended:" + activity.kind() + ":" + completed);
+				}
+			});
+		}
+		ACTIVITY_EVENTS.put(guest, Collections.synchronizedList(new ArrayList<>()));
+	}
+
+	/** The activity events recorded for {@code guest} since {@link #recordActivities}, in order. */
+	public static List<String> activityEvents(String guest) {
+		List<String> kept = ACTIVITY_EVENTS.get(guest);
+		return kept == null ? List.of() : List.copyOf(kept);
+	}
+
+	public static void stopRecordingActivities(String guest) {
+		ACTIVITY_EVENTS.remove(guest);
 	}
 
 	/** The serial and start day of the player's marriage record, as "serial@since[+ceremony]", or "none". */
@@ -193,6 +231,11 @@ public final class GuestMilestoneTesting {
 
 	public static void stopRecording(UUID receiver) {
 		GuestNotices.RECORDED.remove(receiver);
+	}
+
+	/** Sets the player's two notice settings directly (a test's own setup and cleanup). */
+	public static boolean setNotices(MinecraftServer server, UUID player, boolean receive, boolean share) {
+		return GuestMilestoneState.get(server).notices(player, receive, share);
 	}
 
 	public static boolean receives(MinecraftServer server, UUID player) {

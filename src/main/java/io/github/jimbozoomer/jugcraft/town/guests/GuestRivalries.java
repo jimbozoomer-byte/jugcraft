@@ -347,10 +347,10 @@ public final class GuestRivalries {
 		return !free || GuestActivity.get(server).current(id) == null;
 	}
 
-	/** Ends both activities (ours only) and forgets the rivalry; tells the player unless it ended quietly. */
+	/** Ends both activities (ours only, not completed) and forgets the rivalry; tells the player unless it ended quietly. */
 	static void stop(MinecraftServer server, Running running, Stop why) {
 		RUNNING.remove(running.player(), running);
-		release(server, running);
+		release(server, running, false);
 		ServerPlayer player = why == Stop.QUIET ? null : server.getPlayerList().getPlayer(running.player());
 		if (player != null) {
 			player.sendSystemMessage(Component.translatableWithFallback("message.jugcraft.guest.rivalry.fizzled",
@@ -358,12 +358,12 @@ public final class GuestRivalries {
 		}
 	}
 
-	/** Ends each of the two activities if it is still this rivalry's. */
-	private static void release(MinecraftServer server, Running running) {
+	/** Ends each of the two activities if it is still this rivalry's; {@code completed} when it was played to its end. */
+	private static void release(MinecraftServer server, Running running, boolean completed) {
 		GuestActivity activity = GuestActivity.get(server);
 		for (String guest : List.of(running.first(), running.second())) {
 			if (ours(activity.current(guest), running)) {
-				activity.end(guest, KIND);
+				activity.end(guest, KIND, completed);
 			}
 		}
 	}
@@ -371,7 +371,7 @@ public final class GuestRivalries {
 	/** The rivalry's comic ending, then the day's reward (once per player per day), then both guests go home. */
 	private static void finish(MinecraftServer server, Running running, ServerPlayer player, boolean firstIn, boolean secondIn) {
 		RUNNING.remove(running.player(), running);
-		release(server, running);
+		release(server, running, true);
 		Component a = name(running.first());
 		Component b = name(running.second());
 		RandomSource random = player.getRandom();
