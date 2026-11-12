@@ -1,5 +1,7 @@
 package io.github.jimbozoomer.jugcraft.test;
 
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import io.github.jimbozoomer.jugcraft.town.CustomNpcs;
 import io.github.jimbozoomer.jugcraft.town.JugcraftTown;
 import io.github.jimbozoomer.jugcraft.town.TownData;
@@ -13,6 +15,7 @@ import io.github.jimbozoomer.jugcraft.town.guests.GuestFavors;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestFeature;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestKeepsakes;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestLedger;
+import io.github.jimbozoomer.jugcraft.town.guests.GuestLedgerTesting;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestMarriage;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestMilestoneMeals;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestMilestoneTesting;
@@ -30,6 +33,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -73,6 +77,10 @@ public class GuestMilestoneGameTests {
 	private static final String DOOR = GuestRosterTesting.guest("test_d_door", true);
 	private static final String OTHER = GuestRosterTesting.guest("test_d_other", false);
 	private static final String RIVAL = GuestRosterTesting.guest("test_d_rival", false);
+	private static final String RESTART = GuestRosterTesting.guest("test_d_restart", true);
+	private static final String RITE = GuestRosterTesting.guest("test_d_rite", true);
+	private static final String BUSY_WED = GuestRosterTesting.guest("test_d_busy_wed", true);
+	private static final String BUSY_OTHER = GuestRosterTesting.guest("test_d_busy_other", false);
 	private static final String FEAST = GuestRosterTesting.guest("test_d_feast", true);
 	private static final String SINGLE = GuestRosterTesting.guest("test_d_single", true);
 	private static final String SPOUSE = GuestRosterTesting.guest("test_d_spouse", true);
@@ -520,6 +528,209 @@ public class GuestMilestoneGameTests {
 			GuestMilestoneTesting.forgetChurch(guest);
 			clear(made);
 			priest.discard();
+		}
+	}
+
+	/**
+	 * A restart leaves a saved ceremony activity with no ceremony running (that lived in memory): recovery ends it, as not
+	 * completed, and records nothing for the marriage. It ends nothing but a ceremony.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aLeftoverCeremonyAfterARestartIsEndedWithNothingRecorded(GameTestHelper h) {
+		floor(h);
+		ServerLevel level = h.getLevel();
+		MinecraftServer server = level.getServer();
+		ServerPlayer player = visitor(h, 3, 3);
+		UUID me = player.getUUID();
+		String guest = RESTART;
+		List<Townsfolk> made = new ArrayList<>();
+		GuestActivity activity = GuestActivity.get(server);
+		GuestMilestoneTesting.recordActivities(guest);
+		try {
+			Townsfolk npc = place(h, guest, 2, 3, made);
+			marry(h, player, npc, guest);
+			h.assertTrue(activity.begin(guest, new GuestActivity.Activity(GuestCeremonies.KIND, me, level.getGameTime(), level.dimension(),
+					npc.blockPosition())) && GuestMilestoneTesting.running(me).isEmpty(),
+					"(as a restart leaves it: the saved ceremony activity holds the guest, and no ceremony is running)");
+			GuestMilestoneTesting.recoverCeremonies(server);
+			h.assertTrue(activity.current(guest) == null, "Recovery ends the leftover ceremony");
+			h.assertTrue(!GuestMilestoneTesting.marriage(server, me).endsWith("+ceremony") && !GuestMilestoneTesting.reached(server, me, guest, "ceremony_1")
+					&& keepsakes(player, "ceremony_1") == 0, "and records nothing: no ceremony held, no milestone, no bouquet");
+			h.assertTrue(GuestMilestoneTesting.activityEvents(guest).equals(List.of("began:ceremony", "ended:ceremony:false")),
+					"It ended as not completed: " + GuestMilestoneTesting.activityEvents(guest));
+			h.assertTrue(guest.equals(GuestLedger.get(server).spouseOf(me)) && GuestMilestoneTesting.option(player, npc, guest, "ceremony"),
+					"The marriage stands, and its ceremony may still be held");
+
+			h.assertTrue(activity.begin(guest, new GuestActivity.Activity("outing", UUID.randomUUID(), level.getGameTime(), level.dimension(),
+					npc.blockPosition())), "(an outing activity, as a restart might also leave)");
+			GuestMilestoneTesting.recoverCeremonies(server);
+			h.assertTrue(activity.current(guest) != null && "outing".equals(activity.current(guest).kind()), "is not the ceremonies' to end");
+			h.succeed();
+		} finally {
+			GuestMilestoneTesting.stopRecordingActivities(guest);
+			activity.end(guest, GuestCeremonies.KIND);
+			activity.end(guest, "outing");
+			clear(made);
+		}
+	}
+
+	/**
+	 * A ceremony is called off from either path, with nothing recorded: the menu's cancel only beside the guest's own
+	 * canonical entity (a copy or the wrong guest id is refused and the ceremony goes on), the player's
+	 * {@code /guests ceremony cancel} from anywhere, for a request or a running ceremony. A divorce during a ceremony ends
+	 * it, and so does an operator's forced divorce, which fires no event, at the ceremony's next step.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aCeremonyIsCalledOffFromEitherPathAndByADivorce(GameTestHelper h) throws CommandSyntaxException {
+		floor(h);
+		ServerLevel level = h.getLevel();
+		MinecraftServer server = level.getServer();
+		ServerPlayer player = visitor(h, 3, 3);
+		UUID me = player.getUUID();
+		String guest = RITE;
+		List<Townsfolk> made = new ArrayList<>();
+		Townsfolk priest = priest(h, 6, 6);
+		CommandDispatcher<CommandSourceStack> dispatcher = server.getCommands().getDispatcher();
+		CommandSourceStack mine = player.createCommandSourceStack().withSuppressedOutput();
+		GuestMilestoneTesting.recordActivities(guest);
+		try {
+			Townsfolk npc = place(h, guest, 2, 3, made);
+			GuestMilestoneTesting.church(guest, level, area(h));
+			GuestLedger ledger = GuestLedger.get(server);
+			marry(h, player, npc, guest);
+
+			// The menu's cancel: only beside the canonical entity, as this guest.
+			confirmed(h, player, npc, guest);
+			Townsfolk copy = stand(h, guest, 4, 3, made);
+			h.assertTrue(!copy.getUUID().equals(ledger.canonical(guest)), "(the copy is not the canonical entity)");
+			h.assertFalse(GuestMilestoneTesting.act(player, copy, guest, "ceremony_cancel").done(), "A copy cannot call the ceremony off");
+			h.assertFalse(GuestMilestoneTesting.act(player, npc, OTHER, "ceremony_cancel").done(), "nor can the wrong guest id");
+			h.assertTrue(guest.equals(GuestMilestoneTesting.running(me)) && GuestActivity.get(server).current(guest) != null, "The ceremony goes on");
+			copy.discard();
+			h.assertTrue(GuestMilestoneTesting.act(player, npc, guest, "ceremony_cancel").done(), "Beside the guest itself it is called off");
+			nothingHeld(h, server, me, guest, "after the menu's cancel");
+
+			// The command: from anywhere, for a running ceremony and for a request.
+			confirmed(h, player, npc, guest);
+			Vec3 away = centre(h, 3, 3).add(12, 0, 0);
+			player.snapTo(away.x, away.y, away.z, 0.0F, 0.0F);
+			h.assertTrue(dispatcher.execute("guests ceremony cancel", mine) == 1, "/guests ceremony cancel calls a running ceremony off from afar");
+			nothingHeld(h, server, me, guest, "after the command");
+			Vec3 back = centre(h, 3, 3);
+			player.snapTo(back.x, back.y, back.z, 90.0F, 0.0F);
+			h.assertTrue(GuestMilestoneTesting.act(player, npc, guest, "ceremony").done(), "(a ceremony is asked for)");
+			h.assertTrue(dispatcher.execute("guests ceremony cancel", mine) == 1, "and the command withdraws the request");
+			h.assertFalse(GuestMilestoneTesting.act(player, npc, guest, "ceremony_confirm").done(), "which then cannot be confirmed");
+			h.assertTrue(dispatcher.execute("guests ceremony cancel", mine) == 0, "With nothing left, the command cancels nothing");
+
+			// A divorce during a running ceremony ends it.
+			confirmed(h, player, npc, guest);
+			h.assertTrue(GuestMarriage.requestDivorce(player, guest).done() && GuestMarriage.confirmDivorce(player, guest).done(), "(divorced)");
+			nothingHeld(h, server, me, guest, "after a divorce");
+
+			// An operator's forced divorce fires no event; the ceremony's next step ends it.
+			GuestMilestoneTesting.clearCooldowns(server, me, guest);
+			marry(h, player, npc, guest);
+			confirmed(h, player, npc, guest);
+			h.assertTrue(me.equals(GuestLedgerTesting.forceDivorce(ledger, guest, false)), "(an operator forces a divorce)");
+			GuestMilestoneTesting.step(server, me);
+			nothingHeld(h, server, me, guest, "after a forced divorce");
+			h.assertTrue(GuestMilestoneTesting.activityEvents(guest).stream().noneMatch(event -> event.equals("ended:ceremony:true")),
+					"No ceremony ended as completed: " + GuestMilestoneTesting.activityEvents(guest));
+			h.succeed();
+		} finally {
+			GuestMilestoneTesting.stopRecordingActivities(guest);
+			GuestMilestoneTesting.endCeremony(server, me);
+			GuestMilestoneTesting.forgetChurch(guest);
+			clear(made);
+			priest.discard();
+		}
+	}
+
+	/** The ceremony's player commands need only a player: no operator, and the shared {@code /guests} root stays open. */
+	@GameTest(maxTicks = 20)
+	public void ceremonyAndNoticeCommandsNeedOnlyAPlayer(GameTestHelper h) throws CommandSyntaxException {
+		floor(h);
+		MinecraftServer server = h.getLevel().getServer();
+		ServerPlayer player = visitor(h, 3, 3);
+		UUID me = player.getUUID();
+		CommandDispatcher<CommandSourceStack> dispatcher = server.getCommands().getDispatcher();
+		CommandSourceStack mine = player.createCommandSourceStack().withSuppressedOutput();
+		CommandSourceStack console = server.createCommandSourceStack().withSuppressedOutput();
+		try {
+			h.assertFalse(CustomNpcs.isOperator(mine), "(the survivor is no operator)");
+			h.assertTrue(dispatcher.execute("guests ceremony cancel", mine) == 0, "A player may run /guests ceremony cancel (nothing to cancel)");
+			h.assertTrue(dispatcher.execute("guests notices on", mine) == 1 && GuestMilestoneTesting.receives(server, me), "and /guests notices on");
+			h.assertTrue(dispatcher.execute("guests notices off", mine) == 1 && !GuestMilestoneTesting.receives(server, me), "and off");
+			h.assertTrue(!parses(dispatcher, "guests ceremony cancel", console) && !parses(dispatcher, "guests notices on", console),
+					"The console, which is no player, gets neither");
+			h.assertFalse(parses(dispatcher, "guests place " + RITE, mine), "An operator's subcommand stays closed to the player");
+			h.succeed();
+		} finally {
+			GuestMilestoneTesting.setNotices(server, me, false, false);
+		}
+	}
+
+	/**
+	 * November 12 review: a player spending time with another guest (an outing, a visit, a rivalry) is not offered a
+	 * ceremony, and neither a request nor its confirmation goes through, until that ends; nothing holds the spouse.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aCeremonyWaitsWhileThePlayerSpendsTimeWithAnotherGuest(GameTestHelper h) {
+		floor(h);
+		ServerLevel level = h.getLevel();
+		MinecraftServer server = level.getServer();
+		ServerPlayer player = visitor(h, 3, 3);
+		UUID me = player.getUUID();
+		String guest = BUSY_WED;
+		List<Townsfolk> made = new ArrayList<>();
+		Townsfolk priest = priest(h, 6, 6);
+		GuestActivity activity = GuestActivity.get(server);
+		try {
+			Townsfolk npc = place(h, guest, 2, 3, made);
+			Townsfolk other = place(h, BUSY_OTHER, 4, 2, made);
+			GuestMilestoneTesting.church(guest, level, area(h));
+			marry(h, player, npc, guest);
+			h.assertTrue(activity.begin(BUSY_OTHER, new GuestActivity.Activity("outing", me, level.getGameTime(), level.dimension(),
+					other.blockPosition())), "(the player is on an outing with another guest)");
+			h.assertFalse(GuestMilestoneTesting.option(player, npc, guest, "ceremony"), "No ceremony is offered meanwhile");
+			GuestResult refused = GuestMilestoneTesting.act(player, npc, guest, "ceremony");
+			h.assertTrue(!refused.done() && refused.message().getString().contains("already spending time"), "and one is refused: "
+					+ refused.message().getString());
+			h.assertTrue(activity.end(BUSY_OTHER, "outing"), "(the outing ends)");
+
+			h.assertTrue(GuestMilestoneTesting.act(player, npc, guest, "ceremony").done(), "A ceremony is asked for");
+			h.assertTrue(activity.begin(BUSY_OTHER, new GuestActivity.Activity("outing", me, level.getGameTime(), level.dimension(),
+					other.blockPosition())), "(another outing begins before it is confirmed)");
+			h.assertFalse(GuestMilestoneTesting.act(player, npc, guest, "ceremony_confirm").done(), "Its confirmation is refused");
+			h.assertTrue(activity.current(guest) == null && GuestMilestoneTesting.running(me).isEmpty(), "and nothing holds the spouse");
+			h.assertTrue(activity.end(BUSY_OTHER, "outing"), "(the outing ends)");
+			confirmed(h, player, npc, guest);
+			h.assertTrue(GuestMilestoneTesting.act(player, npc, guest, "ceremony_cancel").done(), "(free again: held, then withdrawn)");
+			h.succeed();
+		} finally {
+			activity.end(BUSY_OTHER, "outing");
+			GuestMilestoneTesting.endCeremony(server, me);
+			GuestMilestoneTesting.forgetChurch(guest);
+			clear(made);
+			priest.discard();
+		}
+	}
+
+	/** Nothing of the player's ceremony with {@code guest} is left, and nothing was recorded for it. */
+	private static void nothingHeld(GameTestHelper h, MinecraftServer server, UUID player, String guest, String when) {
+		h.assertTrue(GuestMilestoneTesting.running(player).isEmpty() && GuestActivity.get(server).current(guest) == null,
+				"No ceremony runs and nothing holds the guest " + when);
+		h.assertTrue(!GuestMilestoneTesting.marriage(server, player).endsWith("+ceremony") && !GuestMilestoneTesting.reached(server, player, guest, "ceremony_1")
+				&& !GuestMilestoneTesting.reached(server, player, guest, "ceremony_2"), "and no ceremony was recorded " + when);
+	}
+
+	private static boolean parses(CommandDispatcher<CommandSourceStack> dispatcher, String command, CommandSourceStack source) {
+		try {
+			dispatcher.execute(command, source);
+			return true;
+		} catch (CommandSyntaxException refused) {
+			return false;
 		}
 	}
 

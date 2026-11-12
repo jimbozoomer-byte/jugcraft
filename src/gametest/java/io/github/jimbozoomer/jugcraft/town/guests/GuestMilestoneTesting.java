@@ -184,6 +184,11 @@ public final class GuestMilestoneTesting {
 		GuestCeremonies.step(server, player);
 	}
 
+	/** The ceremonies' restart recovery, as the server runs it when started and once a second. */
+	public static void recoverCeremonies(MinecraftServer server) {
+		GuestCeremonies.recover(server, GuestActivity.get(server).all());
+	}
+
 	/** Ends the player's request and ceremony, if any (a test's cleanup). */
 	public static void endCeremony(MinecraftServer server, UUID player) {
 		GuestCeremonies.left(server, player);

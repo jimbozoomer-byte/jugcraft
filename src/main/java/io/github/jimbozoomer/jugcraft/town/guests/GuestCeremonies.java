@@ -46,7 +46,8 @@ import org.jspecify.annotations.Nullable;
  * <li>It ends cleanly, the activity ended and nothing recorded, on cancel, a lapsed request, the walk taking longer than
  * {@link #WALK_TICKS}, the whole lasting longer than {@link #MAX_TICKS}, the player leaving (beyond {@link #LEAVE},
  * another level, logout, death, spectating), the guest, the priest or the church unloading, a divorce, the activity
- * taken, or the server stopping. After a restart a ceremony activity nobody runs is ended ({@link #recover}).</li>
+ * taken, or the server stopping. After a restart a ceremony activity nobody runs is ended ({@link #recover}), when the
+ * server has started.</li>
  * </ol>
  *
  * <p>It changes no block, moves or removes no church object or slot machine, opens no storage and loads no chunk.
@@ -206,7 +207,21 @@ public final class GuestCeremonies {
 				"%s sets off for the Church of Notch. Meet them beside the Priest of Notch.", name(guest));
 	}
 
-	/** Withdraws the player's request, or ends their running ceremony, with {@code guest}; nothing is recorded. */
+	/**
+	 * The menu's {@code ceremony_cancel}: the player beside the guest's canonical entity, as every entry point with a
+	 * guest checks ({@link GuestMilestones#beside}), then {@link #cancel(ServerPlayer, String)}. A copy of the guest, the
+	 * wrong guest id or an unavailable guest is refused and nothing changes.
+	 */
+	public static GuestResult cancel(ServerPlayer player, Townsfolk npc, String guest) {
+		GuestResult away = GuestMilestones.beside(player, npc, guest);
+		return away != null ? away : cancel(player, guest);
+	}
+
+	/**
+	 * Withdraws the player's own request, or ends their own running ceremony, with {@code guest}; nothing is recorded. Needs
+	 * no guest entity: {@code /guests ceremony cancel} uses it from anywhere, since a player may always call off their own
+	 * ceremony (the guest may be walking to the church, or out of reach).
+	 */
 	public static GuestResult cancel(ServerPlayer player, String guest) {
 		MinecraftServer server = player.level().getServer();
 		UUID me = player.getUUID();
@@ -249,7 +264,8 @@ public final class GuestCeremonies {
 	/**
 	 * Why the player may not hold a ceremony with {@code guest} now, or null: the guest marriage-eligible
 	 * ({@code mayMarry}), the two married to each other in the ledger, the ceremony of this marriage not yet held, no
-	 * ceremony of the player or the guest under way, and nothing else holding the guest. Reads only.
+	 * ceremony of the player or the guest under way, the player holding no other guest's activity (an outing, a visit, a
+	 * rivalry: one at a time, as outings require), and nothing else holding the guest. Reads only.
 	 */
 	static @Nullable GuestResult eligible(MinecraftServer server, UUID player, String guest) {
 		GuestRoster.Guest entry = GuestRoster.get(guest);
@@ -272,6 +288,9 @@ public final class GuestCeremonies {
 		}
 		if (RUNNING.containsKey(player) || runningFor(guest) != null) {
 			return GuestResult.refused("message.jugcraft.guest.ceremony.under_way", "A ceremony with %s is already under way.", name(guest));
+		}
+		if (GuestOutings.busy(server, player)) {
+			return GuestResult.refused("message.jugcraft.guest.outing.player_busy", "You are already spending time with a guest. End that first.");
 		}
 		if (GuestActivity.get(server).current(guest) != null) {
 			return busy(guest);
@@ -321,6 +340,7 @@ public final class GuestCeremonies {
 	private static int cancelCommand(CommandSourceStack source) {
 		ServerPlayer me = source.getPlayer();
 		if (me == null) {
+			source.sendFailure(Component.translatableWithFallback("message.jugcraft.guest.ceremony.cancel_player", "Only a player can cancel their ceremony."));
 			return 0;
 		}
 		MinecraftServer server = source.getServer();
@@ -332,8 +352,12 @@ public final class GuestCeremonies {
 			return 0;
 		}
 		GuestResult result = cancel(me, guest);
-		source.sendSuccess(result::message, false);
-		return result.done() ? 1 : 0;
+		if (result.done()) {
+			source.sendSuccess(result::message, false);
+			return 1;
+		}
+		source.sendFailure(result.message());
+		return 0;
 	}
 
 	// ---------------------------------------------------------------- the rite
@@ -534,7 +558,10 @@ public final class GuestCeremonies {
 		}
 	}
 
-	/** Once a second: a ceremony activity nobody here runs (after a restart or a crash) is ended. */
+	/**
+	 * When the server has started, and then once a second: a ceremony activity nobody here runs (left by a restart or a
+	 * crash, since running ceremonies live in memory) is ended, as not completed, with nothing recorded for the marriage.
+	 */
 	static void recover(MinecraftServer server, Map<String, GuestActivity.Activity> held) {
 		held.forEach((guest, activity) -> {
 			if (KIND.equals(activity.kind()) && runningFor(guest) == null) {

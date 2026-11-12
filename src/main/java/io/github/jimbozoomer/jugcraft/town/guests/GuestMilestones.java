@@ -84,6 +84,7 @@ public final class GuestMilestones {
 		GuestEvents.ACTIVITY_BEGAN.register((server, guest, activity) -> safely(() -> GuestNotices.began(server, guest, activity)));
 		GuestEvents.ACTIVITY_ENDED.register((server, guest, activity, completed) -> safely(() -> ended(server, guest, activity, completed)));
 		ServerTickEvents.END_SERVER_TICK.register(server -> safely(() -> tick(server)));
+		ServerLifecycleEvents.SERVER_STARTED.register(server -> safely(() -> GuestCeremonies.recover(server, GuestActivity.get(server).all())));
 		ServerLifecycleEvents.SERVER_STOPPING.register(server -> safely(() -> GuestCeremonies.stopping(server)));
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			ticks = 0;

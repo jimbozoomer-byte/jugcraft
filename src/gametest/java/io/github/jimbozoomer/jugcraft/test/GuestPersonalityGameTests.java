@@ -65,6 +65,9 @@ public class GuestPersonalityGameTests {
 	private static final String END_B = GuestRosterTesting.guest("test_b_end_b", false);
 	private static final String PRIZE_A = GuestRosterTesting.guest("test_b_prize_a", false);
 	private static final String PRIZE_B = GuestRosterTesting.guest("test_b_prize_b", false);
+	private static final String HOLD_A = GuestRosterTesting.guest("test_b_hold_a", false);
+	private static final String HOLD_B = GuestRosterTesting.guest("test_b_hold_b", false);
+	private static final String HOLD_C = GuestRosterTesting.guest("test_b_hold_c", false);
 	private static final String ENTRY = GuestRosterTesting.guest("test_b_entry", false);
 	private static final String ENTRY_OTHER = GuestRosterTesting.guest("test_b_entry_other", false);
 	/** May not marry: romance must never reach it, even with an adult's line table borrowed. */
@@ -428,6 +431,47 @@ public class GuestPersonalityGameTests {
 			activity.end(BUSY_A, "outing");
 			activity.end(BUSY_A, "visit");
 			activity.end(BUSY_B, "outing");
+			clear(made);
+			GuestFavorTesting.unpin(me);
+		}
+	}
+
+	/**
+	 * November 12 review: a player spending time with one guest (an outing, a visit, a ceremony) does not also start a
+	 * rivalry with others, as outings already require (one at a time). Refused and not offered, holding nothing, until
+	 * that activity ends.
+	 */
+	@GameTest(maxTicks = 20)
+	public void aRivalryWaitsWhileThePlayerSpendsTimeWithAnotherGuest(GameTestHelper h) {
+		floor(h);
+		MinecraftServer server = h.getLevel().getServer();
+		ServerPlayer player = visitor(h, 3, 4);
+		UUID me = player.getUUID();
+		GuestLedgerTesting.reset(server, HOLD_A, HOLD_B, HOLD_C);
+		List<Townsfolk> made = new ArrayList<>();
+		GuestFavorTesting.pinDay(player, DAY);
+		GuestActivity activity = GuestActivity.get(server);
+		try {
+			Townsfolk a = place(h, HOLD_A, 1, 2, made);
+			Townsfolk b = place(h, HOLD_B, 5, 2, made);
+			Townsfolk c = place(h, HOLD_C, 3, 6, made);
+			GuestFeature feature = GuestPersonalityTesting.feature();
+
+			h.assertTrue(activity.begin(HOLD_C, new GuestActivity.Activity("outing", me, 0L, h.getLevel().dimension(), c.blockPosition())),
+					"Precondition: the player is on an outing with a third guest");
+			h.assertFalse(feature.available(player, a, HOLD_A, "rivalry"), "No rivalry is offered while the player spends time with another guest");
+			GuestResult refused = GuestPersonalityTesting.startRivalry(player, a, HOLD_A, "STARE", b);
+			h.assertFalse(refused.done(), "nor started: " + refused.message().getString());
+			h.assertTrue(activity.current(HOLD_A) == null && activity.current(HOLD_B) == null && "outing".equals(kind(activity, HOLD_C))
+					&& !GuestPersonalityTesting.running(player), "Nothing is held, and the outing is untouched");
+
+			h.assertTrue(activity.end(HOLD_C, "outing"), "The outing ends");
+			h.assertTrue(feature.available(player, a, HOLD_A, "rivalry"), "Free again: the option is offered");
+			h.assertTrue(GuestPersonalityTesting.startRivalry(player, a, HOLD_A, "STARE", b).done(), "and the rivalry starts");
+			h.succeed();
+		} finally {
+			GuestPersonalityTesting.stop(server, me);
+			activity.end(HOLD_C, "outing");
 			clear(made);
 			GuestFavorTesting.unpin(me);
 		}

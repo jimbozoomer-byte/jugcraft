@@ -61,7 +61,7 @@ final class GuestMilestoneFeature implements GuestFeature {
 			case MEAL -> GuestMilestoneMeals.share(player, npc, guest);
 			case CEREMONY -> GuestCeremonies.request(player, npc, guest);
 			case CEREMONY_CONFIRM -> GuestCeremonies.confirm(player, npc, guest);
-			case CEREMONY_CANCEL -> GuestCeremonies.cancel(player, guest);
+			case CEREMONY_CANCEL -> GuestCeremonies.cancel(player, npc, guest);
 			case NOTICES -> GuestNotices.toggle(player, npc, guest);
 			case SHARE -> GuestNotices.toggleShare(player, npc, guest);
 			default -> GuestResult.refused("message.jugcraft.guest.option.unknown", "That is not something you can do here.");

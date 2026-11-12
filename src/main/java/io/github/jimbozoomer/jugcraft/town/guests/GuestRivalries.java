@@ -121,10 +121,14 @@ public final class GuestRivalries {
 
 	// ---------------------------------------------------------------- the options
 
-	/** Whether the "rivalry" option is offered: a fictional guest, free, and the player has none running. Cheap, read only. */
+	/**
+	 * Whether the "rivalry" option is offered: a fictional guest, free, and the player has none running and holds no other
+	 * guest's activity. Cheap, read only.
+	 */
 	static boolean mayOffer(ServerPlayer player, String guest) {
-		return GuestPersonality.mayCompete(guest) && !RUNNING.containsKey(player.getUUID())
-				&& GuestActivity.get(player.level().getServer()).current(guest) == null;
+		MinecraftServer server = player.level().getServer();
+		return GuestPersonality.mayCompete(guest) && !RUNNING.containsKey(player.getUUID()) && !GuestOutings.busy(server, player.getUUID())
+				&& GuestActivity.get(server).current(guest) == null;
 	}
 
 	/** Whether the player's running rivalry involves this guest (the "rivalry_cancel" option). */
@@ -141,8 +145,9 @@ public final class GuestRivalries {
 	/**
 	 * Starts a rivalry; {@code kind} and {@code rival} chosen here when null (a test may name them; a named rival must
 	 * pass the same checks as one found). Refused, holding nothing, unless the player may act with the guest, the guest
-	 * may compete, the player has no rivalry running, neither guest is held by anything, and an eligible rival stands
-	 * within {@link #RIVAL_RANGE}.
+	 * may compete, the player has no rivalry running and holds no other guest's activity (an outing, a visit, a ceremony:
+	 * one at a time, as outings require), neither guest is held by anything, and an eligible rival stands within
+	 * {@link #RIVAL_RANGE}.
 	 */
 	static GuestResult start(ServerPlayer player, Townsfolk npc, String guest, @Nullable Kind kind, @Nullable Townsfolk rival) {
 		GuestResult away = GuestPersonality.check(player, npc, guest);
@@ -158,6 +163,9 @@ public final class GuestRivalries {
 			return GuestResult.refused("message.jugcraft.guest.rivalry.already", "You are already watching a rivalry.");
 		}
 		MinecraftServer server = player.level().getServer();
+		if (GuestOutings.busy(server, me)) {
+			return GuestResult.refused("message.jugcraft.guest.outing.player_busy", "You are already spending time with a guest. End that first.");
+		}
 		GuestActivity activity = GuestActivity.get(server);
 		if (activity.current(guest) != null) {
 			return GuestResult.refused("message.jugcraft.guest.rivalry.busy", "%s is busy right now.", name);
