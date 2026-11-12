@@ -184,6 +184,16 @@ public final class GuestMilestoneTesting {
 		GuestCeremonies.step(server, player);
 	}
 
+	/** Whether a meal would be shared for no affection as a married couple at full affection (the meal's one exception). */
+	public static boolean marriedAtFull(MinecraftServer server, UUID player, String guest) {
+		return GuestMilestoneMeals.marriedAtFull(server, player, guest);
+	}
+
+	/** Why a ceremony may not be held now (its eligibility, the venue aside), or null when it may. */
+	public static @Nullable GuestResult ceremonyRefusal(MinecraftServer server, UUID player, String guest) {
+		return GuestCeremonies.eligible(server, player, guest);
+	}
+
 	/** The ceremonies' restart recovery, as the server runs it when started and once a second. */
 	public static void recoverCeremonies(MinecraftServer server) {
 		GuestCeremonies.recover(server, GuestActivity.get(server).all());

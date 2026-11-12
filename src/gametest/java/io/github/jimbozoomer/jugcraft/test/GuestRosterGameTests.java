@@ -8,8 +8,11 @@ import io.github.jimbozoomer.jugcraft.town.CustomNpcs;
 import io.github.jimbozoomer.jugcraft.town.TownProtection;
 import io.github.jimbozoomer.jugcraft.town.Townsfolk;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestAppearances;
+import io.github.jimbozoomer.jugcraft.town.guests.GuestBalance;
+import io.github.jimbozoomer.jugcraft.town.guests.GuestKeepsakes;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestLedger;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestMenu;
+import io.github.jimbozoomer.jugcraft.town.guests.GuestMilestoneTesting;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestPlacementTesting;
 import io.github.jimbozoomer.jugcraft.town.guests.GuestRoster;
 import java.util.HashMap;
@@ -50,6 +53,9 @@ import org.jspecify.annotations.Nullable;
  * only the guests in {@link #MINE}; each picks a free one and places it within the same tick, so they never collide.
  */
 public class GuestRosterGameTests {
+	/** The guests held from marriage (owner rule, 11 November): eleven shown as minors or students, three of unstated age. */
+	private static final List<String> HELD = List.of("asa_mitaka", "tokai_teio", "agnes_tachyon", "gold_ship", "oguri_cap", "special_week",
+			"rei_ayanami", "asuka_langley", "rem", "megumin", "rin_ishtar", "power", "reze", "zero_two");
 	/**
 	 * The only guests these tests bind (the coordinator's split: workers A and B own others, and tests share one server).
 	 * Pending ids never bind and are used freely for refusals.
@@ -73,6 +79,42 @@ public class GuestRosterGameTests {
         h.assertTrue(!GuestPlacementTesting.clearLawn(level, feet), "Never occupy a street or doorstep");
         h.succeed();
     }
+
+	/**
+	 * The owner's rule of 11 November: the 14 guests shown as minors or school students in their source work, or whose age
+	 * is unstated, have companionship but never marriage. Exactly these are available without {@code mayMarry}; even at
+	 * full affection none can be married, none reaches a romance keepsake, a ceremony or the married couple's meal.
+	 */
+	@GameTest(maxTicks = 1)
+	public void theFourteenHeldGuestsNeverReachMarriageOrRomance(GameTestHelper helper) {
+		MinecraftServer server = helper.getLevel().getServer();
+		GuestLedger ledger = GuestLedger.get(server);
+		UUID fan = UUID.randomUUID();
+		helper.assertTrue(HELD.size() == 14 && Set.copyOf(HELD).size() == 14, "(the fourteen held ids)");
+		List<String> withoutMarriage = new java.util.ArrayList<>();
+		for (GuestRoster.Guest guest : GuestRoster.ALL) {
+			if (guest.available() && !guest.mayMarry()) {
+				withoutMarriage.add(guest.id());
+			}
+		}
+		helper.assertTrue(Set.copyOf(withoutMarriage).equals(Set.copyOf(HELD)), "Exactly the fourteen are held from marriage: " + withoutMarriage);
+		try {
+			for (String id : HELD) {
+				GuestRoster.Guest guest = GuestRoster.get(id);
+				helper.assertTrue(guest != null && guest.available() && !guest.mayMarry(), id + " has companionship and no marriage");
+				ledger.addAffection(fan, id, GuestBalance.MAX_AFFECTION);
+				helper.assertTrue(ledger.affection(fan, id) == GuestBalance.MAX_AFFECTION && ledger.canMarry(fan, id) == GuestLedger.Refusal.NO_MARRIAGE
+						&& !ledger.marry(fan, id) && ledger.spouseOf(id) == null, id + " cannot be married, even at full affection");
+				helper.assertTrue(!GuestKeepsakes.romance(server, fan, id) && !GuestMilestoneTesting.marriedAtFull(server, fan, id)
+						&& GuestMilestoneTesting.ceremonyRefusal(server, fan, id) != null, id + " reaches no romance, ceremony or married meal");
+			}
+		} finally {
+			for (String id : HELD) {
+				ledger.addAffection(fan, id, -GuestBalance.MAX_AFFECTION);
+			}
+		}
+		helper.succeed();
+	}
 
 	/** Saved ids are unique and well formed; pending guests can be neither placed nor married. */
 	@GameTest(maxTicks = 1)
