@@ -87,3 +87,48 @@ Logs include `build/oct29-resource-recheck.log`, `build/oct29-client-fixes-tests
 `build/oct29-model-reference-audit.json`. JEI page numbers are not stable
 identifiers; use the named item families and gallery as the regression scope.
 This is focused local validation, not a full release suite or live-server test.
+
+## November 12 re-derivation
+
+Owner report checked again against main `8075c6d58b` by Claude Opus 5.5 (worker C, November 12 batch). The report
+in docs/TODO.md was made against 20261029.1; main from `46bac6b349` through the October 29 integration `f82f88c5ac`
+still had the October 26 sign in `Aircraft.bank` (`+turn`). The October 29 fix above (`-turn`, committed in `a4febfea58`) is correct; no second reversal is
+applied.
+
+Conventions, from the code and the supplied files: the right key sends turn -1 (`AircraftClient`); the server raises
+the yaw (`setYRot(getYRot() - t*...)`), a right turn by Minecraft's convention (yaw 0 faces +Z, 90 faces -X). The
+renderer turns the model by Ry(-yaw) Rx(pitch) Rz(bank), post-multiplied, so the bank is about the model's own nose.
+The supplied meshes face +Z (biplane propeller at z +32 px, rudder at -41.5; pilot seats ahead of passengers; front
+mounts ahead of single pilots) and the owner's parts named left are at +X (bamboo hopper rudders and propellers, cargo
+airship propellers, 98 of 106 warship side-named groups; the eight exceptions are chest panels named from each
+chest's front). Rz(+bank) therefore lowers the -X (starboard) wing.
+
+| Variant | Roll source | Transform | Right turn (right key) | Verdict |
+| --- | --- | --- | --- | --- |
+| Biplane | `bank = -turn*power*18` | Ry(-yaw) Rx(pitch) Rz(bank) | +18°: right tip down about 1.16 blocks, left up 1.09 | Correct since a4febfea58 |
+| Bamboo Hopper | `-turn*power*18` | same | +18°: right tip down 2.01, left up 1.86 | Correct |
+| Airship | `-turn*power*5`; stick `-turn*20` | same | +5°: right side down 0.08, left up 0.06 | Correct |
+| Cargo Airship | `-turn*power*5`; stick | same | +5°: down 0.14 / up 0.12 | Correct |
+| Gyrodyne | `-turn*power*5`; stick `-turn*25` | same | +5°: down 0.22 / up 0.22 | Correct |
+| Quadrocopter | `-turn*power*5` | same | +5°: down 0.14 / up 0.14 | Correct |
+| Warship | body `-turn*power*2` plus envelope `balloon_roll = -turn*2` | envelope Rz(180+roll) Ry(0) Rx(180+pitch): its extra roll is outermost, about the body's nose | +2° body +2° envelope: envelope right side down 0.26, left up 0.24 | Correct |
+| Weapon models | `roll` node: `-variable.roll` = -bank | inside the banked body, after the weapon's yaw/pitch | counter-rolls the mounted weapon about its barrel | Not a body bank; unchanged |
+
+Views: first person, F5 behind and F5 in front use vanilla's camera (yaw and pitch only, no roll); `AircraftCameraMixin`
+only lengthens the F5 distance and the owner third-person orbit is off while riding. On screen the wingtip on the side
+the nose swings toward drops in all three. Rudders and control sticks swing toward the turn. The Zeppelin, raider blimp,
+hot-air balloon, broomstick and drones apply no turn-driven roll.
+
+The roll-to-pose arithmetic (bank, body turn, part turns, expression variables) is now shared, unchanged, through
+`aircraft/AircraftAttitude`, so tests exercise the renderer's own arithmetic:
+
+- `AircraftBankingGameTests` (server): flies each aircraft from five headings with the real steering and flight code,
+  checks the yaw direction, the shared bank formula and the inside/outside wingtips through every view; checks the
+  supplied seats, front mounts and side names; the warship envelope's added roll; rudder and stick deflection.
+  Written, not run (no Minecraft build here).
+- `AircraftFlightClientGameTests` also checks the shared quaternion equals the three PoseStack turns it replaced.
+  Written, not run.
+- `scripts/tests/test_aircraft_banking.py`: mirrors the same arithmetic over the real meshes with a source contract;
+  a negative control confirms the October 26 signs fail on every craft. Ran: six tests passed.
+
+Owner in-game confirmation on a build at or after `a4febfea58` remains the acceptance step.

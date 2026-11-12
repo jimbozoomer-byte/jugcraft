@@ -40,6 +40,7 @@
       "io.github.jimbozoomer.jugcraft.test.JimtafactsComputerGameTests",
       "io.github.jimbozoomer.jugcraft.test.ArtisanFurnitureGameTests",
       "io.github.jimbozoomer.jugcraft.test.OwnerFurnitureAircraftGameTests",
+      "io.github.jimbozoomer.jugcraft.test.AircraftBankingGameTests",
       "io.github.jimbozoomer.jugcraft.test.DeathGraveGameTests",
       "io.github.jimbozoomer.jugcraft.test.RecipeConflictGameTests",
       "io.github.jimbozoomer.jugcraft.test.FoodRecipeConflictGameTests",
