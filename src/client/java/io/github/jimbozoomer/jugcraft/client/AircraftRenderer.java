@@ -2,7 +2,6 @@ package io.github.jimbozoomer.jugcraft.client;
 
 import com.google.gson.*;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.aircraft.*;
 import java.io.*;
@@ -19,9 +18,18 @@ import net.minecraft.world.phys.AABB;
 public final class AircraftRenderer extends EntityRenderer<Aircraft,AircraftRenderer.State> {
     private record Node(String name,float[] offset,float[] rotation,JsonObject animation,QuadModel plain,QuadModel tinted,List<Node> children) {}
     private static final Map<String,List<Node>> MODELS=new HashMap<>();
-    public static final class State extends EntityRenderState {
+    public static final class State extends EntityRenderState implements AircraftAttitude.Controls {
         AircraftSpec spec;float yaw,pitch,spin,bank;int paint,weapons;float forward,turn,vertical;
         float aimYaw,aimPitch,recoil;net.minecraft.world.item.ItemStack banner=net.minecraft.world.item.ItemStack.EMPTY;
+        @Override public float engineRotation(){return spin;}
+        @Override public float steering(){return turn;}
+        @Override public float climb(){return vertical;}
+        @Override public float throttle(){return forward;}
+        @Override public float bodyPitch(){return pitch;}
+        @Override public float bodyBank(){return bank;}
+        @Override public float aimYaw(){return aimYaw;}
+        @Override public float aimPitch(){return aimPitch;}
+        @Override public float recoil(){return recoil;}
     }
     public AircraftRenderer(EntityRendererProvider.Context context){super(context);shadowRadius=1.5F;}
     public static void clear(){MODELS.clear();}
@@ -47,34 +55,14 @@ public final class AircraftRenderer extends EntityRenderer<Aircraft,AircraftRend
         s.forward=a.animatedControl(0,delta);s.turn=a.animatedControl(1,delta);s.vertical=a.animatedControl(2,delta);s.bank=a.bank(delta);
         s.aimYaw=a.aimYaw();s.aimPitch=a.aimPitch();s.recoil=a.recoil();s.banner=a.banner().copy();
     }
-    /** Only the arithmetic forms present in these owner files; never execute model-provided code. */
-    private static float expression(String raw,State s){
-        String e=raw.replace("variable.","").replaceAll("\\s+","");if(e.isEmpty())return 0;
-        int sign=1;if(e.startsWith("-")){sign=-1;e=e.substring(1);}
-        String[] parts=e.split("\\*");float base=switch(parts[0]){
-            case "engine_rotation"->s.spin;
-            case "pressing_interpolated_x"->s.turn;
-            case "pressing_interpolated_y"->s.vertical;
-            case "pressing_interpolated_z"->s.forward;
-            case "balloon_pitch"->s.pitch*.2F;
-            case "balloon_roll"->-s.turn*2;
-            case "turret_cooldown"->1-s.recoil;
-            case "(1-turret_cooldown)"->s.recoil;
-            case "pitch","turret_pitch"->s.aimPitch;
-            case "yaw","turret_yaw"->-s.aimYaw;
-            case "roll"->s.bank;
-            case "chest"->0;
-            default->{try{yield Float.parseFloat(parts[0]);}catch(NumberFormatException ex){yield 0;}}
-        };
-        if(parts.length>1)base*=Float.parseFloat(parts[1]);return sign*base;
-    }
+    /** The owner files' expressions (arithmetic only, never model-provided code) are read by the shared AircraftAttitude. */
     private static float[] animated(Node n,String key,State s){
-        var a=n.animation().getAsJsonObject(key);float[] out={0,0,0};if(a!=null)for(int i=0;i<3;i++){String k=List.of("x","y","z").get(i);if(a.has(k))out[i]=expression(a.get(k).getAsString(),s);}return out;
+        var a=n.animation().getAsJsonObject(key);float[] out={0,0,0};if(a!=null)for(int i=0;i<3;i++){String k=List.of("x","y","z").get(i);if(a.has(k))out[i]=AircraftAttitude.expression(a.get(k).getAsString(),s);}return out;
     }
     private static void draw(List<Node> nodes,State s,PoseStack pose,SubmitNodeCollector collector){
         for(var n:nodes){pose.pushPose();var p=animated(n,"position",s);var r=animated(n,"rotation",s);
             pose.translate((n.offset()[0]+p[0])/16,(n.offset()[1]+p[1])/16,(n.offset()[2]+p[2])/16);
-            pose.rotateDegrees(Axis.ZP,n.rotation()[2]+r[2]);pose.rotateDegrees(Axis.YP,n.rotation()[1]+r[1]);pose.rotateDegrees(Axis.XP,n.rotation()[0]+r[0]);
+            pose.rotate(AircraftAttitude.part(n.rotation(),r));
             if(n.name().startsWith("banner_")){
                 if(s.banner.getItem() instanceof net.minecraft.world.item.BannerItem banner){
                     n.plain().submitBanner(pose,collector,s.lightCoords,net.minecraft.client.renderer.Sheets.BANNER_PATTERN_BASE,0xFF000000|banner.getColor().getTextureDiffuseColor(),0);
@@ -88,9 +76,9 @@ public final class AircraftRenderer extends EntityRenderer<Aircraft,AircraftRend
             draw(n.children(),s,pose,collector);pose.popPose();
         }
     }
-    /** Shared with the client regression: source forward is +Z and port wing is +X. */
+    /** Shared with the client and server regressions: source forward is +Z and port wing is +X (AircraftAttitude). */
     public static void applyBodyOrientation(PoseStack pose,float yaw,float pitch,float bank){
-        pose.rotateDegrees(Axis.YP,-yaw);pose.rotateDegrees(Axis.XP,pitch);pose.rotateDegrees(Axis.ZP,bank);
+        pose.rotate(AircraftAttitude.body(yaw,pitch,bank));
     }
     @Override public void submit(State s,PoseStack pose,SubmitNodeCollector collector,CameraRenderState camera){
         load();pose.pushPose();pose.translate(0,s.spec.groundOffset(),0);applyBodyOrientation(pose,s.yaw,s.pitch,s.bank);
