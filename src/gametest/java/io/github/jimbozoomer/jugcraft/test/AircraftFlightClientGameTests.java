@@ -19,6 +19,13 @@ public final class AircraftFlightClientGameTests implements FabricClientGameTest
             var starboard=pose.last().pose().transformPosition(new org.joml.Vector3f(-2,0,0));
             if(left ? port.y>=starboard.y : starboard.y>=port.y)
                 throw new AssertionError("Rendered wing tilts away from turn: "+a.spec().name()+" yaw="+yaw);
+            // The renderer now applies the shared AircraftAttitude quaternion; it must equal the
+            // three PoseStack turns it replaced (the server test AircraftBankingGameTests checks the quaternion).
+            var replaced=new com.mojang.blaze3d.vertex.PoseStack();
+            replaced.rotateDegrees(com.mojang.math.Axis.YP,-yaw);replaced.rotateDegrees(com.mojang.math.Axis.XP,10);replaced.rotateDegrees(com.mojang.math.Axis.ZP,a.bank(1));
+            for(var probe:new org.joml.Vector3f[]{new org.joml.Vector3f(2,0,0),new org.joml.Vector3f(0,2,0),new org.joml.Vector3f(0,0,2)})
+                if(pose.last().pose().transformPosition(new org.joml.Vector3f(probe)).distance(replaced.last().pose().transformPosition(new org.joml.Vector3f(probe)))>1e-4F)
+                    throw new AssertionError("Shared attitude differs from the PoseStack turns: "+a.spec().name()+" yaw="+yaw);
         }
     }
     @Override public void runTest(ClientGameTestContext c){
