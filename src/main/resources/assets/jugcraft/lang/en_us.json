@@ -33700,5 +33700,7 @@
   "message.jugcraft.guest.outfit.name.normal": "normal",
   "message.jugcraft.guest.outfit.name.winter": "winter",
   "message.jugcraft.guest.outfit.name.harvest": "autumn harvest",
-  "message.jugcraft.guest.outfit.name.spring": "spring"
+  "message.jugcraft.guest.outfit.name.spring": "spring",
+  "message.jugcraft.guest.meal.shared_full": "You share a simple meal of %s with %s. You are already as close as can be, so it adds no affection.",
+  "message.jugcraft.guest.ceremony.cancel_player": "Only a player can cancel their ceremony."
 }

@@ -128,7 +128,7 @@ Owner requested completing the remaining appearances. Codex implemented 32 indiv
 
 Saved guests using an old development stand-in migrate to their named skin on the normal service tick. Other operator-selected skins are preserved. Added `/guests city preview` and `/guests city place`: creative operators may populate only clear, loaded town lawns, with a three-by-three empty grass margin, separation from residents/entities and all existing claim/owner-object checks. Never writes terrain, never loads chunks, never duplicates or relocates a canonical identity. No live-world placements were made.
 
-Resolved the previously documented unapproved eligibility split locally: all identified guests use the same nonsexual game relationship rules. The four unidentified entries remain held. No changes to exclusivity, diamond cost, affection caps or seven-day divorce cooldown.
+Owner rule, 11 November 2026: proposal, marriage and the church ceremony are only for unambiguous adults. Fourteen guests are companionship-only (the eleven their source works depict as minors or school students, plus Power, Reze and Zero Two, whose ages are not stated); every guest uses the same nonsexual companionship mechanics. The four unidentified entries remain held. No changes to exclusivity, diamond cost, affection caps or seven-day divorce cooldown.
 
 Validation is running; results will be recorded below. No commits, pushes, releases, updater promotion or server operations.
 

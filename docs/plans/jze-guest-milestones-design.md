@@ -42,7 +42,7 @@ Per player and guest, each fires once, is recorded in the saved data, and is rew
 | --- | --- | --- |
 | `first_gift` | `GuestEvents.GIFT_GIVEN` | thank-you letter (friendship) |
 | `first_quest` | `GuestEvents.QUEST_TURNED_IN` | errand letter (friendship) |
-| `first_outing` | an `outing` activity in `GuestActivity` ends (polled once a second; worker C's classes are never called) | "Outing Sketch" paper note (friendship) |
+| `first_outing` | `GuestEvents.ACTIVITY_ENDED` for an `outing` activity ended as completed (a rewarded finish), fired synchronously by the outing's own ending | "Outing Sketch" paper note (friendship) |
 | `affection_250` | affection reaches 250 | pressed flower (friendship) |
 | `affection_500` | 500 | letter (friendship) |
 | `affection_750` | 750 | dyed leather keepsake cap (friendship) |
@@ -58,7 +58,7 @@ Per player and guest, each fires once, is recorded in the saved data, and is rew
 - **Letters**: a written book (title at most 32 characters). Fictional guests sign their own letters with generic,
   original, friendly text; for real-person guests the letter comes from "The Town Post" and only notes game-world
   events (no signature, quote or claim attributed to the person).
-- **Keepsakes**: a pressed flower (poppy, cornflower, blue orchid, allium, azure bluet or oxeye daisy, by a fixed hash),
+- **Keepsakes**: a pressed flower (poppy, cornflower, blue orchid, dandelion or pink tulip, by a fixed hash),
   a dyed leather cap, a paper sketch-map note, and the ceremony's lily-of-the-valley bouquet. Each has a custom name,
   lore and a `jugcraft_keepsake` custom-data marker, so it is never a plain stack: guests do not take it as a gift
   (favors accept plain stacks only) and the town shops buy none of these items. Delivery uses
@@ -72,12 +72,18 @@ Per player and guest, each fires once, is recorded in the saved data, and is rew
 ## Shared meal
 
 `GuestFeature` option `milestones/meal`. The player holds a plain modest food in the main hand (bread, baked potato,
-cooked cod, salmon, chicken, porkchop, mutton, rabbit or beef, pumpkin pie, cookie or apple; no bowl foods, nothing
+cooked cod, salmon, chicken, porkchop, mutton or beef, pumpkin pie, cookie or apple; no bowl foods, nothing
 golden). Once per player and guest per game day (the day `GuestFavors` uses, never earlier than the last meal's day,
 so a clock moved backwards gives no second meal). As `GuestRewards` requires, the meal is offered only while a gain is
 possible (`GuestRewards.left > 0` and `GuestLedger.canGainAffection`), so no food is taken for nothing. Exactly one item
 leaves the hand stack, the day is recorded, then `GuestRewards.grant(player, guest, 8)` adds at most 8 within the shared
 budget. The text is friendly for every guest.
+
+One stated exception (owner decision, 12 November): a couple the ledger already has married (`mayMarry()` and the
+spouse both ways), at full affection, may still share their one meal a day. Exactly one food is taken, the day is
+recorded, no affection is added and the shared budget is untouched; the message says plainly that no affection is
+gained. An unmarried guest at full affection, a held guest (never married by the ledger) and any guest while the player
+is married to someone else are still refused before anything is taken.
 
 ## Church ceremony (optional, cosmetic, adults only)
 
@@ -121,8 +127,8 @@ Two per-player settings in the saved data, both off by default:
 
 Gossip comes about every 10 minutes per receiving player, about a placed, available guest, from generic templates:
 real-person guests only get lines about town mechanics (errands, visitors, gifts); fictional guests may also get light
-original town-flavoured lines. Rivalry notices follow a new `rivalry` activity (at most once per guest per 5 minutes)
-and name only the guest. A milestone or ceremony announcement names a player only when that player has `share` on, and
+original town-flavoured lines. Rivalry notices follow `GuestEvents.ACTIVITY_BEGAN` for a `rivalry` activity, fired by
+its own start (at most once per guest per 5 minutes), and name only the guest. A milestone or ceremony announcement names a player only when that player has `share` on, and
 goes only to players with `notices` on. No relationship is ever broadcast to everyone.
 
 ## Numbers (first choices for owner review)
@@ -158,6 +164,7 @@ friendship letters for held guests; entry-point checks.
 - Held guests (14 entries, see above) get friendship milestones only, by the owner's rule; this is intended, not a gap.
 - A marriage to a now-held guest that already exists in a saved ledger stays in the ledger untouched; this feature
   treats it as friendship (no ceremony, no anniversaries).
-- An outing that starts and ends within one second is not observed as an outing.
+- (Resolved 12 November: outings and rivalries are seen through `ACTIVITY_BEGAN`/`ACTIVITY_ENDED`, fired at the source,
+  so one that starts and ends within one second is no longer missed.)
 - The ceremony walk uses the guest's ordinary goals; a guest that cannot path into the church times out cleanly. Its
   goals may open and close an ordinary wooden door as every resident does; this feature sets no block.
