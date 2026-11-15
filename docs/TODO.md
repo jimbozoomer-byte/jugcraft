@@ -1,5 +1,12 @@
 # Jugcraft TODO
 
+## November 15 — current server world climate
+
+- [x] Implement opt-in persistent climate wrapper and preserve procedural valley state.
+- [x] Prepare narrow metadata migration around the existing town origin, preserving existing chunks.
+- [x] Focused candidate validation passed: 5 server checks, 7,928,159 pure assertions, existing-save migration client test and 23 Python checks.
+- [ ] Finish reviewed release; obtain restart approval, warn players for 30 seconds, activate on the current world and verify future generation. [Record](features/existing-world-climate.md).
+
 ## November 3 — raider crews, companion stable, placed-food remodels, Thanksgiving decor (local, Claude Code)
 
 Owner request, 3 November 2026. Local working branches only: nothing is committed, pushed, released or deployed. Codex reviews, integrates and tests. [Ledger](features/holiday-batch-nov3.md).

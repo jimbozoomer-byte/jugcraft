@@ -320,3 +320,12 @@ tasks.register('verifyEmbeddedLibraries') {
 }
 tasks.named('compileJava') { dependsOn 'verifyEmbeddedLibraries' }
 tasks.named('processResources') { dependsOn 'verifyEmbeddedLibraries' }
+
+// Existing-world climate validation and deterministic multi-noise lookup access.
+loom { accessWidenerPath = file('src/main/resources/jugcraft.accesswidener') }
+tasks.register('climateBandsTest', JavaExec) {
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'io.github.jimbozoomer.jugcraft.world.climate.ClimateBandsTests'
+}
+tasks.named('check') { dependsOn tasks.named('climateBandsTest') }

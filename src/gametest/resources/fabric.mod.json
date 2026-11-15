@@ -13,6 +13,7 @@
       "io.github.jimbozoomer.jugcraft.test.StorageCrateMultiplayerHarness"
     ],
     "fabric-gametest": [
+      "io.github.jimbozoomer.jugcraft.test.ClimateCoreGameTests",
       "io.github.jimbozoomer.jugcraft.test.FestivalRegressionGameTests",
       "io.github.jimbozoomer.jugcraft.building.TwigworksWorldGameTests",
       "io.github.jimbozoomer.jugcraft.test.EquipmentAccessGameTests",
@@ -429,6 +430,7 @@
       "io.github.jimbozoomer.jugcraft.test.JeiStationClientGameTests$WithJei$Probe"
     ],
     "fabric-client-gametest": [
+      "io.github.jimbozoomer.jugcraft.world.ClimateMigrationClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.EquipmentAccessClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.CraftingChoicesClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.ImportedModelAtlasClientTests",
