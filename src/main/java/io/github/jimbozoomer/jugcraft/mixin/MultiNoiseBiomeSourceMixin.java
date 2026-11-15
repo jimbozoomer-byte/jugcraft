@@ -5,6 +5,8 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.llamalad7.mixinextras.sugar.Local;
 import io.github.jimbozoomer.jugcraft.biome.JugcraftRegions;
 import io.github.jimbozoomer.jugcraft.world.AdamOndiAhman;
+import io.github.jimbozoomer.jugcraft.world.climate.StableBiomeLookup;
+import org.spongepowered.asm.mixin.Shadow;
 import net.minecraft.core.Holder;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeResolver;
@@ -25,7 +27,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * the answer is then the valley's ({@link AdamOndiAhman#override}).
  */
 @Mixin(MultiNoiseBiomeSource.class)
-public abstract class MultiNoiseBiomeSourceMixin {
+public abstract class MultiNoiseBiomeSourceMixin implements StableBiomeLookup.Source {
+    @Unique private boolean jugcraft$stableClimateLookup;
+    @Shadow private Climate.ParameterList<Holder<Biome>> parameters() { throw new AssertionError(); }
+
+    @Override public void jugcraft$stabilizeClimateLookup() { jugcraft$stableClimateLookup = true; }
+
 	@Unique
 	private JugcraftRegions.Source jugcraft$regionState = new JugcraftRegions.Source();
 
@@ -46,8 +53,8 @@ public abstract class MultiNoiseBiomeSourceMixin {
 			remap = false)
 	private Holder<Biome> jugcraft$regions(MultiNoiseBiomeSource source, Climate.TargetPoint target, Operation<Holder<Biome>> original,
 			@Local(argsOnly = true, ordinal = 0) int x, @Local(argsOnly = true, ordinal = 2) int z) {
-		Holder<Biome> biome = jugcraft$regionState.biome(source, x, z, target);
-		return AdamOndiAhman.override(source, x, z, target, biome != null ? biome : original.call(source, target));
+		Holder<Biome> biome = jugcraft$regionState.biome(source, x, z, target, jugcraft$stableClimateLookup);
+		return AdamOndiAhman.override(source, x, z, target, biome != null ? biome : jugcraft$stableClimateLookup ? StableBiomeLookup.find(parameters(), target) : original.call(source, target));
 	}
 
 	@WrapOperation(method = "/^lambda\\$createResolverForChunk\\$.*/", at = @At(value = "INVOKE",
@@ -55,7 +62,7 @@ public abstract class MultiNoiseBiomeSourceMixin {
 			remap = false)
 	private Holder<Biome> jugcraft$regionsForChunk(MultiNoiseBiomeSource source, Climate.TargetPoint target,
 			Operation<Holder<Biome>> original, @Local(argsOnly = true, ordinal = 3) int x, @Local(argsOnly = true, ordinal = 5) int z) {
-		Holder<Biome> biome = jugcraft$regionState.biome(source, x, z, target);
-		return AdamOndiAhman.override(source, x, z, target, biome != null ? biome : original.call(source, target));
+		Holder<Biome> biome = jugcraft$regionState.biome(source, x, z, target, jugcraft$stableClimateLookup);
+		return AdamOndiAhman.override(source, x, z, target, biome != null ? biome : jugcraft$stableClimateLookup ? StableBiomeLookup.find(parameters(), target) : original.call(source, target));
 	}
 }

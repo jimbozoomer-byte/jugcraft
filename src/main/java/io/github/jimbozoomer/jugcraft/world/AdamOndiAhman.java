@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.biome.JugcraftRegions;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
+import io.github.jimbozoomer.jugcraft.world.climate.ClimateBiomeSource;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -145,7 +146,7 @@ public final class AdamOndiAhman {
 		World(ServerLevel level, int spacing, int share) {
 			this.print = fingerprint(level.getSeed());
 			this.generator = level.getChunkSource().getGenerator();
-			this.source = generator.getBiomeSource();
+			this.source = proceduralSource(generator.getBiomeSource());
 			this.random = level.getChunkSource().randomState();
 			this.heights = level;
 			this.spacing = spacing;
@@ -203,9 +204,16 @@ public final class AdamOndiAhman {
 		return JugcraftConfig.isFeatureEnabled(FEATURE);
 	}
 
+	/** Climate migration keeps the original procedural source and its saved valley state.
+	 * The multi-noise mixin calls us with this inner source, not the climate wrapper.
+	 * Designed worlds remain excluded: their painted biome ownership is unchanged. */
+	private static BiomeSource proceduralSource(BiomeSource source) {
+		return source instanceof ClimateBiomeSource climate ? climate.base() : source;
+	}
+
 	/** Takes up the Overworld as it loads, before any chunk of it generates: its noise, and its start valley if it has one. */
 	static void load(ServerLevel level) {
-		if (!enabled() || !(level.getChunkSource().getGenerator().getBiomeSource() instanceof MultiNoiseBiomeSource)) {
+		if (!enabled() || !(proceduralSource(level.getChunkSource().getGenerator().getBiomeSource()) instanceof MultiNoiseBiomeSource)) {
 			world = null;
 			return;
 		}

@@ -1,0 +1,4 @@
+accessWidener v2 official
+
+# Climate-only deterministic tie handling needs the existing spatial-tree cache.
+accessible class net/minecraft/world/level/biome/Climate$RTree

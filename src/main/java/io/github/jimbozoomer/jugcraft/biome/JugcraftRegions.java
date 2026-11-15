@@ -363,6 +363,11 @@ public final class JugcraftRegions {
 		 * of this source; null to let vanilla answer.
 		 */
 		public Holder<Biome> biome(BiomeSource source, int x, int z, Climate.TargetPoint target) {
+            return biome(source, x, z, target, false);
+        }
+
+        /** Stable ties are opt-in for climate-enabled sources only; ordinary worlds retain vanilla lookup behaviour. */
+        public Holder<Biome> biome(BiomeSource source, int x, int z, Climate.TargetPoint target, boolean stableTies) {
 			if (!enabled()) {
 				return null;
 			}
@@ -376,7 +381,11 @@ public final class JugcraftRegions {
 				checked = true;
 			}
 			List<Climate.ParameterList<Holder<Biome>>> lists = regional;
-			return lists == null ? null : landscape.pick(lists.get(layout).findValue(target),seedPrint,x,z,target);
+			if (lists == null) return null;
+            Holder<Biome> chosen = stableTies
+                    ? io.github.jimbozoomer.jugcraft.world.climate.StableBiomeLookup.find(lists.get(layout), target)
+                    : lists.get(layout).findValue(target);
+            return landscape.pick(chosen,seedPrint,x,z,target);
 		}
 	}
 }

@@ -6,6 +6,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 ## Unreleased
 
+### Existing-world spawn-relative climate
+- Existing worlds can opt into persistent north/south climate bands for newly generated terrain, without deleting or repainting old chunks.
+- Preserve the original seed, terrain generator, cave biomes, Nether/End and saved valley state; add an operator climate status command and an offline migration preparation tool.
+- [Migration and validation record](docs/features/existing-world-climate.md). Live activation requires an approved maintenance restart.
+
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
 ### Unmerged: Harvest Festival Grounds, part 4 (Harvest Bunting and the Sack-Race Sack)
