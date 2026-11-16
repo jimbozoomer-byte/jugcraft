@@ -152,7 +152,8 @@ DOSSIERS = {
                    "rite_class": "ExhumationRite", "off_season": None,
                    "tokens": ["exhumation_writ"], "rite": ["exhumation_writ", "stone_brick_sarcophagus"], "trades": [],
                    "after_win": ["exhumation_writ_from_grave_dust"], "made_from": [],
-                   "loot": ["grave_dust", "soulreaver", "gravewarden", "emptied_phylactery", "lichs_crown"]},
+                   "loot": ["grave_dust", "soulreaver", "gravewarden", "emptied_phylactery", "lichs_crown",
+                            "wight_king_helmet", "wight_king_chestplate", "wight_king_leggings", "wight_king_boots", "wight_king_zweihander"]},
     "iron_dreadnought": {"lair": "foundry_trench", "advancement": "grounded", "trophies": ["dynamo_halberd", "piston_hammer"],
                          "rite_class": "OrdersRite", "off_season": None,
                          "tokens": ["sealed_orders"], "rite": ["sealed_orders", "field_telephone"],
@@ -168,7 +169,8 @@ DOSSIERS = {
                           "rite_class": "AltarKeystoneRite", "off_season": None,
                           "tokens": ["altar_keystone"], "rite": ["altar_keystone", "altar_keystone_from_dreamglass"], "trades": [],
                           "after_win": ["altar_keystone_from_cydonian_shards"], "made_from": [],
-                          "loot": ["cydonian_shard", "corelance", "redstar_cleaver", "lowfall_core", "sentinels_visor"]},
+                          "loot": ["cydonian_shard", "corelance", "redstar_cleaver", "lowfall_core", "sentinels_visor",
+                                   "sentinel_helmet", "sentinel_chestplate", "sentinel_leggings", "sentinel_boots", "sentinel_longsword", "sentinel_shield"]},
     "pumpkin_king": {"lair": "crowfield", "advancement": "uncrowned", "trophies": ["hallowreap", "crowbill"],
                      "rite_class": "HarvestCrownRite", "off_season": f"message.{MOD}.lair.crown.off_season",
                      "tokens": ["harvest_crown"], "rite": ["harvest_crown", "scarecrow"], "trades": [("seasonal", "minecraft:hay_block")],
@@ -181,6 +183,18 @@ DOSSIERS = {
                          "after_win": ["hessians_bridle_from_lantern"], "made_from": [],
                          "loot": ["horseman_lantern", "hollowflail", "hessian_sabre", "hessians_spur", "hessians_tricorn"]},
 }
+
+DOSSIERS.update({
+    "storm_roc": {"lair": "crown_of_thunder", "advancement": "eye_of_the_storm", "trophies": ["stormcaller", "galefeather"],
+                  "rite_class": "ThunderVaneRite", "off_season": None, "tokens": ["thunder_vane"],
+                  "rite": ["thunder_vane"], "trades": [], "after_win": ["thunder_vane_from_roc_feathers"], "made_from": [],
+                  "loot": ["roc_feather", "stormcaller", "galefeather", "weather_vane_lens", "rocs_crest"]},
+    "glass_abbot": {"lair": "glass_chapel", "advancement": "seen_clearly", "trophies": ["glass_reliquary"],
+                    "first_win_item": "glass_reliquary", "rite_class": "GlassAccordRite", "off_season": None,
+                    "tokens": ["glass_accord"], "rite": ["glass_accord"], "trades": [],
+                    "after_win": ["glass_accord_from_prism_shards"], "made_from": ["lantern_lens", "mirror_inscription", "abbey_glass"],
+                    "loot": ["prism_shard", "glass_reliquary", "abbots_cowl"]},
+})
 
 # What each Jugcraft key does, for the Keys page (key.jugcraft.<name>; every key the client registers).
 KEY_HELP = {
@@ -337,6 +351,16 @@ INSPECT = {
 }
 
 DOSSIER = {
+    "crown_of_thunder.rite": "In the Overworld, use a Thunder Vane under the open sky in mountain or hill country at Y120 or higher while rain or thunder falls. The vane is consumed when Grey Mist opens; enter it to reach the summit.",
+    "crown_of_thunder.lore": "Travellers tell of a vast winged shadow above the mountain storms, and four rods that can drag lightning out of the sky.",
+    "crown_of_thunder.prepare": "Watch which Storm Rod charges. Put it between yourself and the diving bird so his marked lane crosses it; when the lightning grounds him, close in before he takes flight. Keep away from the summit's edges and deal with the fledglings.",
+    "crown_of_thunder.credit": "Hurt the keeper or his fledglings, or help at the rod that grounds him. You must be alive within 64 blocks of the summit when he falls to receive your share; this encounter does not credit healing or wards, or retain rewards for absent players.",
+    "crown_of_thunder.leave": "Grey Mist in the stone arch on the terrace's south edge takes you home at any time. When the keeper falls, another exit opens at the foot of his nest's crag.",
+    "glass_chapel.rite": "In clear Overworld daylight, hold up a Glass Accord while sunlight reaches your head through clear or stained glass within 16 blocks overhead. Tinted glass does not work. The accord is consumed when Grey Mist opens into the chapel.",
+    "glass_chapel.lore": "An abandoned chapel keeps a congregation of reflections. Its guardian wears the windows as a mantle; light sent home through the mirrors can break it.",
+    "glass_chapel.prepare": "Turn the marked mirrors to return the gathered beam to its source, then strike while the mantle is broken. Use the pillars against shard fans. During the veil, distinguish the real figure from its images; a Lantern Lens helps on return visits.",
+    "glass_chapel.credit": "A share goes to those who strike the keeper or his images, restore %s health lost to his side, ward %s damage for a friend, or turn a mirror that sends his beam home, within %s blocks. Qualified fallen or disconnected players keep their rewards for their return.",
+    "glass_chapel.leave": "Grey Mist in the south doorway behind the arrival takes you home at any time. When the keeper falls, another exit opens behind the lectern.",
     "hollow_acre.rite": "The Last Rites, at night in the Overworld: lay a Mourning Wreath on a grave (any headstone) or "
                         "within %s blocks of it, light %s or more candles within %s blocks of the grave, and ring the "
                         "Death Knell within %s blocks of it",

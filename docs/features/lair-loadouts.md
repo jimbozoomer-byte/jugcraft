@@ -31,6 +31,8 @@ The keeper's health and armour, its rule, and what it takes of a blow with the r
 | The Cydonian Sentinel | 480 | 12 | strike its open core | ×2 / ×1, no armour open |
 | The Pumpkin King | 400 | 6 | pick his harvest clean to leave him bereft | ×1.5 / ×1 |
 | The Headless Horseman | 420 | 8 | relight the braziers he snuffs | ×1.5 / ×0.5 |
+| The Storm Roc | 400 | 8 | lead his dive through the charged storm rod | ×1.5 / ×1 |
+| The Glass Abbot | 340 | 6 | reflect his beam to crack his mantle | ×1.25 / ×0.25 |
 
 ## The times
 
@@ -50,6 +52,8 @@ Seconds of hitting, alone, for each keeper and loadout: **open** (every blow lan
 | The Cydonian Sentinel | 22 s / 71 s | 29 s / 79 s | 43 s / 2 min 20 s | 5 min 44 s / 12 min 08 s | 12 s / 40 s | 16 s / 46 s |
 | The Pumpkin King | 27 s / 43 s | 34 s / 51 s | 53 s / 85 s | 6 min 32 s / 10 min 00 s | 16 s / 24 s | 18 s / 30 s |
 | The Headless Horseman | 31 s / 108 s | 37 s / 2 min 10 s | 61 s / 3 min 29 s | 6 min 48 s / 21 min 44 s | 17 s / 60 s | 19 s / 76 s |
+| The Storm Roc | 29 s / 47 s | 34 s / 54 s | 58 s / 93 s | 6 min 32 s / 10 min 00 s | 17 s / 26 s | 18 s / 32 s |
+| The Glass Abbot | 28 s / 2 min 45 s | 34 s / 3 min 26 s | 55 s / 5 min 15 s | 6 min 40 s / > 30 min | 16 s / 94 s | 18 s / 2 min 00 s |
 
 The loadouts:
 - **Steel Sword**: 6.5 a blow at 1.6 a second (the sword's 3, the hand's 1 and steel's 2.5).

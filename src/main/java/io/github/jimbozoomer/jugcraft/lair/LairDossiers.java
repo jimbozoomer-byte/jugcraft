@@ -17,6 +17,10 @@ import io.github.jimbozoomer.jugcraft.guide.encyclopedia.EncyclopediaPayload.Edg
 import io.github.jimbozoomer.jugcraft.guide.encyclopedia.EncyclopediaRequestPayload;
 import io.github.jimbozoomer.jugcraft.guide.encyclopedia.PageWriter;
 import io.github.jimbozoomer.jugcraft.lair.alpha.AlphaWerewolfEntity;
+import io.github.jimbozoomer.jugcraft.lair.abbot.AbbotLoot;
+import io.github.jimbozoomer.jugcraft.lair.abbot.GlassAbbotEntity;
+import io.github.jimbozoomer.jugcraft.lair.roc.RocLoot;
+import io.github.jimbozoomer.jugcraft.lair.roc.StormRocEntity;
 import io.github.jimbozoomer.jugcraft.lair.alpha.AlphaWerewolfLoot;
 import io.github.jimbozoomer.jugcraft.lair.alpha.JugcraftAlpha;
 import io.github.jimbozoomer.jugcraft.lair.dreadnought.GroundingStrap;
@@ -113,7 +117,7 @@ public final class LairDossiers {
 				List.of("hagmoss", "hagthorn", "bogfang", "hags_eye", "hags_shawl"), List.of("hag_stone_from_hagmoss"), List.of()),
 		CRYPT_LICH(Lair.CRYPT_ARCHIVE, CryptLichLoot.BOSS, CryptLichLoot.ADVANCEMENT, List.of("soulreaver", "gravewarden"), null, null,
 				List.of("exhumation_writ"), List.of("exhumation_writ", "stone_brick_sarcophagus"), List.of(),
-				List.of("grave_dust", "soulreaver", "gravewarden", "emptied_phylactery", "lichs_crown"), List.of("exhumation_writ_from_grave_dust"), List.of()),
+				List.of("grave_dust", "soulreaver", "gravewarden", "emptied_phylactery", "lichs_crown", "wight_king_helmet", "wight_king_chestplate", "wight_king_leggings", "wight_king_boots", "wight_king_zweihander"), List.of("exhumation_writ_from_grave_dust"), List.of()),
 		IRON_DREADNOUGHT(Lair.FOUNDRY_TRENCH, IronDreadnoughtLoot.BOSS, IronDreadnoughtLoot.ADVANCEMENT, List.of("dynamo_halberd", "piston_hammer"), null, null,
 				List.of("sealed_orders"), List.of("sealed_orders", "field_telephone"), List.of(Items.BELL),
 				List.of("salvaged_coil", "dynamo_halberd", "piston_hammer", "grounding_strap", "dreadnought_visor"), List.of("sealed_orders_from_salvaged_coil"),
@@ -123,7 +127,7 @@ public final class LairDossiers {
 				List.of("alpha_pelt", "moonfang", "howler", "packfinder_charm", "alphas_hood"), List.of("howling_totem_from_alpha_pelt"), List.of()),
 		CYDONIAN_SENTINEL(Lair.CYDONIAN_SANCTUM, SentinelLoot.BOSS, SentinelLoot.ADVANCEMENT, List.of("corelance", "redstar_cleaver"), null, null,
 				List.of("altar_keystone"), List.of("altar_keystone", "altar_keystone_from_dreamglass"), List.of(),
-				List.of("cydonian_shard", "corelance", "redstar_cleaver", "lowfall_core", "sentinels_visor"), List.of("altar_keystone_from_cydonian_shards"),
+				List.of("cydonian_shard", "corelance", "redstar_cleaver", "lowfall_core", "sentinels_visor", "sentinel_helmet", "sentinel_chestplate", "sentinel_leggings", "sentinel_boots", "sentinel_longsword", "sentinel_shield"), List.of("altar_keystone_from_cydonian_shards"),
 				List.of()),
 		PUMPKIN_KING(Lair.CROWFIELD, PumpkinKingLoot.BOSS, PumpkinKingLoot.ADVANCEMENT, List.of("hallowreap", "crowbill"), "message.jugcraft.lair.crown.off_season", null,
 				List.of("harvest_crown"), List.of("harvest_crown", "scarecrow"), List.of(Items.HAY_BLOCK),
@@ -132,7 +136,14 @@ public final class LairDossiers {
 		HESSIAN_HORSEMAN(Lair.CHURCH_BRIDGE, HorsemanLoot.BOSS, HorsemanLoot.ADVANCEMENT, List.of("hollowflail", "hessian_sabre"), null,
 				"message.jugcraft.lair.bridle.in_season", List.of("hessians_bridle"), List.of("hessians_bridle"), List.of(),
 				List.of("horseman_lantern", "hollowflail", "hessian_sabre", "hessians_spur", "hessians_tricorn"), List.of("hessians_bridle_from_lantern"),
-				List.of());
+				List.of()),
+		STORM_ROC(Lair.CROWN_OF_THUNDER, "storm_roc", RocLoot.ADVANCEMENT, List.of("stormcaller", "galefeather"), null, null,
+				List.of("thunder_vane"), List.of("thunder_vane"), List.of(),
+				List.of("roc_feather", "stormcaller", "galefeather", "weather_vane_lens", "rocs_crest"), List.of("thunder_vane_from_roc_feathers"), List.of()),
+		GLASS_ABBOT(Lair.GLASS_CHAPEL, AbbotLoot.BOSS, AbbotLoot.ADVANCEMENT, List.of("glass_reliquary"), null, null,
+				List.of("glass_accord"), List.of("glass_accord"), List.of(),
+				List.of("prism_shard", "glass_reliquary", "abbots_cowl"), List.of("glass_accord_from_prism_shards"),
+				List.of("lantern_lens", "mirror_inscription", "abbey_glass"));
 
 		public final Lair lair;
 		/** The keeper's id in {@link LairRewards} ("vesperine"), and its entity's. */
@@ -272,6 +283,8 @@ public final class LairDossiers {
 			case PUMPKIN_KING -> Component.translatable("encyclopedia.jugcraft.dossier.crowfield.rite", HarvestCrownRite.HARVEST_MIN,
 					HarvestCrownRite.HARVEST_REACH);
 			case HESSIAN_HORSEMAN -> Component.translatable("encyclopedia.jugcraft.dossier.church_bridge.rite");
+			case STORM_ROC -> Component.translatable("encyclopedia.jugcraft.dossier.crown_of_thunder.rite");
+			case GLASS_ABBOT -> Component.translatable("encyclopedia.jugcraft.dossier.glass_chapel.rite");
 		};
 		out.fact(rite, null, items(boss.tokens));
 		for (String recipe : boss.rite) {
@@ -319,6 +332,8 @@ public final class LairDossiers {
 		boolean concordance = JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE);
 		String key = "encyclopedia.jugcraft.dossier." + boss.lair.id + ".prepare";
 		switch (boss) {
+			case STORM_ROC -> out.fact(Component.translatable(key));
+			case GLASS_ABBOT -> out.fact(Component.translatable(key), null, items(List.of("lantern_lens")));
 			case VESPERINE -> out.fact(Component.translatable(key, number(VesperineEntity.SLAM_RADIUS)));
 			case TATTERLACE -> out.fact(Component.translatable(key, TatterlaceEntity.KNIT_TICKS / 20, GoldenThimble.COOLDOWN / 20), null,
 					items(List.of("golden_thimble")));
@@ -380,10 +395,12 @@ public final class LairDossiers {
 		out.heading(Component.translatable("entity.jugcraft." + boss.boss));
 		out.fact(Component.translatable("encyclopedia.jugcraft.dossier." + boss.lair.id + ".credit", number(Encounter.HEALING),
 				number(Encounter.WARDING), (int) Encounter.REACH));
-		out.fact(Component.translatable("encyclopedia.jugcraft.dossier.credit.wards"));
-		// Concordance Chunk C (C-02): a Stillroot Poultice on a friend is healing too, named while the Concordance brews it.
-		if (poultices()) {
-			out.fact(Component.translatable("encyclopedia.jugcraft.dossier.credit.poultice"), null, items(List.of("salve")));
+		if (boss != Boss.STORM_ROC) {
+			out.fact(Component.translatable("encyclopedia.jugcraft.dossier.credit.wards"));
+			// Only encounters using shared support credit count healing and wards.
+			if (poultices()) {
+				out.fact(Component.translatable("encyclopedia.jugcraft.dossier.credit.poultice"), null, items(List.of("salve")));
+			}
 		}
 		List<Item> trophies = items(boss.trophies);
 		if (discovery == Discovery.DEFEATED) {
@@ -421,7 +438,7 @@ public final class LairDossiers {
 			out.fact(Component.translatable("encyclopedia.jugcraft.dossier.owed"));
 		}
 		LairVisit visit = player.getAttached(Lairs.VISIT);
-		if (visit != null && visit.lair().equals(boss.lair.id)) {
+		if (boss != Boss.STORM_ROC && visit != null && visit.lair().equals(boss.lair.id)) {
 			share(player, out);
 		}
 	}
@@ -443,6 +460,8 @@ public final class LairDossiers {
 			case CYDONIAN_SENTINEL -> CydonianSentinelEntity.ABANDON_TICKS / 20;
 			case PUMPKIN_KING -> PumpkinKingEntity.ABANDON_TICKS / 20;
 			case HESSIAN_HORSEMAN -> HessianHorsemanEntity.ABANDON_TICKS / 20;
+			case STORM_ROC -> StormRocEntity.ABANDON_TICKS / 20;
+			case GLASS_ABBOT -> GlassAbbotEntity.ABANDON_TICKS / 20;
 		};
 	}
 

@@ -44882,6 +44882,10 @@
   ],
   "acquisition_info": [
     {
+      "item": "jugcraft:abbots_cowl",
+      "key": "abbots_cowl"
+    },
+    {
       "item": "jugcraft:adept_wand",
       "key": "adept_wand"
     },
@@ -44954,8 +44958,16 @@
       "key": "frost_knight_leggings"
     },
     {
+      "item": "jugcraft:galefeather",
+      "key": "galefeather"
+    },
+    {
       "item": "jugcraft:glacier_maul",
       "key": "glacier_maul"
+    },
+    {
+      "item": "jugcraft:glass_reliquary",
+      "key": "glass_reliquary"
     },
     {
       "item": "jugcraft:golden_thimble",
@@ -45074,6 +45086,10 @@
       "key": "piston_hammer"
     },
     {
+      "item": "jugcraft:prism_shard",
+      "key": "prism_shard"
+    },
+    {
       "item": "jugcraft:pumpkin_kings_crown",
       "key": "pumpkin_kings_crown"
     },
@@ -45118,6 +45134,14 @@
       "key": "rimeclaw"
     },
     {
+      "item": "jugcraft:roc_feather",
+      "key": "roc_feather"
+    },
+    {
+      "item": "jugcraft:rocs_crest",
+      "key": "rocs_crest"
+    },
+    {
       "item": "jugcraft:rooted_thallite_foundation",
       "key": "rooted_thallite_foundation"
     },
@@ -45128,6 +45152,22 @@
     {
       "item": "jugcraft:salvaged_coil",
       "key": "salvaged_coil"
+    },
+    {
+      "item": "jugcraft:sentinel_boots",
+      "key": "sentinel_boots"
+    },
+    {
+      "item": "jugcraft:sentinel_chestplate",
+      "key": "sentinel_chestplate"
+    },
+    {
+      "item": "jugcraft:sentinel_helmet",
+      "key": "sentinel_helmet"
+    },
+    {
+      "item": "jugcraft:sentinel_leggings",
+      "key": "sentinel_leggings"
     },
     {
       "item": "jugcraft:sentinel_longsword",
@@ -45146,6 +45186,10 @@
       "key": "soulreaver"
     },
     {
+      "item": "jugcraft:stormcaller",
+      "key": "stormcaller"
+    },
+    {
       "item": "jugcraft:tatterlace_headdress",
       "key": "tatterlace_headdress"
     },
@@ -45160,6 +45204,26 @@
     {
       "item": "jugcraft:vesper_scythe",
       "key": "vesper_scythe"
+    },
+    {
+      "item": "jugcraft:weather_vane_lens",
+      "key": "weather_vane_lens"
+    },
+    {
+      "item": "jugcraft:wight_king_boots",
+      "key": "wight_king_boots"
+    },
+    {
+      "item": "jugcraft:wight_king_chestplate",
+      "key": "wight_king_chestplate"
+    },
+    {
+      "item": "jugcraft:wight_king_helmet",
+      "key": "wight_king_helmet"
+    },
+    {
+      "item": "jugcraft:wight_king_leggings",
+      "key": "wight_king_leggings"
     },
     {
       "item": "jugcraft:wight_king_zweihander",

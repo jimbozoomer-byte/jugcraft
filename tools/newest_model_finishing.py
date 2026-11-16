@@ -70,7 +70,8 @@ CLOSE_FACES = {
 }
 # Hash-guarded separation records own the remaining meshes, including hanging
 # basket handles. Do not unfold them again before the final manifest pass.
-TARGETS = {name for name in BASKETS if "_hanging" not in name} | CRYSTALS | CLOSE_FACES.keys()
+TARGETS = ({name for name in BASKETS if "_hanging" not in name} | CRYSTALS | CLOSE_FACES.keys()
+           | {'supps/block/bamboo_spikes_tipped'})  # No hash-record owner; retain its source-matched overlay planes.
 
 
 def owner_relative(relative):

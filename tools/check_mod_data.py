@@ -13837,7 +13837,8 @@ def check_acquisition(registered):
             # One trophy: the table's chance, and a first kill adds it when the roll did not.
             first = info["first"]
             method = first.split("_")[0] + "".join(word.capitalize() for word in first.split("_")[1:])
-            if not re.search(rf"if \(firstKill\(player\)[^{{]*\{{\s*loot\.add\(new ItemStack\(\w+\.{method}\(\)\)\);", loot_java) \
+            accessor = rf"(?:{method}\(\)|{first.upper()})"
+            if not re.search(rf"if \(firstKill\(player\)[^{{]*\{{\s*loot\.add\(new ItemStack\(\w+\.{accessor}\)\)\);", loot_java) \
                     or f"first victory over {him} always brings it" not in pages.get(first, ""):
                 err(f"acquisition: {loot_path.name} must still add {first} on a player's first kill, as its JEI page says")
         elif "trophies" in info:
@@ -13873,13 +13874,23 @@ def check_acquisition(registered):
         # fight's Encounter (paid once each, kept for the fallen and the away; healing and wards are credited for every
         # fight by Lairs' observer), and they name an objective exactly when the boss's own package credits a deed.
         package = "\n".join(path.read_text(encoding="utf-8") for path in sorted(loot_path.parent.glob("*.java")))
-        if f'BOSS = "{boss}";' not in loot_java or f"LairRewards.payer({cls}.BOSS, {cls}::pay)" not in package \
+        if info.get("credit") == "roc":
+            # This encounter predates Encounter/LairRewards. Verify its distinct
+            # rule and say so explicitly instead of promising healing/deferred credit.
+            required = ('damageBy.getOrDefault(player.getUUID(), 0.0F) > 0.0F',
+                        'helpers.contains(player.getUUID())', 'helpers.add(player.getUUID())',
+                        'player.isAlive() && part && player.position().distanceTo(centre) <= 64.0',
+                        'RocLoot.reward(level, this, participants(level))')
+            if boss != 'storm_roc' or not all(fragment in package for fragment in required) \
+                    or 'Healing, wards and deferred rewards are not credited' not in aq.share(info):
+                err('acquisition: Storm Roc credit must match its living nearby damage/rod participants, without shared-reward promises')
+        elif f'BOSS = "{boss}";' not in loot_java or f"LairRewards.payer({cls}.BOSS, {cls}::pay)" not in package \
                 or not re.search(rf"LairRewards\.pay\(\w+, {cls}\.BOSS, encounter,", package):
             err(f"acquisition: {boss}'s JEI pages say a share goes to whoever earns it by a blow, healing or a ward, but "
                 f"{cls} is not paid through LairRewards (BOSS = \"{boss}\", LairRewards.payer and LairRewards.pay from "
                 "its Encounter)")
         deeds = bool(re.search(r"\.deed\(", package))
-        if deeds != info.get("objective"):
+        if info.get("credit") != "roc" and deeds != info.get("objective"):
             err(f"acquisition: {boss}'s JEI pages {'do not name' if deeds else 'name'} an objective, but lair/"
                 f"{loot_path.parent.name} {'credits a deed' if deeds else 'credits none'} (Encounter.deed): set "
                 "\"objective\" in tools/acquisition.py BOSSES")
@@ -29863,7 +29874,16 @@ def check_encyclopedia(root, lang):
         if table != set(dossier["loot"]):
             err(f"tools/encyclopedia.py: {boss}'s loot {sorted(dossier['loot'])} is not the table's {sorted(table)}")
         trophy_table = dossier.get("trophy_table", boss)
-        trophies = set(re.findall(r'"name": "jugcraft:([a-z_]+)"', text(DATA / MOD / "loot_table" / "bosses" / f"{trophy_table}.json")))
+        if dossier.get("first_win_item"):
+            # The Abbot guarantees one concrete item in code, rather than rolling
+            # a separate pair table. check_acquisition verifies that exact grant.
+            import acquisition as aq
+            first = dossier['first_win_item']
+            if first != aq.BOSSES.get(boss, {}).get('first'):
+                err(f'encyclopedia: {boss} first-win item must match its audited acquisition grant')
+            trophies = {first}
+        else:
+            trophies = set(re.findall(r'"name": "jugcraft:([a-z_]+)"', text(DATA / MOD / "loot_table" / "bosses" / f"{trophy_table}.json")))
         if not 1 <= len(dossier["trophies"]) <= 2 or set(dossier["trophies"]) != trophies or not trophies <= table:
             err(f"tools/encyclopedia.py: {boss}'s trophies {dossier['trophies']} must be the one or two of "
                 f"loot_table/bosses/{trophy_table}.json ({sorted(trophies)}), each in the loot table")

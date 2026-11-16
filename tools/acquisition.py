@@ -37,11 +37,13 @@ import concordance_trinkets as trinkets
 import crypt_lich as cl
 import cydonian_sentinel as cs
 import gear
+import glass_abbot as ga
 import hessian_horseman as hh
 import iron_dreadnought as idn
 import lairs
 import mire_hag as mh
 import pumpkin_king as pk
+import storm_roc as sr
 import tatterlace as tt
 import vesperine as vs
 import yeti_king as yk
@@ -106,7 +108,7 @@ BOSSES = {
                              "any hour",
                    "loot_class": "lair/lich/CryptLichLoot.java", "table": "entities/crypt_lich", "objective": True,
                    "trophies": (cl.TROPHIES, cl.TROPHY_CHANCE), "count": ("grave_dust", cl.GRAVE_DUST),
-                   "chances": cl.CHANCES},
+                   "chances": cl.CHANCES, "set": cl.SET_PIECES},
     "iron_dreadnought": {"name": idn.ENTITIES["iron_dreadnought"], "pronouns": ("his", "him"),
                          "lair": lairs.LAIRS["foundry_trench"]["display"],
                          "opened": f"which {lairs.ITEMS['sealed_orders']} used on a Field Telephone in a trench under the "
@@ -127,7 +129,7 @@ BOSSES = {
                           "opened": f"which an {lairs.ITEMS['altar_keystone']} set into the Ancient Altar at night opens",
                           "loot_class": "lair/sentinel/SentinelLoot.java", "table": "entities/cydonian_sentinel",
                           "objective": False, "trophies": (cs.TROPHIES, cs.TROPHY_CHANCE),
-                          "count": ("cydonian_shard", cs.SHARDS), "chances": cs.CHANCES},
+                          "count": ("cydonian_shard", cs.SHARDS), "chances": cs.CHANCES, "set": cs.SET_PIECES},
     # Already paid through lair/LairRewards (its Witching Season package); its pages since Concordance Chunk E (E4).
     "pumpkin_king": {"name": pk.ENTITIES["pumpkin_king"], "pronouns": ("his", "him"),
                      "lair": lairs.LAIRS["crowfield"]["display"],
@@ -149,6 +151,22 @@ BOSSES = {
                                                  "The Headless Horseman who rides the Overworld in the Halloween season "
                                                  "drops one too when a player brings him down")}},
 }
+
+
+BOSSES.update({
+    "storm_roc": {"name": sr.ENTITIES["storm_roc"], "pronouns": ("his", "him"),
+                  "lair": lairs.LAIRS["crown_of_thunder"]["display"],
+                  "opened": "which a Thunder Vane used under an open mountain sky at Y120 or higher while it rains or thunders opens",
+                  "loot_class": "lair/roc/RocLoot.java", "table": "entities/storm_roc", "objective": True,
+                  "credit": "roc", "trophies": (sr.TROPHIES, sr.TROPHY_CHANCE),
+                  "count": ("roc_feather", sr.FEATHERS), "chances": sr.CHANCES},
+    "glass_abbot": {"name": ga.ENTITIES["glass_abbot"], "pronouns": ("his", "him"),
+                    "lair": lairs.LAIRS["glass_chapel"]["display"],
+                    "opened": "which a Glass Accord held in clear daylight beneath glass in the Overworld opens",
+                    "loot_class": "lair/abbot/AbbotLoot.java", "table": "entities/glass_abbot", "objective": True,
+                    "first": "glass_reliquary", "count": ("prism_shard", ga.SHARDS_DROPPED),
+                    "chances": {"glass_reliquary": ga.RELIQUARY_CHANCE, **ga.CHANCES}},
+})
 
 
 def _crafted(key, recipes, names):
@@ -244,6 +262,10 @@ def _a(name):
 
 def share(info):
     """A boss page's last sentence: who is paid, by the kinds of part its fight credits."""
+    if info.get("credit") == "roc":
+        return ("A share goes to each player who hurt him or his fledglings, or helped at the rod that grounded him, "
+                "and is alive within 64 blocks of the summit when he falls. Healing, wards and deferred rewards "
+                "are not credited in this encounter.")
     parts = list(PARTS) + ([OBJECTIVE] if info["objective"] else [])
     return f"A share goes to each player who earns it in the fight by {', '.join(parts[:-1])} or {parts[-1]}."
 

@@ -125873,6 +125873,18 @@
             },
             {
               "type": "minecraft:single",
+              "resource": "jugcraft:newest/supps/block/bamboo_spikes_base_tipped"
+            },
+            {
+              "type": "minecraft:single",
+              "resource": "jugcraft:newest/supps/block/bamboo_spikes_overlay"
+            },
+            {
+              "type": "minecraft:single",
+              "resource": "jugcraft:newest/supps/block/bamboo_spikes_overlay_2"
+            },
+            {
+              "type": "minecraft:single",
               "resource": "jugcraft:newest/supps/block/barnacles"
             },
             {
@@ -160986,6 +160998,18 @@
             {
               "type": "minecraft:single",
               "resource": "jugcraft:newest/supps/block/bamboo_spikes_base"
+            },
+            {
+              "type": "minecraft:single",
+              "resource": "jugcraft:newest/supps/block/bamboo_spikes_base_tipped"
+            },
+            {
+              "type": "minecraft:single",
+              "resource": "jugcraft:newest/supps/block/bamboo_spikes_overlay"
+            },
+            {
+              "type": "minecraft:single",
+              "resource": "jugcraft:newest/supps/block/bamboo_spikes_overlay_2"
             },
             {
               "type": "minecraft:single",

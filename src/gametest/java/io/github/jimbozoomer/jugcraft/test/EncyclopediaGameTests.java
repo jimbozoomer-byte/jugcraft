@@ -77,6 +77,8 @@ import io.github.jimbozoomer.jugcraft.lair.tatterlace.TatterlaceEntity;
 import io.github.jimbozoomer.jugcraft.lair.vesperine.VesperineEntity;
 import io.github.jimbozoomer.jugcraft.lair.yeti.JugcraftYeti;
 import io.github.jimbozoomer.jugcraft.lair.yeti.YetiKingEntity;
+import io.github.jimbozoomer.jugcraft.lair.roc.StormRocEntity;
+import io.github.jimbozoomer.jugcraft.lair.abbot.GlassAbbotEntity;
 import io.github.jimbozoomer.jugcraft.town.JugcraftTown;
 import io.github.jimbozoomer.jugcraft.town.Town;
 import io.github.jimbozoomer.jugcraft.town.TownDecor;
@@ -688,7 +690,9 @@ public class EncyclopediaGameTests {
 				Map.entry(LairDossiers.Boss.ALPHA_WEREWOLF, AlphaWerewolfEntity.ABANDON_TICKS),
 				Map.entry(LairDossiers.Boss.CYDONIAN_SENTINEL, CydonianSentinelEntity.ABANDON_TICKS),
 				Map.entry(LairDossiers.Boss.PUMPKIN_KING, PumpkinKingEntity.ABANDON_TICKS),
-				Map.entry(LairDossiers.Boss.HESSIAN_HORSEMAN, HessianHorsemanEntity.ABANDON_TICKS));
+				Map.entry(LairDossiers.Boss.HESSIAN_HORSEMAN, HessianHorsemanEntity.ABANDON_TICKS),
+				Map.entry(LairDossiers.Boss.STORM_ROC, StormRocEntity.ABANDON_TICKS),
+				Map.entry(LairDossiers.Boss.GLASS_ABBOT, GlassAbbotEntity.ABANDON_TICKS));
 		helper.assertValueEqual(ticks.keySet(), Set.of(LairDossiers.Boss.values()), "every keeper's reset is checked");
 		for (LairDossiers.Boss boss : LairDossiers.Boss.values()) {
 			helper.assertValueEqual(LairDossiers.resetSeconds(boss), ticks.get(boss) / 20, boss + " starts over after its own ABANDON_TICKS");
@@ -949,11 +953,17 @@ public class EncyclopediaGameTests {
 		for (LairDossiers.Boss boss : LairDossiers.Boss.values()) {
 			List<String> keys = section(page, boss.lair).stream().map(row -> key(row.text())).toList();
 			List<String> whole = new ArrayList<>(List.of("lair.jugcraft." + boss.lair.id, dossier + boss.lair.id + ".rite", dossier + "party",
-					"entity.jugcraft." + boss.boss, dossier + boss.lair.id + ".credit", dossier + "credit.wards", dossier + "won",
+					"entity.jugcraft." + boss.boss, dossier + boss.lair.id + ".credit", dossier + "won",
 					dossier + boss.lair.id + ".leave", dossier + "grave_goods", dossier + boss.lair.id + ".lore", dossier + "reset"));
 			boss.loot.forEach(loot -> whole.add("jei.jugcraft.acquire." + loot));
-			if (JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE)) {
-				whole.add(dossier + "credit.poultice");
+			if (boss != LairDossiers.Boss.STORM_ROC) {
+				whole.add(dossier + "credit.wards");
+				if (JugcraftConfig.isFeatureEnabled(JugcraftConcordance.FEATURE)) {
+					whole.add(dossier + "credit.poultice");
+				}
+			} else {
+				helper.assertTrue(!keys.contains(dossier + "credit.wards") && !keys.contains(dossier + "credit.poultice"),
+						"Roc's immediate damage/rod rewards must not promise support credit");
 			}
 			helper.assertTrue(keys.containsAll(whole) && keys.stream().anyMatch(key -> key.startsWith(dossier + boss.lair.id + ".prepare")),
 					boss + "'s dossier is whole: " + keys);
@@ -1020,6 +1030,10 @@ public class EncyclopediaGameTests {
 		player.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(JugcraftConcordance.INITIATE_WAND));
 		player.getInventory().add(new ItemStack(JugcraftLairs.DEATH_KNELL));
 		player.getInventory().add(new ItemStack(JugcraftLairs.CURSED_SPINDLE));
+		// Exercise the expanded directory on the wire, not only two unopened rites.
+		for (LairDossiers.Boss boss : LairDossiers.Boss.values()) {
+			TrickOrTreat.award(player, boss.advancement);
+		}
 		EncyclopediaPayload sent = build(player);
 		RegistryFriendlyByteBuf buffer = new RegistryFriendlyByteBuf(Unpooled.buffer(), helper.getLevel().registryAccess());
 		EncyclopediaPayload.CODEC.encode(buffer, sent);

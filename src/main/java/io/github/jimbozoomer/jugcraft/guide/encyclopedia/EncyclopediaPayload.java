@@ -95,9 +95,10 @@ public record EncyclopediaPayload(int sequence, List<Component> notices, List<Pa
 		public static final int MAX_ID = 32;
 		/**
 		 * Bounded for the complete 61-species menagerie directory and its introductory topics, and for every lair's dossier,
-		 * found and beaten, with the bestiary's creatures after them (Concordance Chunk E, E4: ten keepers, room for more).
+		 * found and beaten, with the bestiary's creatures after them. The thirteen-keeper combined catalogue needs
+		 * at most 415 rows, including the new armour rewards; keep a bounded allowance for its recipe explanations.
 		 */
-		public static final int MAX_ROWS = 384;
+		public static final int MAX_ROWS = 448;
 		public static final StreamCodec<RegistryFriendlyByteBuf, Page> STREAM_CODEC = StreamCodec.composite(
 				ByteBufCodecs.stringUtf8(MAX_ID), Page::id,
 				ComponentSerialization.TRUSTED_STREAM_CODEC, Page::title,

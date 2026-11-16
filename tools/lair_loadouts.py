@@ -28,6 +28,8 @@ import pumpkin_king as pk
 import tatterlace as tt
 import vesperine as vs
 import yeti_king as yk
+import storm_roc as sr
+import glass_abbot as ga
 
 TICKS = 20
 # Vanilla: a blow within HURT_IMMUNITY ticks of the last that counted deals only what it has over that one (an equal
@@ -107,6 +109,10 @@ KEEPERS = [
      "rule": "pick his harvest clean to leave him bereft"},
     {"name": "The Headless Horseman", "numbers": hh.HESSIAN_HORSEMAN,
      "taken": (hh.HESSIAN_HORSEMAN["REVEALED"], hh.HESSIAN_HORSEMAN["HIDDEN"]), "rule": "relight the braziers he snuffs"},
+    {"name": "The Storm Roc", "numbers": sr.ROC, "taken": (sr.ROC["GROUNDED_MULTIPLIER"], 1.0),
+     "rule": "lead his dive through the charged storm rod"},
+    {"name": "The Glass Abbot", "numbers": ga.ABBOT, "taken": (ga.ABBOT["CRACKED_MULTIPLIER"], ga.ABBOT["MANTLE"]),
+     "rule": "reflect his beam to crack his mantle"},
 ]
 
 
