@@ -65,6 +65,7 @@ import iron_dreadnought_data
 import alpha_werewolf_data
 import pumpkin_king_data
 import hessian_horseman_data
+import lineage
 import cydonian_sentinel_data
 import storm_roc_data
 import glass_abbot_data
@@ -344,6 +345,7 @@ def assets(root, write, lang):
     alpha_werewolf_data.assets(root, write, lang)
     pumpkin_king_data.assets(root, write, lang)
     hessian_horseman_data.assets(root, write, lang)
+    lineage.assets(root, write, lang)
     cydonian_sentinel_data.assets(root, write, lang)
     storm_roc_data.assets(root, write, lang)
     glass_abbot_data.assets(root, write, lang)
@@ -524,6 +526,7 @@ def loot(data, write):
     alpha_werewolf_data.loot(out, write)
     pumpkin_king_data.loot(out, write)
     hessian_horseman_data.loot(out, write)
+    lineage.loot(out.parent, write)
     cydonian_sentinel_data.loot(out, write)
     storm_roc_data.loot(out, write)
     glass_abbot_data.loot(out, write)
@@ -619,6 +622,7 @@ def recipes(out, write):
     cydonian_sentinel_data.recipes(out, write, conditions)
     storm_roc_data.recipes(out, write, conditions)
     glass_abbot_data.recipes(out, write, conditions)
+    lineage.recipes(out, write, conditions)
     kitchen_data.recipes(out, write, conditions)
 
 
@@ -682,6 +686,7 @@ def tags(tags):
     alpha_werewolf_data.tags(tags)
     pumpkin_king_data.tags(tags)
     hessian_horseman_data.tags(tags)
+    lineage.tags(tags)
     cydonian_sentinel_data.tags(tags)
     storm_roc_data.tags(tags)
     glass_abbot_data.tags(tags)

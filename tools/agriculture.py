@@ -45,6 +45,7 @@ import hessian_horseman
 import cydonian_sentinel
 import storm_roc
 import glass_abbot
+import lineage
 import vesperine
 import kitchen
 import feasts
@@ -2955,7 +2956,7 @@ def all_items():
             + herbs.items() + spices.items() + lairs.items() + vesperine.items() + tatterlace.items()
             + yeti_king.items() + cinder_tyrant.items() + mire_hag.items() + crypt_lich.items()
             + iron_dreadnought.items() + alpha_werewolf.items() + pumpkin_king.items() + hessian_horseman.items()
-            + cydonian_sentinel.items() + storm_roc.items() + glass_abbot.items())
+            + cydonian_sentinel.items() + storm_roc.items() + glass_abbot.items() + lineage.items())
 
 
 def owns(entry_id):
