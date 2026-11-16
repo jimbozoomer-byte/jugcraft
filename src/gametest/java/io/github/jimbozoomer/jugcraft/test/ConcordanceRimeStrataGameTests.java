@@ -97,7 +97,8 @@ public class ConcordanceRimeStrataGameTests {
 	private static final String FIRST_LIGHT = "jugcraft:first_light";
 	private static final String WAND = "jugcraft:initiate_wand";
 	private static final String BENCH = "jugcraft:lampwright_bench";
-	private static final List<String> RIME_SPELLS = List.of("jugcraft:rimebind", "jugcraft:preserve");
+	// Concordance Chunk E (E3) added Quench to what Rimekeeping teaches.
+	private static final List<String> RIME_SPELLS = List.of("jugcraft:rimebind", "jugcraft:preserve", "jugcraft:quench");
 	private static final List<String> STRATA_SPELLS = List.of("jugcraft:brace");
 	/** A new player cannot be hurt until its client has loaded the world, or for 60 ticks (see LairEncounterGameTests). */
 	private static final int LOADING_TICKS = 80;
@@ -233,8 +234,8 @@ public class ConcordanceRimeStrataGameTests {
 
 	/**
 	 * Both entries load cleanly as Practitioner research after First Light, each of its own Principle and tradition.
-	 * Understanding Rimekeeping teaches exactly Rimebind and Preserve, and Stratawrighting exactly Brace, at the rules'
-	 * costs; mastery lowers each by one.
+	 * Understanding Rimekeeping teaches exactly Rimebind, Preserve and Quench (Quench since Chunk E), and Stratawrighting
+	 * exactly Brace, at the rules' costs; mastery lowers each by one.
 	 */
 	@GameTest(maxTicks = 20)
 	public void rimeAndStrataTeachTheirInvocations(GameTestHelper helper) {
@@ -781,8 +782,8 @@ public class ConcordanceRimeStrataGameTests {
 
 	/**
 	 * What a player learned of Rime and Strata, with an entry this version no longer knows, round-trips through the
-	 * knowledge's codec unchanged; relearning keeps the unknown entry and teaches exactly Rimebind, Preserve and Brace at the
-	 * rules' costs. A knowledge from before Chunk B (First Light only) relearns none of them.
+	 * knowledge's codec unchanged; relearning keeps the unknown entry and teaches exactly Rimebind, Preserve, Quench (since
+	 * Chunk E) and Brace at the rules' costs. A knowledge from before Chunk B (First Light only) relearns none of them.
 	 */
 	@GameTest(maxTicks = 20)
 	public void rimeAndStrataResearchSurviveASave(GameTestHelper helper) {
@@ -804,8 +805,9 @@ public class ConcordanceRimeStrataGameTests {
 		Map<String, Integer> expected = Map.of(
 				"jugcraft:rimebind", rules.invocations().get("jugcraft:rimebind").cost(ResearchState.MASTERED),
 				"jugcraft:preserve", rules.invocations().get("jugcraft:preserve").cost(ResearchState.MASTERED),
+				"jugcraft:quench", rules.invocations().get("jugcraft:quench").cost(ResearchState.MASTERED),
 				"jugcraft:brace", rules.invocations().get("jugcraft:brace").cost(ResearchState.UNDERSTOOD));
-		helper.assertTrue(relearned.invocations().equals(expected), "and teaches exactly Rimebind, Preserve and Brace at the rules' costs: "
+		helper.assertTrue(relearned.invocations().equals(expected), "and teaches exactly Rimebind, Preserve, Quench and Brace at the rules' costs: "
 				+ relearned.invocations());
 		Knowledge older = new Knowledge(Knowledge.SCHEMA, Map.of(FIRST_LIGHT, new Knowledge.Progress(ResearchState.UNDERSTOOD, Map.of())), Map.of());
 		Map<String, Integer> olderSpells = ResearchEngine.relearn(older, rules).invocations();

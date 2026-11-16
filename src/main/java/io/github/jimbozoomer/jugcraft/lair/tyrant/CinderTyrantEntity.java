@@ -7,6 +7,8 @@ import com.geckolib.animation.AnimationController;
 import com.geckolib.animation.RawAnimation;
 import com.geckolib.animation.object.LoopType;
 import com.geckolib.util.GeckoLibUtil;
+import io.github.jimbozoomer.jugcraft.concordance.rime.Rimebind;
+import io.github.jimbozoomer.jugcraft.concordance.strata.Brace;
 import io.github.jimbozoomer.jugcraft.guns.JugcraftGuns;
 import io.github.jimbozoomer.jugcraft.lair.Encounter;
 import io.github.jimbozoomer.jugcraft.lair.JugcraftLairs;
@@ -110,6 +112,8 @@ public class CinderTyrantEntity extends Monster implements GeoEntity {
 	public static final double QUENCH_SPEED = 0.5;
 	public static final double QUENCH_MARGIN = 0.25;
 	public static final int REHEAT_TICKS = 20;
+	/** Rime's answer (Concordance Chunk E, E3): a Rimebind on him while he is quenched keeps his seams dark this much longer, once a window. */
+	public static final int RIME_LENGTHEN = 40;
 	public static final float SWEEP_DAMAGE = 10.0F;
 	public static final double SWEEP_REACH = 4.0;
 	public static final double SWEEP_FRONT = 45.0;
@@ -214,6 +218,10 @@ public class CinderTyrantEntity extends Monster implements GeoEntity {
 		HOT, QUENCHED, REHEATING
 	}
 
+	/** A trough a player flooded: its stones, who turned its gate, and when it drains (game time). */
+	public record Flood(Set<BlockPos> cells, UUID turner, long until) {
+	}
+
 	/** A patch of fire where a gob or a cinder burst, and the game time it goes out. */
 	public record FirePatch(Vec3 at, long until) {
 	}
@@ -268,6 +276,11 @@ public class CinderTyrantEntity extends Monster implements GeoEntity {
 	/** Ticks left quenched, and of his seams flaring back after. */
 	private int quenched;
 	private int reheating;
+	/** How often he has been quenched this fight, and whether Rime has lengthened the window under way. */
+	private int quenches;
+	private boolean lengthened;
+	/** The troughs players flooded that may still be wet: whose turn quenches him is a deed of his fight. */
+	private final List<Flood> floods = new ArrayList<>();
 	/** This fight: who took part and how (Concordance Chunk B, on Chunk A's lair/Encounter); his arena is round his bowl. */
 	private final Encounter encounter = new Encounter(this, this::centre);
 	private final List<UUID> cinderlings = new ArrayList<>();
@@ -971,10 +984,30 @@ public class CinderTyrantEntity extends Monster implements GeoEntity {
 		return hit;
 	}
 
-	/** Pushes {@code player} along {@code way} (flat) by {@code strength}, and up by {@code up}, and tells their client. */
-	static void push(ServerPlayer player, Vec3 way, double strength, double up) {
-		player.push(way.x * strength, up, way.z * strength);
+	/**
+	 * Pushes {@code player} along {@code way} (flat) by {@code strength}, and up by {@code up}, and tells their client: his
+	 * Tail Sweep's and his Body Slam's push. A Brace takes some of it off ({@link Brace#spend}, as against the Yeti King),
+	 * and a Brace another player put on them is that player's deed ({@link #braced}).
+	 */
+	void push(ServerPlayer player, Vec3 way, double strength, double up) {
+		double share = Brace.spend(player);
+		if (share < 1.0) {
+			braced(player);
+		}
+		player.push(way.x * strength * share, up * share, way.z * strength * share);
 		player.connection.send(new ClientboundSetEntityMotionPacket(player));
+	}
+
+	/**
+	 * A Brace took some of his push off {@code player}: if another player put it on them, that caster's deed in his fight,
+	 * one for each push it meets (keyed by the braced player and the tick). A Brace one put on oneself credits no one.
+	 */
+	private void braced(ServerPlayer player) {
+		UUID id = Brace.caster(player);
+		ServerPlayer caster = id == null || id.equals(player.getUUID()) ? null : player.level().getServer().getPlayerList().getPlayer(id);
+		if (caster != null && LairBosses.eligible(caster) && encounter.contains(caster)) {
+			encounter.deed(caster, "brace " + player.getUUID() + " " + player.level().getGameTime());
+		}
 	}
 
 	/** Where his slam comes down: where the foe stood, kept within the bowl he roams. */
@@ -1048,8 +1081,78 @@ public class CinderTyrantEntity extends Monster implements GeoEntity {
 		level.playSound(null, getX(), getY(), getZ(), SoundEvents.MACE_SMASH_GROUND_HEAVY, SoundSource.HOSTILE, 3.0F, 0.5F);
 		if (inFloodedTrough(level)) {
 			quench(level);
+			sluiceDeed(level);
 		}
 		return hit;
+	}
+
+	/** The trough stones under him: his feet, and {@value #QUENCH_MARGIN} round them, on the bowl's floor. */
+	private List<BlockPos> under() {
+		List<BlockPos> out = new ArrayList<>();
+		AABB box = getBoundingBox().inflate(QUENCH_MARGIN, 0.0, QUENCH_MARGIN);
+		int y = origin.getY() + CinderKiln.BOWL;
+		for (int x = (int) Math.floor(box.minX); x <= (int) Math.floor(box.maxX); x++) {
+			for (int z = (int) Math.floor(box.minZ); z <= (int) Math.floor(box.maxZ); z++) {
+				out.add(new BlockPos(x, y, z));
+			}
+		}
+		return out;
+	}
+
+	/**
+	 * A sluice opened by {@code player}: its trough is wet until {@link SluiceGateBlock#FLOOD_TICKS} from now. If he is
+	 * quenched in it, whoever turned it has done a deed of his fight (Concordance Chunk E, E4; B-P4).
+	 */
+	public void sluiceOpened(ServerLevel level, Set<BlockPos> trough, ServerPlayer player) {
+		long now = level.getGameTime();
+		floods.removeIf(flood -> flood.until() < now);
+		floods.add(new Flood(Set.copyOf(trough), player.getUUID(), now + SluiceGateBlock.FLOOD_TICKS));
+	}
+
+	/** The troughs players flooded that he still remembers. */
+	public List<Flood> floods() {
+		return List.copyOf(floods);
+	}
+
+	/** He was quenched where he stands: whoever turned the gate of a wet trough under him has done a deed of his fight. */
+	private void sluiceDeed(ServerLevel level) {
+		long now = level.getGameTime();
+		List<BlockPos> under = under();
+		for (Flood flood : floods) {
+			if (flood.until() < now || under.stream().noneMatch(flood.cells()::contains)) {
+				continue;
+			}
+			ServerPlayer turner = level.getServer().getPlayerList().getPlayer(flood.turner());
+			if (turner != null && LairBosses.eligible(turner) && encounter.contains(turner)) {
+				encounter.deed(turner, "sluice " + quenches + " " + flood.turner());
+			}
+		}
+	}
+
+	/**
+	 * A Rimebind took on him ({@link Rimebind#bound}): quenched, his seams stay dark {@value #RIME_LENGTHEN} ticks longer,
+	 * once a window, and whoever cast it has done a deed of his fight; hot, the frost hisses off him and does nothing.
+	 * Returns whether it lengthened the window.
+	 */
+	public boolean rimebound(ServerLevel level, @Nullable ServerPlayer caster) {
+		if (quenched <= 0 || lengthened || !fighting()) {
+			level.sendParticles(ParticleTypes.WHITE_SMOKE, getX(), getY() + 1.6, getZ(), 6, 0.8, 0.3, 0.8, 0.02);
+			return false;
+		}
+		lengthened = true;
+		quenched += RIME_LENGTHEN;
+		level.sendParticles(ParticleTypes.SNOWFLAKE, getX(), getY() + 1.2, getZ(), 30, 1.4, 0.6, 1.8, 0.02);
+		level.playSound(null, getX(), getY(), getZ(), SoundEvents.POWDER_SNOW_STEP, SoundSource.HOSTILE, 2.0F, 0.6F);
+		tell(level, "message.jugcraft.cinder_tyrant.rime");
+		if (caster != null && LairBosses.eligible(caster) && encounter.contains(caster)) {
+			encounter.deed(caster, "rime " + quenches);
+		}
+		return true;
+	}
+
+	/** Whether Rime has lengthened the cooling window under way. */
+	public boolean lengthened() {
+		return lengthened;
 	}
 
 	/** Whether any trough stone under him (his feet, and {@value #QUENCH_MARGIN} round them) is flooded. */
@@ -1248,6 +1351,8 @@ public class CinderTyrantEntity extends Monster implements GeoEntity {
 		boolean fresh = quenched == 0;
 		quenched = QUENCH_TICKS;
 		reheating = 0;
+		quenches++;
+		lengthened = false;
 		setHeat(Heat.QUENCHED);
 		level.sendParticles(ParticleTypes.CLOUD, getX(), getY() + 0.5, getZ(), 40, 1.8, 0.6, 1.8, 0.08);
 		level.sendParticles(ParticleTypes.WHITE_SMOKE, getX(), getY() + 1.5, getZ(), 20, 1.4, 0.8, 1.4, 0.04);
@@ -1273,6 +1378,17 @@ public class CinderTyrantEntity extends Monster implements GeoEntity {
 	}
 
 	// ---------------------------------------------------------------- fire patches
+
+	/** His fire patches within {@code radius} of {@code at} go out (a Quench Flask's splash); returns how many. */
+	public int douse(ServerLevel level, Vec3 at, double radius) {
+		int before = patches.size();
+		patches.removeIf(patch -> Math.hypot(patch.at().x - at.x, patch.at().z - at.z) <= radius && Math.abs(patch.at().y - at.y) <= 2.0);
+		int doused = before - patches.size();
+		if (doused > 0) {
+			level.playSound(null, at.x, at.y, at.z, SoundEvents.FIRE_EXTINGUISH, SoundSource.HOSTILE, 1.0F, 1.2F);
+		}
+		return doused;
+	}
 
 	/** A patch of fire bursts at {@code at} (on the floor) for {@value #PATCH_TICKS} ticks; the oldest goes out past {@value #MAX_PATCHES}. */
 	public void firePatch(ServerLevel level, Vec3 at) {
@@ -1575,6 +1691,9 @@ public class CinderTyrantEntity extends Monster implements GeoEntity {
 		entityData.set(MOLTEN, false);
 		quenched = 0;
 		reheating = 0;
+		quenches = 0;
+		lengthened = false;
+		floods.clear();
 		setHeat(Heat.HOT);
 		phase = Phase.WAITING;
 		phaseTicks = 0;

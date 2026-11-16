@@ -32,15 +32,17 @@ with its own gesture, sound, particles and icon:
 [Ember](arcane-concordance-ember.md) added Hearthspark (utility), Hearthguard (defense), Cinderbolt and Hearthflare
 (damage), and Concordance Chunk B, unit 3 ([Rime and Strata](arcane-concordance-rime-strata.md)) adds Rimebind (defense:
 a 20% slow for 3 s, then a 2 s thaw), Brace (support: half the knockback of the next blow, for the caster's party) and
-Preserve (utility: an Alembic Crucible keeps its heat band for 60 s). That makes 13 of the 16 an instrument's tunings
-can hold (`Tunings.MAX`, which `check_mod_data` holds the invocations to), each signature still unique.
+Preserve (utility: an Alembic Crucible keeps its heat band for 60 s), and Concordance Chunk E
+([the Cinder Tyrant's package](cinder-tyrant-concordance.md)) adds Quench (support: Cooled for 5 s, so the creature
+touched cannot burn and hot ground spares it). That makes 14 of the 16 an instrument's tunings can hold (`Tunings.MAX`,
+which `check_mod_data` holds the invocations to), each signature still unique.
 
-**The spell bar's keys run out.** A player can hold 13 invocations and an inscribed spell, but Spell Engine's spell bar
+**The spell bar's keys run out.** A player can hold 14 invocations and an inscribed spell, but Spell Engine's spell bar
 gives keys to its first 9 only (`SpellHotbar.update` skips the rest). The bar lists a player's invocations sorted by id,
 then the inscribed spell, so whatever comes after the ninth gets no key and is not on the bar. Which ones drop depends
-on what was learned: with First Light mastered and Hearthbinding and Rimekeeping understood, Revelation and Rimebind;
-Stratawrighting's Brace, second by id, pushes Preserve off too, and Hearthflare on top of that (Hearthbinding mastered)
-Lanternward. An inscribed spell, always last, is the first to go. The order, a cap or a loadout is the owner's open
+on what was learned: with First Light mastered and Hearthbinding and Rimekeeping understood, Quench, Revelation and
+Rimebind; Stratawrighting's Brace, second by id, pushes Preserve off too, and Hearthflare on top of that (Hearthbinding
+mastered) Lanternward. An inscribed spell, always last, is the first to go. The order, a cap or a loadout is the owner's open
 question from #250; `check_mod_data` keeps this paragraph to the count.
 
 **An instrument grants nothing by itself.** The spell bar offers only the invocations your research has taught; a

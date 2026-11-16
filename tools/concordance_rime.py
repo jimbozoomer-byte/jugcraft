@@ -17,6 +17,9 @@ Concordance Chunk B, unit 3.
 - B-10, the links (unit 4): a Frost boon arm's slow is elective cold work (B-P26, B-P53; the boon itself unchanged).
 - B-09 (unit 5): the Yeti King's charge broken on an ice column is elective cold work for the player its column deed
   names (Rime.column), the same kind as a Frost boon arm's slow: one key between them (B-P56).
+- Chunk E, E3 (docs/features/cinder-tyrant-concordance.md): Quench (support), the Rimekeepers' heat buffering: the creature
+  it touches is put out and Cooled for COOLED_TICKS (rime/Cooling): hot ground and burning pass it by. And Rimebind on the
+  Cinder Tyrant while he is quenched keeps his seams dark a little longer (lair/tyrant, tools/cinder_tyrant.py).
 
 Java: concordance/rime (Rime, RimeSurvey, Rimebind, Frostward); tools/check_mod_data.py check_rime and (B-08)
 check_winter_brine hold it to these tables.
@@ -24,6 +27,7 @@ Imports only leaf tables, never tools/concordance.py (tools/owner_art.py imports
 """
 from concordance_alchemy import BANDS, FROSTWARD
 from concordance_ember import EMBER_SPECIMEN_TAG
+from cinder_tyrant import CINDER_TYRANT
 
 MOD = "jugcraft"
 
@@ -93,7 +97,7 @@ RESEARCH = {"rimekeeping": {
                        {"type": "notes"}],
         "mastered": [{"type": "practice", "activity": RIMEWORK, "distinct": RIMEWORK_MASTERY}],
     },
-    "unlocks": {"understood": {"invocations": [rid("rimebind"), rid("preserve")]}},
+    "unlocks": {"understood": {"invocations": [rid("rimebind"), rid("preserve"), rid("quench")]}},
     "advancements": {
         "encountered": ("First Frost", "Examine snow or ice", "task", "minecraft:snowball"),
         "observed": ("Cold Against Warmth", "Examine snow or ice, and something that holds fire", "task", "minecraft:ice"),
@@ -145,6 +149,15 @@ PRESERVE_WORD = "rimehold"
 # Timed; the Mitten stays the lasting answer (B-D3).
 FROSTWARD_COLOUR = 0x73DAD8  # the ice of the owner's icon (frozen.png)
 
+# ---------------------------------------------------------------------------------------------- Chunk E, E3: Quench
+# Cooled (Java: rime/Cooling): while it lasts the creature's burning is put out each tick and hot-floor and burning damage
+# pass it by (a magma block, the Cinder Kiln's slag); fire, lava and a creature's fire still reach it. Quench gives it for
+# COOLED_TICKS to the creature it touches, the Quench Flask (tools/cinder_tyrant.py QUENCH_FLASK) to everyone it splashes.
+COOLED = rid("cooled")
+COOLED_COLOUR = 0x9FD8E8
+COOLED_TICKS = 100
+QUENCH_WORD = "quenching"
+
 COMPONENTS = {
     "rimegrip": {"slot": "operation", "requires": _UNDERSTOOD, "authored": True, "capacity": 1, "focus": 2,
                  "operation": {"effect": "status", "intent": "harmful", "principle": "rime", "magnitude": 0,
@@ -157,6 +170,12 @@ COMPONENTS = {
                                   "school": "spell_power:frost"},
                     "name": "Rimehold",
                     "text": f"Preserve's stillness: an Alembic Crucible's heat stays in its band for {_FOCI}."},
+    QUENCH_WORD: {"slot": "operation", "requires": _UNDERSTOOD, "authored": True, "capacity": 1, "focus": 2,
+                  "operation": {"effect": "status", "intent": "helpful", "principle": "rime", "magnitude": 0,
+                                "duration": COOLED_TICKS, "status": COOLED, "stacking": "exclusive"},
+                  "name": "Quenching",
+                  "text": f"Quench's cool: a creature is put out and Cooled for {COOLED_TICKS // 20} seconds; hot ground and "
+                          "burning pass it by."},
 }
 
 INVOCATIONS = {
@@ -189,10 +208,24 @@ INVOCATIONS = {
         "fizzle": "Nothing to preserve: Preserve holds an Alembic Crucible within %s blocks",
     },
 }
+INVOCATIONS["quench"] = {
+    "name": "Quench", "role": "support", "composition": f"touch struck {QUENCH_WORD}", "stage": "understood",
+    "focus": 3, "mastered_focus": 2, "tunings": [], "work": 2, "persists": COOLED_TICKS,
+    "cast": 0.4, "cooldown": 3.0,
+    "animation": ("kindle_cast", "kindle_release"), "sounds": ("concordance.rime_gather", "concordance.preserve"),
+    "particle": "minecraft:snowflake", "icon": "minecraft:snow_block",
+    "description": f"Cools the creature you touch: its burning goes out, and for {COOLED_TICKS // 20} seconds it cannot "
+                   "burn and hot ground (a magma block, the Cinder Kiln's slag) does not hurt it. Quench a friend standing "
+                   "in fire.",
+    "counter": "It buffers heat; it is no Fire Resistance: fire itself, lava and a creature's fire (the Cinder Tyrant's "
+               "breath, spit and wave) still reach a Cooled creature. A second cast only starts the cool again. Milk "
+               "ends it.",
+    "fizzle": "Nothing to quench: Quench cools a creature within %s blocks",
+}
 for _invocation in INVOCATIONS.values():
     _invocation.update({"principle": "rime", "research": RESEARCH_ID})
 
-STATUS_NAMES = {RIMEBOUND: "Rimebound"}
+STATUS_NAMES = {RIMEBOUND: "Rimebound", COOLED: "Cooled"}
 MESSAGES = {
     "examine.cold": "The %s is cold enough to ache. You hold it and watch how slowly it gives",
     "crucible.status_held": "Alembic Crucible: %s, %s degrees, %s parts; preserved for %s s",
@@ -209,6 +242,9 @@ OWNER_FILES = {
     "textures/mob_effect/rime_thaw.png": "assets/ars_nouveau/textures/mob_effect/soaked.png",
     # B-08 (unit 4, B-P43): the owner's "Frozen" icon, used for its opposite, the ward against frost.
     "textures/mob_effect/frostward.png": "assets/ars_jymbaumental/textures/mob_effect/frozen.png",
+    # Chunk E (E3): Quench's water, and Cooled's mist.
+    "textures/spell/quench.png": "assets/ars_jimbaux/textures/item/conjure_water.png",
+    "textures/mob_effect/cooled.png": "assets/ars_jymbaumental/textures/mob_effect/mist.png",
 }
 
 
@@ -217,6 +253,7 @@ def lang_entries(lang):
     lang[f"effect.{MOD}.rimebound"] = "Rimebound"
     lang[f"effect.{MOD}.rime_thaw"] = "Thawing"
     lang[f"effect.{FROSTWARD.replace(':', '.')}"] = "Frostward"  # B-08
+    lang[f"effect.{COOLED.replace(':', '.')}"] = "Cooled"  # Chunk E, E3
 
 
 def _band_floors():
@@ -244,13 +281,13 @@ def codex():
                 # Unconditioned: check_progression wants a readable recipe page for every reachable recipe-made item.
                 ("crafting_recipe", "Frost Horn", "Blown at night on snow or ice in the Overworld, it takes you down into "
                  "the Glacier Hall. Arriving there is a study of cold in itself.", rid("frost_horn")),
-                ("text", "Understood", f"You can now cast **Rimebind** and **Preserve** with any Concordance instrument. "
+                ("text", "Understood", f"You can now cast **Rimebind**, **Preserve** and **Quench** with any Concordance instrument. "
                  f"To **master** Rimekeeping, do {RIMEWORK_MASTERY} kinds of cold work: {work}."
                  + (f" Any of these can stand for one: {_ELECTIVE}." if len(_ELECTIVES) > 1
                     else f" This can stand for one of them: {_ELECTIVE}." if _ELECTIVES else "")
                  + " Only someone who understands the **Alembic Arts** can put water in a crucible by hand. A magma block "
                  "keeps a crucible warm and a campfire makes it hot.", (research, "understood")),
-                ("text", "Mastered", "Rimebind and Preserve cost a point less Focus.", (research, "mastered")),
+                ("text", "Mastered", "Rimebind, Preserve and Quench cost a point less Focus.", (research, "mastered")),
             ]},
         ("winter", "rimebound"): {
             "name": "Rimebound", "x": 2, "y": 0, "icon": "minecraft:snowball", "condition": (research, "understood"),
@@ -267,7 +304,23 @@ def codex():
                        "next) a moment longer, frost-locked, before it strikes: once each time he thaws. Drawing his "
                        "charge into an ice column, as the player it was aimed at, having already taken part in his "
                        "fight, is cold work too, once you understand Rimekeeping: the same kind as a Frost boon arm's "
-                       "slow.")]},
+                       "slow."),
+                      ("text", "Against the Cinder Tyrant", "His steps are his own too, and a hot Tyrant shrugs the frost "
+                       "off. But bound while he is quenched (his seams dark after a slam into a flooded trough), they stay "
+                       f"dark {CINDER_TYRANT['RIME_LENGTHEN'] // 20} seconds longer: once each time he is quenched. The "
+                       "binding that does it is a deed of his "
+                       "fight.")]},
+        ("winter", "quenching"): {
+            "name": "Quench", "x": 8, "y": 0, "icon": "minecraft:snow_block", "condition": (research, "understood"),
+            "description": "Cooling a friend in the fire",
+            "pages": [
+                ("text", "Quench", f"Quench cools the creature you touch: its burning goes out, and for "
+                 f"{COOLED_TICKS // 20} seconds it is **Cooled**: it cannot burn, and hot ground (a magma block, the Cinder "
+                 "Kiln's molten slag) does not hurt it."),
+                ("text", "What it will not do", "Cooled is no Fire Resistance. Fire itself, lava and a creature's fire "
+                 "(the Cinder Tyrant's breath, his spit and his wave) still reach it; Hearthguard and a Fire Resistance "
+                 "potion keep those off. A **Quench Flask**, thrown, cools everyone it splashes for longer, once."),
+            ]},
         ("winter", "preserving"): {
             "name": "Preserve", "x": 4, "y": 0, "icon": rid("crucible"), "condition": (research, "understood"),
             "description": "Holding a crucible's heat",

@@ -367,6 +367,13 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - **What they are for:** Pumpkin Crates and Farm Stands, the Crowfield's harvest, compost, and (the three squashes) any recipe that takes a vegetable.
 - **Drawn by the owner's rules:** shaped models, skins in the vanilla manner (one colour stepped into tones, regular grooves, warts and specks on an even lattice, no noise or gradient), and 16×16 seed icons drawn from maps. Record: [pumpkin-patch-market.md](docs/features/pumpkin-patch-market.md).
 - **Checked:** see the record's Verification. The game tests and client screenshots run in CI only; not played by hand.
+### Unmerged: The Cinder Tyrant's heat and cooling package (Concordance Chunk E)
+- **The Quench Flask:** a glass bottle shaken with three snowballs, thrown. Its splash puts out and **Cooled** everyone within 2.5 blocks for 10 seconds, strikes fire-born creatures (blazes, magma cubes, his Cinderlings) for 6, puts out fire and his burning patches, and never quenches him. Cooled spares hot ground and burning, but not fire itself: it is no Fire Resistance. Record: [cinder-tyrant-concordance.md](docs/features/cinder-tyrant-concordance.md).
+- **Quench (Rime, support):** taught with Rimebind and Preserve. Touch a creature to put it out and cool it for 5 seconds. That makes 14 invocations.
+- **The schools answer him:** a Rimebind on him while he is quenched keeps his seams dark 2 seconds longer, once a quench, and a Brace halves his sweep's and slam's push. Each is its caster's deed in his fight.
+- **His objective (B-P4):** whoever opens the sluice he is quenched in has done a deed. His JEI pages now name an objective, and his dossier names the flask (always) and the Concordance's answers (while it is on).
+- **Tempering:** Hearthspark on an Alembic Crucible holds its heat at hot for 60 seconds, whatever is beneath; this counts as a hearth kind kindled.
+- **Checked:** the Python audits and unit tests pass locally; the game tests run in CI. Not played by hand.
 
 ### Unmerged: The Blood Moon
 - **A Blood Moon rises every fourth night of the Halloween season, and on Halloween night:** the night sky turns blood red with a red haze about you, zombies and skeletons put on costumes far more often (40%), costumed mobs drop double candy, will-o'-wisps gather thick, and the Headless Horseman rides by everyone who hasn't seen him that day. Being out when it rises earns **Bad Moon Rising**.

@@ -31,7 +31,8 @@ import org.jspecify.annotations.Nullable;
  * Preserve, an alteration in Rime's school ({@link #SCHOOL}), holds an Alembic Crucible's heat in its band instead of
  * putting out fire ({@link #preserves}, {@link #preserve}): never an inventory, an item, food or a machine, and never a
  * block changed. Rimebind is {@link Rimebind}; the winter survey {@link RimeSurvey}. Frostward, Winter Brine's status
- * (Concordance Chunk B, B-08), is {@link Frostward}; the Rimekeeper's travel kit (B-10) is {@link RimeGear}.
+ * (Concordance Chunk B, B-08), is {@link Frostward}; the Rimekeeper's travel kit (B-10) is {@link RimeGear}; Cooled,
+ * Quench's heat buffering (Chunk E, E3), is {@link Cooling}.
  */
 public final class Rime {
 	/** The practice Rimekeeping is mastered by (tools/concordance_rime.py RIMEWORK). */
@@ -65,6 +66,7 @@ public final class Rime {
 		Rimebind.register();
 		RimeSurvey.register();
 		Frostward.register();
+		Cooling.register(); // Chunk E (E3): Quench's heat buffering
 		RimeGear.register(); // Chunk B unit 4 (B-10): the travel kit
 	}
 

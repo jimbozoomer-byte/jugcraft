@@ -29,6 +29,9 @@ CINDER_TYRANT = {
     # QUENCH_TAKEN, and he crawls at QUENCH_SPEED of his pace. Then his cracks flare back over REHEAT_TICKS.
     "HOT_TAKEN": 0.5, "QUENCH_TICKS": 160, "QUENCH_TAKEN": 1.25, "QUENCH_SPEED": 0.5, "QUENCH_MARGIN": 0.25,
     "REHEAT_TICKS": 20,
+    # Concordance Chunk E (E3; docs/features/cinder-tyrant-concordance.md): a Rimebind that takes on him while he is
+    # quenched keeps his seams dark this much longer, once a window (the planning pack's "up to two seconds").
+    "RIME_LENGTHEN": 40,
     # Tail Sweep: his tail swung round his back and flanks; the front of him, SWEEP_FRONT degrees either side of his
     # head, it never reaches. He coils sideways to his foe as he winds up.
     "SWEEP_DAMAGE": 10.0, "SWEEP_REACH": 4.0, "SWEEP_FRONT": 45.0, "SWEEP_KNOCKBACK": 1.0, "SWEEP_BURN": 3,
@@ -97,7 +100,7 @@ ENTITIES = {
 GECKO = {name: name for name in ENTITIES}
 # The bodies drawn with a glow layer, and so with a glowmask: all of them burn.
 GLOWING = tuple(ENTITIES)
-ITEMS = {"tyrant_scale": "Tyrant Scale", "salamander_charm": "Salamander Charm"}
+ITEMS = {"tyrant_scale": "Tyrant Scale", "salamander_charm": "Salamander Charm", "quench_flask": "Quench Flask"}
 COSTUMES = {"tyrant_crest": "The Tyrant's Crest"}
 
 RECIPES = {
@@ -107,7 +110,16 @@ RECIPES = {
     "kiln_seal_from_scales": {"shapeless": ["minecraft:obsidian", "minecraft:obsidian", "minecraft:obsidian",
                                             "minecraft:obsidian", "minecraft:magma_block", "minecraft:gold_ingot",
                                             "jugcraft:tyrant_scale", "jugcraft:tyrant_scale"], "result": "kiln_seal"},
+    # Concordance Chunk E (E2): the ordinary player's preparation for his kiln, from snow.
+    "quench_flask": {"shapeless": ["minecraft:glass_bottle", "minecraft:snowball", "minecraft:snowball", "minecraft:snowball"],
+                     "result": "quench_flask"},
 }
+# The Quench Flask (Java: lair/tyrant/ThrownQuenchFlask), thrown: everything within RADIUS of where it breaks is splashed.
+# A creature born of fire (QUENCHABLE, #jugcraft:quenchable) takes FIRE_BORN_DAMAGE from its thrower, and a Cinderling
+# then gutters out; every other creature is put out and Cooled (tools/concordance_rime.py COOLED) for COOLED_TICKS; fire
+# on the ground and the Tyrant's fire patches go out. It never quenches the Tyrant himself.
+QUENCH_FLASK = {"RADIUS": 2.5, "COOLED_TICKS": 200, "FIRE_BORN_DAMAGE": 6.0}
+QUENCHABLE = ("minecraft:blaze", "minecraft:magma_cube", "jugcraft:cinderling")
 
 MESSAGES = {
     "wakes": "The Cinder Tyrant rises from the crucible, slag streaming from his plates",
@@ -118,6 +130,7 @@ MESSAGES = {
     "reset": "The Cinder Tyrant sinks back into the crucible",
     "defeated": "The Cinder Tyrant falls, and the crucible cools to black glass",
     "loot": "His molten hoard is yours",
+    "rime": "Frost holds the Tyrant's plates dark a moment longer",
 }
 
 
