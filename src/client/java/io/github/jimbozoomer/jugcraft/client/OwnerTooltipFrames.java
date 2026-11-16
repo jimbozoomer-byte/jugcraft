@@ -5,11 +5,28 @@ import net.minecraft.client.gui.*;
 import net.minecraft.client.gui.screens.inventory.tooltip.*;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.world.item.*;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 
 /** Supplied frame atlas, native item preview and centered titles, without replacing tooltip text/data. */
 public final class OwnerTooltipFrames {
     private static final net.minecraft.resources.Identifier BORDER=Jugcraft.id("textures/gui/newest/tooltip_borders.png");
     private OwnerTooltipFrames(){}
+    /** Keep authored descriptions readable at small GUI sizes without dropping text or its styles. */
+    public static List<Component> boundedLines(Font font,List<Component> original,int guiWidth){
+        int maximum=Math.max(40,Math.min(320,guiWidth-32));
+        if(original.stream().allMatch(line->font.width(line)<=maximum))return original;
+        var result=new ArrayList<Component>();
+        for(var line:original){
+            if(font.width(line)<=maximum){result.add(line);continue;}
+            for(var wrapped:font.getSplitter().splitLines(line,maximum,Style.EMPTY)){
+                var copy=Component.empty();
+                wrapped.visit((style,text)->{copy.append(Component.literal(text).withStyle(style));return Optional.empty();},Style.EMPTY);
+                result.add(copy);
+            }
+        }
+        return result;
+    }
     public static List<ClientTooltipComponent> components(List<ClientTooltipComponent> original,ItemStack stack,Font font){
         if(stack.isEmpty()||original.isEmpty())return original;
         var result=new ArrayList<>(original);int width=Math.max(48,result.stream().mapToInt(c->c.getWidth(font)).max().orElse(0));

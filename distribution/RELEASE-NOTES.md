@@ -12,7 +12,7 @@ Changes prepared since 0.1.0-alpha.20261103.1:
 - Pharmacy progression, treatment effects and a strain HUD.
 - Powered-equipment charging and handling improvements, scanner cancellation, chainsaw costs and drill-action fixes. Powered night vision now applies and bills consistently.
 - Imbuement Chamber lapis-input fix. The Hydroponics Bay now clearly names its required Nutrient Solution and explains why it refuses plain water; pump/pipe and bucket transfers are covered by regressions.
-- Villager-trading tooltip crash fix and native GUI tooltip handling.
+- Villager-trading tooltip crash fix, native GUI tooltip handling and wrapping for long item descriptions on small screens.
 - Aircraft control, banking, seating, muzzle alignment and compact controls-display fixes; walker cockpit, aiming and safe-dismount improvements.
 - Better raid approach retries and guard lookout behavior around city walls.
 - Unified encyclopedia route guidance, restored introductory chapters and clearer boss dossiers covering preparation, entry, rewards, reset and exits.
@@ -24,7 +24,7 @@ Changes prepared since 0.1.0-alpha.20261103.1:
 - Expanded decorative transmutation support. Its final output policy remains under economy review; this candidate must not be promoted until that review is resolved.
 - Spawn-relative climate bands for future Overworld generation in the existing server world: arctic north beyond roughly 2,500 blocks; hot/tropical south beyond 2,000; temperate again beyond 4,000; frigid beyond 5,500, with blended transitions. Existing generated chunks and builds are preserved; Nether and End generation are unchanged.
 
-Candidate status: not deployed. Full resource regeneration and data/model audits pass. The full local build and all 4,170 required server tests pass. Full rendered-client and optional-absence checks remain pending, and two economy assertions remain unresolved. Exact evidence and limitations are recorded in docs/features/nov16-combined-release.md. Do not describe this candidate as a tested public release yet.
+Candidate status: not deployed. Full resource regeneration and data/model audits pass. The full local build and all 4,170 required server tests pass with optional integrations present and absent. Full rendered-client checks and the final corrected CI run remain pending, and two economy assertions remain unresolved. Exact evidence and limitations are recorded in docs/features/nov16-combined-release.md. Do not describe this candidate as a tested public release yet.
 
 PR #612's drone tower, drop squads, plasma weapons, taller world and TV helpers are held for separate review and are not part of this candidate.
 

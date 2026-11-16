@@ -74,11 +74,15 @@ public final class EncyclopediaProgressionClientGameTests implements FabricClien
 
 			context.getInput().pressKey(EncyclopediaClient.key());
 			context.waitForScreen(EncyclopediaScreen.class);
-			context.waitFor(client -> EncyclopediaClient.navigator().pages().stream().anyMatch(page -> page.id().equals("route_technology"))
+			int requested = context.computeOnClient(client -> EncyclopediaClient.sequence());
+			context.waitFor(client -> EncyclopediaClient.navigator().applied() >= requested
+					&& EncyclopediaClient.navigator().pages().stream().anyMatch(page -> page.id().equals("route_technology"))
 					&& EncyclopediaClient.navigator().pages().stream().anyMatch(page -> page.id().equals("route_magic")));
+			context.clickScreenButton("ui.jugcraft.contents");
+			context.waitTicks(2);
 
 			// Technology: the Map tab shows a tile for every step.
-			context.clickScreenButton("ui.jugcraft.book.technology");
+			context.runOnClient(mc -> ((EncyclopediaScreen)mc.gui.screen()).pressChapter("technology"));
 			context.waitForScreen(EncyclopediaRoutesScreen.class);
 			context.clickScreenButton("ui.jugcraft.book.route_map");
 			context.waitFor(client -> routes(client).mapShown());

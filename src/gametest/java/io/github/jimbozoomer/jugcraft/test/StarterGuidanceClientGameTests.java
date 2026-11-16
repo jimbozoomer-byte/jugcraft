@@ -14,9 +14,15 @@ public final class StarterGuidanceClientGameTests implements FabricClientGameTes
             world.getConnection().waitForChunksRender();
             c.getInput().pressKey(EncyclopediaClient.key());
             c.waitForScreen(EncyclopediaScreen.class);
-            c.waitFor(mc -> EncyclopediaClient.navigator().pages().stream().anyMatch(p -> p.id().equals("jimta_guides")));
+            int requested = c.computeOnClient(mc -> EncyclopediaClient.sequence());
+            c.waitFor(mc -> EncyclopediaClient.navigator().applied() >= requested
+                && EncyclopediaClient.navigator().pages().stream().anyMatch(p -> p.id().equals("jimta_guides")));
+            // Looking at a nearby block opens Inspect when the response arrives. Navigate
+            // through the real Contents button after that response, not before it races in.
+            c.clickScreenButton("ui.jugcraft.contents");
+            c.waitTicks(2);
             c.takeScreenshot("encyclopedia_unified_home");
-            c.clickScreenButton("ui.jugcraft.book.technology");
+            c.runOnClient(mc -> ((EncyclopediaScreen)mc.gui.screen()).pressChapter("technology"));
             c.waitForScreen(EncyclopediaRoutesScreen.class);
             c.waitTicks(3); c.takeScreenshot("encyclopedia_technology_start");
             c.clickScreenButton("ui.jugcraft.book.read");
@@ -44,7 +50,7 @@ public final class StarterGuidanceClientGameTests implements FabricClientGameTes
             });
             c.waitTicks(3); c.takeScreenshot("encyclopedia_starter_recipe_grids");
             c.runOnClient(mc -> ((EncyclopediaScreen)mc.gui.screen()).showContents());
-            c.waitTicks(2); c.clickScreenButton("ui.jugcraft.book.magic");
+            c.waitTicks(2); c.runOnClient(mc -> ((EncyclopediaScreen)mc.gui.screen()).pressChapter("magic"));
             c.waitForScreen(EncyclopediaRoutesScreen.class);
             c.waitTicks(3); c.takeScreenshot("encyclopedia_magic_start");
             c.clickScreenButton("ui.jugcraft.book.read");
