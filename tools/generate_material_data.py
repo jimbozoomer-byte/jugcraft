@@ -103,8 +103,13 @@ def write(path, obj):
     if path.is_relative_to(RES):
         WRITTEN_RESOURCES.add(path.relative_to(RES).as_posix())
     if isinstance(obj, dict) and obj.get("elements") and "models" in path.parts:
+        import newest_original_art
         if any(path.stem == name or path.stem.startswith(name + "_") for name in NUCLEAR_CLOSED_MODELS):
             model_writer.finish_closed(obj["elements"])
+        elif newest_original_art.intentional_reversed_elements(path, obj["elements"]):
+            # The NEWEST collection's authored two-sided shells (paper lanterns, lunch baskets, the whirlwind ring, the
+            # upside-down potato) keep the supplied geometry exactly, reversed boxes and all, as the art check expects.
+            pass
         else:
             model_writer.finish_elements(obj["elements"])
     path.parent.mkdir(parents=True, exist_ok=True)
