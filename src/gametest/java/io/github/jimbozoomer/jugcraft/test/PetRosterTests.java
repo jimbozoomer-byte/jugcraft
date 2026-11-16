@@ -46,12 +46,23 @@ public final class PetRosterTests {
     }
     @GameTest(maxTicks=40) public void unloadedRecallNeverCreatesStaleCopy(GameTestHelper h){
         var p=h.makeMockServerPlayerInLevel();var wolf=EntityTypes.WOLF.create(h.getLevel(),EntitySpawnReason.COMMAND);wolf.tame(p);
+        // A newly constructed entity defaults to world origin, outside this test's
+        // loaded arena in the full suite. Keep the arriving pet in this fixture.
+        var pos=h.absolutePos(new BlockPos(1,2,1));
+        wolf.snapTo(pos.getX()+.5,pos.getY(),pos.getZ()+.5,0,0);
+        wolf.setNoAi(true);wolf.setNoGravity(true);
         var entry=Pets.enroll(wolf);
         h.assertTrue(Pets.action(p,wolf.getUUID().toString(),"recall").startsWith("Recall queued"),"Unloaded recall queued");
         h.assertTrue(entry.getBooleanOr("recall",false),"Queue persisted");
         h.assertTrue(Pets.action(p,wolf.getUUID().toString(),"summon").equals("Pet is already active."),"No summon from stale snapshot");
-        h.getLevel().addFreshEntity(wolf);
-        h.runAfterDelay(22,()->{h.assertTrue(wolf.isRemoved()&&entry.getStringOr("state","").equals("STORED"),"Queued recall stores the real entity when it loads");h.succeed();});
+        wolf.setItemSlot(EquipmentSlot.MAINHAND,new ItemStack(Items.DIAMOND,3));
+        h.assertTrue(h.getLevel().addFreshEntity(wolf),"The original pet loads into the test arena");
+        h.runAfterDelay(22,()->{
+            h.assertTrue(wolf.isRemoved()&&entry.getStringOr("state","").equals("STORED"),"Queued recall stores the real entity when it loads");
+            var restored=(Mob)EntityType.loadEntityRecursive(net.minecraft.world.level.storage.TagValueInput.create(net.minecraft.util.ProblemReporter.DISCARDING,p.registryAccess(),entry.getCompoundOrEmpty("entity")),h.getLevel(),EntitySpawnReason.LOAD,EntityProcessor.NOP);
+            h.assertTrue(restored!=null&&restored.getUUID().equals(wolf.getUUID())&&restored.getMainHandItem().is(Items.DIAMOND)&&restored.getMainHandItem().getCount()==3,"Recall snapshots the arriving pet's identity and current equipment");
+            h.succeed();
+        });
     }
     @GameTest(maxTicks=40) public void customPetsAndSummonExclusions(GameTestHelper h){
         var p=h.makeMockServerPlayerInLevel();var stranger=h.makeMockServerPlayerInLevel();
