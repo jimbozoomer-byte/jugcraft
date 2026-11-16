@@ -460,7 +460,8 @@
       "local.peepo.CraftingTablePlanningGameTests",
       "io.github.jimbozoomer.jugcraft.test.ComponentYieldGameTests",
       "io.github.jimbozoomer.jugcraft.town.HalloweenQuestsGameTests",
-      "io.github.jimbozoomer.jugcraft.town.BountyListGameTests"
+      "io.github.jimbozoomer.jugcraft.town.BountyListGameTests",
+      "io.github.jimbozoomer.jugcraft.test.WalkerCockpitGameTests"
     ],
     "jei_mod_plugin": [
       "io.github.jimbozoomer.jugcraft.test.JeiStationClientGameTests$WithJei$Probe"
@@ -473,6 +474,7 @@
       "io.github.jimbozoomer.jugcraft.test.ChargingStationClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.PoweredEquipmentClientGameTests",
       "io.github.jimbozoomer.jugcraft.world.ClimateMigrationClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.WalkerCockpitClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.EquipmentAccessClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.CraftingChoicesClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.ImportedModelAtlasClientTests",

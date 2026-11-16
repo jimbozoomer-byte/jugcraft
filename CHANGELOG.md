@@ -51,6 +51,19 @@ No numbered release yet. Entries on feature branches remain proposed until their
 ### Unmerged: Beardshy
 - **Beardshy**, the shy side of Beardson (the Retro Trader): a villager-bodied NPC in a pink hoodie, round glasses and a ginger beard. Walk up and he hurries off with an apology; crouch and he stays to talk (18 lines about stolen land, Denali, internet sayings and over-explaining). Hit, he apologises and runs; he never fights back. He trades and drops nothing and doesn't spawn on his own yet: use his spawn egg (a pink egg with ginger spots, in the Spawn Eggs tab) or `/summon jugcraft:beardshy`.
 - The Harvest Feast story that would make him the Thanksgiving event's antagonist (he wants the feast cancelled) is laid out for the owner's approval, not built. Record: [beardshy.md](docs/features/beardshy.md).
+### Unmerged: the walker cockpit (all three walkers)
+- **The view from the seat:**
+  - The Armoured Walker's pilot stands up in the roof hatch, and the Howitzer Walker's sits in a commander's seat over the roof. Before, both looked out from inside their hulls.
+  - Pilots' hands are hidden in every walker.
+  - Turning with left/right turns the view with the hull (for the Howitzer, only while turning by hand).
+  - Third person sits back past each hull.
+- **Telegraphs**, drawn in the world for the pilot:
+  - the Armoured cannon's and the Howitzer's arc and landing ring, with the Howitzer's laying shown against a crosshair mark;
+  - the fist's, ram's and stomp's reach, with what they would hit outlined;
+  - the drill's block.
+- **The Armoured Walker's cannon** now lands on what the crosshair is on (raised for its fall, up to 96 blocks), with no spread.
+- **Gauges** at the top left: fuel, hull wear, reload and shells, and whether the attack is ready. They replace the fuel message every two seconds.
+- Record: [walker-cockpit.md](docs/features/walker-cockpit.md).
 - **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
 
 ### Unmerged: Harvest Festival Grounds, part 4 (Harvest Bunting and the Sack-Race Sack)

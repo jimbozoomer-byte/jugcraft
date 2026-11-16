@@ -28,7 +28,7 @@ The model follows the owner's Blender render, part by part, in Jugcraft's blocky
 ### Piloting
 - Place it from its item, use it to climb into the roof hatch (head out), and refuel it with a diesel or kerosene bucket, exactly like the Diesel Walker.
 - **Movement:** walk, turn, jump and climb one-block steps with the movement keys. It burns 4 mB of fuel a second while it walks or turns.
-- **Hold use: the hull cannon.** It fires a Heavy Shell where you look, every 2 seconds, taking one from your inventory (none in creative). Shells are damage-only blasts, like every gun's: they never break blocks. With no shells it tells you once.
+- **Hold use: the hull cannon.** It fires a Heavy Shell onto what the crosshair is on (raised for its fall, up to 96 blocks; the arc and landing are drawn for the pilot, [walker-cockpit.md](walker-cockpit.md)), every 2 seconds, taking one from your inventory (none in creative). Shells are damage-only blasts, like every gun's: they never break blocks. With no shells it tells you once.
 - **Attack: the piston ram.**
   - The ram strikes whatever is in front, up to 2.6 blocks ahead, for 16 damage, and throws it hard.
   - It can ram again after 1.2 seconds.
