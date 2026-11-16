@@ -202,3 +202,19 @@ is a wrapped paragraph in a scrolling page; `check_encyclopedia_routes` now requ
 Known limit, calculated and not yet seen in a screenshot: the home tab (`BookArt.Tab`) cuts its label with "…", and at
 CI's 427×240 GUI it leaves 134 pixels for a title, so "Magic: the Arcane Concordance" (about 158 by the font's widths)
 will be cut there.
+
+## First-join welcome (27 October 2026)
+
+Before this, the first thing a new player read on joining was the Exchange's starter-loan offer and its guide book;
+nothing mentioned the encyclopedia. Now, the first time a player joins with Jugcraft's client, chat says:
+"Welcome to Jugcraft! Press **B**, or the scroll button in your inventory, to open the Encyclopedia: your first steps,
+the machinery and magic routes, and every key." The key is shown as the player's own binding, so a remapped key reads
+correctly. It comes before the Exchange's greeting, which is unchanged. A `jugcraft.encyclopedia_welcome` tag on the
+player keeps it to the first join; stand-in test players and clients without Jugcraft get nothing.
+
+Implemented with Claude Opus 5.5 (Claude Code) for a contributor, on the fork. Verification: the client game test
+`EncyclopediaClientGameTests` checks that the joined player carries the welcome tag. Local
+`python tools/generate_material_data.py`, `python tools/check_mod_data.py` and `python scripts/check_repository.py`:
+both passed (7,797 material IDs). CI: fork [run 40427541933](https://github.com/mmme123-spec/jugcraftfork/actions/runs/40427541933) on e9086350b: green. The mod built, the generated-data and material checks passed, the server game tests passed (with and without optional integrations), and all sixteen client shards passed. Not run: a human joining a fresh world.
+
+After merging main (5b8d6520c): fork [run 40463073693](https://github.com/mmme123-spec/jugcraftfork/actions/runs/40463073693) on `a99ede0c6`, green, every job and all sixteen client shards.
