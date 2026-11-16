@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:block",
+  "random_sequence": "jugcraft:blocks/skillet_corn_cakes",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:skillet_corn_cakes"
+        }
+      ],
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      }
+    }
+  ]
+}

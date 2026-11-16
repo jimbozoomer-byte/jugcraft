@@ -37,8 +37,13 @@ public class ChainsawItem extends PoweredToolItem {
         return net.minecraft.world.InteractionResult.SUCCESS;
     }
 
-    @Override public long energyPerBlock(ItemStack stack) {
-        return EquipmentSettings.number(stack,"saw_mode",0)==2 ? efficientCost(stack, 5L * (2 + ToolUpgrades.level(stack,ToolUpgrades.Kind.OVERCLOCK))) : super.energyPerBlock(stack);
+    /** Leaf clearing's price per leaf: a quarter of the felling price before Overclock and Efficiency. */
+    public long leafCost(ItemStack stack) {
+        return efficientCost(stack, 5L * (2 + ToolUpgrades.level(stack,ToolUpgrades.Kind.OVERCLOCK)));
+    }
+    /** Leaf clearing charges its leaf price for leaves only. Any other block, and machines, pay the felling price. */
+    @Override public long energyPerBlock(ItemStack stack, BlockState state) {
+        return EquipmentSettings.number(stack,"saw_mode",0)==2 && state.is(BlockTags.LEAVES) ? leafCost(stack) : energyPerBlock(stack);
     }
     @Override public float getDestroySpeed(ItemStack stack,BlockState state) {
         return EquipmentSettings.number(stack,"saw_mode",0)==2 && !state.is(BlockTags.LEAVES) ? 1 : super.getDestroySpeed(stack,state);
@@ -72,6 +77,7 @@ public class ChainsawItem extends PoweredToolItem {
 	public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display, Consumer<Component> tooltip,
 			TooltipFlag flag) {
 		super.appendHoverText(stack, context, display, tooltip, flag);
+		if (EquipmentSettings.number(stack, "saw_mode", 0) == 2) tooltip.accept(Component.literal("Leaf clearing: " + leafCost(stack) + " JE per leaf"));
 		tooltip.accept(Component.translatable("tooltip.jugcraft.chainsaw").withStyle(ChatFormatting.GRAY));
 	}
 }

@@ -3894,12 +3894,12 @@
   {
     "source": "art/owner-library/originals/Oct23/Jimtafacts/applied energentics reborn by jimbo/assets/ae2/models/item/color_applicator_colored.json",
     "runtime": "src/main/resources/assets/jugcraft/models/jimtafacts/ae2/item/color_applicator_colored.json",
-    "changes": "Namespace references and native emission metadata; original elements and pixels retained. Audited overlapping faces separated and exposed box faces closed for the native renderer, UVs pinned."
+    "changes": "Namespace references and native emission metadata; original elements and pixels retained. Geometry and UVs unchanged; only the audited faces buried inside opaque neighbours are left out."
   },
   {
     "source": "art/owner-library/originals/Oct23/Jimtafacts/applied energentics reborn by jimbo/assets/ae2/models/item/color_applicator.json",
     "runtime": "src/main/resources/assets/jugcraft/models/jimtafacts/ae2/item/color_applicator.json",
-    "changes": "Namespace references and native emission metadata; original elements and pixels retained. Audited overlapping faces separated and exposed box faces closed for the native renderer, UVs pinned."
+    "changes": "Namespace references and native emission metadata; original elements and pixels retained. Geometry and UVs unchanged; only the audited faces buried inside opaque neighbours are left out."
   },
   {
     "source": "art/owner-library/originals/Oct23/Jimtafacts/applied energentics reborn by jimbo/assets/ae2/textures/guis/quartzknife.png",

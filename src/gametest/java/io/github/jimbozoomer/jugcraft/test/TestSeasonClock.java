@@ -1,41 +1,43 @@
 package io.github.jimbozoomer.jugcraft.test;
 
-import java.time.Clock;
 import java.time.Instant;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
+import org.jspecify.annotations.Nullable;
 
-/** Scoped season clock for world generation on every test thread. Never shipped with the mod. */
+/** One real-date snapshot for a client tour; closed after its worlds finish saving. Not shipped with the mod. */
 public final class TestSeasonClock implements AutoCloseable {
-	private static volatile Clock clock;
-	private final Clock previous;
+	private static volatile @Nullable Instant frozen;
+	private final Instant captured;
 
-	private TestSeasonClock(Instant instant) {
-		previous = clock;
-		clock = Clock.fixed(instant, ZoneOffset.UTC);
+	private TestSeasonClock(Instant captured) {
+		this.captured = captured;
 	}
 
-	public static TestSeasonClock freeze(Instant instant) {
-		return new TestSeasonClock(instant);
+	public static TestSeasonClock freeze(Instant instant) { return freezeAt(instant); }
+
+	public static java.time.LocalDate date(java.time.ZoneId zone) {
+		Instant snapshot = frozen;
+		return snapshot == null ? java.time.LocalDate.now(zone) : java.time.LocalDate.ofInstant(snapshot, zone);
 	}
 
-	public static TestSeasonClock freeze() { return freeze(Instant.now()); }
-
-	static TestSeasonClock freezeAt(Instant instant) { return freeze(instant); }
-
-	public static @org.jspecify.annotations.Nullable Instant frozenInstant() {
-		Clock current = clock;
-		return current == null ? null : current.instant();
+	public static TestSeasonClock freeze() {
+		return freezeAt(Instant.now());
 	}
 
-	public static LocalDate date(ZoneId zone) {
-		Clock current = clock;
-		return current == null ? LocalDate.now(zone) : LocalDate.now(current.withZone(zone));
+	static synchronized TestSeasonClock freezeAt(Instant captured) {
+		if (frozen != null) throw new IllegalStateException("A seasonal test clock is already active");
+		var scope = new TestSeasonClock(captured);
+		frozen = scope.captured;
+		return scope;
+	}
+
+	public static @Nullable Instant frozenInstant() {
+		return frozen;
 	}
 
 	@Override
 	public void close() {
-		clock = previous;
+		synchronized (TestSeasonClock.class) {
+			if (frozen == captured) frozen = null;
+		}
 	}
 }

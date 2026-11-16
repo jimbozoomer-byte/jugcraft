@@ -117,7 +117,7 @@ with no number changed (B-10). Their decisions are B-P40 to B-P53, all Proposed,
 - **No economy loop** (06:146-158): Yeti Fur reaches no Rime-bearing ingredient (snowball, amethyst shard, gloamcap).
   Its wool goes on through the Assayer's Scale to sugar and bone meal, which are ingredients but carry no Rime; no
   recipe, villager trade or Scale form makes snow, amethyst or gloamcap from it, so the boss makes Frostward no cheaper
-  (a town's coin shops, where the General Store buys wool and the Seasonal Stall sells snow blocks in winter, are money,
+  (a town's coin shops, where the Seasonal Stall sells snow blocks in winter, are money,
   as for any item, and stay outside this check); a draught or a salve is neither an ingredient nor weighed at the
   Assayer's Scale; diluting makes more bottles but not more Frostward (two parts of the same brew carry 0.406 a
   part, below the threshold); two draughts drunk one after the other keep the longer time, never the sum.

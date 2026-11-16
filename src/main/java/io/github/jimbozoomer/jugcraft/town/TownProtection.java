@@ -101,6 +101,15 @@ public final class TownProtection {
 		if (player.isSpectator()) return InteractionResult.FAIL;
 		BlockState state = level.getBlockState(pos);
 		boolean holding = !player.getMainHandItem().isEmpty() || !player.getOffhandItem().isEmpty();
+		// Only the season ledger's own servings are public, never arbitrary stored food.
+		if (level instanceof net.minecraft.server.level.ServerLevel server && TownFeast.managed(server, pos)) {
+			if (TownFeast.mayPublicEat(server, pos, player)
+					&& io.github.jimbozoomer.jugcraft.finance.LandRegistry.mayBuild(player, level, pos)) {
+				InteractionResult result = state.useWithoutItem(level, player, hit);
+				return result.consumesAction() ? result : InteractionResult.FAIL;
+			}
+			return InteractionResult.FAIL;
+		}
 		// Execute only the block's ordinary interaction, never the held item's use-on-block
 		// fallback (placing, stripping, dyeing, waterlogging, etc.). Claim checks still apply.
 		if (publicBlock(level, pos, state)
@@ -116,9 +125,11 @@ public final class TownProtection {
 
 	/** Public amenities do not expose persistent inventories; unknown block entities stay private. */
 	public static boolean publicBlock(Level level, BlockPos pos, BlockState state) {
+		// A set-down meal's empty-hand interaction removes it into inventory. Treat it like a flower pot,
+		// not a door; the managed public feast has its own serving-only permission above this fallback.
+		if (state.getBlock() instanceof io.github.jimbozoomer.jugcraft.agriculture.PlacedDishBlock) return false;
 		// This is the player's personal inventory, explicitly provided by the bank.
 		if (state.is(net.minecraft.world.level.block.Blocks.ENDER_CHEST)) return true;
-        if (state.getBlock() instanceof io.github.jimbozoomer.jugcraft.boardgames.TableBlock) return true;
         if (state.getBlock() instanceof io.github.jimbozoomer.jugcraft.boardgames.TableBlock) return true;
         // Public enchanting uses an isolated vanilla menu; it never exposes the
         // owner's new persistent table inventory (OwnerEnchantingMenuMixin).

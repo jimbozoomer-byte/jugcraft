@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=north,waterlogged=false": {
+      "model": "jugcraft:block/carved_bowls_and_spoons"
+    },
+    "facing=north,waterlogged=true": {
+      "model": "jugcraft:block/carved_bowls_and_spoons"
+    },
+    "facing=east,waterlogged=false": {
+      "model": "jugcraft:block/carved_bowls_and_spoons",
+      "y": 90
+    },
+    "facing=east,waterlogged=true": {
+      "model": "jugcraft:block/carved_bowls_and_spoons",
+      "y": 90
+    },
+    "facing=south,waterlogged=false": {
+      "model": "jugcraft:block/carved_bowls_and_spoons",
+      "y": 180
+    },
+    "facing=south,waterlogged=true": {
+      "model": "jugcraft:block/carved_bowls_and_spoons",
+      "y": 180
+    },
+    "facing=west,waterlogged=false": {
+      "model": "jugcraft:block/carved_bowls_and_spoons",
+      "y": 270
+    },
+    "facing=west,waterlogged=true": {
+      "model": "jugcraft:block/carved_bowls_and_spoons",
+      "y": 270
+    }
+  }
+}

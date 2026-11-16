@@ -202,6 +202,17 @@ class ClientTestSelectionTests(unittest.TestCase):
         self.assertIn("ConcordancePactNetworkTests", chosen)
         self.assertIn("ConcordancePactNetworkTests", selection.WEIGHTS)
 
+    def test_garden_network_test_is_its_own_class_and_weighed(self):
+        # Concordance garden cohort, GC-10 unit 7 (GC-P142): the garden's two-client test is a client class of its own, with
+        # a running-time estimate.
+        chosen, _ = selection.select(["src/gametest/java/io/github/jimbozoomer/jugcraft/test/ConcordanceGardenNetworkTests.java"], self.tests, set())
+        self.assertIn("ConcordanceGardenNetworkTests", chosen)
+        self.assertIn("ConcordanceGardenNetworkTests", selection.WEIGHTS)
+        # GC-10 unit 7 (review): it opens the stranger's pact screen, so a change to the magic interface kit's sprites, which
+        # no class names, selects it with the others.
+        chosen, _ = selection.select(["src/main/resources/assets/jugcraft/textures/gui/sprites/magic/plate.png"], self.tests, set())
+        self.assertIn("ConcordanceGardenNetworkTests", chosen)
+
     def test_measured_long_suites_do_not_share_one_shard(self):
         # Use the actual full-suite layout: the old estimates put both long
         # suites together in shard 6 alongside 21 other classes.
@@ -215,17 +226,6 @@ class ClientTestSelectionTests(unittest.TestCase):
             with self.subTest(isolated=name):
                 isolated_job = next(names for _, names in jobs if name in names)
                 self.assertEqual([name], isolated_job)
-
-    def test_garden_network_test_is_its_own_class_and_weighed(self):
-        # Concordance garden cohort, GC-10 unit 7 (GC-P142): the garden's two-client test is a client class of its own, with
-        # a running-time estimate.
-        chosen, _ = selection.select(["src/gametest/java/io/github/jimbozoomer/jugcraft/test/ConcordanceGardenNetworkTests.java"], self.tests, set())
-        self.assertIn("ConcordanceGardenNetworkTests", chosen)
-        self.assertIn("ConcordanceGardenNetworkTests", selection.WEIGHTS)
-        # GC-10 unit 7 (review): it opens the stranger's pact screen, so a change to the magic interface kit's sprites, which
-        # no class names, selects it with the others.
-        chosen, _ = selection.select(["src/main/resources/assets/jugcraft/textures/gui/sprites/magic/plate.png"], self.tests, set())
-        self.assertIn("ConcordanceGardenNetworkTests", chosen)
 
     def test_workflow_runs_every_selected_shard(self):
         workflow = (ROOT / ".github/workflows/build.yml").read_text()

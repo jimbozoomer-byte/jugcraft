@@ -45,11 +45,15 @@ public class ProspectorScreen extends Screen implements ScreenKit.Fitted {
 	}
 
     public ProspectorScreen(SurveyPayload payload) {
-        super(Component.translatable(payload.instrument() == 2 ? "item.jugcraft.jimta_advanced_ore_scanner"
-            : payload.instrument() == 1 ? "item.jugcraft.jimta_ore_scanner" : "item.jugcraft.prospector"));
+        super(heading(payload));
         snapshot = payload; readings = payload.readings();
         if (HISTORY.isEmpty() || !HISTORY.peekFirst().equals(payload)) HISTORY.addFirst(payload);
         while (HISTORY.size() > 5) HISTORY.removeLast();
+    }
+    /** The instrument that took the survey shown (History can show another instrument's survey). */
+    private static Component heading(SurveyPayload payload) {
+        return Component.translatable(payload.instrument() == 2 ? "item.jugcraft.jimta_advanced_ore_scanner"
+            : payload.instrument() == 1 ? "item.jugcraft.jimta_ore_scanner" : "item.jugcraft.prospector");
     }
     private List<OreSurvey.Reading> visible() {
         if (filter == 0) return readings;
@@ -101,7 +105,7 @@ public class ProspectorScreen extends Screen implements ScreenKit.Fitted {
 	public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float delta) {
 		super.extractBackground(graphics, mouseX, mouseY, delta);
 		ScreenKit.body(graphics, theme, left, top, WIDTH, HEIGHT);
-		ScreenKit.title(graphics, font, theme, left, top, title, readings.isEmpty() ? theme.dim() : theme.ok(), WIDTH - 80);
+		ScreenKit.title(graphics, font, theme, left, top, heading(snapshot), readings.isEmpty() ? theme.dim() : theme.ok(), WIDTH - 80);
 		ScreenKit.chip(graphics, font, theme, left + WIDTH - 4, top + 1, t("signals", readings.size()), theme.text());
 		ScreenKit.pane(graphics, theme, left + 6, top + GLASS_Y, WIDTH - 12, GLASS_HEIGHT);
 
@@ -118,7 +122,8 @@ public class ProspectorScreen extends Screen implements ScreenKit.Fitted {
 		// The phosphor warms up: dim for the first moment.
 		int text = t < 0.4F ? theme.dim() : theme.text();
 
-		graphics.text(font, snapshot.diameter() + "x" + snapshot.diameter() + " chunks | coverage " + snapshot.coverage() + "/" + (snapshot.diameter() * snapshot.diameter()), sx + 6, sy + 5, text, false);
+		// Only the scanners measure their area and coverage; the Prospector and Survey Rocket send no such figures.
+		if (snapshot.instrument() > 0) graphics.text(font, snapshot.diameter() + "x" + snapshot.diameter() + " chunks | coverage " + snapshot.coverage() + "/" + (snapshot.diameter() * snapshot.diameter()), sx + 6, sy + 5, text, false);
         if (snapshot.instrument() > 0) graphics.text(font, snapshot.dimension().substring(snapshot.dimension().indexOf(':')+1) + " " + snapshot.origin().toShortString() + " | " + Math.max(0, ((net.minecraft.client.Minecraft.getInstance().level == null ? snapshot.sampledAt() : net.minecraft.client.Minecraft.getInstance().level.getGameTime()) - snapshot.sampledAt()) / 20) + "s ago", sx + 6, sy + 18, theme.dim(), false);
 		// Under the heading, the workshop glass's band (a plain rule if the look has none).
 		int band = theme.frame().band();

@@ -1,5 +1,107 @@
 # Jugcraft TODO
 
+- [ ] **Owner correction Nov15 — current live world climate bands:** migrate future Overworld generation around the saved spawn-city origin (X1296/Z400), preserving all generated chunks/builds. Migration bundle prepared locally; validate old-save reopen and new terrain, prepare matching build, then obtain restart confirmation and give 30-second warning. This replaces the earlier new-world-only rollout assumption. See `docs/features/spawn-relative-climate.md`.
+
+## November 15 — spawn-relative Overworld climate bands (new-world opt-in complete locally)
+
+- [ ] **Add north/south climate bands anchored to the world spawn and spawn city's location.** Owner request recorded by OpenAI Codex; implementation brief sent to the existing Claude coordinator with four workstreams (core selection, runtime integration, editor, independent tests), with local integration/review owned by Codex. All four deliveries are integrated locally. The 29 focused server tests and three combined client suites pass, including dense generation, real exported data, independent profiles and save/reopen checks. The current implementation supports new World Designer worlds, not automatic changes to the live world. [Work record and acceptance](features/spawn-relative-climate.md). Distances are approximate north/south offsets from that origin, not distance from world coordinates 0,0 or radial distance. Bands extend east/west.
+
+| Location relative to spawn/city | Requested biome mix |
+| --- | --- |
+| About 2,500 blocks north and farther north | Arctic/frigid biomes only. |
+| Central area, between the northern threshold and about 2,000 blocks south | Retain the normal central biome mix. |
+| About 2,000–4,000 blocks south | Hot belt: deserts, tropical biomes and jungles. |
+| About 4,000–5,500 blocks south | Temperate belt again: taiga, forests and grasslands. |
+| About 5,500 blocks south and farther south | Arctic/frigid biomes only again. |
+
+Implementation planning: resolve and persist the exact spawn/city climate origin (north is decreasing Z, south increasing Z), choose compatible vanilla/custom biome pools and transition widths, and account for appropriate oceans/rivers and seasonal behavior. Reuse the [World Designer](WORLD_DESIGNER.md) model/serialized generation framework where applicable. Plan how this applies to newly generated terrain and existing explored regions while preserving the spawn city, player builds and claims; do not silently regenerate existing chunks.
+
+Dispatch status: all four workers resumed and delivered. Codex integrated the combined 18-patch series locally, verified its hashes, corrected the pinned-game API and registry lifecycle, and added an actual-export regression fixture. Combined Minecraft validation passed; nothing has been pushed or applied to the live world. Codex also fixed inherited history-dependent biome ties only for opted-in climate sources.
+
+- [x] New World Designer climate opt-in: editor controls/overview/export, frozen authored origin, compatible surface pools, caves/paint preservation, codec lifecycle, consistent base lookup and combined runtime checks. See the feature ledger for exact evidence and limits.
+- [ ] Existing server-world climate migration: inspect a disposable world copy, choose the actual spawn/city anchor, assess explored-region seams, and prepare a reversible saved-generator migration before requesting deployment. No live chunks or builds have been changed.
+- [ ] Climate season follow-up: map seasonal foliage for `landscape_ominous_woods` and `landscape_origin_valley`; retain documented vanilla frozen-ocean precipitation behavior unless deliberately redesigned.
+- [ ] Existing worldgen follow-up: fix `supps_ocean_barnacles` attempting writes into far chunks. The dense climate audit also reproduced these warnings in its unbanded control; investigate feature bounds separately.
+
+## November 14 — Thanksgiving batch 2: feast side dishes (local, Claude Code)
+
+- [x] **Six Thanksgiving side dishes implemented and locally reviewed.** Glazed Carrots, Roasted Root Vegetables, Scalloped Potatoes, Apple Cranberry Crisp, Stuffed Mushrooms and Skillet Corn Cakes have recipes, sculpted placed models and food/drop behavior. Combined server cases, protected-town pickup, `c:foods` membership and the actual client gallery pass. Codex inspected every dish; owner play review is still separate. [Record](features/thanksgiving-dishes.md).
+
+## November 14 — next Thanksgiving expansion (local, validated)
+
+- [x] Complete selected combined validation of the integrated four-worker weapon, pirate ship, food/decor and horse/Pegasus/crossbreed package. Final run passes all 440 server cases; all 31 selected client classes pass, including the corrected tooltip/HUD and clear two-client horse views. Resource/economy audits and personal Minecraft image review pass. Owner play review and publication remain separate. [Evidence and limits](features/thanksgiving-expansion-nov14.md).
+- [x] Safe seasonal harvest craft installation implemented locally: four lawn scenes, dry-run reporting, exact saved ownership, whole-footprint/buffer checks, repeat/reload/owner-override tests. All ten server cases and actual town client gallery pass. Owner additions, church slot machines, doors, stalls and walking lanes are preserved; no live world changed.
+- [x] Review and locally integrate ready PRs #600/#609/#611 against verified unchanged main/heads. Resolve overlaps, preserve local fixes, reconcile selected economy consumers, repair still fuel-container extraction and validate together. Remote PRs remain unchanged; #596 and #593 still report conflicts and 27 others are drafts. Publication/merge is a later step.
+
+## November 14 — Thanksgiving crafts and horse review (local)
+
+- [x] Four-worker Thanksgiving package: all four initial bundles and follow-ups integrated locally (27 new props, three refinements, two reuse decisions), with personal generated-preview review, 62 combined Python checks, initial combined compilation and full data/model audit passing. Canonical seating, cross-part claim/explosion protection, public corn toss and fluid-resistant arches are implemented; all 27 essence values reproduce from the game JAR, and 19 inexpensive props are tablet outputs. All 118 selected combined server tests and six client suites pass; the final close-up/HUD-isolation rerun and personal Minecraft image review are complete. Local only, ready for owner play review. [Scope and acceptance](features/thanksgiving-craft-package-nov14.md).
+- [x] Finish horse/Pegasus observer review and corrected-seat rerun. Five ground breeds have spawning, fitted tack, bounded traits, saved crossbreeding and cargo; Pegasus has survival spawning, breeding, flight and a light pack. Final server tests, single-client rider/flight checks and two-client replication pass. Codex inspected all five unobscured breed views and grounded/airborne Pegasus; the two-pixel seat mismatch is fixed. [Gameplay and remaining proposals](features/horse-breeds.md).
+- [x] Complete selected local integration validation of the A–D/E–H deliveries and aircraft aim follow-up. The local merge preserved existing fixes; compilation, eleven focused Python checks and art validation pass. The three raid failures from the first 52/55 run are repaired: the focused raid/homestead rerun passed all 30 tests, including the full city scenario. All 118 selected combined server tests now pass, including this cohort. All six selected client suites pass; representative rendered review is complete. Two-client observer/load checks remain separate follow-ups. [Integration and limitations](features/nov14-local-integration.md). Cloud delivery is not local validation or deployment.
+
+## November 13 deliveries — integrated and reviewed November 14
+
+- [x] Claude E: unified encyclopedia tech/magic route maps, per-step guidance and live recipe links. Server routes and rendered navigation/minimum-GUI checks pass; equipment stays usable without research gates.
+- [x] Claude F: close the demonstrated essence-to-Jug General Store loop by refusing formable supplies. Combined economy regressions pass; convenience-only outputs are preserved.
+- [ ] Economy follow-up: reconcile the 19 documented older wood-recipe gains against a deliberate shared budget. Selected mineral-sand/component/pharmacy consumers and mossy-oak inputs are reconciled locally; unrelated generated price changes were not adopted. [November 14 evidence](features/thanksgiving-expansion-nov14.md).
+- [x] Claude G plus Codex repairs: guard line-of-sight repositioning, intentional raid approaches, bounded recovery and holding without random wandering. Selected raid and full-city scenarios pass; owner builds/claims remain protected.
+- [x] Claude H: opt-in reproducible benchmark tooling and mock-player isolation fixes. Isolation/runtime cleanup checks pass.
+- [ ] Run and record the performance baselines; benchmark tooling alone is not a measured performance result. Separate observer-client validation also remains.
+- [x] Prior A–D polish integrated: storage-cell tint, color-applicator faces, connected home geometry, aircraft transforms/HUD, and guest wardrobes/held-item alignment. Selected server/client tests and rendered review pass. Existing recorded weapon/model limitations remain in the feature ledger.
+- [x] Codex: reviewed all delivered patches, preserved the dirty checkout, fixed local integration defects, and completed the 118-test selected server cohort, six client suites, resource/Python checks and personal image review. No publication or deployment.
+
+The original A–D ZIP is retained under `build/nov13-review` (SHA-256 `7e7c416c778893e1830d7658e1265c6dae080e2c4f0684a1960b41336779e679`; all 21 checksum-listed files verified). Later E–H, aircraft and holiday deliveries are recorded in [the November 14 integration ledger](features/nov14-local-integration.md) and [holiday acceptance](features/thanksgiving-craft-package-nov14.md). These current results supersede the earlier cloud-only/pending-local checkpoints. The whole repository suite, a two-client observer and load validation are not claimed by these selected local checks.
+
+## November 12 — parallel repair and companion followup
+
+- [x] Local aircraft flight-help layout: all controls fit at 854x480 and 640x480, including rebound keys; the rendered HUD tests and uncluttered captures pass on November 14.
+
+- [x] Claude A: audited the 164 reported item/model IDs against supplied originals and added regression coverage; the reported runtime mappings were already repaired on main.
+- [x] Claude B: repaired missing faces in six backpack handles and three rope models while retaining intentional openings; focused checks and art audit pass.
+- [x] Claude C: shared aircraft attitude helper and banking regressions integrated; rendered steering, F5 and sound-resource checks passed. Existing bank direction was correct; no extra sign flip applied.
+- [x] Claude D: integrated companion API compatibility, full-affection meals, event-driven outing milestones and ceremony persistence/permission fixes, with adult-only eligibility.
+- [x] Codex: preserved dirty work, integrated all deliveries, corrected race-timeout rewards and Activities layout, and completed combined local validation: 3,795 required server tests, four selected rendered client classes, 23 Python checks, compilation and art/repository checks.
+- [ ] Remaining visual followup: storage-cell LED tint; connected-table/fountain/Christmas-bulb/bathtub-tap/storage-drive/color-applicator candidates. Missing dedicated originals noted by the texture worker remain unresolved; do not equate passing file-reference audits with complete visual acceptance.
+
+All four November 12 Claude workers and the November 11 expansion are delivered and integrated locally. See [local integration evidence and limitations](features/nov12-local-integration.md). No release or live restart.
+
+## November 11 — guest personalities, outings and ceremonies
+
+- [x] Implement the owner-approved [four-worker companion expansion](plans/jze-guest-expansion-nov11.md): appearance/wardrobe; personalities/errands/banter/rivalries; outings/home visits; milestones/weddings/opt-in notices. Preserve existing guest mechanics and owner builds. Local/review only; all four deliveries are integrated. Combined local runtime validation passed; see the November 12 integration record for exact coverage and remaining visual limits.
+
+## November 9 — JZE unique town guests and relationships
+
+Owner-approved Jughead request. Full scope, roster, clarification holds and work split: [feature plan](features/jze-town-relationships.md). Keep implementation local/review-only.
+
+- [x] One persistent NPC per approved character across the server; no per-player copies or duplicate respawns after unload/restart.
+- [x] Gift/fetch quests raise saved player-to-NPC affection to a cap before marriage. Server validates quests, items, distance and repeat submissions.
+- [x] Exactly one spouse per player and one player per NPC; atomic acceptance prevents competing proposals from both succeeding.
+- [x] Divorce releases both partners; **both have a seven-real-day remarriage cooldown**, persisted across restarts.
+- [x] Reuse town/custom NPCs and shared UI; show affection, current request, availability, proposal confirmation and cooldown clearly. Preserve owner-placed city objects and existing NPCs.
+- [ ] Add the approved JZE roster with distinctive Minecraft-style appearances; Brittany Venti and Agnes Tachyon are confirmed. Rooni needs an identifying reference; Remielle, the unnamed guest and Jakeey's K-pop choices remain pending, not guessed.
+- [x] Validate duplicate prevention, competing proposals, inventory consumption, unload/reload, divorce/cooldown and rendered UI together before release.
+
+
+- [ ] **Appearance acceptance and pending identities:** 32 authored character-inspired skins and model accessories plus protected lawn preview/placement commands are implemented locally. Review their likenesses and identify the four held entries. No live-city placement. [Art record](audits/jze-guest-appearances.md).
+- [x] **Resolve roster scope discrepancy locally:** all 32 identified guests support friendship; romance remains restricted to the reviewed eligible adults. Fourteen held characters cannot marry. Unidentified entries remain unavailable.
+- [x] **November 11 local foundation verified:** 26/26 guest server tests and real client UI/confirmation checks pass. Full sweep was 3,744/3,745 before correcting one test-only assertion. [Evidence and limitations](features/jze-town-relationships.md#final-local-validation--november-11). Not released.
+
+## November 8 — reported hydroponics water input failure
+
+- [x] **Local hydroponics fix:** clarified that the bay takes Nutrient Solution (fertilizer + water in the Chemical Reactor), not plain water. Gauge, bucket refusal messages, item tooltip and handbook now agree. Claude's patch integrated locally; all six full-multiblock fluid tests and rendered empty/filled gauge checks passed November 9. Not released.
+
+## November 9 — local imbuement repair
+
+- [x] Chamber hand insertion accepts lapis for Source Gems. All 17 Nouveau expansion server tests passed on the local integrated build; see [evidence](features/nov7-priorities.md). Not released.
+
+## November 7 — owner-selected priorities
+
+See [ordered work and delegation](features/nov7-priorities.md). First fix trading tooltips, lapis imbuement and powered night vision. Then #3 equipment, #4 mineral processing, #5 tablet building outputs, #6 city raids, #7 walker cockpits, #8 harvest city transition, #11 garden pacts, and finally roaming pirate ships. Keep this batch local until reviewed and tested.
+
+- [x] **November 9 local batch verified:** equipment, mineral routes, reviewed tablet decorations, city combat/cockpit, garden pacts, harvest feast and roaming pirate ships. Combined 3,718 server tests passed; final pirate correction passed all 35 focused cases and rendered ship checks. [Exact evidence and limits](features/nov7-priorities.md#current-completion--november-9-local-batch).
+- [ ] **Before release:** owner visual/balance review and populated city/ocean playtest; prepare a separate release and request restart confirmation. Current work is local only.
+
+
 ## Pharmacy follow-up — November 4
 
 - [ ] Add companion automation to pharmacy machines after reusable Precision Process Modules can be supplied and retained safely in upgrade slots. These eight forms currently remain outside helper assistance; preserve the existing 40 supported industrial processors.
@@ -29,14 +131,16 @@ Owner request, 3 November 2026. Local working branches only: nothing is committe
 - [x] **B — Companion stable screen implemented and tested locally:** wood/leather styling, portraits, health/bond, status/KO countdown, behavior controls and keyboard navigation. Real client checks pass for recall/deploy, Stay, keyboard selection, recovery lock and 640×480 layout; screenshots reviewed. Not an exhaustive GUI-scale or two-human multiplayer test. [Record](features/pet-inventory-nov2.md#companion-stable-screen-3-november-2026).
 - [x] **C — All eight placed-food remodels integrated locally:** sculpted dishware and ingredients, source generators, textures and collision/opaque-face tests. Rendered client test passes; clean 1280×720 in-game visuals reviewed. The shared [food modelling guide](FOOD_MODELS.md) records the style for future dishes. [Record](features/placed-food-remodels.md).
 - [x] **D–G — Thanksgiving decorations integrated locally:** 19 new craftable blocks plus the Autumn Leaf Table Runner; existing equivalents reused. Placement, drops, garland connections, candle interactions and runner swaps pass combined server checks. Gravy boat refined. Twenty new essence entries generated without changing existing values. Rendered client test passes. [Record](features/thanksgiving-decor.md).
+- [ ] **Thanksgiving group B — woodland harvest crafts (local, Claude Code, 14 November):** eight decorations ([record](features/thanksgiving-woodland-crafts.md)); offline checks pass, Java syntax-parsed only, game tests written but not run. Needs a compile, the server game tests and an in-game look. Owner/Codex follow-up: verify the craft forms and motifs against the three cited pages, which were not fetchable here.
 - [ ] **Before release:** owner visual playtest, optional full-city raid soak test, and separate approval for any live restart. No town decoration migration or owner-placement changes were made. Existing 48 imported-model geometry audit findings remain a separate priority; this batch adds no findings. Whole-repository generator limitations remain recorded in the ledger; do not label the full repository audit green.
 
 ## Thanksgiving festival — November 1
 
 - [x] **Phase 9 — Optional chess/checkers wagers completed locally.** Free by default; 1/5/10/25/50 Jugs each, mutual consent, Exchange escrow, winner/draw settlement, refunds and saved receipts. Nine board/wager server tests, two Exchange regressions and rendered/input client validation passed. No deployment. [Evidence](features/thanksgiving-festival-nov1.md).
 
-- [ ] **Phase 6 — HOLD until Halloween decor is finished (roughly November 3–4).** Cornucopia/city transition plan prepared; no implementation or automatic activation authorized yet. Preserve owner edits and slot machines.
-- [ ] Clean the existing `harvest_costume` empty equipment-layer metadata warning before festival publication; preserve the custom costume renderer.
+- [x] **Phase 6 centerpiece/migration — verified locally November 9, not released.** Larger 5x3x5 cornucopia with lanterns; versioned November 4–30 scene; whole-multiblock owner protection. All 15 city and 3 prop-related tests plus rendered day/night review pass. Legacy layouts and owner placements preserved. [Evidence](features/nov7-priorities.md).
+- [x] **Phase 6 feast sites verified locally November 9:** finite public servings, no refill after consumption/reload, protected owner food/furniture, clear entrances and stall lanes. Combined server and rendered interaction checks pass. No live town migration yet. [Evidence](features/nov7-priorities.md).
+- [x] Fixed `harvest_costume` equipment metadata locally: valid transparent vanilla layer preserves the custom costume renderer. Native codec and rendered festival client test pass (November 9); four resource tests pass. Not released.
 - [x] **Phases 7–8 — Checkers and chess completed locally.** Shared free-play interfaces, saved two-player matches, live carved pieces and server-checked moves. 31 rules assertions, four server tests, two resource tests and rendered/input client validation passed. Optional wagers are now completed in phase 9; no publication or deployment. [Evidence](features/thanksgiving-festival-nov1.md#phases-78-final-validation--november-2).
 
 - [x] **Phases 3–5 — Dishes, giant turkey and November costumes completed locally.** Four dishes with recipes/serving models, a 24-portion 3×3×2 turkey, year-round player Pilgrim outfits and reversible November citizen/raider overlays. Six resource checks, seven server tests and the final rendered client review passed. Owner artistic/playtest feedback and publication remain separate. [Feature record](features/thanksgiving-festival-nov1.md).
@@ -161,6 +265,7 @@ chose star-bred lines first and it is designed; the others are not scoped yet.
   Winter Crown is up, a star forge that works only at alignments. Needs thinking through before any design.
 - Also floated, not discussed further yet: meteor falls charted by the forecast, with star-iron and sky-glass as new
   materials.
+- [ ] Regenerate `alchemy/values.json` with `tools/build_alchemy_values.py --minecraft-jar` and confirm the hand-computed sand records (10 November audit), then run the new sand game tests in a Gradle build.
 
 ## Local cosmetic costume — October 26
 

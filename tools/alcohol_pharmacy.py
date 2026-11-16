@@ -89,7 +89,7 @@ HANDBOOK = {
     'mash_conditioning_barrel': ['A shared rustic barrel variant for new mash and conditioning jobs. It leaves all existing Cider Barrel items, recipes, saved contents and ageing unchanged. No electricity, generator or motor. New jobs advance only while the machine is loaded, and saved work/cancellation follow the common process rules.',
         'One Mash Jug ferments into one Fermented Mash Jug in 1200 loaded ticks. Later, four Refined Spirits Concentrate plus honeycomb condition into four Reserve Whiskey Concentrate in 2400 ticks, retaining an Oak Conditioning Insert. Install that insert in the conditioning socket; the initial mash job needs no tool.'],
     'moonshine_still': ['A fueled copper still with no power connections. One Fermented Mash Jug, four empty glass bottles and 200 furnace-fuel ticks make four Moonshine and return one Empty Mash Jug. Fuel burns only for paid processing; idle, pause, missing tools and blocked output do not consume fuel.',
-        'Upper front mash, upper rear bottles, lower right fuel. Lower front drink output, lower rear returned-jug outlet. Fuel remainder containers stay in the fuel slot exactly once. This is an abstract game recipe with no real distillation controls.'],
+        'Upper front mash, upper rear bottles, lower right fuel. Lower front drink output, lower rear returned-jug outlet. Empty fuel containers return once in the fuel slot and can be extracted through the lower-right fuel port; unburned fuel and recipe ingredients cannot be extracted there. This is an abstract game recipe with no real distillation controls.'],
 }
 
 def write_extras(write, assets, data, lang, condition):

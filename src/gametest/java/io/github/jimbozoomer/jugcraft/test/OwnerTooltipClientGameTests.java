@@ -39,10 +39,14 @@ public final class OwnerTooltipClientGameTests implements FabricClientGameTest {
                     graphics.setTooltipForNextFrame(client.font, stack, 100, 100);
                     graphics.extractDeferredElements(100, 100, 0);
                     int[] previews = {0};
+                    renderState.forEachItem(state -> {
+                        if (!state.itemStackRenderState().isEmpty()) previews[0]++;
+                    });
+                    // The retained fix renders a native GUI item. Entity previews were the unsafe path.
                     renderState.forEachPictureInPicture(state -> {
-                        if (state instanceof net.minecraft.client.renderer.state.gui.pip.GuiEntityRenderState preview
-                                && preview.renderState() instanceof net.minecraft.client.renderer.entity.state.ItemEntityRenderState dropped
-                                && !dropped.item.isEmpty()) previews[0]++;
+                        if (state instanceof net.minecraft.client.renderer.state.gui.pip.GuiEntityRenderState) {
+                            throw new AssertionError("Tooltip created an entity preview for " + item);
+                        }
                     });
                     if (previews[0] != (stack.isDamageableItem() ? 1 : 0)) {
                         throw new AssertionError("Wrong number of item previews for " + item + ": " + previews[0]);

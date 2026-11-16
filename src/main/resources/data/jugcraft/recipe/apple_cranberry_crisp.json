@@ -1,0 +1,23 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:bowl",
+    "minecraft:apple",
+    "jugcraft:cranberries",
+    "jugcraft:cranberries",
+    "jugcraft:flour",
+    "minecraft:sugar",
+    "jugcraft:butter"
+  ],
+  "result": {
+    "id": "jugcraft:apple_cranberry_crisp",
+    "count": 1
+  }
+}

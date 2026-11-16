@@ -40,11 +40,26 @@ each `pennant` blocks across at one texel to a pixel, every `spacing` blocks (cl
 Sack-Race Sack: a hessian sack worn in the legs slot, up to the waist; in it a player walks at `speed` (multiplied),
 can't step up a block without hopping (`step`), and jumps `jump` harder, just short of clearing a fence. Attributes
 of the item, so nothing ticks for them.
+
+Part 5, the Harvest Centerpiece (agriculture/HarvestCenterpieceBlock; the town square's November centrepiece, Thanksgiving
+phase 6, docs/features/thanksgiving-festival-nov1.md): the Giant Cornucopia's horn and the harvest spilling from it,
+the same thing half as big again (`scale`; its 1.25 m mouth 1.9 m), standing in a harvest show 5 m square: more of the
+harvest spilling out before it (a show pumpkin, a white pumpkin, squashes, gourds, pears, apples and corn), two corn
+shocks standing behind it, two straw bales roped with twine and three brass lanterns with amber glass, one standing on
+the ground and one on each bale, lit or put out with a hand like the Haunted Archway's (`light` each while lit). Five
+blocks across, three up and five deep, placed and broken as one (MultiDecorationBlock), with no block entity; it fits
+wholly inside the town square's 7 x 13 x 7 centrepiece site (`site`). The Giant Cornucopia itself is unchanged.
+Sizes in pixels of its frame (80 across, 48 up, 80 deep), facing north; `horn_at` is where the horn's own frame's
+corner stands in it.
 """
 
 # Its mouth across its opening inside the rim (20 px, 1.25 m) and the horn's length from its rim to the back of its tail
 # (43 px, 2.7 m), in pixels.
 CORNUCOPIA = {"block": "giant_cornucopia", "display": "Giant Cornucopia", "size": (3, 2, 2), "mouth": 20.0, "length": 43.0}
+# The Harvest Centerpiece: its blocks, the horn's scale and where its frame stands, its lanterns' light, and the town
+# square's centrepiece site it must fit in (across, up, deep).
+CENTERPIECE = {"block": "harvest_centerpiece", "display": "Harvest Centerpiece", "size": (5, 3, 5), "scale": 1.5,
+               "horn_at": (11.0, 0.0, 14.5), "light": 13, "site": (7, 13, 7)}
 
 # The show's vegetables: each `block`, `display`, the crop nine of which make it, and its sizes in pixels.
 SHOW = {
@@ -97,6 +112,11 @@ RECIPES = [
      "key": {"I": "minecraft:iron_block", "B": "minecraft:blast_furnace", "P": "minecraft:piston", "C": "minecraft:clock",
              "G": "minecraft:green_dye"},
      "result": ENGINE["block"], "count": 1, "category": "building"},
+    # The centerpiece: a Giant Cornucopia set out with pumpkins, corn and straw, and three lanterns.
+    {"id": CENTERPIECE["block"], "pattern": ["LCL", "PGP", "HHH"],
+     "key": {"L": "minecraft:lantern", "C": "jugcraft:corn", "P": "minecraft:pumpkin", "G": "jugcraft:giant_cornucopia",
+             "H": "minecraft:hay_block"},
+     "result": CENTERPIECE["block"], "count": 1, "category": "building"},
     # The wagon: planks and sticks on iron-shod wheels, under a load of hay.
     {"id": WAGON["block"], "pattern": ["HHH", "PSP", "I I"],
      "key": {"H": "minecraft:hay_block", "P": "#minecraft:planks", "S": "minecraft:stick", "I": "minecraft:iron_ingot"},
@@ -114,7 +134,8 @@ SHAPELESS = [
 
 
 def blocks():
-    return [CORNUCOPIA["block"]] + [spec["block"] for spec in SHOW.values()] + [RIBBON_BOARD["block"], ENGINE["block"], WAGON["block"]]
+    return [CORNUCOPIA["block"]] + [spec["block"] for spec in SHOW.values()] + [RIBBON_BOARD["block"], ENGINE["block"], WAGON["block"],
+                                                                                CENTERPIECE["block"]]
 
 
 def items():

@@ -1338,7 +1338,7 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 		};
 	}
 
-	/** The slots an item port reaches: input ports only insert (what the recipes use), output ports only extract. */
+	/** Recipe inputs only insert and outputs only extract. A furnace-fuel slot also releases spent containers. */
 	public @Nullable Storage<ItemVariant> itemPort(FormPort port) {
 		if (!port.kind().item()) {
 			return null;
@@ -1350,11 +1350,23 @@ public class FormMachineBlockEntity extends BlockEntity implements ExtendedMenuP
 		List<Storage<ItemVariant>> reached = new ArrayList<>();
 		for (int slot = 0; slot < count; slot++) {
 			if (port.reaches(slot)) {
-				reached.add(container.getSlot(first + slot));
+				Storage<ItemVariant> backing = container.getSlot(first + slot);
+				if (input && first + slot == form.fuelSlot()) {
+					// Filter this slot, not the combined input view: a spent bucket must never
+					// make unrelated recipe ingredients extractable through an ALL-input port.
+					reached.add(new FilteringStorage<ItemVariant>(backing) {
+						@Override protected boolean canInsert(ItemVariant variant) { return true; }
+						@Override protected boolean canExtract(ItemVariant variant) {
+							return !variant.isBlank() && level instanceof ServerLevel server && furnaceTicks(server, variant.toStack()) <= 0;
+						}
+					});
+				} else {
+					reached.add(input ? FilteringStorage.insertOnlyOf(backing) : FilteringStorage.extractOnlyOf(backing));
+				}
 			}
 		}
 		Storage<ItemVariant> combined = new CombinedStorage<>(reached);
-		return companionAutomation.observe(input ? FilteringStorage.insertOnlyOf(combined) : FilteringStorage.extractOnlyOf(combined), input);
+		return companionAutomation.observe(combined, input);
 	}
 
 	/** Pushes output tanks and output slots out of their ports, into pipes or the storage beyond. */

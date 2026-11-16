@@ -81,7 +81,9 @@ public record EncyclopediaPayload(int sequence, List<Component> notices, List<Pa
 		/** Bought, sold or shared between players instead of made. */
 		TRADE,
 		/** Opens only after a boss has been beaten; never the only way. */
-		OPTIONAL_BOSS;
+		OPTIONAL_BOSS,
+		/** Another way to the same thing (a different recipe or an unpowered station); choose it instead, not as well. */
+		ALTERNATIVE;
 
 		public String id() {
 			return name().toLowerCase(Locale.ROOT);
@@ -147,14 +149,20 @@ public record EncyclopediaPayload(int sequence, List<Component> notices, List<Pa
 	}
 
 	/**
-	 * A recipe as the server has it, to draw as a crafting grid: its id, its station ({@link #SHAPED}, {@link #SHAPELESS}
-	 * or {@link #STONECUTTER}), the grid's width (shaped), each slot's items (an empty slot has none; a slot that takes
+	 * A recipe as the server has it, to draw as a crafting grid: its id, its station ({@link #SHAPED}, {@link #SHAPELESS},
+	 * {@link #STONECUTTER}, or a process: {@link #SMELTING}, {@link #MACHINE} or {@link #WORKSHOP}), the grid's width (shaped), each slot's items (an empty slot has none; a slot that takes
 	 * any of several shows up to {@value #MAX_ALTERNATIVES} of them in turn), and what it makes and how many.
 	 */
 	public record Grid(Identifier recipe, int station, int width, List<List<Item>> slots, Item result, int count) {
 		public static final int SHAPED = 0;
 		public static final int SHAPELESS = 1;
 		public static final int STONECUTTER = 2;
+		/** A furnace recipe (smelting or blasting): one input, cooked. */
+		public static final int SMELTING = 3;
+		/** A Jugcraft machine recipe: its inputs, one slot per item used. */
+		public static final int MACHINE = 4;
+		/** A starter workshop recipe (bench, kiln or crucible): its inputs, one slot per item used. */
+		public static final int WORKSHOP = 5;
 		public static final int MAX_SLOTS = 9;
 		public static final int MAX_ALTERNATIVES = 4;
 		public static final StreamCodec<RegistryFriendlyByteBuf, Grid> STREAM_CODEC = StreamCodec.composite(

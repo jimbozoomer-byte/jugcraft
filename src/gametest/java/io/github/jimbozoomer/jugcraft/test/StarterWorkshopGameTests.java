@@ -126,7 +126,13 @@ public class StarterWorkshopGameTests {
 
     @GameTest(structure=ARENA) public void starterWorkshopEveryManualReceiptMatchesPoweredYieldAndApprovedWorkTime(GameTestHelper h) {
         var be=place(h,0); var player=worker(h,be);
-        h.assertTrue(be.catalog().entries().size()==14,"Exactly the fourteen approved manual recipes, including all four circuit choices and two sanding operations");
+        var original=Set.of("iron_plate","copper_plate","tin_plate","zinc_plate","lead_plate","bronze_plate","brass_plate","copper_wire","basic_circuit","basic_circuit_raw","basic_circuit_wired","basic_circuit_soldered");
+        var sanding=Set.of("sands_smooth_sandstone","sands_smooth_red_sandstone");
+        var approved=new HashSet<String>(original); approved.addAll(sanding);
+        var actual=new HashSet<String>();
+        for(var entry:be.catalog().entries()) actual.add(entry.id().getPath().substring("starter_workshop/".length()));
+        h.assertTrue(actual.equals(approved) && be.catalog().entries().size()==14,
+            "All twelve manufacturing choices plus the two approved sanding operations");
         for (var entry:be.catalog().entries()) {
             var r=entry.recipe(); be.select(entry.id()); be.setItem(5,ItemStack.EMPTY);
             String name=entry.id().getPath().substring("starter_workshop/".length());

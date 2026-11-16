@@ -40,7 +40,7 @@ Primary specialty and supported player role: a shared hub. It serves traders and
   - **Lamps** burn with soul fire at Halloween. Townsfolk and decorators wear carved pumpkins at Halloween.
   - A site no decorator has reached after 5 minutes changes on its own, so the town is never left half-decorated.
 - **Jugs:** the town's credit, shown in every shop screen and at the Jug Tellers. A player's first visit inside the wall brings 20 Jugs.
-  - **The General Store** buys a farm's and a mine's ordinary goods for Jugs (crops, wool, leather, logs, coal, ingots, redstone, lapis and emeralds). It sells useful basics.
+  - **The General Store** buys a farm's and a mine's ordinary goods for Jugs (crops, leather, feathers, string, coal, ingots, redstone, lapis and emeralds). It sells useful basics. It buys nothing the transmutation tablet can form, so cobblestone, logs and wool earn no Jugs (12 November economy audit, [convenience transmutation](convenience-transmutation.md#economy-audit-12-november-2026)).
   - **The Seasonal Stall** sells what fits the theme: blossoms in spring, fireworks in summer, pumpkins in autumn, snow and ice in winter, candles and skulls at Halloween, pies at the Harvest Feast, and red and green candles in December.
   - **Curiosities** sells music discs, name tags, saddles, bells, item frames and the like.
   - **The Florist** sells flowers and saplings.
@@ -49,10 +49,11 @@ Primary specialty and supported player role: a shared hub. It serves traders and
 - **Commands:** `/jugcraft town` shows where the town is and today's theme; `/jugcraft jugs` shows your Jugs. Operators can also use:
   - `/jugcraft town place` builds the town round them in a world that has none;
   - `/jugcraft town theme <theme|auto>` holds a theme;
+  - `/jugcraft town decor-preview <theme>` reports proposed decoration changes, protected/owner-edited cells and unloaded sites without changing blocks or the selected theme. Unloaded sites are deferred, not assumed safe.
   - `/jugcraft jugs give|take <player> <amount>`.
 
 ## Connections
-- Existing input producer: the General Store takes vanilla crops, mob drops, logs and mined materials, and so turns surplus from farms (including the farming branch's machines) and mines into Jugs.
+- Existing input producer: the General Store takes vanilla crops, mob drops and mined materials, and so turns surplus from farms (including the farming branch's machines) and mines into Jugs. The server refuses any item in `jugcraft:tablet_outputs`, even if a data pack adds a buy offer for it.
 - Existing output consumer: the shops sell decoration and fun items, and Jugs pass between players at the Jug Tellers.
 - Technology connection: none yet. Later shops can take the mod's own products; tools/town_shops.py is data.
 - Magic connection: none yet.
@@ -200,3 +201,7 @@ Primary specialty and supported player role: a shared hub. It serves traders and
   - a crafting recipe for Jug Tellers;
   - quests and more townsfolk lines.
 - **Backup:** the town's blocks are ordinary blocks in the world. Removing the mod leaves them, and loses the townsfolk and the Jugs data.
+
+### Local November 9 harvest migration
+
+The versioned `harvest_v2` site layout installs the new 5x3x5 lantern-lit cornucopia on November 4–30, with Halloween/December priority retained. Global NPC/shop theme names stay unchanged. Existing `harvest` scene data remains for saved-world comparisons. Whole multiblock sites are preflighted before changes; any owner conflict or incomplete footprint preserves the whole site, including in future seasons. Public lantern lit/unlit state does not count as a replaced prop. Old roots are removed before child blocks to prevent item drops. The read-only decor preview uses the same decision. All 15 city regressions and actual client day/night review pass locally; details and limits are in [the November ledger](nov7-priorities.md). No live city was changed. Feast-table/food sites remain unfinished.

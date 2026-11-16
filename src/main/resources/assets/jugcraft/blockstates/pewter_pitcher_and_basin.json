@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jugcraft:block/pewter_pitcher_and_basin"
+    },
+    "facing=east": {
+      "model": "jugcraft:block/pewter_pitcher_and_basin",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jugcraft:block/pewter_pitcher_and_basin",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jugcraft:block/pewter_pitcher_and_basin",
+      "y": 270
+    }
+  }
+}

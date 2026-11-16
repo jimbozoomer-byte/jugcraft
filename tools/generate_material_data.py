@@ -203,6 +203,8 @@ def assets():
     arms.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import arms_variants
     arms_variants.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import thanksgiving_weapons  # Thanksgiving weapons (docs/features/thanksgiving-weapons.md): models, item definitions, recipes, lang
+    thanksgiving_weapons.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import arms_motion
     arms_motion.write_all(write, ASSETS)
     import grapple
@@ -256,6 +258,8 @@ def assets():
     raiders.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import zeppelin
     zeppelin.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import pirate_ship
+    pirate_ship.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import mech
     mech.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import landship
@@ -329,6 +333,10 @@ def assets():
     cursed_mirror.write_all(write, ASSETS, DATA / MOD, lang, self_drop)
     import chima_data
     chima_data.write_all(write, RES, lang)
+    import pegasus_data
+    pegasus_data.write_all(write, RES, lang)
+    import horse_breeds_data
+    horse_breeds_data.write_all(write, RES, lang)
     import vanilla_logs
     vanilla_logs.write_all(write, ASSETS)
     write(ASSETS / "lang" / "en_us.json", dict(sorted(lang.items())))
@@ -1985,17 +1993,17 @@ def main():
     newest_model_finishing.generate(write)
     import model_atlas
     model_atlas.generate(write)
-    # Finished pharmacy maps own only their named items after the final shared model passes.
-    import pharmacy_item_art
-    pharmacy_item_art.write_all(write, ASSETS)
-    # Separately authored importers also contribute to these shared resources;
-    # preserve their enumerated additions after the final tag and atlas writers.
-    owner_resource_patches.apply(phase='final')
     # Keep native player grips after both authored and owner-library model writers.
     import held_equipment
     held_equipment.generate()
+    # Separately authored importers also contribute to these shared resources;
+    # preserve their enumerated additions after the final tag and atlas writers.
+    owner_resource_patches.apply(phase='final')
+    # Finished pharmacy maps own only their named items after the final shared model passes.
+    import pharmacy_item_art
+    pharmacy_item_art.write_all(write, ASSETS)
 
-    # Last of the names: no two items may share one, whichever collection wrote it.
+    # Resolve duplicate display names after every resource writer.
     import display_names
     display_names.apply(write, ASSETS)
     from generated_resource_cleanup import prune

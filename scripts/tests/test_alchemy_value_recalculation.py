@@ -46,11 +46,17 @@ class AlchemyValueRecalculationTests(unittest.TestCase):
                 target=root/path;target.parent.mkdir(parents=True,exist_ok=True);target.write_text(json.dumps(data),encoding='utf-8')
             write('tools/data/alchemy_value_seeds.json',{'items':{'minecraft:quartz':1,'jugcraft:raw':900},'tags':{}})
             existing={'jugcraft:'+name:record(n) for name,n in [('raw',4),('component',100),('machine',200),('unrelated',50)]}
+            # A new component can also be recycled into a historical root. A
+            # transitive consumer walk must not unlock that reference price.
+            existing['minecraft:iron_ingot'] = dict(numerator=256, denominator=1, source='reference')
             write('src/main/resources/data/jugcraft/alchemy/values.json',{'items':existing})
             for name,inputs,count in [('component',['raw','raw'],4),('machine',['component','raw'],1),('new_item',['component'],1),('unrelated',['raw'],8)]:
                 write('src/main/resources/data/jugcraft/recipe/'+name+'.json',{
                     'type':'minecraft:crafting_shapeless','ingredients':['jugcraft:'+x for x in inputs],
                     'result':{'id':'jugcraft:'+name,'count':count}})
+            write('src/main/resources/data/jugcraft/recipe/recycled_iron.json', {
+                'type':'minecraft:smelting', 'ingredient':'jugcraft:component',
+                'result':{'id':'minecraft:iron_ingot','count':1}})
             jar=root/'vanilla.zip'
             with zipfile.ZipFile(jar,'w'):pass
             with patch.object(builder,'ROOT',root),redirect_stdout(io.StringIO()):
@@ -60,3 +66,4 @@ class AlchemyValueRecalculationTests(unittest.TestCase):
             self.assertEqual(result['jugcraft:unrelated'],existing['jugcraft:unrelated'])
             self.assertEqual(result['jugcraft:component']['numerator'],2)
             self.assertEqual(result['jugcraft:machine']['numerator'],6)
+            self.assertEqual(result['minecraft:iron_ingot'], existing['minecraft:iron_ingot'])

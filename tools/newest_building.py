@@ -25,6 +25,29 @@ FAMILIES = {'stoneworks': ('stoneworks', 'stoneworks'), 'paths': ('mcwpaths', 'p
 # Registry declarations in the supplied reference distinguish actual blocks
 # from the three engineer presentation variants which have no item or registry.
 FACTORY_PRESENTATION_ONLY = {'engineer1', 'engineer2', 'engineer3'}
+# cozyhome's AbstractHorizontalConnectingBlock.checkDiagonalNeighbor sets a diagonal only when both of
+# its cardinal connections are set, and the supplied table and fountain multiparts rely on that: the
+# inner-corner fill assumes the three blocks round its quarter. OwnerHomeBlock.joined reads each
+# diagonal cell alone, so a lone diagonal neighbour added the fill to a single, double or middle
+# piece (bared fill sides, a table top drawn twice, a solid quarter in a fountain basin).
+DIAGONAL_CARDINALS = {'north_east': ('north', 'east'), 'north_west': ('north', 'west'),
+                      'south_east': ('south', 'east'), 'south_west': ('south', 'west')}
+
+
+def require_diagonal_cardinals(name, state):
+    """State the source's implication (diagonal => both cardinals) in a table's or fountain's parts.
+
+    Every state the source's own rule produces renders exactly as supplied; a lone diagonal
+    neighbour now changes nothing. Applied to the runtime blockstate only (shapes are unchanged)."""
+    if not name.endswith(('_table', '_fountain')):
+        return state
+    for part in state.get('multipart', []):
+        when = part.get('when', {})
+        if len(when) == 1:
+            (key, value), = when.items()
+            if key in DIAGONAL_CARDINALS and value == 'true':
+                part['when'] = dict(sorted({**{side: 'true' for side in DIAGONAL_CARDINALS[key]}, key: 'true'}.items()))
+    return state
 
 
 def repair_unused_faces(data):
@@ -367,6 +390,8 @@ def generate(writer=write):
             # Plain full-block paving entries with a thin authored mesh are real low paths.
             if kind == 'path' and prefix == 'stoneworks': blocks[ident]['kind'] = 'block'
             runtime_state = map_value(state, ns, prefix, True)
+            if prefix == 'homeworks':
+                runtime_state = require_diagonal_cardinals(name, runtime_state)
             if kind == 'large_factory_fan':
                 # Occupy all four blocks; draw the supplied 2x2 mesh only once.
                 runtime_state = {'multipart': [{'when': {'column': '0', 'row': '0', 'facing': facing},

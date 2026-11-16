@@ -33,6 +33,7 @@ final class EncyclopediaWidgets {
 	private static final int RECOMMENDED = 0xFF6FC8F0;
 	private static final int TRADE = 0xFFFFD98A;
 	private static final int BOSS = 0xFFC79BF2;
+	private static final int ALTERNATIVE = 0xFFE0A060;
 
 	private EncyclopediaWidgets() {
 	}
@@ -69,6 +70,9 @@ final class EncyclopediaWidgets {
 		return Component.translatable(switch (grid.station()) {
 			case EncyclopediaPayload.Grid.SHAPELESS -> "encyclopedia.jugcraft.grid.shapeless";
 			case EncyclopediaPayload.Grid.STONECUTTER -> "encyclopedia.jugcraft.grid.stonecutter";
+			case EncyclopediaPayload.Grid.SMELTING -> "encyclopedia.jugcraft.grid.smelting";
+			case EncyclopediaPayload.Grid.MACHINE -> "encyclopedia.jugcraft.grid.machine";
+			case EncyclopediaPayload.Grid.WORKSHOP -> "encyclopedia.jugcraft.grid.workshop";
 			default -> "encyclopedia.jugcraft.grid.shaped";
 		});
 	}
@@ -76,7 +80,7 @@ final class EncyclopediaWidgets {
 	/**
 	 * A step's or a way's mark, 8 by 8, beside its words. A step: Done a filled square, Next an arrowhead, Can do now a
 	 * hollow square, Later a dot, Not available a cross. A way: Required a filled diamond, Recommended a hollow one, Trade
-	 * a ring, Optional (after a boss) a skull.
+	 * a ring, Optional (after a boss) a skull, Alternative a fork.
 	 */
 	static final class Mark extends AbstractWidget {
 		static final int WIDTH = 10;
@@ -116,6 +120,7 @@ final class EncyclopediaWidgets {
 				case RECOMMENDED -> diamond(graphics, x, y, RECOMMENDED, false);
 				case TRADE -> ring(graphics, x, y, TRADE);
 				case OPTIONAL_BOSS -> skull(graphics, x, y, BOSS);
+				case ALTERNATIVE -> fork(graphics, x, y, ALTERNATIVE);
 				default -> {
 				}
 			}
@@ -151,6 +156,15 @@ final class EncyclopediaWidgets {
 			graphics.fill(x + 6, y + 6, x + 7, y + 7, colour);
 		}
 
+		/** Two ways joining into one: an alternative. */
+		private static void fork(GuiGraphicsExtractor graphics, int x, int y, int colour) {
+			graphics.fill(x + 3, y + 4, x + 5, y + 8, colour);
+			for (int r = 0; r < 4; r++) {
+				graphics.fill(x + r, y + r, x + r + 2, y + r + 1, colour);
+				graphics.fill(x + 6 - r, y + r, x + 8 - r, y + r + 1, colour);
+			}
+		}
+
 		private static void skull(GuiGraphicsExtractor graphics, int x, int y, int colour) {
 			graphics.fill(x + 1, y, x + 7, y + 6, colour);
 			graphics.fill(x + 2, y + 6, x + 6, y + 8, colour);
@@ -170,11 +184,16 @@ final class EncyclopediaWidgets {
         private final int columns;
 
 		Items(int x, Font font, List<Item> items, int maxWidth) {
-            super(x, 0, Math.min(Math.max(1, items.size()) * SLOT, maxWidth),
-                ((items.size() + Math.max(1, maxWidth / SLOT) - 1) / Math.max(1, maxWidth / SLOT)) * SLOT, CommonComponents.EMPTY);
+			this(x, font, maxWidth, items.stream().map(Item::getDefaultInstance).toList());
+		}
+
+		/** Stacks, each drawn with its count (a route map's inputs and outputs). */
+		Items(int x, Font font, int maxWidth, List<ItemStack> shown) {
+            super(x, 0, Math.min(Math.max(1, shown.size()) * SLOT, maxWidth),
+                ((shown.size() + Math.max(1, maxWidth / SLOT) - 1) / Math.max(1, maxWidth / SLOT)) * SLOT, CommonComponents.EMPTY);
             columns = Math.max(1, maxWidth / SLOT);
 			this.font = font;
-			items.forEach(item -> stacks.add(item.getDefaultInstance()));
+			stacks.addAll(shown);
 			active = false;
 		}
 

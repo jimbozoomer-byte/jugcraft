@@ -44,7 +44,9 @@ def generate(writer=None):
  model('giant_turkey_feast',{**roast(''),'display':display})
  w(Path('data/jugcraft/loot_table/blocks/giant_turkey_feast.json'),{'type':'minecraft:block','pools':[{'rolls':1,'entries':[{'type':'minecraft:item','name':'jugcraft:giant_turkey_feast','condition':{'type':'minecraft:all_of','terms':[{'type':'minecraft:survives_explosion'},{'type':'minecraft:match_block','blocks':'jugcraft:giant_turkey_feast','state':{'part':'0'}}]},'modifier':{'type':'minecraft:copy_state','block':'jugcraft:giant_turkey_feast','properties':['remaining']}}]}]})
  w(Path('data/jugcraft/recipe/giant_turkey_feast.json'),{'type':'minecraft:crafting_shapeless','ingredients':['jugcraft:roast_turkey']*4,'result':{'id':'jugcraft:giant_turkey_feast'}})
- w(Path('assets/jugcraft/equipment/harvest_costume.json'),{'layers':{}})
+ # A valid, transparent vanilla layer keeps headEquipment populated for our
+ # custom geometry. 26.3 rejects both empty layer maps and empty layer lists.
+ w(Path('assets/jugcraft/equipment/harvest_costume.json'),{'layers':{'humanoid':[{'texture':'jugcraft:harvest_costume'}]}})
  for n,dress in [('pilgrim_coat_costume',False),('pilgrim_dress_costume',True)]:
   e=[box((2,1,2),(14,2,14),'#cloth'),box((4,2,4),(12,9,12),'#cloth'),box((3.8,3,3.8),(12.2,4,12.2),'#band'),box((7,3,3.6),(9,4.5,3.8),'#buckle')]
   model(n,{'textures':{'cloth':'minecraft:block/white_wool' if dress else 'minecraft:block/black_wool','band':'minecraft:block/brown_wool','buckle':'minecraft:block/gold_block','particle':'minecraft:block/white_wool' if dress else 'minecraft:block/black_wool'},'elements':e,'display':display})
@@ -60,4 +62,10 @@ def generate(writer=None):
  lang['tooltip.jugcraft.giant_turkey_feast']='%s / 24 portions remaining'
  lang['tooltip.jugcraft.giant_turkey_feast.controls']='3 x 3 floor, 2 high. Eat empty-handed; carve with a knife; sneak empty-handed to pack.'
  w(Path('assets/jugcraft/lang/en_us.json'),lang)
-if __name__=='__main__':generate()
+def write_costume_texture():
+ from PIL import Image
+ path=RES/'assets/jugcraft/textures/entity/equipment/humanoid/harvest_costume.png'
+ path.parent.mkdir(parents=True,exist_ok=True)
+ Image.new('RGBA',(64,32),(0,0,0,0)).save(path)
+
+if __name__=='__main__':generate();write_costume_texture()

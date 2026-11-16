@@ -816,6 +816,16 @@ def crop_textures():
     out.update(harvest_festival_textures())
     from thanksgiving_decor_data import textures as thanksgiving_decor_textures  # and the Thanksgiving decorations
     out.update(thanksgiving_decor_textures())
+    from thanksgiving_homestead_data import textures as thanksgiving_homestead_textures  # and the homestead's
+    out.update(thanksgiving_homestead_textures())
+    from thanksgiving_woodland_data import textures as thanksgiving_woodland_textures  # and the woodland harvest crafts
+    out.update(thanksgiving_woodland_textures())
+    from thanksgiving_town_data import textures as thanksgiving_town_textures  # and the Thanksgiving harvest town details
+    out.update(thanksgiving_town_textures())
+    from thanksgiving_toys_data import textures as thanksgiving_toys_textures  # and the Thanksgiving festival toys
+    out.update(thanksgiving_toys_textures())
+    from thanksgiving_dishes_data import textures as thanksgiving_dishes_textures  # and the Thanksgiving side dishes
+    out.update(thanksgiving_dishes_textures())
     from lair_textures import lair_textures  # and the lairs' blocks, the Mourning Wreath and the Death Knell
     out.update(lair_textures())
     from adam_ondi_ahman_textures import adam_ondi_ahman_textures  # and Adam-ondi-Ahman's Ancient Altar

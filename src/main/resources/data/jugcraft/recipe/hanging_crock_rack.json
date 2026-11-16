@@ -1,0 +1,24 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "#minecraft:wooden_slabs",
+    "minecraft:stick",
+    "minecraft:stick",
+    "minecraft:string",
+    "minecraft:clay_ball",
+    "minecraft:clay_ball",
+    "jugcraft:onion",
+    "jugcraft:dried_herbs"
+  ],
+  "result": {
+    "id": "jugcraft:hanging_crock_rack",
+    "count": 1
+  }
+}

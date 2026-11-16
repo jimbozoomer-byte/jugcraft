@@ -7,6 +7,7 @@ import io.github.jimbozoomer.jugcraft.town.Town;
 import io.github.jimbozoomer.jugcraft.town.TownBuilder;
 import io.github.jimbozoomer.jugcraft.town.TownData;
 import io.github.jimbozoomer.jugcraft.town.TownDecor;
+import io.github.jimbozoomer.jugcraft.town.TownFeast;
 import io.github.jimbozoomer.jugcraft.town.TownShops;
 import io.github.jimbozoomer.jugcraft.town.TownState;
 import io.github.jimbozoomer.jugcraft.town.Townsfolk;
@@ -62,6 +63,7 @@ public class TownGameTests {
 		var connection = new net.minecraft.network.Connection(net.minecraft.network.protocol.PacketFlow.SERVERBOUND);
 		new io.netty.channel.embedded.EmbeddedChannel(connection);
 		level.getServer().getPlayerList().placeNewPlayer(connection, player, net.minecraft.server.network.CommonListenerCookie.createInitial(profile, false));
+		TestPlayers.track(h, player);
 		player.setGameMode(GameType.SURVIVAL);
 		h.assertTrue(!player.isCreative() && !player.isSpectator(), "Public amenities are tested by a real survival visitor");
 		var old = level.getBlockState(at); var below = level.getBlockState(at.below()); var above = level.getBlockState(at.above());
@@ -362,7 +364,8 @@ public class TownGameTests {
     }
 
 	/**
-	 * A test town far away: its square's chunks are built straight from the data and checked block by block, its
+	 * A test town far away: its square's chunks are built straight from the data and checked block by block (the
+	 * Thanksgiving feast the town itself sets out in season, recognised by TownFeast.authored, aside), its
 	 * townsfolk come out, a survival player can neither break nor place there, an explosion and a fire leave it as it
 	 * was, townsfolk shrug off a player's blows, and a lamp changes with the theme.
 	 */
@@ -407,6 +410,7 @@ public class TownGameTests {
 		}
 		int checked = 0;
 		int wrong = 0;
+		int feast = 0;
 		String firstWrong = null;
 		for (ChunkPos pos : chunks) {
 			for (int wx = pos.x() << 4; wx < (pos.x() << 4) + 16; wx++) {
@@ -424,6 +428,12 @@ public class TownGameTests {
 						checked++;
 						BlockState found = level.getBlockState(origin.offset(x, y, z));
 						if (found != data.state(index)) {
+							// The town's Thanksgiving feast (TownFeast) is authored, not a change: a cell counts only while the
+							// town's ledger has its site set out and the cell is exactly the town's own placement.
+							if (TownFeast.authored(level, origin.offset(x, y, z)) || harvestCraftAuthored(level, origin, origin.offset(x, y, z))) {
+								feast++;
+								continue;
+							}
 							wrong++;
 							if (firstWrong == null) {
 								firstWrong = x + " " + y + " " + z + ": " + found + " instead of " + data.state(index);
@@ -433,8 +443,8 @@ public class TownGameTests {
 				}
 			}
 		}
-		LOGGER.info("Test town: {} chunks round the square built, {} blocks checked, {} differ{}", chunks.size(), checked, wrong,
-				firstWrong == null ? "" : " (first: " + firstWrong + ")");
+		LOGGER.info("Test town: {} chunks round the square built, {} blocks checked, {} differ{}, {} the town's own feast", chunks.size(),
+				checked, wrong, firstWrong == null ? "" : " (first: " + firstWrong + ")", feast);
 		helper.assertTrue(checked > 10_000 && wrong == 0, "The square is built as designed: " + wrong + " of " + checked + " blocks differ"
 				+ (firstWrong == null ? "" : ", first " + firstWrong));
 		// The town has brought out one townsperson for each place in these chunks (they are looked up once the chunks'
@@ -564,8 +574,17 @@ public class TownGameTests {
 	 * Blocks of the town in {@code chunks} that became air or stopped being air, or gained or lost a fluid, since they were
 	 * built (decor sites aside): a count and the first one, or null if none did.
 	 */
+	/** Only accept exact, ledger-recorded seasonal placements, never arbitrary changes near a scene. */
+	private static boolean harvestCraftAuthored(ServerLevel level, BlockPos origin, BlockPos at) {
+		return io.github.jimbozoomer.jugcraft.town.TownHarvestCrafts.ledger(level).entries().stream()
+				.filter(e -> e.origin().equals(origin) && e.status().equals("placed"))
+				.anyMatch(e -> e.cells().stream().anyMatch(c -> c.pos().equals(at))
+						&& e.cells().stream().allMatch(c -> level.getBlockState(c.pos()) == c.placed()));
+	}
+
 	private static String drift(ServerLevel level, TownData data, BlockPos origin, List<ChunkPos> chunks, Set<Long> sites) {
 		int drifted = 0;
+		int feast = 0;
 		String first = null;
 		int[] min = {Integer.MAX_VALUE, Integer.MAX_VALUE, Integer.MAX_VALUE};
 		int[] max = {Integer.MIN_VALUE, Integer.MIN_VALUE, Integer.MIN_VALUE};
@@ -586,6 +605,11 @@ public class TownGameTests {
                         if (data.mask(x,z) != TownData.INSIDE && want.isAir()) continue;
 						BlockState found = level.getBlockState(origin.offset(x, y, z));
 						if (want.isAir() != found.isAir() || want.getFluidState().isEmpty() != found.getFluidState().isEmpty()) {
+							// The town's own feast, set out as recorded (TownFeast.authored), is not drift; anything else is.
+							if (TownFeast.authored(level, origin.offset(x, y, z)) || harvestCraftAuthored(level, origin, origin.offset(x, y, z))) {
+								feast++;
+								continue;
+							}
 							drifted++;
 							if (first == null) {
 								first = x + " " + y + " " + z + ": " + found + " instead of " + want;
@@ -623,7 +647,8 @@ public class TownGameTests {
 			}
 			LOGGER.info("Test town: round the fountain, {} blocks differ: {}", rim.size(), rim.size() > 40 ? rim.subList(0, 40) : rim);
 		}
-		LOGGER.info("Test town: {} blocks drifted after ticking{}", drifted, first == null ? "" : " (first: " + first + ")");
+		LOGGER.info("Test town: {} blocks drifted after ticking{}; {} cells are the town's own feast", drifted,
+				first == null ? "" : " (first: " + first + ")", feast);
 		return drifted == 0 ? null : drifted + " blocks, first " + first;
 	}
 

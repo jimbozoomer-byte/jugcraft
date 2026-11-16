@@ -3,9 +3,11 @@ package io.github.jimbozoomer.jugcraft.walker;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -19,8 +21,11 @@ import org.jspecify.annotations.Nullable;
 public final class WalkerAim {
 	/** How far a shell's flight is followed, in ticks. */
 	public static final int FLIGHT_TICKS = 200;
-	/** Drag a tick, as a thrown projectile's (and {@link io.github.jimbozoomer.jugcraft.artillery.Ballistics}'). */
-	public static final double DRAG = 0.99;
+	/**
+	 * Drag a tick, as a thrown projectile's (and {@link io.github.jimbozoomer.jugcraft.artillery.Ballistics}'): the game's
+	 * air drag is the float {@code 0.99F}, which its inertia step scales the speed by as a double (0.9900000095...).
+	 */
+	public static final double DRAG = 0.99F;
 
 	private WalkerAim() {
 	}
@@ -29,17 +34,65 @@ public final class WalkerAim {
 	public record Flight(List<Vec3> points, @Nullable Vec3 impact) {
 	}
 
+	/** Whether the chunk column at chunk coordinates (x, z) is loaded. */
+	@FunctionalInterface
+	public interface ChunkLoaded {
+		boolean test(int chunkX, int chunkZ);
+	}
+
+	/** A hair past each end of a path, more than the block walk of {@link Level#clip} reaches beyond its ends. */
+	private static final double PATH_EDGE = 1.0E-4;
+
+	/** {@link #chunksLoadedAlong} for {@code level}'s loaded chunks. */
+	public static boolean loadedAlong(Level level, Vec3 a, Vec3 b) {
+		return chunksLoadedAlong(a, b, (x, z) -> level.hasChunkAt(new BlockPos(x << 4, 0, z << 4)));
+	}
+
 	/**
-	 * The point on the block the pilot looks at, up to {@code reach} blocks, or null if there is none. The look is traced a
-	 * chunk at a time and stops at the first chunk that is not loaded, so aiming never loads one. The look is the
-	 * rotation the mounted pilot's camera sends, not the animated head yaw.
+	 * Whether every chunk in the x/z rectangle of the straight path from {@code a} to {@code b} is loaded, the path's ends
+	 * and a hair past them included. On a server, {@link Level#clip} reads each block along its path, and reading a block
+	 * in a chunk that is not loaded loads (or generates) it. So a path's ends being loaded is not enough: a path across a
+	 * chunk's corner passes through a neighbour, however short the crossing. Every chunk the path can touch lies in the
+	 * rectangle, so this is a plain superset: it may also count a corner chunk the path misses. The paths here are short
+	 * (a look is clipped 16 blocks at a time, a shell a tick at a time), so the rectangle is at most three chunks a side.
+	 */
+	public static boolean chunksLoadedAlong(Vec3 a, Vec3 b, ChunkLoaded loaded) {
+		int x0 = Mth.floor(Math.min(a.x, b.x) - PATH_EDGE) >> 4, x1 = Mth.floor(Math.max(a.x, b.x) + PATH_EDGE) >> 4;
+		int z0 = Mth.floor(Math.min(a.z, b.z) - PATH_EDGE) >> 4, z1 = Mth.floor(Math.max(a.z, b.z) + PATH_EDGE) >> 4;
+		for (int x = x0; x <= x1; x++) {
+			for (int z = z0; z <= z1; z++) {
+				if (!loaded.test(x, z)) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	/** Whether every chunk {@code box} spans is loaded, so testing it for blocks (as noCollision does) loads none. */
+	public static boolean loadedIn(Level level, AABB box) {
+		for (int x = Mth.floor(box.minX) >> 4; x <= Mth.floor(box.maxX) >> 4; x++) {
+			for (int z = Mth.floor(box.minZ) >> 4; z <= Mth.floor(box.maxZ) >> 4; z++) {
+				if (!level.hasChunkAt(new BlockPos(x << 4, 0, z << 4))) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * The point on the block the pilot looks at, up to {@code reach} blocks, or null if there is none. The look is traced
+	 * at most 16 blocks at a time and stops where it would read a chunk that is not loaded (its end's, or one it crosses
+	 * on the way: {@link #loadedAlong}), so aiming never loads one. The look is the rotation the mounted pilot's camera
+	 * sends, not the animated head yaw.
 	 */
 	public static @Nullable Vec3 lookedAt(Level level, Entity pilot, int reach) {
 		Vec3 from = pilot.getEyePosition();
 		Vec3 look = Vec3.directionFromRotation(pilot.getXRot(), pilot.getYRot());
 		for (int travelled = 0; travelled < reach; travelled += 16) {
 			Vec3 to = from.add(look.scale(Math.min(16, reach - travelled)));
-			if (!level.isLoaded(BlockPos.containing(to))) {
+			if (!level.isLoaded(BlockPos.containing(to)) || !loadedAlong(level, from, to)) {
 				return null;
 			}
 			BlockHitResult hit = level.clip(new ClipContext(from, to, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, pilot));
@@ -52,9 +105,12 @@ public final class WalkerAim {
 	}
 
 	/**
-	 * A shell's flight from {@code start} at {@code velocity} (blocks a tick), each tick moving by its speed, losing
-	 * {@value #DRAG} to drag and falling by {@code gravity}, as {@link io.github.jimbozoomer.jugcraft.artillery.Ballistics}
-	 * models it; it comes down on the first block it meets, and stops at a chunk that is not loaded.
+	 * A shell's flight from {@code start} at {@code velocity} (blocks a tick, as the shell is shot). Each tick goes as a
+	 * thrown projectile's does (ThrowableProjectile.tick: gravity, then inertia, then the move): its speed falls by
+	 * {@code gravity}, loses {@link #DRAG} to drag, and only then does it move by that speed; so its first step is already
+	 * the slowed, fallen one. {@link io.github.jimbozoomer.jugcraft.artillery.Ballistics} models it the same way. It comes
+	 * down on the first block it meets (where the game puts a shell that hits, before it bursts), and stops where its next
+	 * tick would read a chunk that is not loaded (where it ends, or one it crosses on the way: {@link #loadedAlong}).
 	 */
 	public static Flight flight(Level level, Vec3 start, Vec3 velocity, double gravity, @Nullable Entity shooter) {
 		List<Vec3> points = new ArrayList<>();
@@ -62,8 +118,9 @@ public final class WalkerAim {
 		Vec3 v = velocity;
 		points.add(at);
 		for (int tick = 0; tick < FLIGHT_TICKS; tick++) {
+			v = new Vec3(v.x * DRAG, (v.y - gravity) * DRAG, v.z * DRAG);
 			Vec3 next = at.add(v);
-			if (!level.isLoaded(BlockPos.containing(next)) || next.y < level.getMinY()) {
+			if (!level.isLoaded(BlockPos.containing(next)) || next.y < level.getMinY() || !loadedAlong(level, at, next)) {
 				return new Flight(points, null);
 			}
 			BlockHitResult hit = level.clip(new ClipContext(at, next, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE,
@@ -74,7 +131,6 @@ public final class WalkerAim {
 			}
 			at = next;
 			points.add(at);
-			v = new Vec3(v.x * DRAG, v.y * DRAG - gravity, v.z * DRAG);
 		}
 		return new Flight(points, null);
 	}

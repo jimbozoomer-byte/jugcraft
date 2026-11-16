@@ -2,6 +2,8 @@
 
 ## Current foundation
 
+For delayed server test stages, register callbacks before they execute. Minecraft 26.3's `GameTestInfo` invokes callbacks while iterating its live Fastutil map; nested `runAfterDelay`, `runAtTickTime` or `onEachTick` registration can invalidate that iterator and crash the test server. Queue later stages at the equivalent absolute offsets during fixture setup, retaining references to entities created by an earlier stage as needed. Preserve all input ticks, checks and timeouts. The November 14 combined run exposed this in horse, Pegasus, gun and pirate fixtures; the fix is test-only and does not replace the game's scheduler.
+
 Run `python scripts/check_repository.py` with Python 3.11+. The Foundation / repository job checks required files, relative Markdown links, and the phase declaration. It is not a Java compiler, mod test, security audit, or gameplay approval. In the `bootstrap` phase, Java/Gradle sources are allowed. The Build workflow compiles the mod (`./gradlew build`), checks generated JSON is current and runs `tools/check_mod_data.py`, which validates material data and audits recipes offline. None of these is a game test.
 
 Game tests run in the Build workflow too. The `mod` job's `./gradlew build` runs every server game test on every change. The client game tests start a real game and photograph showrooms. Sixteen jobs distribute that work; the expanded all-gun gallery alone took about 30 minutes in October 16 CI, so:
@@ -34,6 +36,8 @@ Locally:
 - The garden cohort's client class alone: `./gradlew runClientGameTest --no-daemon -PclientTests=ConcordanceGardenPactClientGameTests`.
 
 The client tests a pull request skips still run on `main` after it merges. A break they catch there is fixed in a follow-up pull request.
+- The server workload benchmark (opt-in): `./gradlew runGameTest -PjugcraftBenchmark=all` (or `machines,crowd,raid`) runs only `ServerLoadGameTests.workloadBenchmark`, which measures a baseline, a factory, a crowd and a raid-like fight over real server ticks: mean/p95 tick ms against the baseline, heap before/after, the server thread's allocation and the JVM it ran on, each span twice. Its lines begin `Workload benchmark |` and are also appended to `build/run/gameTest/workload-benchmark.jsonl`; every other run passes it at once. Format and options: [server-load-benchmark.md](features/server-load-benchmark.md#opt-in-workload-benchmark).
+- The client frame benchmark (opt-in): `./gradlew runClientGameTest -PclientTests=FrameBenchmarkClientGameTests -PjugcraftFrameBenchmark=true` draws a fixed scene and samples its frame times (lines `Frame benchmark |`, also `frame-benchmark.jsonl`). Without the property the class returns at once. Software-rendered CI figures are not a player's; see [server-load-benchmark.md](features/server-load-benchmark.md#client-frame-benchmark).
 
 ## Gameplay PR evidence after bootstrap
 

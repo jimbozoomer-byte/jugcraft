@@ -327,6 +327,9 @@ def quilt_rail():
 _built = {}
 BUILDERS = {"window_box": window_box, "half_barrel_planter": half_barrel, "galvanized_tub_planter": galvanized_tub,
             fg.SWING["block"]: swing, "wheat_stook": stook, "corn_dolly": corn_dolly, "bittersweet_wreath": wreath, "quilt_rail": quilt_rail}
+# The Quilt Rail refined by the Thanksgiving homestead (docs/features/thanksgiving-homestead.md): its quilt drapes in
+# pleats with a bound hem. Same ID, shape, states, recipe and loot.
+BUILDERS["quilt_rail"] = lambda: __import__("thanksgiving_homestead_data").quilt_rail()
 
 
 def build(block):

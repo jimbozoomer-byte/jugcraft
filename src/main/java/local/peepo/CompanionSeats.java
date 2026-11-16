@@ -32,6 +32,10 @@ public final class CompanionSeats {
         return true;
     }
     static boolean externalAvailable(PeepoEntity npc,BlockPos pos){return !isReserved(npc.level(),pos) || CLAIMS.get(npc.level()).get(pos).npc.equals(npc.getUUID());}
+    /** Forgets any companion's reservation of the seat at {@code pos} (its seat is gone: a settle broken under it). */
+    public static void release(Level level,BlockPos pos){var claims=CLAIMS.get(level);if(claims!=null)claims.remove(pos);}
+    /** A seat's canonical cell ({@link Seat.Sittable#seatCell}): reservations and occupancy are kept there, whichever block is used. */
+    static BlockPos seatCell(Level level,BlockPos pos,BlockState state){return state.getBlock() instanceof Seat.Sittable s?s.seatCell(level,pos,state).immutable():pos;}
     static void reserveExternal(PeepoEntity npc,BlockPos pos,int ticks){
         var claims=CLAIMS.computeIfAbsent(npc.level(),l->new HashMap<>());var current=claims.get(pos);
         long now=npc.level().getGameTime();
@@ -71,6 +75,7 @@ public final class CompanionSeats {
             if(!npc.level().hasChunkAt(pos) || excluded.containsKey(pos))continue;
             var state=npc.level().getBlockState(pos);
             if(!supported(state))continue;
+            if(!seatCell(npc.level(),pos,state).equals(pos))continue; // the seat is offered once, at its canonical cell
             if(fence(state)) {
                 for(int dx=-1;dx<=1;dx++)for(int dz=-1;dz<=1;dz++) {
                     if(dx==0 && dz==0 || !connected(state,dx,dz))continue;
@@ -119,7 +124,7 @@ public final class CompanionSeats {
             this(level,pos,state,Direction.NORTH);railX=dx;railZ=dz;
             normal=new Vec3(-dz*side,0,dx*side).normalize();neighborState=level.getBlockState(other());
         }
-        Surface(Level level,BlockPos pos,BlockState state,Direction facing) { this.level=level;this.pos=pos;original=state;this.facing=facing; }
+        Surface(Level level,BlockPos pos,BlockState state,Direction facing) { this.level=level;this.pos=seatCell(level,pos,state);original=this.pos.equals(pos)?state:level.getBlockState(this.pos);this.facing=facing; }
         private boolean edge() { return original.getBlock() instanceof BedBlock || original.getBlock() instanceof CompanionBedBlock; }
         private Vec3 entrance() {
             if(rail())return Vec3.atBottomCenterOf(BlockPos.containing(pos.getX()+.5+railX*.5+normal.x*.9,pos.getY(),pos.getZ()+.5+railZ*.5+normal.z*.9));

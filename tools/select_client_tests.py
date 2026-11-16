@@ -78,6 +78,10 @@ WEIGHTS = {
     "TownClientGameTests": 120,
     "GuideScreenshotGameTests": 120,
     "SeasonClientGameTests": 90,
+    # Climate generation creates/reopens real worlds and samples distant chunks; provisional estimates.
+    "ClimateBandsAuditClientGameTests": 480,
+    "ClimateDesignClientGameTests": 240,
+    "ClimateExportClientGameTests": 180,
     # Concordance Chunk B unit 4: about 25 shots at 2 s each and 200 ticks of the Yeti King's frost on the player, which
     # its length would put far lower (an estimate, not a measurement).
     "ConcordanceWinterClientGameTests": 120,
@@ -185,6 +189,8 @@ WEIGHTS = {
     "MineralSandClientGameTests": 900,
     "UndergroundDepositClientGameTests": 600,
     "OwnerCollectionsNetworkTests": 360,
+    # Dedicated server plus a second client, then five rider/observer views. Estimate pending the combined local run.
+    "HorseBreedsNetworkTests": 600,
     "HerobrineNetworkTests": 360,
     "AlphaWerewolfClientGameTests": 300,
     "CinderTyrantClientGameTests": 240,
@@ -197,7 +203,7 @@ WEIGHTS = {
 # Second JVMs, the gun gallery and the expanded biome tour need their own
 # host budget. Small local shard counts still retain every class.
 ISOLATED_CLIENTS = {"OwnerCollectionsNetworkTests", "HerobrineNetworkTests", "ConcordancePactNetworkTests",
-                    "GunsClientGameTests", "BiomeClientGameTests", "ConcordanceGardenNetworkTests"}
+                    "GunsClientGameTests", "BiomeClientGameTests", "ConcordanceGardenNetworkTests", "HorseBreedsNetworkTests", "MineralSandClientGameTests"}
 # Classes a client test shows without naming them (registered by another class, or reached through an optional
 # integration), by the classes that show them: Stolas's renderer (his glowmask layer, scale, culling and departure) and
 # his perch's and anchor's Jade provider (the unit review, D2), and since the garden cohort, the pact spirits' renderer table

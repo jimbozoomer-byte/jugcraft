@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jugcraft:block/pumpkin_carving_bench"
+    },
+    "facing=east": {
+      "model": "jugcraft:block/pumpkin_carving_bench",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jugcraft:block/pumpkin_carving_bench",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jugcraft:block/pumpkin_carving_bench",
+      "y": 270
+    }
+  }
+}

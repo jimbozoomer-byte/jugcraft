@@ -131,6 +131,13 @@ def build(jar, affected_items=None):
     # none): without these they fell to the one-essence fallback, a Landscapes plank was worth a quarter and steel one.
     for item, price in json.loads((ROOT / 'tools/data/alchemy_decorative_roots.json').read_text())['items'].items():
         values[item] = Fraction(price); origins[item] = 'local decorative accounting'
+    # Keep the established one-essence crop budget before resolving decorative
+    # recipes. Seed/crop cycles otherwise leave these roots unresolved, and the
+    # alphabetical fallback loop can lock a crafted basket at 1 before its flax
+    # receives a value. This preserves crop prices while deriving the whole prop.
+    for crop in ('corn', 'flax', 'cranberries', 'onion', 'dried_herbs'):
+        values['jugcraft:' + crop] = Fraction(1)
+        origins['jugcraft:' + crop] = 'fallback (balance pending)'
     locked=set(values)
     edges=[]
     for rid,r in recipes.items():
@@ -161,7 +168,10 @@ def build(jar, affected_items=None):
         # Keep the current prices of all unrelated ingredients and do not enable uncatalogued items.
         values={k:Fraction(v['numerator'],v['denominator']) for k,v in existing.items()}
         origins={k:v['source'] for k,v in existing.items()}
-        locked=set(values)-affected
+        # A consumer walk can reach a seeded material through a recycling recipe.
+        # That does not authorize revaluing the historical roots (e.g. iron/gold)
+        # or their entire downstream economy. Preserve their existing anchors.
+        locked=(set(values)-affected) | {k for k,v in existing.items() if v['source'].startswith('reference')}
         edges=[edge for edge in edges if edge[2] in affected and edge[2] in existing]
         local_items=set(values)
     # Root materials without a known historical value receive an explicit local base
@@ -219,6 +229,18 @@ def build(jar, affected_items=None):
         if item in local_items:
             values[item] = mixed_oxide / 4
             origins[item] = 'local rare-earth maximum coproduct allocation'
+            locked.add(item)
+    # Fluid-machine recipes are not derived above, so every zirconia form would keep
+    # the one-essence fallback while finishing turns one fired blank into two inserts.
+    # Price each form at its two-insert yield: finishing, firing, conditioning and the
+    # short sand/concentrate routes then spend at least the value they return.
+    insert = values.get('jugcraft:zirconia_insert', Fraction(1))
+    for material in ('zirconia_precursor', 'zirconia_powder', 'zirconia_charge',
+                     'zirconia_blank', 'fired_zirconia_blank'):
+        item = 'jugcraft:' + material
+        if item in local_items:
+            values[item] = 2 * insert
+            origins[item] = 'local zirconia finishing accounting'
             locked.add(item)
     propagate()
     # Every local item definition has a value, including uncraftable decorative assets.

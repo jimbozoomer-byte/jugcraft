@@ -11,6 +11,9 @@ import io.github.jimbozoomer.jugcraft.nouveau.NouveauScrying;
 import io.github.jimbozoomer.jugcraft.pharmacology.*;
 import java.util.List;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
+import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
+import net.fabricmc.fabric.api.transfer.v1.transaction.Transaction;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.gametest.framework.GameTestHelper;
@@ -59,6 +62,46 @@ public class PharmacologyPrecisionGameTests {
 		h.assertTrue(result.is(PrecisionPharmacy.item("moonshine")) && result.getCount() == 4
 				&& still.container().getItem(still.form().firstOutputSlot() + 1).is(PrecisionPharmacy.item("empty_mash_jug")), "Four bottles plus one returned empty jug");
 		ticks(h, still, 20); h.assertTrue(result.getCount() == 4 && still.furnaceTicksRemaining() == fuel - 200, "Idle does not burn fuel or duplicate output");
+		h.succeed();
+	}
+
+	@GameTest(structure = ARENA)
+	public void stillFuelPortReturnsSpentBucketsWithoutExposingInputsOrLiveFuel(GameTestHelper h) {
+		for (Direction facing : Direction.Plane.HORIZONTAL) {
+			var machine = place(h, IndustrialForms.MOONSHINE_STILL, facing);
+			feed(machine, recipe(machine, h, "beverage_moonshine"));
+			machine.container().setItem(machine.form().fuelSlot(), new ItemStack(Items.LAVA_BUCKET));
+			ticks(h, machine, 1);
+			int heat = machine.furnaceTicksRemaining();
+			var port = machine.form().ports().stream().filter(p -> p.name().equals("fuel_in")).findFirst().orElseThrow();
+			BlockPos at = machine.form().cellPos(machine.getBlockPos(), facing, machine.form().cellIndex(port.column(), port.row(), port.layer()));
+			var storage = ItemStorage.SIDED.find(h.getLevel(), at, port.side().world(facing));
+			h.assertTrue(storage != null && machine.container().getItem(machine.form().fuelSlot()).is(Items.BUCKET), "A burned lava bucket is reachable at the actual rotated fuel port");
+			try (var tx = Transaction.openOuter()) {
+				h.assertTrue(storage.extract(ItemVariant.of(Items.BUCKET), 1, tx) == 1, "An extractor can simulate returning the bucket");
+			}
+			h.assertTrue(machine.container().getItem(machine.form().fuelSlot()).is(Items.BUCKET), "Aborted transfer leaves the bucket in place");
+			try (var tx = Transaction.openOuter()) {
+				var view = storage.iterator().next();
+				h.assertTrue(view.extract(ItemVariant.of(Items.BUCKET), 1, tx) == 1
+						&& storage.extract(ItemVariant.of(Items.BUCKET), 1, tx) == 0, "Iteration and direct extraction return exactly one bucket");
+				tx.commit();
+			}
+			try (var tx = Transaction.openOuter()) {
+				h.assertTrue(storage.insert(ItemVariant.of(Items.COAL), 3, tx) == 3
+						&& storage.extract(ItemVariant.of(Items.COAL), 3, tx) == 0, "Fuel can be replenished but never siphoned back out");
+				tx.commit();
+			}
+			machine.container().setItem(0, new ItemStack(PrecisionPharmacy.item("fermented_mash_jug")));
+			var allInputs = machine.itemPort(new FormPort("fixture_all", FormPort.Kind.ITEM_IN, FormPort.ALL, 0, 0, 0, FormSide.FRONT));
+			try (var tx = Transaction.openOuter()) {
+				h.assertTrue(allInputs.extract(ItemVariant.of(PrecisionPharmacy.item("fermented_mash_jug")), 1, tx) == 0
+						&& allInputs.extract(ItemVariant.of(Items.COAL), 3, tx) == 0, "The remainder exception applies only to spent fuel, even on an ALL-input view");
+			}
+			h.assertTrue(machine.furnaceTicksRemaining() == heat && machine.container().getItem(machine.form().fuelSlot()).getCount() == 3,
+					"Transfers neither spend nor refund heat and keep the next fuel stack");
+			clear(h, machine);
+		}
 		h.succeed();
 	}
 

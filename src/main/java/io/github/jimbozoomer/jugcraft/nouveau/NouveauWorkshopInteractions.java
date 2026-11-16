@@ -47,6 +47,16 @@ public final class NouveauWorkshopInteractions {
             }
             if(held.isEmpty()&&p.isShiftKeyDown()&&!threads.isEmpty()){String removed=threads.removeLast();armor.set(NouveauGear.THREADS,List.copyOf(threads));var thread=new ItemStack(NouveauCatalog.item("thread_"+removed));if(!p.getInventory().add(thread))p.drop(thread,false,net.minecraft.util.Prediction.SERVER_ONLY);b.setChanged();return InteractionResult.SUCCESS;}
         }
+        if(kind.equals("imbuement_chamber")&&!held.isEmpty()&&(NouveauRecipes.imbues(held)||held.is(NouveauCatalog.item("blank_parchment"))||held.is(NouveauCatalog.item("spell_parchment")))){
+            // Loading by hand, as in Ars: an item an imbuement uses goes into the input slots, merged first, then the
+            // first empty slot (slot 0 when the chamber is empty, where scribing reads it). Anything else keeps its
+            // ordinary use, so blocks still place against the chamber.
+            int before=held.getCount();
+            for(int i=0;i<NouveauWorkshop.INPUTS&&!held.isEmpty();i++){var slot=b.getItem(i);if(!slot.isEmpty()&&ItemStack.isSameItemSameComponents(slot,held)){int n=Math.min(held.getCount(),slot.getMaxStackSize()-slot.getCount());slot.grow(n);held.shrink(n);}}
+            for(int i=0;i<NouveauWorkshop.INPUTS&&!held.isEmpty();i++)if(b.getItem(i).isEmpty())b.setItem(i,held.split(Math.min(held.getCount(),held.getMaxStackSize())));
+            if(held.getCount()==before){p.sendOverlayMessage(Component.literal("The Imbuement Chamber's inputs are full"));return InteractionResult.FAIL;}
+            b.setChanged();return InteractionResult.SUCCESS;
+        }
         if(Set.of("arcane_pedestal","arcane_platform","scribes_table","alteration_table","spell_prism","basic_spell_turret","spell_turret","rotating_spell_turret","timer_spell_turret").contains(kind)){
             if(held.isEmpty()&&!b.getItem(0).isEmpty()){p.setItemInHand(hand,b.removeItem(0,b.getItem(0).getCount()));return InteractionResult.SUCCESS;}
             if(!held.isEmpty()&&b.getItem(0).isEmpty()){b.setItem(0,held.split(1));return InteractionResult.SUCCESS;}

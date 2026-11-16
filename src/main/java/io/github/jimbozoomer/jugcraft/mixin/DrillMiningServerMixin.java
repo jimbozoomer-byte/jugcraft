@@ -51,8 +51,11 @@ public abstract class DrillMiningServerMixin implements DrillMiningContext {
     private boolean jugcraft$scopeFaceToRoot(BlockPos pos, Operation<Boolean> original) {
         DrillMiningTarget previous = jugcraft$activeDrill;
         DrillMiningTarget pending = jugcraft$pendingDrill;
-        jugcraft$pendingDrill = null;
-        jugcraft$activeDrill = pending != null && pending.matches(player, pos) ? pending : null;
+        // Only the block the face was latched for uses it up: a lagged, delayed destroy of an earlier block must not
+        // clear the face the player has since started on another.
+        boolean root = pending != null && pending.matches(player, pos);
+        if (root) jugcraft$pendingDrill = null;
+        jugcraft$activeDrill = root ? pending : null;
         try {
             return original.call(pos);
         } finally {

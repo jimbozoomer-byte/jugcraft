@@ -331,8 +331,8 @@ public class EncyclopediaGameTests {
 		ServerPlayer player = player(helper);
 		EncyclopediaPayload payload = build(player);
 		helper.assertValueEqual(payload.pages().stream().map(EncyclopediaPayload.Page::id).toList(),
-				List.of("technology_start", "magic_start", "alchemy_start", "mentors", "discover", "nouveau", "botanical", "botanical_flowers", "menagerie", "woodland", "household", "habitats", "beasts", "caverns", "jimta_network", "jimta_guides"),
-				"a newcomer's first steps and ungated owner-collection references");
+				List.of("technology_start", "magic_start", "alchemy_start", "mentors", "discover", "nouveau", "botanical", "botanical_flowers", "menagerie", "woodland", "household", "habitats", "beasts", "caverns", "jimta_network", "jimta_guides", "route_technology", "route_magic"),
+				"a newcomer's first steps, ungated owner-collection references and both route maps");
 		Map<String, EncyclopediaPayload.Row> steps = steps(payload);
 		helper.assertValueEqual(List.copyOf(steps.keySet()), expectedSteps(), "the route's steps, in order");
 		for (Map.Entry<String, EncyclopediaPayload.Row> step : steps.entrySet()) {

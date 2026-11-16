@@ -127,8 +127,11 @@ public final class ConcordanceGardenNetworkTests implements FabricClientGameTest
 					server.runOnServer(minecraft -> prepare(minecraft, stand, perch, holderBed, holder));
 					server.runOnServer(minecraft -> minecraft.getPlayerList().getWhiteList().add(new UserWhiteListEntry(NameAndId.createOffline(PEER_NAME))));
 					InProcessServerConfigs.beforeAdditionalClient(server);
-					peer = CLIENT.launch(server.computeOnServer(MinecraftServer::getPort), "-Xmx2G");
+					// Main's models need more than 2 GB to bake (PeerClientStartup): the shared heap, and startup waited for
+					// separately before the login deadline, as the other two-client tests do.
+					peer = CLIENT.launch(server.computeOnServer(MinecraftServer::getPort), PeerClientStartup.HEAP_OPTION);
 					Process joining = peer;
+					PeerClientStartup.await(() -> context.waitTicks(1), joining, CLIENT.coordination());
 					server.waitFor(minecraft -> {
 						if (!joining.isAlive()) {
 							throw CLIENT.failure("The second client exited before joining: " + joining.exitValue());

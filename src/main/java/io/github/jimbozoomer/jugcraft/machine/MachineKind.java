@@ -538,6 +538,21 @@ public enum MachineKind implements StringRepresentable {
 		};
 	}
 
+	/**
+	 * The one fluid a {@link #tankCapacity()} tank takes from pumps, pipes and buckets, or null without one. The
+	 * machine's inlet, its screen's gauge and the bay's refusal message all read it, so they cannot disagree. The
+	 * hydroponic bay takes only nutrient solution: plain water is refused (docs/features/hydroponics.md).
+	 */
+	public net.minecraft.world.level.material.@Nullable Fluid tankFluid() {
+		return switch (this) {
+			case STEAM_GENERATOR, LARGE_STEAM_ENGINE, ORE_WASHER -> net.minecraft.world.level.material.Fluids.WATER;
+			case GEOTHERMAL_GENERATOR -> net.minecraft.world.level.material.Fluids.LAVA;
+			case HYDROPONIC_BAY -> io.github.jimbozoomer.jugcraft.chemistry.PetroFluids.NUTRIENT_SOLUTION.source();
+			case ELECTROPLATING_BATH -> io.github.jimbozoomer.jugcraft.chemistry.PetroFluids.SULFURIC_ACID.source();
+			default -> null;
+		};
+	}
+
 	/** Generators with a supported solid-fuel inventory. */
 	public boolean solidFuelCompanion() {return this==COAL_GENERATOR || isBoiler();}
 	public boolean supportsCompanionLogistics() {return supportsCompanionAssistance() || solidFuelCompanion();}

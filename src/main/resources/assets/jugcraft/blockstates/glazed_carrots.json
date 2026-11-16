@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jugcraft:block/glazed_carrots",
+      "y": 180
+    },
+    "facing=east": {
+      "model": "jugcraft:block/glazed_carrots",
+      "y": 270
+    },
+    "facing=south": {
+      "model": "jugcraft:block/glazed_carrots"
+    },
+    "facing=west": {
+      "model": "jugcraft:block/glazed_carrots",
+      "y": 90
+    }
+  }
+}

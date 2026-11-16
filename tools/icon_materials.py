@@ -70,6 +70,10 @@ OBSIDIAN = Material((14, 8, 24), (30, 20, 46), (50, 36, 76), (72, 54, 106), (104
 MAGMA = Material((60, 14, 6), (96, 28, 10), (124, 40, 12), (178, 66, 16), (230, 116, 30), (250, 176, 70), shine=False)
 # The Lantern Fen's: the Hag Stone's flint, a dark green-grey worn smooth by the fen.
 FEN_FLINT = Material((24, 32, 30), (36, 46, 44), (60, 78, 70), (88, 118, 100), (130, 156, 140), (196, 216, 202))
+# Knapped flint, for the woodland hunting weapons' stone heads and points (tools/thanksgiving_weapons.py: the
+# Stone-headed Hatchet, the Hunting Spear and the hunting bow's drawn arrow): a cool dark grey, darker than iron, its
+# light the sheen of a fresh flake. Provisional: not yet shown to the owner.
+FLINT = Material((18, 18, 22), (40, 40, 46), (58, 58, 66), (86, 86, 96), (124, 124, 134), (176, 176, 188))
 # The Mire Hag's loot (tools/item_icons/hagmoss.txt, hags_eye.txt and hags_shawl.txt): her grey moss, a dull green-grey
 # that does not shine (tools/mire_hag_art.py MOSS); and marsh-light, the sickly green of her eyes and her lantern's flame,
 # only ever a stone or an accent.
@@ -176,6 +180,8 @@ MATERIALS = {
     "obsidian": OBSIDIAN, "magma": MAGMA,
     # the Lantern Fen's, and the Mire Hag's loot
     "fen_flint": FEN_FLINT, "hagmoss": HAGMOSS, "marsh_light": MARSH_LIGHT,
+    # the woodland hunting weapons' knapped stone (tools/thanksgiving_weapons.py)
+    "flint": FLINT,
     # the Crypt Lich's loot
     "old_bone": OLD_BONE, "soul_fire": SOUL_FIRE,
     # the Earth school's metal (Concordance Chunk C)

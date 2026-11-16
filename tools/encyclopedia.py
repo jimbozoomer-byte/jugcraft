@@ -41,9 +41,11 @@ PAGES = {
     "caverns": "Cave Exploration",
     "jimta_network": "Digital Workshops",
     "jimta_guides": "Workshop Guides",
+    "route_technology": "Technology Route Map",
+    "route_magic": "Magic Route Map",
     "keys": "Keys",
 }
-SERVER_PAGES = ["technology_start", "magic_start", "alchemy_start", "mentors", "discover", "spellcraft", "expedition", "inspect", "nouveau", "botanical", "botanical_flowers", "menagerie", "woodland", "household", "habitats", "beasts", "caverns", "jimta_network", "jimta_guides"]
+SERVER_PAGES = ["technology_start", "magic_start", "alchemy_start", "mentors", "discover", "spellcraft", "expedition", "inspect", "nouveau", "botanical", "botanical_flowers", "menagerie", "woodland", "household", "habitats", "beasts", "caverns", "jimta_network", "jimta_guides", "route_technology", "route_magic"]
 
 # Where a step of a route stands for a player (EncyclopediaPayload.StepState, NONE aside), in words.
 STATES = {
@@ -59,6 +61,8 @@ EDGES = {
     "recommended": "Recommended",
     "trade": "Trade",
     "optional_boss": "Optional: after a boss",
+    # Another way to the same item (a route map's other recipe or unpowered station); appended to keep ordinals.
+    "alternative": "Alternative",
 }
 
 # The First Light route (FirstLightRoute.java), in order. Each step: how much it matters, when it is done, what it waits

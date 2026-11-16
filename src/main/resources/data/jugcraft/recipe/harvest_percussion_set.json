@@ -1,0 +1,22 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "#minecraft:wooden_slabs",
+    "minecraft:leather",
+    "minecraft:iron_nugget",
+    "minecraft:iron_nugget",
+    "jugcraft:warty_gourd",
+    "minecraft:stick"
+  ],
+  "result": {
+    "id": "jugcraft:harvest_percussion_set",
+    "count": 1
+  }
+}

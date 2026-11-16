@@ -30,10 +30,9 @@ public final class ConcordanceClientOptions {
 	private static boolean simpleJournal;
 	private static boolean wornTrinkets = true;
 	private static Presentation.Intensity intensity = Presentation.Intensity.FULL;
-	private static DrugVisualOptions drugVisuals = DrugVisualOptions.DEFAULT;
-
 	/** The pact spirits (their counterparts, entity ids) whose three beats this player has paged through. */
 	private static final Set<String> heardBeats = new LinkedHashSet<>();
+	private static DrugVisualOptions drugVisuals = DrugVisualOptions.DEFAULT;
 
 	private ConcordanceClientOptions() {
 	}
@@ -133,14 +132,13 @@ public final class ConcordanceClientOptions {
 		// The two settings on at first are off only when they say so: a mistyped value leaves them on.
 		wornTrinkets = !"false".equalsIgnoreCase(properties.getProperty("concordance.worn_trinkets", "true").trim());
 		intensity = Presentation.Intensity.fromId(properties.getProperty("concordance.visual_intensity", "full"));
-		drugVisuals = DrugVisualOptions.read(properties);
-
 		heardBeats.clear();
 		for (String spirit : properties.getProperty("concordance.heard_beats", "").split(",")) {
 			if (!spirit.isBlank()) {
 				heardBeats.add(spirit.trim());
 			}
 		}
+		drugVisuals = DrugVisualOptions.read(properties);
 		Presentation.configure(intensity, reducedMotion);
 		save();
 	}
@@ -154,9 +152,8 @@ public final class ConcordanceClientOptions {
 		properties.setProperty("concordance.simple_journal", Boolean.toString(simpleJournal));
 		properties.setProperty("concordance.worn_trinkets", Boolean.toString(wornTrinkets));
 		properties.setProperty("concordance.visual_intensity", intensity.id());
-		drugVisuals.write(properties);
-
 		properties.setProperty("concordance.heard_beats", String.join(",", heardBeats));
+		drugVisuals.write(properties);
 		try (Writer writer = Files.newBufferedWriter(path)) {
 			properties.store(writer, "Jugcraft client display settings (kept on this computer): concordance.hud shows Focus while"
 					+ " a Concordance instrument is held; concordance.reduced_motion makes Kindled light, the bench and the journal"

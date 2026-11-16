@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jugcraft:block/harvest_sampler"
+    },
+    "facing=east": {
+      "model": "jugcraft:block/harvest_sampler",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jugcraft:block/harvest_sampler",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jugcraft:block/harvest_sampler",
+      "y": 270
+    }
+  }
+}

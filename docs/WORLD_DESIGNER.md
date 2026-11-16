@@ -41,6 +41,66 @@ You can choose another seed with the same design. The painted height field and m
 
 For a **new dedicated-server world**, place the ZIP in `<level-name>/datapacks/` before first start, select `level-type=jugcraft:designed`, and include `file/<your-pack>.zip` in `initial-enabled-packs` while preserving the server's other intended packs. Keep structures enabled. Everyone connecting needs the matching Jugcraft build and required mods. This does not change an existing world's preset.
 
+## Optional climate bands
+
+A design can add **spawn-relative climate bands**: east–west belts measured north and south of the design spawn, never from 0,0. North is −Z.
+
+| Belt | Default | Biomes |
+| --- | --- | --- |
+| Frigid, north | 2,500 blocks north and beyond | Strictly arctic/frozen\* |
+| Central | everything between the belts | The normal seed mix, unchanged |
+| Hot | 2,000–4,000 blocks south | Hot pools: desert, savanna, jungle and similar |
+| Temperate | 4,000–5,500 blocks south | Temperate pools: forest, taiga, grassland and similar |
+| Frigid, south | 5,500 blocks south and beyond | Strictly arctic/frozen\* |
+
+\* *Strict* describes biome identity: every unpainted surface biome beyond a frigid limit comes from the frigid pools.
+- Painted cells always win over the bands.
+- `minecraft:frozen_ocean` and `minecraft:deep_frozen_ocean` are in the frigid ocean pools. As in vanilla, they rain in places and their open water does not fully freeze.
+- A few frigid land biomes, such as `cold_desert` and `landscape_siberian_taiga`, are cold but have no precipitation.
+
+**Transitions.** Each belt edge has a transition, 256 blocks wide by default and 0–1,024 allowed. The game picks one side per natural patch instead of hard lines.
+- The hot and temperate edges are centred on their thresholds.
+- The frigid transitions lie entirely on the inner side, so everything at and beyond a frigid limit is in the frigid zone (see the note above).
+
+**What climate changes.** It changes biomes only, never terrain. Oceans stay oceans, rivers stay rivers and beaches stay beaches, using that zone's version of each. Cave and underground biomes are left alone. Painted cells always keep their painted biome: climate applies to unpainted cells and to the world beyond the design. The biome pools come from the mod's data pack tags (`#jugcraft:climate/<zone>/<category>`); this editor does not edit them.
+
+**Using it.**
+1. In the details panel, tick **Enable spawn-relative climate bands**.
+2. Adjust the four distances, the transition width and, optionally, the variety salt, which reshuffles patches without moving the belts. Invalid values are explained beside the fields and block export.
+3. Choose **Climate** above the map, or **Show climate overview**. It draws ±8,000 blocks around spawn, more for far limits; scroll to zoom and **Fit map** to reset.
+   - Strict frigid limits are red.
+   - Transitions are hatched.
+   - The 2,048-block design is the outlined square.
+   - The cursor readout names the belt and its distance from spawn.
+   - The 65 × 65 terrain grid itself is not enlarged.
+
+**Anchor.** Export anchors the bands at exactly the design spawn: `{"mode":"fixed","x":<spawn x>,"z":<spawn z>}`. Moving the spawn moves the bands, and the server rejects a pack whose anchor differs from its spawn. Later `/setworldspawn` changes do not move the climate of an existing world.
+
+**Which builds can use it.** Export needs a catalog from a Jugcraft build that reports climate support (`"climate":{"schema":1}`). With an older catalog the editor blocks export of a climate-enabled design, because older builds would silently ignore the bands. Designs without climate, planning mode and older catalogs behave exactly as before.
+
+**Saved data.** The saved design gains an optional block:
+```json
+"climate": {"schema":1,"enabled":true,"north_frigid":2500,"south_hot_start":2000,"south_hot_end":4000,"south_frigid":5500,"transition":256,"salt":0}
+```
+- Designs without it open, save and export byte-for-byte as before.
+- A switched-off block keeps your values but exports nothing.
+- When enabled, the pack writes a `climate` field into the `jugcraft:design` biome source.
+
+**Validation.** It matches the server codec exactly, in whole blocks, where T is the transition width:
+- each distance is 1–1,000,000;
+- T is 0–1,024;
+- the salt is a 32-bit integer;
+- north frigid > T;
+- hot start < temperate start < south frigid;
+- 2 × hot start > T;
+- temperate start − hot start ≥ T;
+- 2 × (south frigid − temperate start) ≥ 3 × T.
+
+**Limits.**
+- It is for new designed worlds only. There is no procedural, non-design climate preset yet.
+- Existing worlds and generated chunks are not changed.
+- The editor's overview is a plan. Check the result in a new test world, and keep the design, pack and mod collection together with the world.
+
 ## What this first version does and does not control
 
 | Area | Current behavior |
@@ -68,6 +128,7 @@ Read the [feature record](features/world-designer.md), [framework catalog](FRAME
 - `world/design/DesignGrid`, `DesignDensity`, `DesignBiomeSource` and `DesignPlacement` are per-world, serialized generation components. No global active-map singleton: two different worlds must retain separate designs.
 - `WorldDesigner` handles registration, catalog export and the existing spawn/town hooks. Reuse `TownPlanner`, `TownState` and `TownBuilder` for town construction and persistence.
 - New generation features should have a versioned field, editor preview, bounded validation, server codec, real-world generation test and save/reopen evidence. Update both the Java and JavaScript contracts together.
+- The climate rules in `model.js` (`climateIssues`, `validateClimateProfile`, `climateZoneAt`) mirror the server `ClimateProfile` codec and band geometry rule for rule. Change both together; the JavaScript tests pin the boundaries.
 - Existing frameworks remain available for future in-game screens, animated previews or guides. This browser editor does not need GeckoLib, a spell framework, GuiLib, or a second UI runtime to draw a map. Keep client-only APIs out of the common generation classes.
 
 Run the model tests with `node --test tools/world-designer/model.test.cjs` (Node 18+). A headless export is available as `node tools/world-designer/compile.cjs design.jugcraft.json catalog.json output.zip`; it refuses to overwrite an existing output. Run the Minecraft checks documented in the feature record as well—JavaScript tests alone do not prove world generation works.

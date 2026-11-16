@@ -221,7 +221,13 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> implemen
 			line = String.format("%,d / %,d JE", menu.energy(), menu.capacity());
 		} else if (kind.tankCapacity() > 0 && my >= BAR_Y - 1 && my <= BAR_Y + BAR_HEIGHT
 				&& (kind.isProcessor() ? mx >= 29 && mx < 37 : mx >= 149 && mx < 163)) {
-			line = String.format("%,d / %,d mB", menu.data(MachineBlockEntity.DATA_TANK), kind.tankCapacity());
+			// Name the one fluid the tank takes ("Nutrient Solution: 0 / 8,000 mB"), so an empty gauge says what it wants.
+			Fluid wanted = kind.tankFluid();
+			Component name = wanted == null ? Component.translatable("container.jugcraft.tank.empty")
+					: FluidVariantAttributes.getName(FluidVariant.of(wanted));
+			graphics.setTooltipForNextFrame(font, name.copy().append(String.format(": %,d / %,d mB",
+					menu.data(MachineBlockEntity.DATA_TANK), kind.tankCapacity())), mouseX, mouseY);
+			return;
 		}
 		FluidMachineSpec spec = kind.fluidSpec();
 		if (line == null && spec != null && my >= MachineMenu.TANK_Y - 1 && my <= MachineMenu.TANK_Y + MachineMenu.TANK_HEIGHT) {
@@ -385,8 +391,11 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> implemen
 				slot(graphics, MachineMenu.upgradeX(index), MachineMenu.UPGRADE_Y, kind.slots + index, MachineSkin.Icon.UPGRADE);
 			}
 			if (kind.tankCapacity() > 0) {
-				// Water gauge between the energy bar and the input slot.
-				tube(graphics, x + 30, y + BAR_Y, 6, 52 - BAR_Y, menu.data(MachineBlockEntity.DATA_TANK), kind.tankCapacity(), WATER);
+				// Tank gauge between the energy bar and the input slot, in the colour of the fluid it takes (the bay's
+				// nutrient solution is green, not water blue).
+				Fluid wanted = kind.tankFluid();
+				tube(graphics, x + 30, y + BAR_Y, 6, 52 - BAR_Y, menu.data(MachineBlockEntity.DATA_TANK), kind.tankCapacity(),
+						wanted == null ? WATER : fluidColor(wanted));
 			}
 			MachineSkin.arrow(graphics, theme, x + MachineMenu.arrowX(kind), y + 43, progressFraction());
 		}
@@ -598,6 +607,11 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> implemen
 			ItemStack stack = result == null ? ItemStack.EMPTY : result.getItem();
 			if (!stack.isEmpty() && stack.getCount() >= stack.getMaxStackSize()) {
 				return new Status("output_full", true, false, "output_full");
+			}
+			// The bay's tank takes only nutrient solution (piped water is refused), so say so and how to make it.
+			if (kind == MachineKind.HYDROPONIC_BAY
+					&& menu.data(MachineBlockEntity.DATA_TANK) < MachineKind.HYDROPONIC_SOLUTION_PER_HARVEST) {
+				return new Status("idle", true, false, "add_nutrient_solution");
 			}
 			boolean anyInput = false;
 			for (int slot = 0; slot < output; slot++) {

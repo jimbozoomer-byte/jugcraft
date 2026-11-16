@@ -6,7 +6,7 @@
   "mixins": [
     "EquipmentAudioProbeMixin",
     "GameTestHelperPlayersMixin",
-    "SeasonClockMixin"
+    "SeasonDateSnapshotMixin"
   ],
   "injectors": {
     "defaultRequire": 1

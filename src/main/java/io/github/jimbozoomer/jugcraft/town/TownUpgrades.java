@@ -76,6 +76,13 @@ public final class TownUpgrades {
     }
     private static final SavedDataType<Progress> TYPE = new SavedDataType<>(Jugcraft.id("town_upgrades"), Progress::new, Progress.CODEC, null);
 
+    /** Read-only ownership query: preview must not reset a migration ledger for a new origin. */
+    static boolean preservedDecor(ServerLevel level, BlockPos pos) {
+        Progress p = level.getServer().overworld().getDataStorage().get(TYPE);
+        return p != null && p.origin.equals(Optional.ofNullable(TownState.get(level).origin()))
+            && p.preservedDecor.contains(pos.asLong());
+    }
+
     public static Progress progress(ServerLevel level) {
         Progress p = level.getServer().overworld().getDataStorage().computeIfAbsent(TYPE);
         Optional<BlockPos> origin = Optional.ofNullable(TownState.get(level).origin());

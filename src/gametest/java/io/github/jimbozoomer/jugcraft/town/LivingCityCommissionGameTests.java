@@ -11,6 +11,98 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.Blocks;
 
 public class LivingCityCommissionGameTests {
+    @GameTest public void harvestDisplayRunsAfterHalloweenUntilDecember(GameTestHelper h) {
+        h.assertTrue(!TownDecor.harvestDisplayOn(java.time.LocalDate.of(2026,11,3)),"Halloween retains November 3");
+        h.assertTrue(TownDecor.harvestDisplayOn(java.time.LocalDate.of(2026,11,4)),"Harvest starts November 4");
+        h.assertTrue(TownDecor.harvestDisplayOn(java.time.LocalDate.of(2026,11,30)),"Harvest retains November 30");
+        h.assertTrue(!TownDecor.harvestDisplayOn(java.time.LocalDate.of(2026,12,1)),"December can replace harvest");h.succeed();
+    }
+    @GameTest public void actualHarvestSceneMigratesFromHalloweenAndIntoDecember(GameTestHelper h) {
+        var data=TownData.get();var level=h.getLevel();
+        var site=data.sites.stream().filter(s->s.kind().equals("centerpiece")).findFirst().orElseThrow();
+        h.assertTrue(data.centerpiece.containsKey("harvest_v2"),"Registered scene is packaged");
+        var anchor=h.absolutePos(new BlockPos(1,1,1));
+        int minX=java.util.Arrays.stream(site.blocks()).mapToInt(b->b[0]).min().orElseThrow();
+        int minY=java.util.Arrays.stream(site.blocks()).mapToInt(b->b[1]).min().orElseThrow();
+        int minZ=java.util.Arrays.stream(site.blocks()).mapToInt(b->b[2]).min().orElseThrow();
+        var previous="halloween";
+        for(var next:new String[]{"harvest_v2","harvest_v2","december"}) {
+            var cells=new java.util.ArrayList<TownDecor.DecorCell>();
+            for(var b:site.blocks()) {
+                var pos=anchor.offset(b[0]-minX,b[1]-minY,b[2]-minZ);
+                var expected=TownDecor.stateFor(data,site,previous,b[3]);
+                if(previous.equals("halloween")) TownBuilder.set(level,pos,expected);
+                cells.add(new TownDecor.DecorCell(pos,expected,TownDecor.stateFor(data,site,next,b[3])));
+            }
+            h.assertTrue(TownDecor.applyCells(level,cells),"Whole packaged scene transitions to "+next);
+            for(var c:cells) h.assertTrue(level.getBlockState(c.pos())==c.wanted(),"All scene cells match "+next);
+            previous=next;
+        }
+        h.assertTrue(level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,
+            new net.minecraft.world.phys.AABB(anchor).expandTowards(7,16,7)).isEmpty(),"No free drops from seasonal replacement");
+        h.succeed();
+    }
+    private java.util.List<TownDecor.DecorCell> hornCells(GameTestHelper h, boolean removing) {
+        var block=(io.github.jimbozoomer.jugcraft.agriculture.MultiDecorationBlock)net.minecraft.core.registries.BuiltInRegistries.BLOCK
+            .getValue(net.minecraft.resources.Identifier.parse("jugcraft:giant_cornucopia"));
+        var root=h.absolutePos(new BlockPos(4,1,2));
+        var cells=new java.util.ArrayList<TownDecor.DecorCell>();
+        for(int part=block.cells().length-1;part>=0;part--) {
+            var state=block.defaultBlockState().setValue(block.partProperty(),part);
+            var pos=block.partPos(root,net.minecraft.core.Direction.NORTH,part);
+            cells.add(new TownDecor.DecorCell(pos,removing?state:Blocks.AIR.defaultBlockState(),
+                removing?Blocks.AIR.defaultBlockState():state));
+            TownBuilder.set(h.getLevel(),pos,removing?state:Blocks.AIR.defaultBlockState());
+        }
+        return cells;
+    }
+    @GameTest public void seasonalMultiblockRemovesRootWithoutDropsAndCanBeRepeated(GameTestHelper h) {
+        var cells=hornCells(h,true);var level=h.getLevel();
+        h.assertTrue(TownDecor.applyCells(level,cells),"Intact cornucopia migrates");
+        for(var c:cells) h.assertTrue(level.getBlockState(c.pos()).isAir(),"Every old part removed");
+        h.assertTrue(level.getEntitiesOfClass(net.minecraft.world.entity.item.ItemEntity.class,
+            new net.minecraft.world.phys.AABB(h.absolutePos(new BlockPos(0,0,0))).inflate(10)).isEmpty(),"Migration creates no dropped props");
+        h.assertTrue(TownDecor.applyCells(level,cells),"Repeated application is safe");h.succeed();
+    }
+    @GameTest public void seasonalMultiblockLanternToggleDoesNotFreezeTheSeason(GameTestHelper h) {
+        var cells=hornCells(h,true);var level=h.getLevel();
+        for(var c:cells) TownBuilder.set(level,c.pos(),c.expected().setValue(
+            io.github.jimbozoomer.jugcraft.agriculture.MultiDecorationBlock.LIT,false));
+        h.assertTrue(TownDecor.applyCells(level,cells),"Turning off authored lanterns does not count as a replacement");
+        for(var c:cells) h.assertTrue(level.getBlockState(c.pos()).isAir(),"Unlit display still clears");h.succeed();
+    }
+    @GameTest public void seasonalMultiblockPreservesWholeSiteWhenOwnerEditsOneCell(GameTestHelper h) {
+        var cells=hornCells(h,false);var level=h.getLevel();var owner=cells.get(0).pos();
+        level.setBlockAndUpdate(owner,Blocks.GOLD_BLOCK.defaultBlockState());
+        h.assertTrue(TownDecor.blockedDisplay(level,cells),"Preview flags entire display");
+        h.assertTrue(!TownDecor.applyCells(level,cells),"Conflicting display is not partially placed");
+        for(var c:cells) h.assertTrue(level.getBlockState(c.pos()).is(c.pos().equals(owner)?Blocks.GOLD_BLOCK:Blocks.AIR),"Owner state preserved");
+        h.assertTrue(TownUpgrades.preservedDecor(level,cells.get(1).pos()),"Whole site remains protected in later seasons");h.succeed();
+    }
+    @GameTest public void seasonalMultiblockRejectsIncompleteFootprint(GameTestHelper h) {
+        var cells=hornCells(h,false);cells.remove(0);
+        h.assertTrue(!TownDecor.applyCells(h.getLevel(),cells),"Never place a prop outside authored site bounds");
+        for(var c:cells) h.assertTrue(h.getLevel().getBlockState(c.pos()).isAir(),"No partial display placed");h.succeed();
+    }
+    @GameTest public void decorPreviewDoesNotClaimOrReplaceOwnerCells(GameTestHelper h) {
+        var level=h.getLevel();var pos=h.absolutePos(new BlockPos(2,2,2));
+        var expected=Blocks.OAK_PLANKS.defaultBlockState();var wanted=TownData.parse("minecraft:red_wool");
+        level.setBlockAndUpdate(pos,Blocks.GOLD_BLOCK.defaultBlockState());
+        var progress=TownUpgrades.progress(level);
+        h.assertTrue(!progress.preservedDecor.contains(pos.asLong()), "Fixture begins unclaimed");
+        var before=TownUpgrades.Progress.CODEC.encodeStart(JsonOps.INSTANCE,progress).getOrThrow();
+        h.assertTrue(TownDecor.cellChange(level,pos,expected,wanted)==TownDecor.CellChange.PRESERVE,"Preview flags owner edit");
+        h.assertTrue(!progress.preservedDecor.contains(pos.asLong()), "Preview does not persist an override");
+        h.assertTrue(before.equals(TownUpgrades.Progress.CODEC.encodeStart(JsonOps.INSTANCE,progress).getOrThrow()),"Preview leaves migration ledger unchanged");
+        h.assertTrue(level.getBlockState(pos).is(Blocks.GOLD_BLOCK), "Preview leaves owner block untouched");
+        level.setBlockAndUpdate(pos,expected);
+        h.assertTrue(TownDecor.cellChange(level,pos,expected,wanted)==TownDecor.CellChange.REPLACE,"Matching authored cell can change");
+        h.assertTrue(TownDecor.updateAuthoredDecor(level,pos,expected,wanted),"Actual update uses same decision");
+        h.assertTrue(TownDecor.cellChange(level,pos,expected,wanted)==TownDecor.CellChange.UNCHANGED,"Repeated update is unchanged");
+        level.setBlockAndUpdate(pos,Blocks.CHEST.defaultBlockState());
+        h.assertTrue(TownDecor.cellChange(level,pos,Blocks.CHEST.defaultBlockState(),wanted)==TownDecor.CellChange.PRESERVE,"Even matching container is protected");
+        h.succeed();
+    }
     @GameTest public void fullSizeNoticeboardPartsAndRemoval(GameTestHelper h) {
         var level=h.getLevel();var block=JugcraftTown.COMMISSION_BOARD;
         var root=h.absolutePos(new BlockPos(2,2,2));
@@ -150,6 +242,7 @@ public class LivingCityCommissionGameTests {
         var connection=new net.minecraft.network.Connection(net.minecraft.network.protocol.PacketFlow.SERVERBOUND);
         new io.netty.channel.embedded.EmbeddedChannel(connection);
         level.getServer().getPlayerList().placeNewPlayer(connection,player,net.minecraft.server.network.CommonListenerCookie.createInitial(profile,false));
+        io.github.jimbozoomer.jugcraft.test.TestPlayers.track(h,player);
         var pos=h.absolutePos(new BlockPos(2,2,2));
         try{
             player.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);

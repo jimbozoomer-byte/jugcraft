@@ -139,6 +139,8 @@ public final class Jugcraft implements ModInitializer {
 		JugcraftExosuit.register();
 		JugcraftGrapple.register();
 		io.github.jimbozoomer.jugcraft.weapons.JugcraftArms.register();
+		io.github.jimbozoomer.jugcraft.weapons.NavalCutlassItem.register();
+		io.github.jimbozoomer.jugcraft.weapons.HuntingWeapons.register();
 		io.github.jimbozoomer.jugcraft.guns.JugcraftGuns.register();
 		io.github.jimbozoomer.jugcraft.pharmacology.Pharmacology.register();
 		io.github.jimbozoomer.jugcraft.weapons.FieldChemistry.register();
@@ -186,6 +188,10 @@ public final class Jugcraft implements ModInitializer {
 		io.github.jimbozoomer.jugcraft.season.Beardshy.register();
 		new io.github.jimbozoomer.jugcraft.creatures.scary.ScaryMod().onInitialize();
 		io.github.jimbozoomer.jugcraft.creatures.chima.ChimaMod.register();
+		// The Pegasus, a flying horse (docs/features/pegasus.md).
+		io.github.jimbozoomer.jugcraft.pegasus.JugcraftPegasus.register();
+		// Five horse breeds, their saddlebags and crossbreeding (docs/features/horse-breeds.md).
+		io.github.jimbozoomer.jugcraft.horses.HorseBreeds.register();
 		io.github.jimbozoomer.jugcraft.server.ServerUtilities.register();
 		io.github.jimbozoomer.jugcraft.town.JugcraftTown.register();
 		io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance.register();
@@ -204,6 +210,7 @@ public final class Jugcraft implements ModInitializer {
         io.github.jimbozoomer.jugcraft.aquatic.OwnerAquaculture.register();
         io.github.jimbozoomer.jugcraft.ribbits.OwnerRibbits.register();
         io.github.jimbozoomer.jugcraft.menagerie.OwnerSupplementaries.register();
+        io.github.jimbozoomer.jugcraft.menagerie.PirateShips.register();
         io.github.jimbozoomer.jugcraft.menagerie.OwnerAmendments.register();
         io.github.jimbozoomer.jugcraft.botany.Jugtania.register();
         io.github.jimbozoomer.jugcraft.arcane.ForbiddenArcane.register();

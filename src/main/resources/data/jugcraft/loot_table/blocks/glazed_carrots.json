@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:block",
+  "random_sequence": "jugcraft:blocks/glazed_carrots",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:glazed_carrots"
+        }
+      ],
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      }
+    }
+  ]
+}

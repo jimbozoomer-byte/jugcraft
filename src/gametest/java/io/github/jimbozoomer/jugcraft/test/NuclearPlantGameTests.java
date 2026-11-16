@@ -42,6 +42,11 @@ import net.minecraft.world.level.block.Rotation;
  * The pre-made nuclear plants (docs/features/nuclear.md, "Pre-made plants"): the plant and part blueprints load from
  * the jar at their full size, the new core designs and cooling towers behave, and a whole small modular plant built by
  * /nuclear build forms six working units with both cooling tower banks.
+ * <p>
+ * Each test that builds whole plants (118,096 to 724,889 blocks, chunks, block entities and lighting) has a test
+ * environment of its own, so it runs in a batch of its own: before, all six were in one default batch and built about
+ * 2.2 million blocks in the same tick, on top of the batch's other tests (docs/features/server-load-benchmark.md,
+ * "Full-suite memory"). The environments do nothing else.
  */
 public class NuclearPlantGameTests {
 	/** Block counts the blueprints must have (the same as tools/nuclear_plants.py writes; checked again there). */
@@ -118,7 +123,7 @@ public class NuclearPlantGameTests {
 	}
 
 	/** /nuclear build of the small modular plant, far from the other tests: six modules, each a working unit, and both tower banks formed. */
-	@GameTest(maxTicks = 200)
+	@GameTest(maxTicks = 200, environment = "jugcraft-test:nuclear_plant_small")
 	public void smallPlantBuildsAndForms(GameTestHelper helper) {
 		if (TestFocus.skip("nuclear")) {
 			helper.succeed();
@@ -154,7 +159,7 @@ public class NuclearPlantGameTests {
 	 * power, nothing measurable gets out of the reactor buildings: everywhere in the open round them (on the ground and on
 	 * the roofs, within 70 blocks) reads below a tenth of a microsievert an hour over background.
 	 */
-	@GameTest(maxTicks = 400)
+	@GameTest(maxTicks = 400, environment = "jugcraft-test:nuclear_plant_shielding")
 	public void reactorBuildingsKeepRadiationIn(GameTestHelper helper) {
 		if (TestFocus.skip("nuclear")) {
 			helper.succeed();
@@ -509,7 +514,7 @@ public class NuclearPlantGameTests {
 	 * REG XF breaker (round 26, 8d). The pieces are ticked by hand, in
 	 * the order the server ticks them.
 	 */
-	@GameTest(maxTicks = 40)
+	@GameTest(maxTicks = 40, environment = "jugcraft-test:nuclear_plant_power")
 	public void mediumPlantPowerReachesTheBatteries(GameTestHelper helper) {
 		if (TestFocus.skip("nuclear")) {
 			helper.succeed();
@@ -848,7 +853,7 @@ public class NuclearPlantGameTests {
 	 * show: a full-power, a tripped, a cold and an unprotected reactor's meters, bistables, permissives and actuations
 	 * (nuclear/RelayRoom.java readings).
 	 */
-	@GameTest(maxTicks = 40)
+	@GameTest(maxTicks = 40, environment = "jugcraft-test:nuclear_plant_relay_room")
 	public void mediumPlantRelayRoomReadsTheReactor(GameTestHelper helper) {
 		if (TestFocus.skip("nuclear")) {
 			helper.succeed();
@@ -928,7 +933,7 @@ public class NuclearPlantGameTests {
 	 * chiller and pump, its normal outside air damper open, the rest shut or on standby, no alarms. On EMERGENCY both
 	 * trains go to filtered air; back on AUTO a reactor trip does the same, and the reset brings it back.
 	 */
-	@GameTest(maxTicks = 40)
+	@GameTest(maxTicks = 40, environment = "jugcraft-test:nuclear_plant_hvac")
 	public void mediumPlantHvacRoomSwitchesToEmergency(GameTestHelper helper) {
 		if (TestFocus.skip("nuclear")) {
 			helper.succeed();
@@ -1033,7 +1038,7 @@ public class NuclearPlantGameTests {
 	 * clear for five minutes the emergency is terminated. Damaged fuel is a SITE AREA EMERGENCY, with the core at its
 	 * damage temperature a GENERAL EMERGENCY.
 	 */
-	@GameTest(maxTicks = 40)
+	@GameTest(maxTicks = 40, environment = "jugcraft-test:nuclear_plant_tsc")
 	public void mediumPlantTscClassifiesTheEmergency(GameTestHelper helper) {
 		if (TestFocus.skip("nuclear")) {
 			helper.succeed();

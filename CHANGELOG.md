@@ -51,6 +51,7 @@ No numbered release yet. Entries on feature branches remain proposed until their
 ### Unmerged: Beardshy
 - **Beardshy**, the shy side of Beardson (the Retro Trader): a villager-bodied NPC in a pink hoodie, round glasses and a ginger beard. Walk up and he hurries off with an apology; crouch and he stays to talk (18 lines about stolen land, Denali, internet sayings and over-explaining). Hit, he apologises and runs; he never fights back. He trades and drops nothing and doesn't spawn on his own yet: use his spawn egg (a pink egg with ginger spots, in the Spawn Eggs tab) or `/summon jugcraft:beardshy`.
 - The Harvest Feast story that would make him the Thanksgiving event's antagonist (he wants the feast cancelled) is laid out for the owner's approval, not built. Record: [beardshy.md](docs/features/beardshy.md).
+
 ### Unmerged: the walker cockpit (all three walkers)
 - **The view from the seat:**
   - The Armoured Walker's pilot stands up in the roof hatch, and the Howitzer Walker's sits in a commander's seat over the roof. Before, both looked out from inside their hulls.

@@ -285,6 +285,9 @@ def all_items():
 
 def feature_of(entry_id):
     """The feature switch that owns a registered ID."""
+    import thanksgiving_weapons
+    if entry_id in thanksgiving_weapons.items():
+        return thanksgiving_weapons.feature_of(entry_id)
     import town_assets
     if entry_id in town_assets.BLOCKS:
         return "town"

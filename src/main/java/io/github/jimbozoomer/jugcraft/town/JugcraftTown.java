@@ -74,6 +74,7 @@ public final class JugcraftTown {
 		TownsfolkCare.register();
 		TownCommand.register();
 		CustomNpcs.register();
+		io.github.jimbozoomer.jugcraft.town.guests.GuestService.register();
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			ShopMenu.clear();
 			AtmMenu.clear();

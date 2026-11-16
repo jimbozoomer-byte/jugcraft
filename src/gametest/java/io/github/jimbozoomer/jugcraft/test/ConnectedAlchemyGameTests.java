@@ -27,8 +27,7 @@ public class ConnectedAlchemyGameTests {
     static ServerPlayer player(GameTestHelper h){var profile=new com.mojang.authlib.GameProfile(UUID.randomUUID(),"alchemy-connect");
         var p=new ServerPlayer(h.getLevel().getServer(),h.getLevel(),profile,net.minecraft.server.level.ClientInformation.createDefault());
         var connection=new net.minecraft.network.Connection(net.minecraft.network.protocol.PacketFlow.SERVERBOUND);new io.netty.channel.embedded.EmbeddedChannel(connection);
-        h.getLevel().getServer().getPlayerList().placeNewPlayer(connection,p,net.minecraft.server.network.CommonListenerCookie.createInitial(profile,false));p.setGameMode(GameType.SURVIVAL);
-        TestPlayers.track(h, p);
+        h.getLevel().getServer().getPlayerList().placeNewPlayer(connection,p,net.minecraft.server.network.CommonListenerCookie.createInitial(profile,false));TestPlayers.track(h,p);p.setGameMode(GameType.SURVIVAL);
         h.assertTrue(!p.isCreative()&&!p.getAbilities().mayfly,"Actual survival player, not vanilla's permanently creative mock");p.getInventory().clearContent();p.getInventory().setSelectedSlot(0);
         var at=h.absolutePos(new BlockPos(2,3,3));p.snapTo(at.getX()+.5,at.getY(),at.getZ()+.5,0,0);
         ConcordanceProgress.grant(p,"jugcraft:first_light",ResearchState.UNDERSTOOD);ConcordanceProgress.grant(p,Assaying.RESEARCH,ResearchState.UNDERSTOOD);Assaying.setBalance(p,10000);return p;}

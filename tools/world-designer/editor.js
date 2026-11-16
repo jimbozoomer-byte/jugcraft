@@ -6,7 +6,7 @@
   const demo={biomes:['minecraft:plains','minecraft:forest','minecraft:taiga','minecraft:river','minecraft:meadow','minecraft:snowy_plains','minecraft:desert'],
     structures:[{id:'minecraft:village_plains',biomes:['minecraft:plains','minecraft:meadow']}]};
   let design=M.createDesign(), catalog=null, tool='raise', view='terrain', zoom=1, pan={x:0,y:0}, pointer=null, stroke=null, space=false, dirty=false, frame=false, toastTimer;
-  let history=[], future=[];
+  let history=[], future=[], overviewZoom=1, climatePending={};
   const labels={raise:'Raise terrain',lower:'Lower terrain',flatten:'Level terrain',smooth:'Smooth terrain',river:'Carve river',biome:'Paint biome',erase:'Clear biome paint',pan:'Move map',spawn:'Place spawn',town:'Place walled city',structure:'Place structure'};
   const pretty=id=>id.split(':').pop().replaceAll('_',' ').replace(/\b\w/g,c=>c.toUpperCase());
   const content=()=>catalog||demo;
@@ -39,6 +39,7 @@
     const w=canvas.clientWidth,h=canvas.clientHeight,ratio=window.devicePixelRatio||1;
     if(canvas.width!==Math.round(w*ratio)||canvas.height!==Math.round(h*ratio)){canvas.width=Math.round(w*ratio);canvas.height=Math.round(h*ratio);}
     ctx.setTransform(ratio,0,0,ratio,0,0);ctx.clearRect(0,0,w,h);
+    if(view==='climate'){drawClimate(w,h);return;}
     const t=transform(),g=design.grid,start=screen(g.origin_x,g.origin_z),size=t.extent*t.s;
     ctx.fillStyle='#12251f';ctx.fillRect(0,0,w,h);ctx.strokeStyle='#20372b';ctx.lineWidth=1;
     for(let x=0;x<w;x+=32){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}for(let y=0;y<h;y+=32){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
@@ -52,7 +53,68 @@
     if(pointer&&tool!=='pan'&&!space){const p=world(pointer.x,pointer.y);ctx.strokeStyle='#eff8d9';ctx.lineWidth=1;ctx.setLineDash([5,4]);ctx.beginPath();ctx.arc(pointer.x,pointer.y,['spawn','town','structure'].includes(tool)?14:Number($('radius').value)*t.s,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);$('cursor').textContent=`X ${Math.round(p.x).toLocaleString()}  ·  Z ${Math.round(p.z).toLocaleString()}  ·  Height ${Math.round(M.height(design,p.x,p.z))}`;}
     const scale=128*t.s>45?128:256;$('scale').style.width=`${Math.max(50,scale*t.s)}px`;$('scale').textContent=`${scale} blocks`;
   }
-  function chooseTool(next){tool=next;document.querySelectorAll('[data-tool]').forEach(b=>{const on=b.dataset.tool===tool;b.classList.toggle('selected',on);b.setAttribute('aria-pressed',String(on));});$('active-tool').textContent=labels[tool];canvas.style.cursor=tool==='pan'?'grab':'crosshair';requestDraw();}
+  // ---- Climate bands: settings panel and the overview, which reaches far beyond the 65 × 65 terrain grid ----
+  const climateFields=['north_frigid','south_hot_start','south_hot_end','south_frigid','transition','salt'], blocks=M.formatBlocks;
+  const zoneColor={frigid:'#d5e6e8',central:'#5f8b58',hot:'#dcab5f',temperate:'#2e6b57'}, zoneInk={frigid:'#1b2c2c',central:'#eef5e4',hot:'#2d2212',temperate:'#e6f2e9'};
+  const zoneName={frigid:'Frigid',central:'Central',hot:'Hot',temperate:'Temperate'}, zoneHint={frigid:'frigid biome pools only · painted cells still win',central:'normal biome mix, unchanged',hot:'desert · savanna · jungle pools',temperate:'forest · taiga · grassland pools'};
+  const climateOn=()=>Boolean(design.climate&&design.climate.enabled===true), climateValues=()=>design.climate||M.createClimate();
+  function syncClimate(){
+    const c=design.climate,on=climateOn(),values=climateValues(),issues=on?M.climateIssues(c):[],bad=new Set(issues.map(i=>i.field));
+    $('climate-enabled').checked=on;$('climate-state').textContent=on?'On':'Off';
+    for(const f of climateFields){const input=$('climate-'+f),v=values[f]===undefined&&f==='salt'?0:values[f];if(!(f in climatePending))input.value=Number.isFinite(v)?String(v):'';input.disabled=!on;input.setAttribute('aria-invalid',String(on&&(bad.has(f)||f in climatePending)));}
+    const messages=[...Object.values(climatePending),...issues.map(i=>i.message)];
+    if(on&&catalog&&!M.catalogSupportsClimate(catalog))messages.push('This mod catalog does not report climate-band support, so export is blocked: an older Jugcraft build would ignore the bands. Update Jugcraft and export a new catalog.');
+    $('climate-issues').replaceChildren(...[...new Set(messages)].map(m=>{const li=document.createElement('li');li.textContent=m;return li;}));
+    $('climate-note').textContent=`Blocks north/south of spawn (X ${design.spawn.x} · Z ${design.spawn.z}); north is −Z. Belts run east and west without end. Painted cells keep their biome; climate changes unpainted and outside biomes only, never terrain. “Strict” frigid means frigid biomes only: as in vanilla, frozen and deep frozen oceans rain in places and their open water does not fully freeze, and cold desert or Siberian taiga are cold but dry.`;
+  }
+  function climateChanged(){syncClimate();validation();caption();requestDraw();}
+  function setView(next){view=next;document.querySelectorAll('[data-view]').forEach(a=>{const on=a.dataset.view===view;a.classList.toggle('selected',on);a.setAttribute('aria-pressed',String(on));});$('active-tool').textContent=view==='climate'?'Climate overview · scroll to zoom':labels[tool];canvas.style.cursor=view==='climate'?'default':tool==='pan'?'grab':'crosshair';caption();if(view==='climate')requestDraw();else buildPreview();}
+  function caption(){const extent=(design.grid.width-1)*design.grid.step,climate=view==='climate';
+    $('map-size').textContent=climate?`Climate overview · ±${blocks(overview().radius)} blocks`:`${extent.toLocaleString()} × ${extent.toLocaleString()} blocks`;
+    $('map-sub').textContent=climate?(climateOn()?'From spawn · north is −Z · belts run east–west without end':'Climate bands are off · this preview exports nothing'):'Surface plan · procedural world beyond the border';}
+  function overview(){const w=canvas.clientWidth,h=canvas.clientHeight,c=climateValues(),gutterLeft=82,gutterRight=182,size=Math.max(140,Math.min(w-gutterLeft-gutterRight-16,h-218));
+    return M.climateOverview(design,c,{radius:Math.max(500,Math.round(M.overviewRadius(c)*overviewZoom/500)*500),size,left:Math.round(gutterLeft+Math.max(0,(w-gutterLeft-gutterRight-size)/2)),top:Math.round(Math.max(96,(h-size)/2-14))});}
+  function line(x0,y0,x1,y1){ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();}
+  function drawClimate(w,h){
+    const c=climateValues(),on=climateOn(),o=overview(),{left,top,size}=o,font=(px,bold)=>`${bold?'bold ':''}${px}px Segoe UI, sans-serif`;
+    caption();ctx.fillStyle='#12251f';ctx.fillRect(0,0,w,h);ctx.textBaseline='middle';
+    if(M.climateIssues({...c,enabled:true}).length){ctx.fillStyle='#e9f0d8';ctx.textAlign='center';ctx.font=font(13);ctx.fillText('Fix the climate settings in the details panel to preview the belts.',w/2,h/2);$('cursor').textContent='Climate settings need attention';return;}
+    ctx.save();ctx.beginPath();ctx.rect(left,top,size,size);ctx.clip();
+    for(const r of o.regions){if(r.zone)ctx.fillStyle=zoneColor[r.zone];else{const g=ctx.createLinearGradient(0,r.y0,0,r.y1);g.addColorStop(0,zoneColor[r.north]);g.addColorStop(1,zoneColor[r.south]);ctx.fillStyle=g;}ctx.fillRect(left,r.y0,size,Math.max(.75,r.y1-r.y0));}
+    ctx.strokeStyle='#ffffff38';ctx.lineWidth=1;    // hatched transitions: the game chooses one side per natural patch
+    for(const r of o.regions)if(!r.zone&&r.y1-r.y0>3){const t=r.y1-r.y0;ctx.save();ctx.beginPath();ctx.rect(left,r.y0,size,t);ctx.clip();for(let x=left-t;x<left+size;x+=7)line(x,r.y1,x+t,r.y0);ctx.restore();}
+    ctx.strokeStyle='#0d1d1726';for(const t of o.ticksX)line(t.px,top,t.px,top+size);for(const t of o.ticksZ)line(left,t.y,left+size,t.y);
+    ctx.textAlign='left';
+    for(const r of o.regions)if(r.zone&&r.y1-r.y0>18){const mid=(r.y0+r.y1)/2;ctx.fillStyle=zoneInk[r.zone];ctx.font=font(11,true);const name=zoneName[r.zone]+(r.strict?' · strict':'');if(r.y1-r.y0>36){ctx.fillText(name,left+12,mid-7);ctx.font=font(10);ctx.fillText(zoneHint[r.zone],left+12,mid+8);}else ctx.fillText(name,left+12,mid);}
+    const k=o.core,a=o.authored,px=x=>left+(x-o.anchor.x+o.radius)*o.scale,py=z=>top+(z-o.anchor.z+o.radius)*o.scale;
+    ctx.strokeStyle='#f7fbef';ctx.lineWidth=1.5;ctx.strokeRect(k.left,k.top,k.right-k.left,k.bottom-k.top);ctx.setLineDash([3,3]);ctx.strokeStyle='#f7fbef99';ctx.lineWidth=1;ctx.strokeRect(a.left,a.top,a.right-a.left,a.bottom-a.top);ctx.setLineDash([]);
+    const extent=(design.grid.width-1)*design.grid.step,coreLabel=`${blocks(extent)}² design`;ctx.font=font(10);const lw=ctx.measureText(coreLabel).width+10;ctx.fillStyle='#17291fe8';ctx.fillRect(k.left,k.top-17,lw,15);ctx.fillStyle='#e9f0d8';ctx.fillText(coreLabel,k.left+5,k.top-9.5);
+    if(design.town){ctx.fillStyle='#f2c986';ctx.fillRect(px(design.town.x)-3,py(design.town.z)-3,6,6);}
+    ctx.fillStyle='#1a2a21';ctx.strokeStyle='#d6edac';ctx.lineWidth=2;ctx.beginPath();ctx.arc(o.anchor.px,o.anchor.py,6,0,Math.PI*2);ctx.fill();ctx.stroke();
+    if(!on){ctx.fillStyle='#12251fb3';ctx.fillRect(left,top,size,size);const note='Climate bands are off · enable them in the details panel';ctx.font=font(12,true);const nw=Math.min(size-16,ctx.measureText(note).width+24);ctx.fillStyle='#17291ff2';ctx.fillRect(left+(size-nw)/2,top+14,nw,28);ctx.fillStyle='#e9f0d8';ctx.textAlign='center';ctx.fillText(note,left+size/2,top+28,nw-16);}
+    ctx.restore();
+    ctx.strokeStyle='#8aa171';ctx.lineWidth=1;ctx.strokeRect(left,top,size,size);
+    // Axes: distances from spawn. North (−Z) is the top edge, west the left.
+    const sparse=o.step*o.scale<64;ctx.font=font(10);ctx.fillStyle='#c3d3c1';
+    ctx.textAlign='right';o.ticksZ.forEach((t,i)=>{if(sparse&&i%2)return;ctx.fillText(t.label,left-9,t.y);});
+    ctx.textAlign='center';o.ticksX.forEach((t,i)=>{if(sparse&&i%2)return;ctx.fillText(t.label,t.px,top-10);});
+    ctx.font=font(10,true);ctx.fillStyle='#e9f0d8';ctx.textAlign='center';ctx.fillText('↑ NORTH · −Z',left+size/2,top-28);ctx.fillText('↓ SOUTH · +Z',left+size/2,top+size+15);
+    // Threshold lines and their labels (pushed apart so close belts stay readable).
+    const marks=o.edges.filter(e=>e.visible).sort((p,q)=>p.y-q.y).map(e=>({e,ly:e.y}));let last=-Infinity;
+    for(const m of marks){m.ly=Math.max(m.ly,last+30,top+8);last=m.ly;}let limit=top+size-8;for(let i=marks.length-1;i>=0;i--){marks[i].ly=Math.min(marks[i].ly,limit);limit=marks[i].ly-30;}
+    ctx.globalAlpha=on?1:.55;
+    for(const {e,ly} of marks){ctx.strokeStyle=e.strict?'#f06a5d':'#1d2a22cc';ctx.lineWidth=e.strict?2:1.25;ctx.setLineDash(e.strict?[]:[6,4]);line(left,e.y,left+size+8,e.y);ctx.setLineDash([]);ctx.strokeStyle='#8fa594';ctx.lineWidth=1;line(left+size+8,e.y,left+size+16,ly);
+      ctx.textAlign='left';ctx.font=font(11,true);ctx.fillStyle=e.strict?'#f59a8f':'#e9f0d8';ctx.fillText(e.label,left+size+20,ly-7);ctx.font=font(10);ctx.fillStyle='#b4c7b9';ctx.fillText(`${e.distance} · Z ${blocks(e.z)}`,left+size+20,ly+7);}
+    ctx.globalAlpha=1;
+    if(marks.length<o.edges.length){ctx.textAlign='left';ctx.font=font(10);ctx.fillStyle='#f59a8f';ctx.fillText('More belts lie beyond this view · Fit map',left+size+20,top+size+16);}
+    const scale=o.step*o.scale;$('scale').style.width=`${Math.max(30,scale)}px`;$('scale').textContent=`${blocks(o.step)} blocks`;
+    if(pointer&&pointer.x>=left&&pointer.x<=left+size&&pointer.y>=top&&pointer.y<=top+size){
+      const p=M.overviewWorld(o,pointer.x,pointer.y),bx=Math.floor(p.x),bz=Math.floor(p.z),s=bz-design.spawn.z,z=M.climateZoneAt(c,s);
+      const where=s===0?'level with spawn':`${blocks(Math.abs(s))} ${s<0?'N':'S'} of spawn`,zone=z.blend?`${zoneName[z.blend.from]} → ${zoneName[z.blend.to]} transition, ${Math.round(z.blend.progress*100)}% across`:zoneName[z.zone]+(z.strict?' (strict)':'');
+      $('cursor').textContent=`X ${blocks(bx)}  ·  Z ${blocks(bz)}  ·  ${where}  ·  ${on?'':'Off · '}${zone}`;
+    } else $('cursor').textContent='Move across the overview to inspect a belt';
+  }
+  function chooseTool(next){if(view==='climate'&&next!=='pan')setView('terrain');tool=next;document.querySelectorAll('[data-tool]').forEach(b=>{const on=b.dataset.tool===tool;b.classList.toggle('selected',on);b.setAttribute('aria-pressed',String(on));});$('active-tool').textContent=labels[tool];canvas.style.cursor=tool==='pan'?'grab':'crosshair';requestDraw();}
   function fillChoices(){
     const old=$('biome').value,filter=$('biome-filter').value.trim().toLowerCase();$('biome').replaceChildren();
     for(const id of content().biomes.filter(id=>id.toLowerCase().includes(filter))){const option=new Option(`${pretty(id)}${id.startsWith('minecraft:')?'':' · '+id.split(':')[0]}`,id);$('biome').add(option);}
@@ -70,19 +132,19 @@
     });
   }
   function validation(){const errors=M.validate(design,catalog,true);$('validation-title').textContent=errors.length?'Before you export':'Ready to export';$('validation').replaceChildren();errors.slice(0,6).forEach(error=>{const li=document.createElement('li');li.textContent=error;$('validation').append(li);});if(errors.length>6){const li=document.createElement('li');li.textContent=`And ${errors.length-6} more issue(s). Fix the above first.`;$('validation').append(li);}return errors;}
-  function refresh(){landmarks();validation();buildPreview();const extent=(design.grid.width-1)*design.grid.step;$('map-size').textContent=`${extent.toLocaleString()} × ${extent.toLocaleString()} blocks`;}
+  function refresh(){climatePending={};landmarks();validation();syncClimate();buildPreview();caption();}
   function place(kind,x,z){if(!Number.isFinite(x)||!Number.isFinite(z)){notify('Enter valid X and Z coordinates.');return;}let p={x:Math.round(x),z:Math.round(z)};if(kind==='town')p=M.snapTown(p.x,p.z,content().townSize||192);if(kind==='structure')p={x:Math.floor(x/16)*16+8,z:Math.floor(z/16)*16+8,id:$('structure').value};if(M.weight(design,p.x,p.z)!==1){notify('Place landmarks inside the dotted border.');return;}if(kind==='structure'&&(!p.id||design.structures.length>=32)){notify('Select a structure; a design supports up to 32 markers.');return;}
     remember();if(kind==='structure')design.structures.push(p);else design[kind]=p;refresh();notify(kind==='town'?'Walled city placed. Its builder will level the footprint.':kind==='structure'?'Structure start chunk pinned. Check its biome requirements.':'Spawn moved.');
   }
   function dab(p){if(M.weight(design,p.x,p.z)===0)return;if(tool==='biome'&&!$('biome').value)return;M.paint(design,p.x,p.z,tool,Number($('radius').value),Number($('strength').value),Number($('target').value),$('biome').value);}
-  canvas.addEventListener('pointerdown',e=>{if(e.button!==0&&e.button!==1)return;e.preventDefault();canvas.focus();pointer=location(e);canvas.setPointerCapture(e.pointerId);const p=world(pointer.x,pointer.y);if(tool==='pan'||space||e.button===1){stroke={mode:'pan',last:pointer};return;}if(['spawn','town','structure'].includes(tool)){place(tool,p.x,p.z);return;}remember();stroke={mode:'paint',last:p};dab(p);buildPreview();});
+  canvas.addEventListener('pointerdown',e=>{if(e.button!==0&&e.button!==1)return;e.preventDefault();canvas.focus();if(view==='climate')return;pointer=location(e);canvas.setPointerCapture(e.pointerId);const p=world(pointer.x,pointer.y);if(tool==='pan'||space||e.button===1){stroke={mode:'pan',last:pointer};return;}if(['spawn','town','structure'].includes(tool)){place(tool,p.x,p.z);return;}remember();stroke={mode:'paint',last:p};dab(p);buildPreview();});
   canvas.addEventListener('pointermove',e=>{pointer=location(e);if(stroke?.mode==='pan'){pan.x+=pointer.x-stroke.last.x;pan.y+=pointer.y-stroke.last.y;stroke.last=pointer;}else if(stroke?.mode==='paint'){const p=world(pointer.x,pointer.y),dist=Math.hypot(p.x-stroke.last.x,p.z-stroke.last.z),count=Math.min(256,Math.ceil(dist/Math.max(8,design.grid.step/2)));for(let i=1;i<=count;i++)dab({x:stroke.last.x+(p.x-stroke.last.x)*i/count,z:stroke.last.z+(p.z-stroke.last.z)*i/count});stroke.last=p;buildPreview();}requestDraw();});
   function endStroke(){if(stroke?.mode==='paint')validation();stroke=null;}
   canvas.addEventListener('pointerup',endStroke);canvas.addEventListener('pointercancel',endStroke);canvas.addEventListener('lostpointercapture',endStroke);canvas.addEventListener('pointerleave',()=>{if(!stroke)pointer=null;requestDraw();});
-  canvas.addEventListener('wheel',e=>{e.preventDefault();const p=location(e),before=world(p.x,p.y);zoom=Math.max(.5,Math.min(8,zoom*Math.exp(-e.deltaY*.001)));const after=screen(before.x,before.z);pan.x+=p.x-after.x;pan.y+=p.y-after.y;requestDraw();},{passive:false});
-  document.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>chooseTool(b.dataset.tool));document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{view=b.dataset.view;document.querySelectorAll('[data-view]').forEach(a=>a.classList.toggle('selected',a===b));buildPreview();});
+  canvas.addEventListener('wheel',e=>{e.preventDefault();if(view==='climate'){overviewZoom=Math.max(.125,Math.min(8,overviewZoom*Math.exp(e.deltaY*.001)));requestDraw();return;}const p=location(e),before=world(p.x,p.y);zoom=Math.max(.5,Math.min(8,zoom*Math.exp(-e.deltaY*.001)));const after=screen(before.x,before.z);pan.x+=p.x-after.x;pan.y+=p.y-after.y;requestDraw();},{passive:false});
+  document.querySelectorAll('[data-tool]').forEach(b=>b.onclick=()=>chooseTool(b.dataset.tool));document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>setView(b.dataset.view));
   for(const id of ['radius','strength','target'])$(id).oninput=()=>{$(id+'-value').textContent=$(id).value+(id==='radius'?' blocks':'');requestDraw();};
-  $('undo').onclick=()=>restore(history,future);$('redo').onclick=()=>restore(future,history);$('fit').onclick=()=>{zoom=1;pan={x:0,y:0};requestDraw();};$('contours').onchange=buildPreview;
+  $('undo').onclick=()=>restore(history,future);$('redo').onclick=()=>restore(future,history);$('fit').onclick=()=>{zoom=1;pan={x:0,y:0};overviewZoom=1;requestDraw();};$('contours').onchange=buildPreview;
   $('biome-filter').oninput=fillChoices;$('biome').onchange=()=>{$('biome-id').textContent=$('biome').value;chooseTool('biome');};$('structure').onchange=()=>{structureDetail();chooseTool('structure');};
   $('place-coordinates').onclick=()=>place($('coordinate-kind').value,Number($('coordinate-x').value),Number($('coordinate-z').value));
   $('name').onchange=()=>{remember();design.name=$('name').value.trim()||'Untitled world';$('name').value=design.name;validation();};
@@ -92,6 +154,11 @@
   $('save').onclick=()=>{download(fileName()+'.jugcraft.json',JSON.stringify(design,null,2),'application/json');dirty=false;notify('Design saved. Keep this file to edit it later.');};
   $('export').onclick=()=>{const errors=validation();if(errors.length){notify(errors[0]);return;}try{download(fileName()+'.zip',M.zip(M.packFiles(design,catalog)),'application/zip');notify('World pack exported. Add it when creating a new world.');}catch(e){notify(e.message);}};
   let importKind='design';function pick(kind){importKind=kind;$('file').value='';$('file').click();}$('open').onclick=()=>pick('design');$('catalog').onclick=()=>pick('catalog');$('file').onchange=async()=>{const file=$('file').files[0];if(!file)return;try{if(file.size>8*1024*1024)throw new Error('Choose a JSON file smaller than 8 MB.');const value=JSON.parse(await file.text());if(importKind==='catalog')loadCatalog(value);else{const errors=M.validateShape(value);if(errors.length)throw new Error(errors[0]);remember();design=M.copy(value);$('name').value=design.name;zoom=1;pan={x:0,y:0};refresh();notify('Design opened.');}}catch(e){notify('Could not open file: '+e.message);}};
+  $('climate-enabled').onchange=()=>{remember();const on=$('climate-enabled').checked;if(!design.climate)design.climate=M.createClimate();design.climate.enabled=on;climatePending={};climateChanged();if(on&&view!=='climate')notify('Climate bands on. Choose Climate above the map to see the belts.');};
+  for(const f of climateFields)$('climate-'+f).onchange=()=>{if(!climateOn())return;const text=$('climate-'+f).value.trim(),n=Number(text);
+    if(text===''||!Number.isSafeInteger(n)){climatePending[f]=`${M.climateLabels[f]}: enter a whole number. The design keeps ${blocks(design.climate[f]??0)}.`;syncClimate();return;}
+    delete climatePending[f];if(design.climate[f]!==n){remember();design.climate[f]=n;}climateChanged();};
+  $('climate-view').onclick=()=>{setView('climate');canvas.scrollIntoView({block:'nearest'});};
   $('help').onclick=()=>$('guide').showModal();document.querySelectorAll('.close').forEach(b=>b.onclick=()=>$('guide').close());window.addEventListener('beforeunload',e=>{if(dirty){e.preventDefault();e.returnValue='';}});
   new ResizeObserver(requestDraw).observe(canvas);chooseTool('raise');
   if(globalThis.JUGCRAFT_CATALOG){try{loadCatalog(globalThis.JUGCRAFT_CATALOG);}catch(e){notify('Catalog could not load: '+e.message);updateCatalog();}}else updateCatalog();

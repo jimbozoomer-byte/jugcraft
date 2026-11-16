@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=north,waterlogged=false": {
+      "model": "jugcraft:block/twined_pack_basket"
+    },
+    "facing=north,waterlogged=true": {
+      "model": "jugcraft:block/twined_pack_basket"
+    },
+    "facing=east,waterlogged=false": {
+      "model": "jugcraft:block/twined_pack_basket",
+      "y": 90
+    },
+    "facing=east,waterlogged=true": {
+      "model": "jugcraft:block/twined_pack_basket",
+      "y": 90
+    },
+    "facing=south,waterlogged=false": {
+      "model": "jugcraft:block/twined_pack_basket",
+      "y": 180
+    },
+    "facing=south,waterlogged=true": {
+      "model": "jugcraft:block/twined_pack_basket",
+      "y": 180
+    },
+    "facing=west,waterlogged=false": {
+      "model": "jugcraft:block/twined_pack_basket",
+      "y": 270
+    },
+    "facing=west,waterlogged=true": {
+      "model": "jugcraft:block/twined_pack_basket",
+      "y": 270
+    }
+  }
+}

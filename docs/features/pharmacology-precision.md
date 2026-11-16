@@ -43,6 +43,8 @@ The rustic forms use the common formed-machine recipe, escrow, cancellation, per
 
 The steel beverage line uses distinct fluids; industrial `bioethanol` is never bottled into a drink. Reserve conditioning requires stainless parts for its insert; high-proof processing additionally requires the precision module. Masterwork Reserve remains in Batch 5.
 
+Local integration correction, 14 November: an extractor can remove spent fuel containers through the still's lower-right fuel port. Unburned fuel and recipe inputs remain protected from extraction, including through a combined input view. This prevents empty lava buckets from blocking automatic refueling. A four-facing sided-port regression covers committed and aborted transfers, view iteration, refueling and conserved heat; it is pending the combined integration test run.
+
 ## Precision manufacturing
 
 Build one Precision Process Module from four Stainless Steel Plates, quartz, two amethyst shards, an Advanced Circuit and a Precision Stainless Valve. It is a reusable process tool in an existing formed-machine upgrade slot and contributes no speed/efficiency bonus. Its slot locks during a job. Existing machine inventories and saved slot indices are retained.

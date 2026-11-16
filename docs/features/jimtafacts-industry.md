@@ -289,6 +289,14 @@ families; these entries do not establish full source parity.
 
 The latest inventory resolves duplicate `BCTransportItems` aliases to the same implemented pipe definitions. `obsidianFluid` is an unused declaration: the supplied `preInit` never constructs it, and no corresponding texture/collector exists. The inventory distinguishes that from a missing real feature. Native fluid/RT heat, superheated steam, reactor vessels, table lasers and gate parameters/expansions are local, but this does not claim complete source energy/transport parity. Unregistered decorative/obsolete textures remain preserved rather than becoming inert inventory clutter.
 
+## November 7 report: Industrial Night Vision Goggles
+
+**Report.** The goggles spent their charge but gave no night vision.
+
+**Cause.** On `main`, the exosuit's helmet tick runs for every player. When it was not giving vision itself, it removed any ambient, particle-free night vision of 260 ticks or less, which is exactly the goggles' effect. Both callbacks run at the end of each server tick, so each tick the goggles paid and the exosuit took the vision away. The nano and quantum helmets share the goggles' path and were stripped the same way.
+
+**Fix.** One owner, `PoweredNightVision`, gives and takes away all powered helmet vision. It removes only its own effect, and leaves alone any vision another source gave or merged into it. See [powered night vision ownership](powered-night-vision.md) for the rule, the energy prices and the tests (written, not yet run).
+
 ## Deferred validation
 
 Written but not run: industrial processor batches/heat, robot conservation/claims/persistence, powered gear and flight, gate/filter behavior, crop genetics/anchors/claims, fluid-cell transactions and denied access, compact reactor fuel depletion/cooling/chamber removal/redstone/buffer pause, matter-output economy, canning/bottling conservation, civil machine claims/drop conservation, charge pad/teleporter safety, and source-byte/UV/recipe tests. Combined compilation, resource audit, server tests, original-model client rendering, two-player protections and owner playtest remain required before release. Nothing here is deployed or merged.

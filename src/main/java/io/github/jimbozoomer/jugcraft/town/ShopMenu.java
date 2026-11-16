@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.town;
 
+import io.github.jimbozoomer.jugcraft.concordance.assay.TabletOutputs;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -225,11 +226,27 @@ public class ShopMenu extends AbstractContainerMenu {
 		return true;
 	}
 
+	/**
+	 * Whether the town refuses to pay Jugs for {@code item}: anything the transmutation tablet, condensers or density gems
+	 * may form ({@link TabletOutputs#ALLOWED}). Essence is renewable (collectors make it from daylight) and any dissolved
+	 * item turns into it, so paying Jugs for a formable supply would turn essence into currency, which the convenience-only
+	 * output rule forbids (docs/features/convenience-transmutation.md). Read live, so a data pack that widens the tag also
+	 * narrows what the town buys.
+	 */
+	public static boolean transmutable(Item item) {
+		return item != Items.AIR && new ItemStack(item).is(TabletOutputs.ALLOWED);
+	}
+
 	/** The player sells to the shop: they must carry the whole count, and their Jugs must not pass the maximum. */
 	public static boolean sell(ServerPlayer player, TownShops.Offer offer) {
 		MinecraftServer server = player.level().getServer();
 		Item item = offer.itemType();
 		if (item == Items.AIR) {
+			return false;
+		}
+		if (transmutable(item)) {
+			player.sendOverlayMessage(Component.translatableWithFallback("message.jugcraft.shop.transmutable",
+					"The town does not buy %s: transmutation can make it", new ItemStack(item).getHoverName()));
 			return false;
 		}
 		Inventory inventory = player.getInventory();

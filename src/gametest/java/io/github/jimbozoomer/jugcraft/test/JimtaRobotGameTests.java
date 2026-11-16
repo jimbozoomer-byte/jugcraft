@@ -27,6 +27,7 @@ public final class JimtaRobotGameTests {
         var connection=new net.minecraft.network.Connection(net.minecraft.network.protocol.PacketFlow.SERVERBOUND);
         new io.netty.channel.embedded.EmbeddedChannel(connection);
         h.getLevel().getServer().getPlayerList().placeNewPlayer(connection,p,net.minecraft.server.network.CommonListenerCookie.createInitial(profile,false));
+        TestPlayers.track(h,p);
         p.setGameMode(GameType.SURVIVAL);p.snapTo(Vec3.atCenterOf(h.absolutePos(new BlockPos(5,2,5))));return p;
     }
     private static WorkshopRobot robot(GameTestHelper h,ServerPlayer p,String program){

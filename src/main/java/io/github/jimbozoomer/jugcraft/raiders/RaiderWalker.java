@@ -49,16 +49,20 @@ import org.jspecify.annotations.Nullable;
  *
  * <p>Its driver ({@link RaiderCrew}) sits head and shoulders out of the open hatch on its roof. Without its driver a
  * crewed walker stalls, smokes and goes down; when it falls, the driver climbs out and fights on foot. It charges only
- * a defender it can reach on foot; one it cannot (on a wall, behind a gate) it engages from a standoff
- * ({@value #STANDOFF} blocks), in sight, with its hull launcher, rather than grinding against the wall.
+ * a defender it can reach on foot; one it cannot (behind a gate, say) it engages with its hull launcher from a standoff
+ * in sight of them, {@value #STANDOFF} to {@value JugcraftRaiders#WALKER_LAUNCH_MAX} - 4 blocks off, on its own side of
+ * the town wall ({@link RaidStandoff}), rather than grinding against the wall. In a raid it tries
+ * {@value RaidEngagement#STANDOFF_TRIES} standoffs, then gives that defender up and marches on ({@link RaidEngagement}).
  */
 public class RaiderWalker extends Monster implements Raider {
 	private static final EntityDataAccessor<Integer> PUNCHED_AT = SynchedEntityData.defineId(RaiderWalker.class, EntityDataSerializers.INT);
-	/** Where it engages a defender it cannot reach: this far off, within its launcher's reach. */
-	static final int STANDOFF = 14;
+	/** Where it engages a defender it cannot reach: at least this far off, within its launcher's reach. */
+	static final int STANDOFF = 10;
 	/** Ticks between its checks whether its target can be reached on foot. */
 	static final int REACH_CHECK_TICKS = 20;
 	private final RaidMember member = new RaidMember();
+	/** Its memory of its fight in a raid (made when first asked for: goals are set up before field initialisers run). */
+	private @Nullable RaidEngagement engagement;
 	private int launch = JugcraftRaiders.WALKER_LAUNCH_COOLDOWN;
 	/** Whether it has had a crew (saved): a walker that has lost its crew fails; one that never had one walks as before. */
 	private boolean crewed;
@@ -87,9 +91,18 @@ public class RaiderWalker extends Monster implements Raider {
 		builder.define(PUNCHED_AT, -100);
 	}
 
+	/** Guards only ({@link RaiderTargets}); in a raid, on the ground and not given up ({@link RaidEngagement#allows}). */
 	@Override
 	public boolean canAttack(net.minecraft.world.entity.LivingEntity target) {
-		return RaiderTargets.allowed(target) && super.canAttack(target);
+		return RaiderTargets.allowed(target) && engagement().allows(target) && super.canAttack(target);
+	}
+
+	@Override
+	public RaidEngagement engagement() {
+		if (engagement == null) {
+			engagement = new RaidEngagement(this);
+		}
+		return engagement;
 	}
 
 	@Override
@@ -108,11 +121,16 @@ public class RaiderWalker extends Monster implements Raider {
 			}
 		});
 		goalSelector.addGoal(3, new StandoffGoal());
-		goalSelector.addGoal(4, new MarchGoal(this, () -> stalled() ? null : member.objective, 1.0));
+		goalSelector.addGoal(1, new MarchGoal(this, () -> stalled() ? null : member.objective, 1.0));
 		goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.6) {
 			@Override
 			public boolean canUse() {
-				return !stalled() && super.canUse();
+				return !stalled() && !engagement().holding() && super.canUse();
+			}
+
+			@Override
+			public boolean canContinueToUse() {
+				return !stalled() && !engagement().holding() && super.canContinueToUse();
 			}
 		});
 		goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 16.0F));
@@ -201,6 +219,7 @@ public class RaiderWalker extends Monster implements Raider {
 			return;
 		}
 		abandoned = 0;
+		engagement().tick();
 		LivingEntity target = getTarget();
 		if (--launch <= 0 && target != null && target.isAlive()) {
 			double distance = distanceTo(target);
@@ -311,15 +330,17 @@ public class RaiderWalker extends Monster implements Raider {
 	}
 
 	/**
-	 * A defender it cannot reach on foot: it walks to a standoff {@value #STANDOFF} blocks from them, on its side, holds
-	 * there facing them while its launcher fires, and backs off if they are nearer than the launcher's least range.
-	 * If it gets no nearer its standoff for a while (a wall, a ditch), it tries a spot further round.
+	 * A defender it cannot reach on foot: it holds wherever it has them in sight and in its launcher's reach (backing off
+	 * if they are nearer than its least range), and otherwise walks to a standoff in sight of them ({@link RaidStandoff},
+	 * on its own side of the town wall). A standoff it gets no nearer for six seconds, or reaches without sight of them,
+	 * is swapped for another further round; in a raid, after {@value RaidEngagement#STANDOFF_TRIES} it gives the defender
+	 * up ({@link RaidEngagement#nextStandoff}). It never loads a chunk to look for one.
 	 */
 	private final class StandoffGoal extends Goal {
 		private int repath;
+		private @Nullable Vec3 spot;
 		private double nearest;
 		private int stalls;
-		private float swing;
 
 		StandoffGoal() {
 			setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
@@ -339,14 +360,15 @@ public class RaiderWalker extends Monster implements Raider {
 		@Override
 		public void start() {
 			repath = 0;
+			spot = null;
 			nearest = Double.MAX_VALUE;
 			stalls = 0;
-			swing = 0;
 		}
 
 		@Override
 		public void stop() {
 			getNavigation().stop();
+			spot = null;
 		}
 
 		@Override
@@ -365,34 +387,35 @@ public class RaiderWalker extends Monster implements Raider {
 				return;
 			}
 			repath = 20;
-			Vec3 from = target.position();
-			Vec3 away = position().subtract(from);
-			Vec3 flat = new Vec3(away.x, 0, away.z);
-			double distance = flat.length();
+			double dx = getX() - target.getX();
+			double dz = getZ() - target.getZ();
+			double distance = Math.sqrt(dx * dx + dz * dz);
 			if (distance >= JugcraftRaiders.WALKER_LAUNCH_MIN && distance <= JugcraftRaiders.WALKER_LAUNCH_MAX - 4 && hasLineOfSight(target)) {
 				getNavigation().stop();   // in reach and in sight: hold and let the launcher work
-				stalls = 0;
-				nearest = Double.MAX_VALUE;
+				spot = null;
 				return;
 			}
-			Vec3 dir = distance < 1.0E-3 ? new Vec3(1, 0, 0) : flat.scale(1.0 / distance);
-			Vec3 spot = from.add(dir.yRot(swing * net.minecraft.util.Mth.DEG_TO_RAD).scale(STANDOFF));
-			double gap = position().distanceToSqr(spot.x, getY(), spot.z);
-			if (gap < nearest - 1.0) {
-				nearest = gap;
-				stalls = 0;
-			} else if (++stalls >= 6) {
-				// No nearer for six seconds: try a spot further round.
-				swing = swing >= 0 ? -swing - 35.0F : -swing;
+			if (spot != null) {
+				double gap = position().distanceToSqr(spot);
+				if (gap < 4.0) {
+					spot = null;   // there, and still no shot: another, further round
+				} else if (gap < nearest - 1.0) {
+					nearest = gap;
+					stalls = 0;
+				} else if (++stalls >= 6) {
+					spot = null;   // no nearer for six seconds (a wall, a ditch): another, further round
+				}
+			}
+			if (spot == null) {
+				spot = engagement().nextStandoff(target, STANDOFF, JugcraftRaiders.WALKER_LAUNCH_MAX - 4);
 				nearest = Double.MAX_VALUE;
 				stalls = 0;
+				if (spot == null) {
+					getNavigation().stop();
+					return;
+				}
 			}
-			int x = (int) Math.floor(spot.x);
-			int z = (int) Math.floor(spot.z);
-			BlockPos to = new BlockPos(x, level().getHeight(net.minecraft.world.level.levelgen.Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, x, z), z);
-			if (level().isLoaded(to)) {
-				getNavigation().moveTo(to.getX() + 0.5, to.getY(), to.getZ() + 0.5, 0.9);
-			}
+			getNavigation().moveTo(spot.x, spot.y, spot.z, 0.9);
 		}
 	}
 }

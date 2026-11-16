@@ -86,6 +86,9 @@ final class IndustrialHandTools {
         }
         @Override public InteractionResult useOn(UseOnContext ctx){
             var p=ctx.getPlayer();if(p==null)return InteractionResult.FAIL;
+            // The client predicts as the vanilla hoe does: PASS here would also run use() (the shift mode toggle) and the
+            // off-hand item on a click the server tills.
+            if(ctx.getLevel().isClientSide())return Chargeable.energy(ctx.getItemInHand())<50?InteractionResult.FAIL:super.useOn(ctx);
             if(ctx.getLevel() instanceof ServerLevel level&&(!Authority.mayChange(level,p,ctx.getClickedPos())||Chargeable.energy(ctx.getItemInHand())<50))return InteractionResult.FAIL;
             int radius=Math.clamp(EquipmentSettings.number(ctx.getItemInHand(),"hoe_area",0),0,1);
             InteractionResult result=InteractionResult.PASS;

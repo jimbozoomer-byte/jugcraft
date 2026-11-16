@@ -18,7 +18,13 @@ class StarterWorkshopTests(unittest.TestCase):
         processes=workshop.processes()
         rows=dict(processes)
         self.assertEqual(len(processes),len(rows),'Every workshop choice keeps a distinct recipe ID')
-        self.assertEqual(21,len(rows))
+        original={f'{metal}_plate' for metal in ['iron','copper','tin','zinc','lead','bronze','brass']} | {
+            'copper_wire','basic_circuit','basic_circuit_raw','basic_circuit_wired','basic_circuit_soldered','bronze_ingot','brass_ingot','solder_ingot',
+            'fire_lining','fire_crucible','fire_insulators','silicon'}
+        sanding={'sands_smooth_sandstone','sands_smooth_red_sandstone'}
+        self.assertEqual(original | sanding,set(rows))
+        self.assertEqual(19,len(original))
+        self.assertEqual(12,sum(rows[name]['station']==0 for name in original))
         self.assertEqual(14,sum(r['station']==0 for r in rows.values()))
         self.assertEqual((200,4),(rows['bronze_ingot']['time'],rows['bronze_ingot']['result']['count']))
         self.assertEqual((120,2),(rows['solder_ingot']['time'],rows['solder_ingot']['result']['count']))

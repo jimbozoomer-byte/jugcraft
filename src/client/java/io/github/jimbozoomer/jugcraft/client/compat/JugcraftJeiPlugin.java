@@ -127,6 +127,7 @@ public class JugcraftJeiPlugin implements IModPlugin {
 	public void registerRecipes(IRecipeRegistration registration) {
 		for (var station : processingStations) registration.addRecipes(station.type(), station.recipes());
 		JugcraftJeiStations.addInformation(registration);
+		WoodlandJeiInfo.addInformation(registration);
 		for (Machine machine : machines()) {
 			registration.addRecipes(machine.type(), machine.recipes());
 		}

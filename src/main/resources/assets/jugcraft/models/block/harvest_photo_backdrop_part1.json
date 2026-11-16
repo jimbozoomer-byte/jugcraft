@@ -1,0 +1,60 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "p": "jugcraft:block/harvest_photo_backdrop",
+    "particle": "jugcraft:block/harvest_photo_backdrop"
+  },
+  "elements": [
+    {
+      "from": [
+        0.0,
+        0,
+        4.5
+      ],
+      "to": [
+        7.0,
+        16,
+        10.5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0.0,
+            1.0,
+            0.875,
+            3.0
+          ],
+          "texture": "#p"
+        },
+        "south": {
+          "uv": [
+            0.0,
+            1.0,
+            0.875,
+            3.0
+          ],
+          "texture": "#p"
+        },
+        "east": {
+          "uv": [
+            1.0,
+            1.0,
+            1.75,
+            3.0
+          ],
+          "texture": "#p"
+        },
+        "west": {
+          "uv": [
+            1.0,
+            1.0,
+            1.75,
+            3.0
+          ],
+          "texture": "#p"
+        }
+      }
+    }
+  ]
+}

@@ -141,11 +141,6 @@
           "price": 1
         },
         {
-          "item": "minecraft:white_wool",
-          "count": 32,
-          "price": 1
-        },
-        {
           "item": "minecraft:feather",
           "count": 64,
           "price": 1
@@ -173,26 +168,6 @@
         {
           "item": "minecraft:honeycomb",
           "count": 16,
-          "price": 1
-        },
-        {
-          "item": "minecraft:oak_log",
-          "count": 64,
-          "price": 1
-        },
-        {
-          "item": "minecraft:spruce_log",
-          "count": 64,
-          "price": 1
-        },
-        {
-          "item": "minecraft:birch_log",
-          "count": 64,
-          "price": 1
-        },
-        {
-          "item": "minecraft:cobblestone",
-          "count": 64,
           "price": 1
         },
         {

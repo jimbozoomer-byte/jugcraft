@@ -1,0 +1,20 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jugcraft:tin_ingot",
+    "jugcraft:tin_ingot",
+    "jugcraft:tin_nugget",
+    "jugcraft:flax"
+  ],
+  "result": {
+    "id": "jugcraft:pewter_pitcher_and_basin",
+    "count": 1
+  }
+}

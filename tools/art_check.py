@@ -934,6 +934,14 @@ DRAWN_TOGETHER = {
     "deep_drilling_assembly": [("deep_drilling_assembly", (0, 0, 0)), ("deep_drilling_assembly_upper", (0, 16, 0))],
     "farm_stand": [("farm_stand_0", (0, 0, 0)), ("farm_stand_1", (-16, 0, 0))],
     "harvest_effigy": [(f"harvest_effigy_{i}", (0, 16 * i, 0)) for i in range(3)],
+    # The Timber Harvest Arch's eleven parts (tools/thanksgiving_town.py ARCH cells {right, up}; its opening has none).
+    "timber_harvest_arch": [(f"timber_harvest_arch_{i}", (-16 * r, 16 * u, 0)) for i, (r, u) in enumerate(
+        ((0, 0), (0, 1), (0, 2), (0, 3), (1, 3), (2, 3), (3, 3), (4, 3), (4, 2), (4, 1), (4, 0)))],
+    # The Harvest Centerpiece (5 x 3 x 5, MultiDecorationBlock's part order: across to the placer's right, up, away),
+    # its lanterns out and lit (the blocks holding a lantern's glass drawn by their _lit model).
+    "harvest_centerpiece": [(f"harvest_centerpiece_{p}", (16 * (4 - p % 5), 16 * (p // 5 % 3), 16 * (p // 15))) for p in range(75)],
+    "harvest_centerpiece (lit)": [(f"harvest_centerpiece_{p}" + ("_lit" if p in (0, 4, 5, 62, 67) else ""),
+                                   (16 * (4 - p % 5), 16 * (p // 5 % 3), 16 * (p // 15))) for p in range(75)],
 }
 
 

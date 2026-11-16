@@ -87,6 +87,13 @@ public class PharmacologyHudArtClientGameTests implements FabricClientGameTest {
 		for(int[] test:cases)if(StrainPillHud.layer(test[0])!=test[1]||StrainPillHud.fillColumns(test[0],0)!=test[2])throw new AssertionError("Strain boundary "+test[0]);
 		if(StrainPillHud.fillColumns(650,6)!=2||StrainPillHud.fillColumns(650,7)!=0||StrainPillHud.fillColumns(1000,9)!=5||StrainPillHud.fillColumns(2001,9)!=0||StrainPillHud.fillColumns(3000,9)!=5)throw new AssertionError("Ten-slot capacity / half-pill fill");
 		if(StrainPillHud.rowX(640)!=330||StrainPillHud.rowY(400,0,false,false)!=351||StrainPillHud.rowY(400,0,true,false)!=341||StrainPillHud.rowY(400,0,true,true)!=318||StrainPillHud.rowY(400,2,false,false)!=341||StrainPillHud.rowY(400,3,false,false)!=318)throw new AssertionError("Hunger-column alignment, air/mount rows, selected title and action-bar clearance");
+        if (io.github.jimbozoomer.jugcraft.client.PharmacyHudLayout.anchorY(332,400,20,20,0,true,true)!=332
+                || io.github.jimbozoomer.jugcraft.client.PharmacyHudLayout.anchorY(332,400,40,40,12,true,true)!=298
+                || io.github.jimbozoomer.jugcraft.client.PharmacyHudLayout.anchorY(332,400,40,40,12,true,false)>325)
+            throw new AssertionError("Our status clears stacked native armour and forecast without moving the normal lane");
+        if (!io.github.jimbozoomer.jugcraft.client.PharmacyHudLayout.isDoseStatus(net.minecraft.network.chat.Component.translatable("message.jugcraft.drug.status"))
+                || io.github.jimbozoomer.jugcraft.client.PharmacyHudLayout.isDoseStatus(net.minecraft.network.chat.Component.literal("Other message")))
+            throw new AssertionError("Only our translated dose status is repositioned");
 		var active=new StrainStatus(1,0,0,0,false,0,0);
 		if(StrainPillHud.visible(StrainStatus.EMPTY,true,false,false,true)||!StrainPillHud.visible(active,true,false,false,true)||StrainPillHud.visible(active,false,false,false,true)||StrainPillHud.visible(active,true,true,false,true)||StrainPillHud.visible(active,true,false,true,true)||StrainPillHud.visible(active,true,false,false,false))throw new AssertionError("Visibility matches vanilla survival HUD");
 	}

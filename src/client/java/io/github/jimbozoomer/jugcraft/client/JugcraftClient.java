@@ -138,8 +138,14 @@ public final class JugcraftClient implements ClientModInitializer {
 		RocketPackClient.register();
 		FinanceClient.register();
 		BroomstickClient.register();
+		io.github.jimbozoomer.jugcraft.client.pegasus.PegasusClient.register();
+		// The horse breeds' layers and renderers, and the Pegasus's pack layer (docs/features/horse-breeds.md).
+		io.github.jimbozoomer.jugcraft.client.horses.HorseBreedsClient.register();
 		BalloonClient.register();
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.airship.JugcraftAirships.ZEPPELIN, ZeppelinRenderer::new);
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.menagerie.PirateShips.SHIP, PirateShipRenderer::new);
+		PirateShipRenderer.register();
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.menagerie.PirateShips.DECK, net.minecraft.client.renderer.entity.NoopRenderer::new);
 		// The raider faction (batch 57): infantry in uniform, the walker and blimp in raider paint, and their bombs.
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRUNT, RaiderRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRENADIER, RaiderRenderer::new);
@@ -285,6 +291,13 @@ public final class JugcraftClient implements ClientModInitializer {
 				lines.add(net.minecraft.network.chat.Component.translatable("tooltip.jugcraft.plating.repair")
 						.withStyle(net.minecraft.ChatFormatting.GRAY));
 			}
+			// The hydroponic bay runs on nutrient solution only; piped water is refused (docs/features/hydroponics.md).
+			var hydroponicBay = io.github.jimbozoomer.jugcraft.machine.JugcraftMachines.MACHINES
+					.get(io.github.jimbozoomer.jugcraft.machine.MachineKind.HYDROPONIC_BAY);
+			if (hydroponicBay != null && stack.is(hydroponicBay.asItem())) {
+				lines.add(net.minecraft.network.chat.Component.translatable("tooltip.jugcraft.hydroponic_bay")
+						.withStyle(net.minecraft.ChatFormatting.GRAY));
+			}
 		});
 		EngineersHandbookItem.openScreen = () -> Minecraft.getInstance().gui.setScreen(new HandbookScreen());
 		// Gear traits' descriptions show while Shift is held (gear/TraitTooltips.java, docs/features/trait-details.md).
@@ -304,8 +317,13 @@ public final class JugcraftClient implements ClientModInitializer {
 		// The Jugcraft Encyclopedia: its key, its inventory button and its screen (Concordance Chunk A, A-04).
 		EncyclopediaClient.register();
         CraftingChoicesClient.register();
-		ClientPlayNetworking.registerGlobalReceiver(SurveyPayload.TYPE,
-				(payload, context) -> Minecraft.getInstance().gui.setScreen(new ProspectorScreen(payload)));
+		ClientPlayNetworking.registerGlobalReceiver(SurveyPayload.TYPE, (payload, context) -> {
+			// Surveys finish seconds after the click: never replace a screen opened since (a chest, chat). The result is saved
+			// on the scanner, which shows it again on Shift-use (Shift+Sprint for the advanced one).
+			var client = Minecraft.getInstance();
+			if (client.gui.screen() == null) client.gui.setScreen(new ProspectorScreen(payload));
+			else if (client.player != null) client.player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Survey complete: Shift-use the scanner to view it"));
+		});
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.CARVED_PUMPKIN_ENTITY, CarvedPumpkinRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.GIANT_PUMPKIN_ENTITY, GiantPumpkinRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SCARECROW_ENTITY, ScarecrowRenderer::new);
@@ -513,6 +531,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.town.JugcraftTown.SHOP_MENU, ShopScreen::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.town.JugcraftTown.ATM_MENU, AtmScreen::new);
         MenuScreens.register(io.github.jimbozoomer.jugcraft.town.JugcraftTown.COMMISSION_MENU, CommissionScreen::new);
+		MenuScreens.register(io.github.jimbozoomer.jugcraft.town.guests.GuestService.MENU, GuestScreen::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.control.JugcraftControl.CONTROLLER_MENU, LogicControllerScreen::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialGateParameters.TYPE, io.github.jimbozoomer.jugcraft.client.jimtafacts.GateParametersScreen::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.jimtafacts.industry.CompactReactor.MENU, CompactReactorScreen::new);

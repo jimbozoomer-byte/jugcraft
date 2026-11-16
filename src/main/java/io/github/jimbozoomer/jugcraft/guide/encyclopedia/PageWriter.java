@@ -4,10 +4,13 @@ import io.github.jimbozoomer.jugcraft.concordance.ConcordanceProgress;
 import io.github.jimbozoomer.jugcraft.concordance.journal.Journal;
 import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
+import io.github.jimbozoomer.jugcraft.machine.MachineRecipe;
+import io.github.jimbozoomer.jugcraft.machine.MultiMachineRecipe;
 import io.github.jimbozoomer.jugcraft.town.JugcraftTown;
 import io.github.jimbozoomer.jugcraft.town.Town;
 import io.github.jimbozoomer.jugcraft.town.TownDecor;
 import io.github.jimbozoomer.jugcraft.town.TownShops;
+import io.github.jimbozoomer.jugcraft.workshop.WorkshopRecipe;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -25,8 +28,11 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.context.ContextMap;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.AbstractCookingRecipe;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.SingleRecipeInput;
 import net.minecraft.world.item.crafting.display.RecipeDisplay;
 import net.minecraft.world.item.crafting.display.ShapedCraftingRecipeDisplay;
 import net.minecraft.world.item.crafting.display.ShapelessCraftingRecipeDisplay;
@@ -40,7 +46,8 @@ import org.jspecify.annotations.Nullable;
  * or a codex link, so each is honest in one place:
  * <ul>
  * <li>a recipe is shown only if this server has it, as its crafting grid read from the server's own recipe (a data pack
- * that changes one changes the page); one a route needs but the server lacks is said to be unavailable, never shown;</li>
+ * that changes one changes the page); one a route needs but the server lacks is said to be unavailable, never shown. A
+ * furnace, machine or starter-workshop recipe is drawn the same way, its inputs one slot per item used;</li>
  * <li>a sale is shown only for a town that stands in this world, for an offer on sale in today's theme;</li>
  * <li>a codex entry is linked only once the player's research has opened it (the entry's own unlock, which the audit
  * pins to the codex data).</li>
@@ -50,8 +57,8 @@ import org.jspecify.annotations.Nullable;
  * Chunk E, E4), and icons past {@value EncyclopediaPayload.Row#MAX_ICONS} are dropped. It only reads.
  */
 public final class PageWriter {
-	/** The most crafting grids a page shows. */
-	public static final int MAX_GRIDS = 12;
+	/** The most crafting grids a page shows (the route maps draw one for each made step and its other ways). */
+	public static final int MAX_GRIDS = 32;
 
 	/** Finds a recipe on this server (game tests pass one that pretends some are missing). */
 	@FunctionalInterface
@@ -121,8 +128,7 @@ public final class PageWriter {
 		Optional<RecipeHolder<?>> found = recipes.find(id);
 		if (found.isEmpty()) {
 			if (kind == EncyclopediaPayload.EdgeKind.REQUIRED) {
-				add(EncyclopediaPayload.Kind.EDGE, EncyclopediaPayload.StepState.BLOCKED, kind,
-						Component.translatable("encyclopedia.jugcraft.absent", text), null, List.of(), null, null);
+				absent(kind, text);
 			}
 			return false;
 		}
@@ -151,11 +157,17 @@ public final class PageWriter {
 		return List.copyOf(items);
 	}
 
+	/** A needed way that this server has no recipe for: said to be unavailable here, and nothing is advertised. */
+	public void absent(EncyclopediaPayload.EdgeKind kind, Component text) {
+		add(EncyclopediaPayload.Kind.EDGE, EncyclopediaPayload.StepState.BLOCKED, kind,
+				Component.translatable("encyclopedia.jugcraft.absent", text), null, List.of(), null, null);
+	}
+
 	/** A recipe's grid, read from the server's recipe as the recipe book shows it; null for a kind it does not draw. */
 	private EncyclopediaPayload.@Nullable Grid grid(Identifier id, Recipe<?> recipe) {
 		List<RecipeDisplay> displays = recipe.display();
 		if (displays.isEmpty()) {
-			return null;
+			return process(id, recipe);
 		}
 		RecipeDisplay display = displays.getFirst();
 		ContextMap context = SlotDisplayContext.fromLevel(player.level());
@@ -179,7 +191,7 @@ public final class PageWriter {
 				slots = List.of(cut.input());
 			}
 			default -> {
-				return null;
+				return process(id, recipe);
 			}
 		}
 		List<List<Item>> items = new ArrayList<>();
@@ -200,6 +212,51 @@ public final class PageWriter {
 			return null;
 		}
 		return new EncyclopediaPayload.Grid(id, station, width, items, result.getItem(), result.getCount());
+	}
+
+	/**
+	 * A furnace, Jugcraft machine or starter-workshop recipe as a grid: each input once per item one operation uses (at
+	 * most {@value EncyclopediaPayload.Grid#MAX_SLOTS} slots), and what one operation makes; null for any other kind.
+	 */
+	private static EncyclopediaPayload.@Nullable Grid process(Identifier id, Recipe<?> recipe) {
+		List<List<Item>> slots = new ArrayList<>();
+		ItemStack result;
+		int station;
+		if (recipe instanceof MachineRecipe machine) {
+			station = EncyclopediaPayload.Grid.MACHINE;
+			slots(machine.input(), machine.inputCount(), slots);
+			result = machine.output().create();
+		} else if (recipe instanceof AbstractCookingRecipe cooking) {
+			station = EncyclopediaPayload.Grid.SMELTING;
+			slots(cooking.input(), 1, slots);
+			result = cooking.assemble(new SingleRecipeInput(ItemStack.EMPTY));
+		} else if (recipe instanceof MultiMachineRecipe multi) {
+			station = EncyclopediaPayload.Grid.MACHINE;
+			for (MultiMachineRecipe.Part part : multi.parts()) {
+				slots(part.ingredient(), part.count(), slots);
+			}
+			result = multi.output().create();
+		} else if (recipe instanceof WorkshopRecipe workshop) {
+			station = EncyclopediaPayload.Grid.WORKSHOP;
+			for (MultiMachineRecipe.Part part : workshop.parts()) {
+				slots(part.ingredient(), part.count(), slots);
+			}
+			result = workshop.result().create();
+		} else {
+			return null;
+		}
+		if (slots.isEmpty() || result.isEmpty()) {
+			return null;
+		}
+		return new EncyclopediaPayload.Grid(id, station, Math.min(3, slots.size()), slots, result.getItem(), result.getCount());
+	}
+
+	/** {@code count} slots of {@code ingredient}'s items (at most a grid's alternatives each), while the grid has room. */
+	private static void slots(Ingredient ingredient, int count, List<List<Item>> out) {
+		List<Item> choices = ingredient.items().limit(EncyclopediaPayload.Grid.MAX_ALTERNATIVES).map(Holder::value).toList();
+		for (int i = 0; i < count && out.size() < EncyclopediaPayload.Grid.MAX_SLOTS; i++) {
+			out.add(choices);
+		}
 	}
 
 	/**

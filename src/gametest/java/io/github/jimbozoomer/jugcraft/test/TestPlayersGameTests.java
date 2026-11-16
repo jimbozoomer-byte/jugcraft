@@ -5,16 +5,23 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import net.fabricmc.fabric.api.entity.FakePlayer;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.BlockPos;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.gametest.framework.GameTestInfo;
 import net.minecraft.gametest.framework.RetryOptions;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ClientInformation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.level.block.Rotation;
 
-/** Real mock-player joins with isolated completion listeners; no dependence on test order or a later batch. */
+/**
+ * Real mock-player joins with isolated completion listeners; no dependence on test order or a later batch. Since
+ * 12 November 2026 also the fixtures that join players themselves, and absent fake players' trackers
+ * (docs/features/server-load-benchmark.md, "Full-suite memory").
+ */
 @SuppressWarnings("removal")
 public class TestPlayersGameTests {
 	@GameTest(maxTicks = 30)
@@ -118,6 +125,73 @@ public class TestPlayersGameTests {
 		helper.assertTrue(scope.info().getListeners().count() == 0 && tracked(scope.helper()) == 0,
 				"No embedded mock connection means no fixture cleanup ownership");
 		helper.succeed();
+	}
+
+	/**
+	 * Fixtures that join their own players instead of through TestPlayers.mock (here the Jimta robot owner and the
+	 * connected alchemist, which about a hundred tests share) leave with their test, and their transports are closed so
+	 * Fabric ends their network sessions. Before, they stayed in the game for the rest of the run.
+	 */
+	@GameTest(maxTicks = 20)
+	public void directJoinFixturesLeaveWithTheirTest(GameTestHelper helper) {
+		Scope scope = scope(helper);
+		try {
+			ServerPlayer robotOwner = JimtaRobotGameTests.player(scope.helper());
+			ServerPlayer alchemist = ConnectedAlchemyGameTests.player(scope.helper());
+			helper.assertTrue(online(robotOwner) && online(alchemist), "Both direct-join fixtures are in the game during their test");
+			helper.assertTrue(tracked(scope.helper()) == 2, "Both belong to their test's cleanup: " + tracked(scope.helper()));
+			scope.complete(true);
+			helper.assertTrue(!online(robotOwner) && !online(alchemist), "Both leave when their test ends");
+			helper.assertTrue(!MockPlayerChannels.transportOpen(robotOwner) && !MockPlayerChannels.transportOpen(alchemist),
+					"Their fake transports are closed");
+			helper.succeed();
+		} finally {
+			scope.complete(false);
+		}
+	}
+
+	/** A fixture that logs its player out by hand (as the robot and alchemy tests do) still has the transport closed at the end. */
+	@GameTest(maxTicks = 20)
+	public void handRemovedFixturePlayersAreStillDisposed(GameTestHelper helper) {
+		Scope scope = scope(helper);
+		try {
+			ServerPlayer player = JimtaRobotGameTests.player(scope.helper());
+			helper.getLevel().getServer().getPlayerList().remove(player);
+			helper.assertTrue(!online(player) && MockPlayerChannels.transportOpen(player), "Logged out by hand, its transport is still open");
+			scope.complete(true);
+			helper.assertTrue(!MockPlayerChannels.transportOpen(player), "Its test's end closes it");
+			helper.succeed();
+		} finally {
+			scope.complete(false);
+		}
+	}
+
+	/**
+	 * A fake player for an identity that is not in the game (a stand-in for an absent owner) leaves an advancement tracker
+	 * in the player list; the sweep lets it go. A stand-in for a present owner shares the owner's, which stays.
+	 */
+	@GameTest(maxTicks = 20)
+	public void absentStandInTrackersAreReleased(GameTestHelper helper) {
+		Scope scope = scope(helper);
+		try {
+			MinecraftServer server = helper.getLevel().getServer();
+			PlayerList list = server.getPlayerList();
+			ServerPlayer owner = TestPlayers.mock(scope.helper());
+			FakePlayer present = FakePlayer.get(helper.getLevel(), new GameProfile(owner.getUUID(), "[Present stand-in]"));
+			UUID away = UUID.randomUUID();
+			FakePlayer absent = FakePlayer.get(helper.getLevel(), new GameProfile(away, "[Absent stand-in]"));
+			Map<?, ?> trackers = MockPlayerChannels.trackers(list);
+			helper.assertTrue(trackers != null, "The player list keeps its trackers by identity");
+			helper.assertTrue(present.getAdvancements() == owner.getAdvancements(), "A present owner's stand-in shares the owner's tracker");
+			helper.assertTrue(trackers.get(away) == absent.getAdvancements(), "The absent identity's stand-in left a tracker behind");
+			int released = MockPlayerChannels.releaseAbsentStandIns(server);
+			helper.assertTrue(released >= 1 && !trackers.containsKey(away), "The absent stand-in's tracker is let go (" + released + ")");
+			helper.assertTrue(trackers.get(owner.getUUID()) == owner.getAdvancements() && online(owner), "The present owner keeps theirs");
+			helper.assertTrue(absent.getAdvancements() != null, "The fake player still has its own tracker to ask");
+			helper.succeed();
+		} finally {
+			scope.complete(false);
+		}
 	}
 
 	private static boolean online(ServerPlayer player) {

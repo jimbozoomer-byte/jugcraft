@@ -109,7 +109,7 @@ public class OreScannerItem extends Item implements Chargeable {
             bottom = level.getMinY(); top = Math.min(level.getMaxY() - 1, origin.getY() + OreSurvey.ABOVE); height = top - bottom + 1;
             Arrays.fill(nearest, Double.POSITIVE_INFINITY); started = level.getGameTime();
         }
-        boolean valid() { return player.isAlive() && !player.isSpectator() && player.level() == level && player.getItemInHand(hand) == stack && level.getGameTime() - started <= 600; }
+        boolean valid() { return player.isAlive() && !player.isSpectator() && player.level() == level && player.getItemInHand(hand) == stack && !stack.isEmpty() && level.getGameTime() - started <= 600; }
         boolean step(int budget) {
             int perChunk = columns * columns * height, total = diameter * diameter * perChunk;
             BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();

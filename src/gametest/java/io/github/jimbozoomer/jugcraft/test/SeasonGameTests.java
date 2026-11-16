@@ -52,15 +52,23 @@ public class SeasonGameTests {
 	@GameTest
 	public void generationTestClockSpansMidnightAndRestoresItsScope(GameTestHelper helper) {
 		var settings = JugcraftSeasons.settings();
-		try (TestSeasonClock beforeMidnight = TestSeasonClock.freeze(Instant.parse("2026-11-01T23:59:59Z"))) {
-			equal(helper, JugcraftSeasons.date(), LocalDate.of(2026, 11, 1), "before UTC midnight");
-			equal(helper, JugcraftSeasons.today(), settings.dayOn(LocalDate.of(2026, 11, 1)), "generation day before midnight");
-			equal(helper, TestSeasonClock.date(ZoneId.of("Pacific/Auckland")), LocalDate.of(2026, 11, 2), "configured zone is retained");
-			try (TestSeasonClock afterMidnight = TestSeasonClock.freeze(Instant.parse("2026-11-02T00:00:01Z"))) {
-				equal(helper, JugcraftSeasons.date(), LocalDate.of(2026, 11, 2), "after UTC midnight");
-				equal(helper, JugcraftSeasons.today(), settings.dayOn(LocalDate.of(2026, 11, 2)), "generation day after midnight");
-			}
-			equal(helper, JugcraftSeasons.date(), LocalDate.of(2026, 11, 1), "closing an inner scope restores the frozen date");
+		try (TestSeasonClock beforeMidnight = TestSeasonClock.freezeAt(Instant.parse("2026-11-01T23:59:59Z"))) {
+			LocalDate date = TestSeasonClock.frozenInstant().atZone(settings.zone()).toLocalDate();
+			equal(helper, JugcraftSeasons.date(), date, "frozen date uses configured zone");
+			equal(helper, JugcraftSeasons.today(), settings.dayOn(date), "generation day before midnight");
+			equal(helper, TestSeasonClock.frozenInstant().atZone(ZoneId.of("Pacific/Auckland")).toLocalDate(),
+					LocalDate.of(2026, 11, 2), "the same instant retains zone semantics");
+			boolean refused = false;
+			try (var nested = TestSeasonClock.freezeAt(Instant.parse("2026-11-02T00:00:01Z"))) {
+				// A second live scope would change the date seen by parallel generation tasks.
+			} catch (IllegalStateException expected) { refused = true; }
+			helper.assertTrue(refused, "A concurrent clock scope must be refused");
+			equal(helper, JugcraftSeasons.date(), date, "a refused scope leaves the original date");
+		}
+		try (var afterMidnight = TestSeasonClock.freezeAt(Instant.parse("2026-11-02T00:00:01Z"))) {
+			LocalDate date = TestSeasonClock.frozenInstant().atZone(settings.zone()).toLocalDate();
+			equal(helper, JugcraftSeasons.date(), date, "a new scope after midnight");
+			equal(helper, JugcraftSeasons.today(), settings.dayOn(date), "generation day after midnight");
 		}
 		equal(helper, JugcraftSeasons.settings(), settings, "freezing the clock leaves operator settings unchanged");
 		LocalDate realBefore = LocalDate.now(settings.zone());

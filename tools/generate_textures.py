@@ -1365,6 +1365,8 @@ def machines():
     arms.draw_all(save)
     import arms_variants
     arms_variants.draw_all(save)
+    import thanksgiving_weapons  # Thanksgiving weapons: their icons and model textures
+    thanksgiving_weapons.draw_all(save)
     import field_chemistry
     field_chemistry.draw_all(save, save_armor)
     import construction
@@ -1393,6 +1395,8 @@ def machines():
     trenchworks.draw_all(save)
     import zeppelin
     zeppelin.draw_all(save)
+    import pirate_ship
+    pirate_ship.draw_all(save)
     import mech
     mech.draw_all(save)
     import landship
@@ -1492,6 +1496,8 @@ def glass_textures():
 
 
 def main():
+    import thanksgiving_data
+    thanksgiving_data.write_costume_texture()
     save(blend(17), "item", "bronze_blend")
     icon = ore(STONE, 11)
     icon.paste(from_mask(INGOT, BRONZE), (0, 3), from_mask(INGOT, BRONZE))

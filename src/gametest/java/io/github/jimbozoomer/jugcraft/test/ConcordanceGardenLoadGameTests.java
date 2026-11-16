@@ -427,6 +427,7 @@ public class ConcordanceGardenLoadGameTests {
 			Connection connection = new Connection(PacketFlow.SERVERBOUND);
 			channels.add(new EmbeddedChannel(new ChannelHandler[] {connection}));
 			server.getPlayerList().placeNewPlayer(connection, player, cookie);
+			TestPlayers.track(helper, player);
 			player.setGameMode(GameType.SURVIVAL);
 			BlockPos to = helper.absolutePos(at);
 			player.snapTo(to.getX() + 0.5, to.getY(), to.getZ() + 0.5, 0.0F, 0.0F);

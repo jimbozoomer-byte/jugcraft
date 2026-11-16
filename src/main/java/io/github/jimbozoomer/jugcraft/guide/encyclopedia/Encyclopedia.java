@@ -85,6 +85,9 @@ public final class Encyclopedia {
         page("caverns", io.github.jimbozoomer.jugcraft.menagerie.MenagerieGuide::caverns);
         page("jimta_network", io.github.jimbozoomer.jugcraft.jimtafacts.network.DigitalGuide::write);
         page("jimta_guides", io.github.jimbozoomer.jugcraft.jimtafacts.spellbooks.JimtaGuides::write);
+		// The route maps (tools/encyclopedia_progression.py): every step read again from this server's recipes.
+		page("route_technology", (p, r, out) -> ProgressionRoutes.write(ProgressionRoutes.TECHNOLOGY, p, out));
+		page("route_magic", (p, r, out) -> ProgressionRoutes.write(ProgressionRoutes.MAGIC, p, out));
 		PayloadTypeRegistry.clientboundPlay().register(MentorOpenPayload.TYPE, MentorOpenPayload.CODEC);
 		PayloadTypeRegistry.serverboundPlay().register(EncyclopediaRequestPayload.TYPE, EncyclopediaRequestPayload.CODEC);
 		PayloadTypeRegistry.clientboundPlay().register(EncyclopediaPayload.TYPE, EncyclopediaPayload.CODEC);

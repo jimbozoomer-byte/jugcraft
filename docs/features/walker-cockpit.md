@@ -25,6 +25,7 @@ Ray traces through each model's exported quads checked these eyes. The script wa
   - Turning the Diesel or Armoured Walker with left/right turns the pilot's view with it, as a turret sight would, so the crosshair stays where it was on the walker. The mouse aims from there.
   - The Howitzer Walker's view follows only while left/right is held. Its hull also turns by itself to lay the gun where the pilot looks, and following that would chase the look round.
 - **Third person sits back past the hull:** 7 blocks for the Diesel Walker, 7.5 for the Armoured and 9 for the Howitzer. Vanilla's 4 blocks put the camera inside the hull. This uses the aircraft's camera mixin.
+- **Getting out** (10 November 2026): the pilot steps off on the ground beside the walker, clear of its hull, to its left, else its right, behind or in front, on its own level or up to two blocks up a slope (`DieselWalker.getDismountLocationForPassenger`). Before, vanilla's default set them on top of the hull, 4.25 to 5.4 blocks up, and they fell through it and took fall damage. A walker boxed in on every side falls back to that default.
 
 ### Telegraphs: where the attack will go
 The telegraphs are drawn in the world on the pilot's own client and show through blocks. Each is worked out once a client tick from the same calls the server uses, so what is shown is what happens.
@@ -72,9 +73,10 @@ They replace the "Fuel: n%" message that was sent every two seconds and pushed t
 ## Multiplayer and persistence
 - **Server-authoritative:** the server still aims, fires and strikes. The client only draws what the server's own calls give for its own pilot; nothing it shows is sent back.
 - **New synced data:** the walker's fuel (an int) and wear (a float), set each server tick only when they change, and the Armoured Walker's last shot (for the reload gauge). None is saved; fuel is saved as before.
-- **Aiming loads no chunk:** the look and the shell's flight stop at the first chunk that is not loaded.
+- **Aiming loads no chunk:** the look and the shell's flight stop at the first chunk that is not loaded. Every chunk in the x/z rectangle of each 16-block look segment or tick of flight, its ends included, must be loaded (`WalkerAim.chunksLoadedAlong`, 10 November 2026), so even a corner a segment only grazes between two loaded ends is covered. The rectangle is a plain superset of the chunks the path crosses. On a server, `Level.clip` reads every block on its path and would load such a chunk. Getting out tests a spot's blocks only where every chunk under it is loaded (`WalkerAim.loadedIn`). In loaded terrain the look, the flight and the shot clip exactly as before.
+- **The flight is stepped as the game steps a shell** (10 November 2026). Each tick a thrown projectile falls by its gravity, loses drag (the game's float `0.99F`), and only then moves; so even its first step is the fallen, dragged one. `WalkerAim.flight` and `Ballistics` (the firing solutions of the crewed guns, tower guns, walkers and town guard mechas) had moved first and dragged after, which put the cannon's real shell about 2 blocks short of its telegraph at 28 blocks. Both now step in the game's order, and the guns' aim follows. The shells themselves fly as they always did.
 - **Bounded work on the pilot's client:** at most 200 steps of flight, one look trace and one entity query a tick. Nothing runs for anyone who is not piloting.
-- **Seats:** the new seats move only where a mounted pilot sits. No saved data changes, and a pilot dismounts as before.
+- **Seats:** the new seats move only where a mounted pilot sits. No saved data changes. A pilot now dismounts beside the walker on the ground (see "Getting out"); the server picks the spot.
 - Not verified with two players or on a dedicated server.
 
 ## Dependencies and assets
@@ -92,10 +94,13 @@ They replace the "Fuel: n%" message that was sent every two seconds and pushed t
 ## Verification
 - Planned in CI, server game tests `WalkerCockpitGameTests`:
   - `walkerPilotsLookOutOverTheirHulls`: the Armoured and Howitzer pilots' eyes are over their roofs, and the camera sits back past each hull;
-  - `armouredCannonLandsWhereItsArcShows`: the telegraph's landing is on the crosshair 28 blocks ahead, the shell fired comes down where the arc does, and its burst hurts a pig by the crosshair;
+  - `armouredCannonLandsWhereItsArcShows`: the telegraph's landing is on the crosshair 28 blocks ahead, and the shell fired comes down where the arc does. The test keeps the shell itself: once it has burst, its place is the point it hit, which must be within a hundredth of a block of the telegraph's landing (10 November 2026; it had been held only to a tick's flight). Its burst hurts a pig by the crosshair;
+  - `realShellStepsWhereTheSharedFlightMathPutsIt` (10 November 2026): a real Heavy Shell, shot with no spread, is where `WalkerAim.flight` and `Ballistics.heightAtDistance` put it after each of its first five ticks, to a millionth of a block. The first step is also worked out in the test, in the game's order, and must match `WalkerAim` exactly;
   - `howitzerArcComesDownOnTheCrosshairOnceLaid`: once laid, the arc drawn from the barrel comes down within 2.5 blocks of the crosshair;
   - `theDrawnReachIsWhatIsStruck`: the fist's box takes in the pig in front and not the one behind, and strikes only the one in front; the stomp's ring takes in the pig beside it and not one six blocks off;
   - `theGaugesReadTheWalker`: the fuel gauge reads a quarter tank, and a hit shows as wear.
+  - `aimingStopsAtAnUnloadedChunkOnItsPath` (10 November 2026): the path check on synthetic loaded-chunk sets. A path between loaded (0, 0) and (1, 1) stops at unloaded (1, 0), both ways, and at a corner it grazes by a thousandth of a block. An unloaded start or end stops it, and so does an unloaded corner chunk inside its rectangle that it misses. A path inside one loaded chunk runs on, a straight path through an unloaded chunk stops, and a path starting a hair short of a chunk's edge counts the chunk over it.
+  - `pilotsStepOffBesideTheirWalkers` (10 November 2026): the Howitzer's pilot steps off to its left on the ground, and the Armoured Walker's pilot to its right with its left walled off, outside the hull, unhurt.
 - Client game test `WalkerCockpitClientGameTests`, for each walker:
   - the view from the seat, with the telegraphs and gauges, and an arc landing for the two guns;
   - holding left turns the hull and the view together;

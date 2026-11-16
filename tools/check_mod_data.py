@@ -87,6 +87,8 @@ import howitzer_walker
 import gear
 import arms
 import arms_variants
+import thanksgiving_weapons
+import horse_breeds_data
 import check_icon_maps
 import plastic
 from machines import (CROPS, MACHINES, STATS, ORE_PROCESSING_MULTIPLIER, ORE_WASHING_MULTIPLIER, ORE_LEACHING_MULTIPLIER, BYPRODUCT_SHARE,
@@ -608,6 +610,8 @@ def item_units(ref):
         return {}
     if path in arms.items():
         return arms.metal_content(path)
+    if path in thanksgiving_weapons.items():
+        return thanksgiving_weapons.metal_content(path)
     if path in arms_variants.items():
         # A styled variant holds the steel arm it is smithed from and its style's addition; patterns and trophies none.
         if path in arms_variants.BY_ID and arms_variants.line(path) in arms_variants.STYLES:
@@ -927,7 +931,7 @@ def check_tags():
                                                     + list(exchange_blocks.BLOCKS) + list(exchange_poker.BLOCKS) + list(exchange_casino.BLOCKS) + list(exchange_casino.ITEMS)
                                                     + petro.petro_blocks() + petro.petro_items() + deposits.all_blocks()
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
-                                                    + arms.items() + arms_variants.items()
+                                                    + arms.items() + arms_variants.items() + thanksgiving_weapons.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
                                                     + field_chemistry.items() + pharmacology.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + aged_wood.blocks() + fire_control.blocks() + fire_control.items() + list(raiders.ITEMS) + list(raiders.BLOCKS) + list(armoured_walker.ITEMS) + list(howitzer_walker.ITEMS) + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(unmasking.ITEMS) + list(trains.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
                                                     + ag.all_blocks() + ag.all_items() + (town_assets.blocks() + styx.blocks())
@@ -946,6 +950,11 @@ def check_tags():
         if registry == 'block': known.update('jimta_' + n for n in jimtafacts_network.BLOCKS); known.update(jimtafacts_spellbooks.blocks()); known.update(jimtafacts_industry.blocks())
         if registry == 'entity_type': known.update({'jimta_mimic', 'jimta_tiny_tnt'})
         if registry == 'entity_type': known.update({'jimta_workshop_robot','jimta_dynamite'})
+        if registry == 'entity_type':
+            pegasus_registry = (JAVA_ROOT / 'pegasus' / 'JugcraftPegasus.java').read_text(encoding='utf-8')
+            known.update(re.findall(r'public static final String ID = "([a-z_]+)";', pegasus_registry))
+            horse_registry = (JAVA_ROOT / 'horses' / 'HorseBreed.java').read_text(encoding='utf-8')
+            known.update(re.findall(r'[A-Z_]+\("([a-z_]+)"', horse_registry))
         if registry == 'block': known.update({'jimta_dynamite_charge','jimta_nuclear_charge'})
         if registry == 'item': known.add('jimta_nuclear_charge')
         if registry == 'entity_type': known.update('jimta_'+kind+'_boat' for kind in ('rubber','carbon','electric'))
@@ -3783,6 +3792,21 @@ def check_java():
         placed = load(DATA / MOD / "worldgen" / "placed_feature" / f"ore_{name}.json") or {}
         if placed.get("placement") != [{"type": "minecraft:rarity_filter", "chance": info["rarity"]}]:
             err(f"Mineral sand {name}: rarity or bounded chunk anchor changed")
+    # Simplified processing (tools/mineral_sand_processing.py): every finite feed has a recipe naming its
+    # exact ID, and no recipe result or byproduct recreates a reserve unit.
+    sand_ids = {f"{MOD}:{name}" for name in SANDS}
+    fed = set()
+    for path in sorted((DATA / MOD / "recipe").rglob("*.json")):
+        recipe = load(path) or {}
+        outputs = [recipe.get("result")] + list(recipe.get("results") or []) + list(recipe.get("byproducts") or [])
+        for sand in sorted({o if isinstance(o, str) else o.get("id") for o in outputs if isinstance(o, (str, dict))} & sand_ids):
+            err(f"{path.relative_to(DATA)}: recreates the finite mineral-sand reserve {sand}")
+        for part in [recipe.get("ingredient")] + list(recipe.get("items") or recipe.get("ingredients") or []):
+            ref = part.get("ingredient") if isinstance(part, dict) else part
+            if isinstance(ref, str) and ref in sand_ids:
+                fed.add(ref)
+    for sand in sorted(sand_ids - fed):
+        err(f"Mineral sand {sand} has no processing recipe naming its exact ID")
     if limited and 'Jugcraft.id("has_ore/" + ore[0])' not in worldgen:
         err("JugcraftWorldgen does not place biomeOres by their biome tag jugcraft:has_ore/<name>")
     for placed in limited:
@@ -17056,6 +17080,43 @@ def check_clockwork():
             err(f"{key}: its text must be there" + (f" ({text})" if text else ""))
 
 
+def check_thanksgiving_woodland():
+    """Thanksgiving woodland harvest crafts (tools/thanksgiving_woodland.py, docs/features/thanksgiving-woodland-crafts.md):
+    tools/thanksgiving_woodland_check.py's findings (regeneration, outlines and states, art rules, drops, recipes, the
+    Java table and the shared hooks)."""
+    import thanksgiving_woodland_check
+    for problem in thanksgiving_woodland_check.errors():
+        err(problem)
+
+
+def check_thanksgiving_town():
+    """Thanksgiving harvest town details (tools/thanksgiving_town.py, docs/features/thanksgiving-town-details.md): the
+    checks of tools/thanksgiving_town_check.py (registration, names, loot, mining and planter tags, blockstates, recipes,
+    outlines and regeneration). Their models are checked by check_art with the rest, the arch's parts drawn together
+    (art_check.DRAWN_TOGETHER)."""
+    import thanksgiving_town_check
+    for problem in thanksgiving_town_check.problems():
+        err(problem)
+
+
+def check_thanksgiving_toys():
+    """Thanksgiving festival toys (tools/thanksgiving_toys.py, docs/features/thanksgiving-toys.md): every problem
+    tools/thanksgiving_toys_check.py finds (the generated files, the Java's numbers, drops, tags, names, recipes and
+    the backdrop's open middle) is an error."""
+    import thanksgiving_toys_check
+    for problem in thanksgiving_toys_check.problems(ROOT):
+        err(problem)
+
+
+def check_thanksgiving_dishes():
+    """Thanksgiving side dishes (tools/thanksgiving_dishes.py, docs/features/thanksgiving-dishes.md): every problem
+    tools/thanksgiving_dishes_check.py finds (the Java and hooks, the generated files, drops, names, recipes, balance,
+    outlines and essence records) is an error."""
+    import thanksgiving_dishes_check
+    for problem in thanksgiving_dishes_check.problems(ROOT):
+        err(problem)
+
+
 def check_thanksgiving_decor():
     """Thanksgiving decorations (tools/thanksgiving_decor.py, docs/features/thanksgiving-decor.md): every prop is
     registered by JugcraftAgriculture.registerThanksgivingDecor() as its kind's block with the table's shape (a floor
@@ -17193,7 +17254,10 @@ def check_harvest_festival():
     of it, drawn by StringLightsRenderer from its own texture, its pennants the table's size and spacing at a texel to a
     pixel; the Sack-Race Sack goes on the legs, drawn as leggings from its own texture, its attributes the table's, so
     that in it a player is slowed, hops up every block and can't jump a fence; both are woven from the farm's flax; and
-    their names have their text."""
+    their names have their text. Part 5: the Harvest Centerpiece fits the town square's centrepiece site, is the table's
+    size with no block entity, its shapes and model in its frame, its blockstate whole (each lantern block's lit model
+    while lit, which glows, and only those), dropping once, made from a Giant Cornucopia and lanterns, mined with an
+    axe, with its text."""
     import harvest_festival as hf
     import harvest_festival_data as hfd
 
@@ -17241,6 +17305,62 @@ def check_harvest_festival():
         err(f"recipe/{block}.json: it must take the farm's corn and butternut squash")
     if lang.get(f"block.{MOD}.{block}") != spec["display"]:
         err(f"block.{MOD}.{block}: the text must be {spec['display']}")
+    # Part 5: the Harvest Centerpiece, the town square's November centrepiece (Thanksgiving phase 6).
+    spec = hf.CENTERPIECE
+    block = spec["block"]
+    w, h, d = spec["size"]
+    if any(spec["size"][k] > spec["site"][k] for k in range(3)):
+        err(f"tools/harvest_festival.py CENTERPIECE: {spec['size']} blocks must fit the town square's {spec['site']} centrepiece site")
+    java = read(JAVA_ROOT / "agriculture" / "HarvestCenterpieceBlock.java")
+    _, _, lanterns = hfd.centerpiece_parts()
+    for item in ("extends MultiDecorationBlock {", f"box({w}, {h}, {d})", f"LIGHT = {spec['light']};",
+                 "LANTERNS = Set.of(" + ", ".join(str(p) for p in lanterns) + ");"):
+        if item not in java:
+            err(f"HarvestCenterpieceBlock: missing {item} (tools/harvest_festival.py CENTERPIECE, harvest_festival_data.centerpiece_parts)")
+    if "EntityBlock" in java or "BlockEntity" in java:
+        err("HarvestCenterpieceBlock: the centerpiece keeps nothing, so it has no block entity")
+    for box in re.findall(r"new double\[\] \{([^}]*)\}", java):
+        x0, y0, z0, x1, y1, z1 = (float(v) for v in box.split(","))
+        if not (0 <= x0 < x1 <= 16 * w and 0 <= y0 < y1 <= 16 * h and 0 <= z0 < z1 <= 16 * d):
+            err(f"HarvestCenterpieceBlock: the shape {{{box}}} must lie in its {16 * w} x {16 * h} x {16 * d} frame")
+    if f'registerBlock("{block}", HarvestCenterpieceBlock::new' not in java_main \
+            or "lightLevel(HarvestCenterpieceBlock::light)" not in java_main \
+            or f'registerItem("{block}", props -> new BlockItem(centerpiece, props)' not in java_main:
+        err(f"JugcraftAgriculture: {block} must be a HarvestCenterpieceBlock lit by its lanterns, with its item, in registerHarvestFestival")
+    sc = hfd.build(block)
+    for name in ("whole", "whole_lit"):
+        if any(min(e["from"]) < 0 or e["to"][0] > 16 * w or e["to"][1] > 16 * h or e["to"][2] > 16 * d
+               for e in sc.models[name] if "rotation" not in e):
+            err(f"tools/harvest_festival_data.py harvest_centerpiece {name}: every box must lie in its frame, or its blocks' models lose it")
+    if not lanterns or len(lanterns) < len(hfd.LANTERNS):
+        err("tools/harvest_festival_data.py harvest_centerpiece: every lantern's glass must be drawn lit in its block's lit model")
+    variants = (load(ASSETS / "blockstates" / f"{block}.json") or {}).get("variants", {})
+    turns = {"north": 0, "east": 90, "south": 180, "west": 270}
+    for part in range(w * h * d):
+        if not (ASSETS / "models" / "block" / f"{block}_{part}.json").is_file():
+            err(f"models/block/{block}_{part}.json must be written")
+        lit_model = ASSETS / "models" / "block" / f"{block}_{part}_lit.json"
+        if (part in lanterns) != lit_model.is_file():
+            err(f"models/block/{block}_{part}_lit.json: written exactly for the blocks holding a lantern's glass")
+        elif part in lanterns and not any(e.get("light_emission") for e in (load(lit_model) or {}).get("elements", [])):
+            err(f"models/block/{block}_{part}_lit.json: its lantern glass must glow (light_emission)")
+        for face, turn in turns.items():
+            for on in ("false", "true"):
+                want = f"{MOD}:block/{block}_{part}" + ("_lit" if on == "true" and part in lanterns else "")
+                got = variants.get(f"facing={face},lit={on},part={part}", {})
+                if got.get("model") != want or got.get("y", 0) != turn:
+                    err(f"blockstates/{block}.json: facing {face}, lit {on}, part {part} must be {want} turned {turn}")
+    pools = (load(DATA / MOD / "loot_table" / "blocks" / f"{block}.json") or {}).get("pools", [])
+    if len(pools) != 1 or '"part": "0"' not in json.dumps(pools):
+        err(f"loot_table/blocks/{block}.json: it drops once, from its first block")
+    keys = set(((load(DATA / MOD / "recipe" / f"{block}.json") or {}).get("key") or {}).values())
+    if not {f"{MOD}:{hf.CORNUCOPIA['block']}", "minecraft:lantern"} <= keys:
+        err(f"recipe/{block}.json: it is made from a Giant Cornucopia and lanterns")
+    if lang.get(f"block.{MOD}.{block}") != spec["display"]:
+        err(f"block.{MOD}.{block}: the text must be {spec['display']}")
+    axe = load(DATA / "minecraft" / "tags" / "block" / "mineable" / "axe.json") or {}
+    if f"{MOD}:{block}" not in axe.get("values", []):
+        err(f"The {spec['display']} is willow, straw and produce: it is mined with an axe")
     # Part 2: the Giant Vegetable Show and the Prize Ribbon Board.
     for veg in hf.SHOW.values():
         block = veg["block"]
@@ -25566,11 +25686,24 @@ def check_garden_pacts(co, root, lang, registered, research):
             or keeping.count("Transaction.openOuter()") != 1 or keeping.count(".extract(") != 1 or keeping.count(".commit()") != 1:
         err("GraftKeeping.spend: one outer transaction, one extraction of exactly one donor, committed only then, nothing else "
             "inside it, and no other transaction in the service (GC-P82, GC-P85)")
-    for banned in (".setGraft(", ".consume(", "getInventory()", ".insert(", "ItemStack", "Garden.sample(", ".habitat(level)",
+    for banned in (".setGraft(", ".consume(", "getInventory()", ".insert(", "ItemStack", "Garden.sample(",
                    "forgetSample(", "sendParticles(", "CourierLedger", "Logistics.", "getPlayer(record.holder()).getInventory"):
         if banned in keeping:
             err(f"spirits/GraftKeeping.java: never {banned} (the graft is Grafting.apply's, the donor the store's in its "
                 "transaction; no inventory, no sample, never cargo: no courier ledger, reservation or transit; GC-07, GC-P85)")
+    # The garden pacts' review (10 November 2026): his one sample, a ripe host's bed with no reading, through the bed's own
+    # budgeted reading, at most one a think (foras-pact.md, "A ripe host after a restart").
+    if keeping.count(".habitat(level)") != 1 or "host.bed().habitat(level) == null ? null : helps(level, host)" \
+            not in _java_body(keeping, "static @Nullable Boolean firstReading(") \
+            or "if (helps == null && !sampled && ripe(level, host)) {" not in step or step.count("sampled = true;") != 1 \
+            or step.count("firstReading(level, host)") != 1 or "block.isMaxAge(crop)" not in _java_body(keeping, "static boolean ripe("):
+        err("spirits/GraftKeeping.java: his only sample is a ripe host's bed with no reading, through VerdantBedBlockEntity.habitat "
+            "(the level's allowance), at most one a think (the garden pacts' review, 10 November 2026)")
+    for cls, names in NOV10_LIFECYCLE_TESTS.items():
+        source = (tests / f"{cls}.java").read_text(encoding="utf-8") if (tests / f"{cls}.java").is_file() else ""
+        for name in names:
+            if not re.search(rf"public void {name}\(GameTestHelper \w+\)", source):
+                err(f"{cls}: missing the garden pacts' review game test {name} (10 November 2026)")
     landed = _java_body(keeping, "private static Status grafted(")
     order = [landed.find(n) for n in ("memory.grafted(graft);", "holder.taskDone(level, now);",
                                       "foras.attendWork(graft.crop(), ForasEntity.Gesture.WORK.ticks, now);",
@@ -27157,9 +27290,11 @@ def check_magic_ui(lang):
         err("tools/owner_art.py: writes and checks the magic interface kit (magic_ui.OWNER_FILES and ADAPTED in adaptations())")
     if not set(mu.BUILT) <= {target for target, _, _ in owner_art.builds()}:
         err("tools/owner_art.py: writes the magic interfaces' drawn glyphs and marks (magic_ui.BUILT in builds())")
-    expected = owner_art.expected()
+    # owner_art joins native roots with slash-delimited resource IDs. Compare
+    # paths, not strings: Windows otherwise reports every sidecar as absent.
+    expected = {Path(path) for path in owner_art.expected()}
     for target in mu.MCMETA:
-        if str(ASSETS / (target + ".mcmeta")) not in expected:
+        if ASSETS / (target + ".mcmeta") not in expected:
             err(f"tools/owner_art.py: does not write {target}.mcmeta (magic_ui.MCMETA)")
     names = ("MagicArt", "MagicTheme", "MagicLayout", "MagicScreen", "MagicButton", "MagicText", "MagicChip", "MagicStacks",
              "MagicPortrait", "MagicPortraits", "PactGlance", "RosterGlance", "MagicGlance")
@@ -28935,7 +29070,8 @@ def registered_items():
     registered = (set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items())
                   | set(ag.all_blocks()) | set(ag.all_items()) | set(petro.petro_items()) | set(petro.petro_blocks())
                   | set(deposits.all_blocks()) | set(guide_books.BOOKS) | set(tank_display.BLOCKS) | set(exchange_blocks.BLOCKS) | set(exchange_poker.BLOCKS) | set(exchange_casino.BLOCKS) | set(exchange_casino.ITEMS)
-                  | set(arms.items()) | set(arms_variants.items())
+                  | set(arms.items()) | set(arms_variants.items()) | set(thanksgiving_weapons.items())
+                  | {breed + '_spawn_egg' for breed in horse_breeds_data.BREEDS}
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
                   | set(field_chemistry.items()) | set(pharmacology.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(fortifications.blocks()) | set(bunkerworks.blocks()) | set(aged_wood.blocks()) | set(fire_control.blocks()) | set(fire_control.items()) | set(raiders.ITEMS) | set(armoured_walker.ITEMS) | set(howitzer_walker.ITEMS) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(unmasking.ITEMS) | set(trains.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
                   | set(ph.blocks()) | set(ph.items()) | set((town_assets.blocks() + styx.blocks()))
@@ -29115,6 +29251,10 @@ def main():
     check_harvest_festival()
     check_thanksgiving_decor()
     check_keeper_credit()
+    check_thanksgiving_woodland()
+    check_thanksgiving_town()
+    check_thanksgiving_toys()
+    check_thanksgiving_dishes()
     check_hessian_horseman()
     check_lair_loadouts()
     check_cydonian_sentinel()
@@ -30412,6 +30552,15 @@ GC06_TESTS = {
 }
 # GC-07 unit 4
 # Concordance garden cohort, GC-07 (check_garden_pacts): the graft extracted, the bed index's stores, Foras's service.
+# The garden pacts' review (10 November 2026): a garden pact's whole lifecycle, the real land claim, a save and reload with
+# nothing duplicated, the perch's freedom from research, and Foras's ripe host after a reload (check_garden_pacts).
+NOV10_LIFECYCLE_TESTS = {
+    "ConcordanceGardenLifecycleGameTests": [
+        "bindingBuerAtThePerchEasesTheHoldersBed", "anUnpaidUpkeepStopsTheServiceUntilItIsPaid",
+        "endingTheGardenPactReturnsTheEscrowOnceAndBuerLeaves", "onlyTheHolderMayBindEndPayOrCommandTheirSpirit",
+        "aRealLandClaimKeepsBuerOffANeighboursGround", "aGardenPactSurvivesASaveAndReloadWithNothingDuplicated",
+        "forasReadsARipeHostThatLostItsReading", "thePerchNeedsNoResearchOnlyTheSpiritsOwn"],
+}
 GC07_GRAFT_TESTS = {
     "ConcordanceGardenGameTests": ["theGraftGestureBehavesAsBefore", "aGraftGainsOnlyWhereEveryFitIsNoWorseAndOneBetter",
                                    "theGardenReachIndexesStoresTouchingThePerch"],
