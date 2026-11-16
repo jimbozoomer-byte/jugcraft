@@ -15,14 +15,19 @@ class StarterWorkshopTests(unittest.TestCase):
             self.assertEqual({'id':'jugcraft:copper_cable','count':count},result,name)
 
     def test_approved_recipes_only_and_equal_material_yields(self):
-        rows=dict(workshop.processes())
-        self.assertEqual(16,len(rows))
-        self.assertEqual(9,sum(r['station']==0 for r in rows.values()))
+        processes=workshop.processes()
+        rows=dict(processes)
+        self.assertEqual(len(processes),len(rows),'Every workshop choice keeps a distinct recipe ID')
+        self.assertEqual(19,len(rows))
+        self.assertEqual(12,sum(r['station']==0 for r in rows.values()))
         self.assertEqual((200,4),(rows['bronze_ingot']['time'],rows['bronze_ingot']['result']['count']))
         self.assertEqual((120,2),(rows['solder_ingot']['time'],rows['solder_ingot']['result']['count']))
         self.assertEqual(100,rows['copper_wire']['time'])
         self.assertEqual(3,rows['copper_wire']['result']['count'])
-        self.assertEqual(200,rows['basic_circuit']['time'])
+        for name,count in [('basic_circuit_raw',1),('basic_circuit_wired',2),('basic_circuit_soldered',2),('basic_circuit',4)]:
+            self.assertEqual((200,count),(rows[name]['time'],rows[name]['result']['count']))
+            self.assertTrue(rows[name]['heated'])
+            self.assertEqual({'id':'jugcraft:soldering_tool'},rows[name]['tool'])
         self.assertTrue(all(r['time']==100 for n,r in rows.items() if n.endswith('_plate')))
         self.assertEqual(2,rows['fire_insulators']['ingredients'][0]['count'])
         self.assertFalse(any(c['feature']=='drones' for c in rows['fire_insulators']['fabric:load_conditions']))

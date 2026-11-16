@@ -30,6 +30,7 @@ public class AlchemyPlayabilityGameTests {
         var connection=new net.minecraft.network.Connection(net.minecraft.network.protocol.PacketFlow.SERVERBOUND);
         new io.netty.channel.embedded.EmbeddedChannel(connection);
         h.getLevel().getServer().getPlayerList().placeNewPlayer(connection,p,net.minecraft.server.network.CommonListenerCookie.createInitial(profile,false));
+        TestPlayers.track(h, p);
         p.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
         h.assertTrue(!p.isCreative()&&!p.isSpectator()&&!Assaying.knows(p),"Fixture is an ordinary survival player without research");return p;
     }

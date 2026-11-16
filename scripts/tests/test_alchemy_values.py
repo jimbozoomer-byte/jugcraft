@@ -1,5 +1,6 @@
 """Data-level conservation checks for the universal catalogue (runtime transactions have game tests)."""
 from fractions import Fraction
+from collections import Counter
 import json
 from pathlib import Path
 import unittest
@@ -11,6 +12,35 @@ def value(item):
     v=VALUES[item];return Fraction(v['numerator'],v['denominator'])
 
 class AlchemyValueTests(unittest.TestCase):
+    def test_component_yield_choices_cannot_multiply_essence(self):
+        recipes=ROOT/'src/main/resources/data/jugcraft/recipe'
+        products={'jugcraft:'+name for name in ('basic_circuit','advanced_circuit','microchip','electric_motor')}
+        def ingredient_value(ref):
+            if not ref.startswith('#'):return value(ref)
+            # Fabric supplies this vanilla common tag rather than a local resource file.
+            if ref=='#c:ingots/copper':return value('minecraft:copper_ingot')
+            namespace,name=ref[1:].split(':',1)
+            tag=ROOT/'src/main/resources/data'/namespace/'tags/item'/(name+'.json')
+            members=json.loads(tag.read_text(encoding='utf-8'))['values']
+            return min(ingredient_value(member if isinstance(member,str) else member['id']) for member in members)
+        paths=[recipes/name for name in ('basic_circuit.json','electric_motor.json','ceramics_motors.json','ceramics_motors_prepared.json')]
+        for folder in ('circuit_assembly','starter_workshop','lithography'):paths.extend((recipes/folder).glob('*.json'))
+        checked=0
+        for path in paths:
+            recipe=json.loads(path.read_text(encoding='utf-8'))
+            outputs=recipe.get('results',[recipe.get('result',{})])
+            if not any(out.get('id') in products for out in outputs):continue
+            if 'pattern' in recipe:
+                bill=sum(n*ingredient_value(recipe['key'][symbol]) for symbol,n in Counter(''.join(recipe['pattern'])).items() if symbol!=' ')
+            else:
+                parts=recipe.get('ingredients',recipe.get('items',[]))
+                bill=sum(ingredient_value(part['ingredient'])*part.get('count',1) if isinstance(part,dict) else ingredient_value(part) for part in parts)
+            # Ignoring consumed acid is conservative: even the solid inputs must pay for every chip.
+            with self.subTest(recipe=path.relative_to(recipes)):
+                self.assertLessEqual(sum(value(out['id'])*out.get('count',1) for out in outputs),bill)
+            checked+=1
+        self.assertGreaterEqual(checked,18,'Cover crafting, workshop, assembler and both acid choices')
+
     def test_overworld_quartz_does_not_multiply_essence_by_mining_or_crushing(self):
         for ore in ('quartz_ore','deepslate_quartz_ore'):
             self.assertGreaterEqual(value('jugcraft:'+ore),4*value('minecraft:quartz'))
@@ -43,9 +73,27 @@ class AlchemyValueTests(unittest.TestCase):
             self.assertEqual(value('minecraft:'+metal+'_block'),9*unit)
             if 'minecraft:'+metal+'_nugget' in VALUES:self.assertEqual(9*value('minecraft:'+metal+'_nugget'),unit)
 
-    def test_fishing_salvage_cannot_undercut_recoverable_metals(self):
-        self.assertGreaterEqual(value('jugcraft:aquatic_tin_can'), 7*value('minecraft:iron_nugget'))
-        self.assertGreaterEqual(value('jugcraft:aquatic_goldfish'), value('minecraft:gold_nugget'))
+    def test_aquatic_salvage_cannot_mint_historical_metals_from_fallbacks(self):
+        routes = (
+            ('tin_can_to_iron_nugget', 'aquatic_tin_can', 'iron'),
+            ('tin_can_to_iron_nugget_from_blasting', 'aquatic_tin_can', 'iron'),
+            ('gold_nugget_from_gold_fish', 'aquatic_goldfish', 'gold'),
+        )
+        for recipe, item, metal in routes:
+            with self.subTest(recipe=recipe):
+                data = json.loads((ROOT / 'src/main/resources/data/jugcraft/recipe/newest/aquatic'
+                                   / (recipe + '.json')).read_text(encoding='utf-8'))
+                source = 'jugcraft:' + item
+                inputs = data.get('ingredients', [data.get('ingredient')])
+                self.assertEqual(inputs, [source], 'Salvage consumes exactly one loot item')
+                output = data['result']
+                self.assertEqual(output['id'], 'minecraft:' + metal + '_nugget')
+                # Compare against the locked ingot root, not merely the nugget's
+                # possibly corrupted derived price: both sides used to be cheap.
+                recovered = output.get('count', 1) * value('minecraft:' + metal + '_ingot') / 9
+                self.assertEqual(value(source), recovered)
+                self.assertGreaterEqual(value(source), output.get('count', 1) * value(output['id']))
+                self.assertIn('salvage accounting', VALUES[source]['source'])
 
     def test_filled_buckets_cannot_create_a_cheaper_empty_shell(self):
         for item in ('water_bucket','lava_bucket','milk_bucket','cod_bucket','powder_snow_bucket'):

@@ -88,6 +88,7 @@ public final class MenagerieGameTests {
         var connection=new net.minecraft.network.Connection(net.minecraft.network.protocol.PacketFlow.SERVERBOUND);
         new io.netty.channel.embedded.EmbeddedChannel(connection);
         h.getLevel().getServer().getPlayerList().placeNewPlayer(connection,p,net.minecraft.server.network.CommonListenerCookie.createInitial(profile,false));
+        TestPlayers.track(h, p);
         p.setGameMode(GameType.SURVIVAL);p.setPos(Vec3.atCenterOf(h.absolutePos(new BlockPos(1,1,1))));
         h.assertTrue(!p.isCreative()&&!p.isSpectator(),"Fixture exercises real survival costs");return p;
     }

@@ -26,7 +26,7 @@ def processes():
     for machine, outputs in allowed.items():
         for recipe in source[machine]:
             if recipe['output'] not in outputs: continue
-            name = recipe['output'].split(':')[1]
+            name = recipe.get('name', recipe['output'].split(':')[1])
             parts = recipe.get('inputs') or [(recipe['input'], 1)]
             row = dict(type='jugcraft:starter_working', station=2 if machine == 'alloy_smelter' else 0,
                 ingredients=[dict(ingredient=i, count=c) for i,c in parts],

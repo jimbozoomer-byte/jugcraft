@@ -174,6 +174,7 @@ public class WildenStalkerGameTests {
         var connection = new Connection(PacketFlow.SERVERBOUND);
         new EmbeddedChannel(connection);
         h.getLevel().getServer().getPlayerList().placeNewPlayer(connection, p, cookie);
+        TestPlayers.track(h, p);
         p.setGameMode(GameType.SURVIVAL);
         p.connection.handleAcceptPlayerLoad(new net.minecraft.network.protocol.game.ServerboundPlayerLoadedPacket());
         h.assertTrue(p.connection.hasClientLoaded(), "Fixture completed the loading handshake and is damageable");

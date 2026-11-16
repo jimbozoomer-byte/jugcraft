@@ -766,10 +766,22 @@ def _wire_drawer():
 
 # Circuit assembler: up to three ingredient stacks, any slot order.
 CIRCUIT_ASSEMBLER = [
+    {"name": "basic_circuit_raw", "inputs": [["jugcraft:silicon", 1], ["#c:ingots/copper", 1], ["#c:ingots/tin", 1]],
+     "output": "jugcraft:basic_circuit", "count": 1, "ticks": 200, "features": [FEATURE, "silicon", "tin"]},
+    {"name": "basic_circuit_wired", "inputs": [["jugcraft:silicon", 1], ["jugcraft:copper_wire", 3], ["#c:ingots/tin", 1]],
+     "output": "jugcraft:basic_circuit", "count": 2, "ticks": 200, "features": [FEATURE, "silicon", "tin"]},
+    {"name": "basic_circuit_soldered", "inputs": [["jugcraft:silicon", 1], ["#c:ingots/copper", 1], ["jugcraft:solder_ingot", 1]],
+     "output": "jugcraft:basic_circuit", "count": 2, "ticks": 200, "features": [FEATURE, "silicon", "lead"]},
     {"inputs": [["jugcraft:silicon", 1], ["jugcraft:copper_wire", 3], ["jugcraft:solder_ingot", 1]],
-     "output": "jugcraft:basic_circuit", "count": 1, "ticks": 200, "features": [FEATURE, "silicon", "lead"]},
-    {"inputs": [["jugcraft:basic_circuit", 2], ["jugcraft:silver_wire", 3], ["jugcraft:invar_plate", 1]],
+     "output": "jugcraft:basic_circuit", "count": 4, "ticks": 200, "features": [FEATURE, "silicon", "lead"]},
+    {"name": "advanced_circuit_raw", "inputs": [["jugcraft:basic_circuit", 2], ["#c:ingots/silver", 1], ["#c:ingots/invar", 1]],
      "output": "jugcraft:advanced_circuit", "count": 1, "ticks": 300, "features": [FEATURE, "silver", "nickel"]},
+    {"name": "advanced_circuit_wired", "inputs": [["jugcraft:basic_circuit", 2], ["jugcraft:silver_wire", 3], ["#c:ingots/invar", 1]],
+     "output": "jugcraft:advanced_circuit", "count": 2, "ticks": 300, "features": [FEATURE, "silver", "nickel"]},
+    {"name": "advanced_circuit_plated", "inputs": [["jugcraft:basic_circuit", 2], ["#c:ingots/silver", 1], ["jugcraft:invar_plate", 1]],
+     "output": "jugcraft:advanced_circuit", "count": 2, "ticks": 300, "features": [FEATURE, "silver", "nickel"]},
+    {"inputs": [["jugcraft:basic_circuit", 2], ["jugcraft:silver_wire", 3], ["jugcraft:invar_plate", 1]],
+     "output": "jugcraft:advanced_circuit", "count": 4, "ticks": 300, "features": [FEATURE, "silver", "nickel"]},
     # Electronics (batch 7): four microchips bonded to an advanced circuit with gold.
     {"inputs": [["jugcraft:microchip", 4], ["jugcraft:advanced_circuit", 1], ["minecraft:gold_ingot", 1]],
      "output": "jugcraft:processor", "count": 1, "ticks": 400, "features": [FEATURE, "silicon", "sulfur", "silver", "nickel"]},

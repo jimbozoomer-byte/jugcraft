@@ -1399,7 +1399,7 @@ public class PetroGameTests {
 		});
 	}
 
-	/** Nitric acid etches microchips too, using 50 mB where sulfuric acid takes 100. */
+	/** Nitric acid doubles the microchip yield, using 50 mB where sulfuric acid takes 100. */
 	@GameTest(maxTicks = 400)
 	public void lithographyEtchesWithNitricAcid(GameTestHelper helper) {
 		if (TestFocus.skip("petro")) {
@@ -1412,7 +1412,7 @@ public class PetroGameTests {
 		station.setItem(1, new ItemStack(BuiltInRegistries.ITEM.getValue(Jugcraft.id("copper_wire")), 2));
 		helper.succeedWhen(() -> {
 			ItemStack out = station.getItem(station.kind().outputSlot());
-			helper.assertTrue(out.is(PetroItems.MICROCHIP) && out.getCount() == 4, "Microchips: " + out);
+			helper.assertTrue(out.is(PetroItems.MICROCHIP) && out.getCount() == 8, "Microchips: " + out);
 			helper.assertTrue(station.tanks().input(0).millibuckets() == 950,
 					"Nitric acid left: " + station.tanks().input(0).millibuckets());
 		});

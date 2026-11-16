@@ -107,7 +107,21 @@ class WalnutWorldgenTests(unittest.TestCase):
             return Fraction(value["numerator"], value["denominator"])
         for old, new in walnut_data.ALIASES.items():
             self.assertEqual(price(old), price(new))
-        self.assertEqual(price("jugcraft:walnut_husk"), price("minecraft:brown_dye"))
+        dye = read(DATA/"recipe/walnut_husk_dye.json")
+        self.assertEqual("minecraft:crafting_shapeless", dye["type"])
+        self.assertEqual(["jugcraft:walnut_husk"], dye["ingredients"])
+        self.assertEqual({"id": "minecraft:brown_dye"}, dye["result"])
+        # This conversion only consumes husks. Other real dye recipes can lower
+        # brown dye's price; equality would incorrectly require a reverse route.
+        self.assertLessEqual(price(dye["result"]["id"]), price(dye["ingredients"][0]))
+        petals = read(DATA/"recipe/jugtania/dye_brown.json")
+        self.assertEqual("minecraft:crafting_shapeless", petals["type"])
+        self.assertEqual(["#jugcraft:jugtania_petals/brown"], petals["ingredients"])
+        self.assertEqual({"id": "minecraft:brown_dye"}, petals["result"])
+        alternatives = read(DATA/"tags/item/jugtania_petals/brown.json")["values"]
+        self.assertEqual({"jugcraft:jugtania_brown_petal", "jugcraft:jugtania_brown_mushroom"}, set(alternatives))
+        self.assertLessEqual(price("minecraft:brown_dye"), min(price(item) for item in alternatives))
+        self.assertEqual("recipe jugcraft:jugtania/dye_brown", records["minecraft:brown_dye"]["source"])
         self.assertEqual(price("jugcraft:walnut_planks"), 8)
 
 

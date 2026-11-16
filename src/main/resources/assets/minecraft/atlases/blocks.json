@@ -37130,6 +37130,14 @@
     {
       "type": "minecraft:single",
       "resource": "jugcraft:newest/windowworks/item/window_half_bar_base"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "jugcraft:newest/doorworks/item/cherry_waffle_door"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "jugcraft:newest/supps/block/lumisene/lumisene"
     }
   ]
 }

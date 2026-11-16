@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " P ",
+    "CNC",
+    " D "
+  ],
+  "key": {
+    "P": "minecraft:paper",
+    "C": "jugcraft:forbidden_arcane_crystal",
+    "N": "minecraft:nether_star",
+    "D": "minecraft:dragon_breath"
+  },
+  "result": {
+    "id": "jugcraft:forbidden_divine_pact",
+    "count": 1
+  }
+}

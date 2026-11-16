@@ -435,7 +435,11 @@
       "io.github.jimbozoomer.jugcraft.test.PharmacologySterileGameTests",
       "io.github.jimbozoomer.jugcraft.test.PharmacologyPrecisionGameTests",
       "io.github.jimbozoomer.jugcraft.test.PharmacologyReleaseGameTests",
-      "io.github.jimbozoomer.jugcraft.test.PharmacologyPsychedelicGameTests"
+      "io.github.jimbozoomer.jugcraft.test.PharmacologyPsychedelicGameTests",
+      "local.peepo.CraftingTablePlanningGameTests",
+      "io.github.jimbozoomer.jugcraft.test.ComponentYieldGameTests",
+      "io.github.jimbozoomer.jugcraft.building.OwnerTwigsWorldGameTests",
+      "io.github.jimbozoomer.jugcraft.test.AcquisitionRepairGameTests"
     ],
     "jei_mod_plugin": [
       "io.github.jimbozoomer.jugcraft.test.JeiStationClientGameTests$WithJei$Probe"
@@ -760,13 +764,15 @@
       "io.github.jimbozoomer.jugcraft.test.PharmacologyPrecisionClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.PharmacologySterileClientGameTests",
       "io.github.jimbozoomer.jugcraft.test.PharmacologyClientGameTests",
-      "io.github.jimbozoomer.jugcraft.test.PharmacologyFactoryClientGameTests"
+      "io.github.jimbozoomer.jugcraft.test.PharmacologyFactoryClientGameTests",
+      "io.github.jimbozoomer.jugcraft.test.OwnerTooltipClientGameTests"
     ]
   },
   "depends": {
     "jugcraft": "*"
   },
   "mixins": [
-    "jugcraft-test.mixins.json"
+    "jugcraft-test.mixins.json",
+    "jugcraft-test.client.mixins.json"
   ]
 }

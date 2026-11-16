@@ -4,6 +4,7 @@ Original models and pixel data are retained. Only resource/registry references
 and the item-definition schema are adapted; no supplied program is executed.
 """
 from pathlib import Path
+from copy import deepcopy
 import json
 import shutil
 from menagerie_content import read
@@ -39,10 +40,19 @@ def repair_unused_faces(data):
     return data
 
 
-def write(path, data):
-    if '/loot_table/' in str(path).replace('\\','/'):
-        from menagerie_data import loot as native_loot
-        data=native_loot(data)
+def native_model(path, data):
+    """Preserve authored geometry with bounded, deterministic native adaptations."""
+    model_path = str(path).replace('\\', '/')
+    if any(model_path.endswith('/models/' + ref) for ref in (
+            'newest/fenceworks/block/parent/grass_topped_wall_triple.json',
+            'newest/twigworks/block/template_paper_lantern.json',
+            'newest/twigworks/block/template_paper_lantern_hanging.json')):
+        # Main's exact repair records own these surfaces. Reusing that definition
+        # keeps native import and final atlas finishing idempotent, not cumulative.
+        from imported_geometry_repairs import records, repair_elements
+        ref = model_path.rsplit('/models/', 1)[1]
+        data = deepcopy(data)
+        data['elements'] = repair_elements(ref, data['elements'], records()[ref])
     if '/models/newest/homeworks/' in str(path).replace('\\','/'): data=repair_unused_faces(data)
     # Repair four supplied faces which otherwise sample adjacent sprites in the atlas.
     if any(str(path).replace('\\', '/').endswith('/models/newest/' + name + '.json') for name in (
@@ -50,6 +60,14 @@ def write(path, data):
         'lightworks/block/upgraded_torch', 'lightworks/block/upgraded_torch_wall')):
         from model_writer import fit_uvs
         fit_uvs(data.get('elements', []))
+    return data
+
+
+def write(path, data):
+    if '/loot_table/' in str(path).replace('\\','/'):
+        from menagerie_data import loot as native_loot
+        data=native_loot(data)
+    data = native_model(path, data)
     path.parent.mkdir(parents=True, exist_ok=True)
     # This large runtime descriptor exceeds GitHub's file limit when indented.
     # Keep the identical JSON data compact in both standalone and shared generation.
@@ -193,6 +211,7 @@ def generate(writer=write):
     def writer(path, data):
         # 26.3 uses condition/modifier codecs, including for manually assembled
         # architecture drops. Convert once at the common output boundary.
+        data = native_model(path, data)
         original_writer(path, native_loot(data) if '/loot_table/' in path.as_posix() else data)
     blocks, items, language, omitted, provenance = {}, {}, {}, [], []
     holiday_behaviors = read(CAT / 'holiday-behaviors.json')['entries']
@@ -551,8 +570,11 @@ def generate(writer=write):
                 entries += ['jugcraft:twigworks_polished_calcite', 'jugcraft:stoneworks_polished_calcite']
             merge_tag(target / rel, entries, writer)
         prune_unregistered(prefix, allowed)
+        changes = 'Native block behaviors; remapped identifiers; original model coordinates and texture bytes retained'
+        if prefix == 'twigworks':
+            changes += '; paper-lantern inverted inner cubes unfolded into six inward-facing planes with identical surface positions and UV mapping'
         provenance.append({'folder': folder, 'namespace': ns, 'blocks': sum(d['collection'] == prefix for d in blocks.values()), 'items': sum(d['collection'] == prefix for d in items.values()), 'runtime': 'newest/' + prefix,
-                           'changes': 'Native block behaviors; remapped identifiers; original model coordinates and texture bytes retained'})
+                           'changes': changes})
     painting_root = SOURCE / 'painting'
     paintings = []
     labels = read(painting_root / 'assets/mcwpaintings/lang/en_us.json')
@@ -570,10 +592,10 @@ def generate(writer=write):
         copy(painting_root / 'assets/mcwpaintings/textures/painting' / (source.stem + '.png'), ASSET / 'textures/painting/newest' / (source.stem + '.png'))
         paintings.append('jugcraft:' + ident)
     merge_tag(RES / 'data/minecraft/tags/painting_variant/placeable.json', paintings, writer)
-    # Property combinations originate in sets; serialize states deterministically.
-    for spec in blocks.values():
-        if 'shapes' in spec:
-            spec['shapes'] = dict(sorted(spec['shapes'].items()))
+    # Multipart properties arrive as sets; their iteration order must not leak
+    # into the compact descriptor in either shared or standalone generation.
+    from newest_shapes import order_shape_keys
+    order_shape_keys(blocks)
     writer(RES / 'jugcraft/newest_building.json', {'blocks': blocks, 'items': items, 'paintings': paintings})
     lang_path = ASSET / 'lang/en_us.json'
     merged = read(lang_path); merged.update(language)

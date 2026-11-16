@@ -50,8 +50,12 @@ class AcquisitionRecipesTests(unittest.TestCase):
         self.assertEqual('jugcraft:botanical_water_shaped', rows['jugtania/water_rod']['type'])
         for part in ('helmet', 'chestplate', 'leggings', 'boots'):
             self.assertEqual('jugcraft:botanical_armor_upgrade', rows['jugtania/terrasteel_' + part]['type'])
-        self.assertEqual(['jugcraft:supps_trapped_present', 'minecraft:red_dye'],
-                         rows['acquisition/supps_trapped_present_red']['ingredients'])
+        for name, row in rows.items():
+            self.assertFalse(any(isinstance(value, str) and value.startswith((
+                'jugcraft:supps_present', 'jugcraft:supps_trapped_present'))
+                for value in row.get('ingredients', [])), name + ': ordinary crafting loses stored components')
+        conversion = ROOT / 'src/main/resources/data/jugcraft/recipe/acquisition/present_conversion.json'
+        self.assertEqual({'type': 'jugcraft:supps_present_conversion'}, json.loads(conversion.read_text()))
 
 
 if __name__ == '__main__':

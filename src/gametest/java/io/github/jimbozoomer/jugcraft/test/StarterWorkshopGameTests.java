@@ -126,7 +126,7 @@ public class StarterWorkshopGameTests {
 
     @GameTest(structure=ARENA) public void starterWorkshopEveryManualReceiptMatchesPoweredYieldAndApprovedWorkTime(GameTestHelper h) {
         var be=place(h,0); var player=worker(h,be);
-        h.assertTrue(be.catalog().entries().size()==9,"Exactly the nine approved manual recipes");
+        h.assertTrue(be.catalog().entries().size()==12,"Exactly the twelve approved manual recipes, including all four circuit choices");
         for (var entry:be.catalog().entries()) {
             var r=entry.recipe(); be.select(entry.id()); be.setItem(5,ItemStack.EMPTY);
             for(int i=0;i<3;i++) be.setItem(i,ItemStack.EMPTY);

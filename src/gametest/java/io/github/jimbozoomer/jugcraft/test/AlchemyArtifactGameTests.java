@@ -39,6 +39,7 @@ public class AlchemyArtifactGameTests {
         var connection=new Connection(PacketFlow.SERVERBOUND);
         new EmbeddedChannel(connection);
         h.getLevel().getServer().getPlayerList().placeNewPlayer(connection,p,cookie);
+        TestPlayers.track(h, p);
         p.setGameMode(GameType.SURVIVAL);
         h.assertTrue(!p.isCreative()&&!p.isSpectator()&&!p.getAbilities().mayfly,"Fixture starts as an ordinary grounded survival player");
         var at=h.absolutePos(new BlockPos(4,2,6));p.snapTo(at.getX()+.5,at.getY(),at.getZ()+.5,180,0);

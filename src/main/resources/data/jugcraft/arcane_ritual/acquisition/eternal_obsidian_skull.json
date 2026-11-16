@@ -1,0 +1,25 @@
+{
+  "forge_tier": 3,
+  "main_ingredient": {
+    "item": "jugcraft:forbidden_obsidian_skull"
+  },
+  "inputs": [
+    {
+      "amount": 1,
+      "ingredient": {
+        "item": "jugcraft:forbidden_eternal_stella"
+      }
+    }
+  ],
+  "essences": {
+    "aureal": 1200,
+    "blood": 600,
+    "experience": 600,
+    "souls": 9
+  },
+  "magic_circle": "jugcraft:forbidden_create_item",
+  "result": {
+    "type": "jugcraft:forbidden_create_item",
+    "result_item": "jugcraft:forbidden_eternal_obsidian_skull"
+  }
+}

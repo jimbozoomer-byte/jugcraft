@@ -48,4 +48,3 @@ final class NpcPlayerSkins {
 		state.slim = skin.model() == PlayerModelType.SLIM;
 	}
 }
-
