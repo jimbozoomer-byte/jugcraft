@@ -13,6 +13,8 @@
     "PoweredEquipmentEquipMixin",
     "DrillMiningServerMixin",
     "PoweredUpgradeRecipeMixin",
+    "ClimateParameterListAccess",
+    "ClimateRTreeAccess",
     "ArcaneBucketRemainderMixin",
     "ArcaneDroppedMatterMixin",
     "ArcaneAquaticMiningMixin",

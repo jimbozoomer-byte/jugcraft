@@ -15,6 +15,7 @@
   "license": "MIT",
   "icon": "assets/jugcraft/icon.png",
   "environment": "*",
+  "accessWidener": "jugcraft.accesswidener",
   "entrypoints": {
     "preLaunch": [
       "io.github.jimbozoomer.jugcraft.update.UpdateStartupGuard"

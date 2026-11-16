@@ -14,6 +14,12 @@ The chemistry/pharmacy manufacturing foundation, existing drug roster, shared st
 - [ ] **Implement Clockwork Elf trading and its later progression.** Define the actual offers, prices, rewards, advanced materials/formulas and any realm-linked pharmacy/manufacturing steps from the existing tree. Make the rewards useful and the costs conserved; keep the ordinary chemistry tree, first medicines, alcohol upgrades and basic Ketamine scouting reachable without elven goods. Record any additional endgame branch explicitly before marking it complete.
 - [ ] **Review full progression and balance.** Play through acquisition, cultivation, machine/tool gates and complete manufacturing chains; tune ingredient/packaging costs, long benefits, XR/patch tradeoffs, premium alcohol grades, family replacement/tolerance, combination strain and high-strain penalties. Retain the positive-first design and no injury/combat-debuff upkeep.
 - [ ] **Close pharmacy integration and validation gaps.** Reconcile current player-facing guides with the final soft-threshold/decaying-strain rules, complete full generated-data/recipe/economy and CI checks, test optional integrations absent and external shader packs, and run a representative performance check plus a human two-client dedicated-server session. Cover private cues, simultaneous machine/trade use, conservation, save migration, reconnect/death and the future dimension's return paths. Earlier automated/native checks remain evidence of their stated scope, not these missing checks.
+## November 15 — current server world climate
+
+- [x] Implement opt-in persistent climate wrapper and preserve procedural valley state.
+- [x] Prepare narrow metadata migration around the existing town origin, preserving existing chunks.
+- [x] Focused candidate validation passed: 5 server checks, 7,928,159 pure assertions, existing-save migration client test and 23 Python checks.
+- [ ] Finish reviewed release; obtain restart approval, warn players for 30 seconds, activate on the current world and verify future generation. [Record](features/existing-world-climate.md).
 
 ## November 3 — raider crews, companion stable, placed-food remodels, Thanksgiving decor (local, Claude Code)
 

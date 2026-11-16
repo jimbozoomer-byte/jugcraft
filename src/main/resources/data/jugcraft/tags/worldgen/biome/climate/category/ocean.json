@@ -1,0 +1,10 @@
+{
+  "values": [
+    "jugcraft:ice_sheet",
+    "minecraft:cold_ocean",
+    "minecraft:frozen_ocean",
+    "minecraft:lukewarm_ocean",
+    "minecraft:ocean",
+    "minecraft:warm_ocean"
+  ]
+}
