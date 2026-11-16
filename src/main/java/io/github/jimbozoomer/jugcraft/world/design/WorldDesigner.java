@@ -33,11 +33,9 @@ import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 public final class WorldDesigner {
 	private WorldDesigner() { }
 	public static void register() {
-		Registry.register(BuiltInRegistries.BIOME_SOURCE, Jugcraft.id("climate"), io.github.jimbozoomer.jugcraft.world.climate.ClimateBiomeSource.CODEC);
-		io.github.jimbozoomer.jugcraft.world.climate.ClimateWorlds.register();
 		Registry.register(BuiltInRegistries.DENSITY_FUNCTION_TYPE, Jugcraft.id("design_density"), DesignDensity.CODEC);
 		Registry.register(BuiltInRegistries.BIOME_SOURCE, Jugcraft.id("design"), DesignBiomeSource.CODEC);
-		// Climate bands over any base source (world/climate). No shipped world preset uses this type yet.
+		// Shared climate codec for authored worlds and the explicit existing-world migration.
 		Registry.register(BuiltInRegistries.BIOME_SOURCE, Jugcraft.id("climate"), io.github.jimbozoomer.jugcraft.world.climate.ClimateBiomeSource.CODEC);
 		io.github.jimbozoomer.jugcraft.world.climate.ClimateWorlds.register();
 		Registry.register(BuiltInRegistries.STRUCTURE_PLACEMENT, Jugcraft.id("design_pin"), DesignPlacement.CODEC);
