@@ -9893,6 +9893,34 @@
         {
           "items": [
             [
+              "jugcraft:pharmaceutical_starch",
+              2
+            ],
+            [
+              "minecraft:redstone",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:paracetamol",
+              4
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
               "jugcraft:borax",
               1
             ]
@@ -10356,7 +10384,7 @@
               4
             ],
             [
-              "minecraft:glass_bottle",
+              "jugcraft:pharmaceutical_starch",
               1
             ]
           ],
@@ -11525,6 +11553,342 @@
             ]
           ],
           "ticks": 80,
+          "tool": "",
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "jugcraft:pharmaceutical_starch",
+              2
+            ],
+            [
+              "minecraft:sugar",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:pharmaceutical_base",
+              4
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "jugcraft:sterile_carrier",
+              2
+            ],
+            [
+              "jugcraft:azure_culture_starter",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:culture_feed",
+              4
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "jugcraft:sterile_carrier",
+              2
+            ],
+            [
+              "minecraft:quartz",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:lidocaine_stock",
+              4
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "jugcraft:pharmaceutical_base",
+              2
+            ],
+            [
+              "minecraft:redstone",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:adrenaline_stock",
+              4
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "minecraft:kelp",
+              4
+            ],
+            [
+              "minecraft:lapis_lazuli",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:salbutamol_stock",
+              4
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "minecraft:beetroot",
+              4
+            ],
+            [
+              "minecraft:amethyst_shard",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:redleaf_medical_stock",
+              4
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "jugcraft:pharmaceutical_base",
+              2
+            ],
+            [
+              "minecraft:quartz",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:naloxone_stock",
+              4
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "jugcraft:pharmaceutical_base",
+              4
+            ],
+            [
+              "minecraft:oak_log",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:organic_process_stock",
+              500
+            ]
+          ],
+          "results": [],
+          "ticks": 200,
+          "tool": "",
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "jugcraft:dreamcap",
+              4
+            ],
+            [
+              "jugcraft:mycelium_catalyst",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:dream_concentrate",
+              4
+            ]
+          ],
+          "ticks": 180,
+          "tool": "",
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "jugcraft:prism_cactus_fruit",
+              4
+            ],
+            [
+              "minecraft:amethyst_shard",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:prismatic_concentrate",
+              4
+            ]
+          ],
+          "ticks": 180,
+          "tool": "",
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "jugcraft:dream_concentrate",
+              4
+            ],
+            [
+              "minecraft:redstone",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:psilocybin_stock",
+              4
+            ]
+          ],
+          "ticks": 180,
+          "tool": "",
+          "retained_inputs": []
+        },
+        {
+          "items": [
+            [
+              "jugcraft:prismatic_concentrate",
+              4
+            ],
+            [
+              "minecraft:quartz",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:mescaline_stock",
+              4
+            ]
+          ],
+          "ticks": 180,
           "tool": "",
           "retained_inputs": []
         }
@@ -13272,6 +13636,54 @@
           "ticks": 400,
           "tool": "",
           "energy_per_tick": 8
+        },
+        {
+          "items": [
+            [
+              "jugcraft:culture_feed",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:antibiotic_broth",
+              500
+            ]
+          ],
+          "results": [],
+          "ticks": 400,
+          "tool": "",
+          "energy_per_tick": 48
+        },
+        {
+          "items": [
+            [
+              "jugcraft:beverage_culture_pack",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:grain_mash",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:beverage_wash",
+              1000
+            ]
+          ],
+          "results": [],
+          "ticks": 400,
+          "tool": "",
+          "energy_per_tick": 48
         }
       ]
     },
@@ -13329,6 +13741,54 @@
           "ticks": 400,
           "tool": "",
           "energy_per_tick": 7
+        },
+        {
+          "items": [
+            [
+              "jugcraft:culture_feed",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:antibiotic_broth",
+              500
+            ]
+          ],
+          "results": [],
+          "ticks": 400,
+          "tool": "",
+          "energy_per_tick": 39
+        },
+        {
+          "items": [
+            [
+              "jugcraft:beverage_culture_pack",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:grain_mash",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:beverage_wash",
+              1000
+            ]
+          ],
+          "results": [],
+          "ticks": 400,
+          "tool": "",
+          "energy_per_tick": 39
         }
       ]
     },
@@ -14440,6 +14900,174 @@
           "ticks": 320,
           "tool": "",
           "energy_per_tick": 87
+        },
+        {
+          "items": [
+            [
+              "jugcraft:methylphenidate_reagent_blend",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:organic_process_stock",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:methylphenidate_stock",
+              4
+            ]
+          ],
+          "ticks": 240,
+          "tool": "jugcraft:precision_process_module",
+          "energy_per_tick": 87
+        },
+        {
+          "items": [
+            [
+              "jugcraft:amphetamine_reagent_blend",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:organic_process_stock",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:amphetamine_stock",
+              4
+            ]
+          ],
+          "ticks": 240,
+          "tool": "jugcraft:precision_process_module",
+          "energy_per_tick": 87
+        },
+        {
+          "items": [
+            [
+              "jugcraft:modafinil_reagent_blend",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:organic_process_stock",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:modafinil_stock",
+              4
+            ]
+          ],
+          "ticks": 240,
+          "tool": "jugcraft:precision_process_module",
+          "energy_per_tick": 87
+        },
+        {
+          "items": [
+            [
+              "jugcraft:ketamine_reagent_blend",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:organic_process_stock",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:ketamine_stock",
+              4
+            ]
+          ],
+          "ticks": 240,
+          "tool": "jugcraft:precision_process_module",
+          "energy_per_tick": 87
+        },
+        {
+          "items": [
+            [
+              "jugcraft:fentanyl_reagent_blend",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:organic_process_stock",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:fentanyl_stock",
+              4
+            ]
+          ],
+          "ticks": 240,
+          "tool": "jugcraft:precision_process_module",
+          "energy_per_tick": 87
+        },
+        {
+          "items": [
+            [
+              "jugcraft:perception_substrate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:organic_process_stock",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:lsd_stock",
+              4
+            ]
+          ],
+          "ticks": 240,
+          "tool": "jugcraft:precision_process_module",
+          "energy_per_tick": 87
+        },
+        {
+          "items": [
+            [
+              "jugcraft:oneiric_stock",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:organic_process_stock",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:dmt_stock",
+              4
+            ]
+          ],
+          "ticks": 240,
+          "tool": "jugcraft:precision_process_module",
+          "energy_per_tick": 87
         }
       ]
     },
@@ -15059,6 +15687,29 @@
           "ticks": 160,
           "tool": "",
           "energy_per_tick": 32
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:beverage_wash",
+              1000
+            ]
+          ],
+          "fluid_results": [
+            [
+              "jugcraft:refined_beverage_stock",
+              500
+            ],
+            [
+              "jugcraft:stillage",
+              500
+            ]
+          ],
+          "results": [],
+          "ticks": 240,
+          "tool": "",
+          "energy_per_tick": 64
         }
       ]
     },
@@ -17652,6 +18303,2744 @@
           "ticks": 160,
           "tool": "",
           "energy_per_tick": 64
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:laboratory_analyzer",
+      "type": "laboratory_analyzer",
+      "recipes": [
+        {
+          "items": [
+            [
+              "jugcraft:caffeine_drink",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:caffeine_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "energy_per_tick": 32
+        },
+        {
+          "items": [
+            [
+              "jugcraft:aspirin",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:aspirin_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "energy_per_tick": 32
+        },
+        {
+          "items": [
+            [
+              "jugcraft:paracetamol",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:paracetamol_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "energy_per_tick": 32
+        },
+        {
+          "items": [
+            [
+              "jugcraft:rehydration_salts",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:rehydration_salts_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "energy_per_tick": 32
+        },
+        {
+          "items": [
+            [
+              "jugcraft:activated_charcoal",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:activated_charcoal_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "energy_per_tick": 32
+        },
+        {
+          "items": [
+            [
+              "jugcraft:stimulant",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:stimulant_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "energy_per_tick": 32
+        },
+        {
+          "items": [
+            [
+              "jugcraft:antibiotic_extract",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:penicillin_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "energy_per_tick": 32
+        },
+        {
+          "items": [
+            [
+              "jugcraft:lidocaine_stock",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:lidocaine_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "energy_per_tick": 32
+        },
+        {
+          "items": [
+            [
+              "jugcraft:adrenaline_stock",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:adrenaline_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "energy_per_tick": 32
+        },
+        {
+          "items": [
+            [
+              "jugcraft:salbutamol_stock",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:salbutamol_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "energy_per_tick": 32
+        },
+        {
+          "items": [
+            [
+              "jugcraft:redleaf_medical_stock",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:morphine_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "energy_per_tick": 32
+        },
+        {
+          "items": [
+            [
+              "jugcraft:naloxone_stock",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:naloxone_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "energy_per_tick": 32
+        },
+        {
+          "items": [
+            [
+              "jugcraft:methylphenidate_active",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:methylphenidate_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "jugcraft:precision_process_module",
+          "energy_per_tick": 48
+        },
+        {
+          "items": [
+            [
+              "jugcraft:amphetamine_active",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:amphetamine_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "jugcraft:precision_process_module",
+          "energy_per_tick": 48
+        },
+        {
+          "items": [
+            [
+              "jugcraft:modafinil_active",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:modafinil_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "jugcraft:precision_process_module",
+          "energy_per_tick": 48
+        },
+        {
+          "items": [
+            [
+              "jugcraft:ketamine_active",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:ketamine_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "jugcraft:precision_process_module",
+          "energy_per_tick": 48
+        },
+        {
+          "items": [
+            [
+              "jugcraft:fentanyl_active",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:fentanyl_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "jugcraft:precision_process_module",
+          "energy_per_tick": 48
+        },
+        {
+          "items": [
+            [
+              "jugcraft:refined_spirits_concentrate",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:refined_spirits_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "energy_per_tick": 32
+        },
+        {
+          "items": [
+            [
+              "jugcraft:reserve_whiskey_concentrate",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:reserve_whiskey_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "energy_per_tick": 32
+        },
+        {
+          "items": [
+            [
+              "jugcraft:high_proof_spirits_concentrate",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:high_proof_spirits_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 160,
+          "tool": "jugcraft:precision_process_module",
+          "energy_per_tick": 32
+        },
+        {
+          "items": [
+            [
+              "jugcraft:caffeine_xr_core",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:caffeine_xr_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:release_control_die",
+          "energy_per_tick": 96
+        },
+        {
+          "items": [
+            [
+              "jugcraft:methylphenidate_xr_core",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:methylphenidate_xr_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:release_control_die",
+          "energy_per_tick": 96
+        },
+        {
+          "items": [
+            [
+              "jugcraft:amphetamine_xr_core",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:amphetamine_xr_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:release_control_die",
+          "energy_per_tick": 96
+        },
+        {
+          "items": [
+            [
+              "jugcraft:modafinil_xr_core",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:modafinil_xr_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:release_control_die",
+          "energy_per_tick": 96
+        },
+        {
+          "items": [
+            [
+              "jugcraft:fentanyl_patch_stock",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:fentanyl_patch_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:release_control_die",
+          "energy_per_tick": 96
+        },
+        {
+          "items": [
+            [
+              "jugcraft:masterwork_reserve_concentrate",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:masterwork_reserve_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:precision_process_module",
+          "energy_per_tick": 96
+        },
+        {
+          "items": [
+            [
+              "jugcraft:thc_active",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:thc_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 180,
+          "tool": "",
+          "energy_per_tick": 48
+        },
+        {
+          "items": [
+            [
+              "jugcraft:psilocybin_active",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:psilocybin_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 180,
+          "tool": "",
+          "energy_per_tick": 48
+        },
+        {
+          "items": [
+            [
+              "jugcraft:mescaline_active",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:mescaline_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 180,
+          "tool": "",
+          "energy_per_tick": 48
+        },
+        {
+          "items": [
+            [
+              "jugcraft:lsd_active",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:lsd_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 180,
+          "tool": "jugcraft:precision_process_module",
+          "energy_per_tick": 48
+        },
+        {
+          "items": [
+            [
+              "jugcraft:dmt_active",
+              1
+            ],
+            [
+              "jugcraft:blank_formula_plate",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:dmt_formula_plate",
+              1
+            ]
+          ],
+          "ticks": 180,
+          "tool": "jugcraft:precision_process_module",
+          "energy_per_tick": 48
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:pharmaceutical_separator",
+      "type": "pharmaceutical_separator",
+      "recipes": [
+        {
+          "items": [
+            [
+              "jugcraft:coffee_beans",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:caffeine_concentrate",
+              8
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "energy_per_tick": 48
+        },
+        {
+          "items": [
+            [
+              "minecraft:cocoa_beans",
+              8
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:caffeine_concentrate",
+              4
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "energy_per_tick": 48
+        },
+        {
+          "items": [
+            [
+              "jugcraft:willow_log",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:salicylic_acid",
+              4
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "energy_per_tick": 48
+        },
+        {
+          "items": [
+            [
+              "minecraft:birch_log",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:salicylic_acid",
+              2
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "energy_per_tick": 48
+        },
+        {
+          "items": [
+            [
+              "minecraft:potato",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:pharmaceutical_starch",
+              8
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "energy_per_tick": 48
+        },
+        {
+          "items": [
+            [
+              "jugcraft:corn",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:pharmaceutical_starch",
+              4
+            ]
+          ],
+          "ticks": 160,
+          "tool": "",
+          "energy_per_tick": 48
+        },
+        {
+          "items": [],
+          "fluids": [
+            [
+              "jugcraft:antibiotic_broth",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:antibiotic_extract",
+              4
+            ]
+          ],
+          "ticks": 200,
+          "tool": "",
+          "energy_per_tick": 48
+        },
+        {
+          "items": [
+            [
+              "jugcraft:methylphenidate_stock",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:methylphenidate_active",
+              4
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:precision_process_module",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [
+            [
+              "jugcraft:amphetamine_stock",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:amphetamine_active",
+              4
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:precision_process_module",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [
+            [
+              "jugcraft:modafinil_stock",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:modafinil_active",
+              4
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:precision_process_module",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [
+            [
+              "jugcraft:ketamine_stock",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:ketamine_active",
+              4
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:precision_process_module",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [
+            [
+              "jugcraft:fentanyl_stock",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:fentanyl_active",
+              4
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:precision_process_module",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [
+            [
+              "minecraft:sugar",
+              2
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:refined_beverage_stock",
+              1000
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:refined_spirits_concentrate",
+              8
+            ]
+          ],
+          "ticks": 200,
+          "tool": "",
+          "energy_per_tick": 48
+        },
+        {
+          "items": [
+            [
+              "jugcraft:reserve_whiskey_concentrate",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:refined_beverage_stock",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:high_proof_spirits_concentrate",
+              4
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:precision_process_module",
+          "energy_per_tick": 80
+        },
+        {
+          "items": [
+            [
+              "jugcraft:masterwork_blend",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "jugcraft:refined_beverage_stock",
+              1000
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:masterwork_unconditioned_concentrate",
+              4
+            ]
+          ],
+          "ticks": 300,
+          "tool": "jugcraft:precision_process_module",
+          "energy_per_tick": 128
+        },
+        {
+          "items": [
+            [
+              "jugcraft:botanical_resin",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:thc_stock",
+              4
+            ]
+          ],
+          "ticks": 180,
+          "tool": "",
+          "energy_per_tick": 48
+        },
+        {
+          "items": [
+            [
+              "jugcraft:thc_stock",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:thc_active",
+              4
+            ]
+          ],
+          "ticks": 180,
+          "tool": "",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [
+            [
+              "jugcraft:psilocybin_stock",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:psilocybin_active",
+              4
+            ]
+          ],
+          "ticks": 180,
+          "tool": "",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [
+            [
+              "jugcraft:mescaline_stock",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:mescaline_active",
+              4
+            ]
+          ],
+          "ticks": 180,
+          "tool": "",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [
+            [
+              "jugcraft:lsd_stock",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:lsd_active",
+              4
+            ]
+          ],
+          "ticks": 180,
+          "tool": "jugcraft:precision_process_module",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [
+            [
+              "jugcraft:dmt_stock",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:dmt_active",
+              4
+            ]
+          ],
+          "ticks": 180,
+          "tool": "jugcraft:precision_process_module",
+          "energy_per_tick": 64
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:formulation_press",
+      "type": "formulation_press",
+      "recipes": [
+        {
+          "items": [
+            [
+              "jugcraft:caffeine_concentrate",
+              8
+            ],
+            [
+              "minecraft:sugar",
+              4
+            ],
+            [
+              "minecraft:glass_bottle",
+              8
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              2000
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:caffeine_drink",
+              8
+            ]
+          ],
+          "ticks": 160,
+          "tool": "jugcraft:caffeine_formula_plate",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [
+            [
+              "jugcraft:salicylic_acid",
+              4
+            ],
+            [
+              "jugcraft:cider_vinegar",
+              2
+            ],
+            [
+              "jugcraft:pharmaceutical_starch",
+              2
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ],
+            [
+              "jugcraft:sulfuric_acid",
+              50
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:aspirin",
+              8
+            ]
+          ],
+          "ticks": 160,
+          "tool": "jugcraft:aspirin_formula_plate",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [
+            [
+              "jugcraft:pharmaceutical_base",
+              2
+            ],
+            [
+              "jugcraft:pharmaceutical_starch",
+              2
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:paracetamol",
+              8
+            ]
+          ],
+          "ticks": 160,
+          "tool": "jugcraft:paracetamol_formula_plate",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [
+            [
+              "jugcraft:salt",
+              4
+            ],
+            [
+              "minecraft:sugar",
+              2
+            ],
+            [
+              "minecraft:paper",
+              8
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              2000
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:rehydration_salts",
+              8
+            ]
+          ],
+          "ticks": 160,
+          "tool": "jugcraft:rehydration_salts_formula_plate",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [
+            [
+              "minecraft:charcoal",
+              4
+            ],
+            [
+              "minecraft:redstone",
+              2
+            ],
+            [
+              "jugcraft:pharmaceutical_starch",
+              2
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:activated_charcoal",
+              8
+            ]
+          ],
+          "ticks": 160,
+          "tool": "jugcraft:activated_charcoal_formula_plate",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [
+            [
+              "jugcraft:caffeine_concentrate",
+              4
+            ],
+            [
+              "jugcraft:pharmaceutical_base",
+              2
+            ],
+            [
+              "jugcraft:pharmaceutical_starch",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ],
+            [
+              "jugcraft:bioethanol",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:stimulant",
+              4
+            ]
+          ],
+          "ticks": 160,
+          "tool": "jugcraft:stimulant_formula_plate",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [
+            [
+              "jugcraft:methylphenidate_active",
+              2
+            ],
+            [
+              "jugcraft:pharmaceutical_starch",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:methylphenidate",
+              4
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:methylphenidate_formula_plate",
+          "energy_per_tick": 96
+        },
+        {
+          "items": [
+            [
+              "jugcraft:amphetamine_active",
+              2
+            ],
+            [
+              "jugcraft:pharmaceutical_starch",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:amphetamine",
+              4
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:amphetamine_formula_plate",
+          "energy_per_tick": 96
+        },
+        {
+          "items": [
+            [
+              "jugcraft:modafinil_active",
+              2
+            ],
+            [
+              "jugcraft:pharmaceutical_starch",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:modafinil",
+              4
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:modafinil_formula_plate",
+          "energy_per_tick": 96
+        },
+        {
+          "items": [
+            [
+              "jugcraft:refined_spirits_concentrate",
+              1
+            ],
+            [
+              "minecraft:sugar",
+              1
+            ],
+            [
+              "minecraft:glass_bottle",
+              4
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:moonshine",
+              4
+            ]
+          ],
+          "ticks": 160,
+          "tool": "jugcraft:refined_spirits_formula_plate",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [
+            [
+              "jugcraft:refined_spirits_concentrate",
+              4
+            ],
+            [
+              "minecraft:sugar",
+              1
+            ],
+            [
+              "minecraft:glass_bottle",
+              4
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:refined_spirits",
+              4
+            ]
+          ],
+          "ticks": 160,
+          "tool": "jugcraft:refined_spirits_formula_plate",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [
+            [
+              "jugcraft:reserve_whiskey_concentrate",
+              4
+            ],
+            [
+              "minecraft:sugar",
+              1
+            ],
+            [
+              "minecraft:glass_bottle",
+              4
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:reserve_whiskey",
+              4
+            ]
+          ],
+          "ticks": 160,
+          "tool": "jugcraft:reserve_whiskey_formula_plate",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [
+            [
+              "jugcraft:high_proof_spirits_concentrate",
+              4
+            ],
+            [
+              "minecraft:sugar",
+              1
+            ],
+            [
+              "minecraft:glass_bottle",
+              4
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:high_proof_spirits",
+              4
+            ]
+          ],
+          "ticks": 160,
+          "tool": "jugcraft:high_proof_spirits_formula_plate",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [
+            [
+              "jugcraft:caffeine_xr_core",
+              4
+            ],
+            [
+              "jugcraft:empty_pharmacy_capsule",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:caffeine_xr",
+              4
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:caffeine_xr_formula_plate",
+          "energy_per_tick": 96
+        },
+        {
+          "items": [
+            [
+              "jugcraft:methylphenidate_xr_core",
+              4
+            ],
+            [
+              "jugcraft:empty_pharmacy_capsule",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:methylphenidate_xr",
+              4
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:methylphenidate_xr_formula_plate",
+          "energy_per_tick": 96
+        },
+        {
+          "items": [
+            [
+              "jugcraft:amphetamine_xr_core",
+              4
+            ],
+            [
+              "jugcraft:empty_pharmacy_capsule",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:amphetamine_xr",
+              4
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:amphetamine_xr_formula_plate",
+          "energy_per_tick": 96
+        },
+        {
+          "items": [
+            [
+              "jugcraft:modafinil_xr_core",
+              4
+            ],
+            [
+              "jugcraft:empty_pharmacy_capsule",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:modafinil_xr",
+              4
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:modafinil_xr_formula_plate",
+          "energy_per_tick": 96
+        },
+        {
+          "items": [
+            [
+              "jugcraft:release_matrix_blend",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:release_matrix",
+              4
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:release_control_die",
+          "energy_per_tick": 96
+        },
+        {
+          "items": [
+            [
+              "jugcraft:release_matrix",
+              4
+            ],
+            [
+              "jugcraft:silicone",
+              2
+            ],
+            [
+              "minecraft:amethyst_shard",
+              1
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:advanced_release_matrix",
+              4
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:release_control_die",
+          "energy_per_tick": 96
+        },
+        {
+          "items": [
+            [
+              "jugcraft:pharmaceutical_starch",
+              2
+            ],
+            [
+              "minecraft:paper",
+              2
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:empty_pharmacy_capsule",
+              8
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:release_control_die",
+          "energy_per_tick": 96
+        },
+        {
+          "items": [
+            [
+              "jugcraft:fentanyl_patch_stock",
+              4
+            ],
+            [
+              "jugcraft:sterile_carrier",
+              1
+            ],
+            [
+              "minecraft:paper",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:fentanyl_patch",
+              4
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:fentanyl_patch_formula_plate",
+          "energy_per_tick": 96
+        },
+        {
+          "items": [
+            [
+              "jugcraft:masterwork_reserve_concentrate",
+              4
+            ],
+            [
+              "minecraft:sugar",
+              1
+            ],
+            [
+              "minecraft:glass_bottle",
+              4
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:masterwork_reserve",
+              4
+            ]
+          ],
+          "ticks": 160,
+          "tool": "jugcraft:masterwork_reserve_formula_plate",
+          "energy_per_tick": 128
+        },
+        {
+          "items": [
+            [
+              "jugcraft:thc_active",
+              4
+            ],
+            [
+              "jugcraft:botanical_capsule_shell",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:thc",
+              4
+            ]
+          ],
+          "ticks": 180,
+          "tool": "jugcraft:thc_formula_plate",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [
+            [
+              "jugcraft:psilocybin_active",
+              4
+            ],
+            [
+              "jugcraft:botanical_capsule_shell",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:psilocybin",
+              4
+            ]
+          ],
+          "ticks": 180,
+          "tool": "jugcraft:psilocybin_formula_plate",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [
+            [
+              "jugcraft:mescaline_active",
+              4
+            ],
+            [
+              "jugcraft:botanical_capsule_shell",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:mescaline",
+              4
+            ]
+          ],
+          "ticks": 180,
+          "tool": "jugcraft:mescaline_formula_plate",
+          "energy_per_tick": 64
+        },
+        {
+          "items": [
+            [
+              "jugcraft:lsd_active",
+              4
+            ],
+            [
+              "minecraft:paper",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:lsd",
+              4
+            ]
+          ],
+          "ticks": 180,
+          "tool": "jugcraft:lsd_formula_plate",
+          "energy_per_tick": 96
+        },
+        {
+          "items": [
+            [
+              "jugcraft:dmt_active",
+              4
+            ],
+            [
+              "jugcraft:empty_pharmacy_capsule",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:dmt",
+              4
+            ]
+          ],
+          "ticks": 180,
+          "tool": "jugcraft:dmt_formula_plate",
+          "energy_per_tick": 96
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:autoclave",
+      "type": "autoclave",
+      "recipes": [
+        {
+          "items": [
+            [
+              "minecraft:glass_bottle",
+              8
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:sterile_vial",
+              8
+            ]
+          ],
+          "ticks": 200,
+          "tool": "",
+          "energy_per_tick": 80
+        },
+        {
+          "items": [
+            [
+              "jugcraft:pharmaceutical_starch",
+              8
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:sterile_carrier",
+              8
+            ]
+          ],
+          "ticks": 200,
+          "tool": "",
+          "energy_per_tick": 80
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:sterile_filler",
+      "type": "sterile_filler",
+      "recipes": [
+        {
+          "items": [
+            [
+              "jugcraft:antibiotic_extract",
+              2
+            ],
+            [
+              "jugcraft:sterile_carrier",
+              1
+            ],
+            [
+              "jugcraft:sterile_vial",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:penicillin",
+              4
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:penicillin_formula_plate",
+          "energy_per_tick": 96
+        },
+        {
+          "items": [
+            [
+              "jugcraft:lidocaine_stock",
+              2
+            ],
+            [
+              "jugcraft:sterile_carrier",
+              1
+            ],
+            [
+              "jugcraft:sterile_vial",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:lidocaine",
+              4
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:lidocaine_formula_plate",
+          "energy_per_tick": 96
+        },
+        {
+          "items": [
+            [
+              "jugcraft:adrenaline_stock",
+              2
+            ],
+            [
+              "jugcraft:sterile_carrier",
+              1
+            ],
+            [
+              "jugcraft:sterile_vial",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:adrenaline",
+              4
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:adrenaline_formula_plate",
+          "energy_per_tick": 96
+        },
+        {
+          "items": [
+            [
+              "jugcraft:salbutamol_stock",
+              2
+            ],
+            [
+              "jugcraft:sterile_carrier",
+              1
+            ],
+            [
+              "jugcraft:sterile_vial",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:salbutamol",
+              4
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:salbutamol_formula_plate",
+          "energy_per_tick": 96
+        },
+        {
+          "items": [
+            [
+              "jugcraft:redleaf_medical_stock",
+              2
+            ],
+            [
+              "jugcraft:sterile_carrier",
+              1
+            ],
+            [
+              "jugcraft:sterile_vial",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:morphine",
+              4
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:morphine_formula_plate",
+          "energy_per_tick": 96
+        },
+        {
+          "items": [
+            [
+              "jugcraft:naloxone_stock",
+              2
+            ],
+            [
+              "jugcraft:sterile_carrier",
+              1
+            ],
+            [
+              "jugcraft:sterile_vial",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:naloxone",
+              4
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:naloxone_formula_plate",
+          "energy_per_tick": 96
+        },
+        {
+          "items": [
+            [
+              "jugcraft:ketamine_active",
+              2
+            ],
+            [
+              "jugcraft:sterile_carrier",
+              1
+            ],
+            [
+              "jugcraft:sterile_vial",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:ketamine",
+              4
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:ketamine_formula_plate",
+          "energy_per_tick": 96
+        },
+        {
+          "items": [
+            [
+              "jugcraft:fentanyl_active",
+              2
+            ],
+            [
+              "jugcraft:sterile_carrier",
+              1
+            ],
+            [
+              "jugcraft:sterile_vial",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              250
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:fentanyl",
+              4
+            ]
+          ],
+          "ticks": 200,
+          "tool": "jugcraft:fentanyl_formula_plate",
+          "energy_per_tick": 96
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:mash_conditioning_barrel",
+      "type": "mash_conditioning_barrel",
+      "recipes": [
+        {
+          "items": [
+            [
+              "jugcraft:mash_jug",
+              1
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:fermented_mash_jug",
+              1
+            ]
+          ],
+          "ticks": 1200,
+          "tool": "",
+          "energy_per_tick": 0
+        },
+        {
+          "items": [
+            [
+              "jugcraft:refined_spirits_concentrate",
+              4
+            ],
+            [
+              "minecraft:honeycomb",
+              1
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:reserve_whiskey_concentrate",
+              4
+            ]
+          ],
+          "ticks": 2400,
+          "tool": "jugcraft:oak_conditioning_insert",
+          "energy_per_tick": 0
+        },
+        {
+          "items": [
+            [
+              "jugcraft:masterwork_unconditioned_concentrate",
+              4
+            ],
+            [
+              "minecraft:sweet_berries",
+              2
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:masterwork_reserve_concentrate",
+              4
+            ]
+          ],
+          "ticks": 4800,
+          "tool": "jugcraft:masterwork_conditioning_insert",
+          "energy_per_tick": 0
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:moonshine_still",
+      "type": "moonshine_still",
+      "recipes": [
+        {
+          "items": [
+            [
+              "jugcraft:fermented_mash_jug",
+              1
+            ],
+            [
+              "minecraft:glass_bottle",
+              4
+            ]
+          ],
+          "fluids": [],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:moonshine",
+              4
+            ],
+            [
+              "jugcraft:empty_mash_jug",
+              1
+            ]
+          ],
+          "ticks": 200,
+          "tool": "",
+          "energy_per_tick": 0
+        }
+      ]
+    },
+    {
+      "block": "jugcraft:release_coater",
+      "type": "release_coater",
+      "recipes": [
+        {
+          "items": [
+            [
+              "jugcraft:caffeine_concentrate",
+              24
+            ],
+            [
+              "jugcraft:release_matrix",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:caffeine_xr_core",
+              4
+            ]
+          ],
+          "ticks": 300,
+          "tool": "jugcraft:release_control_die",
+          "energy_per_tick": 128
+        },
+        {
+          "items": [
+            [
+              "jugcraft:methylphenidate_active",
+              4
+            ],
+            [
+              "jugcraft:release_matrix",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:methylphenidate_xr_core",
+              4
+            ]
+          ],
+          "ticks": 300,
+          "tool": "jugcraft:release_control_die",
+          "energy_per_tick": 128
+        },
+        {
+          "items": [
+            [
+              "jugcraft:amphetamine_active",
+              6
+            ],
+            [
+              "jugcraft:release_matrix",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:amphetamine_xr_core",
+              4
+            ]
+          ],
+          "ticks": 300,
+          "tool": "jugcraft:release_control_die",
+          "energy_per_tick": 128
+        },
+        {
+          "items": [
+            [
+              "jugcraft:modafinil_active",
+              4
+            ],
+            [
+              "jugcraft:advanced_release_matrix",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:modafinil_xr_core",
+              4
+            ]
+          ],
+          "ticks": 300,
+          "tool": "jugcraft:release_control_die",
+          "energy_per_tick": 128
+        },
+        {
+          "items": [
+            [
+              "jugcraft:fentanyl_active",
+              8
+            ],
+            [
+              "jugcraft:release_matrix",
+              4
+            ],
+            [
+              "jugcraft:pharmacy_patch_backing",
+              4
+            ]
+          ],
+          "fluids": [
+            [
+              "minecraft:water",
+              500
+            ]
+          ],
+          "fluid_results": [],
+          "results": [
+            [
+              "jugcraft:fentanyl_patch_stock",
+              4
+            ]
+          ],
+          "ticks": 300,
+          "tool": "jugcraft:release_control_die",
+          "energy_per_tick": 128
         }
       ]
     },

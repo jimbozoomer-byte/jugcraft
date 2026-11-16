@@ -76,6 +76,8 @@ public final class MachineForm {
 	private final int itemInputs;
 	private final int itemOutputs;
 	private final boolean upgrades;
+	private final boolean fuelled;
+	private final boolean ambient;
 	private final int warmupTicks;
 	private final boolean companionAssistance;
 	private final int waterDrainOutput;
@@ -90,6 +92,12 @@ public final class MachineForm {
 		this.family = builder.family;
 		this.profile = builder.profile;
 		this.upgrades = builder.upgrades;
+		this.fuelled = builder.fuelled;
+		this.ambient = builder.ambient;
+		if (fuelled && builder.itemInputs < 2) throw invalid("a fuelled form needs a recipe input and a separate fuel input");
+		if ((fuelled || ambient) && (upgrades || builder.companionAssistance || !builder.fuels.isEmpty()) || fuelled && ambient) {
+			throw invalid("non-electric processing cannot generate, take upgrades or use companion strokes");
+		}
 		this.warmupTicks = builder.warmup;
 		this.companionAssistance = builder.companionAssistance;
 		this.waterDrainOutput = builder.waterDrainOutput;
@@ -284,7 +292,7 @@ public final class MachineForm {
 				case FLUID_OUT -> target >= 0 && target < builder.outputTanks.size();
 				case ITEM_IN -> itemInputs > 0 && (target == FormPort.ALL || target >= 0 && target < itemInputs);
 				case ITEM_OUT -> itemOutputs > 0 && (target == FormPort.ALL || target >= 0 && target < itemOutputs);
-				case ENERGY_IN -> !generator && family.usesPower();
+				case ENERGY_IN -> !generator && !fuelled && !ambient && family.usesPower();
 				case ENERGY_OUT -> generator;
 			};
 			if (!reaches) {
@@ -520,6 +528,12 @@ public final class MachineForm {
 		return itemInputs;
 	}
 
+	/** Fuel is the final declared input, outside the recipe's ingredient list. No electrical port exists. */
+	public boolean fuelled() { return fuelled; }
+	public boolean ambient() { return ambient; }
+	public int recipeItemInputs() { return itemInputs - (fuelled ? 1 : 0); }
+	public int fuelSlot() { return fuelled ? itemInputs - 1 : -1; }
+
 	public int itemOutputs() {
 		return itemOutputs;
 	}
@@ -576,6 +590,8 @@ public final class MachineForm {
 		private final Set<String> capabilities = new LinkedHashSet<>();
 		private final Map<String, String> aliases = new LinkedHashMap<>();
 		private boolean upgrades;
+		private boolean fuelled;
+		private boolean ambient;
 		private int warmup;
 		private boolean companionAssistance;
 		private int waterDrainOutput = -1;
@@ -640,6 +656,9 @@ public final class MachineForm {
 			this.upgrades = true;
 			return this;
 		}
+
+		public Builder fuelled() { this.fuelled = true; return this; }
+		public Builder ambient() { this.ambient = true; return this; }
 
 		public Builder gasVentOutput(int output, Identifier gas) {
 			this.waterDrainOutput = output;

@@ -763,10 +763,10 @@ def gear_pages():
         {"title": "Medicines", "icon": f"{MOD}:first_aid_kit", "text": [
             "Made in the chemical reactor. First aid kit: two cotton and a soap in bioethanol. Heals four hearts, "
             f"then a {fc.FIRST_AID_COOLDOWN} s wait.",
-            "Antidote: two charcoal and a bottle in lye. Clears poison, wither and every other harmful effect, and "
-            "keeps the good ones (milk clears both).",
-            f"Stimulant: four cocoa beans and a bottle in bioethanol. Speed II and Haste II for "
-            f"{fc.STIMULANT_TICKS // 20} s, with hunger."]},
+            "Antidote: two charcoal and a bottle in lye. Clears its listed vanilla harmful effects and keeps "
+            "benefits (milk clears both). Activated Charcoal handles drug drawbacks.",
+            "Stimulant: four cocoa beans and a bottle in bioethanol. Speed II and Haste II for 60 s, with "
+            "Stimulant Appetite and shared caffeine-family dosing. See Pharmacology for all sustained medicines."]},
     ]
 
 
@@ -914,6 +914,7 @@ def progression_pages():
 
 
 def build():
+    import pharmacology
     chapters = [
         {"title": "Progression", "icon": f"{MOD}:engineers_handbook", "pages": progression_pages()},
         {"title": "Getting Started", "icon": f"{MOD}:engineers_handbook", "pages": [
@@ -966,6 +967,7 @@ def build():
                                        "circuit_assembler", "arc_furnace_controller", "auto_crafter")]},
         {"title": "Ore Processing", "icon": f"{MOD}:pulverizer", "pages":
             [machine_page(m) for m in ("pulverizer", "ore_washer", "sieve", "sawmill")]},
+        {"title": "Pharmacology", "icon": f"{MOD}:caffeine_drink", "pages": pharmacology.handbook_pages()},
         {"title": "Steel", "icon": f"{MOD}:steel_ingot", "pages":
             [machine_page(m) for m in ("coke_oven", "steel_foundry")]
             + [block_page(b, TOOL_BLOCKS[b]["display"]) for b in TOOL_BLOCKS]

@@ -1,0 +1,35 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "jugcraft:chemical_reaction",
+  "capability": "jugcraft:drug_formulation",
+  "items": [
+    {
+      "ingredient": "jugcraft:release_matrix_blend",
+      "count": 4
+    }
+  ],
+  "fluids": [
+    {
+      "fluid": "minecraft:water",
+      "amount": 500
+    }
+  ],
+  "results": [
+    {
+      "id": "jugcraft:release_matrix",
+      "count": 4
+    }
+  ],
+  "tool": "jugcraft:release_control_die",
+  "energy_per_tick": 96,
+  "time": 200
+}

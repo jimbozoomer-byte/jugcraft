@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Choose which client game test classes a change needs, and share them out between CI's client jobs.
 
-The client game tests start a real game and photograph showrooms, distributed across sixteen CI jobs.
+The client game tests start a real game and photograph showrooms, distributed across twenty CI jobs.
 Most pull requests change a few blocks, so a pull request runs only the classes that
 show what it changed; main and a manual run of the Build workflow run them all (docs/TESTING.md).
 
@@ -52,7 +52,10 @@ CODE_DIRS = (ROOT / "src" / "main" / "java", ROOT / "src" / "client" / "java")
 # jobs one still reached 29:32 (run 37989465048); the client tests then shared four jobs. With 131 classes the
 # estimates passed 25 minutes a job (the Cinder Kiln's), so they now share five.
 WEIGHTS = {
-    "BiomeClientGameTests": 570,
+    # Run 41937102882: the expanded natural-world tour was still active at
+    # both 20 and 30 minutes; its 19-class job exhausted the one-hour limit.
+    # Give the tour its own process instead of combining it with more galleries.
+    "BiomeClientGameTests": 2200,
     # Run 38936177915: gun assertions alone span 17:22:33–17:52:09 (~30 minutes),
     # before setup/teardown. The growing all-gun gallery no longer fits its old 260 s estimate.
     "GunsClientGameTests": 2000,
@@ -86,7 +89,10 @@ WEIGHTS = {
     # Concordance Chunk D unit 5 (D-09, D-S22): a dedicated server's start, a second client JVM's start and join (as
     # OwnerCollectionsNetworkTests does), and the stranger's steps at the holder's perch with three shots: an estimate,
     # not a measurement.
-    "ConcordancePactNetworkTests": 300,
+    # This suite starts another client JVM. Isolate its peak resource demand
+    # from the retained world/render state of a long mixed gallery process.
+    # This is resource headroom, not a measured 1,000-second runtime.
+    "ConcordancePactNetworkTests": 1000,
     "JugcraftServerClientGameTests": 90,
     # Companion suites exercise timed AI, inventory trips and cooking, not just
     # showrooms. Allow CI headroom over the focused local runtime measurements.
@@ -94,6 +100,15 @@ WEIGHTS = {
     "PeepoHearthClientTests": 240,
     "PeepoWorkSessionClientTests": 240,
     "PeepoDeliveryClientTests": 240,
+    # PR #611, run 41884611786 shard 6: these completed worlds took ~876 s
+    # (nuclear) and ~585 s (stock), while length-based estimates were ~20 s.
+    # Keep all selected classes and the 60-minute job limit; spread the real work.
+    # Run 41919904118: two natural mineral-sand surveys occupied ~21 minutes
+    # (22:00-22:20), leaving its 25-class group at the one-hour limit during upload.
+    # Give this discovery suite its own shard, keeping every test and the 60m limit.
+    "MineralSandClientGameTests": 1500,
+    "NuclearClientGameTests": 1000,
+    "PeepoProductionStockClientTests": 660,
     "PeepoKitchenAnimationClientTests": 120,
     "PeepoGardenExpansionClientTests": 60,  # focused local runs: about 55 seconds
     "PeepoSuppliesClientTests": 60,
@@ -358,7 +373,7 @@ def main():
     parser.add_argument("--base", help="compare against this revision (a pull request's base)")
     parser.add_argument("--head", default="HEAD")
     parser.add_argument("--all", action="store_true", help="run every class")
-    parser.add_argument("--shards", type=int, default=16)
+    parser.add_argument("--shards", type=int, default=20)
     parser.add_argument("--github-output", help="append shard0..shardN-1 (comma-separated classes) to this file")
     args = parser.parse_args()
 

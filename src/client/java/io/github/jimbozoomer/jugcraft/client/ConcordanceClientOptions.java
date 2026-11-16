@@ -27,6 +27,7 @@ public final class ConcordanceClientOptions {
 	private static boolean simpleJournal;
 	private static boolean wornTrinkets = true;
 	private static Presentation.Intensity intensity = Presentation.Intensity.FULL;
+	private static DrugVisualOptions drugVisuals = DrugVisualOptions.DEFAULT;
 
 	private ConcordanceClientOptions() {
 	}
@@ -59,6 +60,9 @@ public final class ConcordanceClientOptions {
 	public static Presentation.Intensity intensity() {
 		return intensity;
 	}
+
+	public static DrugVisualOptions drugVisuals() { return drugVisuals; }
+	public static void setDrugVisuals(DrugVisualOptions options) { drugVisuals = options; save(); }
 
 	public static void set(boolean showHud, boolean calm, boolean exact, boolean simple, boolean trinkets, Presentation.Intensity chosen) {
 		hud = showHud;
@@ -102,6 +106,7 @@ public final class ConcordanceClientOptions {
 		// The two settings on at first are off only when they say so: a mistyped value leaves them on.
 		wornTrinkets = !"false".equalsIgnoreCase(properties.getProperty("concordance.worn_trinkets", "true").trim());
 		intensity = Presentation.Intensity.fromId(properties.getProperty("concordance.visual_intensity", "full"));
+		drugVisuals = DrugVisualOptions.read(properties);
 		Presentation.configure(intensity, reducedMotion);
 		save();
 	}
@@ -115,6 +120,7 @@ public final class ConcordanceClientOptions {
 		properties.setProperty("concordance.simple_journal", Boolean.toString(simpleJournal));
 		properties.setProperty("concordance.worn_trinkets", Boolean.toString(wornTrinkets));
 		properties.setProperty("concordance.visual_intensity", intensity.id());
+		drugVisuals.write(properties);
 		try (Writer writer = Files.newBufferedWriter(path)) {
 			properties.store(writer, "Jugcraft client display settings (kept on this computer): concordance.hud shows Focus while"
 					+ " a Concordance instrument is held; concordance.reduced_motion makes Kindled light, the bench and the journal"

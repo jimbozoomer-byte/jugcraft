@@ -6,6 +6,8 @@ Owner: jimbozoomer-byte
 Target milestone and tier: industrial chemistry (chlorine, ammonia, bioethanol, lye, aluminum); after the frag grenade (batch 18).
 Primary specialty and supported player role: combat, escape and survival.
 
+Medicine update: [Early pharmacy — Batch 1](pharmacology-early-pharmacy.md) moves the existing Stimulant to the shared dosing ledger, preserving its recipe and first-dose strengths/duration. Its drawback is now a separately identifiable Stimulant Appetite effect. First Aid Kit, Antidote and the weapons in this record retain their behavior; the original CI evidence below predates this update.
+
 ## What was rethought
 - **No pharmacy machine.** A "chemist's bench" would only repeat the chemical reactor, which already mixes items with a fluid. The medicines are reactor recipes instead, and the effort went into making each one do something vanilla brewing does not.
 - **Grenades by role, not by gas.** Each one is a different tool: chlorine for living crowds, smoke to escape, thermite for one tough target, a flashbang to stop a rush. All use the existing grenade launcher.
@@ -22,7 +24,7 @@ Primary specialty and supported player role: combat, escape and survival.
 - **Scuba mask + tank:** with oxygen in the tank, they keep out chlorine and smoke too, using 20 mB a second.
 - **First aid kit:** heals four hearts (Instant Health II) after a 1.5 s use, then a 10 s cooldown. Reactor: two cotton and a soap in 250 mB of bioethanol make two. A stackable heal without brewing.
 - **Antidote:** drink to clear poison, wither, nausea, blindness, hunger, weakness, slowness, mining fatigue, darkness, levitation, infested, oozing and weaving, keeping the good effects (milk clears both). Reactor: two charcoal and a glass bottle in 250 mB of lye. Gives the bottle back.
-- **Stimulant:** Speed II and Haste II for a minute, with Hunger. Haste has no vanilla potion. Reactor: four cocoa beans and a glass bottle in 250 mB of bioethanol. Gives the bottle back.
+- **Stimulant:** Speed II and Haste II for a minute, with Stimulant Appetite. Shares caffeine's saved family/tolerance rules at 25 strain. Reactor: four cocoa beans and a glass bottle in 250 mB of bioethanol. Gives the bottle back.
 - Advancements: **Filtered** (gas mask), **Chemical Arsenal** (any chemical grenade), **Field Medic** (first aid kit). Handbook pages: Chemical Grenades, Gas Mask, Medicines.
 
 ## Connections

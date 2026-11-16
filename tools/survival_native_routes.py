@@ -66,6 +66,16 @@ def extend(root, edge, evidence, items):
             route('tools/agriculture.py:PIES/' + name, ['raw_' + pie, ag.PIES['oven'], '#minecraft:coals'], [pie], 'hearth_baking')
         if j(pie + '_slice') in items:
             route('tools/agriculture.py:PIES/' + name, [pie, '#jugcraft:knives'], [pie + '_slice'], 'slicing')
+    # Pharmacy crops use the shared native crop block; studies exchange a canvas
+    # only after a valid plinth/folio lesson under the corresponding active dose.
+    import psychedelic_pharmacy
+    for name, (_, produce) in psychedelic_pharmacy.CROPS.items():
+        route(java + 'pharmacology/PsychedelicPharmacy.java', [name + '_seeds'], [produce], 'crop_growth')
+    for reward, doses in (('lucid_imprint', ['psilocybin', 'lsd', 'dmt']),
+                          ('pattern_imprint', ['lsd', 'dmt']), ('oneiric_imprint', ['dmt'])):
+        route(java + 'pharmacology/DreamStudyMenu.java',
+              ['dream_study_plinth', 'dream_folio', 'study_canvas', doses], [reward],
+              'complete_authorized_overworld_dream_lesson')
     route('tools/agriculture.py:CIDER', ['cider_press', 'minecraft:apple', 'minecraft:glass_bottle'], ['sweet_cider', 'apple_pomace'], 'cider_press')
     route('tools/agriculture.py:CIDER', ['cider_barrel', 'sweet_cider'], ['sparkling_cider', 'aged_cider'], 'fermentation')
     for base, products in ag.CANDY['makes'].items():

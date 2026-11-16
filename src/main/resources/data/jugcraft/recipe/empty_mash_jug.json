@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "B B",
+    "B B",
+    " B "
+  ],
+  "key": {
+    "B": "minecraft:brick"
+  },
+  "result": {
+    "id": "jugcraft:empty_mash_jug",
+    "count": 2
+  }
+}

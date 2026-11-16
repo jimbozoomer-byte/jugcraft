@@ -1,0 +1,55 @@
+{
+  "type": "minecraft:block",
+  "modifier": {
+    "type": "minecraft:explosion_decay"
+  },
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:prism_cactus_seeds"
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:match_block",
+        "blocks": "jugcraft:prism_cactus_crop",
+        "state": {
+          "age": "7"
+        }
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:prism_cactus_fruit",
+          "modifier": [
+            {
+              "type": "minecraft:set_count",
+              "count": 2
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "rolls": 1,
+      "condition": {
+        "type": "minecraft:match_block",
+        "blocks": "jugcraft:prism_cactus_crop",
+        "state": {
+          "age": "7"
+        }
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:prism_cactus_seeds"
+        }
+      ]
+    }
+  ]
+}

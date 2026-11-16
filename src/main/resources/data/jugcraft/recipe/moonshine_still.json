@@ -1,0 +1,30 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "CGC",
+    "IFI",
+    "CBC"
+  ],
+  "key": {
+    "C": "minecraft:copper_ingot",
+    "G": "minecraft:glass",
+    "I": "minecraft:iron_ingot",
+    "F": "minecraft:furnace",
+    "B": "minecraft:brick"
+  },
+  "result": {
+    "id": "jugcraft:moonshine_still",
+    "count": 1
+  }
+}

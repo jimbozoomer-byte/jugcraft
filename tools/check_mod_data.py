@@ -55,6 +55,7 @@ import tank_display
 import exosuit
 import grapple
 import field_chemistry
+import pharmacology
 import construction
 import hydroponics
 import electroplating
@@ -523,7 +524,7 @@ def item_units(ref):
         return {"aluminum": 9}
     if path in NON_METAL:
         return {}
-    if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items()\
+    if path in plastic.blocks() or path in exosuit.items() or path in grapple.items() or path in field_chemistry.items() or path in pharmacology.items()\
             or path in construction.items() or path in construction.blocks() or path in gas_storage.items() or path in control_electronics.blocks() or path in control_electronics.items() or path in rocketry.items() or path in rocketry.blocks() or path in dieselworks.blocks() or path in kaiserworks.blocks() or path in trenchworks.blocks() or path in fortifications.blocks() or path in bunkerworks.blocks() or path in aged_wood.blocks() or path in fire_control.blocks() or path in fire_control.items() or path in raiders.ITEMS or path in armoured_walker.ITEMS or path in howitzer_walker.ITEMS or path in zeppelin.ITEMS or path in mech.ITEMS or path in landship.ITEMS or path in unmasking.ITEMS or path in trains.ITEMS or path in artillery.ITEMS or path in tower_guns.items()\
             or path in guns.items() or path in guns.blocks() or path in concordance.items() or path in concordance.blocks() or path in industrial_forms.blocks()\
             or path in exchange_poker.BLOCKS or path in exchange_casino.BLOCKS or path in exchange_casino.ITEMS:
@@ -839,12 +840,13 @@ def check_tags():
                                                     + list(tank_display.BLOCKS) + seasons.BLOCKS + ph.blocks() + ph.items()
                                                     + arms.items() + arms_variants.items()
                                                     + gear.items() + plastic.blocks() + exosuit.items() + grapple.items()
-                                                    + field_chemistry.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + aged_wood.blocks() + fire_control.blocks() + fire_control.items() + list(raiders.ITEMS) + list(raiders.BLOCKS) + list(armoured_walker.ITEMS) + list(howitzer_walker.ITEMS) + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(unmasking.ITEMS) + list(trains.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
+                                                    + field_chemistry.items() + pharmacology.items() + construction.items() + construction.blocks() + gas_storage.items() + control_electronics.blocks() + control_electronics.items() + rocketry.items() + rocketry.blocks() + dieselworks.blocks() + kaiserworks.blocks() + trenchworks.blocks() + fortifications.blocks() + bunkerworks.blocks() + aged_wood.blocks() + fire_control.blocks() + fire_control.items() + list(raiders.ITEMS) + list(raiders.BLOCKS) + list(armoured_walker.ITEMS) + list(howitzer_walker.ITEMS) + list(zeppelin.ITEMS) + list(mech.ITEMS) + list(landship.ITEMS) + list(unmasking.ITEMS) + list(trains.ITEMS) + list(artillery.ITEMS) + tower_guns.items()
                                                     + ag.all_blocks() + ag.all_items() + (town_assets.blocks() + styx.blocks())
                                                     + guns.items() + guns.blocks() + industrial_forms.blocks()
                                                     + concordance.items() + concordance.blocks() + concordance.itemless_blocks())
         import nouveau_content
         known = set(known)
+        if registry == 'block': known.update(pharmacology.blocks())
         import newest_registry
         known.update(newest_registry.entries().get(registry, set()))
         if registry == 'block': known.update(starter_workshop.BLOCKS)
@@ -1827,8 +1829,7 @@ def check_field_chemistry():
     java = (JAVA_ROOT / "weapons" / "FieldChemistry.java").read_text(encoding="utf-8")
     for const in ("CHLORINE_RADIUS", "CHLORINE_TICKS", "CHLORINE_DAMAGE", "SMOKE_RADIUS", "SMOKE_TICKS", "THERMITE_RADIUS",
                   "THERMITE_TICKS", "THERMITE_DAMAGE", "THERMITE_FIRE_SECONDS", "FLASH_RADIUS", "FLASH_BLIND_TICKS",
-                  "FLASH_STUN_TICKS", "GAS_MASK_DURABILITY", "SCUBA_GAS_OXYGEN", "FIRST_AID_COOLDOWN", "STIMULANT_TICKS",
-                  "ASPIRIN_REGENERATION_TICKS", "ASPIRIN_COOLDOWN"):
+                  "FLASH_STUN_TICKS", "GAS_MASK_DURABILITY", "SCUBA_GAS_OXYGEN", "FIRST_AID_COOLDOWN"):
         value = getattr(field_chemistry, const)
         m = re.search(rf"\b{const} = ([0-9_.]+)F?;", java)
         if not m or float(m.group(1).replace("_", "")) != float(value):
@@ -3873,6 +3874,12 @@ def check_industrial_forms():
             described = info.get(key, []) if key == "fuels" else info[key]
             if [tuple(item) for item in described] != [tuple(item) for item in built] if key == "fuels" else described != built:
                 err(f"{form}: {key} is {built} in IndustrialForms.java but {described} in tools/industrial_forms.py")
+        for mode in ('fuelled', 'ambient'):
+            if ('.' + mode + '()' in body) != bool(info.get(mode)):
+                err(f'{form}: {mode} work mode differs between Java and generator')
+        if info.get('fuelled') or info.get('ambient'):
+            if info['upgrades'] or any(port[1].startswith('ENERGY_') for port in info['ports']):
+                err(f'{form}: non-electric processing cannot take upgrade cards or expose an electrical port')
         vents = re.findall(r'\.gasVentOutput\((\d+), Jugcraft\.id\("(\w+)"\)\)', body)
         actual_vent = (int(vents[0][0]), f"{MOD}:{vents[0][1]}") if len(vents) == 1 else None
         if len(vents) > 1 or actual_vent != info.get("gas_vent"):
@@ -24420,7 +24427,7 @@ def registered_items():
                   | set(deposits.all_blocks()) | set(guide_books.BOOKS) | set(tank_display.BLOCKS) | set(exchange_blocks.BLOCKS) | set(exchange_poker.BLOCKS) | set(exchange_casino.BLOCKS) | set(exchange_casino.ITEMS)
                   | set(arms.items()) | set(arms_variants.items())
                   | set(gear.items()) | set(plastic.blocks()) | set(exosuit.items()) | set(grapple.items())
-                  | set(field_chemistry.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(fortifications.blocks()) | set(bunkerworks.blocks()) | set(aged_wood.blocks()) | set(fire_control.blocks()) | set(fire_control.items()) | set(raiders.ITEMS) | set(armoured_walker.ITEMS) | set(howitzer_walker.ITEMS) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(unmasking.ITEMS) | set(trains.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
+                  | set(field_chemistry.items()) | set(pharmacology.items()) | set(construction.items()) | set(construction.blocks()) | set(gas_storage.items()) | set(control_electronics.blocks()) | set(control_electronics.items()) | set(rocketry.items()) | set(rocketry.blocks()) | set(dieselworks.blocks()) | set(kaiserworks.blocks()) | set(trenchworks.blocks()) | set(fortifications.blocks()) | set(bunkerworks.blocks()) | set(aged_wood.blocks()) | set(fire_control.blocks()) | set(fire_control.items()) | set(raiders.ITEMS) | set(armoured_walker.ITEMS) | set(howitzer_walker.ITEMS) | set(zeppelin.ITEMS) | set(mech.ITEMS) | set(landship.ITEMS) | set(unmasking.ITEMS) | set(trains.ITEMS) | set(artillery.ITEMS) | set(tower_guns.items())
                   | set(ph.blocks()) | set(ph.items()) | set((town_assets.blocks() + styx.blocks()))
                   | set(guns.items()) | set(guns.blocks()) | set(concordance.items()) | set(concordance.blocks()) | set(industrial_forms.blocks()))
     import starter_workshop

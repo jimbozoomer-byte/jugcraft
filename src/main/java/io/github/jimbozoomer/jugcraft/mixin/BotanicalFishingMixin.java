@@ -11,5 +11,16 @@ public abstract class BotanicalFishingMixin {
     @Shadow private int timeUntilLured;
     @Shadow private int timeUntilHooked;
     @Inject(method="catchingFish",at=@At("HEAD"))
-    private void jugcraft$allure(BlockPos pos,CallbackInfo ci){var p=((FishingHook)(Object)this).getPlayerOwner();if(p!=null&&p.hasEffect(BotanicalBrewing.ALLURE)){if(timeUntilLured>1)timeUntilLured--;if(timeUntilHooked>1)timeUntilHooked--;}}
+    private void jugcraft$allure(BlockPos pos,CallbackInfo ci){
+        var hook=(FishingHook)(Object)this;
+        var p=hook.getPlayerOwner();
+        if(p!=null&&p.hasEffect(BotanicalBrewing.ALLURE)){
+            if(timeUntilLured>1)timeUntilLured--;
+            if(timeUntilHooked>1)timeUntilHooked--;
+        }else if(p instanceof net.minecraft.server.level.ServerPlayer server
+                && io.github.jimbozoomer.jugcraft.pharmacology.PsychedelicPharmacy.fasterBite(server,hook.tickCount)){
+            // THC never shortens the reaction window or compounds Allure's stronger countdown bonus.
+            if(timeUntilLured>1)timeUntilLured--;
+        }
+    }
 }

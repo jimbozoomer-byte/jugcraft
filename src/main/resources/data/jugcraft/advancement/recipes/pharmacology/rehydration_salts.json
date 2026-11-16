@@ -1,0 +1,44 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "salt"
+    }
+  ],
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_ingredient": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "items": "jugcraft:salt"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipes": [
+          "jugcraft:rehydration_salts"
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "has_ingredient",
+      "has_the_recipe"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "jugcraft:rehydration_salts"
+    ]
+  }
+}

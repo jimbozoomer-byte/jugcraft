@@ -1,0 +1,31 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PTP",
+    "MCK",
+    "PWP"
+  ],
+  "key": {
+    "P": "#c:plates/steel",
+    "M": "jugcraft:electric_motor",
+    "C": "jugcraft:basic_circuit",
+    "K": "jugcraft:machine_casing",
+    "W": "jugcraft:copper_cable",
+    "T": "jugcraft:fluid_tank"
+  },
+  "result": {
+    "id": "jugcraft:pharmaceutical_separator",
+    "count": 1
+  }
+}

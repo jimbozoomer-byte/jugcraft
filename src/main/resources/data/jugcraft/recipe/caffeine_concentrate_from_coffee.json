@@ -1,0 +1,18 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jugcraft:coffee_beans",
+    "jugcraft:coffee_beans"
+  ],
+  "result": {
+    "id": "jugcraft:caffeine_concentrate",
+    "count": 2
+  }
+}

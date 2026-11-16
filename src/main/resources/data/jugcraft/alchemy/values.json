@@ -52,12 +52,37 @@
       "denominator": 1,
       "source": "recipe jugcraft:acoustic_wall_panel"
     },
+    "jugcraft:activated_charcoal": {
+      "numerator": 66,
+      "denominator": 1,
+      "source": "recipe jugcraft:activated_charcoal"
+    },
+    "jugcraft:activated_charcoal_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:activated_spodumene": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
     "jugcraft:adept_wand": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:adrenaline": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:adrenaline_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:adrenaline_stock": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -73,6 +98,11 @@
       "source": "recipe jugcraft:circuit_assembly/advanced_circuit"
     },
     "jugcraft:advanced_engine": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:advanced_release_matrix": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -512,6 +542,46 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:amphetamine": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:amphetamine_active": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:amphetamine_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:amphetamine_reagent_blend": {
+      "numerator": 2308,
+      "denominator": 3,
+      "source": "recipe jugcraft:amphetamine_reagent_blend"
+    },
+    "jugcraft:amphetamine_stock": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:amphetamine_xr": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:amphetamine_xr_core": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:amphetamine_xr_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:amphibian_boot": {
       "numerator": 1027,
       "denominator": 2,
@@ -541,6 +611,16 @@
       "numerator": 11248,
       "denominator": 1,
       "source": "recipe jugcraft:animatronic_werewolf"
+    },
+    "jugcraft:antibiotic_broth_bucket": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:antibiotic_extract": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:antidote": {
       "numerator": 1,
@@ -938,9 +1018,9 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:aquatic_gold_hook": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
+      "numerator": 8201,
+      "denominator": 9,
+      "source": "recipe jugcraft:newest/aquatic/gold_hook"
     },
     "jugcraft:aquatic_goldfish": {
       "numerator": 2048,
@@ -1852,6 +1932,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:aspirin_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:assay_glass": {
       "numerator": 1289,
       "denominator": 8,
@@ -1902,6 +1987,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:auto_crafter"
     },
+    "jugcraft:autoclave": {
+      "numerator": 6109,
+      "denominator": 6,
+      "source": "recipe jugcraft:autoclave"
+    },
     "jugcraft:automation_upgrade": {
       "numerator": 16807,
       "denominator": 12,
@@ -1931,6 +2021,11 @@
       "numerator": 26045,
       "denominator": 4,
       "source": "recipe jugcraft:avionics_module"
+    },
+    "jugcraft:azure_culture_starter": {
+      "numerator": 391,
+      "denominator": 24,
+      "source": "recipe jugcraft:azure_culture_starter"
     },
     "jugcraft:baccarat_table": {
       "numerator": 32940,
@@ -3782,6 +3877,16 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:beverage_culture_pack": {
+      "numerator": 109,
+      "denominator": 6,
+      "source": "recipe jugcraft:beverage_culture_pack"
+    },
+    "jugcraft:beverage_wash_bucket": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:beware_doormat": {
       "numerator": 481,
       "denominator": 4,
@@ -3906,6 +4011,11 @@
       "numerator": 376,
       "denominator": 1,
       "source": "recipe jugcraft:blackstone_sarcophagus"
+    },
+    "jugcraft:blank_formula_plate": {
+      "numerator": 1059,
+      "denominator": 16,
+      "source": "recipe jugcraft:blank_formula_plate"
     },
     "jugcraft:blank_stencil": {
       "numerator": 8,
@@ -4162,6 +4272,11 @@
       "denominator": 2,
       "source": "recipe jugcraft:alloying/borosilicate_glass"
     },
+    "jugcraft:botanical_capsule_shell": {
+      "numerator": 35,
+      "denominator": 1,
+      "source": "recipe jugcraft:botanical_capsule_shell"
+    },
     "jugcraft:botanical_gate_weapon_0": {
       "numerator": 1,
       "denominator": 1,
@@ -4223,6 +4338,11 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:botanical_pump_head": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:botanical_resin": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -4343,8 +4463,8 @@
       "source": "recipe jugcraft:breacher"
     },
     "jugcraft:bread_basket": {
-      "numerator": 1685,
-      "denominator": 12,
+      "numerator": 705,
+      "denominator": 4,
       "source": "recipe jugcraft:bread_basket"
     },
     "jugcraft:brew_ladle": {
@@ -5651,6 +5771,36 @@
       "numerator": 1051,
       "denominator": 36,
       "source": "recipe jugcraft:cafe_table"
+    },
+    "jugcraft:caffeine_concentrate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "recipe jugcraft:caffeine_concentrate_from_coffee"
+    },
+    "jugcraft:caffeine_drink": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:caffeine_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:caffeine_xr": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:caffeine_xr_core": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:caffeine_xr_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:caged_ladder": {
       "numerator": 224,
@@ -15512,6 +15662,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:cucumber_seeds"
     },
+    "jugcraft:culture_feed": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:culverin": {
       "numerator": 524,
       "denominator": 1,
@@ -16081,6 +16236,26 @@
       "numerator": 43233,
       "denominator": 4,
       "source": "recipe jugcraft:divining_rod_3"
+    },
+    "jugcraft:dmt": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:dmt_active": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:dmt_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:dmt_stock": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:dnq_additive": {
       "numerator": 1,
@@ -17772,6 +17947,31 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:dream_concentrate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:dream_folio": {
+      "numerator": 4529,
+      "denominator": 4,
+      "source": "recipe jugcraft:dream_folio"
+    },
+    "jugcraft:dream_study_plinth": {
+      "numerator": 1213,
+      "denominator": 4,
+      "source": "recipe jugcraft:dream_study_plinth"
+    },
+    "jugcraft:dreamcap": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:dreamcap_seeds": {
+      "numerator": 385,
+      "denominator": 12,
+      "source": "recipe jugcraft:dreamcap_seeds"
+    },
     "jugcraft:dreamglass": {
       "numerator": 1,
       "denominator": 1,
@@ -18843,6 +19043,16 @@
       "source": "recipe jugcraft:emergency_light_conduit"
     },
     "jugcraft:emptied_phylactery": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:empty_mash_jug": {
+      "numerator": 40,
+      "denominator": 1,
+      "source": "recipe jugcraft:empty_mash_jug"
+    },
+    "jugcraft:empty_pharmacy_capsule": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -20617,6 +20827,51 @@
       "denominator": 1,
       "source": "recipe jugcraft:newest/fenceworks/yellow_poplar_hedge"
     },
+    "jugcraft:fentanyl": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:fentanyl_active": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:fentanyl_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:fentanyl_patch": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:fentanyl_patch_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:fentanyl_patch_stock": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:fentanyl_reagent_blend": {
+      "numerator": 321,
+      "denominator": 1,
+      "source": "recipe jugcraft:fentanyl_reagent_blend"
+    },
+    "jugcraft:fentanyl_stock": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:fermented_mash_jug": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:ferris_wheel": {
       "numerator": 6368,
       "denominator": 1,
@@ -22296,6 +22551,11 @@
       "numerator": 21,
       "denominator": 1,
       "source": "recipe jugcraft:formula"
+    },
+    "jugcraft:formulation_press": {
+      "numerator": 4094,
+      "denominator": 3,
+      "source": "recipe jugcraft:formulation_press"
     },
     "jugcraft:fortress_rifle": {
       "numerator": 180,
@@ -27742,6 +28002,11 @@
       "denominator": 16,
       "source": "recipe jugcraft:heliostat"
     },
+    "jugcraft:hemp_seeds": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:herb_roasted_mutton": {
       "numerator": 136,
       "denominator": 1,
@@ -27961,6 +28226,21 @@
       "numerator": 8453,
       "denominator": 4,
       "source": "recipe jugcraft:high_pressure_extractor"
+    },
+    "jugcraft:high_proof_spirits": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:high_proof_spirits_concentrate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:high_proof_spirits_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:high_purity_boule": {
       "numerator": 8,
@@ -31083,9 +31363,9 @@
       "source": "recipe jugcraft:newest/homeworks/spruce_chair"
     },
     "jugcraft:homeworks_spruce_chandelier": {
-      "numerator": 1,
+      "numerator": 794,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "recipe jugcraft:newest/homeworks/spruce_chandelier"
     },
     "jugcraft:homeworks_spruce_couch": {
       "numerator": 104,
@@ -46432,6 +46712,31 @@
       "denominator": 1,
       "source": "recipe jugcraft:kestrel_rifle"
     },
+    "jugcraft:ketamine": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:ketamine_active": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:ketamine_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:ketamine_reagent_blend": {
+      "numerator": 1057,
+      "denominator": 1,
+      "source": "recipe jugcraft:ketamine_reagent_blend"
+    },
+    "jugcraft:ketamine_stock": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:key_blank": {
       "numerator": 1280,
       "denominator": 9,
@@ -46561,6 +46866,11 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:laboratory_analyzer": {
+      "numerator": 24409,
+      "denominator": 24,
+      "source": "recipe jugcraft:laboratory_analyzer"
     },
     "jugcraft:ladder_tray": {
       "numerator": 160,
@@ -49647,6 +49957,21 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:lidocaine": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:lidocaine_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:lidocaine_stock": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:life_stone": {
       "numerator": 5273518,
       "denominator": 9,
@@ -50602,7 +50927,32 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:lsd": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:lsd_active": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:lsd_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:lsd_stock": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:lubricant_bucket": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:lucid_imprint": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -50952,6 +51302,16 @@
       "denominator": 6,
       "source": "recipe jugcraft:marshmallow_on_a_stick"
     },
+    "jugcraft:mash_conditioning_barrel": {
+      "numerator": 784,
+      "denominator": 1,
+      "source": "recipe jugcraft:mash_conditioning_barrel"
+    },
+    "jugcraft:mash_jug": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:mashed_potatoes_and_gravy": {
       "numerator": 1,
       "denominator": 1,
@@ -50971,6 +51331,36 @@
       "numerator": 1601,
       "denominator": 54,
       "source": "recipe jugcraft:mason_jar_candle"
+    },
+    "jugcraft:masterwork_blend": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:masterwork_conditioning_insert": {
+      "numerator": 21385,
+      "denominator": 8,
+      "source": "recipe jugcraft:masterwork_conditioning_insert"
+    },
+    "jugcraft:masterwork_reserve": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:masterwork_reserve_concentrate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:masterwork_reserve_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:masterwork_unconditioned_concentrate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:mcc_lineup": {
       "numerator": 2399,
@@ -51027,6 +51417,26 @@
       "denominator": 1,
       "source": "recipe jugcraft:mercurial_eye"
     },
+    "jugcraft:mescaline": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:mescaline_active": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:mescaline_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:mescaline_stock": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:metal_press": {
       "numerator": 27046,
       "denominator": 3,
@@ -51043,6 +51453,46 @@
       "source": "recipe jugcraft:cryo_methane_cooling_module"
     },
     "jugcraft:methane_tank": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:methylphenidate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:methylphenidate_active": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:methylphenidate_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:methylphenidate_reagent_blend": {
+      "numerator": 929,
+      "denominator": 1,
+      "source": "recipe jugcraft:methylphenidate_reagent_blend"
+    },
+    "jugcraft:methylphenidate_stock": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:methylphenidate_xr": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:methylphenidate_xr_core": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:methylphenidate_xr_formula_plate": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -51157,6 +51607,46 @@
       "denominator": 2,
       "source": "recipe jugcraft:mobius_fuel_block"
     },
+    "jugcraft:modafinil": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:modafinil_active": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:modafinil_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:modafinil_reagent_blend": {
+      "numerator": 641,
+      "denominator": 1,
+      "source": "recipe jugcraft:modafinil_reagent_blend"
+    },
+    "jugcraft:modafinil_stock": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:modafinil_xr": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:modafinil_xr_core": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:modafinil_xr_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:moisture_separator_reheater": {
       "numerator": 1635,
       "denominator": 8,
@@ -51202,10 +51692,30 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:moonshine": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:moonshine_still": {
+      "numerator": 1049,
+      "denominator": 1,
+      "source": "recipe jugcraft:moonshine_still"
+    },
     "jugcraft:mooring_post": {
       "numerator": 801,
       "denominator": 1,
       "source": "recipe jugcraft:mooring_post"
+    },
+    "jugcraft:morphine": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:morphine_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:mortar": {
       "numerator": 11,
@@ -51517,12 +52027,32 @@
       "denominator": 36,
       "source": "recipe jugcraft:muzzle_brake"
     },
+    "jugcraft:mycelium_catalyst": {
+      "numerator": 385,
+      "denominator": 24,
+      "source": "recipe jugcraft:mycelium_catalyst"
+    },
     "jugcraft:n2o4_tank": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
     "jugcraft:nachos": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:naloxone": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:naloxone_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:naloxone_stock": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -51713,8 +52243,8 @@
       "source": "recipe jugcraft:nouveau/allow_scroll"
     },
     "jugcraft:nouveau_alteration_table": {
-      "numerator": 2,
-      "denominator": 1,
+      "numerator": 4789,
+      "denominator": 9,
       "source": "recipe jugcraft:nouveau/alteration_table"
     },
     "jugcraft:nouveau_amethyst_golem_charm": {
@@ -51918,9 +52448,9 @@
       "source": "recipe jugcraft:nouveau/scry_to_blank_parchment"
     },
     "jugcraft:nouveau_blank_thread": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
+      "numerator": 4105,
+      "denominator": 6,
+      "source": "recipe jugcraft:nouveau/blank_thread"
     },
     "jugcraft:nouveau_blue_archwood_leaves": {
       "numerator": 1,
@@ -52688,9 +53218,9 @@
       "source": "recipe jugcraft:nouveau/magebloom_fiber"
     },
     "jugcraft:nouveau_magelight_torch": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
+      "numerator": 2051,
+      "denominator": 3,
+      "source": "recipe jugcraft:nouveau/magelight_torch"
     },
     "jugcraft:nouveau_manipulation_essence": {
       "numerator": 1,
@@ -52878,13 +53408,13 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:nouveau_repository": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
+      "numerator": 9344,
+      "denominator": 9,
+      "source": "recipe jugcraft:nouveau/repository"
     },
     "jugcraft:nouveau_repository_controller": {
-      "numerator": 5,
-      "denominator": 4,
+      "numerator": 37385,
+      "denominator": 36,
       "source": "recipe jugcraft:nouveau/repository_controller"
     },
     "jugcraft:nouveau_reset": {
@@ -53053,14 +53583,14 @@
       "source": "recipe jugcraft:nouveau/runic_chalk"
     },
     "jugcraft:nouveau_sconce": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
+      "numerator": 4105,
+      "denominator": 9,
+      "source": "recipe jugcraft:nouveau/sconce"
     },
     "jugcraft:nouveau_scribes_table": {
-      "numerator": 1,
-      "denominator": 1,
-      "source": "fallback (balance pending)"
+      "numerator": 4780,
+      "denominator": 9,
+      "source": "recipe jugcraft:nouveau/scribes_table"
     },
     "jugcraft:nouveau_scryer_scroll": {
       "numerator": 1,
@@ -53782,6 +54312,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:oak_cabinet"
     },
+    "jugcraft:oak_conditioning_insert": {
+      "numerator": 68,
+      "denominator": 1,
+      "source": "recipe jugcraft:oak_conditioning_insert"
+    },
     "jugcraft:oat_porridge": {
       "numerator": 25,
       "denominator": 3,
@@ -53906,6 +54441,16 @@
       "numerator": 6348,
       "denominator": 1,
       "source": "recipe jugcraft:oneiric_censer"
+    },
+    "jugcraft:oneiric_imprint": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:oneiric_stock": {
+      "numerator": 581,
+      "denominator": 1,
+      "source": "recipe jugcraft:oneiric_stock"
     },
     "jugcraft:onion": {
       "numerator": 1,
@@ -54038,6 +54583,11 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:organic_fertilizer_carrier": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:organic_process_stock_bucket": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -54618,6 +55168,16 @@
       "source": "recipe jugcraft:paper_cartridge"
     },
     "jugcraft:paprika": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:paracetamol": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:paracetamol_formula_plate": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -56262,6 +56822,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:patina_plate_stairs"
     },
+    "jugcraft:pattern_imprint": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:pea_soup": {
       "numerator": 73,
       "denominator": 1,
@@ -56327,6 +56892,16 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:penicillin": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:penicillin_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:penny_pistol": {
       "numerator": 517,
       "denominator": 1,
@@ -56346,6 +56921,11 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:perception_substrate": {
+      "numerator": 101,
+      "denominator": 1,
+      "source": "recipe jugcraft:perception_substrate"
     },
     "jugcraft:perforated_patina_plate": {
       "numerator": 1216,
@@ -56526,6 +57106,26 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:pharmaceutical_base": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:pharmaceutical_separator": {
+      "numerator": 9197,
+      "denominator": 3,
+      "source": "recipe jugcraft:pharmaceutical_separator"
+    },
+    "jugcraft:pharmaceutical_starch": {
+      "numerator": 66,
+      "denominator": 1,
+      "source": "recipe jugcraft:pharmaceutical_starch"
+    },
+    "jugcraft:pharmacy_patch_backing": {
+      "numerator": 101,
+      "denominator": 4,
+      "source": "recipe jugcraft:pharmacy_patch_backing"
     },
     "jugcraft:philosophers_stone": {
       "numerator": 12937,
@@ -57582,6 +58182,11 @@
       "denominator": 2,
       "source": "recipe jugcraft:precision_finisher"
     },
+    "jugcraft:precision_process_module": {
+      "numerator": 1609,
+      "denominator": 1,
+      "source": "recipe jugcraft:precision_process_module"
+    },
     "jugcraft:precision_shaft": {
       "numerator": 1,
       "denominator": 1,
@@ -57611,6 +58216,21 @@
       "numerator": 8707,
       "denominator": 4,
       "source": "recipe jugcraft:printer"
+    },
+    "jugcraft:prism_cactus_fruit": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:prism_cactus_seeds": {
+      "numerator": 241,
+      "denominator": 12,
+      "source": "recipe jugcraft:prism_cactus_seeds"
+    },
+    "jugcraft:prismatic_concentrate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:prize_ribbon_board": {
       "numerator": 9641,
@@ -57651,6 +58271,26 @@
       "numerator": 8264,
       "denominator": 1,
       "source": "recipe jugcraft:psalm_smg"
+    },
+    "jugcraft:psilocybin": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:psilocybin_active": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:psilocybin_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:psilocybin_stock": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:ptfe_fitting": {
       "numerator": 1,
@@ -58562,6 +59202,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:redleaf_medical_stock": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:redstar_cleaver": {
       "numerator": 1,
       "denominator": 1,
@@ -58612,6 +59257,26 @@
       "denominator": 1,
       "source": "reference tag minecraft:logs"
     },
+    "jugcraft:refined_beverage_stock_bucket": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:refined_spirits": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:refined_spirits_concentrate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:refined_spirits_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:reflex_sight": {
       "numerator": 6683,
       "denominator": 72,
@@ -58656,6 +59321,16 @@
       "numerator": 204,
       "denominator": 1,
       "source": "recipe jugcraft:regatta_flag"
+    },
+    "jugcraft:rehydration_salts": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:rehydration_salts_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:reinforced_concrete": {
       "numerator": 1,
@@ -58702,6 +59377,26 @@
       "denominator": 8,
       "source": "recipe jugcraft:relay_panel"
     },
+    "jugcraft:release_coater": {
+      "numerator": 46649,
+      "denominator": 8,
+      "source": "recipe jugcraft:release_coater"
+    },
+    "jugcraft:release_control_die": {
+      "numerator": 33713,
+      "denominator": 8,
+      "source": "recipe jugcraft:release_control_die"
+    },
+    "jugcraft:release_matrix": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:release_matrix_blend": {
+      "numerator": 281,
+      "denominator": 4,
+      "source": "recipe jugcraft:release_matrix_blend"
+    },
     "jugcraft:reliquary_shrine": {
       "numerator": 425,
       "denominator": 1,
@@ -58726,6 +59421,21 @@
       "numerator": 34,
       "denominator": 1,
       "source": "recipe jugcraft:research_notes"
+    },
+    "jugcraft:reserve_whiskey": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:reserve_whiskey_concentrate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:reserve_whiskey_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:resonant_ring": {
       "numerator": 1,
@@ -59393,6 +60103,21 @@
       "source": "reference tag minecraft:saplings"
     },
     "jugcraft:salamander_charm": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:salbutamol": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:salbutamol_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:salbutamol_stock": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -62577,12 +63302,32 @@
       "denominator": 4,
       "source": "recipe jugcraft:steel_zweihander"
     },
+    "jugcraft:sterile_carrier": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:sterile_filler": {
+      "numerator": 8191,
+      "denominator": 6,
+      "source": "recipe jugcraft:sterile_filler"
+    },
+    "jugcraft:sterile_vial": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:stillage_bucket": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
     "jugcraft:stimulant": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:stimulant_formula_plate": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -65947,6 +66692,11 @@
       "denominator": 3,
       "source": "recipe jugcraft:structural_module"
     },
+    "jugcraft:study_canvas": {
+      "numerator": 227,
+      "denominator": 1,
+      "source": "recipe jugcraft:study_canvas"
+    },
     "jugcraft:stuffed_potato": {
       "numerator": 66,
       "denominator": 1,
@@ -67887,6 +68637,26 @@
       "denominator": 1,
       "source": "recipe jugcraft:thallite_sword"
     },
+    "jugcraft:thc": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:thc_active": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:thc_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:thc_stock": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:theremin": {
       "numerator": 712,
       "denominator": 3,
@@ -68483,9 +69253,9 @@
       "source": "recipe jugcraft:newest/twigworks/allium_paper_lantern"
     },
     "jugcraft:twigworks_azalea_flowers": {
-      "numerator": 16,
-      "denominator": 1,
-      "source": "reference tag minecraft:small_flowers"
+      "numerator": 1,
+      "denominator": 6,
+      "source": "recipe jugcraft:newest/twigworks/azalea_flowers_from_flowering_azalea_leaves"
     },
     "jugcraft:twigworks_bamboo_leaves": {
       "numerator": 1,

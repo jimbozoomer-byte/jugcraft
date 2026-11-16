@@ -1662,11 +1662,11 @@ SCREEN_TEXT = {
     "bench.charge": "Radiance: %s / %s",
     "bench.help": "Hover a button to see what it needs",
     "focus.hud": "Focus %s/%s",
-    "config.title": "Jugcraft: Arcane Concordance",
+    "config.title": "Jugcraft display settings",
     "config.hud": "Show the Focus bar",
     "config.hud.tooltip": "Shows your Focus above the hotbar while you hold a Concordance instrument",
     "config.reduced_motion": "Reduced motion",
-    "config.reduced_motion.tooltip": "Fewer and calmer particles from Kindled light and the bench",
+    "config.reduced_motion.tooltip": "Calmer Concordance particles and interfaces; disables drug visual sway",
 }
 
 TOOLTIPS = {
@@ -1845,7 +1845,7 @@ def lang_entries(lang):
     # JEI's bench category (client/compat/JugcraftJeiPlugin): what a working leaves in the lantern.
     lang[f"jei.{MOD}.concordance.craft"] = "Kindled with %s Radiance; needs First Light"
     lang[f"jei.{MOD}.concordance.infuse"] = "+%s Radiance; needs First Light"
-    lang[f"key.{MOD}.concordance_config"] = "Concordance settings"
+    lang[f"key.{MOD}.concordance_config"] = "Jugcraft display settings"
 
 
 def bench_model():
