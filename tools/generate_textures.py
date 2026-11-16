@@ -733,6 +733,18 @@ def upgrade_card(accent, symbol):
     return img
 
 
+def module_icons():
+    return {
+        "efficiency_module": ((180, 240, 65), [(9, 4), (10, 4), (8, 5), (9, 5), (10, 5), (7, 6), (8, 6), (9, 6), (6, 7), (7, 7), (8, 7), (6, 8), (7, 8), (5, 9), (6, 9), (5, 10)]),
+        "overclock_module": ((255, 90, 40), [(8, 4), (7, 5), (6, 6), (7, 6), (8, 6), (9, 6), (8, 7), (7, 8), (6, 9)]),
+        "range_module": ((80, 170, 255), [(x, y) for x in (6, 8, 10) for y in (5, 7, 9) if (x, y) != (8, 7)] + [(8, 7)]),
+        "capacity_module": ((255, 200, 60), [(7, 4), (8, 4)] + [(x, y) for y in range(5, 11) for x in (6, 9)]
+                            + [(7, 10), (8, 10), (7, 8), (8, 8), (7, 9), (8, 9)]),
+        "silk_touch_module": ((120, 240, 200), [(8, 4), (7, 5), (9, 5), (6, 6), (10, 6), (6, 7), (10, 7), (7, 8), (9, 8), (8, 9)]),
+        "fortune_module": ((80, 220, 90), [(7, 5), (8, 5), (6, 6), (9, 6), (7, 7), (8, 7), (5, 8), (10, 8), (8, 8), (8, 9), (8, 10)]),
+    }
+
+
 def module_card(lamp, glyph):
     """A dieselpunk upgrade module: a gunmetal cartridge with a chrome rim and a hazard-striped grip, a green
     circuit window showing a glyph for what it does, and an indicator lamp."""
@@ -1418,14 +1430,7 @@ def machines():
     save_animation([gearbox_frame(i * 11.25) for i in range(4)], "brass_gearbox_turning")
     arrow = [(5, 8), (6, 8), (7, 8), (8, 8), (9, 8), (10, 8), (9, 7), (8, 6), (9, 9), (8, 10)]
     leaf = [(7, 7), (8, 7), (6, 8), (7, 8), (8, 8), (9, 8), (7, 9), (8, 9), (6, 10), (5, 10)]
-    glyphs = {
-        "overclock_module": ((255, 90, 40), [(8, 4), (7, 5), (6, 6), (7, 6), (8, 6), (9, 6), (8, 7), (7, 8), (6, 9)]),
-        "range_module": ((80, 170, 255), [(x, y) for x in (6, 8, 10) for y in (5, 7, 9) if (x, y) != (8, 7)] + [(8, 7)]),
-        "capacity_module": ((255, 200, 60), [(7, 4), (8, 4)] + [(x, y) for y in range(5, 11) for x in (6, 9)]
-                            + [(7, 10), (8, 10), (7, 8), (8, 8), (7, 9), (8, 9)]),
-        "silk_touch_module": ((120, 240, 200), [(8, 4), (7, 5), (9, 5), (6, 6), (10, 6), (6, 7), (10, 7), (7, 8), (9, 8), (8, 9)]),
-        "fortune_module": ((80, 220, 90), [(7, 5), (8, 5), (6, 6), (9, 6), (7, 7), (8, 7), (5, 8), (10, 8), (8, 8), (8, 9), (8, 10)]),
-    }
+    glyphs = module_icons()
     for module, (lamp, glyph) in glyphs.items():
         save(module_card(lamp, glyph), "item", module)
     save(upgrade_card([(160, 40, 30), (220, 70, 40)], arrow), "item", "speed_upgrade")

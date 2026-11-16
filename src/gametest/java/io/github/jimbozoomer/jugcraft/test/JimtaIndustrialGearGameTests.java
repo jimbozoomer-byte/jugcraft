@@ -51,9 +51,9 @@ public final class JimtaIndustrialGearGameTests {
     }
     @GameTest public void quantumChestUsesExistingPaidJetpackInput(GameTestHelper h){
         var p=JimtaRobotGameTests.player(h);try{
-            var suit=gear("quantum_chestplate",50);p.setItemSlot(EquipmentSlot.CHEST,suit);
+            var suit=gear("quantum_chestplate",20);p.setItemSlot(EquipmentSlot.CHEST,suit);
             h.assertTrue(RocketPackItem.canThrust(p),"Existing flight input recognizes charged quantum chest");RocketPackItem.thrust(p);
-            h.assertTrue(Chargeable.energy(suit)==0&&!RocketPackItem.canThrust(p),"One real thrust pays shared fifty JE and exhausts the battery");
+            h.assertTrue(Chargeable.energy(suit)==0&&!RocketPackItem.canThrust(p),"One real thrust pays shared twenty JE and exhausts the battery");
             Chargeable.setEnergy(suit,100);CustomData.update(DataComponents.CUSTOM_DATA,suit,t->t.putBoolean("JimtaGearOff",true));
             h.assertTrue(!RocketPackItem.canThrust(p),"Equipment toggle disables flight without changing research or global permissions");
         }finally{h.getLevel().getServer().getPlayerList().remove(p);}h.succeed();

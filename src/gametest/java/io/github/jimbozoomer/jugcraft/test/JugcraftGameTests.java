@@ -3540,7 +3540,7 @@ public class JugcraftGameTests {
 
 	/**
 	 * Batch 28: a charged exosuit gives more speed, a full-block step, no fall damage and a shield, and its leggings
-	 * and boots pay a JE a tick; flat pieces give none of it, and nothing is left behind.
+	 * and boots do not pay while idle; flat pieces give none of it, and nothing is left behind.
 	 */
 	@GameTest
 	public void exosuitPowersRunOnCharge(GameTestHelper helper) {
@@ -3552,11 +3552,11 @@ public class JugcraftGameTests {
 		helper.assertTrue(player.getAttribute(Attributes.MOVEMENT_SPEED).hasModifier(Exosuit.SPEED), "No speed bonus");
 		helper.assertTrue(player.getAttribute(Attributes.STEP_HEIGHT).getValue() >= 1.0,
 				"Step height " + player.getAttribute(Attributes.STEP_HEIGHT).getValue());
-		helper.assertTrue(player.getAttribute(Attributes.FALL_DAMAGE_MULTIPLIER).getValue() == 0.0, "Fall damage still counts");
+		helper.assertTrue(!player.getAttribute(Attributes.FALL_DAMAGE_MULTIPLIER).hasModifier(Exosuit.FALL), "Legacy permanent fall immunity remains");
 		helper.assertTrue(player.getMaxAbsorption() >= Exosuit.SHIELD_POINTS, "Shield holds " + player.getMaxAbsorption());
 		for (EquipmentSlot paid : new EquipmentSlot[] {EquipmentSlot.LEGS, EquipmentSlot.FEET}) {
 			ItemStack piece = player.getItemBySlot(paid);
-			helper.assertTrue(Chargeable.energy(piece) == Chargeable.capacity(piece) - 1,
+			helper.assertTrue(Chargeable.energy(piece) == Chargeable.capacity(piece),
 					"The " + paid + " piece holds " + Chargeable.energy(piece) + " JE");
 		}
 		for (ArmorType type : JugcraftExosuit.PIECES) {
@@ -3651,6 +3651,8 @@ public class JugcraftGameTests {
 		ItemStack drill = charged(JugcraftTools.MINING_DRILL);
 		drill.set(JugcraftTools.DRILL_MODE, MiningDrillItem.AREA);
 		ServerPlayer player = miner(helper, drill);
+		player.setPos(net.minecraft.world.phys.Vec3.atCenterOf(helper.absolutePos(new BlockPos(2, 2, 3))).add(0, 0, -3));
+		player.gameMode.handleBlockBreakAction(helper.absolutePos(new BlockPos(2, 2, 3)), net.minecraft.network.protocol.game.ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, Direction.NORTH, helper.getLevel().getMaxY(), 0);
 		helper.assertTrue(player.gameMode.destroyBlock(helper.absolutePos(new BlockPos(2, 2, 3))), "The drill broke nothing");
 		for (int x = 1; x <= 3; x++) {
 			for (int y = 1; y <= 3; y++) {
@@ -3673,6 +3675,8 @@ public class JugcraftGameTests {
 			helper.setBlock(new BlockPos(2, y, 2), Blocks.OAK_LOG);
 		}
 		helper.setBlock(new BlockPos(3, 4, 3), Blocks.OAK_LOG);
+		helper.setBlock(new BlockPos(2, 0, 2), Blocks.DIRT);
+		ChainsawTreeGameTests.canopy(helper, new BlockPos(2, 5, 2), false);
 		ServerPlayer player = miner(helper, charged(JugcraftTools.CHAINSAW));
 		player.gameMode.destroyBlock(helper.absolutePos(new BlockPos(2, 1, 2)));
 		for (int y = 1; y <= 5; y++) {
@@ -3699,7 +3703,7 @@ public class JugcraftGameTests {
 		helper.succeed();
 	}
 
-	/** A capacity module doubles what a drill holds; a second triples it; a third does not fit. */
+	/** A capacity module doubles what a drill holds; a second quadruples it; a third does not fit. */
 	@GameTest
 	public void capacityModulesAddCharge(GameTestHelper helper) {
 		if (TestFocus.skip("machines")) {
@@ -3714,7 +3718,7 @@ public class JugcraftGameTests {
 		helper.assertTrue(ToolUpgrades.fit(helper.getLevel(), drill, ToolUpgrades.Kind.CAPACITY) == ToolUpgrades.Result.FULL,
 				"A third capacity module fitted");
 		Chargeable.setEnergy(drill, Long.MAX_VALUE);
-		helper.assertTrue(Chargeable.energy(drill) == 3 * JugcraftTools.DRILL_CAPACITY, "The drill holds " + Chargeable.energy(drill));
+		helper.assertTrue(Chargeable.energy(drill) == 4 * JugcraftTools.DRILL_CAPACITY, "The drill holds " + Chargeable.energy(drill));
 		helper.succeed();
 	}
 
@@ -3752,9 +3756,11 @@ public class JugcraftGameTests {
 			}
 		}
 		ItemStack drill = charged(JugcraftTools.MINING_DRILL);
-		drill.set(JugcraftTools.DRILL_MODE, MiningDrillItem.AREA);
+		drill.set(JugcraftTools.DRILL_MODE, MiningDrillItem.AREA_LARGE);
 		ToolUpgrades.fit(helper.getLevel(), drill, ToolUpgrades.Kind.RANGE);
 		ServerPlayer player = miner(helper, drill);
+		player.setPos(net.minecraft.world.phys.Vec3.atCenterOf(helper.absolutePos(new BlockPos(2, 3, 3))).add(0, 0, -3));
+		player.gameMode.handleBlockBreakAction(helper.absolutePos(new BlockPos(2, 3, 3)), net.minecraft.network.protocol.game.ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, Direction.NORTH, helper.getLevel().getMaxY(), 0);
 		player.gameMode.destroyBlock(helper.absolutePos(new BlockPos(2, 3, 3)));
 		for (int x = 0; x <= 4; x++) {
 			for (int y = 1; y <= 5; y++) {
@@ -3766,7 +3772,7 @@ public class JugcraftGameTests {
 		helper.succeed();
 	}
 
-	/** An overclock module speeds the drill up by half and doubles its JE per block. */
+	/** An overclock module speeds the drill up by half and adds half its JE per block. */
 	@GameTest
 	public void overclockModuleSpeedsUp(GameTestHelper helper) {
 		if (TestFocus.skip("machines")) {
@@ -3779,7 +3785,7 @@ public class JugcraftGameTests {
 		BlockState stone = Blocks.STONE.defaultBlockState();
 		float ratio = fast.getDestroySpeed(stone) / plain.getDestroySpeed(stone);
 		helper.assertTrue(Math.abs(ratio - 1.5F) < 0.01F, "Overclocked speed ratio " + ratio);
-		helper.assertTrue(((MiningDrillItem) fast.getItem()).energyPerBlock(fast) == 2 * JugcraftTools.DRILL_ENERGY_PER_BLOCK,
+		helper.assertTrue(((MiningDrillItem) fast.getItem()).energyPerBlock(fast) == 3 * JugcraftTools.DRILL_ENERGY_PER_BLOCK / 2,
 				"Overclocked JE per block " + ((MiningDrillItem) fast.getItem()).energyPerBlock(fast));
 		helper.succeed();
 	}

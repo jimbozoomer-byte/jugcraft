@@ -20,6 +20,15 @@ public final class TestSeasonClock implements AutoCloseable {
 		return new TestSeasonClock(instant);
 	}
 
+	public static TestSeasonClock freeze() { return freeze(Instant.now()); }
+
+	static TestSeasonClock freezeAt(Instant instant) { return freeze(instant); }
+
+	public static @org.jspecify.annotations.Nullable Instant frozenInstant() {
+		Clock current = clock;
+		return current == null ? null : current.instant();
+	}
+
 	public static LocalDate date(ZoneId zone) {
 		Clock current = clock;
 		return current == null ? LocalDate.now(zone) : LocalDate.now(current.withZone(zone));
