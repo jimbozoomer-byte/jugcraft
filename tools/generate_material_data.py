@@ -1985,6 +1985,10 @@ def main():
     # Keep native player grips after both authored and owner-library model writers.
     import held_equipment
     held_equipment.generate()
+
+    # Last of the names: no two items may share one, whichever collection wrote it.
+    import display_names
+    display_names.apply(write, ASSETS)
     from generated_resource_cleanup import prune
     prune(RES, previous, WRITTEN_RESOURCES)
     # Include finished server recipes after removing obsolete generated recipes.
