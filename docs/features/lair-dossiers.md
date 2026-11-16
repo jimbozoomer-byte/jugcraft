@@ -66,6 +66,22 @@ shared credit already).
 **The route:** any keeper's first win does the First Light route's lair step, now all eleven (it read "any lair's keeper"
 before, but the dossiers knew only four).
 
+## Replay (E4 part 3)
+
+Part 3 makes a keeper quicker to face again, and says when a fight starts over:
+
+- **Every keeper now has a cheaper token.** The three that lacked one are:
+  - the Alpha Werewolf: his pelt and three bones make a Howling Totem with no silver;
+  - the Pumpkin King: his ember, one heirloom pumpkin and a hay bale make a Harvest Crown;
+  - the Headless Horseman: his lantern and two leather make a Hessian's Bridle.
+
+  Each token is optional after a win and shown in the keeper's dossier. A share holds one of the item and a token takes one, so none of them is a loop. The audits hold that nothing makes the pelt, the ember or the lantern.
+- **When a fight starts over.** Each met keeper's dossier says: "If nobody who can fight the keeper stays near for 10
+  seconds, the keeper goes back to where they waited, healed, their helpers gone, and the fight starts again from
+  nothing: what anyone did in it is forgotten". The seconds are each keeper's own `ABANDON_TICKS`
+  (`LairDossiers.resetSeconds`; `check_encyclopedia` holds every case to its own keeper's entity).
+- **How long each keeper takes:** [lair-loadouts.md](lair-loadouts.md).
+
 ## The page's room
 
 With four keepers the page's twelve recipe grids (`PageWriter.MAX_GRIDS`) were spoken for. The page now draws grids

@@ -120,6 +120,7 @@ He is no Witching Season boss: the Halloween event adds nothing to his loot.
 - **The Alpha Pelt:**
   - **For those who never fight him:** it tans into four leather (shapeless, one pelt; a werewolf's pelt gives two).
   - **Another hunt:** it counts as a werewolf's pelt (`#jugcraft:werewolf_pelts`), so it binds a Howling Totem, one pelt for one totem.
+  - **A cheaper totem** (since Concordance Chunk E, E4, [lair-dossiers.md](lair-dossiers.md)): his own pelt and three bones make a Howling Totem with no silver (shapeless, `howling_totem_from_alpha_pelt`). One pelt a share and one totem a pelt, so it is no loop. His dossier shows it as optional after a win.
 - **The Packfinder Charm:** a wolf's fang on a leather cord, set with a pale stone. Held in the offhand, every two seconds it makes every werewolf within 32 blocks glow for three seconds, for everyone to see: the werewolves of the woods on full-moon nights, his Packmates and he himself.
 - **The Alpha's Hood:** a costume worn on the head, his silver-grey wolf's head pulled over the wearer's: its crown and sides round the temples, his ears standing up from it (the right one torn short), and his long muzzle jutting over the brow. It counts for trick-or-treating and the costume contest.
 - **Moonfang and the Howler:** Arms VII's two Alpha Werewolf trophies, a sabre and a twinblade, until now in the creative tab only. They fight as the steel sabre and twinblade do, are epic, last twice as long as steel, and carry his boon, **Howl**: a hit cows the foe, weakening its blows (Weakness, 3 s).
