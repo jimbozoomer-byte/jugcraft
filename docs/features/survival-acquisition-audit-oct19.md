@@ -1,5 +1,7 @@
 # Survival recipes and acquisition chains
 
+**Update, 28 October 2026:** the 78 deferred armour and weapon entries now have survival sources: smithing, or their set's boss ([armor-tier-sources.md](armor-tier-sources.md)). The audit no longer marks them deferred.
+
 **Current implementation:** 124 completion recipes, 50 added source pools across
 both passes, and 77 repaired runtime container links. All 5,757 registered items
 are classified; the active survival graph has zero unresolved routes or invalid

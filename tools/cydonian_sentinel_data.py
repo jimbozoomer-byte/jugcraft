@@ -102,6 +102,9 @@ def loot(out, write):
         "type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": low, "max": high}}}], "rolls": 1}]
     pools.append(chance(cs.TROPHIES, cs.TROPHY_CHANCE))
     pools += [chance((item,), p) for item, p in cs.CHANCES.items()]
+    # Its armor set: one sure pool, so every share holds one piece, each as likely (armor-tier-sources.md).
+    pools.append({"entries": [{"type": "minecraft:item", "name": rid(piece)} for piece in cs.SET_PIECES],
+                  "rolls": 1})
     write(out.parent / "entities" / "cydonian_sentinel.json", {"type": "minecraft:gift",
                                                                "random_sequence": rid("entities/cydonian_sentinel"),
                                                                "pools": pools})

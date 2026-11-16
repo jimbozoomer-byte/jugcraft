@@ -1,5 +1,7 @@
 # Four armor designs: Dread Knight, Valkyrie, Wayfarer and Spartan
 
+**Update, 28 October 2026:** no longer creative-only. All four sets are smithed from a crafted pattern and a netherite piece ([armor-tier-sources.md](armor-tier-sources.md)).
+
 Status: implemented on `claude/epic-pascal-f8gpfg`, stacked on `claude/pharaoh-armor` (#246, itself on #241 and #240), since the sets share the lists they are added to. **Not yet compiled, game-tested or played:** the Java compiles only in CI, which has not run on this branch.
 Proposal issue: none. On 7 October 2026 the owner sent four armor designs of their own, a sheet of the four on a blank mannequin and a screenshot of each worn in game ("Here is art of new ones that I made!"), and asked: "I want this to just be for creating new armors for the modpack don't worry about crafting or implementation that way yet that will be decided later just create the armors for the modpack and make them usable in game."
 

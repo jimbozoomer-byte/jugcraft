@@ -1,0 +1,15 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    }
+  ],
+  "type": "minecraft:smithing_transform",
+  "template": "jugcraft:banana_pattern",
+  "base": "minecraft:iron_boots",
+  "addition": "minecraft:yellow_wool",
+  "result": {
+    "id": "jugcraft:banana_boots"
+  }
+}

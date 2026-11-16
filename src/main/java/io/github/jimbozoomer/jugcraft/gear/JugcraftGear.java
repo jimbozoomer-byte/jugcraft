@@ -9,6 +9,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Stream;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
@@ -96,6 +97,10 @@ public final class JugcraftGear {
 	public static final List<String> ARMOR_STYLES = List.of("steampunk", "kaiser", "earthbound_thallite");
 	/** Their smithing templates (tools/gear.py: style_templates()). */
 	public static final List<String> STYLE_TEMPLATES = List.of("steampunk_pattern", "kaiser_pattern", "earthbinding_template");
+	/** The smithed armor-only tiers' patterns (tools/gear.py: tier_patterns()); the boss tiers drop from their boss. */
+	public static final List<String> TIER_PATTERNS = List.of("bloodthorn_pattern", "reforged_white_diamond_pattern",
+			"sunset_gem_pattern", "pharaoh_pattern", "dread_knight_pattern", "valkyrie_pattern", "wayfarer_pattern",
+			"spartan_pattern", "berserker_pattern", "paladin_pattern", "templar_pattern", "banana_pattern", "scarab_pattern");
 	/** Steampunk armor: bronze armor in the steampunk look (goggles, gauge, boiler). */
 	public static final ArmorMaterial STEAMPUNK_ARMOR = restyle(BRONZE_ARMOR, "steampunk");
 	/** Kaiser armor: steel armor in the kaiserpunk parade dress of the Winged Cog. */
@@ -230,7 +235,7 @@ public final class JugcraftGear {
 		armorTier("reaper", REAPER_ARMOR, false);
 		armorTier("banana", BANANA_ARMOR, false);
 		armorTier("scarab", SCARAB_ARMOR, false);
-		for (String id : STYLE_TEMPLATES) {
+		for (String id : Stream.concat(STYLE_TEMPLATES.stream(), TIER_PATTERNS.stream()).toList()) {
 			ResourceKey<Item> key = ResourceKey.create(Registries.ITEM, Jugcraft.id(id));
 			TEMPLATES.put(id, Registry.register(BuiltInRegistries.ITEM, key,
 					new DescribedItem(new Item.Properties().setId(key).rarity(Rarity.UNCOMMON))));

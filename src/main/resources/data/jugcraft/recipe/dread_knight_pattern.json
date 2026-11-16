@@ -1,0 +1,24 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "NBN",
+    "BPB",
+    "NBN"
+  ],
+  "key": {
+    "N": "minecraft:gold_nugget",
+    "B": "minecraft:black_dye",
+    "P": "minecraft:paper"
+  },
+  "result": {
+    "id": "jugcraft:dread_knight_pattern",
+    "count": 4
+  }
+}
