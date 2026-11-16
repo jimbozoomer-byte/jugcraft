@@ -2808,6 +2808,8 @@ def write_all(write, assets, data, lang, condition, self_drop):
     alcohol_pharmacy.write_extras(write, assets, data, lang, condition)
     controlled_release.write_extras(write, assets, data, lang, condition)
     psychedelic_pharmacy.write_extras(write, assets, data, lang, condition)
+    import found_plastic
+    found_plastic.write_extras(write, assets, data, lang, condition)
     for kind, name, recipe in form_recipe_files(condition):
         write(data / "recipe" / kind / f"{name}.json", recipe)
 

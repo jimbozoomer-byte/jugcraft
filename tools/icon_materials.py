@@ -129,6 +129,13 @@ TICKET = Material((70, 30, 4), (120, 56, 8), (200, 98, 8), (238, 142, 22), (250,
 # A food: flat (no shine); a pale material, so its outline may be a third of its mid tone's luma.
 MERINGUE = Material((70, 62, 54), (118, 108, 96), (176, 168, 154), (216, 208, 192), (238, 233, 222), (251, 249, 243),
                     shine=False)
+# Found plastic (tools/item_icons/: the Old Plastic Bottle, Plastic Toy Duck and Broken Plastic Crate, loot broken
+# down for plastic pellets). Bottle plastic is a saturated pale blue, kept apart from the clear glass so a bottle of it
+# reads as plastic; toy yellow is a cool lemon, greener than gold. Neither is a metal, so neither shines.
+BOTTLE_PLASTIC = Material((22, 46, 76), (40, 80, 120), (54, 112, 170), (104, 168, 220), (164, 212, 244), (214, 238, 252),
+                          shine=False)
+TOY_YELLOW = Material((60, 58, 6), (100, 96, 14), (168, 170, 24), (222, 226, 50), (244, 248, 124), (252, 254, 200),
+                      shine=False)
 
 MATERIALS = {
     "tech_clay": Material((48, 22, 22), (78, 38, 38), (124, 57, 57), (168, 83, 83), (201, 116, 111), (228, 158, 146),
@@ -175,6 +182,7 @@ MATERIALS = {
     "thallite": THALLITE,
     # the Storm Roc's loot
     "roc_slate": ROC_SLATE, "storm_light": STORM_LIGHT,
+    "bottle_plastic": BOTTLE_PLASTIC, "toy_yellow": TOY_YELLOW,
 }
 
 # Pharmacy's matte plastics, tablets and liquid identity colors (Art Batch 1).
