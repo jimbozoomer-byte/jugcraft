@@ -695,6 +695,22 @@ public class PetroGameTests {
 		});
 	}
 
+	/** Naphtha polymerizes into plastic pellets too: a bucket gives four, as refinery gas does. */
+	@GameTest(maxTicks = 300)
+	public void reactorMakesPlasticPelletsFromNaphtha(GameTestHelper helper) {
+		if (TestFocus.skip("petro")) {
+			helper.succeed();
+			return;
+		}
+		MachineBlockEntity reactor = place(helper, MachineKind.POLYMERIZATION_REACTOR, new BlockPos(4, 1, 2));
+		reactor.tanks().input(0).fill(PetroFluids.NAPHTHA.source(), 1000);
+		helper.succeedWhen(() -> {
+			helper.assertTrue(reactor.getItem(0).is(PetroItems.PLASTIC_PELLETS) && reactor.getItem(0).getCount() == 4,
+					"Pellets: " + reactor.getItem(0));
+			helper.assertTrue(reactor.tanks().input(0).isResourceBlank(), "Naphtha left: " + reactor.tanks().input(0).millibuckets());
+		});
+	}
+
 	/**
 	 * Synthetic rubber (batch 14): the chemical reactor cracks a bucket of naphtha into 500 mB of butadiene, and the
 	 * polymerization reactor turns 500 mB of butadiene into four rubber.
