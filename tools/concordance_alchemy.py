@@ -532,7 +532,8 @@ PRODUCT_REWARD_ROUTES = {rid("tyrant_scale"): {"minecraft:magma_cream"},  # two 
                            rid("salvaged_coil"): {rid("mendvetch"), "minecraft:sugar"},
                            # Shard -> rare-earth oxide -> neodymium magnet -> prepared electric motors -> tools.
                            # As above, the recipe graph counts retained cutting tools as inputs to these products.
-                           rid("cydonian_shard"): {rid("mendvetch"), "minecraft:sugar"}}
+                           rid("cydonian_shard"): {rid("mendvetch"), "minecraft:sugar"},
+                           rid("roc_feather"): {rid("mendvetch"), "minecraft:sugar"}}
 ROMAN = ["I", "II", "III", "IV", "V"]
 
 

@@ -76,7 +76,7 @@ BOSSES = {
     # first eight, so its two trophies were made with it, with a boon of their own (Rust).
     "cydonian_sentinel": {"display": "the Cydonian Sentinel", "lair": "cydonian_sanctum"},
     "werewolf_alpha": {"display": "the Alpha Werewolf"},
-    "storm_roc": {"display": "the Storm Roc"},
+    "storm_roc": {"display": "the Storm Roc", "lair": "crown_of_thunder"},
     "abyssal_leviathan": {"display": "the Abyssal Leviathan"},
     # The Witching Season's first boss (docs/features/witching-season.md), fought in the Hollow Acre. A boss that is
     # built names its lair (`lair`, a tools/lairs.py LAIRS key), and the handbook lists it among the great foes met.
@@ -149,7 +149,7 @@ DREAD_MAX = 256        # the most foes remembered as lately filled with dread
 FRIGHTLESS = ("#c:bosses", "jugcraft:vesperine", "jugcraft:tatterlace", "jugcraft:yeti_king", "jugcraft:cinder_tyrant",
               "jugcraft:mire_hag", "jugcraft:crypt_lich", "jugcraft:iron_dreadnought", "jugcraft:alpha_werewolf",
               "jugcraft:cydonian_sentinel", "jugcraft:pumpkin_king", "jugcraft:headless_horseman",
-              "jugcraft:hessian_horseman")
+              "jugcraft:hessian_horseman", "jugcraft:storm_roc")
 DRAIN_HEAL = 1.0
 SHOCK_SHARE = 0.3
 SHOCK_RANGE = 4.0
