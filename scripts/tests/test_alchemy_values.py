@@ -133,8 +133,19 @@ class AlchemyValueTests(unittest.TestCase):
                                 3*value('minecraft:sugar')+value('minecraft:glass_bottle'))
         self.assertGreaterEqual(value('jugcraft:borax'),2*value('jugcraft:boric_acid'))
         self.assertGreaterEqual(2*value('jugcraft:silicone'),3*value('jugcraft:gasket'))
-        for stock in ('plastic_pellets','pvc_resin','hdpe_pellets'):
-            self.assertGreaterEqual(value('jugcraft:'+stock),2*value('jugcraft:plastic_sheet'))
+        # The recovered-pellet press makes one sheet; PVC pressing and extrusion
+        # make two per stock. Check the shipped quantities rather than assuming
+        # every route has the same yield.
+        recipes = ROOT/'src/main/resources/data/jugcraft/recipe'
+        for route in ('pressing/plastic_pellets', 'pressing/pvc_resin',
+                      'chemical_reaction/extrude_sheet', 'chemical_reaction/extrude_pvc_sheet'):
+            recipe = json.loads((recipes/(route+'.json')).read_text(encoding='utf-8'))
+            inputs = recipe.get('items', [{'ingredient': recipe.get('ingredient'),
+                                          'count': recipe.get('input_count', 1)}])
+            outputs = recipe.get('results', [recipe.get('result')])
+            spent = sum(value(entry['ingredient'])*entry.get('count', 1) for entry in inputs)
+            returned = sum(value(entry['id'])*entry.get('count', 1) for entry in outputs)
+            self.assertGreaterEqual(spent, returned, route)
 
     def test_boss_drops_that_break_down_do_not_create_essence(self):
         self.assertGreaterEqual(value('jugcraft:roc_feather'),4*value('minecraft:feather'))

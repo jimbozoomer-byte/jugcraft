@@ -121,9 +121,17 @@ def covered(texture, sources):
                for s in sources)
 
 
-def generate(write=None):
+def generate(write=None, retain=None):
     from imported_geometry_repairs import apply as repair_geometry
     repair_geometry()
+    if retain is not None:
+        # These authored meshes are maintained by exact repair records, rather
+        # than newest_model_finishing's plane pass. Retain their ownership in the
+        # shared manifest so cleanup cannot delete a still-referenced model.
+        from imported_geometry_repairs import MODELS, records
+        for relative in records():
+            path = MODELS / relative
+            retain(path)
     from newest_client_compat import finish
     finish()
     from newest_home import finish_item_models

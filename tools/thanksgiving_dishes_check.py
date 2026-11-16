@@ -224,7 +224,8 @@ def problems(repo):
             out.append(f"values.json {MOD}:{dish} must be {want.numerator}/{want.denominator} from \"recipe {MOD}:{dish}\", not {record}")
         if str(record.get("source", "")).startswith("fallback"):
             out.append(f"values.json {MOD}:{dish} must not sit at the one-essence fallback")
-    formable = set((_load(data / "tags" / "item" / "tablet_outputs.json") or {}).get("values", []))
+    formable = {entry if isinstance(entry, str) else entry["id"]
+                for entry in (_load(data / "tags" / "item" / "tablet_outputs.json") or {}).get("values", [])}
     shops = _read(data / "town" / "shops.json")
     for dish in td.DISHES:
         if f"{MOD}:{dish}" in formable:

@@ -14,6 +14,14 @@ import newest_original_art
 
 
 class ImportedGeometryTests(unittest.TestCase):
+    def test_regeneration_retains_every_hash_guarded_runtime_mesh(self):
+        generated = set(json.loads((ROOT/'tools/data/generated-material-resources.json').read_text()))
+        for relative in repairs.records():
+            resource = 'assets/jugcraft/models/' + relative
+            self.assertIn(resource, generated, 'Cleanup must retain repaired runtime models: ' + relative)
+            model = json.loads((repairs.MODELS/relative).read_text())
+            self.assertEqual(repairs.records()[relative]['after_sha256'], repairs.digest(model['elements']), relative)
+
     def test_wall_join_exception_does_not_hide_exterior_holes(self):
         path=repairs.MODELS/'newest/jugtania/block/livingwood_wall_side.json'
         box={'from':[5,0,0],'to':[11,14,8],

@@ -68,7 +68,9 @@ CLOSE_FACES = {
         (36, 'north'), (42, 'west'), (48, 'south'), (52, 'east'), (64, 'north'), (69, 'west'), (74, 'south'), (85, 'east')),
     'holidayworks/block/parent/decorated_christmas_tree_top': ((30, 'north'), (38, 'east'), (45, 'south'), (53, 'west')),
 }
-TARGETS = SEPARATE | BASKETS | CRYSTALS | CLOSE_FACES.keys()
+# Hash-guarded separation records own the remaining meshes, including hanging
+# basket handles. Do not unfold them again before the final manifest pass.
+TARGETS = {name for name in BASKETS if "_hanging" not in name} | CRYSTALS | CLOSE_FACES.keys()
 
 
 def owner_relative(relative):

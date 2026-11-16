@@ -519,7 +519,7 @@ def main():
     parser.add_argument("--base", help="compare against this revision (a pull request's base)")
     parser.add_argument("--head", default="HEAD")
     parser.add_argument("--all", action="store_true", help="run every class")
-    parser.add_argument("--shards", type=int, default=20)
+    parser.add_argument("--shards", type=int, default=24)
     parser.add_argument("--github-output", help="append shard0..shardN-1 (comma-separated classes) to this file")
     args = parser.parse_args()
 

@@ -235,6 +235,10 @@ jobs:
       shard17: ${{ steps.choose.outputs.shard17 }}
       shard18: ${{ steps.choose.outputs.shard18 }}
       shard19: ${{ steps.choose.outputs.shard19 }}
+      shard20: ${{ steps.choose.outputs.shard20 }}
+      shard21: ${{ steps.choose.outputs.shard21 }}
+      shard22: ${{ steps.choose.outputs.shard22 }}
+      shard23: ${{ steps.choose.outputs.shard23 }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
@@ -247,17 +251,17 @@ jobs:
         run: |
           if [ "$EVENT" = pull_request ]; then
             # The pull request's merge commit against its first parent, the base branch.
-            python3 tools/select_client_tests.py --base HEAD^1 --shards 20 --github-output "$GITHUB_OUTPUT"
+            python3 tools/select_client_tests.py --base HEAD^1 --shards 24 --github-output "$GITHUB_OUTPUT"
           else
-            python3 tools/select_client_tests.py --all --shards 20 --github-output "$GITHUB_OUTPUT"
+            python3 tools/select_client_tests.py --all --shards 24 --github-output "$GITHUB_OUTPUT"
           fi
 
   # A real game client with software rendering (Mesa): runs the chosen client game tests in src/gametest
-  # (JugcraftClientGameTests and the rest), which build showrooms and worlds and take screenshots. Twenty jobs share
+  # (JugcraftClientGameTests and the rest), which build showrooms and worlds and take screenshots. Twenty-four jobs share
   # them out (the plan job above), so every chosen class runs once; the "client" job below passes only when the plan
-  # and all twenty do. A job with no classes passes at once.
+  # and all twenty-four do. A job with no classes passes at once.
   client-shard:
-    name: client (shard ${{ matrix.shard }} of 20)
+    name: client (shard ${{ matrix.shard }} of 24)
     needs: plan
     runs-on: ubuntu-24.04
     # Keep the 60-minute limit; the expanded gun gallery has its own measured weight.
@@ -265,7 +269,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
     env:
       CLASSES: ${{ needs.plan.outputs[format('shard{0}', matrix.shard)] }}
       LIBGL_ALWAYS_SOFTWARE: 'true'
@@ -301,7 +305,7 @@ jobs:
           # Test options are written by runClientGameTest after Loom cleans its run directory.
           mkdir -p run
           echo "eula=true" > run/eula.txt
-      - name: Run client game tests (shard ${{ matrix.shard }} of 20)
+      - name: Run client game tests (shard ${{ matrix.shard }} of 24)
         if: env.CLASSES != ''
         run: |
           # Keep the native output and periodic thread dumps in the artifact;

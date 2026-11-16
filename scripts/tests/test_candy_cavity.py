@@ -43,9 +43,14 @@ class CandyCavityResources(unittest.TestCase):
     def test_generator_is_repeatable_and_keeps_saved_structure_definitions(self):
         paths = list((DATA / 'structure/cavern/candy').glob('*.nbt'))
         paths += list((DATA / 'worldgen').rglob('cavern_*.json'))
-        before = {p: hashlib.sha256(p.read_bytes()).digest() for p in paths}
+        # Text newlines differ between a Git checkout and native Windows writes;
+        # keep the JSON content exact after newline normalization and NBT bytes exact.
+        def digest(path):
+            data = path.read_text(encoding='utf-8').encode('utf-8') if path.suffix == '.json' else path.read_bytes()
+            return hashlib.sha256(data).digest()
+        before = {p: digest(p) for p in paths}
         candy_cavity_content.main()
-        self.assertEqual(before, {p: hashlib.sha256(p.read_bytes()).digest() for p in paths})
+        self.assertEqual(before, {p: digest(p) for p in paths})
         for name in ['cake_cave', 'donut_arch', 'soda_bottle']:
             self.assertTrue((DATA / f'worldgen/structure/cavern_{name}.json').exists())
             self.assertTrue((DATA / f'worldgen/template_pool/cavern_{name}.json').exists())

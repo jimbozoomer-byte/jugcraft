@@ -34,7 +34,7 @@ class AcquisitionRepairTests(unittest.TestCase):
         from newest_jugtania import D,mapped,recipe,read
         for name in ('terrasteel_helmet','terrasteel_chestplate','terrasteel_leggings','terrasteel_boots','water_rod'):
             source=read(D/'recipes'/(name+'.json'))
-            source['type']='jugcraft:botanical_water_shaped' if name=='water_rod' else 'jugcraft:botanical_armor_upgrade'
+            source['type']='jugcraft:botanical_water_crafting' if name=='water_rod' else 'jugcraft:botanical_armor_upgrade'
             self.assertEqual(recipe(mapped(source)),read(repairs.RES/'data/jugcraft/recipe/jugtania'/(name+'.json')))
 
 if __name__=='__main__':unittest.main()

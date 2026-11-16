@@ -44978,6 +44978,26 @@
       "key": "grounding_strap"
     },
     {
+      "item": "jugcraft:hades_boots",
+      "key": "hades_boots"
+    },
+    {
+      "item": "jugcraft:hades_chestplate",
+      "key": "hades_chestplate"
+    },
+    {
+      "item": "jugcraft:hades_helmet",
+      "key": "hades_helmet"
+    },
+    {
+      "item": "jugcraft:hades_leggings",
+      "key": "hades_leggings"
+    },
+    {
+      "item": "jugcraft:hades_scythe",
+      "key": "hades_scythe"
+    },
+    {
       "item": "jugcraft:hagmoss",
       "key": "hagmoss"
     },
@@ -45032,26 +45052,6 @@
     {
       "item": "jugcraft:lowfall_core",
       "key": "lowfall_core"
-    },
-    {
-      "item": "jugcraft:hades_boots",
-      "key": "hades_boots"
-    },
-    {
-      "item": "jugcraft:hades_chestplate",
-      "key": "hades_chestplate"
-    },
-    {
-      "item": "jugcraft:hades_helmet",
-      "key": "hades_helmet"
-    },
-    {
-      "item": "jugcraft:hades_leggings",
-      "key": "hades_leggings"
-    },
-    {
-      "item": "jugcraft:hades_scythe",
-      "key": "hades_scythe"
     },
     {
       "item": "jugcraft:magmaw",
@@ -45130,6 +45130,14 @@
       "key": "salvaged_coil"
     },
     {
+      "item": "jugcraft:sentinel_longsword",
+      "key": "sentinel_longsword"
+    },
+    {
+      "item": "jugcraft:sentinel_shield",
+      "key": "sentinel_shield"
+    },
+    {
       "item": "jugcraft:sentinels_visor",
       "key": "sentinels_visor"
     },
@@ -45152,6 +45160,10 @@
     {
       "item": "jugcraft:vesper_scythe",
       "key": "vesper_scythe"
+    },
+    {
+      "item": "jugcraft:wight_king_zweihander",
+      "key": "wight_king_zweihander"
     },
     {
       "item": "jugcraft:yeti_fur",

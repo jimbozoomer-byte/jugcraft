@@ -122,8 +122,8 @@ def formable_conversions():
 # metal/gem the tablet denies except the gravel sifter, whose cobblestone input is free from any cobblestone generator.
 # recipe: (essence spent, maximum essence returned)
 RECORDED_MINTING = {
-    # 1 mud (unvalued: one-essence fallback) -> 4 clay balls at the 16-essence reference.
-    'jugcraft/recipe/water_treatment/mud': (1, 64),
+    # 1 mud (reviewed decorative root: five essence) -> 4 clay balls at the 16-essence reference.
+    'jugcraft/recipe/water_treatment/mud': (5, 64),
     # Sawmill: 1 log (32) -> 6 planks (8 each) + a chanced sawdust (fallback 1); a crafting grid makes 4 planks.
     **{f'jugcraft/recipe/sawing/{wood}_logs': (32, 49) for wood in
        ('acacia', 'birch', 'cherry', 'dark_oak', 'jungle', 'mangrove', 'oak', 'pale_oak', 'spruce',
@@ -138,19 +138,8 @@ RECORDED_MINTING = {
     'jugcraft/recipe/sifting/gravel': (4, Fraction(548, 9)),
     # Sifter: 1 coarse dirt (5/2) -> dirt (1), 15% cotton seeds (1) and 10% wheat seeds (16), counted whole.
     'jugcraft/recipe/sifting/coarse_dirt': (Fraction(5, 2), 18),
-    # Decorative outputs still at the one-essence fallback, made several at a time from a one-essence supply.
-    'jugcraft/recipe/cavern_cinder_brick': (8, 16),
-    'jugcraft/recipe/newest/homeworks/mud_fountain_shaped': (5, 6),
-    'jugcraft/recipe/newest/homeworks/mud_fountain_spout_shaped': (3, 4),
-    'jugcraft/recipe/newest/homeworks/mud_fountain_spout_stonecutting': (1, 6),
-    **{f'jugcraft/recipe/newest/pathworks/mud_brick_{cut}': (1, 4) for cut in
-       ('basket_weave_paving', 'clover_paving', 'crystal_floor_path', 'diamond_paving', 'dumble_paving', 'flagstone_path',
-        'honeycomb_paving', 'running_bond_path', 'square_paving', 'strewn_rocky_path', 'windmill_weave_path')},
-    **{f'jugcraft/recipe/newest/pathworks/mud_brick_{cut}': (1, 2) for cut in
-       ('crystal_floor_slab', 'flagstone_slab', 'running_bond_slab', 'windmill_weave_slab')},
-    'jugcraft/recipe/newest/stairworks/mud_brick_platform': (1, 3),
-    'jugcraft/recipe/newest/stairworks/mud_brick_balcony': (1, 2),
-    'jugcraft/recipe/newest/stairworks/mud_brick_railing': (1, 2),
+    # The combined catalogue derives cinder bricks and mud furnishings from
+    # their recipes. Their 22 former fallback-price exceptions are now closed.
 }
 
 
@@ -252,7 +241,7 @@ class TransmutationOutputConversionTests(unittest.TestCase):
     def test_conversion_audit_detects_a_minting_recipe(self):
         """Negative case: the scan sees a formable input that returns more essence than it costs."""
         found = {name: (spent, returned) for name, spent, returned in formable_conversions()}
-        self.assertEqual((1, 64), found['jugcraft/recipe/water_treatment/mud'])
+        self.assertEqual((5, 64), found['jugcraft/recipe/water_treatment/mud'])
         # A conserving conversion is scanned too and passes: dyed wool washes back to white wool, 48 for 48.
         self.assertEqual((48, 48), found['jugcraft/recipe/jimtafacts_industry/extract_red_wool'])
 

@@ -1992,7 +1992,7 @@ def main():
     import newest_model_finishing
     newest_model_finishing.generate(write)
     import model_atlas
-    model_atlas.generate(write)
+    model_atlas.generate(write, retain=lambda path: WRITTEN_RESOURCES.add(path.relative_to(RES).as_posix()))
     # Keep native player grips after both authored and owner-library model writers.
     import held_equipment
     held_equipment.generate()

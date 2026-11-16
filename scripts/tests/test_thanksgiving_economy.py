@@ -103,7 +103,8 @@ class ThanksgivingEconomy(unittest.TestCase):
                 self.assertEqual(value("jugcraft:" + item), recipe_value(recipe(item)))
 
     def test_only_inexpensive_decor_is_formable_and_no_shop_buys_it(self):
-        formable = set(load(DATA / "jugcraft" / "tags" / "item" / "tablet_outputs.json")["values"])
+        formable = {entry if isinstance(entry, str) else entry["id"]
+                    for entry in load(DATA / "jugcraft" / "tags" / "item" / "tablet_outputs.json")["values"]}
         shops = load(DATA / "jugcraft" / "town" / "shops.json")["shops"]
         bought = {offer["item"] for shop in shops.values() for offer in shop.get("buys", [])}
         for item in ALL_NEW + REFINED:

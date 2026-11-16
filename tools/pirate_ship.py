@@ -1194,7 +1194,8 @@ def merge_lang(text):
     newline)."""
     import bisect
     pairs = json.loads(text, object_pairs_hook=list)
-    if json.dumps(dict(pairs), indent=2, ensure_ascii=False) + "\n" != text:
+    ascii_layout = json.dumps(dict(pairs), indent=2, ensure_ascii=True) + "\n" == text
+    if not ascii_layout and json.dumps(dict(pairs), indent=2, ensure_ascii=False) + "\n" != text:
         raise ValueError("en_us.json is not in the generators' layout")
     keys = [k for k, v in pairs]
     for key, value in LANG.items():
@@ -1207,7 +1208,7 @@ def merge_lang(text):
         at = bisect.bisect_left(keys, key, 0, sorted_end)
         pairs.insert(at, [key, value])
         keys.insert(at, key)
-    return json.dumps(dict(pairs), indent=2, ensure_ascii=False) + "\n"
+    return json.dumps(dict(pairs), indent=2, ensure_ascii=ascii_layout) + "\n"
 
 
 def write_all(write, assets, data, lang, condition):

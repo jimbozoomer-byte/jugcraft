@@ -521,6 +521,7 @@ LAIRS = {
         "ambient_light_color": "#2a3448", "sky_light_color": "#5a6a90",
         "music": "minecraft:music.overworld.old_growth_taiga",
         "ambient_light": 0.2,
+        "motes": ("minecraft:white_ash", 0.003),
     },
     "glass_chapel": {
         "display": "The Glass Chapel",

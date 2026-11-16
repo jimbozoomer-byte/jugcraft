@@ -54,8 +54,9 @@ def texture_sources():
 def original_texture(path):
     """An exception applies only while the exact supplied pixels remain intact."""
     path = Path(path).resolve()
-    if not path.is_relative_to(ROOT): return False
-    source = texture_sources().get(path.relative_to(ROOT).as_posix())
+    root = ROOT.resolve()
+    if not path.is_relative_to(root): return False
+    source = texture_sources().get(path.relative_to(root).as_posix())
     return bool(source and (ROOT / source).is_file() and path.read_bytes() == (ROOT / source).read_bytes())
 
 def original_inward_shell(path, elements):
