@@ -354,6 +354,16 @@
           }
         },
         {
+          "title": "Mineral Sand Processing",
+          "icon": "jugcraft:rare_earth_sand",
+          "text": "Four sands, familiar machines, Short zirconia tooling, Independent rare-earth recovery and more",
+          "link": {
+            "type": "handbook",
+            "chapter": 20,
+            "page": 0
+          }
+        },
+        {
           "title": "Stainless and Structural Alloys",
           "icon": "jugcraft:stainless_steel_ingot",
           "text": "Regional chromite to stainless steel, Chemical vessels and precision valves, Lightweight structural alloy and more",

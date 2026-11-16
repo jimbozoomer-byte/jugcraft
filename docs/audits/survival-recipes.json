@@ -250,10 +250,10 @@
     "jugcraft:ore_washing": 23,
     "jugcraft:polymerization": 4,
     "jugcraft:pressing": 26,
-    "jugcraft:pulverizing": 57,
+    "jugcraft:pulverizing": 58,
     "jugcraft:rocket_assembly": 23,
     "jugcraft:sifting": 3,
-    "jugcraft:starter_working": 16,
+    "jugcraft:starter_working": 18,
     "jugcraft:steelmaking": 1,
     "jugcraft:supps_antique_book": 1,
     "jugcraft:supps_bubble_fill": 1,
@@ -28238,6 +28238,28 @@
         "src/main/resources/data/jugcraft/recipe/ceramic_insulator.json",
         "src/main/resources/data/jugcraft/recipe/ceramics_placed_insulators.json",
         "src/main/resources/data/jugcraft/recipe/starter_workshop/fire_insulators.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:cerium_oxide",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/chemical_reaction/sands_rare_earth_separation.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:cerium_polishing_head",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/sands_cerium_polishing_head.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -56459,11 +56481,12 @@
       "item": "jugcraft:efficiency_upgrade",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
-      "route_count": 3,
+      "route_count": 4,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/ceramics_efficiency_upgrade.json",
         "src/main/resources/data/jugcraft/recipe/efficiency_upgrade.json",
-        "src/main/resources/data/jugcraft/recipe/electronics_efficiency.json"
+        "src/main/resources/data/jugcraft/recipe/electronics_efficiency.json",
+        "src/main/resources/data/jugcraft/recipe/sands_efficiency_upgrade.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -61315,9 +61338,10 @@
       "item": "jugcraft:fired_zirconia_blank",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
-      "route_count": 1,
+      "route_count": 2,
       "routes": [
-        "src/main/resources/data/jugcraft/recipe/chemical_reaction/fire_zirconia.json"
+        "src/main/resources/data/jugcraft/recipe/chemical_reaction/fire_zirconia.json",
+        "src/main/resources/data/jugcraft/recipe/chemical_reaction/sands_fire_zirconia_blank.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -74053,6 +74077,28 @@
       "blocked_by": []
     },
     {
+      "item": "jugcraft:garnet_abrasive_head",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/sands_garnet_abrasive_head.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:garnet_grit",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/pulverizing/sands_garnet_grit.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
       "item": "jugcraft:garnet_sand",
       "status": "natural_or_interaction_source",
       "reason": "",
@@ -74064,6 +74110,17 @@
           "source": "src/main/resources/data/jugcraft/worldgen/feature/ore_garnet_sand.json"
         }
       ],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:garnet_sanding_block",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/sands_garnet_sanding_block.json"
+      ],
+      "evidence": [],
       "blocked_by": []
     },
     {
@@ -134360,10 +134417,22 @@
       "item": "jugcraft:neodymium_magnet",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
-      "route_count": 2,
+      "route_count": 3,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/alloying/neodymium_magnet.json",
-        "src/main/resources/data/jugcraft/recipe/alloying/neodymium_magnet_from_ferroboron.json"
+        "src/main/resources/data/jugcraft/recipe/alloying/neodymium_magnet_from_ferroboron.json",
+        "src/main/resources/data/jugcraft/recipe/alloying/sands_neodymium_magnet.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
+      "item": "jugcraft:neodymium_oxide",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/chemical_reaction/sands_rare_earth_separation.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -152682,9 +152751,10 @@
       "item": "jugcraft:polished_lens",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
-      "route_count": 1,
+      "route_count": 2,
       "routes": [
-        "src/main/resources/data/jugcraft/recipe/chemical_reaction/finish_polished_lens.json"
+        "src/main/resources/data/jugcraft/recipe/chemical_reaction/finish_polished_lens.json",
+        "src/main/resources/data/jugcraft/recipe/chemical_reaction/sands_finish_lens_cerium.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -153091,9 +153161,10 @@
       "item": "jugcraft:precision_shaft",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
-      "route_count": 1,
+      "route_count": 2,
       "routes": [
-        "src/main/resources/data/jugcraft/recipe/chemical_reaction/finish_precision_shaft.json"
+        "src/main/resources/data/jugcraft/recipe/chemical_reaction/finish_precision_shaft.json",
+        "src/main/resources/data/jugcraft/recipe/chemical_reaction/sands_finish_shaft_garnet.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -154231,10 +154302,11 @@
       "item": "jugcraft:rare_earth_oxide",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
-      "route_count": 4,
+      "route_count": 5,
       "routes": [
         "src/main/resources/data/jugcraft/recipe/arc_smelting/monazite.json",
         "src/main/resources/data/jugcraft/recipe/chemical_reaction/rare_earth_oxide.json",
+        "src/main/resources/data/jugcraft/recipe/chemical_reaction/sands_mixed_rare_earth_oxide.json",
         "src/main/resources/data/jugcraft/recipe/crushing/cydonian_shard.json",
         "src/main/resources/data/jugcraft/recipe/rare_earth_oxide.json"
       ],
@@ -154735,8 +154807,9 @@
       "item": "jugcraft:raw_titanium",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
-      "route_count": 3,
+      "route_count": 4,
       "routes": [
+        "src/main/resources/data/jugcraft/recipe/chemical_reaction/sands_titanium_feed.json",
         "src/main/resources/data/jugcraft/recipe/crushing/deepslate_titanium_ore.json",
         "src/main/resources/data/jugcraft/recipe/crushing/titanium_ore.json",
         "src/main/resources/data/jugcraft/recipe/raw_titanium_from_raw_titanium_block.json"
@@ -195248,6 +195321,17 @@
       "blocked_by": []
     },
     {
+      "item": "jugcraft:yttrium_oxide",
+      "status": "chain_with_acquisition_evidence",
+      "reason": "",
+      "route_count": 1,
+      "routes": [
+        "src/main/resources/data/jugcraft/recipe/chemical_reaction/sands_rare_earth_separation.json"
+      ],
+      "evidence": [],
+      "blocked_by": []
+    },
+    {
       "item": "jugcraft:yucca_fence",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
@@ -195509,9 +195593,11 @@
       "item": "jugcraft:zirconia_powder",
       "status": "chain_with_acquisition_evidence",
       "reason": "",
-      "route_count": 1,
+      "route_count": 3,
       "routes": [
-        "src/main/resources/data/jugcraft/recipe/chemical_reaction/calcine_zirconia.json"
+        "src/main/resources/data/jugcraft/recipe/chemical_reaction/calcine_zirconia.json",
+        "src/main/resources/data/jugcraft/recipe/chemical_reaction/sands_zirconia_from_concentrate.json",
+        "src/main/resources/data/jugcraft/recipe/chemical_reaction/sands_zirconia_powder.json"
       ],
       "evidence": [],
       "blocked_by": []
@@ -199625,6 +199711,24 @@
       "inputs": [
         [
           "jugcraft:rare_earth_oxide"
+        ],
+        [
+          "jugcraft:ferroboron"
+        ],
+        [
+          "jugcraft:alloy_smelter"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:neodymium_magnet"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/alloying/sands_neodymium_magnet.json",
+      "type": "jugcraft:alloying",
+      "inputs": [
+        [
+          "jugcraft:neodymium_oxide"
         ],
         [
           "jugcraft:ferroboron"
@@ -240354,6 +240458,184 @@
       ],
       "outputs": [
         "jugcraft:salicylic_acid"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/chemical_reaction/sands_finish_lens_cerium.json",
+      "type": "jugcraft:chemical_reaction",
+      "inputs": [
+        [
+          "jugcraft:optical_blank"
+        ],
+        [
+          "jugcraft:cerium_polishing_head"
+        ],
+        [
+          "jugcraft:precision_finisher"
+        ],
+        [
+          "fluid:minecraft:water"
+        ]
+      ],
+      "outputs": [
+        "fluid:minecraft:water",
+        "jugcraft:polished_lens"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/chemical_reaction/sands_finish_shaft_garnet.json",
+      "type": "jugcraft:chemical_reaction",
+      "inputs": [
+        [
+          "jugcraft:steel_shaft_blank"
+        ],
+        [
+          "jugcraft:garnet_abrasive_head"
+        ],
+        [
+          "jugcraft:precision_finisher"
+        ],
+        [
+          "fluid:minecraft:water"
+        ]
+      ],
+      "outputs": [
+        "fluid:minecraft:water",
+        "jugcraft:precision_shaft"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/chemical_reaction/sands_fire_zirconia_blank.json",
+      "type": "jugcraft:chemical_reaction",
+      "inputs": [
+        [
+          "jugcraft:zirconia_powder"
+        ],
+        [
+          "jugcraft:alumina_calciner"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:fired_zirconia_blank"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/chemical_reaction/sands_mixed_rare_earth_oxide.json",
+      "type": "jugcraft:chemical_reaction",
+      "inputs": [
+        [
+          "jugcraft:rare_earth_sand"
+        ],
+        [
+          "jugcraft:mineral_conditioner"
+        ],
+        [
+          "fluid:minecraft:water"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:rare_earth_oxide"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/chemical_reaction/sands_rare_earth_separation.json",
+      "type": "jugcraft:chemical_reaction",
+      "inputs": [
+        [
+          "jugcraft:rare_earth_oxide"
+        ],
+        [
+          "jugcraft:chemical_reactor"
+        ],
+        [
+          "fluid:jugcraft:sulfuric_acid"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:cerium_oxide",
+        "jugcraft:neodymium_oxide",
+        "jugcraft:yttrium_oxide"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/chemical_reaction/sands_titanium_feed.json",
+      "type": "jugcraft:chemical_reaction",
+      "inputs": [
+        [
+          "jugcraft:titanium_sand"
+        ],
+        [
+          "jugcraft:mineral_conditioner"
+        ],
+        [
+          "fluid:minecraft:water"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:raw_titanium"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/chemical_reaction/sands_titanium_white_dye.json",
+      "type": "jugcraft:chemical_reaction",
+      "inputs": [
+        [
+          "jugcraft:raw_titanium"
+        ],
+        [
+          "jugcraft:chemical_reactor"
+        ],
+        [
+          "fluid:jugcraft:sulfuric_acid"
+        ],
+        [
+          "fluid:minecraft:water"
+        ]
+      ],
+      "outputs": [
+        "minecraft:white_dye"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/chemical_reaction/sands_zirconia_from_concentrate.json",
+      "type": "jugcraft:chemical_reaction",
+      "inputs": [
+        [
+          "jugcraft:zircon_concentrate"
+        ],
+        [
+          "jugcraft:chemical_reactor"
+        ],
+        [
+          "fluid:jugcraft:lye"
+        ],
+        [
+          "fluid:minecraft:water"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:zirconia_powder"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/chemical_reaction/sands_zirconia_powder.json",
+      "type": "jugcraft:chemical_reaction",
+      "inputs": [
+        [
+          "jugcraft:zircon_sand"
+        ],
+        [
+          "jugcraft:chemical_reactor"
+        ],
+        [
+          "fluid:jugcraft:lye"
+        ],
+        [
+          "fluid:minecraft:water"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:zirconia_powder"
       ]
     },
     {
@@ -590248,6 +590530,21 @@
       ]
     },
     {
+      "source": "src/main/resources/data/jugcraft/recipe/pulverizing/sands_garnet_grit.json",
+      "type": "jugcraft:pulverizing",
+      "inputs": [
+        [
+          "jugcraft:garnet_sand"
+        ],
+        [
+          "jugcraft:pulverizer"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:garnet_grit"
+      ]
+    },
+    {
       "source": "src/main/resources/data/jugcraft/recipe/pulverizing/silver_ingot.json",
       "type": "jugcraft:pulverizing",
       "inputs": [
@@ -600820,6 +601117,157 @@
       ]
     },
     {
+      "source": "src/main/resources/data/jugcraft/recipe/sands_cerium_polishing_head.json",
+      "type": "minecraft:crafting_shapeless",
+      "inputs": [
+        [
+          "jugcraft:cerium_oxide"
+        ],
+        [
+          "jugcraft:cerium_oxide"
+        ],
+        [
+          "jugcraft:polishing_head"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:cerium_polishing_head"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/sands_efficiency_upgrade.json",
+      "type": "minecraft:crafting_shaped",
+      "inputs": [
+        [
+          "jugcraft:copper_wire"
+        ],
+        [
+          "jugcraft:yttrium_oxide"
+        ],
+        [
+          "jugcraft:copper_wire"
+        ],
+        [
+          "jugcraft:steel_plate"
+        ],
+        [
+          "jugcraft:basic_circuit"
+        ],
+        [
+          "jugcraft:steel_plate"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:efficiency_upgrade"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/sands_garnet_abrasive_head.json",
+      "type": "minecraft:crafting_shapeless",
+      "inputs": [
+        [
+          "jugcraft:garnet_grit"
+        ],
+        [
+          "jugcraft:garnet_grit"
+        ],
+        [
+          "jugcraft:garnet_grit"
+        ],
+        [
+          "jugcraft:garnet_grit"
+        ],
+        [
+          "minecraft:iron_ingot"
+        ],
+        [
+          "jugcraft:copper_wire"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:garnet_abrasive_head"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/sands_garnet_sanding_block.json",
+      "type": "minecraft:crafting_shapeless",
+      "inputs": [
+        [
+          "jugcraft:garnet_grit"
+        ],
+        [
+          "minecraft:black_wool",
+          "minecraft:blue_wool",
+          "minecraft:brown_wool",
+          "minecraft:cyan_wool",
+          "minecraft:gray_wool",
+          "minecraft:green_wool",
+          "minecraft:light_blue_wool",
+          "minecraft:light_gray_wool",
+          "minecraft:lime_wool",
+          "minecraft:magenta_wool",
+          "minecraft:orange_wool",
+          "minecraft:pink_wool",
+          "minecraft:purple_wool",
+          "minecraft:red_wool",
+          "minecraft:white_wool",
+          "minecraft:yellow_wool"
+        ],
+        [
+          "jugcraft:aged_maple_planks",
+          "jugcraft:aged_pine_planks",
+          "jugcraft:aspen_planks",
+          "jugcraft:bald_cypress_planks",
+          "jugcraft:baobab_planks",
+          "jugcraft:cedar_planks",
+          "jugcraft:chestnut_planks",
+          "jugcraft:cypress_planks",
+          "jugcraft:dead_planks",
+          "jugcraft:dragonblood_planks",
+          "jugcraft:ecology_walnut_planks",
+          "jugcraft:eucalyptus_planks",
+          "jugcraft:fig_planks",
+          "jugcraft:fir_planks",
+          "jugcraft:fruitwood_planks",
+          "jugcraft:holly_planks",
+          "jugcraft:jacaranda_planks",
+          "jugcraft:juniper_planks",
+          "jugcraft:larch_planks",
+          "jugcraft:magnolia_planks",
+          "jugcraft:mahogany_planks",
+          "jugcraft:mango_planks",
+          "jugcraft:maple_planks",
+          "jugcraft:nouveau_archwood_planks",
+          "jugcraft:olive_planks",
+          "jugcraft:palm_planks",
+          "jugcraft:persimmon_planks",
+          "jugcraft:pine_planks",
+          "jugcraft:redwood_planks",
+          "jugcraft:tamarisk_planks",
+          "jugcraft:walnut_planks",
+          "jugcraft:willow_planks",
+          "jugcraft:yew_planks",
+          "jugcraft:yucca_planks",
+          "minecraft:acacia_planks",
+          "minecraft:bamboo_planks",
+          "minecraft:birch_planks",
+          "minecraft:cherry_planks",
+          "minecraft:crimson_planks",
+          "minecraft:dark_oak_planks",
+          "minecraft:jungle_planks",
+          "minecraft:mangrove_planks",
+          "minecraft:oak_planks",
+          "minecraft:pale_oak_planks",
+          "minecraft:poplar_planks",
+          "minecraft:spruce_planks",
+          "minecraft:warped_planks"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:garnet_sanding_block"
+      ]
+    },
+    {
       "source": "src/main/resources/data/jugcraft/recipe/sapper_revolver.json",
       "type": "minecraft:crafting_shaped",
       "inputs": [
@@ -608318,6 +608766,42 @@
       ],
       "outputs": [
         "jugcraft:lead_plate"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/sands_smooth_red_sandstone.json",
+      "type": "jugcraft:starter_working",
+      "inputs": [
+        [
+          "minecraft:cut_red_sandstone"
+        ],
+        [
+          "jugcraft:garnet_sanding_block"
+        ],
+        [
+          "jugcraft:workshop_bench"
+        ]
+      ],
+      "outputs": [
+        "minecraft:smooth_red_sandstone"
+      ]
+    },
+    {
+      "source": "src/main/resources/data/jugcraft/recipe/starter_workshop/sands_smooth_sandstone.json",
+      "type": "jugcraft:starter_working",
+      "inputs": [
+        [
+          "minecraft:cut_sandstone"
+        ],
+        [
+          "jugcraft:garnet_sanding_block"
+        ],
+        [
+          "jugcraft:workshop_bench"
+        ]
+      ],
+      "outputs": [
+        "minecraft:smooth_sandstone"
       ]
     },
     {
@@ -792146,7 +792630,7 @@
         ]
       ],
       "outputs": [
-        "jugcraft:caramel"
+        "jugcraft:hard_candy"
       ]
     },
     {
@@ -792374,7 +792858,61 @@
         ]
       ],
       "outputs": [
+        "jugcraft:cream_caramel"
+      ]
+    },
+    {
+      "source": "tools/agriculture.py:CANDY/cream",
+      "type": "candy_temperature",
+      "inputs": [
+        [
+          "jugcraft:candy_kettle"
+        ],
+        [
+          "jugcraft:candy_tray"
+        ],
+        [
+          "minecraft:sugar"
+        ],
+        [
+          "minecraft:water_bucket"
+        ],
+        [
+          "minecraft:campfire"
+        ],
+        [
+          "minecraft:milk_bucket"
+        ]
+      ],
+      "outputs": [
         "jugcraft:burnt_sugar"
+      ]
+    },
+    {
+      "source": "tools/agriculture.py:CANDY/cream",
+      "type": "candy_temperature",
+      "inputs": [
+        [
+          "jugcraft:candy_kettle"
+        ],
+        [
+          "jugcraft:candy_tray"
+        ],
+        [
+          "minecraft:sugar"
+        ],
+        [
+          "minecraft:water_bucket"
+        ],
+        [
+          "minecraft:campfire"
+        ],
+        [
+          "minecraft:milk_bucket"
+        ]
+      ],
+      "outputs": [
+        "jugcraft:fudge"
       ]
     },
     {

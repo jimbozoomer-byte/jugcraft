@@ -1,6 +1,7 @@
 package io.github.jimbozoomer.jugcraft.workshop;
 
 import io.github.jimbozoomer.jugcraft.config.JugcraftConfig;
+import io.github.jimbozoomer.jugcraft.chemistry.PetroItems;
 import io.github.jimbozoomer.jugcraft.machine.MachineInput;
 import io.github.jimbozoomer.jugcraft.machine.form.WorkLane;
 import java.util.*;
@@ -216,7 +217,9 @@ public final class WorkshopBlockEntity extends BaseContainerBlockEntity implemen
     @Override public boolean canPlaceItem(int slot, ItemStack stack) {
         if (locked(slot)) return false;
         return switch (slot) {
-            case TOOL -> station() == 0 && (stack.is(JugcraftWorkshop.ITEMS.get("workshop_hammer")) || stack.is(JugcraftWorkshop.ITEMS.get("wire_cutters")) || stack.is(JugcraftWorkshop.ITEMS.get("soldering_tool")));
+            case TOOL -> station() == 0 && (stack.is(JugcraftWorkshop.ITEMS.get("workshop_hammer"))
+                || stack.is(JugcraftWorkshop.ITEMS.get("wire_cutters")) || stack.is(JugcraftWorkshop.ITEMS.get("soldering_tool"))
+                || stack.is(PetroItems.GARNET_SANDING_BLOCK));
             case FUEL -> stack.has(DataComponents.COOKING_FUEL);
             case LINING -> station() == 2 && stack.is(JugcraftWorkshop.ITEMS.get("basic_ceramic_lining"));
             case CRUCIBLE -> station() == 2 && stack.is(JugcraftWorkshop.ITEMS.get("ceramic_crucible"));

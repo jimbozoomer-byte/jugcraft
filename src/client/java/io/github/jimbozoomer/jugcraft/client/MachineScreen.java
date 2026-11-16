@@ -369,7 +369,7 @@ public class MachineScreen extends AbstractContainerScreen<MachineMenu> implemen
 				slot(graphics, MachineMenu.fluidItemInputX(spec, slot), MachineMenu.SLOT_Y, slot, null);
 			}
 			for (int slot = 0; slot < spec.itemOutputs(); slot++) {
-				slot(graphics, MachineMenu.fluidItemOutputX(spec, slot), MachineMenu.SLOT_Y, spec.itemInputs() + slot, null);
+				slot(graphics, MachineMenu.fluidItemOutputX(spec, slot), MachineMenu.fluidItemOutputY(spec, slot), spec.itemInputs() + slot, null);
 			}
 			MachineSkin.arrow(graphics, theme, x + MachineMenu.fluidArrowX(spec), y + 43, progressFraction());
 		} else if (kind.isProcessor()) {
