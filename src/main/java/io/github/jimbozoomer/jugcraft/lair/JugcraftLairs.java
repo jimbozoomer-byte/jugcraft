@@ -25,9 +25,11 @@ import net.minecraft.world.level.material.PushReaction;
  * The lairs' registrations (docs/features/hollow-acre.md, docs/features/spindle-loft.md, docs/features/glacier-hall.md,
  * docs/features/cinder-kiln.md, docs/features/lantern-fen.md, docs/features/crypt-archive.md,
  * docs/features/foundry-trench.md, docs/features/moonlit-ring.md, docs/features/cydonian-sanctum.md,
- * docs/features/crowfield.md): the lair-only blocks (unbreakable, no items, no
+ * docs/features/crowfield.md, docs/features/crown-of-thunder.md, docs/features/glass-chapel.md): the lair-only blocks
+ * (unbreakable, no items, no
  * drops), the Mourning Wreath and the Death Knell of the Last Rites, the Cursed Spindle, the Frost Horn, the Kiln Seal,
  * the Hag Stone, the Writ of Exhumation, Sealed Orders, the Howling Totem, the Altar Keystone, the Harvest Crown, the Thunder Vane, the Hessian's Bridle, the Mist
+ * the Hag Stone, the Writ of Exhumation, Sealed Orders, the Howling Totem, the Altar Keystone, the Harvest Crown, the Thunder Vane, the Glass Accord, the Mist
  * Gate, and the lairs' events, rules,
  * rituals and commands. Registered whatever the
  * feature switch says, so saved worlds keep them; the switch
@@ -88,6 +90,10 @@ public final class JugcraftLairs {
 	public static Block STORM_ROD;
 	public static Block ROC_NEST;
 	public static Block STORM_CLOUD;
+	public static Block CHAPEL_MIRROR;
+	public static Block ABBOT_LECTERN;
+	public static Block LANCET_GLASS;
+	public static Block ROSE_GLASS;
 	public static Block MOURNING_WREATH;
 	public static Item MOURNING_WREATH_ITEM;
 	public static Item DEATH_KNELL;
@@ -102,6 +108,7 @@ public final class JugcraftLairs {
 	public static Item HARVEST_CROWN;
 	public static Item THUNDER_VANE;
 	public static Item HESSIANS_BRIDLE;
+	public static Item GLASS_ACCORD;
 	public static EntityType<MistGateEntity> MIST_GATE;
 
 	private JugcraftLairs() {
@@ -183,6 +190,15 @@ public final class JugcraftLairs {
 				SoundType.COPPER, 0, Fit.SEE_THROUGH);
 		ROC_NEST = fixture("roc_nest", Block::new, MapColor.COLOR_GRAY, SoundType.MANGROVE_ROOTS, 0, Fit.SOLID);
 		STORM_CLOUD = fixture("storm_cloud", Block::new, MapColor.COLOR_GRAY, SoundType.WOOL, 0, Fit.PASSABLE);
+		// The Glass Chapel's (docs/features/glass-chapel.md): its three mirrors (any player turns them; a marked one's frame
+		// burns), the Abbot's Lectern, and the stained glass of its lancets and its rose window.
+		CHAPEL_MIRROR = fixture("chapel_mirror", p -> new ChapelMirrorBlock(p.lightLevel(ChapelMirrorBlock::light)), MapColor.GOLD,
+				SoundType.GLASS, 0, Fit.SEE_THROUGH);
+		ABBOT_LECTERN = fixture("abbot_lectern", AbbotLecternBlock::new, MapColor.STONE, SoundType.STONE, 0, Fit.SEE_THROUGH);
+		LANCET_GLASS = fixture("lancet_glass", p -> new TransparentBlock(p) {
+		}, MapColor.NONE, SoundType.GLASS, 0, Fit.SEE_THROUGH);
+		ROSE_GLASS = fixture("rose_glass", p -> new TransparentBlock(p) {
+		}, MapColor.NONE, SoundType.GLASS, 0, Fit.SEE_THROUGH);
 
 		ResourceKey<Block> wreathKey = ResourceKey.create(Registries.BLOCK, Jugcraft.id("mourning_wreath"));
 		MOURNING_WREATH = Registry.register(BuiltInRegistries.BLOCK, wreathKey, new MourningWreathBlock(BlockBehaviour.Properties.of()
@@ -223,6 +239,9 @@ public final class JugcraftLairs {
 		ResourceKey<Item> bridleKey = ResourceKey.create(Registries.ITEM, Jugcraft.id("hessians_bridle"));
 		HESSIANS_BRIDLE = Registry.register(BuiltInRegistries.ITEM, bridleKey, new HessiansBridleItem(new Item.Properties().stacksTo(16)
 				.setId(bridleKey)));
+		ResourceKey<Item> accordKey = ResourceKey.create(Registries.ITEM, Jugcraft.id("glass_accord"));
+		GLASS_ACCORD = Registry.register(BuiltInRegistries.ITEM, accordKey, new GlassAccordItem(new Item.Properties().stacksTo(16)
+				.setId(accordKey)));
 
 		ResourceKey<EntityType<?>> gateKey = ResourceKey.create(Registries.ENTITY_TYPE, Jugcraft.id("mist_gate"));
 		MIST_GATE = Registry.register(BuiltInRegistries.ENTITY_TYPE, gateKey, EntityType.Builder.<MistGateEntity>of(MistGateEntity::new,
@@ -251,6 +270,7 @@ public final class JugcraftLairs {
 			output.accept(HARVEST_CROWN);
 			output.accept(THUNDER_VANE);
 			output.accept(HESSIANS_BRIDLE);
+			output.accept(GLASS_ACCORD);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FUNCTIONAL_BLOCKS).register(output -> output.accept(MOURNING_WREATH_ITEM));
 	}

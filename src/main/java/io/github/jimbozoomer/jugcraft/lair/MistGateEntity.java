@@ -44,8 +44,13 @@ import org.jspecify.annotations.Nullable;
  * whirling round and crackling with sparks, thunder rolling in it now and then, which lifts followers and brings them
  * down on the Crown of Thunder's terrace ({@link ThunderVaneRite#follow}); and where the Hessian's Bridle was used, Grey
  * Mist with hoofbeats in it, which brings followers to on the Church Bridge's wood road ({@link HessiansBridleRite#follow}).
+ * down on the Crown of Thunder's terrace ({@link ThunderVaneRite#follow}); and where the Glass Accord was held up, Grey
+ * Mist shot through with light, motes of it rising like dust in a sunbeam and a chime sounding in it now and then, which
+ * brings followers to stand in the Glass Chapel's narthex ({@link GlassAccordRite#follow}).
  */
 public class MistGateEntity extends Entity {
+	/** How often a chime sounds in the Glass Accord's mist (ticks). */
+	private static final int CHIME_TICKS = 70;
 	/** How often a howl answers from far off through the Howling Totem's mist (ticks). */
 	private static final int HOWL_TICKS = 120;
 	/** How often a crow cries through the Harvest Crown's mist (ticks). */
@@ -108,6 +113,7 @@ public class MistGateEntity extends Entity {
 		boolean mars = lair == Lair.CYDONIAN_SANCTUM;
 		boolean crows = lair == Lair.CROWFIELD;
 		boolean storm = lair == Lair.CROWN_OF_THUNDER;
+		boolean sun = lair == Lair.GLASS_CHAPEL;
 		if (instance() == null || level.getGameTime() >= until) {
 			if (mars) {
 				level.sendParticles(RED_MIST, getX(), getY() + 1.0, getZ(), 40, 0.6, 0.8, 0.6, 0.02);
@@ -121,6 +127,9 @@ public class MistGateEntity extends Entity {
 			}
 			if (snow) {
 				level.sendParticles(ParticleTypes.SNOWFLAKE, getX(), getY() + 0.6, getZ(), 30, 0.6, 0.5, 0.6, 0.05);
+			} else if (sun) {
+				// The light goes out of the mist.
+				level.sendParticles(ParticleTypes.END_ROD, getX(), getY() + 1.0, getZ(), 12, 0.4, 0.8, 0.4, 0.03);
 			} else if (storm) {
 				// The wind drops: a last crackle in the mist.
 				level.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), getY() + 1.0, getZ(), 16, 0.5, 0.8, 0.5, 0.1);
@@ -153,6 +162,17 @@ public class MistGateEntity extends Entity {
 			}
 			if (tickCount % 4 == 0) {
 				level.sendParticles(ParticleTypes.ELECTRIC_SPARK, getX(), getY() + 1.0, getZ(), 2, 0.4, 0.7, 0.4, 0.1);
+			}
+		} else if (sun) {
+			// Grey mist shot through with light: motes rising in it like dust in a sunbeam, a chime now and then.
+			if (tickCount % 2 == 0) {
+				level.sendParticles(ParticleTypes.CLOUD, getX(), getY() + 0.5, getZ(), 2, 0.4, 0.6, 0.4, 0.0);
+			}
+			if (tickCount % 3 == 0) {
+				level.sendParticles(ParticleTypes.END_ROD, getX(), getY() + 0.4 + (tickCount % 30) / 15.0, getZ(), 1, 0.35, 0.1, 0.35, 0.01);
+			}
+			if (tickCount % CHIME_TICKS == 0) {
+				level.playSound(null, blockPosition(), SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.AMBIENT, 0.8F, 1.0F);
 			}
 		} else if (mars) {
 			// The red mist over the altar, and a column of red light rising out of it into the sky.
@@ -276,6 +296,8 @@ public class MistGateEntity extends Entity {
 			ThunderVaneRite.follow(server, open);
 		} else if (open.lair == Lair.CHURCH_BRIDGE) {
 			HessiansBridleRite.follow(server, open);
+		} else if (open.lair == Lair.GLASS_CHAPEL) {
+			GlassAccordRite.follow(server, open);
 		} else {
 			Lairs.enter(server, open);
 		}

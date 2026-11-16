@@ -30,6 +30,8 @@ EDGE_DAMAGE = 4.0     # the mist's toll for flying or falling off, never below h
 # (docs/features/cydonian-sanctum.md), then the Crowfield's (docs/features/crowfield.md).
 # (docs/features/cydonian-sanctum.md), then the Crown of Thunder's (docs/features/crown-of-thunder.md). The Church
 # Bridge (docs/features/church-bridge.md) has none of its own: it reuses the braziers, Moonwood Leaves, Grey Mist and moon.
+# (docs/features/cydonian-sanctum.md), then the Crown of Thunder's (docs/features/crown-of-thunder.md), then the Glass
+# Chapel's (docs/features/glass-chapel.md).
 LAIR_BLOCKS = {
     "blighted_soil": "Blighted Soil",
     "black_wheat": "Black Wheat",
@@ -82,6 +84,10 @@ LAIR_BLOCKS = {
     "storm_rod": "Storm Rod",
     "roc_nest": "Woven Branches",
     "storm_cloud": "Storm Cloud",
+    "chapel_mirror": "Chapel Mirror",
+    "abbot_lectern": "Abbot's Lectern",
+    "lancet_glass": "Lancet Glass",
+    "rose_glass": "Rose Window",
 }
 # The colours of the Spindle Loft's thread: its four spools', and the white of the threads between them.
 THREAD_COLOURS = ("green", "blue", "beige", "red", "white")
@@ -109,7 +115,7 @@ SLUICE_FLOWS = ("ready", "open", "filling", "choked")   # choked: by the Cinder 
 # Trench's breakers, the Moonlit Ring's Warden Bells, the Cydonian Sanctum's red mist and star dials, and the Crowfield's
 # King's Gourds.
 FIXTURES = ("lair_exit", "lair_brazier", "sluice_gate", "fen_lamp", "grave_seal", "archive_lectern", "discharge_breaker",
-            "warden_bell", "red_mist", "star_dial", "kings_gourd")
+            "warden_bell", "red_mist", "star_dial", "kings_gourd", "chapel_mirror")
 
 # The Last Rites (the Hollow Acre's ritual): a grave in the Overworld at night, lit candles round it, a Mourning Wreath
 # laid on it and the Death Knell rung beside it.
@@ -294,6 +300,29 @@ BRIDLE = {
 ROD_PARTS = ("base", "middle", "tip")
 ROD_LIGHT = {"base": 6, "middle": 9, "tip": 12}
 
+# The Glass Accord (the Glass Chapel's summoning, docs/features/glass-chapel.md): held up in the Overworld by day, in
+# clear weather, standing in sunlight (full sky light at the holder's head) that falls through glass
+# (#jugcraft:glass_accord_glass, within glass_reach blocks straight above). The light gathers in it, it dissolves and is
+# used up, and Grey Mist rises where it was held, the gate for lairs.gate_seconds; whoever goes in stands in the
+# chapel's narthex. Not a Witching Season summoning: it works all year, whatever lairs.off_season says.
+ACCORD = {
+    "cooldown": 40,            # ticks between uses of one Accord, answered or not
+    "mist_range": 3,           # how near another open mist into the chapel must not be (blocks)
+    "glass_reach": 16,         # how far over the holder's head the glass may be (blocks)
+}
+# Vanilla's sixteen dye colours.
+DYES = ("white", "orange", "magenta", "light_blue", "yellow", "lime", "pink", "gray", "light_gray", "cyan", "purple", "blue",
+        "brown", "green", "red", "black")
+# What counts as glass the sun falls through: vanilla's clear and stained glass and panes (not tinted glass, which keeps
+# the light out), and any other mod's panes, by the conventional tag (its glass blocks' tag counts tinted glass).
+ACCORD_GLASS = (["minecraft:glass", "minecraft:glass_pane"]
+                + [f"minecraft:{colour}_stained_glass" for colour in DYES]
+                + [f"minecraft:{colour}_stained_glass_pane" for colour in DYES]
+                + [{"id": "#c:glass_panes", "required": False}])
+# The Chapel Mirrors' halves (tools/glass_chapel.py MIRROR_PARTS) and the light a marked one's frame gives.
+MIRROR_HALVES = ("lower", "upper")
+MIRROR_MARKED_LIGHT = 7
+
 ITEMS = {
     "mourning_wreath": "Mourning Wreath",
     "death_knell": "Death Knell",
@@ -308,6 +337,7 @@ ITEMS = {
     "harvest_crown": "Harvest Crown",
     "thunder_vane": "Thunder Vane",
     "hessians_bridle": "Hessian's Bridle",
+    "glass_accord": "Glass Accord",
 }
 GATE = {"entity": "mist_gate", "display": "Mist Gate", "width": 1.6, "height": 2.6}
 
@@ -371,6 +401,11 @@ RECIPES = {
     # A bridle: leather straps, iron bit rings, and a jack-o'-lantern to call its rider by. Used up by the rite.
     "hessians_bridle": {"pattern": ["L L", "IJI", " L "], "key": {
         "L": "minecraft:leather", "I": "minecraft:iron_ingot", "J": "minecraft:jack_o_lantern"}},
+    # An accord: four panes of glass leaded with gold round a spyglass's lens, two amethyst shards to bind the light.
+    # Used up by the sun it gathers. (For one who understands First Light, the Lampwright's Bench makes it cheaper:
+    # tools/concordance.py WORKINGS glass_accord.)
+    "glass_accord": {"pattern": ["GAG", "oSo", "GAG"], "key": {
+        "G": "minecraft:glass", "A": "minecraft:amethyst_shard", "o": "minecraft:gold_ingot", "S": "minecraft:spyglass"}},
 }
 # What counts as a werewolf's pelt for the totem: every kind's (tools/agriculture.py WEREWOLF kinds), and the Alpha's
 # own (tools/alpha_werewolf.py), one for one.
@@ -486,6 +521,14 @@ LAIRS = {
         "ambient_light_color": "#2a3448", "sky_light_color": "#5a6a90",
         "music": "minecraft:music.overworld.old_growth_taiga",
         "ambient_light": 0.2,
+    },
+    "glass_chapel": {
+        "display": "The Glass Chapel",
+        "enter": "The light takes you, and you stand in %s",
+        "sky": "#cfc4ae", "fog": "#a89c86", "water_fog": "#4a5a6a", "water": "#5a7a9a",
+        "ambient_light_color": "#b8a47a", "sky_light_color": "#e8d8b0",
+        "music": "minecraft:music.overworld.grove",
+        "ambient_light": 0.3,
         "motes": ("minecraft:white_ash", 0.003),
     },
 }

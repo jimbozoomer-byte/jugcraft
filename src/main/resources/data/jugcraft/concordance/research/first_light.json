@@ -61,7 +61,8 @@
       "workings": [
         "jugcraft:kindle_lantern",
         "jugcraft:infuse_lantern",
-        "jugcraft:channel_lantern"
+        "jugcraft:channel_lantern",
+        "jugcraft:glass_accord"
       ]
     },
     "mastered": {

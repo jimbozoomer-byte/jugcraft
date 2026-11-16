@@ -17,6 +17,7 @@ import org.jspecify.annotations.Nullable;
  * checked by tools/check_mod_data.py).
  * tools/crypt_archive.py, tools/foundry_trench.py, tools/moonlit_ring.py, tools/cydonian_sanctum.py,
  * tools/crown_of_thunder.py, tools/church_bridge.py; checked by tools/check_mod_data.py).
+ * tools/crown_of_thunder.py, tools/glass_chapel.py; checked by tools/check_mod_data.py).
  */
 public enum Lair {
 	/** Vesperine's lair (docs/features/hollow-acre.md). */
@@ -48,7 +49,9 @@ public enum Lair {
 	 * The Headless Horseman's lair out of the Halloween season (docs/features/church-bridge.md): a wooded hollow, a brook and
 	 * a covered bridge by an old church, a full moon low over the church.
 	 */
-	CHURCH_BRIDGE("church_bridge", 72, 26, 86, new Vec3(36.5, 5.0, 77.5), 180.0F, 36.5, 50.5, 50, 1, new BlockPos(36, 30, -28), 13);
+	CHURCH_BRIDGE("church_bridge", 72, 26, 86, new Vec3(36.5, 5.0, 77.5), 180.0F, 36.5, 50.5, 50, 1, new BlockPos(36, 30, -28), 13),
+	/** The Glass Abbot's lair (docs/features/glass-chapel.md): an abandoned chapel, closed all round, so no moon. */
+	GLASS_CHAPEL("glass_chapel", 35, 24, 46, new Vec3(17.5, 3.0, 41.5), 180.0F, 17.5, 22.5, 30, 0, null, 0);
 
 	/** Blocks between one instance slot and the next, along X (tools/lairs.py SPACING). */
 	public static final int SPACING = 1024;
