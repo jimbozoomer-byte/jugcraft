@@ -29,7 +29,7 @@ import org.jspecify.annotations.Nullable;
 /**
  * A wild autumn mushroom (chanterelle, porcini, puffball, fly agaric, or the glowing jack o'lantern mushroom), found in
  * patches on forest floors. It grows on soil ({@link #SOIL}) and spreads in the shade: one random
- * tick in {@value #SPREAD_CHANCE}, a mushroom with fewer than {@value #SPREAD_CAP} of its kind round it puts out another
+ * tick in {@value #SPREAD_CHANCE}, a mushroom with fewer than {@value #SPREAD_CAP} wild mushrooms of any kind round it puts out another
  * nearby, where the light is below {@value #SPREAD_LIGHT}; bone meal makes it try at once. On a full-moon night, one
  * random tick in {@value #RING_CHANCE} it sprouts a fairy ring ({@link FairyRings}): its kind round a circle it stands on.
  * Picked with a Foraging Basket in either hand, it goes straight into the basket. A puffball bursts in a cloud of spores.
@@ -71,11 +71,14 @@ public class WildMushroomBlock extends VegetationBlock implements BonemealableBl
 		}
 	}
 
-	/** Puts out another of {@code state}'s kind nearby, if fewer than {@value #SPREAD_CAP} are round it; returns whether it did. */
+	/**
+	 * Puts out another of {@code state}'s kind nearby, if fewer than {@value #SPREAD_CAP} wild mushrooms of any kind are round
+	 * it (so the five kinds don't each fill a patch); returns whether it did.
+	 */
 	public static boolean spread(ServerLevel level, BlockPos pos, BlockState state, RandomSource random, boolean shadeOnly) {
 		int near = 0;
 		for (BlockPos at : BlockPos.betweenClosed(pos.offset(-4, -1, -4), pos.offset(4, 1, 4))) {
-			if (level.getBlockState(at).is(state.getBlock()) && ++near >= SPREAD_CAP) {
+			if (level.getBlockState(at).getBlock() instanceof WildMushroomBlock && ++near >= SPREAD_CAP) {
 				return false;
 			}
 		}
