@@ -63,6 +63,12 @@ public class QuernBlock extends HandWorkedBlock {
 		return SHAPE;
 	}
 
+	@Override
+	protected boolean isPathfindable(BlockState state, net.minecraft.world.level.pathfinder.PathComputationType type) {
+		// The inset stand is solid equipment, not a passage for a small companion.
+		return false;
+	}
+
 	/** Grain goes into the eye; anything else does what it would on any block, and an empty hand turns the stone. */
 	@Override
 	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand,
@@ -91,6 +97,7 @@ public class QuernBlock extends HandWorkedBlock {
 			return InteractionResult.SUCCESS;
 		}
 		if (player.isSecondaryUseActive()) {
+			if (quern.companion.collect(player)) return InteractionResult.SUCCESS;
 			ItemStack grain = quern.takeGrain();
 			if (grain.isEmpty()) {
 				return InteractionResult.PASS;

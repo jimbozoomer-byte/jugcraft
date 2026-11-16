@@ -1944,9 +1944,7 @@ def main():
     walnut_data.reconcile(write)
     import newest_building
     def write_imported_building(path, data):
-        # Imported meshes include intentional inward faces and source-specific UV
-        # repairs. Use the same source-preserving writer as standalone import;
-        # model_atlas and the exact repair manifest audit/finish them afterward.
+        # Keep supplied meshes intact until their bounded finishing passes.
         if path.is_relative_to(RES):
             WRITTEN_RESOURCES.add(path.relative_to(RES).as_posix())
         newest_building.write(path, data)
@@ -1960,6 +1958,8 @@ def main():
     import acquisition_repairs
     acquisition_repairs.generate(write)
     diagonal_connections.write_all(write, ASSETS, RES / "assets/minecraft")
+    import newest_model_finishing
+    newest_model_finishing.generate(write)
     import board_game_data
     board_game_data.generate(write)
     import thanksgiving_data

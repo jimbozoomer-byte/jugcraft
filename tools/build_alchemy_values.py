@@ -118,7 +118,7 @@ def build(jar, affected_items=None):
     edges=[]
     for rid,r in recipes.items():
         typ=r.get('type',''); ingredients=[]
-        if typ in ('minecraft:crafting_shaped','jugcraft:botanical_armor_upgrade','jugcraft:botanical_water_shaped','jugcraft:packworks_tier_upgrade'):
+        if typ in ('minecraft:crafting_shaped','jugcraft:botanical_armor_upgrade','jugcraft:botanical_water_shaped','jugcraft:botanical_water_crafting','jugcraft:packworks_tier_upgrade'):
             for c,n in Counter(''.join(r['pattern'])).items():
                 if c!=' ':ingredients.extend([expand(r['key'][c])]*n)
         elif typ=='minecraft:crafting_shapeless': ingredients=[expand(x) for x in r['ingredients']]

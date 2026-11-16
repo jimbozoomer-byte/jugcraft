@@ -25,7 +25,7 @@ def build():
     for part in ('helmet','chestplate','leggings','boots'):
         name='terrasteel_'+part
         add('Jugtania','botania','jugtania','recipes/'+name+'.json','jugtania/'+name,'botanical_armor_upgrade')
-    add('Jugtania','botania','jugtania','recipes/water_rod.json','jugtania/water_rod','botanical_water_shaped')
+    add('Jugtania','botania','jugtania','recipes/water_rod.json','jugtania/water_rod','botanical_water_crafting')
     # Native variants were registered without their ordinary material recipes.
     # Keep each source family's pattern and quantities rather than inventing a
     # cheap generic recipe for functional equipment or boss rewards.

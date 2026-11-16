@@ -47,7 +47,7 @@ class AcquisitionRecipesTests(unittest.TestCase):
 
     def test_restored_special_recipes_keep_their_runtime_constraints(self):
         rows = build()
-        self.assertEqual('jugcraft:botanical_water_shaped', rows['jugtania/water_rod']['type'])
+        self.assertEqual('jugcraft:botanical_water_crafting', rows['jugtania/water_rod']['type'])
         for part in ('helmet', 'chestplate', 'leggings', 'boots'):
             self.assertEqual('jugcraft:botanical_armor_upgrade', rows['jugtania/terrasteel_' + part]['type'])
         for name, row in rows.items():

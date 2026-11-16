@@ -289,6 +289,8 @@ def build(registry_path=None):
     native_exclusions = extend(ROOT, edge, evidence, items)
     from survival_newest_routes import extend as newest_routes
     native_exclusions.update(newest_routes(ROOT, edge, evidence, items))
+    from survival_release_routes import extend as release_routes
+    native_exclusions.update(release_routes(ROOT, edge, evidence, items))
     forbidden = {'minecraft:air', 'minecraft:barrier', 'minecraft:bedrock', 'minecraft:structure_void',
                  'minecraft:structure_block', 'minecraft:jigsaw', 'minecraft:command_block',
                  'minecraft:chain_command_block', 'minecraft:repeating_command_block', 'minecraft:debug_stick',

@@ -71,6 +71,7 @@
     "AttackStrengthAccessor",
     "AlchemicalItemAccess",
     "CompanionGateMixin",
+    "CompanionJukeboxMixin",
     "CompanionShearingInvoker",
     "CompanionLootMixin",
     "DiagonalBlockMixin",

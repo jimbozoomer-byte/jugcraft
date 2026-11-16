@@ -17,7 +17,6 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.*;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.storage.*;
 import net.minecraft.world.phys.*;
 
@@ -54,6 +53,7 @@ public final class CompanionGarden extends SnapshotParticipant<CompanionGarden.S
     public static Item selectionSeed(ItemStack icon){
         if(icon.isEmpty())return null;
         if(seedItem(icon))return icon.getItem();
+        if(icon.getItem() instanceof BlockItem item && item.getBlock() instanceof GourdBlock gourd)return gourd.seed();
         if(icon.is(Items.PUMPKIN))return Items.PUMPKIN_SEEDS;
         if(icon.is(Items.MELON) || icon.is(Items.MELON_SLICE))return Items.MELON_SEEDS;
         if(icon.is(Items.WHEAT))return Items.WHEAT_SEEDS;
@@ -159,7 +159,7 @@ public final class CompanionGarden extends SnapshotParticipant<CompanionGarden.S
         if(job==null || !job.target.equals(target)){job=new Job(target);jobs.put(anchor,job);}
         return job;
     }
-    private boolean enabled(){return npc.level() instanceof ServerLevel server && server.getGameRules().get(GameRules.MOB_GRIEFING);}
+    private boolean enabled(){return npc.level() instanceof ServerLevel;}
     boolean accessible(CompanionAssignments.Target target,BlockPos soil){return validCell(npc.level(),target,soil) && CompanionJobs.permitted(npc,soil) && CompanionJobs.permitted(npc,cropPosition(target,soil))
         && (!(npc.level().getBlockState(soil).getBlock() instanceof VerdantBedBlock) || MagicGardenCompanion.bedAvailable(npc,soil));}
     private boolean hoe(){return npc.belongings.getItem(9).is(ItemTags.HOES);}

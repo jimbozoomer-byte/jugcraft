@@ -59495,7 +59495,7 @@
     "jugcraft:ribbits_mossy_oak_planks_fence_gate": {
       "numerator": 32,
       "denominator": 1,
-      "source": "recipe jugcraft:newest/ribbits/mossy_oak_planks_fence_gate"
+      "source": "recipe jugcraft:newest/ribbits/mossy_oak_planks_fence_gate_from_moss_block"
     },
     "jugcraft:ribbits_mossy_oak_planks_slab": {
       "numerator": 4,
@@ -75910,7 +75910,7 @@
     "minecraft:copper_nugget": {
       "numerator": 128,
       "denominator": 9,
-      "source": "local metal compression accounting"
+      "source": "recipe minecraft:copper_nugget"
     },
     "minecraft:copper_pickaxe": {
       "numerator": 392,
@@ -76845,7 +76845,7 @@
     "minecraft:gold_nugget": {
       "numerator": 2048,
       "denominator": 9,
-      "source": "local metal compression accounting"
+      "source": "recipe minecraft:gold_nugget"
     },
     "minecraft:golden_apple": {
       "numerator": 16512,
@@ -77250,7 +77250,7 @@
     "minecraft:iron_nugget": {
       "numerator": 256,
       "denominator": 9,
-      "source": "local metal compression accounting"
+      "source": "recipe minecraft:iron_nugget"
     },
     "minecraft:iron_pickaxe": {
       "numerator": 776,

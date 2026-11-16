@@ -15,12 +15,14 @@ public final class CompanionJobs {
     }
     static CompanionJob resolveFresh(PeepoEntity npc,BlockPos pos){
         if(!npc.level().hasChunkAt(pos))return null;
+        var staff=npc.staffPost.job(pos);if(staff!=null)return staff;
         var fishing=npc.fishing.job(pos);if(fishing!=null)return fishing;
         var tap=npc.treeTaps.job(pos);if(tap!=null)return tap;
         var water=npc.water.job(pos);if(water!=null)return water;
         var livestock=npc.livestock.job(pos);if(livestock!=null)return livestock;
         var garden=npc.garden.job(pos);if(garden!=null)return garden;
         var be=npc.level().getBlockEntity(pos);if(be==null || be.isRemoved())return null;
+        var handFarm=io.github.jimbozoomer.jugcraft.agriculture.HandFarmCompanion.of(be);if(handFarm!=null)return handFarm.job.prepare(npc);
         if(be instanceof CraftingTableCompanionBlockEntity table)return table.job.prepare(npc);
         if(be instanceof io.github.jimbozoomer.jugcraft.workshop.WorkshopBlockEntity workshop)return workshop.station()==0?workshop.companion.job.prepare(npc):null;
         if(be instanceof io.github.jimbozoomer.jugcraft.agriculture.BatHouseBlockEntity house)return house.companionJob.prepare(npc);
@@ -39,6 +41,7 @@ public final class CompanionJobs {
         for(var adapter:ADAPTERS){var job=adapter.resolve(npc,be);if(job!=null)return job;}
         return null;
     }
+    /** Assigned companion work is exempt from mob_griefing, never from loaded-chunk, town or owner permissions. */
     public static boolean permitted(PeepoEntity npc,BlockPos pos){
         return npc.level().hasChunkAt(pos) && !TownProtection.shieldsBlock(npc.level(),pos)
             && io.github.jimbozoomer.jugcraft.finance.LandRegistry.mayBuildFor(npc.orders.ownerId(),npc.level(),pos);
@@ -52,7 +55,7 @@ public final class CompanionJobs {
         var job=resolve(npc,target.at().pos());if(job!=null){
             var state=npc.readiness.status(job);var block=npc.level().getBlockEntity(target.at().pos());
             var stock=CompanionProductionStock.of(block);
-            return stock!=null && (CompanionStockRecipes.supports(block) || CompanionAdditionalStock.supports(block))?stock.idleStatus(npc,block,state):state;
+            return !target.staffPost() && stock!=null && (CompanionStockRecipes.supports(block) || CompanionAdditionalStock.supports(block))?stock.idleStatus(npc,block,state):state;
         }
         var port=CompanionLogistics.resolve(npc,target);return port==null?CompanionStatus.UNSUPPORTED:port.status();
     }

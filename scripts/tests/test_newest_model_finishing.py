@@ -19,7 +19,7 @@ class ModelFinishingTests(unittest.TestCase):
     def test_actual_target_models_have_no_flickering_faces(self):
         outputs = {}
         finishing.generate(lambda p, v: outputs.setdefault(p, v))
-        self.assertEqual(16, len(outputs))  # Scoped cap/handle repairs; existing separation patches stay intact.
+        self.assertEqual(60, len(outputs))
         for path, model in outputs.items():
             with self.subTest(model=path.name):
                 elements, lookup, _ = art_check._resolve(model, (art_check.ASSETS,))

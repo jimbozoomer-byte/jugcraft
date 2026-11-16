@@ -18,8 +18,10 @@ public final class CompanionLogistics {
         Identifier plan();
         default void prepare(Storage<ItemVariant> source){}
         int needed(ItemStack stack);
+        /** Gate new pickup once before simulation; committed cargo may still finish unloading. */
+        default boolean acceptsSupplyBatch(){return true;}
         /** Cheap discovery demand; a pickup may expand this into a larger balanced batch. */
-        default int pickupNeeded(ItemStack stack){return needed(stack);}
+        default int pickupNeeded(ItemStack stack){return acceptsSupplyBatch()?needed(stack):0;}
         /** Fuel, retained tools and ceramics are not production ingredients. */
         default int stockAuxiliaryNeed(ItemStack stack){return 0;}
         default double supplyPriority(ItemStack stack){return 0;}
@@ -30,6 +32,7 @@ public final class CompanionLogistics {
         Storage<ItemVariant> outputs();
         /** Pickup-only planning; the real transfer still commits in CompanionTransport. */
         default List<ItemStack> supplyBatch(Storage<ItemVariant> source,int slots){
+            if(!acceptsSupplyBatch())return List.of();
             return CompanionDeliveryPlan.create(source,inputs(),slots,this::needed,null);
         }
         /** Status for logistics-only stations that process without a resident helper. */
@@ -39,6 +42,7 @@ public final class CompanionLogistics {
     private static final List<Adapter> ADAPTERS=new ArrayList<>();
     public static void register(Adapter adapter){ADAPTERS.add(Objects.requireNonNull(adapter));}
     public static Port resolve(PeepoEntity npc,CompanionAssignments.Target target){
+        if(target!=null && target.staffPost())return null;
         var base=resolveBase(npc,target);if(base==null || !target.present(npc.level()))return base;
         var block=npc.level().getBlockEntity(target.at().pos());var stock=CompanionProductionStock.of(block);
         return stock==null?base:stock.wrap(npc,block,target,base);
@@ -62,9 +66,13 @@ public final class CompanionLogistics {
         if(be instanceof io.github.jimbozoomer.jugcraft.machine.form.FormMachineBlockEntity form)return form.companionPort.accessible(npc)?form.companionPort.forCompanion(npc):null;
         if(be instanceof io.github.jimbozoomer.jugcraft.workshop.WorkshopBlockEntity workshop)return workshop.companion.accessible(npc)?workshop.companion.forCompanion(npc):null;
         if(be instanceof io.github.jimbozoomer.jugcraft.farming.SprinklerBlockEntity sprinkler)return sprinkler.companion.forCompanion(npc);
+        var display=DisplayCompanion.of(be);if(display!=null)return display.forCompanion(npc);
+        var rack=io.github.jimbozoomer.jugcraft.agriculture.DryingRackCompanion.of(be);if(rack!=null)return rack.port(npc);
+        var confection=io.github.jimbozoomer.jugcraft.agriculture.ConfectionCompanion.of(be);if(confection!=null)return confection.port(npc);
         var serving=ServingCompanion.of(be);if(serving!=null)return serving.forCompanion(npc);
         var magic=MagicGardenCompanion.of(npc,be);if(magic!=null)return magic;
         if(be instanceof io.github.jimbozoomer.jugcraft.agriculture.FarmStandBlockEntity stand)return stand.companion.forCompanion(npc);
+        var handFarm=io.github.jimbozoomer.jugcraft.agriculture.HandFarmCompanion.of(be);if(handFarm!=null)return handFarm.port(npc);
         if(be instanceof io.github.jimbozoomer.jugcraft.concordance.CrucibleBlockEntity crucible)return crucible.companion;
         var vanilla=VanillaCompanionPort.of(be);if(vanilla!=null)return vanilla;
         if(be instanceof io.github.jimbozoomer.jugcraft.machine.MachineBlockEntity machine

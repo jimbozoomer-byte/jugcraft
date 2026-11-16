@@ -32,6 +32,16 @@ final class UniformLayer extends RenderLayer<PeepoState,PeepoModel> {
                 face(new float[]{x,y,z,X,y,z,X,y,Z,x,y,Z}),face(new float[]{x,Y,Z,X,Y,Z,X,Y,z,x,Y,z}),
                 face(new float[]{X,y,z,x,y,z,x,Y,z,X,Y,z}),face(new float[]{x,y,Z,X,y,Z,X,Y,Z,x,Y,Z}));
         }
+        Box(Box source,float angle,float px,float py){
+            color=source.color;float c=(float)Math.cos(angle),s=(float)Math.sin(angle);
+            var rotated=new ArrayList<Face>();
+            for(var f:source.faces){
+                float[] v=f.vertices.clone();
+                for(int i=0;i<v.length;i+=3){float x=v[i]*16-px,y=v[i+1]*16-py;v[i]=px+x*c-y*s;v[i+1]=py+x*s+y*c;v[i+2]*=16;}
+                rotated.add(face(v));
+            }
+            faces=List.copyOf(rotated);
+        }
     }
     private static final Map<Type,Map<String,Map<Material,List<Box>>>> PEEPO=batch(create(false)),JUGHEAD=batch(create(true));
     private record Piece(Material material,Box shape) {}
@@ -205,6 +215,51 @@ final class UniformLayer extends RenderLayer<PeepoState,PeepoModel> {
                         add(m,leg,-.54F,.65F,-.83F,1.08F,.45F,1.4F,0x514A35);
                     }
                 }
+                case PILGRIM -> {
+                    int black=0x29292D, ivory=0xF4EDDC, belt=0x4D3325, gold=0xD8AC50;
+                    add(m,"body",-3.1F,8.86F,-2.24F,6.2F,4.04F,4.48F,black);costumeLimbs(m,black,ivory,0x232326);
+                    // Closed crowns on both rigs: these costumes hide Jughead's jug and bump.
+                    ring(m,-4.43F,3.65F,2.95F,.22F,0,Material.CLOTH,black);
+                    add(m,"head",-2.45F,-5.65F,-2.05F,4.9F,1.22F,4.1F,black);
+                    add(m,"head",-2.25F,-6.75F,-1.85F,4.5F,1.1F,3.7F,black);
+                    add(m,"head",-2.05F,-7.55F,-1.65F,4.1F,.8F,3.3F,black);
+                    ring(m,-5.15F,2.48F,2.08F,.46F,0,Material.LEATHER,belt);
+                    buckle(m,"head",-.48F,-5.19F,-2.16F,.96F,.58F,gold);
+                    // Stepped collar tips stay below the chin, in front of the tunic.
+                    for(float x:new float[]{-2.6F,.35F}){
+                        add(m,"body",x,9.03F,-2.38F,2.25F,.38F,.2F,ivory);
+                        add(m,"body",x+.32F,9.41F,-2.38F,1.6F,.34F,.2F,ivory);
+                        add(m,"body",x+.67F,9.75F,-2.38F,.9F,.28F,.2F,ivory);
+                    }
+                    add(m,"body",-3.14F,11.67F,-2.29F,6.28F,.45F,4.58F,Material.LEATHER,belt);
+                    buckle(m,"body",-.5F,11.59F,-2.39F,1,.63F,gold);
+                    for(String arm:List.of("left_arm","right_arm"))add(m,arm,-.58F,1.62F,-.6F,1.16F,.38F,1.2F,ivory);
+                }
+                case FEATHERED_REGALIA -> {
+                    int tan=0xC69A65, trim=0x765035, cream=0xEFE0BA, accent=0xA94F3C;
+                    add(m,"body",-3.1F,8.86F,-2.24F,6.2F,4.04F,4.48F,tan);costumeLimbs(m,tan,tan,0x79543C);
+                    add(m,"body",-3.14F,11.65F,-2.29F,6.28F,.38F,4.58F,Material.LEATHER,trim);
+                    for(float x:new float[]{-2.65F,-1.6F,-.55F,.5F,1.55F,2.6F})
+                        add(m,"body",x,12.9F,-2.26F,.35F,.24F,.19F,Material.LEATHER,tan);
+                    // Compact stepped feather fan behind the head, with solid depth and no crossing planes.
+                    for(int i=-3;i<=3;i++){
+                        float x=i*.68F, height=3.8F-Math.abs(i)*.48F, y=-4.15F-height;
+                        int first=m.getOrDefault("head",List.of()).size();
+                        add(m,"head",x-.34F,y+.5F,1.04F,.68F,height-.5F,.24F,cream);
+                        add(m,"head",x-.24F,y-.3F,1.04F,.48F,.3F,.24F,trim);
+                        add(m,"head",x-.34F,y,1.01F,.68F,.5F,.30F,trim);
+                        add(m,"head",x-.07F,y+.52F,.99F,.14F,height-.52F,.08F,trim);
+                        add(m,"head",x-.36F,-4.75F,.98F,.72F,.5F,.32F,accent);
+                        var pieces=m.get("head");
+                        for(int j=first;j<pieces.size();j++){var piece=pieces.get(j);pieces.set(j,new Piece(piece.material,new Box(piece.shape,i*.14F,x,-4.15F)));}
+                    }
+                    ring(m,-4.38F,3.05F,2.22F,.42F,0,Material.LEATHER,trim);
+                    for(int i=-3;i<=3;i++){
+                        add(m,"head",i*.78F-.22F,-4.32F,-2.28F,.44F,.28F,.1F,(i%2==0)?cream:accent);
+                    }
+                    for(String arm:List.of("left_arm","right_arm"))
+                        for(float x:new float[]{-.4F,.12F})add(m,arm,x,1.62F,-.63F,.23F,.3F,.18F,Material.LEATHER,trim);
+                }
                 default -> {}
             }
         }
@@ -213,6 +268,21 @@ final class UniformLayer extends RenderLayer<PeepoState,PeepoModel> {
     private static void add(Map<String,List<Piece>> m,String bone,float x,float y,float z,float w,float h,float d,int color){add(m,bone,x,y,z,w,h,d,Material.CLOTH,color);}
     private static void add(Map<String,List<Piece>> m,String bone,float x,float y,float z,float w,float h,float d,Material material,int color){
         m.computeIfAbsent(bone,b->new ArrayList<>()).add(new Piece(material,new Box(x,y,z,w,h,d,color)));
+    }
+    private static void costumeLimbs(Map<String,List<Piece>> m,int cloth,int stocking,int shoe){
+        for(String arm:List.of("left_arm","right_arm"))add(m,arm,-.61F,-.2F,-.64F,1.22F,1.82F,1.28F,cloth);
+        for(String leg:List.of("left_leg","right_leg")){
+            add(m,leg,-.49F,-.12F,-.51F,.98F,.57F,1.02F,cloth);
+            add(m,leg,-.43F,.45F,-.43F,.86F,.62F,.86F,stocking);
+            add(m,leg,-.53F,1.04F,-.81F,1.06F,.49F,1.32F,Material.LEATHER,shoe);
+        }
+    }
+    private static void buckle(Map<String,List<Piece>> m,String bone,float x,float y,float z,float w,float h,int color){
+        add(m,bone,x,y,z,w,.12F,.12F,Material.METAL,color);
+        add(m,bone,x,y+h-.12F,z,w,.12F,.12F,Material.METAL,color);
+        add(m,bone,x,y+.12F,z,.12F,h-.24F,.12F,Material.METAL,color);
+        add(m,bone,x+w-.12F,y+.12F,z,.12F,h-.24F,.12F,Material.METAL,color);
+        add(m,bone,x+w*.48F,y+.12F,z-.02F,.09F,h-.24F,.12F,Material.METAL,color);
     }
     private static void sleeves(Map<String,List<Piece>> m,int color){for(String side:List.of("left_arm","right_arm"))add(m,side,-.62F,-.2F,-.65F,1.24F,1,1.3F,color);}
     private static void cuffs(Map<String,List<Piece>> m,int color){for(String side:List.of("left_leg","right_leg"))add(m,side,-.47F,-.18F,-.5F,.94F,.6F,1,color);}

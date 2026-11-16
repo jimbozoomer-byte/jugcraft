@@ -16,6 +16,12 @@ A single expiring helper lease and live permissions prevent concurrent cooking o
 
 Inventory, filter, plan, intended tray type and active batch identity are saved. A poured tray uses the existing immutable CandyBatch component/time/pull count; an interrupted partial pull restarts. Earlier saves default to empty staging and no plan. Filter changes return unused staging through Output before replanning; live batches finish honestly. Explicit cancellation/unattended heating can overcook, and warm taffy can harden; returned items reflect actual existing rules, not the requested filter type. Full outputs preserve real items, block the next batch, and use existing hauling recovery. Manual pouring/tipping works as before. Shift-empty-hand use on an empty kettle recovers stored items without losing inventory overflow; breaking drops staging, tray and output, while poured syrup follows existing break-loss behavior.
 
-## Validation
+## Completed-batch handoff — 31 October 2026
+
+Implemented with OpenAI Codex (GPT-6). The cook now requests the shared, budgeted Output handoff after finishing a tray, so real candy is collected before an unrelated job or leisure break. The existing four-sugar/eight-piece batch, stock targets, color/flavor components, reusable tray and container remainders are unchanged. Full or disabled Output preserves goods and releases the worker instead of holding a permanent delivery reservation. Ready loaded work stays together; passive five-second setting, one-day crystallization and empty-kettle cooling still release the cook. Existing timed heating and warm-taffy protection remains authoritative.
+
+`PeepoPressCandyBatchClientTests` adds both-companion physical supply/work/output cases, immediate candy pickup, stock-limited whole-batch yields, energy interruption, full-output recovery and passive rock-candy release. The shared implementation and validation are documented in [companion batch deliveries](companion-batch-deliveries.md). No new inventory, ticker, recipe scan or saved queue is introduced.
+
+## Original integration validation
 
 The owner has requested no tests for this integration sequence. Common/client compilation and assembly passed with `gradlew.bat assemble`; the Modrinth distribution was rebuilt and its bundled mod JAR and SHA-512 checksum verified. Existing annotation/deprecation warnings remain. No automated suites or gameplay sessions were run. Manual gameplay remains to verify all candy stages, multiple helpers, stove access, partial deliveries, optional ingredients, output-full recovery, filter changes, manual handoffs and interruption/reload behavior. No multiplayer performance or visual playtest claim is made.
