@@ -457,7 +457,9 @@
       "io.github.jimbozoomer.jugcraft.test.PharmacologyReleaseGameTests",
       "io.github.jimbozoomer.jugcraft.test.PharmacologyPsychedelicGameTests",
       "local.peepo.CraftingTablePlanningGameTests",
-      "io.github.jimbozoomer.jugcraft.test.ComponentYieldGameTests"
+      "io.github.jimbozoomer.jugcraft.test.ComponentYieldGameTests",
+      "io.github.jimbozoomer.jugcraft.town.HalloweenQuestsGameTests",
+      "io.github.jimbozoomer.jugcraft.town.BountyListGameTests"
     ],
     "jei_mod_plugin": [
       "io.github.jimbozoomer.jugcraft.test.JeiStationClientGameTests$WithJei$Probe"
