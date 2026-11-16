@@ -1,4 +1,5 @@
 {
+  "schemaVersion": 1,
   "depends": {
     "jugcraft": "*"
   },
@@ -891,6 +892,5 @@
     }
   ],
   "name": "Jugcraft game tests",
-  "schemaVersion": 1,
   "version": "1.0.0"
 }

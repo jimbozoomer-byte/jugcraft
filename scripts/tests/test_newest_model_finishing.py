@@ -21,8 +21,10 @@ class ModelFinishingTests(unittest.TestCase):
         finishing.generate(lambda p, v: outputs.setdefault(p, v))
         # Scoped cap/handle repairs (16), three rope ends, six backpack handles and six Christmas tree
         # meshes; existing separation patches stay intact (the backpack and tree records carry the same
-        # closing faces).
-        self.assertEqual(31, len(outputs))
+        # closing faces). The bamboo-spike overlay has no hash-record owner, so this
+        # pass must retain it too instead of allowing generator cleanup to prune it.
+        self.assertEqual(32, len(outputs))
+        self.assertIn(finishing.RES / 'assets/jugcraft/models/newest/supps/block/bamboo_spikes_tipped.json', outputs)
         for path, model in outputs.items():
             with self.subTest(model=path.name):
                 elements, lookup, _ = art_check._resolve(model, (art_check.ASSETS,))

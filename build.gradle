@@ -350,9 +350,26 @@ tasks.named("processGametestResources", ProcessResources) {
 		def simpleName = { String name -> name.substring(name.lastIndexOf('.') + 1) }
 		mine = early.collectMany { name -> mine.findAll { simpleName(it) == name } } + mine.findAll { !early.contains(simpleName(it)) }
 		json.entrypoints["fabric-client-gametest"] = mine
-		manifest.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(json))
+		// Loader 0.19.5 scans ahead for schemaVersion before parsing the rest. Keep
+		// it first even after JsonSlurper reshuffles keys: the complete entrypoint
+		// catalogue exceeds the loader's 8 KiB look-ahead buffer.
+		def ordered = new LinkedHashMap([schemaVersion: json.schemaVersion])
+		ordered.putAll(json)
+		manifest.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(ordered))
 		task.logger.lifecycle("Client game tests: ${mine.size()} of ${all.size()} classes: ${mine}")
 	}
+}
+
+tasks.register('gameTestMetadataTest', JavaExec) {
+	dependsOn tasks.named('testClasses'), tasks.named('processGametestResources')
+	classpath = sourceSets.test.runtimeClasspath
+	mainClass = 'io.github.jimbozoomer.jugcraft.build.GameTestMetadataTests'
+	args file('src/gametest/resources/fabric.mod.json').absolutePath,
+		layout.buildDirectory.file('resources/gametest/fabric.mod.json').get().asFile.absolutePath
+}
+tasks.named('check') { dependsOn tasks.named('gameTestMetadataTest') }
+tasks.matching { it.name in ['runGameTest', 'runClientGameTest'] }.configureEach {
+	dependsOn tasks.named('gameTestMetadataTest')
 }
 
 tasks.withType(JavaCompile).configureEach {

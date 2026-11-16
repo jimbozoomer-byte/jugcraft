@@ -13669,6 +13669,13 @@ def check_mire_hag():
             if banned in text:
                 err(f"{cls}.java {why} ({banned})")
 
+def _first_win_grants(loot_java, first):
+    """Recognize the two supported concrete item access forms in a first-kill grant."""
+    method = first.split("_")[0] + "".join(word.capitalize() for word in first.split("_")[1:])
+    accessor = rf"(?:{re.escape(method)}\(\)|{re.escape(first.upper())})"
+    return bool(re.search(rf"if \(firstKill\(player\)[^{{]*\{{\s*loot\.add\(new ItemStack\(\w+\.{accessor}\)\);", loot_java))
+
+
 def check_acquisition(registered):
     """Concordance Chunk A, unit 4, and Chunk B, unit 1 (tools/acquisition.py, docs/features/concordance-first-loadout.md):
     JEI's pages on where the things only a ritual or a lair boss gives come from are the generator's, and each is tied to
@@ -13836,9 +13843,7 @@ def check_acquisition(registered):
         if "first" in info:
             # One trophy: the table's chance, and a first kill adds it when the roll did not.
             first = info["first"]
-            method = first.split("_")[0] + "".join(word.capitalize() for word in first.split("_")[1:])
-            accessor = rf"(?:{method}\(\)|{first.upper()})"
-            if not re.search(rf"if \(firstKill\(player\)[^{{]*\{{\s*loot\.add\(new ItemStack\(\w+\.{accessor}\)\)\);", loot_java) \
+            if not _first_win_grants(loot_java, first) \
                     or f"first victory over {him} always brings it" not in pages.get(first, ""):
                 err(f"acquisition: {loot_path.name} must still add {first} on a player's first kill, as its JEI page says")
         elif "trophies" in info:
