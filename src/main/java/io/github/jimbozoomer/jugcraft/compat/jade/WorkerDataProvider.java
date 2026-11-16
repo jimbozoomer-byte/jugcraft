@@ -5,7 +5,7 @@ import io.github.jimbozoomer.jugcraft.concordance.spirits.ClockworkPorterEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.GatheringShadeEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.HearthlingEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.PactReading;
-import io.github.jimbozoomer.jugcraft.concordance.spirits.StolasEntity;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactSpiritEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkerEntity;
 import io.github.jimbozoomer.jugcraft.concordance.spirits.WorkshopHandEntity;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Bond;
@@ -19,7 +19,7 @@ import snownee.jade.api.IServerDataProvider;
 /**
  * A familiar, spirit or construct for Jade (roadmap step 17): what it is doing or why not, and its own model's numbers
  * (a familiar's bond; what a spirit carries; a construct's integrity, energy and load); since Concordance Chunk D (D-06),
- * Stolas's pact. Names no player.
+ * Stolas's pact; since the garden cohort (GC-01), any pact spirit's. Names no player.
  */
 public enum WorkerDataProvider implements IServerDataProvider<EntityAccessor> {
 	INSTANCE;
@@ -57,9 +57,9 @@ public enum WorkerDataProvider implements IServerDataProvider<EntityAccessor> {
 			snapshot.putLong("energy", porter.body().energy());
 			snapshot.putInt("energy_max", terms == null ? 0 : terms.energy());
 			snapshot.putInt("carried", porter.carriedCount());
-		} else if (worker instanceof StolasEntity stolas && stolas.level() instanceof ServerLevel level) {
-			// Concordance Chunk D, D-06: his pact as his perch keeps it (PactReading: read only, no player, no escrow).
-			snapshot.put("pact", PactReading.stolas(level, stolas, level.getGameTime()));
+		} else if (worker instanceof PactSpiritEntity<?> spirit && spirit.level() instanceof ServerLevel level) {
+			// Concordance Chunk D, D-06; garden cohort GC-01 (SG8): any pact spirit's pact as its perch keeps it (PactReading: read only, no player, no escrow).
+			snapshot.put("pact", PactReading.presence(level, spirit, level.getGameTime()));
 		}
 		return snapshot;
 	}

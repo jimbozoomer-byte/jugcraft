@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "agreement": "jugcraft:amdusias_pact",
+  "research": "jugcraft:garden_regard",
+  "service": {
+    "work": "canopy_shelter",
+    "radius": 6,
+    "from": 0,
+    "to": 24000,
+    "quota": 16
+  },
+  "upkeep": {
+    "offering": "jugcraft:amdusias_offerings",
+    "count": 1,
+    "period_days": 7,
+    "grace_days": 1,
+    "cap": 4
+  },
+  "beneficiaries": "party",
+  "compact": {
+    "items": [
+      {
+        "item": "minecraft:note_block",
+        "count": 1
+      },
+      {
+        "item": "minecraft:oak_sapling",
+        "count": 2
+      }
+    ],
+    "resonance": 0
+  },
+  "beats": [
+    "greeting",
+    "service",
+    "price"
+  ]
+}

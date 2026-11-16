@@ -1,11 +1,13 @@
 package io.github.jimbozoomer.jugcraft.concordance.spirits;
 
 import io.github.jimbozoomer.jugcraft.concordance.Authority;
-import io.github.jimbozoomer.jugcraft.concordance.celestial.Pattern;
+import io.github.jimbozoomer.jugcraft.concordance.courier.Couriers;
 import io.github.jimbozoomer.jugcraft.concordance.resource.BoundWill;
+import io.github.jimbozoomer.jugcraft.concordance.worker.PactParser;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Pacts;
 import io.github.jimbozoomer.jugcraft.concordance.worker.Status;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.function.Predicate;
@@ -158,6 +160,37 @@ public final class PactKeeping {
 		return record != null && AgreementHolder.stranded(level.getServer(), record) ? record : null;
 	}
 
+	/**
+	 * GC-01 (GB4): {@code player}'s own pacts with a pact spirit (PactSpirits) that no holder block keeps
+	 * (AgreementHolder.stranded), in the perch's order (PactParser.REQUIRED, then by counterpart), at most
+	 * PactStatePayload.MAX_CHOICES. Nothing for a stand-in, or with the Concordance off.
+	 */
+	public static List<BoundWill> strandedPacts(ServerLevel level, ServerPlayer player) {
+		if (!Workers.enabled() || Authority.isStandIn(player)) {
+			return List.of();
+		}
+		MinecraftServer server = level.getServer();
+		List<BoundWill> out = new ArrayList<>();
+		for (BoundWill record : BoundWills.of(server).ledger().heldBy(player.getUUID())) {
+			if (record.pact() != null && PactSpirits.knows(record.counterpart()) && AgreementHolder.stranded(server, record)) {
+				out.add(record);
+			}
+		}
+		out.sort(Comparator.comparingInt((BoundWill record) -> order(record.counterpart())).thenComparing(record -> Pacts.counterpart(record.counterpart())));
+		return List.copyOf(out.subList(0, Math.min(out.size(), PactStatePayload.MAX_CHOICES)));
+	}
+
+	private static int order(String counterpart) {
+		int at = PactParser.REQUIRED.indexOf(Pacts.counterpart(counterpart));
+		return at < 0 ? Integer.MAX_VALUE : at;
+	}
+
+	/** GC-05: the perch keeping {@code holder} (the block it is part of), or null when its block is not a perch or not loaded. Reads only. */
+	private static @Nullable PactPerchBlockEntity perchOf(ServerLevel level, AgreementHolder holder) {
+		BlockPos at = Couriers.pos(holder.place(level));
+		return level.isLoaded(at) && level.getBlockEntity(at) instanceof PactPerchBlockEntity perch && perch.holder() == holder ? perch : null;
+	}
+
 	/** How an end went, and the words for it. */
 	public record Ending(AgreementHolder.Ended ended, Component said) {
 	}
@@ -182,12 +215,20 @@ public final class PactKeeping {
 				Component.translatable("message.jugcraft.concordance.workers.departed.ended"), returned));
 	}
 
-	/** The pact page: rows (at most 9), the patterns a reckoning offers (ids, D-05) and the offering kinds a deposit offers. */
-	public record Page(List<Component> rows, List<String> patterns, List<Item> offerings) {
-		public static final Page NONE = new Page(List.of(), List.of(), List.of());
+	/**
+	 * The pact page: rows (at most 11), its service's choices (Star-reckoning's: the patterns observed; GC-01), the offering
+	 * kinds a deposit offers, and the matter its spirit raises (GC-05; null for none).
+	 */
+	public record Page(List<Component> rows, List<PactStatePayload.Choice> choices, List<Item> offerings, PactAccords.@Nullable Matter matter) {
+		public static final Page NONE = new Page(List.of(), List.of(), List.of(), null);
+
+		/** A page with no matter (GC-01's three parts). */
+		public Page(List<Component> rows, List<PactStatePayload.Choice> choices, List<Item> offerings) {
+			this(rows, choices, offerings, null);
+		}
 	}
 
-	/** What the pact kept here shows its holder at game time {@code now}; NONE for anyone else, a copy, or switched off. */
+	/** What the pact kept here shows its holder at game time {@code now}; NONE for anyone else, a copy, or switched off. Its service words its own rows (GC-01, SG6). */
 	public static Page page(ServerLevel level, ServerPlayer player, AgreementHolder holder, long now) {
 		if (!Workers.enabled() || Authority.isStandIn(player) || holder.verify(level, now) != AgreementHolder.Standing.VALID) {
 			return Page.NONE;
@@ -198,13 +239,15 @@ public final class PactKeeping {
 		if (service == null || !record.holder().equals(player.getUUID())) {
 			return Page.NONE;
 		}
-		MinecraftServer server = level.getServer();
+		PactService work = PactServices.get(service.work());
+		Component name = name(record.counterpart());
 		BoundWill.Upkeep upkeep = pact.upkeep();
 		Component offering = upkeep == null ? Component.empty() : AgreementHolder.offeringName(upkeep.offering());
 		List<Component> rows = new ArrayList<>();
 		Status status = Pacts.status(record);
 		if (status == Status.SUSPENDED) {
-			rows.add(Component.translatable("message.jugcraft.concordance.pact.row.state.suspended"));
+			// GC-01 (SG6): a work this version does not know words its suspension with its spirit's name.
+			rows.add(work == null ? Component.translatable("message.jugcraft.concordance.pact.row.state.suspended.serves", name) : work.suspendedRow(name));
 		} else if (status == Status.UPKEEP_HELD && upkeep != null) {
 			rows.add(Component.translatable("message.jugcraft.concordance.pact.row.state.upkeep_held", upkeep.count(), offering));
 		} else if (status == Status.UPKEEP_DUE && upkeep != null) {
@@ -213,25 +256,38 @@ public final class PactKeeping {
 		} else {
 			rows.add(Component.translatable("message.jugcraft.concordance.pact.row.state.active"));
 		}
-		if (holder.spiritLost(level)) {
-			rows.add(Component.translatable("message.jugcraft.concordance.pact.row.lost", name(record.counterpart()), WorkerRoster.MAX_PER_PLAYER));
+		// GC-05 (the matter row): the matter its spirit raises, second, so it is read before the rest; the question and its
+		// answers follow on the screen (PactMenu.kept). Awaiting: what he keeps to until then; answered: the answer kept.
+		PactPerchBlockEntity perch = perchOf(level, holder);
+		PactAccords.Matter matter = perch == null ? null : PactAccords.matter(level, perch, record, now);
+		if (matter != null) {
+			rows.add(matter.awaiting()
+					? Component.translatable("message.jugcraft.concordance.pact.row.matter.awaiting", name, PactAccords.answerName(matter.work(), matter.answers().getFirst()))
+					: Component.translatable("message.jugcraft.concordance.pact.row.matter.answered", name, PactAccords.answerName(matter.work(), matter.answer())));
 		}
-		rows.add(Component.translatable("message.jugcraft.concordance.pact.row.service", service.quota(),
-				Math.max(0, service.quota() - Pacts.done(pact, now))));
+		if (holder.spiritLost(level)) {
+			rows.add(Component.translatable("message.jugcraft.concordance.pact.row.lost", name, WorkerRoster.MAX_PER_PLAYER));
+		}
+		if (work != null) {
+			rows.addAll(work.serviceRows(level, player, record, now));
+		} else {
+			// GC-01 (SG6): kept as it was, listed, suspended and ended, but no service row or action of its own.
+			rows.add(Component.translatable("message.jugcraft.concordance.pact.row.service_unknown", service.work()));
+		}
 		if (upkeep != null) {
 			if (!Pacts.held(record)) {
 				rows.add(Component.translatable("message.jugcraft.concordance.pact.row.next", upkeep.count(), offering, AgreementHolder.days(upkeep.due() - now)));
 			}
 			rows.add(Component.translatable("message.jugcraft.concordance.pact.row.escrow",
-					BoundWills.of(server).periods(record.id(), AgreementHolder.offering(upkeep.offering()), upkeep.count()), upkeep.cap()));
+					BoundWills.of(level.getServer()).periods(record.id(), AgreementHolder.offering(upkeep.offering()), upkeep.count()), upkeep.cap()));
 		}
-		rows.add(Component.translatable(StarReckoning.kept(player) ? "message.jugcraft.concordance.pact.row.obligation_kept"
-				: "message.jugcraft.concordance.pact.row.obligation"));
+		if (work != null) {
+			rows.addAll(work.obligationRows(level, player, record, now));
+		}
 		rows.add(service.from() == 0 && service.to() == Pacts.DAY
 				? Component.translatable("message.jugcraft.concordance.pact.row.area_any", service.radius())
 				: Component.translatable("message.jugcraft.concordance.pact.row.area", service.radius(), Workers.clock(service.from()), Workers.clock(service.to())));
-		rows.add(Component.translatable("message.jugcraft.concordance.pact.row.end"));
-		List<String> patterns = StarReckoning.choices(server, player.getUUID()).stream().map(Pattern::id).toList();
-		return new Page(List.copyOf(rows), patterns, offerings(player, record));
+		rows.add(Component.translatable("message.jugcraft.concordance.pact.row.end", name));
+		return new Page(List.copyOf(rows), work == null ? List.of() : List.copyOf(work.choices(level, player, record, now)), offerings(player, record), matter);
 	}
 }

@@ -1,0 +1,38 @@
+{
+  "schema": 1,
+  "agreement": "jugcraft:bathin_pact",
+  "research": "jugcraft:garden_regard",
+  "service": {
+    "work": "verdance_carrying",
+    "radius": 10,
+    "from": 0,
+    "to": 24000,
+    "quota": 12
+  },
+  "upkeep": {
+    "offering": "jugcraft:bathin_offerings",
+    "count": 4,
+    "period_days": 7,
+    "grace_days": 1,
+    "cap": 4
+  },
+  "beneficiaries": "party",
+  "compact": {
+    "items": [
+      {
+        "item": "minecraft:ender_pearl",
+        "count": 2
+      },
+      {
+        "item": "jugcraft:verdant_chaff",
+        "count": 8
+      }
+    ],
+    "resonance": 0
+  },
+  "beats": [
+    "greeting",
+    "service",
+    "price"
+  ]
+}

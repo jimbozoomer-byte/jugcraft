@@ -1,0 +1,10 @@
+{
+  "schema": 1,
+  "tradition": "spiritbinders",
+  "requires": [
+    {
+      "research": "jugcraft:garden_regard",
+      "state": "understood"
+    }
+  ]
+}
