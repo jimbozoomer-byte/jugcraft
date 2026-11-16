@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Choose which client game test classes a change needs, and share them out between CI's client jobs.
 
-The client game tests start a real game and photograph showrooms, distributed across sixteen CI jobs.
+The client game tests start a real game and photograph showrooms, distributed across twenty CI jobs.
 Most pull requests change a few blocks, so a pull request runs only the classes that
 show what it changed; main and a manual run of the Build workflow run them all (docs/TESTING.md).
 
@@ -10,7 +10,8 @@ How a changed file picks classes (src/gametest/resources/fabric.mod.json lists t
 - docs, Markdown, the generators and checks in tools/ and scripts/ (their output is committed and judged below),
   the art sources in art/ (what the game loads is copied into the assets and judged there), data under
   src/main/resources/data, the language file, the optional resource packs no client test turns on, unit tests,
-  server-only game tests and Claude's settings: nothing;
+  server-only game tests and Claude's settings: nothing (except a language change to the magic screens' words, which
+  selects the classes that open them: MAGIC_WORDS);
 - a Java class under src/main or src/client that only gained code (a feature registering itself in a registry, one
   more entry in a list): the classes matching the names and IDs it gained; comments do not count;
 - a Java class whose existing code changed: every class that shows it (names it, or whose IDs match it with "Block",
@@ -32,6 +33,7 @@ Usage: select_client_tests.py [--base REV] [--head REV] [--all] [--shards N] [--
 Without --base, or with --all, every class runs. Prints a summary and one line per shard.
 """
 import argparse
+from functools import cache
 import json
 import pathlib
 import re
@@ -43,7 +45,8 @@ MOD_JSON = "src/gametest/resources/fabric.mod.json"
 TEST_DIR = ROOT / "src" / "gametest" / "java"
 CODE_DIRS = (ROOT / "src" / "main" / "java", ROOT / "src" / "client" / "java")
 
-# Rough seconds each class takes on a CI runner, to share them out evenly; others are estimated from their length.
+# Rough seconds each class takes on a CI runner, to share them out evenly; ordinary
+# classes use a startup allowance plus source length, and tree subclasses retain harness work.
 # Estimates from the client jobs' logs of October 2026, not measurements per class: with the biome tour at 600, its
 # job took 22 minutes and the others 15 and 14. Biome, Guns, Styx, Arms and ArmorTiers are measured, from run
 # 37980438983's logs (565, 261, 221, 125 and 123 s; their length put the last four at 13 to 28), after three of them in
@@ -52,7 +55,17 @@ CODE_DIRS = (ROOT / "src" / "main" / "java", ROOT / "src" / "client" / "java")
 # jobs one still reached 29:32 (run 37989465048); the client tests then shared four jobs. With 131 classes the
 # estimates passed 25 minutes a job (the Cinder Kiln's), so they now share five.
 WEIGHTS = {
-    "BiomeClientGameTests": 570,
+    # Run 41745007572: the expanded biome tour and plant/processor galleries
+    # were still producing screenshots when their cohorts reached the hour.
+    # Include discovery, rendering and save/reopen work, not just source length.
+    "BiomeClientGameTests": 2200,
+    "NuclearClientGameTests": 1000,
+    "MachineConsolidationClientGameTests": 720,
+    "StarterChemistryClientGameTests": 240,
+    "DryCountryTreeClientGameTests": 480,
+    "TropicalTreeClientGameTests": 480,
+    "HangingFruitClientGameTests": 300,
+    "OrchardWorldgenClientGameTests": 180,
     # Run 38936177915: gun assertions alone span 17:22:33–17:52:09 (~30 minutes),
     # before setup/teardown. The growing all-gun gallery no longer fits its old 260 s estimate.
     "GunsClientGameTests": 2000,
@@ -65,6 +78,10 @@ WEIGHTS = {
     "TownClientGameTests": 120,
     "GuideScreenshotGameTests": 120,
     "SeasonClientGameTests": 90,
+    # Climate generation creates/reopens real worlds and samples distant chunks; provisional estimates.
+    "ClimateBandsAuditClientGameTests": 480,
+    "ClimateDesignClientGameTests": 240,
+    "ClimateExportClientGameTests": 180,
     # Concordance Chunk B unit 4: about 25 shots at 2 s each and 200 ticks of the Yeti King's frost on the player, which
     # its length would put far lower (an estimate, not a measurement).
     "ConcordanceWinterClientGameTests": 120,
@@ -78,7 +95,9 @@ WEIGHTS = {
     # measurement). Unit 3 (D-06) adds his nine poses: four loops waited out and five gestures frozen, about 50 s; and
     # subtitles listened for at the refusal and the acceptance, the answers' marks and Jade's two shots, about 30 s more;
     # estimates. Unit 5 (D-09) adds a timed sequence through his refusal, four frozen frames, about 10 s; an estimate.
-    "ConcordancePactClientGameTests": 240,
+    # The garden cohort's GC-02 adds his turning to the holder on each side of the perch: four turns of up to about three
+    # seconds, four shots and his being sent anew, about 20 s more; an estimate, not a measurement.
+    "ConcordancePactClientGameTests": 260,
     # Concordance Chunk D unit 3 (D-07): a dedicated server's start, the roster walked by keyboard (suspend and resume, an
     # end asked first, a recovery and a cancel), 64 rows paged, and ten shots at three sizes: an estimate, not a measurement.
     # Unit 5 (D-09): the workshop hand carrying one request across the yard, about 30 s more; an estimate.
@@ -86,7 +105,56 @@ WEIGHTS = {
     # Concordance Chunk D unit 5 (D-09, D-S22): a dedicated server's start, a second client JVM's start and join (as
     # OwnerCollectionsNetworkTests does), and the stranger's steps at the holder's perch with three shots: an estimate,
     # not a measurement.
-    "ConcordancePactNetworkTests": 300,
+    "ConcordancePactNetworkTests": 1000,
+    # GC-10 unit 7
+    # Concordance garden cohort, GC-10 unit 7 (GC-P142): a dedicated server's start, a second client JVM's start and join
+    # (SecondClient), two thinks over two beds and three shots: an estimate, not a measurement.
+    "ConcordanceGardenNetworkTests": 300,
+    # Concordance garden cohort, GC-04 (GC-P30): a dedicated server's start, the perch refused for want of a bed, the
+    # chooser and Buer's conversation by keyboard at three sizes, a refused and a sealed acceptance, his work on a bed,
+    # the overworked row, Jade, ten poses frozen, his underside, four bearings and the ending: about 35 shots and their
+    # waits, about 330 s at the pace the Winter entry implies (an estimate, not a measurement). GC-05 adds Bathin at the same
+    # perch: the chooser twice, his conversation by keyboard at three sizes, a refused and a sealed acceptance, one carry
+    # frozen, his matter asked and answered (the accord's two steps, about 40 s), Jade, ten poses frozen, four bearings and
+    # the ending: about 34 shots and their waits, about 230 s more (an estimate, not a measurement).
+    # GC-06b: written as a sum, each later spirit's flow added under its unit's line (+ its seconds).
+    "ConcordanceGardenPactClientGameTests": (560
+                                             # GC-06 unit 3
+                                             # GC-06 adds Marax at the same perch: the chooser twice, his conversation by
+                                             # keyboard at three sizes, a refused and a sealed acceptance, a reading at three
+                                             # sizes and his familiar frozen over its bed, his page with a proud bed, his night
+                                             # look, Jade, eleven poses, four bearings and the ending: about 33 shots and their
+                                             # waits, about 260 s more (an estimate, not a measurement).
+                                             + 260
+                                             # GC-07 unit 4
+                                             # GC-07: Foras at the same perch: the chooser twice, his conversation by
+                                             # keyboard at three sizes, a refused and a sealed acceptance, his matter
+                                             # asked and answered at three sizes, one graft frozen with his cap tipped,
+                                             # Jade, ten poses, four bearings and the ending: 32 shots and their waits,
+                                             # about 220 s more (an estimate, not a measurement).
+                                             + 220
+                                             # GC-08 unit 5
+                                             # GC-08 adds Bifrons at the same perch: the chooser twice, his conversation by
+                                             # keyboard at three sizes, a refused and a sealed acceptance, his two shapes by
+                                             # night, one run frozen at each beat, the run's page row, his matter asked and
+                                             # answered, Jade, ten poses, four bearings and the ending: 36 shots and their
+                                             # waits, about 240 s more (an estimate, not a measurement).
+                                             + 240
+                                             # GC-09 unit 6
+                                             # GC-09: Amdusias at the same perch: the chooser twice, his conversation by
+                                             # keyboard at three sizes, a refused and a sealed acceptance, his late horn, the
+                                             # Inspect page and two Jade readings sheltered, his tree's sway, his matter asked
+                                             # and answered at three sizes, Jade on him, ten poses, four bearings and the
+                                             # ending: 35 shots and their waits, about 240 s more (an estimate, not a
+                                             # measurement).
+                                             + 240
+                                             # GC-10 unit 7
+                                             # GC-10 unit 7 (GC-P144): the line-up, seven spirits placed and one frozen
+                                             # shot, about 20 s; the seven-portrait roster, seven seals, the roster opened
+                                             # and shot, about 40 s; the four plates-in-view asserts and the yard's tidying,
+                                             # nothing; about 90 s with the waits (an estimate, not a measurement).
+                                             + 90
+                                             ),
     "JugcraftServerClientGameTests": 90,
     # Companion suites exercise timed AI, inventory trips and cooking, not just
     # showrooms. Allow CI headroom over the focused local runtime measurements.
@@ -94,6 +162,15 @@ WEIGHTS = {
     "PeepoHearthClientTests": 240,
     "PeepoWorkSessionClientTests": 240,
     "PeepoDeliveryClientTests": 240,
+    # PR #611, run 41884611786 shard 6: these completed worlds took ~876 s
+    # (nuclear) and ~585 s (stock), while length-based estimates were ~20 s.
+    # Keep all selected classes and the 60-minute job limit; spread the real work.
+    # Run 41919904118: two natural mineral-sand surveys occupied ~21 minutes
+    # (22:00-22:20), leaving its 25-class group at the one-hour limit during upload.
+    # Give this discovery suite its own shard, keeping every test and the 60m limit.
+    "MineralSandClientGameTests": 1500,
+    "NuclearClientGameTests": 1000,
+    "PeepoProductionStockClientTests": 660,
     "PeepoKitchenAnimationClientTests": 120,
     "PeepoGardenExpansionClientTests": 60,  # focused local runs: about 55 seconds
     "PeepoSuppliesClientTests": 60,
@@ -102,15 +179,72 @@ WEIGHTS = {
     "PeepoIntegrationClientTests": 300,
     "TransportCrateClientTests": 60,
     "TikiTorchClientTests": 30,
+    # Expanded-catalog CI run 41279398482: physical processor batches took five
+    # minutes, mineral-sand reopen checks thirteen, and independent clients need
+    # about three minutes just to initialize. Source length hid this workload.
+    "PeepoProcessorBatchClientTests": 420,
+    "MineralSandClientGameTests": 900,
+    "UndergroundDepositClientGameTests": 600,
+    "OwnerCollectionsNetworkTests": 360,
+    # Dedicated server plus a second client, then five rider/observer views. Estimate pending the combined local run.
+    "HorseBreedsNetworkTests": 600,
+    "HerobrineNetworkTests": 360,
+    "AlphaWerewolfClientGameTests": 300,
+    "CinderTyrantClientGameTests": 240,
+    # Run 41308506140 exhausted its hour while reaching the expanded gallery
+    # and regional tree survey. Source length understated both workloads.
+    "OwnerCollectionsClientGameTests": 900,
+    "TreeBatchSixClientGameTests": 600,
 }
+
+# Second JVMs, the gun gallery and the expanded biome tour need their own
+# host budget. Small local shard counts still retain every class.
+ISOLATED_CLIENTS = {"OwnerCollectionsNetworkTests", "HerobrineNetworkTests", "ConcordancePactNetworkTests",
+                    "HorseBreedsNetworkTests", "MineralSandClientGameTests", "GunsClientGameTests", "BiomeClientGameTests"}
 # Classes a client test shows without naming them (registered by another class, or reached through an optional
 # integration), by the classes that show them: Stolas's renderer (his glowmask layer, scale, culling and departure) and
-# his perch's and anchor's Jade provider (the unit review, D2).
-SHOWN_BY = {"WorkerClient": {"ConcordancePactClientGameTests"}, "PactDataProvider": {"ConcordancePactClientGameTests"}}
+# his perch's and anchor's Jade provider (the unit review, D2), and since the garden cohort, the pact spirits' renderer table
+# and base (GC-01), and Buer's service and the garden reads it shows at work (GC-04).
+SHOWN_BY = {"WorkerClient": {"ConcordancePactClientGameTests"}, "PactDataProvider": {"ConcordancePactClientGameTests"},
+            "PactSpiritRenderers": {"ConcordancePactClientGameTests", "ConcordanceGardenPactClientGameTests"},
+            "PactSpiritEntity": {"ConcordancePactClientGameTests", "ConcordanceGardenPactClientGameTests"},
+            "StrainTending": {"ConcordanceGardenPactClientGameTests"}, "GardenReach": {"ConcordanceGardenPactClientGameTests"},
+            "GardenPacts": {"ConcordanceGardenPactClientGameTests"}}
 HUB = 5  # a class this many test classes name is a shared registry, not one feature
 WIDE = 4  # a changed class shown by this share of the classes (a quarter) or more is picked by its changed lines
 ENDINGS = ("BlockEntityRenderer", "BlockEntity", "Renderer", "Block", "Item", "Entity", "Model", "Screen", "Menu",
            "Blocks", "Items")
+# And the accord machinery (Concordance garden cohort, GC-05), named by no client test: shown on Bathin's kept page and the
+# roster by the garden's client class (a class this selection keeps only while it is listed).
+SHOWN_BY["PactAccords"] = {"ConcordanceGardenPactClientGameTests"}
+# The magic interfaces (docs/features/magic-interfaces.md): the shared Magic layer and its words and art are shown by every
+# class that opens the pact screen (the pact, garden and network classes, the screen fit check) and by the roster's, whose
+# answers carry PactScreen.Verdict; the kit's sprites and the cosmos are named by no test, so a change to them selects these
+# classes too (MAGIC_ASSETS), as does the end confirmation drawn on the scroll.
+MAGIC_SHOWN = {"ConcordancePactClientGameTests", "ConcordanceGardenPactClientGameTests", "ConcordancePactNetworkTests",
+               "ConcordanceRosterClientGameTests", "ScreenFitClientGameTests"}
+# GC-10 unit 7 (review): the garden's two-client class opens the stranger's pact screen too.
+MAGIC_SHOWN.add("ConcordanceGardenNetworkTests")
+for _name in ("MagicArt", "MagicTheme", "MagicLayout", "MagicScreen", "MagicButton", "MagicText", "MagicChip", "MagicStacks",
+              "MagicPortrait", "MagicPortraits", "PactGlance", "RosterGlance", "PactAfford", "KeepFirstConfirmScreen", "ComposerScroll",
+              "ConcordanceClientOptions"):
+    SHOWN_BY[_name] = SHOWN_BY.get(_name, set()) | MAGIC_SHOWN
+# The magic interfaces' unit 2: a whole sentence's short form (MagicGlance) draws the roster's card states and Jade's short
+# lines; Jade's lines on the pact perch and the spirits are photographed by the pact and garden classes (when Jade is
+# loaded), and those on Concordance blocks by the encyclopedia's.
+SHOWN_BY["MagicGlance"] = SHOWN_BY.get("MagicGlance", set()) | MAGIC_SHOWN
+SHOWN_BY["JugcraftJadeClient"] = SHOWN_BY.get("JugcraftJadeClient", set()) | {
+    "ConcordancePactClientGameTests", "ConcordanceGardenPactClientGameTests", "EncyclopediaClientGameTests"}
+# And the roster's class, whose workshop hand at work is photographed with Jade's overlay of it (unit 2's review).
+SHOWN_BY["JugcraftJadeClient"] |= {"ConcordanceRosterClientGameTests"}
+MAGIC_ASSETS = re.compile(r"^src/main/resources/assets/jugcraft/textures/gui/(?:sprites/(?:magic|tooltip)/|magic/)")
+# The language file is otherwise judged by nothing (its words are judged by the generators' checks), but the magic screens'
+# whole-screen word budgets are judged only by their client tests: a change to a key they draw or narrate (a glance, a
+# short label, a pact or roster screen's words, a whole sentence's short form, or a server sentence of the pacts, garden
+# pacts, workers or roster) selects them.
+LANG_FILE = re.compile(r"^src/main/resources/assets/jugcraft/lang/[a-z_]+\.json$")
+MAGIC_WORDS = re.compile(r'^[-+]\s*"(?:screen\.jugcraft\.pact\.|screen\.jugcraft\.roster\.|screen\.jugcraft\.glance\.'
+                         r'|message\.jugcraft\.concordance\.(?:pact|garden_pact|workers|roster)\.)')
 # Files that change nothing a client test shows.
 NOTHING = (
     re.compile(r"^docs/"),
@@ -245,6 +379,12 @@ def changed_code(base, head, path):
     return lines
 
 
+def magic_words(base, head, path):
+    """Whether a language file's change touches a key the magic screens draw or narrate (MAGIC_WORDS)."""
+    return any(MAGIC_WORDS.match(line) for line in git("diff", "-U0", base, head, "--", path).splitlines()
+               if not line.startswith(("---", "+++")))
+
+
 def by_names(lines, tests):
     """The classes naming the Jugcraft classes and IDs these code lines name (a registry many tests use aside)."""
     classes, ids = names_in("\n".join(lines))
@@ -264,6 +404,10 @@ def select(changed, tests, newly_listed, base=None, head=None):
         test = CLIENT_TEST.match(path)
         if test and test.group(1) in tests:
             chosen.add(test.group(1))
+            continue
+        if base and LANG_FILE.match(path) and magic_words(base, head, path):
+            chosen |= MAGIC_SHOWN & tests.keys()
+            reasons.append(f"{path}: the magic screens' words changed")
             continue
         if any(rule.search(path) for rule in NOTHING):
             continue
@@ -298,6 +442,9 @@ def select(changed, tests, newly_listed, base=None, head=None):
                 reasons.append(f"{path}: no client test shows {name}")
             chosen |= hits
             continue
+        if MAGIC_ASSETS.match(path):
+            chosen |= MAGIC_SHOWN & tests.keys()
+            continue
         asset = ASSET.match(path)
         if asset:
             stem = asset.group(1)
@@ -316,14 +463,25 @@ def select(changed, tests, newly_listed, base=None, head=None):
 
 def share(classes, tests, shards):
     """Longest first, then swap small classes to reduce any remaining imbalance."""
+    @cache
     def weight(name):
         if name in WEIGHTS:
             return WEIGHTS[name]
         path = tests[name]["source"]
-        return 8 + (len(path.read_text(encoding="utf-8").splitlines()) // 15 if path.is_file() else 0)
+        source = path.read_text(encoding="utf-8") if path.is_file() else ""
+        # Short subclasses still run the entire natural-world tree harness,
+        # including regional generation, inspection and save/reopen validation.
+        if name == "TreeBatchTwoClientGameTests" or re.search(
+                r"\bclass\s+\w+\s+extends\s+TreeBatchTwoClientGameTests\b", strip_comments(source)):
+            return 300
+        return 30 + len(source.splitlines()) // 15
 
-    jobs = [[0, []] for _ in range(shards)]
-    for name in sorted(classes, key=lambda n: (-weight(n), n)):
+    isolated = sorted(set(classes) & ISOLATED_CLIENTS)
+    if shards <= len(isolated):
+        isolated = []
+    reserved = [[weight(name), [name]] for name in isolated]
+    jobs = [[0, []] for _ in range(shards - len(reserved))]
+    for name in sorted(set(classes) - set(isolated), key=lambda n: (-weight(n), n)):
         job = min(jobs, key=lambda j: j[0])
         job[0] += weight(name)
         job[1].append(name)
@@ -343,7 +501,7 @@ def share(classes, tests, shards):
         heavy[1][heavy[1].index(a)], light[1][light[1].index(b)] = b, a
         heavy[0] -= delta
         light[0] += delta
-    return jobs
+    return jobs + reserved
 
 
 def listed_at(rev):
@@ -358,7 +516,7 @@ def main():
     parser.add_argument("--base", help="compare against this revision (a pull request's base)")
     parser.add_argument("--head", default="HEAD")
     parser.add_argument("--all", action="store_true", help="run every class")
-    parser.add_argument("--shards", type=int, default=16)
+    parser.add_argument("--shards", type=int, default=20)
     parser.add_argument("--github-output", help="append shard0..shardN-1 (comma-separated classes) to this file")
     args = parser.parse_args()
 

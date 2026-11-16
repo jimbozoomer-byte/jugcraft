@@ -37,6 +37,8 @@ public final class Aircraft extends Entity {
     private static final EntityDataAccessor<Float> AIM_PITCH=SynchedEntityData.defineId(Aircraft.class,EntityDataSerializers.FLOAT);
     private static final EntityDataAccessor<Integer> SHOT=SynchedEntityData.defineId(Aircraft.class,EntityDataSerializers.INT);
     private static final EntityDataAccessor<Integer> DISPLAY=SynchedEntityData.defineId(Aircraft.class,EntityDataSerializers.INT);
+    /** Whole seconds of fuel left, for the pilot's flight help (AircraftHud); it changes once a second, not every tick. */
+    private static final EntityDataAccessor<Integer> FUEL_SECONDS=SynchedEntityData.defineId(Aircraft.class,EntityDataSerializers.INT);
     private final AircraftSpec spec;
     private final SimpleContainer inventory;
     private UUID owner;
@@ -53,8 +55,8 @@ public final class Aircraft extends Entity {
     private final float[] visualControls=new float[3], previousVisualControls=new float[3];
     public float animatedControl(int axis,float partial){return Mth.lerp(partial,previousVisualControls[axis],visualControls[axis]);}
     // Source models face +Z: +X is the pilot's left wing. Positive Z roll
-    // raises that wing, so left input must produce a negative roll.
-    public float bank(float partial){return -animatedControl(1,partial)*power()*(spec.aeroplane()?18F:spec.name().equals("warship")?2F:5F);}
+    // raises that wing, so left input must produce a negative roll (AircraftAttitude).
+    public float bank(float partial){return AircraftAttitude.bank(spec,animatedControl(1,partial),power());}
     public Aircraft(EntityType<? extends Aircraft> type,Level level,AircraftSpec spec){
         super(type,level);this.spec=spec;inventory=new SimpleContainer(spec.sockets().size());
     }
@@ -65,6 +67,7 @@ public final class Aircraft extends Entity {
     public boolean mayUse(Player player){return owner==null||owner.equals(player.getUUID())||player.getAbilities().instabuild
         ||io.github.jimbozoomer.jugcraft.party.JugcraftParties.sameParty(owner,player.getUUID());}
     public int fuel(){return fuel;}
+    public int fuelSeconds(){return entityData.get(FUEL_SECONDS);}
     public float healthFraction(){return Mth.clamp(1-damage/(float)(40*stat("durability",1)),0,1);}
     public int loadedRounds(int slot){return ammunition.getOrDefault(slot,0);}
     public float power(){return entityData.get(POWER);}
@@ -127,10 +130,14 @@ public final class Aircraft extends Entity {
         fire=input.fire();boost=input.boost();inputTick=tickCount;
     }
     @Override public LinearInterpolationHandler createInterpolationHandler(){return SmoothFlight.handler(this);}
-    @Override protected void defineSynchedData(SynchedEntityData.Builder b){b.define(POWER,0F);b.define(CONTROLS,21);b.define(PAINT,0xFFFFFFFF);b.define(WEAPONS,0);b.define(BANNER,ItemStack.EMPTY);b.define(AIM_YAW,0F);b.define(AIM_PITCH,0F);b.define(SHOT,-100);b.define(DISPLAY,0);}
+    @Override protected void defineSynchedData(SynchedEntityData.Builder b){b.define(POWER,0F);b.define(CONTROLS,21);b.define(PAINT,0xFFFFFFFF);b.define(WEAPONS,0);b.define(BANNER,ItemStack.EMPTY);b.define(AIM_YAW,0F);b.define(AIM_PITCH,0F);b.define(SHOT,-100);b.define(DISPLAY,0);b.define(FUEL_SECONDS,0);}
     @Override public boolean isPickable(){return !isRemoved();}
     @Override protected boolean canAddPassenger(Entity rider){return getPassengers().size()<spec.seats();}
-    @Override protected Vec3 getPassengerAttachmentPoint(Entity passenger,EntityDimensions d,float scale){return spec.seat(getPassengers().indexOf(passenger),getPassengers().size()).xRot(getXRot()*Mth.DEG_TO_RAD).yRot(-getYRot()*Mth.DEG_TO_RAD).add(0,spec.groundOffset(),0);}
+    /** The owner's seat, where the renderer draws it: pitched and banked with the body (AircraftAttitude.place). */
+    @Override protected Vec3 getPassengerAttachmentPoint(Entity passenger,EntityDimensions d,float scale){
+        var seat=spec.seat(getPassengers().indexOf(passenger),getPassengers().size());
+        return AircraftAttitude.place(spec,getYRot(),getXRot(),bank(1),seat.x,seat.y,seat.z);
+    }
     @Override public void tick(){
         super.tick();previousRotation=rotation;rotation+=power();
         for(int axis=0;axis<3;axis++){previousVisualControls[axis]=visualControls[axis];visualControls[axis]=Mth.lerp(.2F,visualControls[axis],control(axis));}
@@ -149,6 +156,7 @@ public final class Aircraft extends Entity {
         float power=Mth.lerp(.06F,power(),target);if(power<.001F)power=0;
         entityData.set(POWER,power);
         if(driving&&fuel>0){fuelFraction+=stat("fuel",1);int used=(int)fuelFraction;fuel=Math.max(0,fuel-used);fuelFraction-=used;}
+        entityData.set(FUEL_SECONDS,fuel/20);
         if(listening&&boost&&boostTicks==0&&power>.5F&&!hasTelescope()&&consume("booster",null))boostTicks=60;
         double boostFactor=boostTicks>0?1.5:1; if(boostTicks>0)boostTicks--;
         setYRot(getYRot()-(float)(t*stat("yawSpeed",4)*.3*power));
@@ -176,10 +184,12 @@ public final class Aircraft extends Entity {
         if(horizontalCollision)setDeltaMovement(0,getDeltaMovement().y,0);
         for(var p:getPassengers())p.resetFallDistance();resetFallDistance();
         synchronizeEquipment();
-        entityData.set(AIM_YAW,pilot==null?0F:Mth.wrapDegrees(pilot.getYRot()-getYRot()));
-        entityData.set(AIM_PITCH,pilot==null?0F:Mth.clamp(pilot.getXRot()-getXRot(),-80,80));
+        // Where the pilot looks, in the body's own frame, so turrets drawn on a pitched or banked craft point there.
+        float[] aim=pilot==null?new float[2]:AircraftAttitude.aim(getYRot(),getXRot(),bank(1),pilot.getLookAngle());
+        entityData.set(AIM_YAW,Mth.wrapDegrees(aim[0]));
+        entityData.set(AIM_PITCH,Mth.clamp(aim[1],-80,80));
         if(listening&&fire&&pilot!=null)fire(level,pilot);
-        if(pilot!=null&&tickCount%40==0)pilot.sendOverlayMessage(Component.literal((musclePowered()?"Pedal W to spin rotor":"Fuel "+fuel/20+"s")+"  ·  WASD steer  ·  Space climb / Sprint descend  ·  Attack weapon  ·  Use boost"));
+        // The pilot's flight help (fuel and the bound keys) is drawn by the client: AircraftHud.
     }
     private void synchronizeEquipment(){
         int paint=bodyPaint,weapons=0,index=0,instruments=0;ItemStack banner=ItemStack.EMPTY;
@@ -224,7 +234,7 @@ public final class Aircraft extends Entity {
         ammunition.put(slot,ammunition.get(slot)-cost);return loadedAmmo.get(slot).copy();
     }
     private void fire(ServerLevel level,ServerPlayer pilot){
-        int mountIndex=-1;
+        int mountIndex=-1;float yaw=getYRot(),pitch=getXRot(),bank=bank(1);
         for(int i=0;i<inventory.getContainerSize();i++)if(spec.sockets().get(i).type().equals("weapon")){
             mountIndex++;
             String weapon=name(inventory.getItem(i));boolean bomb=weapon.equals("bomb_bay"),crossbow=weapon.equals("heavy_crossbow");
@@ -238,12 +248,14 @@ public final class Aircraft extends Entity {
             shotTicks.put(i,tickCount);
             entityData.set(SHOT,(int)level.getGameTime());
             for(var mount:positions){
-            var m=mount.getAsJsonObject();Vec3 muzzle=position().add(0,spec.groundOffset(),0).add(new Vec3(m.get("x").getAsDouble(),m.get("y").getAsDouble(),m.get("z").getAsDouble()).xRot(getXRot()*Mth.DEG_TO_RAD).yRot(-getYRot()*Mth.DEG_TO_RAD));
+            // The mount where the renderer draws the weapon model (AircraftAttitude.place).
+            var m=mount.getAsJsonObject();Vec3 muzzle=position().add(AircraftAttitude.place(spec,yaw,pitch,bank,m.get("x").getAsDouble(),m.get("y").getAsDouble(),m.get("z").getAsDouble()));
             if(bomb){
                 var shell=new ArtilleryShell(JugcraftArtillery.HEAVY_SHELL,level,pilot);
                 shell.setPos(muzzle.add(0,-.8,0));shell.setDeltaMovement(getDeltaMovement().add(0,-.2,0));level.addFreshEntity(shell);
             }else if(crossbow){
-                Vec3 direction=pilot.getLookAngle();Vec3 from=muzzle.add(direction.scale(1.25));
+                // From the drawn bolt line on the stock, 1.25 blocks out (the supplied original's barrel length).
+                Vec3 direction=pilot.getLookAngle();Vec3 from=muzzle.add(AircraftAttitude.turn(yaw,pitch,bank,0,AircraftAttitude.CROSSBOW_BOLT,0)).add(direction.scale(1.25));
                 net.minecraft.world.entity.projectile.arrow.AbstractArrow arrow=ammo.is(Items.SPECTRAL_ARROW)
                     ?new net.minecraft.world.entity.projectile.arrow.SpectralArrow(level,from.x,from.y,from.z,ammo,inventory.getItem(i))
                     :new net.minecraft.world.entity.projectile.arrow.Arrow(level,from.x,from.y,from.z,ammo,inventory.getItem(i));
@@ -251,8 +263,12 @@ public final class Aircraft extends Entity {
                 arrow.shoot(direction.x,direction.y+.1,direction.z,3,0);arrow.setDeltaMovement(arrow.getDeltaMovement().add(getDeltaMovement()));level.addFreshEntity(arrow);
                 level.playSound(null,blockPosition(),SoundEvents.CROSSBOW_SHOOT,SoundSource.PLAYERS,1,.8F);
             }else{
-                Vec3 direction=pilot.getLookAngle();var round=new AircraftBullet(level,pilot);
-                round.setPos(muzzle.add(direction));round.shoot(direction.x,direction.y,direction.z,4,1);
+                // Along the drawn barrels (the synced aim, clamped to the turret's travel; inside it, the pilot's look),
+                // from their muzzle: the bore's start, turned to the aim, then the barrels' length along it.
+                var barrel=AircraftAttitude.cannonDirection(aimYaw(),aimPitch());
+                Vec3 direction=AircraftAttitude.turn(yaw,pitch,bank,barrel.x,barrel.y,barrel.z);var round=new AircraftBullet(level,pilot);
+                var bore=AircraftAttitude.cannonBore(aimYaw(),aimPitch());
+                round.setPos(muzzle.add(AircraftAttitude.turn(yaw,pitch,bank,bore.x,bore.y,bore.z)).add(direction.scale(AircraftAttitude.CANNON_BARREL)));round.shoot(direction.x,direction.y,direction.z,4,1);
                 round.setDeltaMovement(round.getDeltaMovement().add(getDeltaMovement()));level.addFreshEntity(round);
                 level.playSound(null,blockPosition(),JugcraftAircraft.SOUNDS.get("cannon"),SoundSource.PLAYERS,1,1);
             }

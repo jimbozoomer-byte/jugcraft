@@ -70,6 +70,10 @@ OBSIDIAN = Material((14, 8, 24), (30, 20, 46), (50, 36, 76), (72, 54, 106), (104
 MAGMA = Material((60, 14, 6), (96, 28, 10), (124, 40, 12), (178, 66, 16), (230, 116, 30), (250, 176, 70), shine=False)
 # The Lantern Fen's: the Hag Stone's flint, a dark green-grey worn smooth by the fen.
 FEN_FLINT = Material((24, 32, 30), (36, 46, 44), (60, 78, 70), (88, 118, 100), (130, 156, 140), (196, 216, 202))
+# Knapped flint, for the woodland hunting weapons' stone heads and points (tools/thanksgiving_weapons.py: the
+# Stone-headed Hatchet, the Hunting Spear and the hunting bow's drawn arrow): a cool dark grey, darker than iron, its
+# light the sheen of a fresh flake. Provisional: not yet shown to the owner.
+FLINT = Material((18, 18, 22), (40, 40, 46), (58, 58, 66), (86, 86, 96), (124, 124, 134), (176, 176, 188))
 # The Mire Hag's loot (tools/item_icons/hagmoss.txt, hags_eye.txt and hags_shawl.txt): her grey moss, a dull green-grey
 # that does not shine (tools/mire_hag_art.py MOSS); and marsh-light, the sickly green of her eyes and her lantern's flame,
 # only ever a stone or an accent.
@@ -165,11 +169,29 @@ MATERIALS = {
     "obsidian": OBSIDIAN, "magma": MAGMA,
     # the Lantern Fen's, and the Mire Hag's loot
     "fen_flint": FEN_FLINT, "hagmoss": HAGMOSS, "marsh_light": MARSH_LIGHT,
+    # the woodland hunting weapons' knapped stone (tools/thanksgiving_weapons.py)
+    "flint": FLINT,
     # the Crypt Lich's loot
     "old_bone": OLD_BONE, "soul_fire": SOUL_FIRE,
     # the Earth school's metal (Concordance Chunk C)
     "thallite": THALLITE,
 }
+
+# Pharmacy's matte plastics, tablets and liquid identity colors (Art Batch 1).
+# Named ramps are shared by editable item maps; no manufacturer art or sampled vanilla pixels.
+MATERIALS.update({
+    "pharmacy_glass": Material((23, 48, 63), (50, 83, 103), (86, 124, 139), (150, 190, 204), (214, 240, 246), (244, 252, 255)),
+    "pharmacy_ivory": Material((65, 48, 49), (96, 77, 72), (144, 121, 108), (204, 188, 163), (235, 225, 200), (252, 246, 226), shine=False),
+    "pharmacy_blue": Material((22, 30, 66), (38, 55, 105), (57, 82, 151), (78, 118, 194), (126, 167, 225), (194, 219, 248), shine=False),
+    "pharmacy_teal": Material((20, 53, 58), (39, 82, 87), (62, 119, 123), (101, 167, 167), (157, 208, 203), (216, 241, 229), shine=False),
+    "pharmacy_coral": Material((71, 29, 41), (119, 55, 63), (166, 87, 88), (213, 125, 112), (239, 171, 150), (255, 217, 190), shine=False),
+    "pharmacy_sage": Material((35, 49, 32), (64, 85, 52), (96, 125, 75), (139, 164, 109), (184, 203, 154), (225, 236, 200), shine=False),
+    "pharmacy_lavender": Material((52, 31, 72), (84, 55, 111), (119, 84, 151), (162, 125, 192), (203, 173, 225), (237, 218, 248), shine=False),
+    "pharmacy_plum": Material((51, 24, 50), (89, 48, 80), (126, 77, 111), (167, 112, 145), (205, 156, 183), (239, 204, 218), shine=False),
+    "pharmacy_crimson": Material((62, 17, 35), (111, 36, 58), (156, 58, 78), (197, 91, 110), (228, 135, 147), (252, 193, 194), shine=False),
+    "pharmacy_coffee": Material((42, 21, 25), (88, 48, 47), (124, 76, 60), (164, 113, 81), (205, 157, 113), (239, 205, 158), shine=False),
+    "pharmacy_orange": Material((68, 31, 13), (122, 65, 28), (174, 100, 43), (222, 148, 61), (249, 196, 105), (255, 231, 170), shine=False),
+})
 
 # Materials meant to be vanilla's own metal: the distance test against copper, iron and gold is skipped for them.
 VANILLA = {"copper", "iron", "gold"}

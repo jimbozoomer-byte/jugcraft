@@ -241,9 +241,27 @@ def tree_of_lights():
     return out
 
 
+def harvest_centerpiece():
+    """Versioned November display; preserve harvest_display(feast=True) for saved-world ownership checks.
+
+    The 5x3x5 supplied-style woven horn fits inside the existing 7x7 site with a one-block margin.
+    North-facing master at (5,1,1); MultiDecorationBlock parts run west, up, south.
+    No serving inventories are created or replenished by seasonal changes.
+    """
+    out = {}
+    for away in range(5):
+        for up in range(3):
+            for right in range(5):
+                part = right + 5 * (up + 3 * away)
+                out[slot(5-right, 1+up, 1+away)] = (
+                    f"jugcraft:harvest_centerpiece[facing=north,lit=true,part={part}]")
+    return out
+
+
 CENTERPIECES = {
     "spring": maypole, "summer": flower_bed, "autumn": harvest_display, "winter": snowman,
     "halloween": jack_pile, "harvest": lambda: harvest_display(feast=True), "december": tree_of_lights,
+    "harvest_v2": harvest_centerpiece,
 }
 
 

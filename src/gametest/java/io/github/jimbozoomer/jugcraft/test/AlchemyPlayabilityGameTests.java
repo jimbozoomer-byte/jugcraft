@@ -30,6 +30,7 @@ public class AlchemyPlayabilityGameTests {
         var connection=new net.minecraft.network.Connection(net.minecraft.network.protocol.PacketFlow.SERVERBOUND);
         new io.netty.channel.embedded.EmbeddedChannel(connection);
         h.getLevel().getServer().getPlayerList().placeNewPlayer(connection,p,net.minecraft.server.network.CommonListenerCookie.createInitial(profile,false));
+        TestPlayers.track(h,p);
         p.setGameMode(net.minecraft.world.level.GameType.SURVIVAL);
         h.assertTrue(!p.isCreative()&&!p.isSpectator()&&!Assaying.knows(p),"Fixture is an ordinary survival player without research");return p;
     }
@@ -187,6 +188,19 @@ public class AlchemyPlayabilityGameTests {
             h.assertTrue(!legacy.canForm()&&legacy.getSlot(2).getItem().isEmpty()&&!Assaying.form(p,new ItemStack(item))&&Assaying.balance(p)==saved,"Legacy menu and scale cannot bypass policy");
         }
         h.assertTrue(!AlchemyPatterns.building(new ItemStack(Items.DIAMOND_BLOCK)),"Building eye cannot select valuable storage blocks");h.succeed();
+    }
+    @GameTest(maxTicks=20)public void decorativeExpansionUsesPaidLearnedTransactions(GameTestHelper h){
+        for(String id:List.of("aspen_planks","chiselworks_braid/oak_planks","stoneworks_andesite_bricks")){
+            var p=fresh(h);var stack=item(id);var menu=tablet(p);
+            h.assertTrue(!stack.isEmpty()&&stack.getItem() instanceof BlockItem&&TabletOutputs.allowed(stack),"Registered building output: "+id);
+            menu.getSlot(0).set(stack.copy());press(menu,p,0);press(menu,p,0);
+            long saved=Assaying.balance(p);long price=Assay.form(AlchemicalWorkshopBlockEntity.material(stack),1);
+            press(menu,p,1);
+            h.assertTrue(menu.getSlot(1).getItem().is(stack.getItem())&&Assaying.balance(p)==saved-price,"Learned decor spends its full existing value: "+id);
+        }
+        for(String id:List.of("steel_crate","condenser_mk1","klein_star_1"))
+            h.assertFalse(TabletOutputs.allowed(item(id)),"Equipment and storage remain blocked: "+id);
+        h.succeed();
     }
     @GameTest(maxTicks=20)public void convenienceCatalogueAllowsTorchesAndBuildingButNotUnknownContent(GameTestHelper h){
         var p=player(h);

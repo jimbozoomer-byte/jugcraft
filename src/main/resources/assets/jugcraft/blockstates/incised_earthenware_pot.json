@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=north,waterlogged=false": {
+      "model": "jugcraft:block/incised_earthenware_pot"
+    },
+    "facing=north,waterlogged=true": {
+      "model": "jugcraft:block/incised_earthenware_pot"
+    },
+    "facing=east,waterlogged=false": {
+      "model": "jugcraft:block/incised_earthenware_pot",
+      "y": 90
+    },
+    "facing=east,waterlogged=true": {
+      "model": "jugcraft:block/incised_earthenware_pot",
+      "y": 90
+    },
+    "facing=south,waterlogged=false": {
+      "model": "jugcraft:block/incised_earthenware_pot",
+      "y": 180
+    },
+    "facing=south,waterlogged=true": {
+      "model": "jugcraft:block/incised_earthenware_pot",
+      "y": 180
+    },
+    "facing=west,waterlogged=false": {
+      "model": "jugcraft:block/incised_earthenware_pot",
+      "y": 270
+    },
+    "facing=west,waterlogged=true": {
+      "model": "jugcraft:block/incised_earthenware_pot",
+      "y": 270
+    }
+  }
+}

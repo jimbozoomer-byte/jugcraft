@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jugcraft:block/turkey_pull_toy"
+    },
+    "facing=east": {
+      "model": "jugcraft:block/turkey_pull_toy",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jugcraft:block/turkey_pull_toy",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jugcraft:block/turkey_pull_toy",
+      "y": 270
+    }
+  }
+}

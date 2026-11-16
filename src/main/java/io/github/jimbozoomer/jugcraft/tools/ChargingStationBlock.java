@@ -2,10 +2,8 @@ package io.github.jimbozoomer.jugcraft.tools;
 
 import io.github.jimbozoomer.jugcraft.energy.EnergyConnectable;
 import io.github.jimbozoomer.jugcraft.energy.EnergyNetworks;
-import java.util.Locale;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -33,12 +31,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jspecify.annotations.Nullable;
 
-/**
- * The charging station: two blocks tall, with a cradle at chest height that holds one powered tool
- * (or the rocket pack) and charges it from cables. Use it with a tool to hang the tool up; use it with
- * an empty hand to take the tool back. The lower half holds the block entity; either half connects to
- * cables and passes use to it.
- */
+/** Two-block cable-powered cabinet. Either half opens its two-item charging and module menu. */
 public class ChargingStationBlock extends BaseEntityBlock implements EnergyConnectable {
 	public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
 	public static final EnumProperty<DoubleBlockHalf> HALF = BlockStateProperties.DOUBLE_BLOCK_HALF;
@@ -97,65 +90,22 @@ public class ChargingStationBlock extends BaseEntityBlock implements EnergyConne
 				(tickLevel, pos, tickState, station) -> station.serverTick((ServerLevel) tickLevel, pos, tickState));
 	}
 
-	@Override
-	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
-			InteractionHand hand, BlockHitResult hit) {
-		if (stack.getItem() instanceof UpgradeModuleItem module) {
-			return fitModule(stack, module, state, level, pos, player);
-		}
-		if (!(stack.getItem() instanceof Chargeable)) {
-			return InteractionResult.TRY_WITH_EMPTY_HAND;
-		}
-		if (!(level.getBlockEntity(lowerPos(state, pos)) instanceof ChargingStationBlockEntity station) || !station.tool().isEmpty()) {
-			return InteractionResult.TRY_WITH_EMPTY_HAND;
-		}
-		if (!level.isClientSide()) {
-			station.setTool(stack.split(1));
-		}
-		return InteractionResult.SUCCESS;
-	}
+    @Override
+    protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hit) {
+        return open(state, level, pos, player);
+    }
 
-	/** Fits an upgrade module into the tool on the cradle (see {@link ToolUpgrades}). */
-	private static InteractionResult fitModule(ItemStack stack, UpgradeModuleItem module, BlockState state, Level level, BlockPos pos,
-			Player player) {
-		if (!(level.getBlockEntity(lowerPos(state, pos)) instanceof ChargingStationBlockEntity station) || station.tool().isEmpty()) {
-			return InteractionResult.TRY_WITH_EMPTY_HAND;
-		}
-		if (!level.isClientSide()) {
-			ItemStack tool = station.tool().copy();
-			Component moduleName = stack.getHoverName();
-			ToolUpgrades.Result result = ToolUpgrades.fit(level, tool, module.kind());
-			if (result == ToolUpgrades.Result.FITTED) {
-				station.setTool(tool);
-				stack.consume(1, player);
-			}
-			player.sendOverlayMessage(Component.translatable("message.jugcraft.module." + result.name().toLowerCase(Locale.ROOT),
-					moduleName, tool.getHoverName()));
-		}
-		return InteractionResult.SUCCESS;
-	}
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+        return open(state, level, pos, player);
+    }
 
-	@Override
-	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
-		if (!(level.getBlockEntity(lowerPos(state, pos)) instanceof ChargingStationBlockEntity station)) {
-			return InteractionResult.PASS;
-		}
-		if (!level.isClientSide()) {
-			ItemStack tool = station.tool();
-			if (!tool.isEmpty()) {
-				player.sendOverlayMessage(Component.translatable("message.jugcraft.charging_station.tool", tool.getHoverName(),
-						String.format("%,d", Chargeable.energy(tool)), String.format("%,d", Chargeable.capacity(tool))));
-				station.setTool(ItemStack.EMPTY);
-				if (!player.getInventory().add(tool)) {
-					Block.popResource(level, pos, tool);
-				}
-			} else {
-				player.sendOverlayMessage(Component.translatable("message.jugcraft.charging_station",
-						String.format("%,d", station.energy().getAmount()), String.format("%,d", station.energy().getCapacity())));
-			}
-		}
-		return InteractionResult.SUCCESS;
-	}
+    private static InteractionResult open(BlockState state, Level level, BlockPos pos, Player player) {
+        if (!(level.getBlockEntity(lowerPos(state, pos)) instanceof ChargingStationBlockEntity station)) return InteractionResult.PASS;
+        if (!level.isClientSide() && station.stillValid(player)) player.openMenu(station);
+        return InteractionResult.SUCCESS;
+    }
 
 	@Override
 	protected void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {

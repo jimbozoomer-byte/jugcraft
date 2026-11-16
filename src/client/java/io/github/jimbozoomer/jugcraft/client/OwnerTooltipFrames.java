@@ -24,13 +24,9 @@ public final class OwnerTooltipFrames {
             public int getHeight(Font f){return 38;}
             public int getWidth(Font f){return 38;}
             public void extractImage(Font f,int x,int y,int w,int h,GuiGraphicsExtractor g){
-                var mc=net.minecraft.client.Minecraft.getInstance();
-                if(mc.level==null){g.item(stack,x+(w-16)/2,y+8);return;}
-                var item=new net.minecraft.world.entity.item.ItemEntity(mc.level,0,0,0,stack.copyWithCount(1));
-                var state=mc.getEntityRenderDispatcher().extractEntity(item,0);
-                if(state instanceof net.minecraft.client.renderer.entity.state.ItemEntityRenderState dropped)dropped.bobOffset=0;
-                float angle=ConcordanceClientOptions.reducedMotion()?0:(System.nanoTime()%12_000_000_000L)/12_000_000_000F*(float)(Math.PI*2);
-                g.entity(state,38,new org.joml.Vector3f(0,-.1F,0),new org.joml.Quaternionf().rotationXYZ(.2F,angle,(float)Math.PI),null,x+(w-38)/2,y,x+(w+38)/2,y+38);
+                // GUI previews must not create an unregistered ItemEntity: the dispatcher
+                // requires a world-assigned entity ID, including inside merchant tooltips.
+                g.item(stack,x+(w-16)/2,y+8);
             }
         });return result;
     }

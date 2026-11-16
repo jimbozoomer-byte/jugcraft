@@ -1,4 +1,4 @@
-"""Separate audited overlapping surfaces without replacing supplied meshes or pixels."""
+"""Separate audited overlapping surfaces without replacing supplied meshes or pixels, or leave out buried ones."""
 import copy
 from model_writer import finish_elements, finish_closed
 
@@ -12,13 +12,31 @@ REPAIRED = {
     'block/jimta_programming_table', 'item/jimtafacts/mimic_spawn_egg',
     'jimtafacts/ae2/block/me_chest_lights_on',
     'jimtafacts/ae2/block/quartz_fixture_wall', 'jimtafacts/ae2/block/quartz_fixture_wall_odd',
-    'jimtafacts/ae2/item/color_applicator', 'jimtafacts/ae2/item/color_applicator_colored',
     'jimtafacts/ae2/part/transition_plane_has_channel', 'jimtafacts/ae2/part/transition_plane_off',
     'jimtafacts/spellbooks/block/scroll_forge', 'jimtafacts/spellbooks/block/ice_spider_egg_frosted',
     'jimtafacts/spellbooks/item/staff_of_the_nines',
 } | {'jimtafacts/spellbooks/block/book_stack_' + n for n in ('02','04','05','08','09','10','11','14')}
 
+# Faces left out, by element index, because they are wholly buried inside opaque neighbours and their only overlaps are
+# with other buried faces (art_check Z1/N1). Every other element, face and UV stays exactly as supplied. The color
+# applicator's 45-degree hose elbows share their buried top and bottom with the straight runs (the rails above and
+# below cover both), and the nozzle-side hose ends sit 0.0084 px in front of the side blocks, buried behind the tips.
+# The separation pass these models had before pushed boxes that leave faces out past their flush neighbours, which
+# opened see-through slits up to 0.2 px wide (November 13). scripts/tests/test_jimtafacts_storage_geometry.py proves
+# each face here is buried and that no left-out face is exposed.
+BURIED = {
+    'jimtafacts/ae2/item/color_applicator': {25: ('up', 'down'), 28: ('up', 'down'), 26: ('north',), 29: ('north',)},
+    'jimtafacts/ae2/item/color_applicator_colored': {
+        **{elbow: ('up', 'down') for elbow in (25, 32, 39, 29, 36, 43)},  # bright, medium and dark tint layers
+        **{end: ('north',) for end in (26, 33, 40, 30, 37, 44)}},
+}
+
 def repair(ref, model):
+    if ref in BURIED and model.get('elements'):
+        model=copy.deepcopy(model)
+        for index, faces in BURIED[ref].items():
+            for face in faces: del model['elements'][index]['faces'][face]
+        return model
     if ref not in REPAIRED | CLOSED or not model.get('elements'): return model
     model=copy.deepcopy(model)
     # Retain the supplied inward-facing shell and its UVs. Its floor coincides

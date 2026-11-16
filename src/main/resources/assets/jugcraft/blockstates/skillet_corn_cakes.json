@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jugcraft:block/skillet_corn_cakes",
+      "y": 180
+    },
+    "facing=east": {
+      "model": "jugcraft:block/skillet_corn_cakes",
+      "y": 270
+    },
+    "facing=south": {
+      "model": "jugcraft:block/skillet_corn_cakes"
+    },
+    "facing=west": {
+      "model": "jugcraft:block/skillet_corn_cakes",
+      "y": 90
+    }
+  }
+}

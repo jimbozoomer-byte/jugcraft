@@ -141,7 +141,7 @@ Still to do:
 **Known limitations:**
 
 - Players see no in-game editor screen; editing is by commands.
-- Items held in a slim-armed NPC's hand sit half a pixel off, unlike vanilla's slim player model.
+- Fixed 13 November (town guests worker D): while slim arms show, the townsfolk model moves the arms' pivots half a pixel in and down (`TownsfolkModel.SLIM_SHIFT`), as vanilla's slim player model places a held item, and offsets the slim boxes back out; held items no longer sit half a pixel off. Client test written, not run; visual check pending.
 - Any language other than English sees the commands' feedback in English.
 
 **Reversible:** removing the feature leaves the NPCs as ordinary townsfolk outside the town's list. A world backup before mass placement is still advised.

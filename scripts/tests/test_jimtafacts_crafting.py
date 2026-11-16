@@ -1,5 +1,5 @@
 """Distinct native crafting bills, including competitors outside the collection."""
-from collections import defaultdict
+from collections import Counter, defaultdict
 import json
 from pathlib import Path
 import sys
@@ -11,6 +11,22 @@ from jimtafacts_crafting import distinct
 
 
 class JimtafactsCraftingTests(unittest.TestCase):
+    def test_iron_scaffold_pattern_preserves_bill_and_avoids_portcullis(self):
+        from jimtafacts_construction import iron_scaffold_recipe
+        scaffold = iron_scaffold_recipe()
+        door = json.loads((ROOT / 'src/main/resources/data/jugcraft/recipe/newest/doorworks/iron_portcullis.json').read_text(encoding='utf-8'))
+
+        def grid(recipe):
+            return tuple(tuple(recipe['key'].get(c, '') for c in row) for row in recipe['pattern'])
+
+        self.assertEqual(scaffold['type'], 'minecraft:crafting_shaped')
+        self.assertEqual(scaffold['result'], {'id': 'jugcraft:jimta_iron_scaffold', 'count': 6})
+        cells = grid(scaffold)
+        self.assertEqual(Counter(item for row in cells for item in row),
+                         Counter({'minecraft:iron_ingot': 3, 'minecraft:iron_bars': 3}))
+        self.assertNotEqual(cells, grid(door))
+        self.assertNotEqual(tuple(tuple(reversed(row)) for row in cells), grid(door))
+
     def test_refinement_preserves_callers_and_nine_slot_limit(self):
         original = ['minecraft:brick'] * 3
         self.assertEqual(distinct('jimtafacts_crops/mug', original), original + ['minecraft:stick'])

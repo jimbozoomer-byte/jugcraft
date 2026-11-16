@@ -8,7 +8,7 @@ import model_writer
 FAMILIES = {
     'aquatic': ('Aquacultah', 'aquaculture'), 'ars_additions': ('ars adds', 'ars_additions'),
     'forbidden': ('forbidden aracane', 'forbidden_arcanus'), 'homeworks': ('home', 'cozyhome'),
-    'jugtania': ('Jugtania', 'botania'), 'packworks': ('BACKPACKS', 'sophisticatedbackpacks'),
+    'holidayworks': ('holiday', 'mcwholidays'), 'jugtania': ('Jugtania', 'botania'), 'packworks': ('BACKPACKS', 'sophisticatedbackpacks'),
     'ribbits': ('frogs', 'ribbits'), 'supps': ('SUPPS', 'supplementaries'),
     'wilds': ('jugziesmobs', 'mowziesmobs'),
 }
@@ -39,9 +39,34 @@ CLOSE_FACES = {
     'jugtania/block/shapes/spreader_scaffolding': tuple((i, 'up') for i in range(10, 14)),
     'supps/block/spring_launcher_head_small': ((1, 'south'),),
     'supps/block/stick_y_tomatoes': ((0, 'up'), (1, 'down')),
+    # Rope tube ends left open for the source's computed knot. The native knot is only set by
+    # shears (OwnerSupplementRopes), so corners and wall-to-hanging joins bared hollow ends. The
+    # caps reuse the source's end-grain UV; where pieces meet, each cap lies inside the other.
+    'supps/block/rope_up': ((0, 'down'),),
+    'supps/block/rope_down': ((0, 'up'),),
+    'supps/block/rope_connection': ((0, 'south'),),
     'supps/special_models/block/books/book_and_quill': ((2, 'up'), (2, 'west')),
     'supps/special_models/block/books/book_enchanted': ((2, 'up'), (2, 'west')),
     **{'supps/special_models/plants/' + n + '_block': ((0, 'down'),) for n in ('cantaloupe', 'honeydew', 'squash')},
+    # The carry handle's top bar (backpack_base element 5, first in every tier's composition) omits
+    # its underside, so the handle loop showed a see-through slot. Close it with its own top face's
+    # UV; the hash-guarded separation record in imported_geometry_repairs.json carries the same face.
+    **{'packworks/block/' + tier: ((5, 'down'),) for tier in TIERS},
+    # Christmas trees (every colour shares these meshes). The innermost south branch segment omits
+    # its inward face, which its three partners draw: whenever a base or bottom section is the top of
+    # the stack, the ring round the trunk top showed into the segment. Twenty bulb caps omit the face
+    # towards the trunk that their lower halves and the other caps draw; middle and top bulbs above eye
+    # height showed into the cap (and through it) from below. Each closing face copies the cap's own
+    # opposite face (texture and UV); the ring segment, which has no opposite face, takes a window of
+    # its own foliage faces (model_writer._closing_face).
+    **{'holidayworks/block/' + tree: ((0, 'north'),) for tree in (
+        'christmas/christmas_tree_base', 'christmas/christmas_tree_bottom', 'parent/decorated_christmas_tree_base')},
+    'holidayworks/block/parent/decorated_christmas_tree_bottom': (
+        (0, 'north'), (51, 'west'), (54, 'west'), (98, 'north'), (104, 'north'),
+        (110, 'west'), (113, 'west'), (124, 'east'), (131, 'east')),
+    'holidayworks/block/parent/decorated_christmas_tree_middle': (
+        (36, 'north'), (42, 'west'), (48, 'south'), (52, 'east'), (64, 'north'), (69, 'west'), (74, 'south'), (85, 'east')),
+    'holidayworks/block/parent/decorated_christmas_tree_top': ((30, 'north'), (38, 'east'), (45, 'south'), (53, 'west')),
 }
 # Narrow release backport: pre-existing separation repairs remain authoritative.
 TARGETS = {name for name in BASKETS if '_hanging' not in name} | CRYSTALS | CLOSE_FACES.keys()

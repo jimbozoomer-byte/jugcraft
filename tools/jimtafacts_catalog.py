@@ -40,7 +40,10 @@ def texture_sources():
         elif isinstance(value, dict):
             source, runtime = value.get('source'), value.get('runtime')
             if isinstance(source, str) and isinstance(runtime, str) and runtime.endswith('.png'):
-                if source.startswith(('art/owner-library/originals/Oct23/Jimtafacts/', 'art/owner-library/originals/Edited-2026-10-29/artifacts/')):
+                # The accessory importer now uses the owner's newer artifacts
+                # folder; keep the same provenance and byte-equality requirement.
+                if source.startswith(('art/owner-library/originals/Oct23/Jimtafacts/',
+                                      'art/owner-library/originals/Edited-2026-10-29/artifacts/')):
                     result[runtime] = source
             for row in value.values():
                 if isinstance(row, (dict, list)): visit(row)

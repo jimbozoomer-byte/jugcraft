@@ -85,6 +85,37 @@ native render/event equivalents rather than being executed unchanged.
 
 ## Full-port validation and local playtest
 
+### Imbuement Chamber lapis correction (7 November 2026)
+
+**Report.** The Imbuement Chamber was reported to refuse lapis for Source Gems.
+
+**Findings.** Each path a player can use was traced:
+- **Holding lapis and right-clicking the chamber did nothing.** The chamber neither loaded the lapis nor opened its menu. `NouveauWorkshopInteractions` handled hand loading only for pedestals, the scribe's and alteration tables, the prism and turrets, so the click passed. In this version a passed click with an item in hand does not fall back to the empty-hand menu. In Ars Nouveau, which this port follows, the chamber is loaded by right-clicking it with the item, and the renderer draws slot 0 on top of the chamber. This is the defect fixed here.
+- **The recipe and tag are sound.**
+  - `imbuement_lapis` reads `c:gems/lapis`, exactly as the supplied original does.
+  - Fabric API's 26.3 convention data lists `minecraft:lapis_lazuli` in that tag.
+  - No Jugcraft tag file replaces it.
+  - The matcher, the station tick, the menu's input slots and the hopper faces all accept lapis.
+
+**Fix.** Right-clicking the chamber with an item that one of its imbuement recipes takes as its input loads the stack, as the menu and hoppers already do. Blank and spell parchment, which the scribing path reads, load the same way.
+- **Placement:** the stack merges into matching input slots first, then fills the first empty slot.
+- **Full chamber:** if the inputs are full, the player is told and keeps the items.
+- **Other items:** any other item keeps its ordinary use, so blocks still place against the chamber.
+- **Unchanged:** sneaking still places blocks, and an empty hand still opens the menu.
+- **Catalysts:** pedestal catalysts are not loaded by hand. They belong on the pedestals.
+
+**Tests** (in `NouveauExpansionGameTests`; not run here, because this environment cannot build the mod):
+- `imbuementChamberLoadsLapisByHandAndImbuesSourceGems`:
+  - right-clicks through the block's real `useItemOn` with three lapis;
+  - lets the station's own tick run with a Source Jar beside it;
+  - requires a Source Gem, with exactly one lapis spent per gem.
+
+  If the report came from a path other than the hand, this test still drives the shipped recipe and tag end to end.
+- `imbuementChamberTakesLapisFromMenuAndHopperButLeavesOtherItems`:
+  - covers the menu's shift-click and the hopper face;
+  - covers an unrelated item passing untouched;
+  - covers full inputs refusing without consuming.
+
 ### Arrow pickup stacking correction (22 October 2026)
 
 The owner reported that five arrows fired from a bronze longbow returned as five

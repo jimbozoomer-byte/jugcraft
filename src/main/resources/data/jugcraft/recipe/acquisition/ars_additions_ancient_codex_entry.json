@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "jugcraft:ars_additions_lost_codex_entry",
+    "jugcraft:ars_additions_lost_codex_entry",
+    "jugcraft:ars_additions_lost_codex_entry"
+  ],
+  "result": {
+    "id": "jugcraft:ars_additions_ancient_codex_entry",
+    "count": 1
+  }
+}

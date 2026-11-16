@@ -1,0 +1,35 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "jugcraft:chemical_reaction",
+  "capability": "jugcraft:botanical_separation",
+  "items": [
+    {
+      "ingredient": "jugcraft:masterwork_blend",
+      "count": 4
+    }
+  ],
+  "fluids": [
+    {
+      "fluid": "jugcraft:refined_beverage_stock",
+      "amount": 1000
+    }
+  ],
+  "results": [
+    {
+      "id": "jugcraft:masterwork_unconditioned_concentrate",
+      "count": 4
+    }
+  ],
+  "tool": "jugcraft:precision_process_module",
+  "energy_per_tick": 128,
+  "time": 300
+}

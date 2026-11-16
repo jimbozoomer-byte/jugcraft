@@ -450,6 +450,9 @@ def write_all(write, assets, data, lang, condition):
     for module in (concordance_ee_equipment, concordance_ee_artifacts, nouveau_content, jimtafacts_gear, newest_equipment_tags):
         for tag, values in module.item_tags().items():
             by_tag.setdefault(tag, []).extend(values)
+    import thanksgiving_weapons  # Thanksgiving weapons (docs/features/thanksgiving-weapons.md): the Naval Cutlass is a sword
+    for tag, values in thanksgiving_weapons.item_tags().items():
+        by_tag.setdefault(tag, []).extend(values)
     for tag, values in by_tag.items():
         write(tags / f"{tag}.json", {"replace": False, "values": values})
     for tier, info in GEAR_TIERS.items():

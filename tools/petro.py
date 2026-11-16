@@ -309,7 +309,7 @@ FLUID_MACHINES = {
     "advanced_engine": {"inputs": [8_000, 4_000], "outputs": [], "item_inputs": 1, "item_outputs": 0, "recipe_type": None},
     # Sulfur + water -> sulfuric acid; bauxite + lye -> alumina; phosphate + acid -> fertilizer (batch 5). Batch 24:
     # also the mixing jobs (brine, fracking fluid), replacing the chemical mixer. 96 JE/t.
-    "chemical_reactor": {"inputs": [8_000, 8_000, 1_000], "outputs": [8_000], "item_inputs": 2, "item_outputs": 1,
+    "chemical_reactor": {"inputs": [8_000, 8_000, 1_000], "outputs": [8_000], "item_inputs": 2, "item_outputs": 3,
                          "recipe_type": "chemical_reaction"},
     # Electronics (batch 7): a wafer and copper wire etched with sulfuric acid into microchips. 192 JE/t.
     "lithography_station": {"inputs": [4_000], "outputs": [], "item_inputs": 2, "item_outputs": 1,
@@ -460,6 +460,10 @@ FLUID_RECIPES = {
         {"name": "aspirin", "items": [("jugcraft:salicylic_acid", 2), ("jugcraft:cider_vinegar", 1)],
          "fluids": [("jugcraft:sulfuric_acid", 50)], "results": [("jugcraft:aspirin", 4)], "ticks": 120,
          "features": ["agriculture", "sulfur", "machines"]},
+        # Deliberately fictional starch/redstone pharmacy formulation; not a real drug synthesis.
+        {"name": "paracetamol", "items": [("jugcraft:pharmaceutical_starch", 2), ("minecraft:redstone", 1)],
+         "fluids": [("minecraft:water", 250)], "results": [("jugcraft:paracetamol", 4)], "ticks": 160,
+         "features": ["agriculture", "machines"]},
         # Boric acid (docs/features/boric-acid.md): borax freed with sulfuric acid. Quantities for review.
         {"name": "boric_acid", "items": [("jugcraft:borax", 1)], "fluids": [("jugcraft:sulfuric_acid", 250)],
          "results": [("jugcraft:boric_acid", 2)], "ticks": 100, "features": ["silicon", "sulfur"]},
@@ -527,7 +531,7 @@ FLUID_RECIPES = {
          "fluids": [("jugcraft:lye", 250)], "results": [("jugcraft:antidote", 1)], "ticks": 100,
          "features": ["machines", "salt"]},
         # Stimulant: caffeine extracted from cocoa beans with bioethanol.
-        {"name": "stimulant", "items": [("minecraft:cocoa_beans", 4), ("minecraft:glass_bottle", 1)],
+        {"name": "stimulant", "items": [("minecraft:cocoa_beans", 4), ("jugcraft:pharmaceutical_starch", 1)],
          "fluids": [("jugcraft:bioethanol", 250)], "results": [("jugcraft:stimulant", 1)], "ticks": 100,
          "features": ["machines"]},
         # Vanadium electrolyte (batch 17): the vanadium in heavy oil residue leached into sulfuric acid, for the flow
@@ -567,9 +571,9 @@ FLUID_RECIPES = {
         {"name": "microchip", "items": [("jugcraft:silicon_wafer", 1), ("jugcraft:copper_wire", 2)],
          "fluids": [("jugcraft:sulfuric_acid", 100)], "results": [("jugcraft:microchip", 4)], "ticks": 200,
          "features": ["silicon", "sulfur"]},
-        # Nitric acid etches as well, and twice as far (batch 12).
+        # Prepared nitric etchant doubles the wafer yield and retains its lower acid cost.
         {"name": "microchip_nitric", "items": [("jugcraft:silicon_wafer", 1), ("jugcraft:copper_wire", 2)],
-         "fluids": [("jugcraft:nitric_acid", 50)], "results": [("jugcraft:microchip", 4)], "ticks": 200,
+         "fluids": [("jugcraft:nitric_acid", 50)], "results": [("jugcraft:microchip", 8)], "ticks": 200,
          "features": ["silicon", "machines"]},
     ],
     # Nitrogen chemistry (batch 12). Fluid volumes shrink: 400 mB of gas in gives 200 of ammonia, so no recipe
@@ -670,6 +674,8 @@ def fluid_recipe_files(condition):
                                          for r in recipe["fluid_results"]]
             if recipe.get("results"):
                 data["results"] = [{"id": item, "count": count} for item, count in recipe["results"]]
+            if recipe.get("result_chances"):
+                data["result_chances"] = recipe["result_chances"]
             if recipe.get("tool"): data["tool"] = recipe["tool"]
             data["time"] = recipe["ticks"]
             yield kind, recipe["name"], data
@@ -708,6 +714,10 @@ ITEMS.update({k: v for k, v in FLUORO_ITEMS.items() if k not in ITEMS})
 from ceramics import ITEMS as CERAMIC_ITEMS
 ITEMS.update(CERAMIC_ITEMS)
 
+import mineral_sand_processing
+ITEMS.update(mineral_sand_processing.ITEMS)
+FLUID_RECIPES['chemical_reactor'].extend(mineral_sand_processing.REACTOR_RECIPES)
+
 from structural_alloys import ITEMS as ALLOY_ITEMS
 ITEMS.update(ALLOY_ITEMS)
 
@@ -737,6 +747,19 @@ ITEMS.update(cryogenic_fuels.ITEMS)
 FLUIDS.update(cryogenic_fuels.FLUIDS)
 FLUID_RECIPES["cryogenic_liquefier"].extend(cryogenic_fuels.LIQUEFIER_RECIPES)
 FLUID_RECIPES["chemical_reactor"].extend(cryogenic_fuels.TANK_RECIPES)
+
+import pharmacy_factory
+FLUID_RECIPES['chemical_reactor'].extend(pharmacy_factory.REACTOR_RECIPES)
+import sterile_pharmacy
+FLUIDS.update(sterile_pharmacy.FLUIDS)
+FLUID_RECIPES['chemical_reactor'].extend(sterile_pharmacy.REACTOR_RECIPES)
+import precision_pharmacy
+import alcohol_pharmacy
+FLUIDS.update(precision_pharmacy.FLUIDS)
+FLUIDS.update(alcohol_pharmacy.FLUIDS)
+FLUID_RECIPES['chemical_reactor'].extend(precision_pharmacy.REACTOR_RECIPES)
+import psychedelic_pharmacy
+FLUID_RECIPES['chemical_reactor'].extend(psychedelic_pharmacy.REACTOR_RECIPES)
 # Methyl chloride (docs/features/silicone.md): methane and chlorine in the Chemical Reactor, made into silicone rubber.
 # Last, so the swirls drawn by index for the gases before it keep their seeds.
 GASES["methyl_chloride"] = {"display": "Methyl Chloride", "feature": "machines",

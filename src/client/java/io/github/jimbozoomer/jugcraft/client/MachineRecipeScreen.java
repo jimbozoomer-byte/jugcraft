@@ -185,7 +185,10 @@ public final class MachineRecipeScreen extends Screen implements ScreenKit.Fitte
         text(lines, tr("recipe_outputs"), heading);
         for (int i = 0; i < r.results().size(); i++) {
             var item = r.results().get(i).create();
-            lines.add(new Line(item, tr("recipe_item_out", i+1, item.getCount(), item.getHoverName()), text));
+            var label = tr("recipe_item_out", i+1, item.getCount(), item.getHoverName()).copy();
+            if (r.resultChance(i) < 1.0F) label.append(Component.literal(String.format(Locale.ROOT,
+                    " (%.0f%%, independent)", r.resultChance(i) * 100)));
+            lines.add(new Line(item, label, text));
             text(portDetails, Component.literal(port(FormPort.Kind.ITEM_OUT, i)), dim);
         }
         for (int i = 0; i < r.fluidResults().size(); i++) {

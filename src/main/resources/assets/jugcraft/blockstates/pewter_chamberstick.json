@@ -1,0 +1,34 @@
+{
+  "variants": {
+    "facing=north,lit=false": {
+      "model": "jugcraft:block/pewter_chamberstick"
+    },
+    "facing=north,lit=true": {
+      "model": "jugcraft:block/pewter_chamberstick_lit"
+    },
+    "facing=east,lit=false": {
+      "model": "jugcraft:block/pewter_chamberstick",
+      "y": 90
+    },
+    "facing=east,lit=true": {
+      "model": "jugcraft:block/pewter_chamberstick_lit",
+      "y": 90
+    },
+    "facing=south,lit=false": {
+      "model": "jugcraft:block/pewter_chamberstick",
+      "y": 180
+    },
+    "facing=south,lit=true": {
+      "model": "jugcraft:block/pewter_chamberstick_lit",
+      "y": 180
+    },
+    "facing=west,lit=false": {
+      "model": "jugcraft:block/pewter_chamberstick",
+      "y": 270
+    },
+    "facing=west,lit=true": {
+      "model": "jugcraft:block/pewter_chamberstick_lit",
+      "y": 270
+    }
+  }
+}

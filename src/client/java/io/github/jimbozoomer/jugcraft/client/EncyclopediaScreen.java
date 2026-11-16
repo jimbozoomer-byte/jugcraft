@@ -53,9 +53,25 @@ public class EncyclopediaScreen extends Screen {
     private long turnedAt = net.minecraft.util.Util.getMillis();
     private record Section(Component title, List<EncyclopediaPayload.Row> rows) { }
 
+    /** A route screen this page was opened from (its Map tab or a lesson link); a button leads back to it. */
+    private @Nullable Screen returnTo;
+    /** The route step to show once its page is laid out (a route map's Live recipe), or -1. */
+    private int pendingStep = -1;
+
     public boolean isHome() { return home; }
-    public void showPage(String id) { emptyPage = ""; home = false; section = 0; scroll = 0; turnTo(id); dirty = true; }
-    public void showContents() { emptyPage = ""; home = true; dirty = true; }
+    public void showPage(String id) { emptyPage = ""; home = false; section = 0; scroll = 0; pendingStep = -1; turnTo(id); dirty = true; }
+    public void showContents() { emptyPage = ""; home = true; returnTo = null; pendingStep = -1; dirty = true; }
+    /** Opens {@code page} at the topic of its {@code step}-th route step (0 is the first): a route map's live recipe. */
+    public void showStep(String page, int step) { showPage(page); pendingStep = step; }
+    /** Shows a button back to {@code screen} (cleared by Contents and by using it). */
+    public void returnTo(@Nullable Screen screen) { returnTo = screen; dirty = true; }
+    public @Nullable Screen returnTo() { return returnTo; }
+    /** The topic being read (0 is the first; tests read it). */
+    public int section() { return section; }
+    private void backToRoute() {
+        Screen target = returnTo; returnTo = null;
+        if (target != null) minecraft.gui.setScreen(target);
+    }
     private static Component ui(String key, Object... args) { return ComposerScreen.ui(key, args); }
 
 
@@ -102,6 +118,11 @@ public class EncyclopediaScreen extends Screen {
         else if (!current.equals(laidOut)) { scroll = 0; section = 0; }
         EncyclopediaPayload.Page page = emptyPage.isEmpty() ? EncyclopediaClient.navigator().current() : null;
         split(page);
+        if (pendingStep >= 0 && page != null) {
+            int at = stepSection(pendingStep);
+            if (at >= 0) { section = at; scroll = 0; }
+            pendingStep = -1;
+        }
         section = Math.max(0, Math.min(section, sections.size() - 1));
         contents = addRenderableWidget(new ComposerScroll(minecraft, bookLeft + 18, bookTop + 58, pageWidth + 4,
             Math.max(20, footer - bookTop - 66), this::focused));
@@ -113,10 +134,16 @@ public class EncyclopediaScreen extends Screen {
             contents.add(keyed("section:" + i, tab), cy); cy += 29;
         }
         contents.arrange(Math.max(0, (section - 2) * 29));
+        int stacked = 0;
         if (page != null && page.rows().stream().anyMatch(row -> row.link().isPresent() && row.link().get().kind() == EncyclopediaPayload.Link.COMPOSER)) {
             contents.setHeight(Math.max(20, contents.getHeight() - 24));
             paperButton("compose", bookLeft + 18, footer - 23, pageWidth - 7, 20,
                 Component.translatable("encyclopedia.jugcraft.link.composer"), "", () -> ComposerClient.open(minecraft, this));
+            stacked++;
+        }
+        if (returnTo != null) {
+            contents.setHeight(Math.max(20, contents.getHeight() - 24));
+            paperButton("route_back", bookLeft + 18, footer - 23 - 24 * stacked, pageWidth - 7, 20, ui("book.back_to_route"), "", this::backToRoute);
         }
         body = addRenderableWidget(new ComposerScroll(minecraft, left, bodyTop, contentWidth + SCROLLBAR,
             Math.max(ROW, footer - 7 - bodyTop), this::focused));
@@ -129,6 +156,16 @@ public class EncyclopediaScreen extends Screen {
         } else line(ly, ui(EncyclopediaClient.navigator().received() ? "book.empty" : "book.loading"), 0, "empty");
         body.arrange(scroll); laidOut = current;
         for (var control : keys.entrySet()) if (control.getValue().equals(focus)) { refocus(control.getKey()); break; }
+    }
+
+    /** The topic that starts with the page's {@code step}-th step row, or -1 (sections must be split already). */
+    private int stepSection(int step) {
+        int seen = 0;
+        for (int i = 0; i < sections.size(); i++) {
+            List<EncyclopediaPayload.Row> rows = sections.get(i).rows();
+            if (!rows.isEmpty() && rows.getFirst().kindOf() == EncyclopediaPayload.Kind.STEP && seen++ == step) return i;
+        }
+        return -1;
     }
 
     /** Opens the topic containing an existing row/link; also used by the keyboard integration test. */
@@ -287,6 +324,7 @@ public class EncyclopediaScreen extends Screen {
 		ChatFormatting colour = switch (edge) {
 			case RECOMMENDED -> ChatFormatting.DARK_AQUA;
 			case TRADE -> ChatFormatting.GOLD;
+			case ALTERNATIVE -> ChatFormatting.BLUE;
 			case OPTIONAL_BOSS -> ChatFormatting.DARK_PURPLE;
 			default -> ChatFormatting.DARK_GRAY;
 		};

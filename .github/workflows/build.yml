@@ -5,12 +5,14 @@ on:
     branches: [main]
   workflow_dispatch:
     inputs:
+      # GC-10 unit 7 (review): the description names the garden's load card too; only its words changed.
       load_card:
-        description: Also run the Concordance load cards, the workshop's and the pact hall's (docs/TESTING.md); ordinary runs never do
+        description: Also run the Concordance load cards, the workshop's, the pact hall's and the garden's (docs/TESTING.md); ordinary runs never do
         type: boolean
         default: false
+      # GC-10 unit 7 (review): the description names the garden cohort's client classes too; only its words changed.
       clients_without_optional:
-        description: Also run Chunk D's pact, roster and two-client tests without the optional integrations (docs/TESTING.md); ordinary runs never do
+        description: Also run Chunk D's pact, roster and two-client tests and the garden cohort's client and two-client tests without the optional integrations (docs/TESTING.md); ordinary runs never do
         type: boolean
         default: false
 permissions:
@@ -133,6 +135,21 @@ jobs:
           if [ -s pacthall.txt ]; then
             echo "::notice title=Pact hall load card::$(awk '{gsub(/%/, "%25"); printf "%s%%0A", $0}' pacthall.txt)"
           fi
+      # Concordance garden cohort, GC-10 unit 7 (GC-S17, GC-P141): the garden load card, opted in as the two above.
+      - name: Run the garden load card
+        if: ${{ !cancelled() }}
+        env:
+          JAVA_TOOL_OPTIONS: -Dfabric-api.gametest.filter=jugcraft-test:concordance_garden_load_game_tests_load_card
+        run: |
+          set -o pipefail
+          ./gradlew runGameTest --no-daemon 2>&1 | tee garden.out
+      - name: Show the garden load card as a notice
+        if: always()
+        run: |
+          grep -F 'Garden load card |' garden.out | sed 's/^.*Garden load card | //' > garden.txt || true
+          if [ -s garden.txt ]; then
+            echo "::notice title=Garden load card::$(awk '{gsub(/%/, "%25"); printf "%s%%0A", $0}' garden.txt)"
+          fi
 
   # Concordance Chunk D, D-09 (08:175; D-P137): the pact's client tests in a build without the optional integrations (Jade
   # among them), only when a manual run asks for it.
@@ -161,6 +178,10 @@ jobs:
           echo "eula=true" > run/eula.txt
       - name: Run the pact client tests without optional integrations
         run: ./gradlew runClientGameTest --no-daemon -PjugcraftOptionalIntegrations=false "-PclientTests=ConcordancePactClientGameTests,ConcordanceRosterClientGameTests,ConcordancePactNetworkTests"
+      # Concordance garden cohort, GC-10 unit 7 (GC-S18, GC-P148): the garden client tests without the optional integrations.
+      - name: Run the garden client tests without optional integrations
+        if: ${{ !cancelled() }}
+        run: ./gradlew runClientGameTest --no-daemon -PjugcraftOptionalIntegrations=false "-PclientTests=ConcordanceGardenPactClientGameTests,ConcordanceGardenNetworkTests"
       - name: Print small previews of the screenshots
         if: always()
         run: |
@@ -185,7 +206,7 @@ jobs:
             **/screenshots/*.png
             **/owner-network-evidence/**/peer.log
 
-  # Which client game test classes to run, shared out between sixteen client jobs (tools/select_client_tests.py).
+  # Which client game test classes to run, shared out between twenty client jobs (tools/select_client_tests.py).
   # A pull request runs the classes that show what it changed; main and a manual run of this workflow run them all.
   plan:
     name: choose client tests
@@ -210,6 +231,10 @@ jobs:
       shard13: ${{ steps.choose.outputs.shard13 }}
       shard14: ${{ steps.choose.outputs.shard14 }}
       shard15: ${{ steps.choose.outputs.shard15 }}
+      shard16: ${{ steps.choose.outputs.shard16 }}
+      shard17: ${{ steps.choose.outputs.shard17 }}
+      shard18: ${{ steps.choose.outputs.shard18 }}
+      shard19: ${{ steps.choose.outputs.shard19 }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
@@ -222,17 +247,17 @@ jobs:
         run: |
           if [ "$EVENT" = pull_request ]; then
             # The pull request's merge commit against its first parent, the base branch.
-            python3 tools/select_client_tests.py --base HEAD^1 --shards 16 --github-output "$GITHUB_OUTPUT"
+            python3 tools/select_client_tests.py --base HEAD^1 --shards 20 --github-output "$GITHUB_OUTPUT"
           else
-            python3 tools/select_client_tests.py --all --shards 16 --github-output "$GITHUB_OUTPUT"
+            python3 tools/select_client_tests.py --all --shards 20 --github-output "$GITHUB_OUTPUT"
           fi
 
   # A real game client with software rendering (Mesa): runs the chosen client game tests in src/gametest
-  # (JugcraftClientGameTests and the rest), which build showrooms and worlds and take screenshots. Sixteen jobs share
+  # (JugcraftClientGameTests and the rest), which build showrooms and worlds and take screenshots. Twenty jobs share
   # them out (the plan job above), so every chosen class runs once; the "client" job below passes only when the plan
-  # and all sixteen do. A job with no classes passes at once.
+  # and all twenty do. A job with no classes passes at once.
   client-shard:
-    name: client (shard ${{ matrix.shard }} of 16)
+    name: client (shard ${{ matrix.shard }} of 20)
     needs: plan
     runs-on: ubuntu-24.04
     # Keep the 60-minute limit; the expanded gun gallery has its own measured weight.
@@ -240,7 +265,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
     env:
       CLASSES: ${{ needs.plan.outputs[format('shard{0}', matrix.shard)] }}
       LIBGL_ALWAYS_SOFTWARE: 'true'
@@ -276,9 +301,13 @@ jobs:
           # Test options are written by runClientGameTest after Loom cleans its run directory.
           mkdir -p run
           echo "eula=true" > run/eula.txt
-      - name: Run client game tests (shard ${{ matrix.shard }} of 16)
+      - name: Run client game tests (shard ${{ matrix.shard }} of 20)
         if: env.CLASSES != ''
         run: |
+          # Keep the native output and periodic thread dumps in the artifact;
+          # screenshot-heavy job logs can exceed the log connector's limit.
+          mkdir -p build/ci-evidence
+          exec > >(tee "build/ci-evidence/client-shard-${{ matrix.shard }}.log") 2>&1
           # Both bounded JVMs plus software rendering need spillover on hosted runners.
           sudo fallocate -l 8G /mnt/jugcraft-client.swap
           sudo chmod 600 /mnt/jugcraft-client.swap
@@ -304,18 +333,7 @@ jobs:
         if: always() && env.CLASSES != ''
         run: |
           python3 -m pip install --quiet pillow
-          python3 - <<'PY'
-          import base64, glob, io, os
-          from PIL import Image
-          for path in sorted(glob.glob("**/screenshots/*.png", recursive=True)):
-              image = Image.open(path).convert("RGB")
-              image.thumbnail((480, 270))
-              buffer = io.BytesIO()
-              image.save(buffer, "JPEG", quality=60)
-              print(f"=== SCREENSHOT {os.path.basename(path)} {image.size}")
-              print(base64.b64encode(buffer.getvalue()).decode())
-              print("=== END")
-          PY
+          python3 scripts/preview_client_screenshots.py
       - uses: actions/upload-artifact@v4
         if: always() && env.CLASSES != ''
         with:
@@ -323,6 +341,9 @@ jobs:
           path: |
             **/screenshots/*.png
             **/owner-network-evidence/**/peer.log
+            build/ci-evidence/*.log
+            build/run/clientGameTest/logs/*.log
+            build/run/clientGameTest/crash-reports/*.txt
 
   # The client game tests' result: green only when the plan and every shard ran and passed.
   client:

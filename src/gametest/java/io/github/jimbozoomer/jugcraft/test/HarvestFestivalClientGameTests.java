@@ -7,6 +7,13 @@ import net.minecraft.world.level.block.*;
 import net.minecraft.world.item.ItemStack;
 public final class HarvestFestivalClientGameTests implements FabricClientGameTest {
  public void runTest(net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext context){
+  context.runOnClient(client->{
+   var id=net.minecraft.resources.Identifier.fromNamespaceAndPath("jugcraft","equipment/harvest_costume.json");
+   try(var reader=new java.io.InputStreamReader(client.getResourceManager().getResourceOrThrow(id).open(),java.nio.charset.StandardCharsets.UTF_8)){
+    var info=net.minecraft.client.resources.model.EquipmentClientInfo.CODEC.parse(com.mojang.serialization.JsonOps.INSTANCE,com.google.gson.JsonParser.parseReader(reader)).getOrThrow();
+    if(info.layers().isEmpty())throw new AssertionError("Costume equipment must decode through the native 26.3 codec");
+   }catch(java.io.IOException e){throw new java.io.UncheckedIOException(e);}
+  });
   try(var single=context.worldBuilder().adjustSettings(c->c.setGameMode(WorldCreationUiState.SelectedGameMode.CREATIVE)).create()){
    single.getConnection().waitForChunksRender();var server=single.getServer();var origin=context.computeOnClient(c->BlockPos.containing(c.player.position()));
    server.runCommand("gamerule minecraft:send_command_feedback false");server.runCommand("time set noon");server.runCommand("weather clear");

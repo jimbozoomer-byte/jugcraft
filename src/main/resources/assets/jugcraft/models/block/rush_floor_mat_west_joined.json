@@ -1,0 +1,80 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "top": "jugcraft:block/rush_floor_mat",
+    "border": "jugcraft:block/rush_floor_mat_border",
+    "particle": "jugcraft:block/rush_floor_mat"
+  },
+  "elements": [
+    {
+      "from": [
+        0.0,
+        0.0,
+        2.0
+      ],
+      "to": [
+        2.0,
+        0.75,
+        14.0
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0.0,
+            2.0,
+            2.0,
+            14.0
+          ],
+          "texture": "#top"
+        },
+        "down": {
+          "uv": [
+            0.0,
+            2.0,
+            2.0,
+            14.0
+          ],
+          "texture": "#top",
+          "cullface": "down"
+        },
+        "north": {
+          "uv": [
+            14.0,
+            15.25,
+            16.0,
+            16
+          ],
+          "texture": "#top"
+        },
+        "south": {
+          "uv": [
+            0.0,
+            15.25,
+            2.0,
+            16
+          ],
+          "texture": "#top"
+        },
+        "west": {
+          "uv": [
+            2.0,
+            15.25,
+            14.0,
+            16
+          ],
+          "texture": "#top"
+        },
+        "east": {
+          "uv": [
+            2.0,
+            15.25,
+            14.0,
+            16
+          ],
+          "texture": "#top"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "minecraft:stick",
+    "minecraft:stick",
+    "minecraft:stick",
+    "minecraft:stick",
+    "jugcraft:flax",
+    "minecraft:string",
+    "minecraft:orange_dye",
+    "minecraft:green_dye"
+  ],
+  "result": {
+    "id": "jugcraft:harvest_sampler",
+    "count": 1
+  }
+}

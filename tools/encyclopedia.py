@@ -41,9 +41,11 @@ PAGES = {
     "caverns": "Cave Exploration",
     "jimta_network": "Digital Workshops",
     "jimta_guides": "Workshop Guides",
+    "route_technology": "Technology Route Map",
+    "route_magic": "Magic Route Map",
     "keys": "Keys",
 }
-SERVER_PAGES = ["technology_start", "magic_start", "alchemy_start", "mentors", "discover", "spellcraft", "expedition", "inspect", "nouveau", "botanical", "botanical_flowers", "menagerie", "woodland", "household", "habitats", "beasts", "caverns", "jimta_network", "jimta_guides"]
+SERVER_PAGES = ["technology_start", "magic_start", "alchemy_start", "mentors", "discover", "spellcraft", "expedition", "inspect", "nouveau", "botanical", "botanical_flowers", "menagerie", "woodland", "household", "habitats", "beasts", "caverns", "jimta_network", "jimta_guides", "route_technology", "route_magic"]
 
 # Where a step of a route stands for a player (EncyclopediaPayload.StepState, NONE aside), in words.
 STATES = {
@@ -59,6 +61,8 @@ EDGES = {
     "recommended": "Recommended",
     "trade": "Trade",
     "optional_boss": "Optional: after a boss",
+    # Another way to the same item (a route map's other recipe or unpowered station); appended to keep ordinals.
+    "alternative": "Alternative",
 }
 
 # The First Light route (FirstLightRoute.java), in order. Each step: how much it matters, when it is done, what it waits
@@ -151,7 +155,7 @@ KEY_HELP = {
     "encyclopedia": "Opens this encyclopedia from the game",
     "concordance_journal": "Opens your Concordance Journal: research, stage, and Compose",
     "concordance_composer": "Opens the Spell Composer straight away (not bound at first)",
-    "concordance_config": "Opens the Concordance's settings on this computer (not bound at first)",
+    "concordance_config": "Opens display settings, including drug visuals, on this computer (not bound at first)",
     "concordance_roster": "Opens your roster: pacts, agreements, familiars, spirits, constructs and courier requests, and what each waits for (not bound at first)",
     "party": "Opens the Party screen",
     "gem_abilities": "Opens worn Gem armor abilities (not bound at first)",

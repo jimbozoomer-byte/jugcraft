@@ -12,10 +12,12 @@ import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Code;
 import io.github.jimbozoomer.jugcraft.concordance.diagnostic.Diagnostic;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Graft;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Habitat;
+import io.github.jimbozoomer.jugcraft.concordance.ecology.HabitatInspection;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Niche;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Organism;
 import io.github.jimbozoomer.jugcraft.concordance.ecology.Verdict;
 import io.github.jimbozoomer.jugcraft.concordance.rules.Evidence;
+import io.github.jimbozoomer.jugcraft.concordance.spirits.PactObligations;
 import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -282,6 +284,8 @@ public class OrganismCropBlock extends CropBlock {
 				stack.consume(1, player);
 				level.levelEvent(LevelEvent.PARTICLES_AND_SOUND_PLANT_GROWTH, pos, 5);
 				Garden.tell(server, "garden.fed", bed.nutrients(), VerdantBedBlockEntity.CAPACITY);
+				// Concordance garden cohort, GC-08: so is feeding the crop on one (its bed below).
+				PactObligations.performed(serverLevel, server, PactObligations.Act.FEED, pos.below());
 			}
 			return InteractionResult.SUCCESS;
 		}
@@ -300,7 +304,8 @@ public class OrganismCropBlock extends CropBlock {
 	/**
 	 * Grafts {@code graft} onto the bed beneath for {@code player}, who holds its donor (C-P62): at most once every four ticks
 	 * (RateGate), only where they could change both this crop and its bed by hand (Authority), and only on a bed with no
-	 * graft the rules know (one trait a bed; one they no longer know is replaced). Spends one donor; changes nothing else.
+	 * graft the rules know (Grafting.holds: one trait a bed; one they no longer know is replaced). Spends one donor; changes
+	 * nothing else (Grafting.apply, the one graft Foras's keeping also ends in: GC-07).
 	 */
 	private InteractionResult graftBed(ServerLevel level, BlockPos pos, ServerPlayer player, ItemStack donor, Graft graft) {
 		if (!RateGate.allow(player, "garden", 4)) {
@@ -314,16 +319,15 @@ public class OrganismCropBlock extends CropBlock {
 			player.sendOverlayMessage(ComposeText.show(Diagnostic.of(Code.MISSING_PERMISSION).text()));
 			return InteractionResult.CONSUME;
 		}
-		if (!bed.graft().isEmpty() && Garden.catalog().graft(bed.graft()) != null) {
+		if (Grafting.holds(bed)) {
 			Garden.tell(player, "garden.graft_held", ComposeText.name(new Text.Ref("graft", bed.graft())));
 			return InteractionResult.CONSUME;
 		}
-		bed.setGraft(graft.id());
-		// The niche changed: the last verdict spoke for the ungrafted plant (the unit review).
-		bed.forgetVerdict();
+		Grafting.apply(level, pos, bed, graft);
 		donor.consume(1, player);
-		level.levelEvent(LevelEvent.PARTICLES_AND_SOUND_PLANT_GROWTH, pos, 5);
 		Garden.tell(player, "garden.grafted", getName(), ComposeText.name(new Text.Ref("graft", graft.id())));
+		// The garden cohort, GC-07: a graft by hand is Foras's first obligation (PactObligations; one line, on success).
+		PactObligations.performed(level, player, PactObligations.Act.GRAFT, pos.below());
 		return InteractionResult.SUCCESS;
 	}
 
@@ -346,6 +350,8 @@ public class OrganismCropBlock extends CropBlock {
 			if (!crop.isEmpty()) {
 				// Mastery is practice: each crop harvested by one's own hand counts once.
 				ConcordanceProgress.record(server, new Evidence.Practiced(Garden.ACTIVITY, organismId()));
+				// GC-09 (GC-P131): Amdusias's first obligation, a crop harvested by hand in his area (its one hook).
+				PactObligations.performed(serverLevel, server, PactObligations.Act.HARVEST, pos);
 			}
 			return InteractionResult.SUCCESS;
 		}
@@ -391,6 +397,11 @@ public class OrganismCropBlock extends CropBlock {
 		}
 		player.sendSystemMessage(ComposeText.show(Text.of("ecology.habitat", habitat.moisture(), habitat.light(), habitat.nutrients(),
 				habitat.diversity(), habitat.disturbance())));
+		// GC-09: what a canopy took from the stir, as growth reads it.
+		Text sheltered = HabitatInspection.sheltered(habitat);
+		if (sheltered != null) {
+			player.sendSystemMessage(ComposeText.show(sheltered));
+		}
 		for (Text line : verdict.reasons(niche, habitat)) {
 			player.sendSystemMessage(ComposeText.show(line));
 		}

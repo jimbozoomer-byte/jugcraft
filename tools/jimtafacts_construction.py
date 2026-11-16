@@ -13,6 +13,11 @@ ART={'cf_sprayer':'itemFoamSprayer','painter':'itemToolPainter','cf_powder':'ite
 def blocks():return {'jimta_'+n for n in BLOCKS}|{'jimta_mining_pipe','jimta_mining_tip'}
 def items():return blocks()|{'jimta_'+n for n in ART}
 def dump(p,v):p.parent.mkdir(parents=True,exist_ok=True);p.write_text(json.dumps(v,indent=2)+'\n',encoding='utf-8')
+def iron_scaffold_recipe():
+ # Same bill and yield; a checkerboard cannot match the portcullis's two solid rows.
+ return {'type':'minecraft:crafting_shaped','category':'building','pattern':['IBI','BIB'],
+  'key':{'I':'minecraft:iron_ingot','B':'minecraft:iron_bars'},
+  'result':{'id':'jugcraft:jimta_iron_scaffold','count':6}}
 def generate(shared=True):
  import jimtafacts_mining_pipes
  jimtafacts_mining_pipes.generate(shared)
@@ -82,7 +87,7 @@ def generate(shared=True):
  craft('sprayer',['jugcraft:tin_plate','jugcraft:iron_plate','minecraft:glass_bottle'],'jugcraft:jimta_cf_sprayer')
  craft('painter',['minecraft:white_wool','minecraft:stick','minecraft:iron_nugget'],'jugcraft:jimta_painter')
  craft('wood_scaffold',['#minecraft:planks']*3+['minecraft:stick']*3,'jugcraft:jimta_wood_scaffold',6)
- craft('iron_scaffold',['minecraft:iron_ingot']*3+['minecraft:iron_bars']*3+['minecraft:iron_nugget'],'jugcraft:jimta_iron_scaffold',6)
+ dump(RES/'data/jugcraft/recipe/jimtafacts_construction/iron_scaffold.json',iron_scaffold_recipe())
  craft('wood_scaffold_reinforced',['jugcraft:jimta_wood_scaffold','minecraft:stick','minecraft:stick'],'jugcraft:jimta_wood_scaffold_reinforced')
  craft('iron_scaffold_reinforced',['jugcraft:jimta_iron_scaffold','jugcraft:jimta_iron_fence'],'jugcraft:jimta_iron_scaffold_reinforced')
  craft('iron_fence',['minecraft:iron_bars','jugcraft:steel_plate'],'jugcraft:jimta_iron_fence',2)

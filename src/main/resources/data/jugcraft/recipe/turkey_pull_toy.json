@@ -1,0 +1,22 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "#minecraft:logs",
+    "#minecraft:wooden_slabs",
+    "minecraft:stick",
+    "minecraft:string",
+    "minecraft:feather",
+    "minecraft:red_dye"
+  ],
+  "result": {
+    "id": "jugcraft:turkey_pull_toy",
+    "count": 1
+  }
+}

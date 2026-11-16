@@ -1,0 +1,2254 @@
+{
+  "variants": {
+    "facing=north,lit=false,part=0": {
+      "model": "jugcraft:block/harvest_centerpiece_0"
+    },
+    "facing=north,lit=false,part=1": {
+      "model": "jugcraft:block/harvest_centerpiece_1"
+    },
+    "facing=north,lit=false,part=2": {
+      "model": "jugcraft:block/harvest_centerpiece_2"
+    },
+    "facing=north,lit=false,part=3": {
+      "model": "jugcraft:block/harvest_centerpiece_3"
+    },
+    "facing=north,lit=false,part=4": {
+      "model": "jugcraft:block/harvest_centerpiece_4"
+    },
+    "facing=north,lit=false,part=5": {
+      "model": "jugcraft:block/harvest_centerpiece_5"
+    },
+    "facing=north,lit=false,part=6": {
+      "model": "jugcraft:block/harvest_centerpiece_6"
+    },
+    "facing=north,lit=false,part=7": {
+      "model": "jugcraft:block/harvest_centerpiece_7"
+    },
+    "facing=north,lit=false,part=8": {
+      "model": "jugcraft:block/harvest_centerpiece_8"
+    },
+    "facing=north,lit=false,part=9": {
+      "model": "jugcraft:block/harvest_centerpiece_9"
+    },
+    "facing=north,lit=false,part=10": {
+      "model": "jugcraft:block/harvest_centerpiece_10"
+    },
+    "facing=north,lit=false,part=11": {
+      "model": "jugcraft:block/harvest_centerpiece_11"
+    },
+    "facing=north,lit=false,part=12": {
+      "model": "jugcraft:block/harvest_centerpiece_12"
+    },
+    "facing=north,lit=false,part=13": {
+      "model": "jugcraft:block/harvest_centerpiece_13"
+    },
+    "facing=north,lit=false,part=14": {
+      "model": "jugcraft:block/harvest_centerpiece_14"
+    },
+    "facing=north,lit=false,part=15": {
+      "model": "jugcraft:block/harvest_centerpiece_15"
+    },
+    "facing=north,lit=false,part=16": {
+      "model": "jugcraft:block/harvest_centerpiece_16"
+    },
+    "facing=north,lit=false,part=17": {
+      "model": "jugcraft:block/harvest_centerpiece_17"
+    },
+    "facing=north,lit=false,part=18": {
+      "model": "jugcraft:block/harvest_centerpiece_18"
+    },
+    "facing=north,lit=false,part=19": {
+      "model": "jugcraft:block/harvest_centerpiece_19"
+    },
+    "facing=north,lit=false,part=20": {
+      "model": "jugcraft:block/harvest_centerpiece_20"
+    },
+    "facing=north,lit=false,part=21": {
+      "model": "jugcraft:block/harvest_centerpiece_21"
+    },
+    "facing=north,lit=false,part=22": {
+      "model": "jugcraft:block/harvest_centerpiece_22"
+    },
+    "facing=north,lit=false,part=23": {
+      "model": "jugcraft:block/harvest_centerpiece_23"
+    },
+    "facing=north,lit=false,part=24": {
+      "model": "jugcraft:block/harvest_centerpiece_24"
+    },
+    "facing=north,lit=false,part=25": {
+      "model": "jugcraft:block/harvest_centerpiece_25"
+    },
+    "facing=north,lit=false,part=26": {
+      "model": "jugcraft:block/harvest_centerpiece_26"
+    },
+    "facing=north,lit=false,part=27": {
+      "model": "jugcraft:block/harvest_centerpiece_27"
+    },
+    "facing=north,lit=false,part=28": {
+      "model": "jugcraft:block/harvest_centerpiece_28"
+    },
+    "facing=north,lit=false,part=29": {
+      "model": "jugcraft:block/harvest_centerpiece_29"
+    },
+    "facing=north,lit=false,part=30": {
+      "model": "jugcraft:block/harvest_centerpiece_30"
+    },
+    "facing=north,lit=false,part=31": {
+      "model": "jugcraft:block/harvest_centerpiece_31"
+    },
+    "facing=north,lit=false,part=32": {
+      "model": "jugcraft:block/harvest_centerpiece_32"
+    },
+    "facing=north,lit=false,part=33": {
+      "model": "jugcraft:block/harvest_centerpiece_33"
+    },
+    "facing=north,lit=false,part=34": {
+      "model": "jugcraft:block/harvest_centerpiece_34"
+    },
+    "facing=north,lit=false,part=35": {
+      "model": "jugcraft:block/harvest_centerpiece_35"
+    },
+    "facing=north,lit=false,part=36": {
+      "model": "jugcraft:block/harvest_centerpiece_36"
+    },
+    "facing=north,lit=false,part=37": {
+      "model": "jugcraft:block/harvest_centerpiece_37"
+    },
+    "facing=north,lit=false,part=38": {
+      "model": "jugcraft:block/harvest_centerpiece_38"
+    },
+    "facing=north,lit=false,part=39": {
+      "model": "jugcraft:block/harvest_centerpiece_39"
+    },
+    "facing=north,lit=false,part=40": {
+      "model": "jugcraft:block/harvest_centerpiece_40"
+    },
+    "facing=north,lit=false,part=41": {
+      "model": "jugcraft:block/harvest_centerpiece_41"
+    },
+    "facing=north,lit=false,part=42": {
+      "model": "jugcraft:block/harvest_centerpiece_42"
+    },
+    "facing=north,lit=false,part=43": {
+      "model": "jugcraft:block/harvest_centerpiece_43"
+    },
+    "facing=north,lit=false,part=44": {
+      "model": "jugcraft:block/harvest_centerpiece_44"
+    },
+    "facing=north,lit=false,part=45": {
+      "model": "jugcraft:block/harvest_centerpiece_45"
+    },
+    "facing=north,lit=false,part=46": {
+      "model": "jugcraft:block/harvest_centerpiece_46"
+    },
+    "facing=north,lit=false,part=47": {
+      "model": "jugcraft:block/harvest_centerpiece_47"
+    },
+    "facing=north,lit=false,part=48": {
+      "model": "jugcraft:block/harvest_centerpiece_48"
+    },
+    "facing=north,lit=false,part=49": {
+      "model": "jugcraft:block/harvest_centerpiece_49"
+    },
+    "facing=north,lit=false,part=50": {
+      "model": "jugcraft:block/harvest_centerpiece_50"
+    },
+    "facing=north,lit=false,part=51": {
+      "model": "jugcraft:block/harvest_centerpiece_51"
+    },
+    "facing=north,lit=false,part=52": {
+      "model": "jugcraft:block/harvest_centerpiece_52"
+    },
+    "facing=north,lit=false,part=53": {
+      "model": "jugcraft:block/harvest_centerpiece_53"
+    },
+    "facing=north,lit=false,part=54": {
+      "model": "jugcraft:block/harvest_centerpiece_54"
+    },
+    "facing=north,lit=false,part=55": {
+      "model": "jugcraft:block/harvest_centerpiece_55"
+    },
+    "facing=north,lit=false,part=56": {
+      "model": "jugcraft:block/harvest_centerpiece_56"
+    },
+    "facing=north,lit=false,part=57": {
+      "model": "jugcraft:block/harvest_centerpiece_57"
+    },
+    "facing=north,lit=false,part=58": {
+      "model": "jugcraft:block/harvest_centerpiece_58"
+    },
+    "facing=north,lit=false,part=59": {
+      "model": "jugcraft:block/harvest_centerpiece_59"
+    },
+    "facing=north,lit=false,part=60": {
+      "model": "jugcraft:block/harvest_centerpiece_60"
+    },
+    "facing=north,lit=false,part=61": {
+      "model": "jugcraft:block/harvest_centerpiece_61"
+    },
+    "facing=north,lit=false,part=62": {
+      "model": "jugcraft:block/harvest_centerpiece_62"
+    },
+    "facing=north,lit=false,part=63": {
+      "model": "jugcraft:block/harvest_centerpiece_63"
+    },
+    "facing=north,lit=false,part=64": {
+      "model": "jugcraft:block/harvest_centerpiece_64"
+    },
+    "facing=north,lit=false,part=65": {
+      "model": "jugcraft:block/harvest_centerpiece_65"
+    },
+    "facing=north,lit=false,part=66": {
+      "model": "jugcraft:block/harvest_centerpiece_66"
+    },
+    "facing=north,lit=false,part=67": {
+      "model": "jugcraft:block/harvest_centerpiece_67"
+    },
+    "facing=north,lit=false,part=68": {
+      "model": "jugcraft:block/harvest_centerpiece_68"
+    },
+    "facing=north,lit=false,part=69": {
+      "model": "jugcraft:block/harvest_centerpiece_69"
+    },
+    "facing=north,lit=false,part=70": {
+      "model": "jugcraft:block/harvest_centerpiece_70"
+    },
+    "facing=north,lit=false,part=71": {
+      "model": "jugcraft:block/harvest_centerpiece_71"
+    },
+    "facing=north,lit=false,part=72": {
+      "model": "jugcraft:block/harvest_centerpiece_72"
+    },
+    "facing=north,lit=false,part=73": {
+      "model": "jugcraft:block/harvest_centerpiece_73"
+    },
+    "facing=north,lit=false,part=74": {
+      "model": "jugcraft:block/harvest_centerpiece_74"
+    },
+    "facing=north,lit=true,part=0": {
+      "model": "jugcraft:block/harvest_centerpiece_0_lit"
+    },
+    "facing=north,lit=true,part=1": {
+      "model": "jugcraft:block/harvest_centerpiece_1"
+    },
+    "facing=north,lit=true,part=2": {
+      "model": "jugcraft:block/harvest_centerpiece_2"
+    },
+    "facing=north,lit=true,part=3": {
+      "model": "jugcraft:block/harvest_centerpiece_3"
+    },
+    "facing=north,lit=true,part=4": {
+      "model": "jugcraft:block/harvest_centerpiece_4_lit"
+    },
+    "facing=north,lit=true,part=5": {
+      "model": "jugcraft:block/harvest_centerpiece_5_lit"
+    },
+    "facing=north,lit=true,part=6": {
+      "model": "jugcraft:block/harvest_centerpiece_6"
+    },
+    "facing=north,lit=true,part=7": {
+      "model": "jugcraft:block/harvest_centerpiece_7"
+    },
+    "facing=north,lit=true,part=8": {
+      "model": "jugcraft:block/harvest_centerpiece_8"
+    },
+    "facing=north,lit=true,part=9": {
+      "model": "jugcraft:block/harvest_centerpiece_9"
+    },
+    "facing=north,lit=true,part=10": {
+      "model": "jugcraft:block/harvest_centerpiece_10"
+    },
+    "facing=north,lit=true,part=11": {
+      "model": "jugcraft:block/harvest_centerpiece_11"
+    },
+    "facing=north,lit=true,part=12": {
+      "model": "jugcraft:block/harvest_centerpiece_12"
+    },
+    "facing=north,lit=true,part=13": {
+      "model": "jugcraft:block/harvest_centerpiece_13"
+    },
+    "facing=north,lit=true,part=14": {
+      "model": "jugcraft:block/harvest_centerpiece_14"
+    },
+    "facing=north,lit=true,part=15": {
+      "model": "jugcraft:block/harvest_centerpiece_15"
+    },
+    "facing=north,lit=true,part=16": {
+      "model": "jugcraft:block/harvest_centerpiece_16"
+    },
+    "facing=north,lit=true,part=17": {
+      "model": "jugcraft:block/harvest_centerpiece_17"
+    },
+    "facing=north,lit=true,part=18": {
+      "model": "jugcraft:block/harvest_centerpiece_18"
+    },
+    "facing=north,lit=true,part=19": {
+      "model": "jugcraft:block/harvest_centerpiece_19"
+    },
+    "facing=north,lit=true,part=20": {
+      "model": "jugcraft:block/harvest_centerpiece_20"
+    },
+    "facing=north,lit=true,part=21": {
+      "model": "jugcraft:block/harvest_centerpiece_21"
+    },
+    "facing=north,lit=true,part=22": {
+      "model": "jugcraft:block/harvest_centerpiece_22"
+    },
+    "facing=north,lit=true,part=23": {
+      "model": "jugcraft:block/harvest_centerpiece_23"
+    },
+    "facing=north,lit=true,part=24": {
+      "model": "jugcraft:block/harvest_centerpiece_24"
+    },
+    "facing=north,lit=true,part=25": {
+      "model": "jugcraft:block/harvest_centerpiece_25"
+    },
+    "facing=north,lit=true,part=26": {
+      "model": "jugcraft:block/harvest_centerpiece_26"
+    },
+    "facing=north,lit=true,part=27": {
+      "model": "jugcraft:block/harvest_centerpiece_27"
+    },
+    "facing=north,lit=true,part=28": {
+      "model": "jugcraft:block/harvest_centerpiece_28"
+    },
+    "facing=north,lit=true,part=29": {
+      "model": "jugcraft:block/harvest_centerpiece_29"
+    },
+    "facing=north,lit=true,part=30": {
+      "model": "jugcraft:block/harvest_centerpiece_30"
+    },
+    "facing=north,lit=true,part=31": {
+      "model": "jugcraft:block/harvest_centerpiece_31"
+    },
+    "facing=north,lit=true,part=32": {
+      "model": "jugcraft:block/harvest_centerpiece_32"
+    },
+    "facing=north,lit=true,part=33": {
+      "model": "jugcraft:block/harvest_centerpiece_33"
+    },
+    "facing=north,lit=true,part=34": {
+      "model": "jugcraft:block/harvest_centerpiece_34"
+    },
+    "facing=north,lit=true,part=35": {
+      "model": "jugcraft:block/harvest_centerpiece_35"
+    },
+    "facing=north,lit=true,part=36": {
+      "model": "jugcraft:block/harvest_centerpiece_36"
+    },
+    "facing=north,lit=true,part=37": {
+      "model": "jugcraft:block/harvest_centerpiece_37"
+    },
+    "facing=north,lit=true,part=38": {
+      "model": "jugcraft:block/harvest_centerpiece_38"
+    },
+    "facing=north,lit=true,part=39": {
+      "model": "jugcraft:block/harvest_centerpiece_39"
+    },
+    "facing=north,lit=true,part=40": {
+      "model": "jugcraft:block/harvest_centerpiece_40"
+    },
+    "facing=north,lit=true,part=41": {
+      "model": "jugcraft:block/harvest_centerpiece_41"
+    },
+    "facing=north,lit=true,part=42": {
+      "model": "jugcraft:block/harvest_centerpiece_42"
+    },
+    "facing=north,lit=true,part=43": {
+      "model": "jugcraft:block/harvest_centerpiece_43"
+    },
+    "facing=north,lit=true,part=44": {
+      "model": "jugcraft:block/harvest_centerpiece_44"
+    },
+    "facing=north,lit=true,part=45": {
+      "model": "jugcraft:block/harvest_centerpiece_45"
+    },
+    "facing=north,lit=true,part=46": {
+      "model": "jugcraft:block/harvest_centerpiece_46"
+    },
+    "facing=north,lit=true,part=47": {
+      "model": "jugcraft:block/harvest_centerpiece_47"
+    },
+    "facing=north,lit=true,part=48": {
+      "model": "jugcraft:block/harvest_centerpiece_48"
+    },
+    "facing=north,lit=true,part=49": {
+      "model": "jugcraft:block/harvest_centerpiece_49"
+    },
+    "facing=north,lit=true,part=50": {
+      "model": "jugcraft:block/harvest_centerpiece_50"
+    },
+    "facing=north,lit=true,part=51": {
+      "model": "jugcraft:block/harvest_centerpiece_51"
+    },
+    "facing=north,lit=true,part=52": {
+      "model": "jugcraft:block/harvest_centerpiece_52"
+    },
+    "facing=north,lit=true,part=53": {
+      "model": "jugcraft:block/harvest_centerpiece_53"
+    },
+    "facing=north,lit=true,part=54": {
+      "model": "jugcraft:block/harvest_centerpiece_54"
+    },
+    "facing=north,lit=true,part=55": {
+      "model": "jugcraft:block/harvest_centerpiece_55"
+    },
+    "facing=north,lit=true,part=56": {
+      "model": "jugcraft:block/harvest_centerpiece_56"
+    },
+    "facing=north,lit=true,part=57": {
+      "model": "jugcraft:block/harvest_centerpiece_57"
+    },
+    "facing=north,lit=true,part=58": {
+      "model": "jugcraft:block/harvest_centerpiece_58"
+    },
+    "facing=north,lit=true,part=59": {
+      "model": "jugcraft:block/harvest_centerpiece_59"
+    },
+    "facing=north,lit=true,part=60": {
+      "model": "jugcraft:block/harvest_centerpiece_60"
+    },
+    "facing=north,lit=true,part=61": {
+      "model": "jugcraft:block/harvest_centerpiece_61"
+    },
+    "facing=north,lit=true,part=62": {
+      "model": "jugcraft:block/harvest_centerpiece_62_lit"
+    },
+    "facing=north,lit=true,part=63": {
+      "model": "jugcraft:block/harvest_centerpiece_63"
+    },
+    "facing=north,lit=true,part=64": {
+      "model": "jugcraft:block/harvest_centerpiece_64"
+    },
+    "facing=north,lit=true,part=65": {
+      "model": "jugcraft:block/harvest_centerpiece_65"
+    },
+    "facing=north,lit=true,part=66": {
+      "model": "jugcraft:block/harvest_centerpiece_66"
+    },
+    "facing=north,lit=true,part=67": {
+      "model": "jugcraft:block/harvest_centerpiece_67_lit"
+    },
+    "facing=north,lit=true,part=68": {
+      "model": "jugcraft:block/harvest_centerpiece_68"
+    },
+    "facing=north,lit=true,part=69": {
+      "model": "jugcraft:block/harvest_centerpiece_69"
+    },
+    "facing=north,lit=true,part=70": {
+      "model": "jugcraft:block/harvest_centerpiece_70"
+    },
+    "facing=north,lit=true,part=71": {
+      "model": "jugcraft:block/harvest_centerpiece_71"
+    },
+    "facing=north,lit=true,part=72": {
+      "model": "jugcraft:block/harvest_centerpiece_72"
+    },
+    "facing=north,lit=true,part=73": {
+      "model": "jugcraft:block/harvest_centerpiece_73"
+    },
+    "facing=north,lit=true,part=74": {
+      "model": "jugcraft:block/harvest_centerpiece_74"
+    },
+    "facing=east,lit=false,part=0": {
+      "model": "jugcraft:block/harvest_centerpiece_0",
+      "y": 90
+    },
+    "facing=east,lit=false,part=1": {
+      "model": "jugcraft:block/harvest_centerpiece_1",
+      "y": 90
+    },
+    "facing=east,lit=false,part=2": {
+      "model": "jugcraft:block/harvest_centerpiece_2",
+      "y": 90
+    },
+    "facing=east,lit=false,part=3": {
+      "model": "jugcraft:block/harvest_centerpiece_3",
+      "y": 90
+    },
+    "facing=east,lit=false,part=4": {
+      "model": "jugcraft:block/harvest_centerpiece_4",
+      "y": 90
+    },
+    "facing=east,lit=false,part=5": {
+      "model": "jugcraft:block/harvest_centerpiece_5",
+      "y": 90
+    },
+    "facing=east,lit=false,part=6": {
+      "model": "jugcraft:block/harvest_centerpiece_6",
+      "y": 90
+    },
+    "facing=east,lit=false,part=7": {
+      "model": "jugcraft:block/harvest_centerpiece_7",
+      "y": 90
+    },
+    "facing=east,lit=false,part=8": {
+      "model": "jugcraft:block/harvest_centerpiece_8",
+      "y": 90
+    },
+    "facing=east,lit=false,part=9": {
+      "model": "jugcraft:block/harvest_centerpiece_9",
+      "y": 90
+    },
+    "facing=east,lit=false,part=10": {
+      "model": "jugcraft:block/harvest_centerpiece_10",
+      "y": 90
+    },
+    "facing=east,lit=false,part=11": {
+      "model": "jugcraft:block/harvest_centerpiece_11",
+      "y": 90
+    },
+    "facing=east,lit=false,part=12": {
+      "model": "jugcraft:block/harvest_centerpiece_12",
+      "y": 90
+    },
+    "facing=east,lit=false,part=13": {
+      "model": "jugcraft:block/harvest_centerpiece_13",
+      "y": 90
+    },
+    "facing=east,lit=false,part=14": {
+      "model": "jugcraft:block/harvest_centerpiece_14",
+      "y": 90
+    },
+    "facing=east,lit=false,part=15": {
+      "model": "jugcraft:block/harvest_centerpiece_15",
+      "y": 90
+    },
+    "facing=east,lit=false,part=16": {
+      "model": "jugcraft:block/harvest_centerpiece_16",
+      "y": 90
+    },
+    "facing=east,lit=false,part=17": {
+      "model": "jugcraft:block/harvest_centerpiece_17",
+      "y": 90
+    },
+    "facing=east,lit=false,part=18": {
+      "model": "jugcraft:block/harvest_centerpiece_18",
+      "y": 90
+    },
+    "facing=east,lit=false,part=19": {
+      "model": "jugcraft:block/harvest_centerpiece_19",
+      "y": 90
+    },
+    "facing=east,lit=false,part=20": {
+      "model": "jugcraft:block/harvest_centerpiece_20",
+      "y": 90
+    },
+    "facing=east,lit=false,part=21": {
+      "model": "jugcraft:block/harvest_centerpiece_21",
+      "y": 90
+    },
+    "facing=east,lit=false,part=22": {
+      "model": "jugcraft:block/harvest_centerpiece_22",
+      "y": 90
+    },
+    "facing=east,lit=false,part=23": {
+      "model": "jugcraft:block/harvest_centerpiece_23",
+      "y": 90
+    },
+    "facing=east,lit=false,part=24": {
+      "model": "jugcraft:block/harvest_centerpiece_24",
+      "y": 90
+    },
+    "facing=east,lit=false,part=25": {
+      "model": "jugcraft:block/harvest_centerpiece_25",
+      "y": 90
+    },
+    "facing=east,lit=false,part=26": {
+      "model": "jugcraft:block/harvest_centerpiece_26",
+      "y": 90
+    },
+    "facing=east,lit=false,part=27": {
+      "model": "jugcraft:block/harvest_centerpiece_27",
+      "y": 90
+    },
+    "facing=east,lit=false,part=28": {
+      "model": "jugcraft:block/harvest_centerpiece_28",
+      "y": 90
+    },
+    "facing=east,lit=false,part=29": {
+      "model": "jugcraft:block/harvest_centerpiece_29",
+      "y": 90
+    },
+    "facing=east,lit=false,part=30": {
+      "model": "jugcraft:block/harvest_centerpiece_30",
+      "y": 90
+    },
+    "facing=east,lit=false,part=31": {
+      "model": "jugcraft:block/harvest_centerpiece_31",
+      "y": 90
+    },
+    "facing=east,lit=false,part=32": {
+      "model": "jugcraft:block/harvest_centerpiece_32",
+      "y": 90
+    },
+    "facing=east,lit=false,part=33": {
+      "model": "jugcraft:block/harvest_centerpiece_33",
+      "y": 90
+    },
+    "facing=east,lit=false,part=34": {
+      "model": "jugcraft:block/harvest_centerpiece_34",
+      "y": 90
+    },
+    "facing=east,lit=false,part=35": {
+      "model": "jugcraft:block/harvest_centerpiece_35",
+      "y": 90
+    },
+    "facing=east,lit=false,part=36": {
+      "model": "jugcraft:block/harvest_centerpiece_36",
+      "y": 90
+    },
+    "facing=east,lit=false,part=37": {
+      "model": "jugcraft:block/harvest_centerpiece_37",
+      "y": 90
+    },
+    "facing=east,lit=false,part=38": {
+      "model": "jugcraft:block/harvest_centerpiece_38",
+      "y": 90
+    },
+    "facing=east,lit=false,part=39": {
+      "model": "jugcraft:block/harvest_centerpiece_39",
+      "y": 90
+    },
+    "facing=east,lit=false,part=40": {
+      "model": "jugcraft:block/harvest_centerpiece_40",
+      "y": 90
+    },
+    "facing=east,lit=false,part=41": {
+      "model": "jugcraft:block/harvest_centerpiece_41",
+      "y": 90
+    },
+    "facing=east,lit=false,part=42": {
+      "model": "jugcraft:block/harvest_centerpiece_42",
+      "y": 90
+    },
+    "facing=east,lit=false,part=43": {
+      "model": "jugcraft:block/harvest_centerpiece_43",
+      "y": 90
+    },
+    "facing=east,lit=false,part=44": {
+      "model": "jugcraft:block/harvest_centerpiece_44",
+      "y": 90
+    },
+    "facing=east,lit=false,part=45": {
+      "model": "jugcraft:block/harvest_centerpiece_45",
+      "y": 90
+    },
+    "facing=east,lit=false,part=46": {
+      "model": "jugcraft:block/harvest_centerpiece_46",
+      "y": 90
+    },
+    "facing=east,lit=false,part=47": {
+      "model": "jugcraft:block/harvest_centerpiece_47",
+      "y": 90
+    },
+    "facing=east,lit=false,part=48": {
+      "model": "jugcraft:block/harvest_centerpiece_48",
+      "y": 90
+    },
+    "facing=east,lit=false,part=49": {
+      "model": "jugcraft:block/harvest_centerpiece_49",
+      "y": 90
+    },
+    "facing=east,lit=false,part=50": {
+      "model": "jugcraft:block/harvest_centerpiece_50",
+      "y": 90
+    },
+    "facing=east,lit=false,part=51": {
+      "model": "jugcraft:block/harvest_centerpiece_51",
+      "y": 90
+    },
+    "facing=east,lit=false,part=52": {
+      "model": "jugcraft:block/harvest_centerpiece_52",
+      "y": 90
+    },
+    "facing=east,lit=false,part=53": {
+      "model": "jugcraft:block/harvest_centerpiece_53",
+      "y": 90
+    },
+    "facing=east,lit=false,part=54": {
+      "model": "jugcraft:block/harvest_centerpiece_54",
+      "y": 90
+    },
+    "facing=east,lit=false,part=55": {
+      "model": "jugcraft:block/harvest_centerpiece_55",
+      "y": 90
+    },
+    "facing=east,lit=false,part=56": {
+      "model": "jugcraft:block/harvest_centerpiece_56",
+      "y": 90
+    },
+    "facing=east,lit=false,part=57": {
+      "model": "jugcraft:block/harvest_centerpiece_57",
+      "y": 90
+    },
+    "facing=east,lit=false,part=58": {
+      "model": "jugcraft:block/harvest_centerpiece_58",
+      "y": 90
+    },
+    "facing=east,lit=false,part=59": {
+      "model": "jugcraft:block/harvest_centerpiece_59",
+      "y": 90
+    },
+    "facing=east,lit=false,part=60": {
+      "model": "jugcraft:block/harvest_centerpiece_60",
+      "y": 90
+    },
+    "facing=east,lit=false,part=61": {
+      "model": "jugcraft:block/harvest_centerpiece_61",
+      "y": 90
+    },
+    "facing=east,lit=false,part=62": {
+      "model": "jugcraft:block/harvest_centerpiece_62",
+      "y": 90
+    },
+    "facing=east,lit=false,part=63": {
+      "model": "jugcraft:block/harvest_centerpiece_63",
+      "y": 90
+    },
+    "facing=east,lit=false,part=64": {
+      "model": "jugcraft:block/harvest_centerpiece_64",
+      "y": 90
+    },
+    "facing=east,lit=false,part=65": {
+      "model": "jugcraft:block/harvest_centerpiece_65",
+      "y": 90
+    },
+    "facing=east,lit=false,part=66": {
+      "model": "jugcraft:block/harvest_centerpiece_66",
+      "y": 90
+    },
+    "facing=east,lit=false,part=67": {
+      "model": "jugcraft:block/harvest_centerpiece_67",
+      "y": 90
+    },
+    "facing=east,lit=false,part=68": {
+      "model": "jugcraft:block/harvest_centerpiece_68",
+      "y": 90
+    },
+    "facing=east,lit=false,part=69": {
+      "model": "jugcraft:block/harvest_centerpiece_69",
+      "y": 90
+    },
+    "facing=east,lit=false,part=70": {
+      "model": "jugcraft:block/harvest_centerpiece_70",
+      "y": 90
+    },
+    "facing=east,lit=false,part=71": {
+      "model": "jugcraft:block/harvest_centerpiece_71",
+      "y": 90
+    },
+    "facing=east,lit=false,part=72": {
+      "model": "jugcraft:block/harvest_centerpiece_72",
+      "y": 90
+    },
+    "facing=east,lit=false,part=73": {
+      "model": "jugcraft:block/harvest_centerpiece_73",
+      "y": 90
+    },
+    "facing=east,lit=false,part=74": {
+      "model": "jugcraft:block/harvest_centerpiece_74",
+      "y": 90
+    },
+    "facing=east,lit=true,part=0": {
+      "model": "jugcraft:block/harvest_centerpiece_0_lit",
+      "y": 90
+    },
+    "facing=east,lit=true,part=1": {
+      "model": "jugcraft:block/harvest_centerpiece_1",
+      "y": 90
+    },
+    "facing=east,lit=true,part=2": {
+      "model": "jugcraft:block/harvest_centerpiece_2",
+      "y": 90
+    },
+    "facing=east,lit=true,part=3": {
+      "model": "jugcraft:block/harvest_centerpiece_3",
+      "y": 90
+    },
+    "facing=east,lit=true,part=4": {
+      "model": "jugcraft:block/harvest_centerpiece_4_lit",
+      "y": 90
+    },
+    "facing=east,lit=true,part=5": {
+      "model": "jugcraft:block/harvest_centerpiece_5_lit",
+      "y": 90
+    },
+    "facing=east,lit=true,part=6": {
+      "model": "jugcraft:block/harvest_centerpiece_6",
+      "y": 90
+    },
+    "facing=east,lit=true,part=7": {
+      "model": "jugcraft:block/harvest_centerpiece_7",
+      "y": 90
+    },
+    "facing=east,lit=true,part=8": {
+      "model": "jugcraft:block/harvest_centerpiece_8",
+      "y": 90
+    },
+    "facing=east,lit=true,part=9": {
+      "model": "jugcraft:block/harvest_centerpiece_9",
+      "y": 90
+    },
+    "facing=east,lit=true,part=10": {
+      "model": "jugcraft:block/harvest_centerpiece_10",
+      "y": 90
+    },
+    "facing=east,lit=true,part=11": {
+      "model": "jugcraft:block/harvest_centerpiece_11",
+      "y": 90
+    },
+    "facing=east,lit=true,part=12": {
+      "model": "jugcraft:block/harvest_centerpiece_12",
+      "y": 90
+    },
+    "facing=east,lit=true,part=13": {
+      "model": "jugcraft:block/harvest_centerpiece_13",
+      "y": 90
+    },
+    "facing=east,lit=true,part=14": {
+      "model": "jugcraft:block/harvest_centerpiece_14",
+      "y": 90
+    },
+    "facing=east,lit=true,part=15": {
+      "model": "jugcraft:block/harvest_centerpiece_15",
+      "y": 90
+    },
+    "facing=east,lit=true,part=16": {
+      "model": "jugcraft:block/harvest_centerpiece_16",
+      "y": 90
+    },
+    "facing=east,lit=true,part=17": {
+      "model": "jugcraft:block/harvest_centerpiece_17",
+      "y": 90
+    },
+    "facing=east,lit=true,part=18": {
+      "model": "jugcraft:block/harvest_centerpiece_18",
+      "y": 90
+    },
+    "facing=east,lit=true,part=19": {
+      "model": "jugcraft:block/harvest_centerpiece_19",
+      "y": 90
+    },
+    "facing=east,lit=true,part=20": {
+      "model": "jugcraft:block/harvest_centerpiece_20",
+      "y": 90
+    },
+    "facing=east,lit=true,part=21": {
+      "model": "jugcraft:block/harvest_centerpiece_21",
+      "y": 90
+    },
+    "facing=east,lit=true,part=22": {
+      "model": "jugcraft:block/harvest_centerpiece_22",
+      "y": 90
+    },
+    "facing=east,lit=true,part=23": {
+      "model": "jugcraft:block/harvest_centerpiece_23",
+      "y": 90
+    },
+    "facing=east,lit=true,part=24": {
+      "model": "jugcraft:block/harvest_centerpiece_24",
+      "y": 90
+    },
+    "facing=east,lit=true,part=25": {
+      "model": "jugcraft:block/harvest_centerpiece_25",
+      "y": 90
+    },
+    "facing=east,lit=true,part=26": {
+      "model": "jugcraft:block/harvest_centerpiece_26",
+      "y": 90
+    },
+    "facing=east,lit=true,part=27": {
+      "model": "jugcraft:block/harvest_centerpiece_27",
+      "y": 90
+    },
+    "facing=east,lit=true,part=28": {
+      "model": "jugcraft:block/harvest_centerpiece_28",
+      "y": 90
+    },
+    "facing=east,lit=true,part=29": {
+      "model": "jugcraft:block/harvest_centerpiece_29",
+      "y": 90
+    },
+    "facing=east,lit=true,part=30": {
+      "model": "jugcraft:block/harvest_centerpiece_30",
+      "y": 90
+    },
+    "facing=east,lit=true,part=31": {
+      "model": "jugcraft:block/harvest_centerpiece_31",
+      "y": 90
+    },
+    "facing=east,lit=true,part=32": {
+      "model": "jugcraft:block/harvest_centerpiece_32",
+      "y": 90
+    },
+    "facing=east,lit=true,part=33": {
+      "model": "jugcraft:block/harvest_centerpiece_33",
+      "y": 90
+    },
+    "facing=east,lit=true,part=34": {
+      "model": "jugcraft:block/harvest_centerpiece_34",
+      "y": 90
+    },
+    "facing=east,lit=true,part=35": {
+      "model": "jugcraft:block/harvest_centerpiece_35",
+      "y": 90
+    },
+    "facing=east,lit=true,part=36": {
+      "model": "jugcraft:block/harvest_centerpiece_36",
+      "y": 90
+    },
+    "facing=east,lit=true,part=37": {
+      "model": "jugcraft:block/harvest_centerpiece_37",
+      "y": 90
+    },
+    "facing=east,lit=true,part=38": {
+      "model": "jugcraft:block/harvest_centerpiece_38",
+      "y": 90
+    },
+    "facing=east,lit=true,part=39": {
+      "model": "jugcraft:block/harvest_centerpiece_39",
+      "y": 90
+    },
+    "facing=east,lit=true,part=40": {
+      "model": "jugcraft:block/harvest_centerpiece_40",
+      "y": 90
+    },
+    "facing=east,lit=true,part=41": {
+      "model": "jugcraft:block/harvest_centerpiece_41",
+      "y": 90
+    },
+    "facing=east,lit=true,part=42": {
+      "model": "jugcraft:block/harvest_centerpiece_42",
+      "y": 90
+    },
+    "facing=east,lit=true,part=43": {
+      "model": "jugcraft:block/harvest_centerpiece_43",
+      "y": 90
+    },
+    "facing=east,lit=true,part=44": {
+      "model": "jugcraft:block/harvest_centerpiece_44",
+      "y": 90
+    },
+    "facing=east,lit=true,part=45": {
+      "model": "jugcraft:block/harvest_centerpiece_45",
+      "y": 90
+    },
+    "facing=east,lit=true,part=46": {
+      "model": "jugcraft:block/harvest_centerpiece_46",
+      "y": 90
+    },
+    "facing=east,lit=true,part=47": {
+      "model": "jugcraft:block/harvest_centerpiece_47",
+      "y": 90
+    },
+    "facing=east,lit=true,part=48": {
+      "model": "jugcraft:block/harvest_centerpiece_48",
+      "y": 90
+    },
+    "facing=east,lit=true,part=49": {
+      "model": "jugcraft:block/harvest_centerpiece_49",
+      "y": 90
+    },
+    "facing=east,lit=true,part=50": {
+      "model": "jugcraft:block/harvest_centerpiece_50",
+      "y": 90
+    },
+    "facing=east,lit=true,part=51": {
+      "model": "jugcraft:block/harvest_centerpiece_51",
+      "y": 90
+    },
+    "facing=east,lit=true,part=52": {
+      "model": "jugcraft:block/harvest_centerpiece_52",
+      "y": 90
+    },
+    "facing=east,lit=true,part=53": {
+      "model": "jugcraft:block/harvest_centerpiece_53",
+      "y": 90
+    },
+    "facing=east,lit=true,part=54": {
+      "model": "jugcraft:block/harvest_centerpiece_54",
+      "y": 90
+    },
+    "facing=east,lit=true,part=55": {
+      "model": "jugcraft:block/harvest_centerpiece_55",
+      "y": 90
+    },
+    "facing=east,lit=true,part=56": {
+      "model": "jugcraft:block/harvest_centerpiece_56",
+      "y": 90
+    },
+    "facing=east,lit=true,part=57": {
+      "model": "jugcraft:block/harvest_centerpiece_57",
+      "y": 90
+    },
+    "facing=east,lit=true,part=58": {
+      "model": "jugcraft:block/harvest_centerpiece_58",
+      "y": 90
+    },
+    "facing=east,lit=true,part=59": {
+      "model": "jugcraft:block/harvest_centerpiece_59",
+      "y": 90
+    },
+    "facing=east,lit=true,part=60": {
+      "model": "jugcraft:block/harvest_centerpiece_60",
+      "y": 90
+    },
+    "facing=east,lit=true,part=61": {
+      "model": "jugcraft:block/harvest_centerpiece_61",
+      "y": 90
+    },
+    "facing=east,lit=true,part=62": {
+      "model": "jugcraft:block/harvest_centerpiece_62_lit",
+      "y": 90
+    },
+    "facing=east,lit=true,part=63": {
+      "model": "jugcraft:block/harvest_centerpiece_63",
+      "y": 90
+    },
+    "facing=east,lit=true,part=64": {
+      "model": "jugcraft:block/harvest_centerpiece_64",
+      "y": 90
+    },
+    "facing=east,lit=true,part=65": {
+      "model": "jugcraft:block/harvest_centerpiece_65",
+      "y": 90
+    },
+    "facing=east,lit=true,part=66": {
+      "model": "jugcraft:block/harvest_centerpiece_66",
+      "y": 90
+    },
+    "facing=east,lit=true,part=67": {
+      "model": "jugcraft:block/harvest_centerpiece_67_lit",
+      "y": 90
+    },
+    "facing=east,lit=true,part=68": {
+      "model": "jugcraft:block/harvest_centerpiece_68",
+      "y": 90
+    },
+    "facing=east,lit=true,part=69": {
+      "model": "jugcraft:block/harvest_centerpiece_69",
+      "y": 90
+    },
+    "facing=east,lit=true,part=70": {
+      "model": "jugcraft:block/harvest_centerpiece_70",
+      "y": 90
+    },
+    "facing=east,lit=true,part=71": {
+      "model": "jugcraft:block/harvest_centerpiece_71",
+      "y": 90
+    },
+    "facing=east,lit=true,part=72": {
+      "model": "jugcraft:block/harvest_centerpiece_72",
+      "y": 90
+    },
+    "facing=east,lit=true,part=73": {
+      "model": "jugcraft:block/harvest_centerpiece_73",
+      "y": 90
+    },
+    "facing=east,lit=true,part=74": {
+      "model": "jugcraft:block/harvest_centerpiece_74",
+      "y": 90
+    },
+    "facing=south,lit=false,part=0": {
+      "model": "jugcraft:block/harvest_centerpiece_0",
+      "y": 180
+    },
+    "facing=south,lit=false,part=1": {
+      "model": "jugcraft:block/harvest_centerpiece_1",
+      "y": 180
+    },
+    "facing=south,lit=false,part=2": {
+      "model": "jugcraft:block/harvest_centerpiece_2",
+      "y": 180
+    },
+    "facing=south,lit=false,part=3": {
+      "model": "jugcraft:block/harvest_centerpiece_3",
+      "y": 180
+    },
+    "facing=south,lit=false,part=4": {
+      "model": "jugcraft:block/harvest_centerpiece_4",
+      "y": 180
+    },
+    "facing=south,lit=false,part=5": {
+      "model": "jugcraft:block/harvest_centerpiece_5",
+      "y": 180
+    },
+    "facing=south,lit=false,part=6": {
+      "model": "jugcraft:block/harvest_centerpiece_6",
+      "y": 180
+    },
+    "facing=south,lit=false,part=7": {
+      "model": "jugcraft:block/harvest_centerpiece_7",
+      "y": 180
+    },
+    "facing=south,lit=false,part=8": {
+      "model": "jugcraft:block/harvest_centerpiece_8",
+      "y": 180
+    },
+    "facing=south,lit=false,part=9": {
+      "model": "jugcraft:block/harvest_centerpiece_9",
+      "y": 180
+    },
+    "facing=south,lit=false,part=10": {
+      "model": "jugcraft:block/harvest_centerpiece_10",
+      "y": 180
+    },
+    "facing=south,lit=false,part=11": {
+      "model": "jugcraft:block/harvest_centerpiece_11",
+      "y": 180
+    },
+    "facing=south,lit=false,part=12": {
+      "model": "jugcraft:block/harvest_centerpiece_12",
+      "y": 180
+    },
+    "facing=south,lit=false,part=13": {
+      "model": "jugcraft:block/harvest_centerpiece_13",
+      "y": 180
+    },
+    "facing=south,lit=false,part=14": {
+      "model": "jugcraft:block/harvest_centerpiece_14",
+      "y": 180
+    },
+    "facing=south,lit=false,part=15": {
+      "model": "jugcraft:block/harvest_centerpiece_15",
+      "y": 180
+    },
+    "facing=south,lit=false,part=16": {
+      "model": "jugcraft:block/harvest_centerpiece_16",
+      "y": 180
+    },
+    "facing=south,lit=false,part=17": {
+      "model": "jugcraft:block/harvest_centerpiece_17",
+      "y": 180
+    },
+    "facing=south,lit=false,part=18": {
+      "model": "jugcraft:block/harvest_centerpiece_18",
+      "y": 180
+    },
+    "facing=south,lit=false,part=19": {
+      "model": "jugcraft:block/harvest_centerpiece_19",
+      "y": 180
+    },
+    "facing=south,lit=false,part=20": {
+      "model": "jugcraft:block/harvest_centerpiece_20",
+      "y": 180
+    },
+    "facing=south,lit=false,part=21": {
+      "model": "jugcraft:block/harvest_centerpiece_21",
+      "y": 180
+    },
+    "facing=south,lit=false,part=22": {
+      "model": "jugcraft:block/harvest_centerpiece_22",
+      "y": 180
+    },
+    "facing=south,lit=false,part=23": {
+      "model": "jugcraft:block/harvest_centerpiece_23",
+      "y": 180
+    },
+    "facing=south,lit=false,part=24": {
+      "model": "jugcraft:block/harvest_centerpiece_24",
+      "y": 180
+    },
+    "facing=south,lit=false,part=25": {
+      "model": "jugcraft:block/harvest_centerpiece_25",
+      "y": 180
+    },
+    "facing=south,lit=false,part=26": {
+      "model": "jugcraft:block/harvest_centerpiece_26",
+      "y": 180
+    },
+    "facing=south,lit=false,part=27": {
+      "model": "jugcraft:block/harvest_centerpiece_27",
+      "y": 180
+    },
+    "facing=south,lit=false,part=28": {
+      "model": "jugcraft:block/harvest_centerpiece_28",
+      "y": 180
+    },
+    "facing=south,lit=false,part=29": {
+      "model": "jugcraft:block/harvest_centerpiece_29",
+      "y": 180
+    },
+    "facing=south,lit=false,part=30": {
+      "model": "jugcraft:block/harvest_centerpiece_30",
+      "y": 180
+    },
+    "facing=south,lit=false,part=31": {
+      "model": "jugcraft:block/harvest_centerpiece_31",
+      "y": 180
+    },
+    "facing=south,lit=false,part=32": {
+      "model": "jugcraft:block/harvest_centerpiece_32",
+      "y": 180
+    },
+    "facing=south,lit=false,part=33": {
+      "model": "jugcraft:block/harvest_centerpiece_33",
+      "y": 180
+    },
+    "facing=south,lit=false,part=34": {
+      "model": "jugcraft:block/harvest_centerpiece_34",
+      "y": 180
+    },
+    "facing=south,lit=false,part=35": {
+      "model": "jugcraft:block/harvest_centerpiece_35",
+      "y": 180
+    },
+    "facing=south,lit=false,part=36": {
+      "model": "jugcraft:block/harvest_centerpiece_36",
+      "y": 180
+    },
+    "facing=south,lit=false,part=37": {
+      "model": "jugcraft:block/harvest_centerpiece_37",
+      "y": 180
+    },
+    "facing=south,lit=false,part=38": {
+      "model": "jugcraft:block/harvest_centerpiece_38",
+      "y": 180
+    },
+    "facing=south,lit=false,part=39": {
+      "model": "jugcraft:block/harvest_centerpiece_39",
+      "y": 180
+    },
+    "facing=south,lit=false,part=40": {
+      "model": "jugcraft:block/harvest_centerpiece_40",
+      "y": 180
+    },
+    "facing=south,lit=false,part=41": {
+      "model": "jugcraft:block/harvest_centerpiece_41",
+      "y": 180
+    },
+    "facing=south,lit=false,part=42": {
+      "model": "jugcraft:block/harvest_centerpiece_42",
+      "y": 180
+    },
+    "facing=south,lit=false,part=43": {
+      "model": "jugcraft:block/harvest_centerpiece_43",
+      "y": 180
+    },
+    "facing=south,lit=false,part=44": {
+      "model": "jugcraft:block/harvest_centerpiece_44",
+      "y": 180
+    },
+    "facing=south,lit=false,part=45": {
+      "model": "jugcraft:block/harvest_centerpiece_45",
+      "y": 180
+    },
+    "facing=south,lit=false,part=46": {
+      "model": "jugcraft:block/harvest_centerpiece_46",
+      "y": 180
+    },
+    "facing=south,lit=false,part=47": {
+      "model": "jugcraft:block/harvest_centerpiece_47",
+      "y": 180
+    },
+    "facing=south,lit=false,part=48": {
+      "model": "jugcraft:block/harvest_centerpiece_48",
+      "y": 180
+    },
+    "facing=south,lit=false,part=49": {
+      "model": "jugcraft:block/harvest_centerpiece_49",
+      "y": 180
+    },
+    "facing=south,lit=false,part=50": {
+      "model": "jugcraft:block/harvest_centerpiece_50",
+      "y": 180
+    },
+    "facing=south,lit=false,part=51": {
+      "model": "jugcraft:block/harvest_centerpiece_51",
+      "y": 180
+    },
+    "facing=south,lit=false,part=52": {
+      "model": "jugcraft:block/harvest_centerpiece_52",
+      "y": 180
+    },
+    "facing=south,lit=false,part=53": {
+      "model": "jugcraft:block/harvest_centerpiece_53",
+      "y": 180
+    },
+    "facing=south,lit=false,part=54": {
+      "model": "jugcraft:block/harvest_centerpiece_54",
+      "y": 180
+    },
+    "facing=south,lit=false,part=55": {
+      "model": "jugcraft:block/harvest_centerpiece_55",
+      "y": 180
+    },
+    "facing=south,lit=false,part=56": {
+      "model": "jugcraft:block/harvest_centerpiece_56",
+      "y": 180
+    },
+    "facing=south,lit=false,part=57": {
+      "model": "jugcraft:block/harvest_centerpiece_57",
+      "y": 180
+    },
+    "facing=south,lit=false,part=58": {
+      "model": "jugcraft:block/harvest_centerpiece_58",
+      "y": 180
+    },
+    "facing=south,lit=false,part=59": {
+      "model": "jugcraft:block/harvest_centerpiece_59",
+      "y": 180
+    },
+    "facing=south,lit=false,part=60": {
+      "model": "jugcraft:block/harvest_centerpiece_60",
+      "y": 180
+    },
+    "facing=south,lit=false,part=61": {
+      "model": "jugcraft:block/harvest_centerpiece_61",
+      "y": 180
+    },
+    "facing=south,lit=false,part=62": {
+      "model": "jugcraft:block/harvest_centerpiece_62",
+      "y": 180
+    },
+    "facing=south,lit=false,part=63": {
+      "model": "jugcraft:block/harvest_centerpiece_63",
+      "y": 180
+    },
+    "facing=south,lit=false,part=64": {
+      "model": "jugcraft:block/harvest_centerpiece_64",
+      "y": 180
+    },
+    "facing=south,lit=false,part=65": {
+      "model": "jugcraft:block/harvest_centerpiece_65",
+      "y": 180
+    },
+    "facing=south,lit=false,part=66": {
+      "model": "jugcraft:block/harvest_centerpiece_66",
+      "y": 180
+    },
+    "facing=south,lit=false,part=67": {
+      "model": "jugcraft:block/harvest_centerpiece_67",
+      "y": 180
+    },
+    "facing=south,lit=false,part=68": {
+      "model": "jugcraft:block/harvest_centerpiece_68",
+      "y": 180
+    },
+    "facing=south,lit=false,part=69": {
+      "model": "jugcraft:block/harvest_centerpiece_69",
+      "y": 180
+    },
+    "facing=south,lit=false,part=70": {
+      "model": "jugcraft:block/harvest_centerpiece_70",
+      "y": 180
+    },
+    "facing=south,lit=false,part=71": {
+      "model": "jugcraft:block/harvest_centerpiece_71",
+      "y": 180
+    },
+    "facing=south,lit=false,part=72": {
+      "model": "jugcraft:block/harvest_centerpiece_72",
+      "y": 180
+    },
+    "facing=south,lit=false,part=73": {
+      "model": "jugcraft:block/harvest_centerpiece_73",
+      "y": 180
+    },
+    "facing=south,lit=false,part=74": {
+      "model": "jugcraft:block/harvest_centerpiece_74",
+      "y": 180
+    },
+    "facing=south,lit=true,part=0": {
+      "model": "jugcraft:block/harvest_centerpiece_0_lit",
+      "y": 180
+    },
+    "facing=south,lit=true,part=1": {
+      "model": "jugcraft:block/harvest_centerpiece_1",
+      "y": 180
+    },
+    "facing=south,lit=true,part=2": {
+      "model": "jugcraft:block/harvest_centerpiece_2",
+      "y": 180
+    },
+    "facing=south,lit=true,part=3": {
+      "model": "jugcraft:block/harvest_centerpiece_3",
+      "y": 180
+    },
+    "facing=south,lit=true,part=4": {
+      "model": "jugcraft:block/harvest_centerpiece_4_lit",
+      "y": 180
+    },
+    "facing=south,lit=true,part=5": {
+      "model": "jugcraft:block/harvest_centerpiece_5_lit",
+      "y": 180
+    },
+    "facing=south,lit=true,part=6": {
+      "model": "jugcraft:block/harvest_centerpiece_6",
+      "y": 180
+    },
+    "facing=south,lit=true,part=7": {
+      "model": "jugcraft:block/harvest_centerpiece_7",
+      "y": 180
+    },
+    "facing=south,lit=true,part=8": {
+      "model": "jugcraft:block/harvest_centerpiece_8",
+      "y": 180
+    },
+    "facing=south,lit=true,part=9": {
+      "model": "jugcraft:block/harvest_centerpiece_9",
+      "y": 180
+    },
+    "facing=south,lit=true,part=10": {
+      "model": "jugcraft:block/harvest_centerpiece_10",
+      "y": 180
+    },
+    "facing=south,lit=true,part=11": {
+      "model": "jugcraft:block/harvest_centerpiece_11",
+      "y": 180
+    },
+    "facing=south,lit=true,part=12": {
+      "model": "jugcraft:block/harvest_centerpiece_12",
+      "y": 180
+    },
+    "facing=south,lit=true,part=13": {
+      "model": "jugcraft:block/harvest_centerpiece_13",
+      "y": 180
+    },
+    "facing=south,lit=true,part=14": {
+      "model": "jugcraft:block/harvest_centerpiece_14",
+      "y": 180
+    },
+    "facing=south,lit=true,part=15": {
+      "model": "jugcraft:block/harvest_centerpiece_15",
+      "y": 180
+    },
+    "facing=south,lit=true,part=16": {
+      "model": "jugcraft:block/harvest_centerpiece_16",
+      "y": 180
+    },
+    "facing=south,lit=true,part=17": {
+      "model": "jugcraft:block/harvest_centerpiece_17",
+      "y": 180
+    },
+    "facing=south,lit=true,part=18": {
+      "model": "jugcraft:block/harvest_centerpiece_18",
+      "y": 180
+    },
+    "facing=south,lit=true,part=19": {
+      "model": "jugcraft:block/harvest_centerpiece_19",
+      "y": 180
+    },
+    "facing=south,lit=true,part=20": {
+      "model": "jugcraft:block/harvest_centerpiece_20",
+      "y": 180
+    },
+    "facing=south,lit=true,part=21": {
+      "model": "jugcraft:block/harvest_centerpiece_21",
+      "y": 180
+    },
+    "facing=south,lit=true,part=22": {
+      "model": "jugcraft:block/harvest_centerpiece_22",
+      "y": 180
+    },
+    "facing=south,lit=true,part=23": {
+      "model": "jugcraft:block/harvest_centerpiece_23",
+      "y": 180
+    },
+    "facing=south,lit=true,part=24": {
+      "model": "jugcraft:block/harvest_centerpiece_24",
+      "y": 180
+    },
+    "facing=south,lit=true,part=25": {
+      "model": "jugcraft:block/harvest_centerpiece_25",
+      "y": 180
+    },
+    "facing=south,lit=true,part=26": {
+      "model": "jugcraft:block/harvest_centerpiece_26",
+      "y": 180
+    },
+    "facing=south,lit=true,part=27": {
+      "model": "jugcraft:block/harvest_centerpiece_27",
+      "y": 180
+    },
+    "facing=south,lit=true,part=28": {
+      "model": "jugcraft:block/harvest_centerpiece_28",
+      "y": 180
+    },
+    "facing=south,lit=true,part=29": {
+      "model": "jugcraft:block/harvest_centerpiece_29",
+      "y": 180
+    },
+    "facing=south,lit=true,part=30": {
+      "model": "jugcraft:block/harvest_centerpiece_30",
+      "y": 180
+    },
+    "facing=south,lit=true,part=31": {
+      "model": "jugcraft:block/harvest_centerpiece_31",
+      "y": 180
+    },
+    "facing=south,lit=true,part=32": {
+      "model": "jugcraft:block/harvest_centerpiece_32",
+      "y": 180
+    },
+    "facing=south,lit=true,part=33": {
+      "model": "jugcraft:block/harvest_centerpiece_33",
+      "y": 180
+    },
+    "facing=south,lit=true,part=34": {
+      "model": "jugcraft:block/harvest_centerpiece_34",
+      "y": 180
+    },
+    "facing=south,lit=true,part=35": {
+      "model": "jugcraft:block/harvest_centerpiece_35",
+      "y": 180
+    },
+    "facing=south,lit=true,part=36": {
+      "model": "jugcraft:block/harvest_centerpiece_36",
+      "y": 180
+    },
+    "facing=south,lit=true,part=37": {
+      "model": "jugcraft:block/harvest_centerpiece_37",
+      "y": 180
+    },
+    "facing=south,lit=true,part=38": {
+      "model": "jugcraft:block/harvest_centerpiece_38",
+      "y": 180
+    },
+    "facing=south,lit=true,part=39": {
+      "model": "jugcraft:block/harvest_centerpiece_39",
+      "y": 180
+    },
+    "facing=south,lit=true,part=40": {
+      "model": "jugcraft:block/harvest_centerpiece_40",
+      "y": 180
+    },
+    "facing=south,lit=true,part=41": {
+      "model": "jugcraft:block/harvest_centerpiece_41",
+      "y": 180
+    },
+    "facing=south,lit=true,part=42": {
+      "model": "jugcraft:block/harvest_centerpiece_42",
+      "y": 180
+    },
+    "facing=south,lit=true,part=43": {
+      "model": "jugcraft:block/harvest_centerpiece_43",
+      "y": 180
+    },
+    "facing=south,lit=true,part=44": {
+      "model": "jugcraft:block/harvest_centerpiece_44",
+      "y": 180
+    },
+    "facing=south,lit=true,part=45": {
+      "model": "jugcraft:block/harvest_centerpiece_45",
+      "y": 180
+    },
+    "facing=south,lit=true,part=46": {
+      "model": "jugcraft:block/harvest_centerpiece_46",
+      "y": 180
+    },
+    "facing=south,lit=true,part=47": {
+      "model": "jugcraft:block/harvest_centerpiece_47",
+      "y": 180
+    },
+    "facing=south,lit=true,part=48": {
+      "model": "jugcraft:block/harvest_centerpiece_48",
+      "y": 180
+    },
+    "facing=south,lit=true,part=49": {
+      "model": "jugcraft:block/harvest_centerpiece_49",
+      "y": 180
+    },
+    "facing=south,lit=true,part=50": {
+      "model": "jugcraft:block/harvest_centerpiece_50",
+      "y": 180
+    },
+    "facing=south,lit=true,part=51": {
+      "model": "jugcraft:block/harvest_centerpiece_51",
+      "y": 180
+    },
+    "facing=south,lit=true,part=52": {
+      "model": "jugcraft:block/harvest_centerpiece_52",
+      "y": 180
+    },
+    "facing=south,lit=true,part=53": {
+      "model": "jugcraft:block/harvest_centerpiece_53",
+      "y": 180
+    },
+    "facing=south,lit=true,part=54": {
+      "model": "jugcraft:block/harvest_centerpiece_54",
+      "y": 180
+    },
+    "facing=south,lit=true,part=55": {
+      "model": "jugcraft:block/harvest_centerpiece_55",
+      "y": 180
+    },
+    "facing=south,lit=true,part=56": {
+      "model": "jugcraft:block/harvest_centerpiece_56",
+      "y": 180
+    },
+    "facing=south,lit=true,part=57": {
+      "model": "jugcraft:block/harvest_centerpiece_57",
+      "y": 180
+    },
+    "facing=south,lit=true,part=58": {
+      "model": "jugcraft:block/harvest_centerpiece_58",
+      "y": 180
+    },
+    "facing=south,lit=true,part=59": {
+      "model": "jugcraft:block/harvest_centerpiece_59",
+      "y": 180
+    },
+    "facing=south,lit=true,part=60": {
+      "model": "jugcraft:block/harvest_centerpiece_60",
+      "y": 180
+    },
+    "facing=south,lit=true,part=61": {
+      "model": "jugcraft:block/harvest_centerpiece_61",
+      "y": 180
+    },
+    "facing=south,lit=true,part=62": {
+      "model": "jugcraft:block/harvest_centerpiece_62_lit",
+      "y": 180
+    },
+    "facing=south,lit=true,part=63": {
+      "model": "jugcraft:block/harvest_centerpiece_63",
+      "y": 180
+    },
+    "facing=south,lit=true,part=64": {
+      "model": "jugcraft:block/harvest_centerpiece_64",
+      "y": 180
+    },
+    "facing=south,lit=true,part=65": {
+      "model": "jugcraft:block/harvest_centerpiece_65",
+      "y": 180
+    },
+    "facing=south,lit=true,part=66": {
+      "model": "jugcraft:block/harvest_centerpiece_66",
+      "y": 180
+    },
+    "facing=south,lit=true,part=67": {
+      "model": "jugcraft:block/harvest_centerpiece_67_lit",
+      "y": 180
+    },
+    "facing=south,lit=true,part=68": {
+      "model": "jugcraft:block/harvest_centerpiece_68",
+      "y": 180
+    },
+    "facing=south,lit=true,part=69": {
+      "model": "jugcraft:block/harvest_centerpiece_69",
+      "y": 180
+    },
+    "facing=south,lit=true,part=70": {
+      "model": "jugcraft:block/harvest_centerpiece_70",
+      "y": 180
+    },
+    "facing=south,lit=true,part=71": {
+      "model": "jugcraft:block/harvest_centerpiece_71",
+      "y": 180
+    },
+    "facing=south,lit=true,part=72": {
+      "model": "jugcraft:block/harvest_centerpiece_72",
+      "y": 180
+    },
+    "facing=south,lit=true,part=73": {
+      "model": "jugcraft:block/harvest_centerpiece_73",
+      "y": 180
+    },
+    "facing=south,lit=true,part=74": {
+      "model": "jugcraft:block/harvest_centerpiece_74",
+      "y": 180
+    },
+    "facing=west,lit=false,part=0": {
+      "model": "jugcraft:block/harvest_centerpiece_0",
+      "y": 270
+    },
+    "facing=west,lit=false,part=1": {
+      "model": "jugcraft:block/harvest_centerpiece_1",
+      "y": 270
+    },
+    "facing=west,lit=false,part=2": {
+      "model": "jugcraft:block/harvest_centerpiece_2",
+      "y": 270
+    },
+    "facing=west,lit=false,part=3": {
+      "model": "jugcraft:block/harvest_centerpiece_3",
+      "y": 270
+    },
+    "facing=west,lit=false,part=4": {
+      "model": "jugcraft:block/harvest_centerpiece_4",
+      "y": 270
+    },
+    "facing=west,lit=false,part=5": {
+      "model": "jugcraft:block/harvest_centerpiece_5",
+      "y": 270
+    },
+    "facing=west,lit=false,part=6": {
+      "model": "jugcraft:block/harvest_centerpiece_6",
+      "y": 270
+    },
+    "facing=west,lit=false,part=7": {
+      "model": "jugcraft:block/harvest_centerpiece_7",
+      "y": 270
+    },
+    "facing=west,lit=false,part=8": {
+      "model": "jugcraft:block/harvest_centerpiece_8",
+      "y": 270
+    },
+    "facing=west,lit=false,part=9": {
+      "model": "jugcraft:block/harvest_centerpiece_9",
+      "y": 270
+    },
+    "facing=west,lit=false,part=10": {
+      "model": "jugcraft:block/harvest_centerpiece_10",
+      "y": 270
+    },
+    "facing=west,lit=false,part=11": {
+      "model": "jugcraft:block/harvest_centerpiece_11",
+      "y": 270
+    },
+    "facing=west,lit=false,part=12": {
+      "model": "jugcraft:block/harvest_centerpiece_12",
+      "y": 270
+    },
+    "facing=west,lit=false,part=13": {
+      "model": "jugcraft:block/harvest_centerpiece_13",
+      "y": 270
+    },
+    "facing=west,lit=false,part=14": {
+      "model": "jugcraft:block/harvest_centerpiece_14",
+      "y": 270
+    },
+    "facing=west,lit=false,part=15": {
+      "model": "jugcraft:block/harvest_centerpiece_15",
+      "y": 270
+    },
+    "facing=west,lit=false,part=16": {
+      "model": "jugcraft:block/harvest_centerpiece_16",
+      "y": 270
+    },
+    "facing=west,lit=false,part=17": {
+      "model": "jugcraft:block/harvest_centerpiece_17",
+      "y": 270
+    },
+    "facing=west,lit=false,part=18": {
+      "model": "jugcraft:block/harvest_centerpiece_18",
+      "y": 270
+    },
+    "facing=west,lit=false,part=19": {
+      "model": "jugcraft:block/harvest_centerpiece_19",
+      "y": 270
+    },
+    "facing=west,lit=false,part=20": {
+      "model": "jugcraft:block/harvest_centerpiece_20",
+      "y": 270
+    },
+    "facing=west,lit=false,part=21": {
+      "model": "jugcraft:block/harvest_centerpiece_21",
+      "y": 270
+    },
+    "facing=west,lit=false,part=22": {
+      "model": "jugcraft:block/harvest_centerpiece_22",
+      "y": 270
+    },
+    "facing=west,lit=false,part=23": {
+      "model": "jugcraft:block/harvest_centerpiece_23",
+      "y": 270
+    },
+    "facing=west,lit=false,part=24": {
+      "model": "jugcraft:block/harvest_centerpiece_24",
+      "y": 270
+    },
+    "facing=west,lit=false,part=25": {
+      "model": "jugcraft:block/harvest_centerpiece_25",
+      "y": 270
+    },
+    "facing=west,lit=false,part=26": {
+      "model": "jugcraft:block/harvest_centerpiece_26",
+      "y": 270
+    },
+    "facing=west,lit=false,part=27": {
+      "model": "jugcraft:block/harvest_centerpiece_27",
+      "y": 270
+    },
+    "facing=west,lit=false,part=28": {
+      "model": "jugcraft:block/harvest_centerpiece_28",
+      "y": 270
+    },
+    "facing=west,lit=false,part=29": {
+      "model": "jugcraft:block/harvest_centerpiece_29",
+      "y": 270
+    },
+    "facing=west,lit=false,part=30": {
+      "model": "jugcraft:block/harvest_centerpiece_30",
+      "y": 270
+    },
+    "facing=west,lit=false,part=31": {
+      "model": "jugcraft:block/harvest_centerpiece_31",
+      "y": 270
+    },
+    "facing=west,lit=false,part=32": {
+      "model": "jugcraft:block/harvest_centerpiece_32",
+      "y": 270
+    },
+    "facing=west,lit=false,part=33": {
+      "model": "jugcraft:block/harvest_centerpiece_33",
+      "y": 270
+    },
+    "facing=west,lit=false,part=34": {
+      "model": "jugcraft:block/harvest_centerpiece_34",
+      "y": 270
+    },
+    "facing=west,lit=false,part=35": {
+      "model": "jugcraft:block/harvest_centerpiece_35",
+      "y": 270
+    },
+    "facing=west,lit=false,part=36": {
+      "model": "jugcraft:block/harvest_centerpiece_36",
+      "y": 270
+    },
+    "facing=west,lit=false,part=37": {
+      "model": "jugcraft:block/harvest_centerpiece_37",
+      "y": 270
+    },
+    "facing=west,lit=false,part=38": {
+      "model": "jugcraft:block/harvest_centerpiece_38",
+      "y": 270
+    },
+    "facing=west,lit=false,part=39": {
+      "model": "jugcraft:block/harvest_centerpiece_39",
+      "y": 270
+    },
+    "facing=west,lit=false,part=40": {
+      "model": "jugcraft:block/harvest_centerpiece_40",
+      "y": 270
+    },
+    "facing=west,lit=false,part=41": {
+      "model": "jugcraft:block/harvest_centerpiece_41",
+      "y": 270
+    },
+    "facing=west,lit=false,part=42": {
+      "model": "jugcraft:block/harvest_centerpiece_42",
+      "y": 270
+    },
+    "facing=west,lit=false,part=43": {
+      "model": "jugcraft:block/harvest_centerpiece_43",
+      "y": 270
+    },
+    "facing=west,lit=false,part=44": {
+      "model": "jugcraft:block/harvest_centerpiece_44",
+      "y": 270
+    },
+    "facing=west,lit=false,part=45": {
+      "model": "jugcraft:block/harvest_centerpiece_45",
+      "y": 270
+    },
+    "facing=west,lit=false,part=46": {
+      "model": "jugcraft:block/harvest_centerpiece_46",
+      "y": 270
+    },
+    "facing=west,lit=false,part=47": {
+      "model": "jugcraft:block/harvest_centerpiece_47",
+      "y": 270
+    },
+    "facing=west,lit=false,part=48": {
+      "model": "jugcraft:block/harvest_centerpiece_48",
+      "y": 270
+    },
+    "facing=west,lit=false,part=49": {
+      "model": "jugcraft:block/harvest_centerpiece_49",
+      "y": 270
+    },
+    "facing=west,lit=false,part=50": {
+      "model": "jugcraft:block/harvest_centerpiece_50",
+      "y": 270
+    },
+    "facing=west,lit=false,part=51": {
+      "model": "jugcraft:block/harvest_centerpiece_51",
+      "y": 270
+    },
+    "facing=west,lit=false,part=52": {
+      "model": "jugcraft:block/harvest_centerpiece_52",
+      "y": 270
+    },
+    "facing=west,lit=false,part=53": {
+      "model": "jugcraft:block/harvest_centerpiece_53",
+      "y": 270
+    },
+    "facing=west,lit=false,part=54": {
+      "model": "jugcraft:block/harvest_centerpiece_54",
+      "y": 270
+    },
+    "facing=west,lit=false,part=55": {
+      "model": "jugcraft:block/harvest_centerpiece_55",
+      "y": 270
+    },
+    "facing=west,lit=false,part=56": {
+      "model": "jugcraft:block/harvest_centerpiece_56",
+      "y": 270
+    },
+    "facing=west,lit=false,part=57": {
+      "model": "jugcraft:block/harvest_centerpiece_57",
+      "y": 270
+    },
+    "facing=west,lit=false,part=58": {
+      "model": "jugcraft:block/harvest_centerpiece_58",
+      "y": 270
+    },
+    "facing=west,lit=false,part=59": {
+      "model": "jugcraft:block/harvest_centerpiece_59",
+      "y": 270
+    },
+    "facing=west,lit=false,part=60": {
+      "model": "jugcraft:block/harvest_centerpiece_60",
+      "y": 270
+    },
+    "facing=west,lit=false,part=61": {
+      "model": "jugcraft:block/harvest_centerpiece_61",
+      "y": 270
+    },
+    "facing=west,lit=false,part=62": {
+      "model": "jugcraft:block/harvest_centerpiece_62",
+      "y": 270
+    },
+    "facing=west,lit=false,part=63": {
+      "model": "jugcraft:block/harvest_centerpiece_63",
+      "y": 270
+    },
+    "facing=west,lit=false,part=64": {
+      "model": "jugcraft:block/harvest_centerpiece_64",
+      "y": 270
+    },
+    "facing=west,lit=false,part=65": {
+      "model": "jugcraft:block/harvest_centerpiece_65",
+      "y": 270
+    },
+    "facing=west,lit=false,part=66": {
+      "model": "jugcraft:block/harvest_centerpiece_66",
+      "y": 270
+    },
+    "facing=west,lit=false,part=67": {
+      "model": "jugcraft:block/harvest_centerpiece_67",
+      "y": 270
+    },
+    "facing=west,lit=false,part=68": {
+      "model": "jugcraft:block/harvest_centerpiece_68",
+      "y": 270
+    },
+    "facing=west,lit=false,part=69": {
+      "model": "jugcraft:block/harvest_centerpiece_69",
+      "y": 270
+    },
+    "facing=west,lit=false,part=70": {
+      "model": "jugcraft:block/harvest_centerpiece_70",
+      "y": 270
+    },
+    "facing=west,lit=false,part=71": {
+      "model": "jugcraft:block/harvest_centerpiece_71",
+      "y": 270
+    },
+    "facing=west,lit=false,part=72": {
+      "model": "jugcraft:block/harvest_centerpiece_72",
+      "y": 270
+    },
+    "facing=west,lit=false,part=73": {
+      "model": "jugcraft:block/harvest_centerpiece_73",
+      "y": 270
+    },
+    "facing=west,lit=false,part=74": {
+      "model": "jugcraft:block/harvest_centerpiece_74",
+      "y": 270
+    },
+    "facing=west,lit=true,part=0": {
+      "model": "jugcraft:block/harvest_centerpiece_0_lit",
+      "y": 270
+    },
+    "facing=west,lit=true,part=1": {
+      "model": "jugcraft:block/harvest_centerpiece_1",
+      "y": 270
+    },
+    "facing=west,lit=true,part=2": {
+      "model": "jugcraft:block/harvest_centerpiece_2",
+      "y": 270
+    },
+    "facing=west,lit=true,part=3": {
+      "model": "jugcraft:block/harvest_centerpiece_3",
+      "y": 270
+    },
+    "facing=west,lit=true,part=4": {
+      "model": "jugcraft:block/harvest_centerpiece_4_lit",
+      "y": 270
+    },
+    "facing=west,lit=true,part=5": {
+      "model": "jugcraft:block/harvest_centerpiece_5_lit",
+      "y": 270
+    },
+    "facing=west,lit=true,part=6": {
+      "model": "jugcraft:block/harvest_centerpiece_6",
+      "y": 270
+    },
+    "facing=west,lit=true,part=7": {
+      "model": "jugcraft:block/harvest_centerpiece_7",
+      "y": 270
+    },
+    "facing=west,lit=true,part=8": {
+      "model": "jugcraft:block/harvest_centerpiece_8",
+      "y": 270
+    },
+    "facing=west,lit=true,part=9": {
+      "model": "jugcraft:block/harvest_centerpiece_9",
+      "y": 270
+    },
+    "facing=west,lit=true,part=10": {
+      "model": "jugcraft:block/harvest_centerpiece_10",
+      "y": 270
+    },
+    "facing=west,lit=true,part=11": {
+      "model": "jugcraft:block/harvest_centerpiece_11",
+      "y": 270
+    },
+    "facing=west,lit=true,part=12": {
+      "model": "jugcraft:block/harvest_centerpiece_12",
+      "y": 270
+    },
+    "facing=west,lit=true,part=13": {
+      "model": "jugcraft:block/harvest_centerpiece_13",
+      "y": 270
+    },
+    "facing=west,lit=true,part=14": {
+      "model": "jugcraft:block/harvest_centerpiece_14",
+      "y": 270
+    },
+    "facing=west,lit=true,part=15": {
+      "model": "jugcraft:block/harvest_centerpiece_15",
+      "y": 270
+    },
+    "facing=west,lit=true,part=16": {
+      "model": "jugcraft:block/harvest_centerpiece_16",
+      "y": 270
+    },
+    "facing=west,lit=true,part=17": {
+      "model": "jugcraft:block/harvest_centerpiece_17",
+      "y": 270
+    },
+    "facing=west,lit=true,part=18": {
+      "model": "jugcraft:block/harvest_centerpiece_18",
+      "y": 270
+    },
+    "facing=west,lit=true,part=19": {
+      "model": "jugcraft:block/harvest_centerpiece_19",
+      "y": 270
+    },
+    "facing=west,lit=true,part=20": {
+      "model": "jugcraft:block/harvest_centerpiece_20",
+      "y": 270
+    },
+    "facing=west,lit=true,part=21": {
+      "model": "jugcraft:block/harvest_centerpiece_21",
+      "y": 270
+    },
+    "facing=west,lit=true,part=22": {
+      "model": "jugcraft:block/harvest_centerpiece_22",
+      "y": 270
+    },
+    "facing=west,lit=true,part=23": {
+      "model": "jugcraft:block/harvest_centerpiece_23",
+      "y": 270
+    },
+    "facing=west,lit=true,part=24": {
+      "model": "jugcraft:block/harvest_centerpiece_24",
+      "y": 270
+    },
+    "facing=west,lit=true,part=25": {
+      "model": "jugcraft:block/harvest_centerpiece_25",
+      "y": 270
+    },
+    "facing=west,lit=true,part=26": {
+      "model": "jugcraft:block/harvest_centerpiece_26",
+      "y": 270
+    },
+    "facing=west,lit=true,part=27": {
+      "model": "jugcraft:block/harvest_centerpiece_27",
+      "y": 270
+    },
+    "facing=west,lit=true,part=28": {
+      "model": "jugcraft:block/harvest_centerpiece_28",
+      "y": 270
+    },
+    "facing=west,lit=true,part=29": {
+      "model": "jugcraft:block/harvest_centerpiece_29",
+      "y": 270
+    },
+    "facing=west,lit=true,part=30": {
+      "model": "jugcraft:block/harvest_centerpiece_30",
+      "y": 270
+    },
+    "facing=west,lit=true,part=31": {
+      "model": "jugcraft:block/harvest_centerpiece_31",
+      "y": 270
+    },
+    "facing=west,lit=true,part=32": {
+      "model": "jugcraft:block/harvest_centerpiece_32",
+      "y": 270
+    },
+    "facing=west,lit=true,part=33": {
+      "model": "jugcraft:block/harvest_centerpiece_33",
+      "y": 270
+    },
+    "facing=west,lit=true,part=34": {
+      "model": "jugcraft:block/harvest_centerpiece_34",
+      "y": 270
+    },
+    "facing=west,lit=true,part=35": {
+      "model": "jugcraft:block/harvest_centerpiece_35",
+      "y": 270
+    },
+    "facing=west,lit=true,part=36": {
+      "model": "jugcraft:block/harvest_centerpiece_36",
+      "y": 270
+    },
+    "facing=west,lit=true,part=37": {
+      "model": "jugcraft:block/harvest_centerpiece_37",
+      "y": 270
+    },
+    "facing=west,lit=true,part=38": {
+      "model": "jugcraft:block/harvest_centerpiece_38",
+      "y": 270
+    },
+    "facing=west,lit=true,part=39": {
+      "model": "jugcraft:block/harvest_centerpiece_39",
+      "y": 270
+    },
+    "facing=west,lit=true,part=40": {
+      "model": "jugcraft:block/harvest_centerpiece_40",
+      "y": 270
+    },
+    "facing=west,lit=true,part=41": {
+      "model": "jugcraft:block/harvest_centerpiece_41",
+      "y": 270
+    },
+    "facing=west,lit=true,part=42": {
+      "model": "jugcraft:block/harvest_centerpiece_42",
+      "y": 270
+    },
+    "facing=west,lit=true,part=43": {
+      "model": "jugcraft:block/harvest_centerpiece_43",
+      "y": 270
+    },
+    "facing=west,lit=true,part=44": {
+      "model": "jugcraft:block/harvest_centerpiece_44",
+      "y": 270
+    },
+    "facing=west,lit=true,part=45": {
+      "model": "jugcraft:block/harvest_centerpiece_45",
+      "y": 270
+    },
+    "facing=west,lit=true,part=46": {
+      "model": "jugcraft:block/harvest_centerpiece_46",
+      "y": 270
+    },
+    "facing=west,lit=true,part=47": {
+      "model": "jugcraft:block/harvest_centerpiece_47",
+      "y": 270
+    },
+    "facing=west,lit=true,part=48": {
+      "model": "jugcraft:block/harvest_centerpiece_48",
+      "y": 270
+    },
+    "facing=west,lit=true,part=49": {
+      "model": "jugcraft:block/harvest_centerpiece_49",
+      "y": 270
+    },
+    "facing=west,lit=true,part=50": {
+      "model": "jugcraft:block/harvest_centerpiece_50",
+      "y": 270
+    },
+    "facing=west,lit=true,part=51": {
+      "model": "jugcraft:block/harvest_centerpiece_51",
+      "y": 270
+    },
+    "facing=west,lit=true,part=52": {
+      "model": "jugcraft:block/harvest_centerpiece_52",
+      "y": 270
+    },
+    "facing=west,lit=true,part=53": {
+      "model": "jugcraft:block/harvest_centerpiece_53",
+      "y": 270
+    },
+    "facing=west,lit=true,part=54": {
+      "model": "jugcraft:block/harvest_centerpiece_54",
+      "y": 270
+    },
+    "facing=west,lit=true,part=55": {
+      "model": "jugcraft:block/harvest_centerpiece_55",
+      "y": 270
+    },
+    "facing=west,lit=true,part=56": {
+      "model": "jugcraft:block/harvest_centerpiece_56",
+      "y": 270
+    },
+    "facing=west,lit=true,part=57": {
+      "model": "jugcraft:block/harvest_centerpiece_57",
+      "y": 270
+    },
+    "facing=west,lit=true,part=58": {
+      "model": "jugcraft:block/harvest_centerpiece_58",
+      "y": 270
+    },
+    "facing=west,lit=true,part=59": {
+      "model": "jugcraft:block/harvest_centerpiece_59",
+      "y": 270
+    },
+    "facing=west,lit=true,part=60": {
+      "model": "jugcraft:block/harvest_centerpiece_60",
+      "y": 270
+    },
+    "facing=west,lit=true,part=61": {
+      "model": "jugcraft:block/harvest_centerpiece_61",
+      "y": 270
+    },
+    "facing=west,lit=true,part=62": {
+      "model": "jugcraft:block/harvest_centerpiece_62_lit",
+      "y": 270
+    },
+    "facing=west,lit=true,part=63": {
+      "model": "jugcraft:block/harvest_centerpiece_63",
+      "y": 270
+    },
+    "facing=west,lit=true,part=64": {
+      "model": "jugcraft:block/harvest_centerpiece_64",
+      "y": 270
+    },
+    "facing=west,lit=true,part=65": {
+      "model": "jugcraft:block/harvest_centerpiece_65",
+      "y": 270
+    },
+    "facing=west,lit=true,part=66": {
+      "model": "jugcraft:block/harvest_centerpiece_66",
+      "y": 270
+    },
+    "facing=west,lit=true,part=67": {
+      "model": "jugcraft:block/harvest_centerpiece_67_lit",
+      "y": 270
+    },
+    "facing=west,lit=true,part=68": {
+      "model": "jugcraft:block/harvest_centerpiece_68",
+      "y": 270
+    },
+    "facing=west,lit=true,part=69": {
+      "model": "jugcraft:block/harvest_centerpiece_69",
+      "y": 270
+    },
+    "facing=west,lit=true,part=70": {
+      "model": "jugcraft:block/harvest_centerpiece_70",
+      "y": 270
+    },
+    "facing=west,lit=true,part=71": {
+      "model": "jugcraft:block/harvest_centerpiece_71",
+      "y": 270
+    },
+    "facing=west,lit=true,part=72": {
+      "model": "jugcraft:block/harvest_centerpiece_72",
+      "y": 270
+    },
+    "facing=west,lit=true,part=73": {
+      "model": "jugcraft:block/harvest_centerpiece_73",
+      "y": 270
+    },
+    "facing=west,lit=true,part=74": {
+      "model": "jugcraft:block/harvest_centerpiece_74",
+      "y": 270
+    }
+  }
+}

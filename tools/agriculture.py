@@ -29,6 +29,11 @@ import party_table
 import clockwork
 import harvest_festival
 import thanksgiving_decor
+import thanksgiving_homestead
+import thanksgiving_woodland
+import thanksgiving_town
+import thanksgiving_toys
+import thanksgiving_dishes
 import orchard_harvest
 import pumpkin_patch
 import adam_ondi_ahman
@@ -2921,6 +2926,7 @@ def itemless_blocks():
     """Blocks without an item of their own: the item that plants them (or the pumpkins they drop) stands in for them."""
     return (crop_blocks() + stem_blocks() + [CRANBERRY["block"], CHESTNUT["sapling"], CIDER["tree"]["sapling"]] + giant_blocks()
             + [potted(m) for m in MUMS] + [potted(WOLFSBANE["block"])] + [MAZE["finish"], MAZE["corn"]] + plants.itemless() + list(feasts.PLACED_PIES) + menu.blocks() + rice.itemless() + soil.itemless() + orchard.itemless() + garden.itemless()
+            + thanksgiving_dishes.blocks()
             + herbs.itemless() + lairs.itemless_blocks() + adam_ondi_ahman.blocks_registered())
 
 
@@ -2936,7 +2942,8 @@ def all_blocks():
             + regatta_blocks() + festivity_blocks() + night_blocks() + decor1_blocks() + decor2_blocks() + decor3_blocks()
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
             + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
-            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.blocks() + [WOLFSBANE["block"], potted(WOLFSBANE["block"])] + WEREWOLF_RUGS + midway.blocks() + ferris_wheel.blocks() + hot_air_balloon.blocks() + plants.blocks() + decor15.blocks() + decor16.blocks() + decor17.blocks() + decor18.blocks() + decor19.blocks() + decor20.blocks() + thanksgiving_decor.blocks() + pumpkin_patch.display_blocks() + pumpkin_patch.extra_blocks() + orchard_harvest.blocks() + barn_tools.blocks() + fall_garden.blocks() + hearth.blocks() + haunted_midway.blocks() + front_yard.blocks() + party_table.blocks() + clockwork.blocks() + harvest_festival.blocks() + kitchen.blocks() + feasts.blocks() + menu.blocks() + rice.blocks() + soil.blocks() + orchard.blocks() + cakes.blocks() + pies_and_tarts.blocks() + milkshakes.blocks() + garden.blocks()
+            + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.blocks() + [WOLFSBANE["block"], potted(WOLFSBANE["block"])] + WEREWOLF_RUGS + midway.blocks() + ferris_wheel.blocks() + hot_air_balloon.blocks() + plants.blocks() + decor15.blocks() + decor16.blocks() + decor17.blocks() + decor18.blocks() + decor19.blocks() + decor20.blocks() + thanksgiving_decor.blocks() + thanksgiving_homestead.blocks() + thanksgiving_woodland.blocks() + thanksgiving_town.blocks() + thanksgiving_toys.blocks() + pumpkin_patch.display_blocks() + pumpkin_patch.extra_blocks() + orchard_harvest.blocks() + barn_tools.blocks() + fall_garden.blocks() + hearth.blocks() + haunted_midway.blocks() + front_yard.blocks() + party_table.blocks() + clockwork.blocks() + harvest_festival.blocks() + kitchen.blocks() + feasts.blocks() + menu.blocks() + rice.blocks() + soil.blocks() + orchard.blocks() + cakes.blocks() + pies_and_tarts.blocks() + milkshakes.blocks() + garden.blocks()
+            + thanksgiving_dishes.blocks()
             + herbs.blocks() + spices.blocks() + lairs.blocks() + vesperine.blocks() + pumpkin_king.blocks()
             + adam_ondi_ahman.blocks_registered())
 
@@ -2949,7 +2956,8 @@ def all_items():
             + decor2_items() + decor3_items() + decor4_items() + decor5_items() + decor6_items() + decor7_items() + decor8_items()
             + decor9_items() + decor10_items() + decor11_items() + decor12_items() + decor13_items() + decor14_items()
             + chandlery_items() + cider_items() + pantry_items() + firework_items()
-            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + [WOLFSBANE["block"], WEREWOLF["dagger"], WEREWOLF["arrow"]] + WEREWOLF_PELTS + WEREWOLF_RUGS + [SQUIRRELS["acorn"]] + midway.items() + ferris_wheel.items() + pinata.items() + hot_air_balloon.items() + leaf_blower.items() + plants.items() + decor15.items() + decor16.items() + decor17.items() + decor18.items() + decor19.items() + decor20.items() + thanksgiving_decor.items() + pumpkin_patch.display_blocks() + pumpkin_patch.extra_blocks() + orchard_harvest.blocks() + barn_tools.items() + fall_garden.blocks() + fall_garden.items() + hearth.items() + haunted_midway.items() + front_yard.items() + party_table.items() + clockwork.items() + harvest_festival.items() + kitchen.items() + feasts.items() + rice.items() + soil.items() + orchard.items() + [i for i in cakes.items() if i not in cakes.ITEMS] + pies_and_tarts.items() + garden.items()
+            + lantern_items() + feast_blocks() + [MAZE["gate"]] + ghost_items() + face_paint_items() + candy_items() + foraging_items() + bat_items() + knitting_items() + pie_items() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.items() + [h["item"] for h in HEX["brews"].values()] + [BROOMSTICK["item"]] + [WOLFSBANE["block"], WEREWOLF["dagger"], WEREWOLF["arrow"]] + WEREWOLF_PELTS + WEREWOLF_RUGS + [SQUIRRELS["acorn"]] + midway.items() + ferris_wheel.items() + pinata.items() + hot_air_balloon.items() + leaf_blower.items() + plants.items() + decor15.items() + decor16.items() + decor17.items() + decor18.items() + decor19.items() + decor20.items() + thanksgiving_decor.items() + thanksgiving_homestead.items() + thanksgiving_woodland.items() + thanksgiving_town.items() + thanksgiving_toys.items() + pumpkin_patch.display_blocks() + pumpkin_patch.extra_blocks() + orchard_harvest.blocks() + barn_tools.items() + fall_garden.blocks() + fall_garden.items() + hearth.items() + haunted_midway.items() + front_yard.items() + party_table.items() + clockwork.items() + harvest_festival.items() + kitchen.items() + feasts.items() + rice.items() + soil.items() + orchard.items() + [i for i in cakes.items() if i not in cakes.ITEMS] + pies_and_tarts.items() + garden.items()
+            + thanksgiving_dishes.items()
             + herbs.items() + spices.items() + lairs.items() + vesperine.items() + tatterlace.items()
             + yeti_king.items() + cinder_tyrant.items() + mire_hag.items() + crypt_lich.items()
             + iron_dreadnought.items() + alpha_werewolf.items() + pumpkin_king.items() + hessian_horseman.items()
@@ -3098,6 +3106,12 @@ SHAPELESS += harvest_festival.SHAPELESS
 SHAPELESS += decor20.SHAPELESS
 # Thanksgiving decorations (tools/thanksgiving_decor.py; docs/features/thanksgiving-decor.md).
 SHAPELESS += thanksgiving_decor.SHAPELESS
+# The Thanksgiving homestead and feast room (tools/thanksgiving_homestead.py; docs/features/thanksgiving-homestead.md).
+SHAPELESS += thanksgiving_homestead.SHAPELESS
+# Thanksgiving woodland harvest crafts (tools/thanksgiving_woodland.py; docs/features/thanksgiving-woodland-crafts.md).
+SHAPELESS += thanksgiving_woodland.SHAPELESS
+# Thanksgiving harvest town details (tools/thanksgiving_town.py; docs/features/thanksgiving-town-details.md).
+SHAPELESS += thanksgiving_town.SHAPELESS
 
 # Kitchen and cooking expansion, slice 1: the Farmhouse Kitchen (tools/kitchen.py).
 ITEMS.update(kitchen.ITEMS)

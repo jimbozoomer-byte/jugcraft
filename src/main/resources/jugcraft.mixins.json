@@ -4,6 +4,9 @@
   "package": "io.github.jimbozoomer.jugcraft.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
+    "PoweredEquipmentEquipMixin",
+    "DrillMiningServerMixin",
+    "PoweredUpgradeRecipeMixin",
     "ArcaneBucketRemainderMixin",
     "ArcaneDroppedMatterMixin",
     "ArcaneAquaticMiningMixin",
@@ -73,6 +76,8 @@
     "JigsawPlacementMixin",
     "LinearInterpolationHandlerInvoker",
     "MultiNoiseBiomeSourceMixin",
+    "ClimateParameterListAccess",
+    "ClimateRTreeAccess",
     "NetherBiomeBootstrapMixin",
     "OverworldBiomeBuilderMixin",
     "PoolElementStructurePieceMixin",
@@ -177,7 +182,14 @@
     "OwnerSlidingCarrierMixin",
     "OwnerHangingSignModelMixin",
     "BotanicalDropCooldownMixin",
-    "OwnerChatDeliveryMixin"
+    "OwnerChatDeliveryMixin",
+    "PharmacologyAttackMixin",
+    "PharmacologySprintMixin",
+    "PharmacologySwimMixin",
+    "PharmacologyDamageMixin",
+    "PharmacologyFoodMixin",
+    "PharmacologyExhaustionMixin",
+    "HorseLineageMixin"
   ],
   "injectors": {
     "defaultRequire": 1

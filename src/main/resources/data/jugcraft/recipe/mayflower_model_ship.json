@@ -1,0 +1,22 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "#minecraft:planks",
+    "#minecraft:wooden_slabs",
+    "minecraft:stick",
+    "minecraft:stick",
+    "minecraft:paper",
+    "minecraft:string"
+  ],
+  "result": {
+    "id": "jugcraft:mayflower_model_ship",
+    "count": 1
+  }
+}

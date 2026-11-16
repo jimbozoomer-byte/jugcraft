@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jugcraft:block/mayflower_model_ship"
+    },
+    "facing=east": {
+      "model": "jugcraft:block/mayflower_model_ship",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jugcraft:block/mayflower_model_ship",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jugcraft:block/mayflower_model_ship",
+      "y": 270
+    }
+  }
+}

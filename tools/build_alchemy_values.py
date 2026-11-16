@@ -3,6 +3,8 @@
 No upstream code is used. Unknown items remain accepted at the explicitly labelled
 one-essence fallback; they are never presented as historical EE values. Run after
 recipe generation. Runtime adds the same fallback for optional registered items.
+Use --affected-item for a recipe-yield edit: only lower existing component/consumer
+prices, keeping unrelated ingredient prices and catalogue membership unchanged.
 """
 import argparse
 from collections import Counter
@@ -13,7 +15,29 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 
-def build(jar):
+def recipe_consumers(edges, roots):
+    affected=set(roots)
+    while True:
+        consumers={out for _,inputs,out,_ in edges if any(options & affected for options in inputs)}
+        added=consumers-affected
+        if not added:break
+        affected.update(added)
+    return affected
+
+
+def limit_recalculation(existing, records, edges, roots):
+    """Lower existing prices affected by a recipe edit without enabling unrelated catalogue items."""
+    if set(roots)-set(existing):raise ValueError('Affected items must already be catalogued')
+    affected=recipe_consumers(edges,roots)
+    result=dict(existing)
+    for item in affected & existing.keys() & records.keys():
+        before,after=existing[item],records[item]
+        if Fraction(after['numerator'],after['denominator']) <= Fraction(before['numerator'],before['denominator']):
+            result[item]=after
+    return result
+
+
+def build(jar, affected_items=None):
     seeds = json.loads((ROOT / 'tools/data/alchemy_value_seeds.json').read_text())
     tags, recipes = {}, {}
     def take(name, data):
@@ -74,14 +98,29 @@ def build(jar):
     for ore in ('quartz_ore', 'deepslate_quartz_ore'):
         values['jugcraft:'+ore] = 4 * values['minecraft:quartz']
         origins['jugcraft:'+ore] = 'local quartz mining/Fortune accounting'
-    # Fishing salvage contains recoverable metal. A one-essence fallback for
-    # these roots would cheapen every nugget-derived recipe while ingots stay fixed.
     for metal in ('iron', 'gold', 'copper'):
-        values['minecraft:'+metal+'_nugget'] = values['minecraft:'+metal+'_ingot'] / 9
-        origins['minecraft:'+metal+'_nugget'] = 'local metal compression accounting'
-    for item, metal, count in (('aquatic_tin_can', 'iron', 7), ('aquatic_goldfish', 'gold', 1)):
-        values['jugcraft:'+item] = count * values['minecraft:'+metal+'_nugget']
-        origins['jugcraft:'+item] = 'local fishing salvage accounting'
+        ingot = 'minecraft:' + metal + '_ingot'
+        if ingot in values:
+            values['minecraft:'+metal+'_nugget'] = values[ingot] / 9
+            origins['minecraft:'+metal+'_nugget'] = 'local metal compression accounting'
+    # Fishing loot can be reclaimed into historical metals: one discarded tin
+    # smelts/blasts into seven iron nuggets, and one goldfish crafts into a gold
+    # nugget. Price these otherwise uncraftable roots at their recoverable metal,
+    # rather than letting a one-essence fallback devalue nuggets below their
+    # reversible nine-nuggets-per-ingot conversion. The recipe-count regression
+    # requires this accounting to be reviewed if either salvage yield changes.
+    for item, metal, nuggets in (('aquatic_tin_can', 'iron', 7), ('aquatic_goldfish', 'gold', 1)):
+        if not (ROOT/'src/main/resources/assets/jugcraft/items'/(item+'.json')).is_file():
+            continue
+        values['jugcraft:'+item] = nuggets * values['minecraft:'+metal+'_ingot'] / 9
+        origins['jugcraft:'+item] = f'local aquatic salvage accounting ({nuggets} {metal} nugget yield)'
+    # Keep the established one-essence crop budget before resolving decorative
+    # recipes. Seed/crop cycles otherwise leave these roots unresolved, and the
+    # alphabetical fallback loop can lock a crafted basket at 1 before its flax
+    # receives a value. This preserves crop prices while deriving the whole prop.
+    for crop in ('corn', 'flax', 'cranberries', 'onion', 'dried_herbs'):
+        values['jugcraft:' + crop] = Fraction(1)
+        origins['jugcraft:' + crop] = 'fallback (balance pending)'
     locked=set(values)
     edges=[]
     for rid,r in recipes.items():
@@ -104,6 +143,20 @@ def build(jar):
         if any(any(s.endswith('_bucket') or s=='minecraft:honey_bottle' for s in opts) for opts in ingredients):continue
         edges.append((rid,ingredients,out['id'],out.get('count',r.get('count',1))))
     local_items={'jugcraft:'+p.stem for p in (ROOT/'src/main/resources/assets/jugcraft/items').glob('*.json')}
+    target=ROOT/'src/main/resources/data/jugcraft/alchemy/values.json'
+    if affected_items:
+        existing=json.loads(target.read_text(encoding='utf-8'))['items']
+        if set(affected_items)-set(existing):raise ValueError('Affected items must already be catalogued')
+        affected=recipe_consumers(edges,affected_items)
+        # Keep the current prices of all unrelated ingredients and do not enable uncatalogued items.
+        values={k:Fraction(v['numerator'],v['denominator']) for k,v in existing.items()}
+        origins={k:v['source'] for k,v in existing.items()}
+        # A consumer walk can reach a seeded material through a recycling recipe.
+        # That does not authorize revaluing the historical roots (e.g. iron/gold)
+        # or their entire downstream economy. Preserve their existing anchors.
+        locked=(set(values)-affected) | {k for k,v in existing.items() if v['source'].startswith('reference')}
+        edges=[edge for edge in edges if edge[2] in affected and edge[2] in existing]
+        local_items=set(values)
     # Root materials without a known historical value receive an explicit local base
     # assignment. Craftable products inherit actual ingredient costs, not that fallback.
     outputs={edge[2] for edge in edges}
@@ -126,21 +179,50 @@ def build(jar):
         pending=local_items-set(values)
         root=min(pending,key=lambda s:(0 if s.endswith(('_ingot','_gem','_dust','_planks')) else 1 if not s.endswith(('_block','_nugget','_slab')) else 2,s))
         values[root]=Fraction(1);origins[root]='fallback (balance pending)';locked.add(root);propagate()
+    # Independent rare-earth outputs must fit the input budget even when all
+    # three rolls succeed. Allocate one quarter of the mixed feed to each
+    # named unit: one Nd + two Ce + one Y spends the whole mixed-oxide value.
+    # Do not price only the average drop: lucky batches must not mint essence.
+    mixed_oxide = values.get('jugcraft:rare_earth_oxide', Fraction(1))
+    for material in ('neodymium_oxide', 'cerium_oxide', 'yttrium_oxide'):
+        item = 'jugcraft:' + material
+        if item in local_items:
+            values[item] = mixed_oxide / 4
+            origins[item] = 'local rare-earth maximum coproduct allocation'
+            locked.add(item)
+    # Fluid-machine recipes are not derived above, so every zirconia form would keep
+    # the one-essence fallback while finishing turns one fired blank into two inserts.
+    # Price each form at its two-insert yield: finishing, firing, conditioning and the
+    # short sand/concentrate routes then spend at least the value they return.
+    insert = values.get('jugcraft:zirconia_insert', Fraction(1))
+    for material in ('zirconia_precursor', 'zirconia_powder', 'zirconia_charge',
+                     'zirconia_blank', 'fired_zirconia_blank'):
+        item = 'jugcraft:' + material
+        if item in local_items:
+            values[item] = 2 * insert
+            origins[item] = 'local zirconia finishing accounting'
+            locked.add(item)
+    propagate()
     # Every local item definition has a value, including uncraftable decorative assets.
     for key in local_items:
         if key not in values:values[key]=Fraction(1);origins[key]='fallback (balance pending)'
     # New botanical dye routes can lower brown dye below its historical seed.
     # Husk conversion must track that final value, not the pre-propagation 64.
-    values['jugcraft:walnut_husk']=values['minecraft:brown_dye']
-    origins['jugcraft:walnut_husk']='local walnut dye accounting (resolved brown dye)'
+    if not affected_items or 'jugcraft:walnut_husk' in affected:
+        values['jugcraft:walnut_husk']=values['minecraft:brown_dye']
+        origins['jugcraft:walnut_husk']='local walnut dye accounting (resolved brown dye)'
     propagate()
     records={k:{'numerator':v.numerator,'denominator':v.denominator,'source':origins[k]} for k,v in sorted(values.items())}
-    target=ROOT/'src/main/resources/data/jugcraft/alchemy/values.json'
+    if affected_items:
+        records=limit_recalculation(existing,records,edges,affected_items)
+        print(f'Scoped recalculation: {sum(records[k] != existing[k] for k in existing)} existing records updated; catalogue membership unchanged')
     target.parent.mkdir(parents=True,exist_ok=True)
     target.write_text(json.dumps({'schema':1,'fallback':1,'items':records},indent=2)+'\n')
-    print(f'{len(records)} values: {Counter("fallback" if s.startswith("fallback") else "recipe" if s.startswith("recipe") else "reference" for s in origins.values())}')
+    print(f'{len(records)} values: {Counter("fallback" if r["source"].startswith("fallback") else "recipe" if r["source"].startswith("recipe") else "reference" for r in records.values())}')
     return records
 
 if __name__=='__main__':
     parser=argparse.ArgumentParser();parser.add_argument('--minecraft-jar',required=True)
-    build(parser.parse_args().minecraft_jar)
+    parser.add_argument('--affected-item',action='append',help='Limit reductions to this existing item and its recipe consumers; repeat for multiple items')
+    args=parser.parse_args()
+    build(args.minecraft_jar,args.affected_item)

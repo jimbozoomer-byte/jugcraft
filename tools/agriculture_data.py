@@ -80,6 +80,11 @@ import party_table_data
 import clockwork_data
 import harvest_festival_data
 import thanksgiving_decor_data
+import thanksgiving_homestead_data
+import thanksgiving_woodland_data
+import thanksgiving_town_data
+import thanksgiving_toys_data
+import thanksgiving_dishes_data
 import pumpkin_patch_data
 import ofrenda_data
 import graveyard_data
@@ -330,6 +335,11 @@ def assets(root, write, lang):
     clockwork_data.assets(root, write, lang)
     harvest_festival_data.assets(root, write, lang)
     thanksgiving_decor_data.assets(root, write, lang)
+    thanksgiving_homestead_data.assets(root, write, lang)
+    thanksgiving_woodland_data.assets(root, write, lang)
+    thanksgiving_town_data.assets(root, write, lang)
+    thanksgiving_toys_data.assets(root, write, lang)
+    thanksgiving_dishes_data.assets(root, write, lang)
     lair_data.assets(root, write, lang)
     adam_ondi_ahman_data.assets(root, write, lang)
     vesperine_data.assets(root, write, lang)
@@ -508,6 +518,11 @@ def loot(data, write):
     clockwork_data.loot(out, write)
     harvest_festival_data.loot(out, write)
     thanksgiving_decor_data.loot(out, write)
+    thanksgiving_homestead_data.loot(out, write)
+    thanksgiving_woodland_data.loot(out, write)
+    thanksgiving_town_data.loot(out, write)
+    thanksgiving_toys_data.loot(out, write)
+    thanksgiving_dishes_data.loot(out, write)
     lair_data.loot(out, write)
     adam_ondi_ahman_data.loot(out, write)
     vesperine_data.loot(out, write)
@@ -611,6 +626,8 @@ def recipes(out, write):
     pumpkin_king_data.recipes(out, write, conditions)
     cydonian_sentinel_data.recipes(out, write, conditions)
     kitchen_data.recipes(out, write, conditions)
+    thanksgiving_toys_data.recipes(out, write, conditions)
+    thanksgiving_dishes_data.recipes(out, write, conditions)
 
 
 # ---------------------------------------------------------------- tags
@@ -661,6 +678,10 @@ def tags(tags):
     clockwork_data.tags(tags)
     harvest_festival_data.tags(tags)
     thanksgiving_decor_data.tags(tags)
+    thanksgiving_homestead_data.tags(tags)
+    thanksgiving_woodland_data.tags(tags)
+    thanksgiving_town_data.tags(tags)
+    thanksgiving_toys_data.tags(tags)
     lair_data.tags(tags)
     adam_ondi_ahman_data.tags(tags)
     vesperine_data.tags(tags)
@@ -714,6 +735,7 @@ def tags(tags):
     kitchen_data.tags(tags)
     feasts_data.tags(tags)
     menu_data.tags(tags)
+    thanksgiving_dishes_data.tags(tags)
     rice_data.tags(tags)
     soil_data.tags(tags)
     orchard_data.tags(tags)

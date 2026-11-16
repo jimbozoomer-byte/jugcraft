@@ -198,12 +198,16 @@ def assets():
     arms.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import arms_variants
     arms_variants.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import thanksgiving_weapons  # Thanksgiving weapons (docs/features/thanksgiving-weapons.md): models, item definitions, recipes, lang
+    thanksgiving_weapons.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import arms_motion
     arms_motion.write_all(write, ASSETS)
     import grapple
     grapple.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import field_chemistry
     field_chemistry.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import pharmacology
+    pharmacology.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import construction
     construction.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import electroplating
@@ -249,6 +253,8 @@ def assets():
     raiders.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import zeppelin
     zeppelin.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import pirate_ship
+    pirate_ship.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import mech
     mech.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import landship
@@ -322,6 +328,10 @@ def assets():
     cursed_mirror.write_all(write, ASSETS, DATA / MOD, lang, self_drop)
     import chima_data
     chima_data.write_all(write, RES, lang)
+    import pegasus_data
+    pegasus_data.write_all(write, RES, lang)
+    import horse_breeds_data
+    horse_breeds_data.write_all(write, RES, lang)
     import vanilla_logs
     vanilla_logs.write_all(write, ASSETS)
     write(ASSETS / "lang" / "en_us.json", dict(sorted(lang.items())))
@@ -1323,6 +1333,10 @@ def recipes():
         recipe = shaped(MACHINE_FEATURE, pattern, key, result, count)
         recipe["fabric:load_conditions"] = condition(MACHINE_FEATURE) + condition("crude_oil")
         write(out / f"{name}.json", recipe)
+    # The unprepared starter circuit is also craftable before building an assembler.
+    starter_circuit = shapeless(MACHINE_FEATURE, [rid("silicon"), "#c:ingots/copper", "#c:ingots/tin"], "basic_circuit", 1)
+    starter_circuit["fabric:load_conditions"] = condition(MACHINE_FEATURE) + condition("silicon") + condition("tin")
+    write(out / "basic_circuit.json", starter_circuit)
     machine_recipe_files(out)
     import petro
     for kind, name, data in petro.fluid_recipe_files(condition):
@@ -1675,6 +1689,12 @@ def tags():
     for crop in tags.entries[("item", f"{MOD}:fermentable")]:
         if crop not in {rid("lemon"), rid("orange")}:
             tags.add("item", f"{MOD}:compact_fermentable", crop)
+    import pharmacology
+    tags.add("block", "minecraft:mineable/pickaxe", rid("dream_study_plinth"))
+    for crop in pharmacology.blocks():
+        if crop.endswith('_crop'):
+            tags.add("block", "minecraft:crops", rid(crop))
+            tags.add("block", "minecraft:maintains_farmland", rid(crop))
     tags.write()
 
 
@@ -1922,6 +1942,8 @@ def main():
         write(instrument_tag, json.loads(instrument_tag.read_text(encoding='utf-8')))
     language = json.loads((ASSETS / "lang/en_us.json").read_text(encoding="utf-8"))
     language.update(spellbook_language)
+    import powered_equipment
+    language.update(powered_equipment.LANG)
     write(ASSETS / "lang/en_us.json", language)
     # Imported walls/fences are generated after the shared pass and need the same connections.
     import diagonal_connections
@@ -1937,6 +1959,14 @@ def main():
             WRITTEN_RESOURCES.add(path.relative_to(RES).as_posix())
         newest_building.write(path, data)
     newest_building.generate(write_imported_building)
+    import newest_ribbits
+    newest_ribbits.import_data_resources(writer=write)
+    import newest_supplementaries
+    newest_supplementaries.write_native_recipes(write)
+    import newest_acquisition_recipes
+    newest_acquisition_recipes.main(writer=write)
+    import acquisition_repairs
+    acquisition_repairs.generate(write)
     diagonal_connections.write_all(write, ASSETS, RES / "assets/minecraft")
     import board_game_data
     board_game_data.generate(write)
@@ -1954,6 +1984,15 @@ def main():
     newest_model_finishing.generate(write)
     import model_atlas
     model_atlas.generate(write)
+    # Keep native player grips after both authored and owner-library model writers.
+    import held_equipment
+    held_equipment.generate()
+    # Separately authored importers also contribute to these shared resources;
+    # preserve their enumerated additions after the final tag and atlas writers.
+    owner_resource_patches.apply(phase='final')
+    # Finished pharmacy maps own only their named items after the final shared model passes.
+    import pharmacy_item_art
+    pharmacy_item_art.write_all(write, ASSETS)
     from generated_resource_cleanup import prune
     prune(RES, previous, WRITTEN_RESOURCES)
     # Include finished server recipes after removing obsolete generated recipes.

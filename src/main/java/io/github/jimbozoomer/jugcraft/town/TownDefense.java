@@ -12,6 +12,24 @@ public final class TownDefense {
     public static final int RANGE = 250;
     private TownDefense() {}
 
+    /** A bounded, reachable firing/meeting post just inside the authored gate.
+     * Keep the opponent identity while rerouting, never carve a shortcut through
+     * the wall or accept a partial path ending at it. Three lanes reduce crowding.
+     */
+    public static net.minecraft.world.level.pathfinder.Path gatePath(Townsfolk guard,
+            net.minecraft.core.BlockPos origin, Vec3 enemy) {
+        var gate = io.github.jimbozoomer.jugcraft.raiders.CityRaidRoute.nearest(origin, enemy);
+        int preferred = Math.floorMod(guard.getUUID().hashCode(), 3) - 1;
+        for (int lane : preferred == 0 ? new int[]{0,-1,1} : new int[]{preferred,0,-preferred}) {
+            var post = gate.passage().offset(-gate.dx()*4 + gate.dz()*lane, 0, -gate.dz()*4 - gate.dx()*lane);
+            if (!guard.level().isLoaded(post)) continue;
+            var path = guard.getNavigation().createPath(post, 0);
+            if (path != null && path.canReach() && path.getEndNode() != null
+                    && path.getEndNode().asBlockPos().equals(post)) return path;
+        }
+        return null;
+    }
+
     public static LivingEntity target(ServerLevel level, net.minecraft.world.entity.Entity shooter, Vec3 from) {
         return target(level, shooter, from, candidate -> true);
     }

@@ -1,0 +1,39 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "jugcraft:chemical_reaction",
+  "capability": "jugcraft:controlled_release",
+  "items": [
+    {
+      "ingredient": "jugcraft:modafinil_active",
+      "count": 4
+    },
+    {
+      "ingredient": "jugcraft:advanced_release_matrix",
+      "count": 4
+    }
+  ],
+  "fluids": [
+    {
+      "fluid": "minecraft:water",
+      "amount": 500
+    }
+  ],
+  "results": [
+    {
+      "id": "jugcraft:modafinil_xr_core",
+      "count": 4
+    }
+  ],
+  "tool": "jugcraft:release_control_die",
+  "energy_per_tick": 128,
+  "time": 300
+}

@@ -35,6 +35,9 @@ public final class AircraftClient {
             }
         });
         JugcraftAircraft.TYPES.values().forEach(t->EntityRendererRegistry.register(t,AircraftRenderer::new));
+        // The pilot's flight help with the player's own key bindings, laid out to fit the GUI (AircraftHud).
+        net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry.attachElementAfter(
+            net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements.HOTBAR,io.github.jimbozoomer.jugcraft.Jugcraft.id("aircraft_help"),AircraftHud::render);
         JugcraftAircraft.MENUS.values().forEach(t->MenuScreens.register(t,AircraftScreen::new));
         ClientTickEvents.END_CLIENT_TICK.register(AircraftSounds::tick);
         ClientTickEvents.END_CLIENT_TICK.register(c->{

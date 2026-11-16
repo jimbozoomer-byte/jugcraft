@@ -3,6 +3,7 @@ package io.github.jimbozoomer.jugcraft.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import io.github.jimbozoomer.jugcraft.agriculture.HotAirBalloon;
+import io.github.jimbozoomer.jugcraft.aircraft.BalloonAttitude;
 import java.util.Map;
 import java.util.WeakHashMap;
 import net.minecraft.client.renderer.SubmitNodeCollector;
@@ -71,10 +72,11 @@ public class HotAirBalloonRenderer extends EntityRenderer<HotAirBalloon, HotAirB
 		glow[0] = state.burning ? Math.min(1.0F, glow[0] + dt * 0.25F) : Math.max(0.0F, glow[0] - dt * 0.05F);
 		state.glow = glow[0];
 		state.flicker = 0.85F + 0.15F * Mth.sin(now * 2.3F) * Mth.sin(now * 0.7F + 1.0F);
-		// The envelope sways gently on its cables, more as it moves.
+		// The envelope sways gently on its cables, and leans the way it drifts: both in the world's frame (BalloonAttitude).
 		Vec3 motion = balloon.getDeltaMovement();
-		state.swayX = 0.8F * Mth.sin(now * 0.031F) + (float) Mth.clamp(motion.z * 20.0, -3.0, 3.0);
-		state.swayZ = 0.8F * Mth.sin(now * 0.023F + 1.7F) - (float) Mth.clamp(motion.x * 20.0, -3.0, 3.0);
+		float[] lean = BalloonAttitude.lean(motion.x, motion.z);
+		state.swayX = 0.8F * Mth.sin(now * 0.031F) + lean[0];
+		state.swayZ = 0.8F * Mth.sin(now * 0.023F + 1.7F) + lean[1];
 		Level level = balloon.level();
 		int light = LightCoordsUtil.getLightCoords(level, BlockPos.containing(balloon.getX(),
 				balloon.getY() + HotAirBalloon.THROAT + HotAirBalloon.ENVELOPE_HEIGHT / 2, balloon.getZ()));
@@ -93,7 +95,7 @@ public class HotAirBalloonRenderer extends EntityRenderer<HotAirBalloon, HotAirB
 		QuadModel flame = DecorQuads.get("balloon_flame");
 		QuadModel glow = DecorQuads.get("balloon_glow_pumpkin");
 		pose.pushPose();
-		pose.rotateDegrees(Axis.YP, 180.0F - state.yaw);
+		pose.rotate(BalloonAttitude.basket(state.yaw));
 		if (basket != null) {
 			basket.submit(pose, collector, state.lightCoords);
 		}
@@ -105,11 +107,11 @@ public class HotAirBalloonRenderer extends EntityRenderer<HotAirBalloon, HotAirB
 			flame.submit(pose, collector, LightCoordsUtil.FULL_BRIGHT);
 			pose.popPose();
 		}
-		// The envelope, swaying about its throat.
+		pose.popPose();
+		// The envelope, swaying about its throat: the sway is in the world's frame, so it comes before the basket's facing.
 		pose.pushPose();
 		pose.translate(0.0F, (float) HotAirBalloon.THROAT, 0.0F);
-		pose.rotateDegrees(Axis.XP, state.swayX);
-		pose.rotateDegrees(Axis.ZP, state.swayZ);
+		pose.rotate(BalloonAttitude.envelope(state.yaw, state.swayX, state.swayZ));
 		pose.translate(0.0F, (float) -HotAirBalloon.THROAT, 0.0F);
 		if (envelope != null) {
 			envelope.submit(pose, collector, state.envelopeLight);
@@ -117,7 +119,6 @@ public class HotAirBalloonRenderer extends EntityRenderer<HotAirBalloon, HotAirB
 		if (state.kind == HotAirBalloon.Kind.PUMPKIN && state.glow > 0.05F && glow != null) {
 			glow.submit(pose, collector, LightCoordsUtil.FULL_BRIGHT);
 		}
-		pose.popPose();
 		pose.popPose();
 		if (state.rope != null) {
 			drawRope(state, pose, collector);

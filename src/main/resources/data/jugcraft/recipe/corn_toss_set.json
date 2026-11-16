@@ -1,0 +1,23 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "#minecraft:wooden_slabs",
+    "#minecraft:wooden_slabs",
+    "minecraft:stick",
+    "jugcraft:corn",
+    "jugcraft:corn",
+    "minecraft:red_dye",
+    "minecraft:string"
+  ],
+  "result": {
+    "id": "jugcraft:corn_toss_set",
+    "count": 1
+  }
+}

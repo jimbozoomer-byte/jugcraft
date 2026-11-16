@@ -505,6 +505,9 @@ BUILDERS = {bt.QUERN["block"]: (quern, 64), bt.CHURN["block"]: (churn, 64), bt.R
             bt.CRIB["block"]: (crib, 128), bt.PULLEY["block"]: (pulley, 64), bt.BELL["block"]: (bell, 64),
             bt.SACK["block"]: (sack, 64), bt.CAN["block"]: (milk_can, 64), bt.TOOL_RACK["block"]: (tool_rack, 64),
             bt.TROUGH["block"]: (trough, 64), bt.LANTERN["block"]: (lantern, 64)}
+# The Butter Churn refined by the Thanksgiving homestead (docs/features/thanksgiving-homestead.md): a tapered, three-hooped
+# stave churn with lug staves and a splash cup. Same ID, shape, states, working and dasher (its `runner` model).
+BUILDERS[bt.CHURN["block"]] = (lambda: __import__("thanksgiving_homestead_data").churn(), 64)
 
 
 def build(block):

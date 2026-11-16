@@ -40,7 +40,11 @@ ABOUT = {
                      "socket, on the outer side of its lower right block.",
     "metal_press": "Presses one ingot into one plate. Four plates craft a gear.",
     "wire_drawer": "Draws one ingot into three wires.",
-    "circuit_assembler": "Assembles circuits from up to three ingredients, in any slots.",
+    "circuit_assembler": "Assembles circuits from up to three ingredients, in any slots. "
+                         "Basic: one silicon, one copper ingot and one tin ingot make one circuit. "
+                         "Use three copper wire instead of copper, or solder instead of tin, for two; both make four. "
+                         "Advanced: two basic circuits, one silver ingot and one invar ingot make one. "
+                         "Three silver wire instead of silver, or an invar plate instead of invar, make two; both make four.",
     "geothermal_generator": "Two blocks wide. Burns lava from its tank (buckets, pumps or pipes): one bucket lasts 1,000 ticks.",
     "wind_turbine": "Nine blocks tall with a seven-block rotor. The higher it stands and the worse the weather, the more it "
                     "makes, up to 72 JE/t (twice that in a thunderstorm). The rotor needs a clear 7x7 square in front of "
@@ -81,7 +85,10 @@ ABOUT = {
                            "again with the same metal to repair; a different metal is refused.",
     "hydroponic_bay": "Grows a seed or cutting in nutrient solution under grow lights: no soil, sunlight or farmland, "
                       "so it works underground, in the Nether or the End. A harvest every 30 seconds uses 100 mB of "
-                      "solution (a fertilizer in a bucket of water, in the chemical reactor) and gives the seed back.",
+                      "solution and gives the seed back. It takes only Nutrient Solution, never plain water: dissolve a "
+                      "fertilizer in a bucket of water in the chemical reactor (1,000 mB, ten harvests), then pump it "
+                      "through pipes into any block of the bay, or pour in a Nutrient Solution Bucket. Water sent to it "
+                      "is refused and stays in the pump or bucket.",
     "crop_harvester": "Two blocks tall. Harvests the ripe crops in the 9x9 field in front of it, starting the block in "
                       "front: one crop a second at 24 JE/t. It keeps the drops and plants one of the seeds again, and "
                       "waits when its three result slots are full. Crops on farmland sit at its own height.",
@@ -110,17 +117,18 @@ ABOUT = {
     "pneumatic_extractor": "Pulls 16 items every 8 ticks from what it faces and pushes them out of its other sides. A "
                            "redstone signal pauses it.",
     "item_sorter": "Takes only the items in its 9-slot filter, and puts them into the inventory it faces.",
-    "mining_drill": "Runs on JE instead of wearing out: 60 JE a block, 100,000 JE when full. Mines everything a "
+    "mining_drill": "Runs on JE instead of wearing out: 60 JE a block, 250,000 JE when full. Mines everything a "
                     "pickaxe or shovel does, faster than netherite. Sneak and use it to switch mode: one block, a 3x3 "
                     "square, or a whole ore vein. Empty, it mines like a bare hand.",
     "chainsaw": "A JE-powered axe that also cuts leaves: 40 JE a block. Cutting a log fells the whole tree above it; "
-                "sneak to cut one log.",
-    "rocket_pack": "Wear it and hold jump in the air to fly, 50 JE a tick (200,000 JE when full). Landing is safe while "
-                   "it fires. On a dedicated server, set allow-flight=true or long hovers get you kicked.",
-    "charging_station": "Two blocks tall. Hang a drill, chainsaw or rocket pack on its cradle and it fills it from "
-                        "cables, 512 JE a tick; take it back with an empty hand. Its lamp lights while it charges.",
-    **{module: f"{about}. Fit it by using it on a charging station holding the tool; it is used up and stays in "
-                 "the tool." for module, (_, _, about) in UPGRADE_MODULES.items()},
+                "sneak to cut one log. Shift-use cycles tree, single-log and leaf-clearing modes. Leaf clearing costs 10 JE/block.",
+    "rocket_pack": "Wear it and hold jump in the air to fly, 20 JE a tick (200,000 JE when full). Landing is safe while "
+                   "it fires. Shift-use the held pack to choose gentle, cruise or full thrust (all 20 JE/t). On a dedicated server, set allow-flight=true or long hovers get you kicked.",
+    "charging_station": "Right-click either half to open two equipment bays. Each lists its installed modules. "
+                        "Use + to install from your cursor or inventory and - to recover one. The bays fairly share "
+                        "512 JE/t from cables; one item alone receives the full rate. The buffer holds 100,000 JE.",
+    **{module: f"{about}. Open the charging station menu, place the equipment in either bay, then use + to fit "
+                 "a module from your inventory or - to recover one. Discharge before reducing capacity." for module, (_, _, about) in UPGRADE_MODULES.items()},
     "conveyor": "Carries items the way you faced when placing it, 2.5 blocks a second, while rotation drives it. A shaft, "
                 "gearbox or motor on any side drives every conveyor joined to it, for 1 KE per conveyor per tick. Pipes, "
                 "hoppers and machines load it, and so do items dropped on it; at the end items go into the conveyor or "
@@ -200,7 +208,8 @@ ABOUT = {
                         "energy they hold. It uses no power.",
     "lithography_station": "Three wide, two tall and two deep: a cleanroom and an operator's desk with a monitor bank. "
                            "A silicon wafer, two copper wire and 100 mB of sulfuric acid make four microchips, every "
-                           "10 seconds at 192 JE/t. Pipe the acid into its tank.",
+                           "10 seconds at 192 JE/t. Substitute 50 mB of nitric acid for eight microchips in the same time. "
+                           "Pipe the acid into its tank.",
     "lithium_battery_bank": "Three wide, two tall, one deep: six lithium battery modules holding 32,000,000 JE, eight "
                             "capacitor banks. It charges from any side and gives power out of the sockets on its "
                             "front, 16,384 JE/t.",
@@ -715,11 +724,11 @@ def gear_pages():
             "harder. Empty, it is an ordinary bow that shoots your arrows."]},
         {"title": "Powered Exosuit", "icon": f"{MOD}:exosuit_helmet", "text": [
             "Four pieces of armor as strong as netherite that run on JE. Each piece holds "
-            f"{exosuit.CAPACITY:,} JE and charges at a charging station; capacity modules fit.",
+            f"{exosuit.CAPACITY:,} JE and charges at a charging station; two capacity modules double storage each time.",
             "Helmet: night vision whenever it is dark. Chestplate: an energy shield that regrows up to four hearts of "
             "absorption, and a jetpack (hold jump in the air). Leggings: 30% more speed. Boots: no fall damage and a "
             "full-block step.",
-            "Each piece works only while it is charged; a flat piece is plain armor."]},
+            "Boots spend 100 JE per heart of fall damage actually prevented. Shield recovery costs 1,000 JE per point; thrust costs 20 JE/t. Legs spend only during boosted movement. A flat piece is plain armor."]},
         {"title": "Liveries", "icon": f"{MOD}:ronin_livery", "text": [
             "The exosuit comes in Vanguard gunmetal. A Ronin livery at a smithing table, with a piece and red dye, "
             "repaints it crimson and silver, with the Ronin's hat and skirt; the power katana becomes the crimson Ronin "
@@ -763,10 +772,10 @@ def gear_pages():
         {"title": "Medicines", "icon": f"{MOD}:first_aid_kit", "text": [
             "Made in the chemical reactor. First aid kit: two cotton and a soap in bioethanol. Heals four hearts, "
             f"then a {fc.FIRST_AID_COOLDOWN} s wait.",
-            "Antidote: two charcoal and a bottle in lye. Clears poison, wither and every other harmful effect, and "
-            "keeps the good ones (milk clears both).",
-            f"Stimulant: four cocoa beans and a bottle in bioethanol. Speed II and Haste II for "
-            f"{fc.STIMULANT_TICKS // 20} s, with hunger."]},
+            "Antidote: two charcoal and a bottle in lye. Clears its listed vanilla harmful effects and keeps "
+            "benefits (milk clears both). Activated Charcoal handles drug drawbacks.",
+            "Stimulant: four cocoa beans and a bottle in bioethanol. Speed II and Haste II for 60 s, with "
+            "Stimulant Appetite and shared caffeine-family dosing. See Pharmacology for all sustained medicines."]},
     ]
 
 
@@ -818,12 +827,13 @@ def ores_page():
                      "Deposits never replenish. Ordinary iron shortcuts require the legacy configuration option.")
         lines.append(line)
     from mineral_sands import SANDS
+    from mineral_sand_processing import FIRST_STEPS
     for name, info in SANDS.items():
         lines.append(f"{info['display']}: shallow beds in {biome_names(info['biomes'])}. "
                      "Look for surface streaks, then shovel the buried bed or use the prospector and powered Ore Drill. "
                      "Each mineral-sand block is one finite feed unit; Fortune does not increase it. "
-                     "The Ore Drill leaves ordinary sand. Stockpile this feed for future separation/refining; "
-                     "the Deposit Drill and generic ore-doubling recipes do not process it.")
+                     f"The Ore Drill leaves ordinary sand. First step: {FIRST_STEPS[name]}; see Mineral Sand Processing. "
+                     "The Deposit Drill and generic ore-doubling recipes do not process it.")
     return {"title": "Ores", "icon": f"{MOD}:tin_ore",
             "text": ["Jugcraft ores appear in Overworld stone and deepslate. Regional exceptions are listed below:"] + lines}
 
@@ -840,7 +850,9 @@ PROGRESSION = [
         ("coal_generator", "Coal generator"), ("copper_cable", "Copper cable"), ("electric_furnace", "Electric furnace"),
         ("crusher", "Crusher: 2x ore")]),
     ("Workshop", "basic_circuit", "Plates, wires and circuits: the parts every later machine needs.", [
-        "Make plates in the metal press and wire in the wire drawer, then basic circuits.",
+        "Craft one silicon, one copper ingot and one tin ingot into one basic circuit, even in your inventory. "
+        "In the workshop bench or circuit assembler, three copper wire replace copper and solder replaces tin: "
+        "either upgrade makes two circuits, both make four. Prepare plates and wire for better yields.",
         "Store power in a battery box. The pulverizer and ore washer take ore to three ingots each.",
         "Find surface deposits with the prospector and put a deposit drill on them."], [
         ("metal_press", "Metal press"), ("wire_drawer", "Wire drawer"), ("basic_circuit", "Basic circuit"),
@@ -914,6 +926,7 @@ def progression_pages():
 
 
 def build():
+    import pharmacology
     chapters = [
         {"title": "Progression", "icon": f"{MOD}:engineers_handbook", "pages": progression_pages()},
         {"title": "Getting Started", "icon": f"{MOD}:engineers_handbook", "pages": [
@@ -966,6 +979,7 @@ def build():
                                        "circuit_assembler", "arc_furnace_controller", "auto_crafter")]},
         {"title": "Ore Processing", "icon": f"{MOD}:pulverizer", "pages":
             [machine_page(m) for m in ("pulverizer", "ore_washer", "sieve", "sawmill")]},
+        {"title": "Pharmacology", "icon": f"{MOD}:caffeine_drink", "pages": pharmacology.handbook_pages()},
         {"title": "Steel", "icon": f"{MOD}:steel_ingot", "pages":
             [machine_page(m) for m in ("coke_oven", "steel_foundry")]
             + [block_page(b, TOOL_BLOCKS[b]["display"]) for b in TOOL_BLOCKS]
@@ -1078,7 +1092,7 @@ def build():
                 "The synthesis converter joins hydrogen and nitrogen into ammonia, and burns ammonia in oxygen over "
                 "water into nitric acid.",
                 "Ammonia and phosphate make fertilizer (six for two phosphate, against four with sulfuric acid). "
-                "Nitric acid etches microchips with half as much acid as sulfuric."]},
+                "Nitric acid etches eight microchips per wafer with 50 mB of acid; sulfuric makes four with 100 mB."]},
             machine_page("air_separation_unit"),
             machine_page("synthesis_converter"),
             form_page("chemical_infuser"),
@@ -1259,6 +1273,9 @@ def build():
     import ceramics
     chapters.append({"title": "Ceramics and Precision", "icon": "jugcraft:porcelain_insulator",
                      "pages": ceramics.GUIDE_PAGES + [form_page('precision_finisher')]})
+    import mineral_sand_processing
+    chapters.append({'title': 'Mineral Sand Processing', 'icon': 'jugcraft:rare_earth_sand',
+                     'pages': [mineral_sand_processing.start_page(biome_names)] + mineral_sand_processing.GUIDE_PAGES})
     import structural_alloys
     chapters.append({"title": "Stainless and Structural Alloys", "icon": "jugcraft:stainless_steel_ingot",
                      "pages": structural_alloys.GUIDE_PAGES})
@@ -1278,4 +1295,6 @@ def build():
     chapters.insert(1, starter_workshop.chapter())
     import storage_crates
     chapters.insert(2, storage_crates.chapter())
+    import powered_equipment
+    chapters.append({"title": "Powered Ore Surveys", "icon": "jugcraft:jimta_ore_scanner", "pages": powered_equipment.SCANNER_PAGES})
     return {"chapters": chapters}

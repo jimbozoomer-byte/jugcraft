@@ -173,13 +173,14 @@ POWERED_TOOLS = {"mining_drill": "Mining Drill", "chainsaw": "Chainsaw", "rocket
 # Upgrade modules for the powered tools, fitted at the charging station (tools/ToolUpgrades): display name, short
 # name for tooltips, and what it does.
 UPGRADE_MODULES = {
-    "overclock_module": ("Overclock Module", "Overclock", "Mines 50% faster for twice the JE a block (up to 2)"),
-    "range_module": ("Range Module", "Range", "The drill's area mode mines 5×5 (drill only)"),
-    "capacity_module": ("Capacity Module", "Capacity", "Holds its base charge again (up to 2)"),
+    "efficiency_module": ("Efficiency Module", "Efficiency", "15% less tool energy per level after Overclock, rounded up (max 2); no speed change"),
+    "overclock_module": ("Overclock Module", "Overclock", "Adds 50% base mining speed and JE per block (up to 2)"),
+    "range_module": ("Range Module", "Range", "Unlocks selectable 5×5 mining and doubles the vein limit (drill only)"),
+    "capacity_module": ("Capacity Module", "Capacity", "Doubles energy capacity each time (up to 2)"),
     "silk_touch_module": ("Silk Touch Module", "Silk Touch", "Blocks drop themselves (drill or chainsaw; not with fortune)"),
     "fortune_module": ("Fortune Module", "Fortune", "More ore drops, up to Fortune III (drill only; not with silk touch)"),
 }
-# Blocks of the powered-tools feature: the 2-tall charging station (lower and upper halves, one item).
+# Blocks of the powered-tools feature: the 2-tall charging station (lower and upper halves, two equipment bays).
 TOOL_BLOCKS = {"charging_station": {"display": "Charging Station"}}
 # Plain storage blocks with their own block entity (storage/). Models: tools/storage_models.py.
 STORAGE_BLOCKS = {"item_crate": {"display": "Item Crate"}}
@@ -546,6 +547,8 @@ CRAFTING = {
                                            "F": "jugcraft:fluid_tank", "L": "minecraft:leather",
                                            "N": "#c:plates/tungsten"}, 1),
     # Upgrade modules: an advanced circuit on a steel card, with what the upgrade is about.
+    "efficiency_module": (["SCS", "CAC", "SCS"], {"S": "#c:plates/steel", "C": "jugcraft:copper_cable",
+                                                "A": "jugcraft:advanced_circuit"}, 1),
     "overclock_module": (["SRS", "RAR", "SRS"], {"S": "#c:plates/steel", "R": "minecraft:redstone_block",
                                                "A": "jugcraft:advanced_circuit"}, 1),
     "range_module": (["STS", "TAT", "STS"], {"S": "#c:plates/steel", "T": "#c:plates/tungsten",
@@ -766,10 +769,22 @@ def _wire_drawer():
 
 # Circuit assembler: up to three ingredient stacks, any slot order.
 CIRCUIT_ASSEMBLER = [
+    {"name": "basic_circuit_raw", "inputs": [["jugcraft:silicon", 1], ["#c:ingots/copper", 1], ["#c:ingots/tin", 1]],
+     "output": "jugcraft:basic_circuit", "count": 1, "ticks": 200, "features": [FEATURE, "silicon", "tin"]},
+    {"name": "basic_circuit_wired", "inputs": [["jugcraft:silicon", 1], ["jugcraft:copper_wire", 3], ["#c:ingots/tin", 1]],
+     "output": "jugcraft:basic_circuit", "count": 2, "ticks": 200, "features": [FEATURE, "silicon", "tin"]},
+    {"name": "basic_circuit_soldered", "inputs": [["jugcraft:silicon", 1], ["#c:ingots/copper", 1], ["jugcraft:solder_ingot", 1]],
+     "output": "jugcraft:basic_circuit", "count": 2, "ticks": 200, "features": [FEATURE, "silicon", "lead"]},
     {"inputs": [["jugcraft:silicon", 1], ["jugcraft:copper_wire", 3], ["jugcraft:solder_ingot", 1]],
-     "output": "jugcraft:basic_circuit", "count": 1, "ticks": 200, "features": [FEATURE, "silicon", "lead"]},
-    {"inputs": [["jugcraft:basic_circuit", 2], ["jugcraft:silver_wire", 3], ["jugcraft:invar_plate", 1]],
+     "output": "jugcraft:basic_circuit", "count": 4, "ticks": 200, "features": [FEATURE, "silicon", "lead"]},
+    {"name": "advanced_circuit_raw", "inputs": [["jugcraft:basic_circuit", 2], ["#c:ingots/silver", 1], ["#c:ingots/invar", 1]],
      "output": "jugcraft:advanced_circuit", "count": 1, "ticks": 300, "features": [FEATURE, "silver", "nickel"]},
+    {"name": "advanced_circuit_wired", "inputs": [["jugcraft:basic_circuit", 2], ["jugcraft:silver_wire", 3], ["#c:ingots/invar", 1]],
+     "output": "jugcraft:advanced_circuit", "count": 2, "ticks": 300, "features": [FEATURE, "silver", "nickel"]},
+    {"name": "advanced_circuit_plated", "inputs": [["jugcraft:basic_circuit", 2], ["#c:ingots/silver", 1], ["jugcraft:invar_plate", 1]],
+     "output": "jugcraft:advanced_circuit", "count": 2, "ticks": 300, "features": [FEATURE, "silver", "nickel"]},
+    {"inputs": [["jugcraft:basic_circuit", 2], ["jugcraft:silver_wire", 3], ["jugcraft:invar_plate", 1]],
+     "output": "jugcraft:advanced_circuit", "count": 4, "ticks": 300, "features": [FEATURE, "silver", "nickel"]},
     # Electronics (batch 7): four microchips bonded to an advanced circuit with gold.
     {"inputs": [["jugcraft:microchip", 4], ["jugcraft:advanced_circuit", 1], ["minecraft:gold_ingot", 1]],
      "output": "jugcraft:processor", "count": 1, "ticks": 400, "features": [FEATURE, "silicon", "sulfur", "silver", "nickel"]},
@@ -923,6 +938,9 @@ def machine_recipes():
             "gas_centrifuge_cascade": GAS_CENTRIFUGE_CASCADE, "fuel_fabricator": FUEL_FABRICATOR}
     import ceramics
     for machine, additions in ceramics.MACHINE_RECIPES.items():
+        recipes[machine] = recipes[machine] + additions
+    import mineral_sand_processing
+    for machine, additions in mineral_sand_processing.MACHINE_RECIPES.items():
         recipes[machine] = recipes[machine] + additions
     import structural_alloys
     for machine, additions in structural_alloys.MACHINE_RECIPES.items():

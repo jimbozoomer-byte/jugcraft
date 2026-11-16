@@ -1,6 +1,18 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "jugcraft:jimtafacts/ae2/item/portable_fluid_cell_4k"
+    "model": "jugcraft:jimtafacts/ae2/item/portable_fluid_cell_4k",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": -1
+      },
+      {
+        "type": "jugcraft:jimta_storage_cell_state"
+      },
+      {
+        "type": "jugcraft:jimta_portable_cell_color"
+      }
+    ]
   }
 }

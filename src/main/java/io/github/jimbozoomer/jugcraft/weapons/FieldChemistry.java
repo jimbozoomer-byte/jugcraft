@@ -5,6 +5,8 @@ import io.github.jimbozoomer.jugcraft.gear.JugcraftGear;
 import io.github.jimbozoomer.jugcraft.gear.ScubaTankItem;
 import io.github.jimbozoomer.jugcraft.materials.JugcraftRegistry;
 import io.github.jimbozoomer.jugcraft.party.JugcraftParties;
+import io.github.jimbozoomer.jugcraft.pharmacology.DrugDrinkItem;
+import io.github.jimbozoomer.jugcraft.pharmacology.Pharmacology;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,12 +72,8 @@ public final class FieldChemistry {
 	public static final int GAS_MASK_DURABILITY = 20;
 	/** Oxygen a sealed scuba set uses each second in gas or smoke instead (mB). */
 	public static final int SCUBA_GAS_OXYGEN = 20;
-	/** Medicines: the first aid kit's cooldown (seconds) and how long the stimulant lasts (ticks). */
+	/** The first aid kit remains an instant medicine; sustained formulations use Pharmacology. */
 	public static final int FIRST_AID_COOLDOWN = 10;
-	public static final int STIMULANT_TICKS = 1200;
-	/** Aspirin (docs/features/aspirin.md): Regeneration I for this long (ticks), and the wait before the next (seconds). */
-	public static final int ASPIRIN_REGENERATION_TICKS = 200;
-	public static final int ASPIRIN_COOLDOWN = 30;
 
 	public static final ResourceKey<DamageType> CHLORINE_DAMAGE_TYPE = ResourceKey.create(Registries.DAMAGE_TYPE,
 			Jugcraft.id("chlorine"));
@@ -121,7 +119,7 @@ public final class FieldChemistry {
 						.sound(SoundEvents.ARMOR_EQUIP_LEATHER).hasConsumeParticles(false)
 						.onConsume(new ApplyStatusEffectsConsumeEffect(new MobEffectInstance(MobEffects.INSTANT_HEALTH, 1, 1)))
 						.build())));
-		// Activated charcoal: clears every harmful effect and keeps the good ones (milk clears both).
+		// Existing antidote: listed vanilla harmful effects only; Activated Charcoal handles drug drawbacks.
 		ANTIDOTE = item("antidote", properties -> new DescribedItem(properties.stacksTo(16).usingConvertsTo(Items.GLASS_BOTTLE)
 				.component(DataComponents.CONSUMABLE, Consumables.defaultDrink()
 						.onConsume(new RemoveStatusEffectsConsumeEffect(HolderSet.direct(List.of(MobEffects.POISON,
@@ -129,24 +127,12 @@ public final class FieldChemistry {
 								MobEffects.SLOWNESS, MobEffects.MINING_FATIGUE, MobEffects.DARKNESS, MobEffects.LEVITATION,
 								MobEffects.INFESTED, MobEffects.OOZING, MobEffects.WEAVING))))
 						.build())));
-		// Caffeine: quick feet and quick hands for a minute, and hungry for it.
-		STIMULANT = item("stimulant", properties -> new DescribedItem(properties.stacksTo(16).usingConvertsTo(Items.GLASS_BOTTLE)
-				.component(DataComponents.CONSUMABLE, Consumables.defaultDrink()
-						.onConsume(new ApplyStatusEffectsConsumeEffect(List.of(
-								new MobEffectInstance(MobEffects.SPEED, STIMULANT_TICKS, 1),
-								new MobEffectInstance(MobEffects.HASTE, STIMULANT_TICKS, 1),
-								new MobEffectInstance(MobEffects.HUNGER, STIMULANT_TICKS, 0))))
-						.build())));
-
-		// Willow bark's salicylic acid, acetylated: eases pain (regeneration) and settles the stomach (no nausea).
+		// Stable item IDs and reactor recipes; both medicines now use the same saved dosing rules as caffeine.
+		STIMULANT = item("stimulant", properties -> new DrugDrinkItem(Pharmacology.packagedDoseProperties(properties),
+				Pharmacology.STIMULANT));
 		SALICYLIC_ACID = item("salicylic_acid", DescribedItem::new);
-		ASPIRIN = item("aspirin", properties -> new DescribedItem(properties.stacksTo(16).useCooldown(ASPIRIN_COOLDOWN)
-				.component(DataComponents.CONSUMABLE, Consumable.builder().consumeSeconds(0.8F).animation(ItemUseAnimation.EAT)
-						.sound(SoundEvents.GENERIC_EAT).hasConsumeParticles(false)
-						.onConsume(new RemoveStatusEffectsConsumeEffect(HolderSet.direct(List.of(MobEffects.NAUSEA))))
-						.onConsume(new ApplyStatusEffectsConsumeEffect(new MobEffectInstance(MobEffects.REGENERATION,
-								ASPIRIN_REGENERATION_TICKS, 0)))
-						.build())));
+		ASPIRIN = item("aspirin", properties -> new DrugDrinkItem(Pharmacology.tabletProperties(properties),
+				Pharmacology.ASPIRIN));
 
 		ResourceKey<EntityType<?>> key = ResourceKey.create(Registries.ENTITY_TYPE, Jugcraft.id("chemical_cloud"));
 		CHEMICAL_CLOUD = Registry.register(BuiltInRegistries.ENTITY_TYPE, key,

@@ -18,6 +18,13 @@ public final class NouveauScryingClient {
     private static int opening;
     private NouveauScryingClient(){}
     public static boolean active(){return camera!=null;}
+    public static void showView(net.minecraft.world.phys.Vec3 eye){
+        var c=Minecraft.getInstance();if(c.player==null||c.level==null)return;
+        if(camera==null||camera.level()!=c.level){camera=new ArmorStand(c.level,eye.x,eye.y,eye.z);camera.setInvisible(true);camera.setNoGravity(true);camera.setPos(eye.x,eye.y-camera.getEyeHeight(),eye.z);opening=10;}
+        camera.xo=camera.getX();camera.yo=camera.getY();camera.zo=camera.getZ();
+        camera.setPos(eye.x,eye.y-camera.getEyeHeight(),eye.z);camera.setYRot(c.player.getYRot());camera.setXRot(c.player.getXRot());c.setCameraEntity(camera);
+    }
+    public static void clearView(Minecraft client){clear(client);}
     public static void register(){
         MenuScreens.register(NouveauScrying.MENU,ScryScreen::new);
         ClientPlayNetworking.registerGlobalReceiver(NouveauScrying.View.TYPE,(packet,ctx)->{

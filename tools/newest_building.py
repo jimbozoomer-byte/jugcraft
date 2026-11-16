@@ -4,6 +4,7 @@ Original models and pixel data are retained. Only resource/registry references
 and the item-definition schema are adapted; no supplied program is executed.
 """
 from pathlib import Path
+from copy import deepcopy
 import json
 import shutil
 from menagerie_content import read
@@ -24,6 +25,29 @@ FAMILIES = {'stoneworks': ('stoneworks', 'stoneworks'), 'paths': ('mcwpaths', 'p
 # Registry declarations in the supplied reference distinguish actual blocks
 # from the three engineer presentation variants which have no item or registry.
 FACTORY_PRESENTATION_ONLY = {'engineer1', 'engineer2', 'engineer3'}
+# cozyhome's AbstractHorizontalConnectingBlock.checkDiagonalNeighbor sets a diagonal only when both of
+# its cardinal connections are set, and the supplied table and fountain multiparts rely on that: the
+# inner-corner fill assumes the three blocks round its quarter. OwnerHomeBlock.joined reads each
+# diagonal cell alone, so a lone diagonal neighbour added the fill to a single, double or middle
+# piece (bared fill sides, a table top drawn twice, a solid quarter in a fountain basin).
+DIAGONAL_CARDINALS = {'north_east': ('north', 'east'), 'north_west': ('north', 'west'),
+                      'south_east': ('south', 'east'), 'south_west': ('south', 'west')}
+
+
+def require_diagonal_cardinals(name, state):
+    """State the source's implication (diagonal => both cardinals) in a table's or fountain's parts.
+
+    Every state the source's own rule produces renders exactly as supplied; a lone diagonal
+    neighbour now changes nothing. Applied to the runtime blockstate only (shapes are unchanged)."""
+    if not name.endswith(('_table', '_fountain')):
+        return state
+    for part in state.get('multipart', []):
+        when = part.get('when', {})
+        if len(when) == 1:
+            (key, value), = when.items()
+            if key in DIAGONAL_CARDINALS and value == 'true':
+                part['when'] = dict(sorted({**{side: 'true' for side in DIAGONAL_CARDINALS[key]}, key: 'true'}.items()))
+    return state
 
 
 def repair_unused_faces(data):
@@ -39,10 +63,19 @@ def repair_unused_faces(data):
     return data
 
 
-def write(path, data):
-    if '/loot_table/' in str(path).replace('\\','/'):
-        from menagerie_data import loot as native_loot
-        data=native_loot(data)
+def native_model(path, data):
+    """Preserve authored geometry with bounded, deterministic native adaptations."""
+    model_path = str(path).replace('\\', '/')
+    if any(model_path.endswith('/models/' + ref) for ref in (
+            'newest/fenceworks/block/parent/grass_topped_wall_triple.json',
+            'newest/twigworks/block/template_paper_lantern.json',
+            'newest/twigworks/block/template_paper_lantern_hanging.json')):
+        # Main's exact repair records own these surfaces. Reusing that definition
+        # keeps native import and final atlas finishing idempotent, not cumulative.
+        from imported_geometry_repairs import records, repair_elements
+        ref = model_path.rsplit('/models/', 1)[1]
+        data = deepcopy(data)
+        data['elements'] = repair_elements(ref, data['elements'], records()[ref])
     if '/models/newest/homeworks/' in str(path).replace('\\','/'): data=repair_unused_faces(data)
     # Repair four supplied faces which otherwise sample adjacent sprites in the atlas.
     if any(str(path).replace('\\', '/').endswith('/models/newest/' + name + '.json') for name in (
@@ -50,6 +83,14 @@ def write(path, data):
         'lightworks/block/upgraded_torch', 'lightworks/block/upgraded_torch_wall')):
         from model_writer import fit_uvs
         fit_uvs(data.get('elements', []))
+    return data
+
+
+def write(path, data):
+    if '/loot_table/' in str(path).replace('\\','/'):
+        from menagerie_data import loot as native_loot
+        data=native_loot(data)
+    data = native_model(path, data)
     path.parent.mkdir(parents=True, exist_ok=True)
     # This large runtime descriptor exceeds GitHub's file limit when indented.
     # Keep the identical JSON data compact in both standalone and shared generation.
@@ -193,6 +234,7 @@ def generate(writer=write):
     def writer(path, data):
         # 26.3 uses condition/modifier codecs, including for manually assembled
         # architecture drops. Convert once at the common output boundary.
+        data = native_model(path, data)
         original_writer(path, native_loot(data) if '/loot_table/' in path.as_posix() else data)
     blocks, items, language, omitted, provenance = {}, {}, {}, [], []
     holiday_behaviors = read(CAT / 'holiday-behaviors.json')['entries']
@@ -348,6 +390,8 @@ def generate(writer=write):
             # Plain full-block paving entries with a thin authored mesh are real low paths.
             if kind == 'path' and prefix == 'stoneworks': blocks[ident]['kind'] = 'block'
             runtime_state = map_value(state, ns, prefix, True)
+            if prefix == 'homeworks':
+                runtime_state = require_diagonal_cardinals(name, runtime_state)
             if kind == 'large_factory_fan':
                 # Occupy all four blocks; draw the supplied 2x2 mesh only once.
                 runtime_state = {'multipart': [{'when': {'column': '0', 'row': '0', 'facing': facing},
@@ -551,8 +595,11 @@ def generate(writer=write):
                 entries += ['jugcraft:twigworks_polished_calcite', 'jugcraft:stoneworks_polished_calcite']
             merge_tag(target / rel, entries, writer)
         prune_unregistered(prefix, allowed)
+        changes = 'Native block behaviors; remapped identifiers; original model coordinates and texture bytes retained'
+        if prefix == 'twigworks':
+            changes += '; paper-lantern inverted inner cubes unfolded into six inward-facing planes with identical surface positions and UV mapping'
         provenance.append({'folder': folder, 'namespace': ns, 'blocks': sum(d['collection'] == prefix for d in blocks.values()), 'items': sum(d['collection'] == prefix for d in items.values()), 'runtime': 'newest/' + prefix,
-                           'changes': 'Native block behaviors; remapped identifiers; original model coordinates and texture bytes retained'})
+                           'changes': changes})
     painting_root = SOURCE / 'painting'
     paintings = []
     labels = read(painting_root / 'assets/mcwpaintings/lang/en_us.json')
@@ -570,10 +617,10 @@ def generate(writer=write):
         copy(painting_root / 'assets/mcwpaintings/textures/painting' / (source.stem + '.png'), ASSET / 'textures/painting/newest' / (source.stem + '.png'))
         paintings.append('jugcraft:' + ident)
     merge_tag(RES / 'data/minecraft/tags/painting_variant/placeable.json', paintings, writer)
-    # Property combinations originate in sets; serialize states deterministically.
-    for spec in blocks.values():
-        if 'shapes' in spec:
-            spec['shapes'] = dict(sorted(spec['shapes'].items()))
+    # Multipart properties arrive as sets; their iteration order must not leak
+    # into the compact descriptor in either shared or standalone generation.
+    from newest_shapes import order_shape_keys
+    order_shape_keys(blocks)
     writer(RES / 'jugcraft/newest_building.json', {'blocks': blocks, 'items': items, 'paintings': paintings})
     lang_path = ASSET / 'lang/en_us.json'
     merged = read(lang_path); merged.update(language)

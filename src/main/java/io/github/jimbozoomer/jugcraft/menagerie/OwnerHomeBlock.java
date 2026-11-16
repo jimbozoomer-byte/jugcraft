@@ -47,11 +47,17 @@ public class OwnerHomeBlock extends HouseholdBlock implements EntityBlock, Optio
         if(function.equals("chandelier"))return Menagerie.mayChange(l,player,root.below());
         return !function.equals("bathtub")||Menagerie.mayChange(l,player,root.relative(facing(s)));
     }
+    /** cozyhome's AbstractHorizontalConnectingBlock.isMatchingBlock: a table or large stump joins only its own block
+     *  (an oak table beside a glass one left the oak apron open); other families keep matching by function. */
+    private boolean joins(BlockState s){return function.equals("table")||function.equals("large_stump")?s.is(this):same(s);}
     private BlockState joined(BlockState s,BlockGetter level,BlockPos p) {
-        for(Direction dir:Direction.Plane.HORIZONTAL)s=set(s,dir.getName(),Boolean.toString(same(level.getBlockState(p.relative(dir)))));
+        for(Direction dir:Direction.Plane.HORIZONTAL)s=set(s,dir.getName(),Boolean.toString(joins(level.getBlockState(p.relative(dir)))));
         for(String corner:new String[]{"north_east","north_west","south_east","south_west"}){
             String[] axes=corner.split("_");Direction a=Direction.byName(axes[0]),b=Direction.byName(axes[1]);
-            s=set(s,corner,Boolean.toString(same(level.getBlockState(p.relative(a).relative(b)))));
+            // checkDiagonalNeighbor: a diagonal also needs both of its cardinal connections, as the supplied
+            // inner_corner_piece fill assumes (a lone diagonal neighbour added an invisible collision quarter).
+            boolean corners=flag(s,axes[0])&&flag(s,axes[1]);
+            s=set(s,corner,Boolean.toString(corners&&joins(level.getBlockState(p.relative(a).relative(b)))));
         }
         Direction f=facing(s);if(!f.getAxis().isHorizontal())return s;
         BlockState left=level.getBlockState(p.relative(f.getClockWise())),right=level.getBlockState(p.relative(f.getCounterClockWise()));

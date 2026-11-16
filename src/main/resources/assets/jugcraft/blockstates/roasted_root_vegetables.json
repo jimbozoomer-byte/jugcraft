@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jugcraft:block/roasted_root_vegetables",
+      "y": 180
+    },
+    "facing=east": {
+      "model": "jugcraft:block/roasted_root_vegetables",
+      "y": 270
+    },
+    "facing=south": {
+      "model": "jugcraft:block/roasted_root_vegetables"
+    },
+    "facing=west": {
+      "model": "jugcraft:block/roasted_root_vegetables",
+      "y": 90
+    }
+  }
+}

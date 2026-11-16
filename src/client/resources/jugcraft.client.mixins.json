@@ -4,6 +4,7 @@
   "package": "io.github.jimbozoomer.jugcraft.mixin.client",
   "compatibilityLevel": "JAVA_21",
   "client": [
+    "DrillMiningClientMixin",
     "BotanicalArmorLayerMixin",
     "OwnerEnchantmentLightMixin",
     "BotanicalSoundMixin",
@@ -46,6 +47,7 @@
     "OwnerThirdPersonCameraMixin",
     "OwnerThirdPersonTurnMixin",
     "OwnerThirdPersonInputMixin",
+    "PegasusSprintKeyMixin",
     "OwnerThirdPersonInteractionMixin",
     "OwnerPartyCreeperRenderMixin",
     "OwnerLecternBookEditMixin",
@@ -59,7 +61,11 @@
     "OwnerAntiqueHandsMixin",
     "OwnerAntiqueFrameMixin",
     "OwnerZoomHudMixin",
-    "OwnerLecternPageAccess"
+    "OwnerLecternPageAccess",
+    "DrugVisionMixin",
+    "DrugPostPassMixin",
+    "PharmacologyAimMixin",
+    "PharmacyOverlayLayoutMixin"
   ],
   "injectors": {
     "defaultRequire": 1

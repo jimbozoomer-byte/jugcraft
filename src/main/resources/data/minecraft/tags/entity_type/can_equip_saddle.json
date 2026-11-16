@@ -1,0 +1,11 @@
+{
+  "replace": false,
+  "values": [
+    "jugcraft:pegasus",
+    "jugcraft:icelandic_horse",
+    "jugcraft:mongolian_horse",
+    "jugcraft:shire_horse",
+    "jugcraft:giant_finnhorse",
+    "jugcraft:friesian_horse"
+  ]
+}

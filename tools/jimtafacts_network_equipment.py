@@ -44,7 +44,8 @@ def generate(source, assets, resources, model, texture, dump, recipe):
     original = json.loads((source / 'models/item/color_applicator_colored.json').read_text(encoding='utf-8'))
     for element, src in zip(colored['elements'], original['elements']):
         for face, data in src.get('faces', {}).items():
-            if 'tintindex' in data: element['faces'][face]['tintindex'] = data['tintindex']
+            # Faces jimtafacts_model_repairs.BURIED leaves out stay out.
+            if 'tintindex' in data and face in element['faces']: element['faces'][face]['tintindex'] = data['tintindex']
     dump(colored_path, colored)
     tints = [{'type': 'minecraft:constant', 'value': -1}] + [{'type': 'minecraft:custom_model_data', 'index': i, 'default': -1} for i in range(3)]
     dump(assets / 'items/jimta_color_applicator.json', {'model': {'type': 'minecraft:condition', 'property': 'minecraft:custom_model_data', 'index': 0,

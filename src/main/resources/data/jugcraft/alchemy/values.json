@@ -18,8 +18,8 @@
       "source": "recipe jugcraft:access_floor_tile"
     },
     "jugcraft:acid_concentrator": {
-      "numerator": 32117,
-      "denominator": 6,
+      "numerator": 1766171,
+      "denominator": 384,
       "source": "recipe jugcraft:acid_concentrator"
     },
     "jugcraft:acorn": {
@@ -52,6 +52,16 @@
       "denominator": 1,
       "source": "recipe jugcraft:acoustic_wall_panel"
     },
+    "jugcraft:activated_charcoal": {
+      "numerator": 66,
+      "denominator": 1,
+      "source": "recipe jugcraft:activated_charcoal"
+    },
+    "jugcraft:activated_charcoal_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:activated_spodumene": {
       "numerator": 1,
       "denominator": 1,
@@ -62,13 +72,28 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:adrenaline": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:adrenaline_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:adrenaline_stock": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:advanced_chip": {
       "numerator": 1411,
       "denominator": 12,
       "source": "recipe jugcraft:circuit_assembly/electronics_bond_chips"
     },
     "jugcraft:advanced_circuit": {
-      "numerator": 1284,
+      "numerator": 81,
       "denominator": 1,
       "source": "recipe jugcraft:circuit_assembly/advanced_circuit"
     },
@@ -77,8 +102,13 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:advanced_release_matrix": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:advanced_solar_panel": {
-      "numerator": 15459,
+      "numerator": 10647,
       "denominator": 4,
       "source": "recipe jugcraft:advanced_solar_panel"
     },
@@ -133,13 +163,13 @@
       "source": "recipe jugcraft:aged_pine_stairs"
     },
     "jugcraft:air_handling_unit": {
-      "numerator": 1043,
-      "denominator": 2,
+      "numerator": 31753,
+      "denominator": 128,
       "source": "recipe jugcraft:air_handling_unit"
     },
     "jugcraft:air_separation_unit": {
-      "numerator": 96619,
-      "denominator": 16,
+      "numerator": 274485,
+      "denominator": 64,
       "source": "recipe jugcraft:air_separation_unit"
     },
     "jugcraft:aircraft_airship": {
@@ -343,8 +373,8 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:alumina_calciner": {
-      "numerator": 4528,
-      "denominator": 3,
+      "numerator": 92635,
+      "denominator": 192,
       "source": "recipe jugcraft:alumina_calciner"
     },
     "jugcraft:alumina_charge": {
@@ -358,8 +388,8 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:aluminate_filter_press": {
-      "numerator": 5410,
-      "denominator": 1,
+      "numerator": 280521,
+      "denominator": 64,
       "source": "recipe jugcraft:aluminate_filter_press"
     },
     "jugcraft:aluminate_slurry_bucket": {
@@ -443,7 +473,7 @@
       "source": "recipe jugcraft:alloys_aluminum_propeller_sets"
     },
     "jugcraft:aluminum_reduction_cell": {
-      "numerator": 2776,
+      "numerator": 1336,
       "denominator": 3,
       "source": "recipe jugcraft:aluminum_reduction_cell"
     },
@@ -493,8 +523,8 @@
       "source": "recipe jugcraft:ammo_hoist"
     },
     "jugcraft:ammonia_chiller": {
-      "numerator": 2886,
-      "denominator": 1,
+      "numerator": 334409,
+      "denominator": 128,
       "source": "recipe jugcraft:ammonia_chiller"
     },
     "jugcraft:ammonite_carbine": {
@@ -512,14 +542,54 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:amphetamine": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:amphetamine_active": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:amphetamine_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:amphetamine_reagent_blend": {
+      "numerator": 2308,
+      "denominator": 3,
+      "source": "recipe jugcraft:amphetamine_reagent_blend"
+    },
+    "jugcraft:amphetamine_stock": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:amphetamine_xr": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:amphetamine_xr_core": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:amphetamine_xr_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:amphibian_boot": {
       "numerator": 1027,
       "denominator": 2,
       "source": "recipe jugcraft:amphibian_boot"
     },
     "jugcraft:anaerobic_digester": {
-      "numerator": 14267,
-      "denominator": 2,
+      "numerator": 816649,
+      "denominator": 128,
       "source": "recipe jugcraft:expanded_anaerobic_digester"
     },
     "jugcraft:angel_at_the_tomb": {
@@ -541,6 +611,16 @@
       "numerator": 11248,
       "denominator": 1,
       "source": "recipe jugcraft:animatronic_werewolf"
+    },
+    "jugcraft:antibiotic_broth_bucket": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:antibiotic_extract": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:antidote": {
       "numerator": 1,
@@ -576,6 +656,11 @@
       "numerator": 61,
       "denominator": 3,
       "source": "recipe jugcraft:apple_cider_donut"
+    },
+    "jugcraft:apple_cranberry_crisp": {
+      "numerator": 415,
+      "denominator": 3,
+      "source": "recipe jugcraft:apple_cranberry_crisp"
     },
     "jugcraft:apple_leaves": {
       "numerator": 1,
@@ -1418,7 +1503,7 @@
       "source": "recipe jugcraft:armored_conduit"
     },
     "jugcraft:armoured_walker": {
-      "numerator": 105212,
+      "numerator": 94385,
       "denominator": 9,
       "source": "recipe jugcraft:armoured_walker"
     },
@@ -1852,6 +1937,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:aspirin_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:assay_glass": {
       "numerator": 1289,
       "denominator": 8,
@@ -1878,7 +1968,7 @@
       "source": "recipe jugcraft:astrolabe"
     },
     "jugcraft:atm": {
-      "numerator": 18432,
+      "numerator": 17952,
       "denominator": 1,
       "source": "recipe jugcraft:survival_completion/atm"
     },
@@ -1898,12 +1988,17 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:auto_crafter": {
-      "numerator": 2438,
+      "numerator": 1958,
       "denominator": 1,
       "source": "recipe jugcraft:auto_crafter"
     },
+    "jugcraft:autoclave": {
+      "numerator": 101659,
+      "denominator": 384,
+      "source": "recipe jugcraft:autoclave"
+    },
     "jugcraft:automation_upgrade": {
-      "numerator": 16807,
+      "numerator": 5287,
       "denominator": 12,
       "source": "recipe jugcraft:electronics_automation"
     },
@@ -1928,9 +2023,14 @@
       "source": "recipe jugcraft:autumn_wreath_orange"
     },
     "jugcraft:avionics_module": {
-      "numerator": 26045,
+      "numerator": 1985,
       "denominator": 4,
       "source": "recipe jugcraft:avionics_module"
+    },
+    "jugcraft:azure_culture_starter": {
+      "numerator": 391,
+      "denominator": 24,
+      "source": "recipe jugcraft:azure_culture_starter"
     },
     "jugcraft:baccarat_table": {
       "numerator": 32940,
@@ -2203,7 +2303,7 @@
       "source": "recipe jugcraft:starter_workshop/fire_lining"
     },
     "jugcraft:basic_circuit": {
-      "numerator": 640,
+      "numerator": 160,
       "denominator": 1,
       "source": "recipe jugcraft:circuit_assembly/basic_circuit"
     },
@@ -2348,8 +2448,8 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:bauxite_digester": {
-      "numerator": 19415,
-      "denominator": 6,
+      "numerator": 953243,
+      "denominator": 384,
       "source": "recipe jugcraft:bauxite_digester"
     },
     "jugcraft:bauxite_residue": {
@@ -2358,7 +2458,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:beam_pistol": {
-      "numerator": 5657,
+      "numerator": 845,
       "denominator": 4,
       "source": "recipe jugcraft:beam_pistol"
     },
@@ -3782,14 +3882,24 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:beverage_culture_pack": {
+      "numerator": 109,
+      "denominator": 6,
+      "source": "recipe jugcraft:beverage_culture_pack"
+    },
+    "jugcraft:beverage_wash_bucket": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:beware_doormat": {
       "numerator": 481,
       "denominator": 4,
       "source": "recipe jugcraft:beware_doormat"
     },
     "jugcraft:bio_generator": {
-      "numerator": 6057,
-      "denominator": 2,
+      "numerator": 291209,
+      "denominator": 128,
       "source": "recipe jugcraft:bio_generator"
     },
     "jugcraft:bioethanol_bucket": {
@@ -3798,9 +3908,14 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:biogas_cleaner": {
-      "numerator": 48371,
-      "denominator": 16,
+      "numerator": 290529,
+      "denominator": 128,
       "source": "recipe jugcraft:biogas_cleaner"
+    },
+    "jugcraft:birch_bark_box": {
+      "numerator": 45,
+      "denominator": 1,
+      "source": "recipe jugcraft:birch_bark_box"
     },
     "jugcraft:birch_cabinet": {
       "numerator": 72,
@@ -3906,6 +4021,11 @@
       "numerator": 376,
       "denominator": 1,
       "source": "recipe jugcraft:blackstone_sarcophagus"
+    },
+    "jugcraft:blank_formula_plate": {
+      "numerator": 1059,
+      "denominator": 16,
+      "source": "recipe jugcraft:blank_formula_plate"
     },
     "jugcraft:blank_stencil": {
       "numerator": 8,
@@ -4162,6 +4282,11 @@
       "denominator": 2,
       "source": "recipe jugcraft:alloying/borosilicate_glass"
     },
+    "jugcraft:botanical_capsule_shell": {
+      "numerator": 35,
+      "denominator": 1,
+      "source": "recipe jugcraft:botanical_capsule_shell"
+    },
     "jugcraft:botanical_gate_weapon_0": {
       "numerator": 1,
       "denominator": 1,
@@ -4223,6 +4348,11 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:botanical_pump_head": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:botanical_resin": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -5148,8 +5278,8 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:brine_concentrator": {
-      "numerator": 44063,
-      "denominator": 6,
+      "numerator": 2530715,
+      "denominator": 384,
       "source": "recipe jugcraft:brine_concentrator"
     },
     "jugcraft:broken_column": {
@@ -5508,28 +5638,28 @@
       "source": "recipe jugcraft:building_sign"
     },
     "jugcraft:bulk_chemical_infuser": {
-      "numerator": 359627,
+      "numerator": 313547,
       "denominator": 48,
       "source": "recipe jugcraft:bulk_chemical_infuser"
     },
     "jugcraft:bulk_chemical_oxidizer": {
-      "numerator": 6061,
-      "denominator": 1,
+      "numerator": 291465,
+      "denominator": 64,
       "source": "recipe jugcraft:bulk_chemical_oxidizer"
     },
     "jugcraft:bulk_chemical_reactor": {
-      "numerator": 1309,
-      "denominator": 1,
+      "numerator": 18057,
+      "denominator": 64,
       "source": "recipe jugcraft:alloys_bulk_chemical_reactor"
     },
     "jugcraft:bulk_electrolytic_separator": {
-      "numerator": 28798,
+      "numerator": 25918,
       "denominator": 3,
       "source": "recipe jugcraft:bulk_electrolytic_separator"
     },
     "jugcraft:bulk_fermenter": {
-      "numerator": 8108,
-      "denominator": 1,
+      "numerator": 422473,
+      "denominator": 64,
       "source": "recipe jugcraft:bulk_fermenter"
     },
     "jugcraft:bulldog_pistol": {
@@ -5652,13 +5782,43 @@
       "denominator": 36,
       "source": "recipe jugcraft:cafe_table"
     },
+    "jugcraft:caffeine_concentrate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "recipe jugcraft:caffeine_concentrate_from_coffee"
+    },
+    "jugcraft:caffeine_drink": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:caffeine_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:caffeine_xr": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:caffeine_xr_core": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:caffeine_xr_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:caged_ladder": {
       "numerator": 224,
       "denominator": 1,
       "source": "recipe jugcraft:caged_ladder"
     },
     "jugcraft:caisson_pistol": {
-      "numerator": 7065,
+      "numerator": 2253,
       "denominator": 4,
       "source": "recipe jugcraft:caisson_pistol"
     },
@@ -5738,12 +5898,12 @@
       "source": "recipe jugcraft:cannon_shell"
     },
     "jugcraft:capacitor_bank": {
-      "numerator": 48218,
+      "numerator": 44609,
       "denominator": 3,
       "source": "recipe jugcraft:capacitor_bank"
     },
     "jugcraft:capacity_module": {
-      "numerator": 3336,
+      "numerator": 2133,
       "denominator": 1,
       "source": "recipe jugcraft:capacity_module"
     },
@@ -5798,7 +5958,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:cargo_exchange_port": {
-      "numerator": 3444,
+      "numerator": 2964,
       "denominator": 1,
       "source": "recipe jugcraft:cargo_exchange_port"
     },
@@ -5842,6 +6002,16 @@
       "denominator": 1,
       "source": "recipe jugcraft:carrot_crate"
     },
+    "jugcraft:carved_bowls_and_spoons": {
+      "numerator": 46,
+      "denominator": 1,
+      "source": "recipe jugcraft:carved_bowls_and_spoons"
+    },
+    "jugcraft:carved_dish_dresser": {
+      "numerator": 320,
+      "denominator": 1,
+      "source": "recipe jugcraft:carved_dish_dresser"
+    },
     "jugcraft:carving_knife": {
       "numerator": 260,
       "denominator": 1,
@@ -5858,7 +6028,7 @@
       "source": "recipe jugcraft:cat_ears_and_tail"
     },
     "jugcraft:catalytic_cracker": {
-      "numerator": 5947,
+      "numerator": 4744,
       "denominator": 1,
       "source": "recipe jugcraft:catalytic_cracker"
     },
@@ -8218,8 +8388,8 @@
       "source": "recipe jugcraft:cavern_stripped_thornwood_wood"
     },
     "jugcraft:cavern_submarine": {
-      "numerator": 5269,
-      "denominator": 2,
+      "numerator": 302217,
+      "denominator": 128,
       "source": "recipe jugcraft:survival_completion/cavern_submarine"
     },
     "jugcraft:cavern_subterranodon_egg": {
@@ -8598,7 +8768,7 @@
       "source": "recipe jugcraft:cavern_waste_drum"
     },
     "jugcraft:cctv_desk": {
-      "numerator": 172329,
+      "numerator": 42281,
       "denominator": 256,
       "source": "recipe jugcraft:cctv_desk"
     },
@@ -8658,7 +8828,7 @@
       "source": "recipe jugcraft:ceiling_tile"
     },
     "jugcraft:cell_rack": {
-      "numerator": 15088,
+      "numerator": 11479,
       "denominator": 3,
       "source": "recipe jugcraft:cell_rack"
     },
@@ -8712,8 +8882,18 @@
       "denominator": 2,
       "source": "recipe jugcraft:ceramics_placed_insulators"
     },
+    "jugcraft:cerium_oxide": {
+      "numerator": 1,
+      "denominator": 8,
+      "source": "local rare-earth maximum coproduct allocation"
+    },
+    "jugcraft:cerium_polishing_head": {
+      "numerator": 1417,
+      "denominator": 4,
+      "source": "recipe jugcraft:sands_cerium_polishing_head"
+    },
     "jugcraft:chainsaw": {
-      "numerator": 1806,
+      "numerator": 603,
       "denominator": 1,
       "source": "recipe jugcraft:chainsaw"
     },
@@ -8728,7 +8908,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:charging_station": {
-      "numerator": 13725,
+      "numerator": 11319,
       "denominator": 2,
       "source": "recipe jugcraft:charging_station"
     },
@@ -8753,23 +8933,23 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:chemical_dissolution_chamber": {
-      "numerator": 9593,
-      "denominator": 3,
+      "numerator": 938587,
+      "denominator": 384,
       "source": "recipe jugcraft:chemical_dissolution_chamber"
     },
     "jugcraft:chemical_distillation_station": {
-      "numerator": 31385,
-      "denominator": 6,
+      "numerator": 1719323,
+      "denominator": 384,
       "source": "recipe jugcraft:chemical_distillation_station"
     },
     "jugcraft:chemical_infuser": {
-      "numerator": 65701,
+      "numerator": 54181,
       "denominator": 24,
-      "source": "recipe jugcraft:chemical_infuser"
+      "source": "recipe jugcraft:expanded_chemical_infuser"
     },
     "jugcraft:chemical_oxidizer": {
-      "numerator": 1965,
-      "denominator": 2,
+      "numerator": 29321,
+      "denominator": 128,
       "source": "recipe jugcraft:expanded_chemical_oxidizer"
     },
     "jugcraft:chemical_reactor": {
@@ -12813,7 +12993,7 @@
       "source": "recipe jugcraft:chives_bundle"
     },
     "jugcraft:chloride_dryer": {
-      "numerator": 14920,
+      "numerator": 13480,
       "denominator": 3,
       "source": "recipe jugcraft:chloride_dryer"
     },
@@ -12873,8 +13053,8 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:chw_pump": {
-      "numerator": 2615,
-      "denominator": 8,
+      "numerator": 6841,
+      "denominator": 128,
       "source": "recipe jugcraft:chw_pump"
     },
     "jugcraft:cider_barrel": {
@@ -12958,8 +13138,8 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:circulating_water_pump": {
-      "numerator": 2743,
-      "denominator": 8,
+      "numerator": 8889,
+      "denominator": 128,
       "source": "recipe jugcraft:circulating_water_pump"
     },
     "jugcraft:citric_acid": {
@@ -13033,8 +13213,8 @@
       "source": "recipe jugcraft:coal_generator"
     },
     "jugcraft:coastal_seawater_intake": {
-      "numerator": 18701,
-      "denominator": 6,
+      "numerator": 907547,
+      "denominator": 384,
       "source": "recipe jugcraft:coastal_seawater_intake"
     },
     "jugcraft:coat_rack": {
@@ -13213,8 +13393,8 @@
       "source": "recipe jugcraft:columbarium"
     },
     "jugcraft:combined_cycle_power_plant": {
-      "numerator": 15662,
-      "denominator": 1,
+      "numerator": 813385,
+      "denominator": 64,
       "source": "recipe jugcraft:combined_cycle_power_plant"
     },
     "jugcraft:comet_pistol": {
@@ -13508,7 +13688,7 @@
       "source": "recipe jugcraft:conference_table"
     },
     "jugcraft:console_desk": {
-      "numerator": 245859,
+      "numerator": 184419,
       "denominator": 128,
       "source": "recipe jugcraft:console_desk"
     },
@@ -13533,7 +13713,7 @@
       "source": "recipe jugcraft:control_monitor"
     },
     "jugcraft:control_remote": {
-      "numerator": 4001,
+      "numerator": 392,
       "denominator": 3,
       "source": "recipe jugcraft:control_remote"
     },
@@ -13543,7 +13723,7 @@
       "source": "recipe jugcraft:control_rod_assembly"
     },
     "jugcraft:control_screen": {
-      "numerator": 13315,
+      "numerator": 9475,
       "denominator": 24,
       "source": "recipe jugcraft:control_screen"
     },
@@ -13583,7 +13763,7 @@
       "source": "recipe jugcraft:control_tray_waterfall_hanger"
     },
     "jugcraft:converter_station": {
-      "numerator": 165467,
+      "numerator": 21107,
       "denominator": 24,
       "source": "recipe jugcraft:converter_station"
     },
@@ -13662,6 +13842,11 @@
       "denominator": 6,
       "source": "recipe jugcraft:ceramics_copper_cable"
     },
+    "jugcraft:copper_chafing_dish": {
+      "numerator": 8053,
+      "denominator": 18,
+      "source": "recipe jugcraft:copper_chafing_dish"
+    },
     "jugcraft:copper_deposit": {
       "numerator": 1,
       "denominator": 1,
@@ -13732,6 +13917,16 @@
       "denominator": 4,
       "source": "recipe jugcraft:corn_dolly"
     },
+    "jugcraft:corn_drying_frame": {
+      "numerator": 16,
+      "denominator": 1,
+      "source": "recipe jugcraft:corn_drying_frame"
+    },
+    "jugcraft:corn_husk_dolls": {
+      "numerator": 71,
+      "denominator": 5,
+      "source": "recipe jugcraft:corn_husk_dolls"
+    },
     "jugcraft:corn_kernel_bag": {
       "numerator": 9,
       "denominator": 2,
@@ -13776,6 +13971,11 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:corn_toss_set": {
+      "numerator": 105,
+      "denominator": 4,
+      "source": "recipe jugcraft:corn_toss_set"
     },
     "jugcraft:cornbread": {
       "numerator": 1,
@@ -13858,18 +14058,18 @@
       "source": "recipe jugcraft:covered_butter_dish"
     },
     "jugcraft:cr_air_handling_unit": {
-      "numerator": 8339,
-      "denominator": 16,
+      "numerator": 31713,
+      "denominator": 128,
       "source": "recipe jugcraft:cr_air_handling_unit"
     },
     "jugcraft:cr_chiller": {
-      "numerator": 11863,
-      "denominator": 8,
+      "numerator": 154809,
+      "denominator": 128,
       "source": "recipe jugcraft:cr_chiller"
     },
     "jugcraft:cr_filtration_unit": {
-      "numerator": 979,
-      "denominator": 2,
+      "numerator": 27657,
+      "denominator": 128,
       "source": "recipe jugcraft:cr_filtration_unit"
     },
     "jugcraft:cracking_catalyst": {
@@ -15408,7 +15608,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:crop_harvester": {
-      "numerator": 3855,
+      "numerator": 3375,
       "denominator": 1,
       "source": "recipe jugcraft:crop_harvester"
     },
@@ -15468,8 +15668,8 @@
       "source": "recipe jugcraft:cryo_cryogenic_insulation"
     },
     "jugcraft:cryogenic_liquefier": {
-      "numerator": 17193,
-      "denominator": 2,
+      "numerator": 438185,
+      "denominator": 64,
       "source": "recipe jugcraft:cryogenic_liquefier"
     },
     "jugcraft:cryogenic_vaporizer": {
@@ -15511,6 +15711,11 @@
       "numerator": 1,
       "denominator": 1,
       "source": "recipe jugcraft:cucumber_seeds"
+    },
+    "jugcraft:culture_feed": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:culverin": {
       "numerator": 524,
@@ -15738,12 +15943,12 @@
       "source": "recipe jugcraft:dc_cable_tray_tee"
     },
     "jugcraft:dc_ground_detector": {
-      "numerator": 19491,
+      "numerator": 11811,
       "denominator": 8,
       "source": "recipe jugcraft:dc_ground_detector"
     },
     "jugcraft:dc_switchboard": {
-      "numerator": 10323,
+      "numerator": 2643,
       "denominator": 8,
       "source": "recipe jugcraft:dc_switchboard"
     },
@@ -15803,7 +16008,7 @@
       "source": "recipe jugcraft:death_knell"
     },
     "jugcraft:deep_drilling_assembly": {
-      "numerator": 667,
+      "numerator": 187,
       "denominator": 1,
       "source": "recipe jugcraft:deep_drilling_assembly"
     },
@@ -15928,7 +16133,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:delivery_rocket": {
-      "numerator": 4135,
+      "numerator": 526,
       "denominator": 3,
       "source": "recipe jugcraft:rocket_assembly/delivery_rocket"
     },
@@ -15948,7 +16153,7 @@
       "source": "recipe jugcraft:depleted_uranium_armor_stairs"
     },
     "jugcraft:deposit_drill": {
-      "numerator": 3861,
+      "numerator": 3381,
       "denominator": 1,
       "source": "recipe jugcraft:deposit_drill"
     },
@@ -16003,12 +16208,12 @@
       "source": "recipe jugcraft:diesel_engine"
     },
     "jugcraft:diesel_generator": {
-      "numerator": 8871,
-      "denominator": 2,
+      "numerator": 532745,
+      "denominator": 128,
       "source": "recipe jugcraft:diesel_generator"
     },
     "jugcraft:diesel_walker": {
-      "numerator": 98831,
+      "numerator": 88004,
       "denominator": 9,
       "source": "recipe jugcraft:diesel_walker"
     },
@@ -16023,8 +16228,8 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:digestate_separator": {
-      "numerator": 6053,
-      "denominator": 2,
+      "numerator": 290953,
+      "denominator": 128,
       "source": "recipe jugcraft:digestate_separator"
     },
     "jugcraft:dill": {
@@ -16058,7 +16263,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:distillation_tower": {
-      "numerator": 4636,
+      "numerator": 3433,
       "denominator": 1,
       "source": "recipe jugcraft:distillation_tower"
     },
@@ -16081,6 +16286,26 @@
       "numerator": 43233,
       "denominator": 4,
       "source": "recipe jugcraft:divining_rod_3"
+    },
+    "jugcraft:dmt": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:dmt_active": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:dmt_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:dmt_stock": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:dnq_additive": {
       "numerator": 1,
@@ -17772,6 +17997,31 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:dream_concentrate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:dream_folio": {
+      "numerator": 4529,
+      "denominator": 4,
+      "source": "recipe jugcraft:dream_folio"
+    },
+    "jugcraft:dream_study_plinth": {
+      "numerator": 1213,
+      "denominator": 4,
+      "source": "recipe jugcraft:dream_study_plinth"
+    },
+    "jugcraft:dreamcap": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:dreamcap_seeds": {
+      "numerator": 385,
+      "denominator": 12,
+      "source": "recipe jugcraft:dreamcap_seeds"
+    },
     "jugcraft:dreamglass": {
       "numerator": 1,
       "denominator": 1,
@@ -17798,7 +18048,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:drone_depot_terminal": {
-      "numerator": 15727,
+      "numerator": 1291,
       "denominator": 6,
       "source": "recipe jugcraft:drone_depot_terminal"
     },
@@ -17808,22 +18058,22 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:drone_t1": {
-      "numerator": 4157,
+      "numerator": 3677,
       "denominator": 1,
       "source": "recipe jugcraft:drone_t1"
     },
     "jugcraft:drone_t2": {
-      "numerator": 102643,
+      "numerator": 85363,
       "denominator": 18,
       "source": "recipe jugcraft:drone_t2"
     },
     "jugcraft:drone_t3": {
-      "numerator": 137761,
+      "numerator": 98827,
       "denominator": 18,
       "source": "recipe jugcraft:drone_t3"
     },
     "jugcraft:drone_t4": {
-      "numerator": 697333,
+      "numerator": 454981,
       "denominator": 72,
       "source": "recipe jugcraft:drone_t4"
     },
@@ -17833,17 +18083,17 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:drone_t6": {
-      "numerator": 26189,
+      "numerator": 4535,
       "denominator": 9,
       "source": "recipe jugcraft:drone_t6"
     },
     "jugcraft:drone_t7": {
-      "numerator": 52505,
+      "numerator": 9197,
       "denominator": 9,
       "source": "recipe jugcraft:drone_t7"
     },
     "jugcraft:drone_t8": {
-      "numerator": 102185,
+      "numerator": 15569,
       "denominator": 9,
       "source": "recipe jugcraft:drone_t8"
     },
@@ -17853,12 +18103,12 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:drone_tower_core": {
-      "numerator": 46627,
+      "numerator": 3319,
       "denominator": 6,
       "source": "recipe jugcraft:drone_tower_core"
     },
     "jugcraft:drone_tower_manual": {
-      "numerator": 16677,
+      "numerator": 14757,
       "denominator": 4,
       "source": "recipe jugcraft:drone_tower_manual"
     },
@@ -18698,7 +18948,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:edg_battery_charger": {
-      "numerator": 774,
+      "numerator": 294,
       "denominator": 1,
       "source": "recipe jugcraft:edg_battery_charger"
     },
@@ -18708,29 +18958,34 @@
       "source": "recipe jugcraft:edg_battery_rack"
     },
     "jugcraft:edg_engine_panel": {
-      "numerator": 7955,
+      "numerator": 4115,
       "denominator": 8,
       "source": "recipe jugcraft:edg_engine_panel"
     },
     "jugcraft:edg_generator_panel": {
-      "numerator": 12879,
-      "denominator": 8,
+      "numerator": 48185,
+      "denominator": 128,
       "source": "recipe jugcraft:edg_generator_panel"
     },
     "jugcraft:edg_load_sequencer": {
-      "numerator": 1999,
+      "numerator": 316,
       "denominator": 1,
       "source": "recipe jugcraft:edg_load_sequencer"
     },
     "jugcraft:edg_protection_panel": {
-      "numerator": 10291,
+      "numerator": 2611,
       "denominator": 8,
       "source": "recipe jugcraft:edg_protection_panel"
     },
     "jugcraft:edg_voltage_regulator": {
-      "numerator": 1350,
+      "numerator": 390,
       "denominator": 1,
       "source": "recipe jugcraft:edg_voltage_regulator"
+    },
+    "jugcraft:efficiency_module": {
+      "numerator": 773,
+      "denominator": 3,
+      "source": "recipe jugcraft:efficiency_module"
     },
     "jugcraft:efficiency_upgrade": {
       "numerator": 649,
@@ -18783,9 +19038,9 @@
       "source": "recipe jugcraft:electric_furnace"
     },
     "jugcraft:electric_motor": {
-      "numerator": 649,
-      "denominator": 2,
-      "source": "recipe jugcraft:ceramics_motors"
+      "numerator": 6537,
+      "denominator": 128,
+      "source": "recipe jugcraft:ceramics_motors_prepared"
     },
     "jugcraft:electric_pump": {
       "numerator": 21025,
@@ -18793,17 +19048,17 @@
       "source": "recipe jugcraft:electric_pump"
     },
     "jugcraft:electrical_control_board": {
-      "numerator": 49245,
+      "numerator": 29997,
       "denominator": 8,
       "source": "recipe jugcraft:electrical_control_board"
     },
     "jugcraft:electrolytic_cell": {
-      "numerator": 32677,
+      "numerator": 25459,
       "denominator": 6,
       "source": "recipe jugcraft:electrolytic_cell"
     },
     "jugcraft:electrolytic_separator": {
-      "numerator": 28813,
+      "numerator": 25933,
       "denominator": 6,
       "source": "recipe jugcraft:electrolytic_separator"
     },
@@ -18828,8 +19083,8 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:emergency_diesel_generator": {
-      "numerator": 23779,
-      "denominator": 16,
+      "numerator": 155233,
+      "denominator": 128,
       "source": "recipe jugcraft:emergency_diesel_generator"
     },
     "jugcraft:emergency_light": {
@@ -18847,6 +19102,16 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:empty_mash_jug": {
+      "numerator": 40,
+      "denominator": 1,
+      "source": "recipe jugcraft:empty_mash_jug"
+    },
+    "jugcraft:empty_pharmacy_capsule": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:enchanted_broom": {
       "numerator": 76,
       "denominator": 1,
@@ -18858,7 +19123,7 @@
       "source": "recipe jugcraft:energy_cell"
     },
     "jugcraft:energy_exchange_port": {
-      "numerator": 4504,
+      "numerator": 895,
       "denominator": 3,
       "source": "recipe jugcraft:energy_exchange_port"
     },
@@ -18878,22 +19143,22 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:epr_reactor_vessel": {
-      "numerator": 2662,
+      "numerator": 256,
       "denominator": 1,
       "source": "recipe jugcraft:epr_reactor_vessel"
     },
     "jugcraft:equipment_rack": {
-      "numerator": 963,
+      "numerator": 243,
       "denominator": 1,
       "source": "recipe jugcraft:equipment_rack"
     },
     "jugcraft:ermine_rifle": {
-      "numerator": 57181,
+      "numerator": 49921,
       "denominator": 6,
       "source": "recipe jugcraft:ermine_rifle"
     },
     "jugcraft:esf_control_board": {
-      "numerator": 246223,
+      "numerator": 149983,
       "denominator": 40,
       "source": "recipe jugcraft:esf_control_board"
     },
@@ -18988,12 +19253,12 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:exosuit_chestplate": {
-      "numerator": 26737,
+      "numerator": 17113,
       "denominator": 4,
       "source": "recipe jugcraft:exosuit_chestplate"
     },
     "jugcraft:exosuit_helmet": {
-      "numerator": 2715,
+      "numerator": 309,
       "denominator": 2,
       "source": "recipe jugcraft:exosuit_helmet"
     },
@@ -19613,8 +19878,8 @@
       "source": "recipe jugcraft:feedwater_heater"
     },
     "jugcraft:feedwater_pump": {
-      "numerator": 2647,
-      "denominator": 8,
+      "numerator": 7353,
+      "denominator": 128,
       "source": "recipe jugcraft:feedwater_pump"
     },
     "jugcraft:fencepost_carbine": {
@@ -20617,6 +20882,51 @@
       "denominator": 1,
       "source": "recipe jugcraft:newest/fenceworks/yellow_poplar_hedge"
     },
+    "jugcraft:fentanyl": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:fentanyl_active": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:fentanyl_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:fentanyl_patch": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:fentanyl_patch_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:fentanyl_patch_stock": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:fentanyl_reagent_blend": {
+      "numerator": 321,
+      "denominator": 1,
+      "source": "recipe jugcraft:fentanyl_reagent_blend"
+    },
+    "jugcraft:fentanyl_stock": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:fermented_mash_jug": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:ferris_wheel": {
       "numerator": 6368,
       "denominator": 1,
@@ -20798,9 +21108,9 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:fired_zirconia_blank": {
-      "numerator": 1,
+      "numerator": 2,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local zirconia finishing accounting"
     },
     "jugcraft:firedrake": {
       "numerator": 3685,
@@ -20893,7 +21203,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:flight_controller": {
-      "numerator": 5440,
+      "numerator": 4000,
       "denominator": 3,
       "source": "recipe jugcraft:flight_controller"
     },
@@ -20938,7 +21248,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:flow_battery": {
-      "numerator": 64436,
+      "numerator": 57218,
       "denominator": 3,
       "source": "recipe jugcraft:flow_battery"
     },
@@ -20948,7 +21258,7 @@
       "source": "recipe jugcraft:battery_flow_cell_stack"
     },
     "jugcraft:flow_stack_module": {
-      "numerator": 8339,
+      "numerator": 1121,
       "denominator": 6,
       "source": "recipe jugcraft:battery_flow_stack_module"
     },
@@ -21008,13 +21318,13 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:fluorocarbon_reactor": {
-      "numerator": 15755,
-      "denominator": 3,
+      "numerator": 1727323,
+      "denominator": 384,
       "source": "recipe jugcraft:fluorocarbon_reactor"
     },
     "jugcraft:fluoromonomer_cracker": {
-      "numerator": 19433,
-      "denominator": 6,
+      "numerator": 954395,
+      "denominator": 384,
       "source": "recipe jugcraft:fluoromonomer_cracker"
     },
     "jugcraft:fluorophosphate_precursor": {
@@ -21071,6 +21381,11 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:folded_linen_stack": {
+      "numerator": 789,
+      "denominator": 20,
+      "source": "recipe jugcraft:folded_linen_stack"
     },
     "jugcraft:food_grade_phosphoric_acid": {
       "numerator": 1,
@@ -22297,13 +22612,18 @@
       "denominator": 1,
       "source": "recipe jugcraft:formula"
     },
+    "jugcraft:formulation_press": {
+      "numerator": 234715,
+      "denominator": 384,
+      "source": "recipe jugcraft:formulation_press"
+    },
     "jugcraft:fortress_rifle": {
       "numerator": 180,
       "denominator": 1,
       "source": "recipe jugcraft:fortress_rifle"
     },
     "jugcraft:fortune_module": {
-      "numerator": 20936,
+      "numerator": 19733,
       "denominator": 1,
       "source": "recipe jugcraft:fortune_module"
     },
@@ -22328,7 +22648,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:fracking_rig": {
-      "numerator": 102902,
+      "numerator": 96413,
       "denominator": 3,
       "source": "recipe jugcraft:fracking_rig"
     },
@@ -22368,6 +22688,11 @@
       "source": "recipe jugcraft:fried_puffball"
     },
     "jugcraft:fried_rice": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:friesian_horse_spawn_egg": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -22453,18 +22778,18 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:fuel_cell": {
-      "numerator": 26983,
+      "numerator": 17359,
       "denominator": 8,
       "source": "recipe jugcraft:fuel_cell"
     },
     "jugcraft:fuel_fabricator": {
-      "numerator": 2926,
+      "numerator": 520,
       "denominator": 1,
       "source": "recipe jugcraft:fuel_fabricator"
     },
     "jugcraft:fuel_handling_machine": {
-      "numerator": 3229,
-      "denominator": 2,
+      "numerator": 17673,
+      "denominator": 128,
       "source": "recipe jugcraft:fuel_handling_machine"
     },
     "jugcraft:full_tatami_mat": {
@@ -26432,10 +26757,25 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:garnet_abrasive_head": {
+      "numerator": 908,
+      "denominator": 3,
+      "source": "recipe jugcraft:sands_garnet_abrasive_head"
+    },
+    "jugcraft:garnet_grit": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:garnet_sand": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:garnet_sanding_block": {
+      "numerator": 57,
+      "denominator": 1,
+      "source": "recipe jugcraft:sands_garnet_sanding_block"
     },
     "jugcraft:garrison_rifle": {
       "numerator": 449,
@@ -26443,23 +26783,23 @@
       "source": "recipe jugcraft:garrison_rifle"
     },
     "jugcraft:gas_burning_generator": {
-      "numerator": 6053,
-      "denominator": 2,
+      "numerator": 290953,
+      "denominator": 128,
       "source": "recipe jugcraft:gas_burning_generator"
     },
     "jugcraft:gas_centrifuge_cascade": {
-      "numerator": 2589,
+      "numerator": 183,
       "denominator": 1,
       "source": "recipe jugcraft:gas_centrifuge_cascade"
     },
     "jugcraft:gas_cleaning_rack": {
-      "numerator": 14243,
-      "denominator": 2,
+      "numerator": 815113,
+      "denominator": 128,
       "source": "recipe jugcraft:gas_cleaning_rack"
     },
     "jugcraft:gas_cleanup_rack": {
-      "numerator": 14243,
-      "denominator": 2,
+      "numerator": 815113,
+      "denominator": 128,
       "source": "recipe jugcraft:gas_cleanup_rack"
     },
     "jugcraft:gas_curtain": {
@@ -26483,8 +26823,8 @@
       "source": "recipe jugcraft:gas_mask"
     },
     "jugcraft:gas_turbine": {
-      "numerator": 10259,
-      "denominator": 1,
+      "numerator": 544585,
+      "denominator": 64,
       "source": "recipe jugcraft:gas_turbine"
     },
     "jugcraft:gasification_residue": {
@@ -26538,17 +26878,17 @@
       "source": "recipe jugcraft:gem_of_eternal_density"
     },
     "jugcraft:general_chip_pattern": {
-      "numerator": 2690,
+      "numerator": 2210,
       "denominator": 1,
       "source": "recipe jugcraft:electronics_pattern"
     },
     "jugcraft:geode_cutter": {
-      "numerator": 57331,
+      "numerator": 50113,
       "denominator": 6,
       "source": "recipe jugcraft:geode_cutter"
     },
     "jugcraft:geothermal_generator": {
-      "numerator": 3978,
+      "numerator": 3498,
       "denominator": 1,
       "source": "recipe jugcraft:geothermal_generator"
     },
@@ -26636,6 +26976,11 @@
       "numerator": 272,
       "denominator": 1,
       "source": "recipe jugcraft:giant_fake_spider"
+    },
+    "jugcraft:giant_finnhorse_spawn_egg": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:giant_marrow": {
       "numerator": 9,
@@ -26752,6 +27097,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:glass_tank"
     },
+    "jugcraft:glazed_carrots": {
+      "numerator": 598,
+      "denominator": 3,
+      "source": "recipe jugcraft:glazed_carrots"
+    },
     "jugcraft:gleaming_salad": {
       "numerator": 81,
       "denominator": 1,
@@ -26803,7 +27153,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:glowmouth": {
-      "numerator": 6073,
+      "numerator": 1233,
       "denominator": 4,
       "source": "recipe jugcraft:glowmouth"
     },
@@ -27013,7 +27363,7 @@
       "source": "recipe jugcraft:grenade"
     },
     "jugcraft:grenade_launcher": {
-      "numerator": 648,
+      "numerator": 168,
       "denominator": 1,
       "source": "recipe jugcraft:grenade_launcher"
     },
@@ -27288,7 +27638,7 @@
       "source": "recipe jugcraft:guard_rail"
     },
     "jugcraft:guidance_unit": {
-      "numerator": 4129,
+      "numerator": 520,
       "denominator": 3,
       "source": "recipe jugcraft:rocket_assembly/guidance_unit"
     },
@@ -27308,12 +27658,12 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:h2_monitor": {
-      "numerator": 15923,
+      "numerator": 4403,
       "denominator": 8,
       "source": "recipe jugcraft:h2_monitor"
     },
     "jugcraft:h2_sensor": {
-      "numerator": 705,
+      "numerator": 225,
       "denominator": 1,
       "source": "recipe jugcraft:h2_sensor"
     },
@@ -27467,6 +27817,11 @@
       "denominator": 3,
       "source": "recipe jugcraft:hangar_pad"
     },
+    "jugcraft:hanging_crock_rack": {
+      "numerator": 58,
+      "denominator": 1,
+      "source": "recipe jugcraft:hanging_crock_rack"
+    },
     "jugcraft:hanging_ghost": {
       "numerator": 241,
       "denominator": 8,
@@ -27501,6 +27856,11 @@
       "numerator": 35,
       "denominator": 2,
       "source": "recipe jugcraft:harvest_bunting"
+    },
+    "jugcraft:harvest_centerpiece": {
+      "numerator": 15517,
+      "denominator": 9,
+      "source": "recipe jugcraft:harvest_centerpiece"
     },
     "jugcraft:harvest_crown": {
       "numerator": 4315,
@@ -27537,10 +27897,25 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:harvest_percussion_set": {
+      "numerator": 2381,
+      "denominator": 36,
+      "source": "recipe jugcraft:harvest_percussion_set"
+    },
+    "jugcraft:harvest_photo_backdrop": {
+      "numerator": 5603,
+      "denominator": 9,
+      "source": "recipe jugcraft:harvest_photo_backdrop"
+    },
     "jugcraft:harvest_place_setting": {
       "numerator": 3379,
       "denominator": 45,
       "source": "recipe jugcraft:harvest_place_setting"
+    },
+    "jugcraft:harvest_sampler": {
+      "numerator": 589,
+      "denominator": 20,
+      "source": "recipe jugcraft:harvest_sampler"
     },
     "jugcraft:harvest_scale": {
       "numerator": 1,
@@ -27738,9 +28113,14 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:heliostat": {
-      "numerator": 2613,
-      "denominator": 16,
+      "numerator": 6809,
+      "denominator": 256,
       "source": "recipe jugcraft:heliostat"
+    },
+    "jugcraft:hemp_seeds": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:herb_roasted_mutton": {
       "numerator": 136,
@@ -27961,6 +28341,21 @@
       "numerator": 8453,
       "denominator": 4,
       "source": "recipe jugcraft:high_pressure_extractor"
+    },
+    "jugcraft:high_proof_spirits": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:high_proof_spirits_concentrate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:high_proof_spirits_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:high_purity_boule": {
       "numerator": 8,
@@ -29743,7 +30138,7 @@
       "source": "recipe jugcraft:holly_wreath"
     },
     "jugcraft:holo_table": {
-      "numerator": 13321,
+      "numerator": 9481,
       "denominator": 24,
       "source": "recipe jugcraft:holo_table"
     },
@@ -31333,8 +31728,8 @@
       "source": "recipe jugcraft:newest/homeworks/warped_wall_mirror"
     },
     "jugcraft:homing_rocket": {
-      "numerator": 4153,
-      "denominator": 12,
+      "numerator": 136,
+      "denominator": 3,
       "source": "recipe jugcraft:rocket_assembly/homing_rocket"
     },
     "jugcraft:honey_cookie": {
@@ -33843,7 +34238,7 @@
       "source": "recipe jugcraft:housing_mold"
     },
     "jugcraft:howitzer_walker": {
-      "numerator": 106229,
+      "numerator": 95402,
       "denominator": 9,
       "source": "recipe jugcraft:alloys_howitzer_walker"
     },
@@ -33856,6 +34251,11 @@
       "numerator": 1457,
       "denominator": 1,
       "source": "recipe jugcraft:howling_totem"
+    },
+    "jugcraft:hunting_spear": {
+      "numerator": 24,
+      "denominator": 1,
+      "source": "recipe jugcraft:hunting_spear"
     },
     "jugcraft:hurricane_lamp": {
       "numerator": 1105,
@@ -33928,7 +34328,7 @@
       "source": "recipe jugcraft:hv_chw_tee"
     },
     "jugcraft:hv_control_panel": {
-      "numerator": 43147,
+      "numerator": 35467,
       "denominator": 8,
       "source": "recipe jugcraft:hv_control_panel"
     },
@@ -34073,12 +34473,12 @@
       "source": "recipe jugcraft:hv_plenum_top_outlet"
     },
     "jugcraft:hv_rad_monitor": {
-      "numerator": 12331,
+      "numerator": 4651,
       "denominator": 8,
       "source": "recipe jugcraft:hv_rad_monitor"
     },
     "jugcraft:hv_refrig_monitor": {
-      "numerator": 10795,
+      "numerator": 3115,
       "denominator": 8,
       "source": "recipe jugcraft:hv_refrig_monitor"
     },
@@ -34103,7 +34503,7 @@
       "source": "recipe jugcraft:hv_supply_diffuser"
     },
     "jugcraft:hv_tox_monitor": {
-      "numerator": 10795,
+      "numerator": 3115,
       "denominator": 8,
       "source": "recipe jugcraft:hv_tox_monitor"
     },
@@ -34163,12 +34563,12 @@
       "source": "recipe jugcraft:rocket_assembly/cryo_hydrolox_motor"
     },
     "jugcraft:hydroponic_bay": {
-      "numerator": 6927,
+      "numerator": 5724,
       "denominator": 1,
       "source": "recipe jugcraft:hydroponic_bay"
     },
     "jugcraft:hydrotreater": {
-      "numerator": 5649,
+      "numerator": 4446,
       "denominator": 1,
       "source": "recipe jugcraft:hydrotreater"
     },
@@ -34188,6 +34588,11 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:ice_cream_cake_slice": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:icelandic_horse_spawn_egg": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -34217,9 +34622,14 @@
       "denominator": 1,
       "source": "recipe jugcraft:impetus_shotgun"
     },
+    "jugcraft:incised_earthenware_pot": {
+      "numerator": 54,
+      "denominator": 1,
+      "source": "recipe jugcraft:incised_earthenware_pot"
+    },
     "jugcraft:industrial_fermenter": {
-      "numerator": 6059,
-      "denominator": 2,
+      "numerator": 291337,
+      "denominator": 128,
       "source": "recipe jugcraft:industrial_fermenter"
     },
     "jugcraft:infernal_claws": {
@@ -34333,7 +34743,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:ion_emitter": {
-      "numerator": 1297,
+      "numerator": 94,
       "denominator": 1,
       "source": "recipe jugcraft:ion_emitter"
     },
@@ -34538,12 +34948,12 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:jimta_advanced_battery": {
-      "numerator": 4763,
+      "numerator": 3323,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_advanced_battery"
     },
     "jugcraft:jimta_advanced_battery_pack": {
-      "numerator": 4897,
+      "numerator": 3457,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_advanced_battery_pack"
     },
@@ -34553,22 +34963,22 @@
       "source": "recipe jugcraft:jimtafacts/network/advanced_card"
     },
     "jugcraft:jimta_advanced_crafting_table": {
-      "numerator": 3722,
+      "numerator": 2039,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_industry/jimta_advanced_crafting_table_housing"
     },
     "jugcraft:jimta_advanced_heat_exchanger": {
-      "numerator": 17737,
-      "denominator": 2,
+      "numerator": 1100169,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_reactor/jimta_advanced_heat_exchanger"
     },
     "jugcraft:jimta_advanced_heat_vent": {
-      "numerator": 17481,
-      "denominator": 2,
+      "numerator": 1083785,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_reactor/jimta_advanced_heat_vent"
     },
     "jugcraft:jimta_advanced_ore_scanner": {
-      "numerator": 15661,
+      "numerator": 9172,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_advanced_ore_scanner"
     },
@@ -34623,7 +35033,7 @@
       "source": "recipe jugcraft:jimtafacts_industry/jimta_assembly_table_housing"
     },
     "jugcraft:jimta_auto_workbench": {
-      "numerator": 2438,
+      "numerator": 1958,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_industry/jimta_auto_workbench_housing"
     },
@@ -34663,7 +35073,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:jimta_barter_station": {
-      "numerator": 1172,
+      "numerator": 692,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_personal/barter_station"
     },
@@ -34693,7 +35103,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:jimta_biogas_jetpack": {
-      "numerator": 654,
+      "numerator": 174,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_biogas_jetpack"
     },
@@ -34748,8 +35158,8 @@
       "source": "recipe jugcraft:jimtafacts_industry/jimta_blast_furnace_housing"
     },
     "jugcraft:jimta_block_cutting_machine": {
-      "numerator": 3995,
-      "denominator": 2,
+      "numerator": 159241,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_industry/steel_assembled_cutting_mill"
     },
     "jugcraft:jimta_blue_covered_cable": {
@@ -34788,7 +35198,7 @@
       "source": "recipe jugcraft:jimtafacts/network/blue_smart_dense_cable"
     },
     "jugcraft:jimta_blueprint_library": {
-      "numerator": 2645,
+      "numerator": 725,
       "denominator": 4,
       "source": "recipe jugcraft:jimtafacts_factory/jimta_blueprint_library"
     },
@@ -34993,7 +35403,7 @@
       "source": "recipe jugcraft:jimtafacts/network/certus_quartz_wrench"
     },
     "jugcraft:jimta_cesu": {
-      "numerator": 2194,
+      "numerator": 754,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_industry/jimta_cesu_housing"
     },
@@ -35098,22 +35508,22 @@
       "source": "recipe jugcraft:jimtafacts/network/charged_staff"
     },
     "jugcraft:jimta_chargepad_batbox": {
-      "numerator": 26035,
+      "numerator": 23155,
       "denominator": 6,
       "source": "recipe jugcraft:jimtafacts_infrastructure/chargepad_batbox"
     },
     "jugcraft:jimta_chargepad_cesu": {
-      "numerator": 7975,
+      "numerator": 1486,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_infrastructure/chargepad_cesu"
     },
     "jugcraft:jimta_chargepad_mfe": {
-      "numerator": 50147,
+      "numerator": 45098,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_infrastructure/chargepad_mfe"
     },
     "jugcraft:jimta_chargepad_mfsu": {
-      "numerator": 50219,
+      "numerator": 45170,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_infrastructure/chargepad_mfsu"
     },
@@ -35123,17 +35533,17 @@
       "source": "recipe jugcraft:jimtafacts/network/charger"
     },
     "jugcraft:jimta_charging_advanced_battery": {
-      "numerator": 19180,
+      "numerator": 13420,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_charging_advanced_battery"
     },
     "jugcraft:jimta_charging_energy_crystal": {
-      "numerator": 26104,
+      "numerator": 20344,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_charging_energy_crystal"
     },
     "jugcraft:jimta_charging_lapotron_crystal": {
-      "numerator": 233128,
+      "numerator": 212932,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_charging_lapotron_crystal"
     },
@@ -35143,7 +35553,7 @@
       "source": "recipe jugcraft:jimtafacts_gear/jimta_charging_re_battery"
     },
     "jugcraft:jimta_charging_table": {
-      "numerator": 2203,
+      "numerator": 763,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_tables/charging"
     },
@@ -35218,43 +35628,43 @@
       "source": "recipe jugcraft:jimtafacts_factory/jimta_chute"
     },
     "jugcraft:jimta_civil_advanced_miner": {
-      "numerator": 28073,
-      "denominator": 2,
+      "numerator": 1392265,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_infrastructure/advanced_miner"
     },
     "jugcraft:jimta_civil_builder": {
-      "numerator": 7457,
-      "denominator": 2,
+      "numerator": 288265,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_civil/builder"
     },
     "jugcraft:jimta_civil_filler": {
-      "numerator": 10017,
-      "denominator": 2,
+      "numerator": 452105,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_civil/filler"
     },
     "jugcraft:jimta_civil_flood_gate": {
-      "numerator": 8865,
-      "denominator": 2,
+      "numerator": 378377,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_civil/flood_gate"
     },
     "jugcraft:jimta_civil_miner": {
-      "numerator": 26899,
-      "denominator": 6,
+      "numerator": 1154587,
+      "denominator": 384,
       "source": "recipe jugcraft:jimtafacts_infrastructure/miner"
     },
     "jugcraft:jimta_civil_mining_well": {
-      "numerator": 8881,
-      "denominator": 2,
+      "numerator": 379401,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_civil/mining_well"
     },
     "jugcraft:jimta_civil_quarry": {
-      "numerator": 23713,
-      "denominator": 2,
+      "numerator": 1328649,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_civil/quarry"
     },
     "jugcraft:jimta_civil_replacer": {
-      "numerator": 8025,
-      "denominator": 2,
+      "numerator": 324617,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_civil/replacer"
     },
     "jugcraft:jimta_civil_terraformer": {
@@ -35303,23 +35713,23 @@
       "source": "recipe jugcraft:jimtafacts/network/color_applicator"
     },
     "jugcraft:jimta_combustion_engine": {
-      "numerator": 4062,
+      "numerator": 3582,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_engines/combustion_engine"
     },
     "jugcraft:jimta_compact_reactor": {
-      "numerator": 28295,
-      "denominator": 8,
+      "numerator": 263737,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_reactor/core"
     },
     "jugcraft:jimta_component_heat_exchanger": {
-      "numerator": 2889,
-      "denominator": 2,
+      "numerator": 88457,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_reactor/jimta_component_heat_exchanger"
     },
     "jugcraft:jimta_component_heat_vent": {
-      "numerator": 1737,
-      "denominator": 2,
+      "numerator": 76169,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_reactor/jimta_component_heat_vent"
     },
     "jugcraft:jimta_compressed_coal_ball": {
@@ -35338,7 +35748,7 @@
       "source": "recipe jugcraft:jimta_computer_cable"
     },
     "jugcraft:jimta_computer_computer_advanced": {
-      "numerator": 125615,
+      "numerator": 67871,
       "denominator": 24,
       "source": "recipe jugcraft:jimta_computer_computer_advanced"
     },
@@ -35348,7 +35758,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:jimta_computer_computer_normal": {
-      "numerator": 67247,
+      "numerator": 9503,
       "denominator": 24,
       "source": "recipe jugcraft:jimta_computer_computer_normal"
     },
@@ -35383,12 +35793,12 @@
       "source": "recipe jugcraft:jimta_computer_speaker"
     },
     "jugcraft:jimta_computer_turtle_advanced": {
-      "numerator": 566447,
+      "numerator": 508703,
       "denominator": 24,
       "source": "recipe jugcraft:jimta_computer_turtle_advanced"
     },
     "jugcraft:jimta_computer_turtle_normal": {
-      "numerator": 124079,
+      "numerator": 66335,
       "denominator": 24,
       "source": "recipe jugcraft:jimta_computer_turtle_normal"
     },
@@ -35488,8 +35898,8 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:jimta_core_heat_exchanger": {
-      "numerator": 5705,
-      "denominator": 2,
+      "numerator": 330121,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_reactor/jimta_core_heat_exchanger"
     },
     "jugcraft:jimta_cowboy_hat": {
@@ -35543,12 +35953,12 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:jimta_crop_analyzer": {
-      "numerator": 2099,
+      "numerator": 659,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_crop_analyzer"
     },
     "jugcraft:jimta_crop_harvester": {
-      "numerator": 3855,
+      "numerator": 3375,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_industry/jimta_crop_harvester_housing"
     },
@@ -35558,8 +35968,8 @@
       "source": "recipe jugcraft:jimtafacts_crops/sticks"
     },
     "jugcraft:jimta_cropmatron": {
-      "numerator": 4675,
-      "denominator": 4,
+      "numerator": 53161,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_infrastructure/cropmatron"
     },
     "jugcraft:jimta_cross_necklace": {
@@ -35703,7 +36113,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:jimta_detector_cable": {
-      "numerator": 7623,
+      "numerator": 5217,
       "denominator": 2,
       "source": "recipe jugcraft:jimtafacts_cables/detector"
     },
@@ -35713,8 +36123,8 @@
       "source": "recipe jugcraft:jimtafacts_industry/diamond_cutting_blade"
     },
     "jugcraft:jimta_diamond_drill": {
-      "numerator": 114373,
-      "denominator": 6,
+      "numerator": 6568603,
+      "denominator": 384,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_diamond_drill"
     },
     "jugcraft:jimta_diamond_dust": {
@@ -35758,23 +36168,23 @@
       "source": "recipe jugcraft:jimtafacts_gear/dynamite"
     },
     "jugcraft:jimta_dynamite_remote": {
-      "numerator": 2243,
+      "numerator": 803,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_gear/dynamite_remote"
     },
     "jugcraft:jimta_ejector_upgrade": {
-      "numerator": 7907,
+      "numerator": 4067,
       "denominator": 8,
       "source": "recipe jugcraft:jimtafacts_upgrades/ejector"
     },
     "jugcraft:jimta_electric_boat": {
-      "numerator": 6079,
-      "denominator": 6,
+      "numerator": 99739,
+      "denominator": 384,
       "source": "recipe jugcraft:jimtafacts_utilities/electric_boat"
     },
     "jugcraft:jimta_electric_engine": {
-      "numerator": 8131,
-      "denominator": 6,
+      "numerator": 231067,
+      "denominator": 384,
       "source": "recipe jugcraft:jimtafacts_engines/electric_engine"
     },
     "jugcraft:jimta_electric_furnace": {
@@ -35783,37 +36193,37 @@
       "source": "recipe jugcraft:jimtafacts_industry/jimta_electric_furnace_housing"
     },
     "jugcraft:jimta_electric_heat_generator": {
-      "numerator": 10681,
-      "denominator": 6,
+      "numerator": 394267,
+      "denominator": 384,
       "source": "recipe jugcraft:jimtafacts_heat/electric_heat_generator"
     },
     "jugcraft:jimta_electric_hoe": {
-      "numerator": 11729,
-      "denominator": 6,
+      "numerator": 461339,
+      "denominator": 384,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_electric_hoe"
     },
     "jugcraft:jimta_electric_jetpack": {
-      "numerator": 10568,
-      "denominator": 3,
+      "numerator": 248219,
+      "denominator": 192,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_electric_jetpack"
     },
     "jugcraft:jimta_electric_kinetic_generator": {
-      "numerator": 16825,
-      "denominator": 6,
+      "numerator": 787483,
+      "denominator": 384,
       "source": "recipe jugcraft:jimtafacts_heat/electric_kinetic_generator"
     },
     "jugcraft:jimta_electric_treetap": {
-      "numerator": 3260,
+      "numerator": 1820,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_electric_treetap"
     },
     "jugcraft:jimta_electric_wrench": {
-      "numerator": 5132,
+      "numerator": 3692,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_electric_wrench"
     },
     "jugcraft:jimta_electrolyzer": {
-      "numerator": 32677,
+      "numerator": 25459,
       "denominator": 6,
       "source": "recipe jugcraft:jimtafacts_industry/jimta_electrolyzer_housing"
     },
@@ -35853,7 +36263,7 @@
       "source": "recipe jugcraft:jimtafacts/network/energy_cell"
     },
     "jugcraft:jimta_energy_crystal": {
-      "numerator": 6494,
+      "numerator": 5054,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_industry/energium_crystal"
     },
@@ -35863,22 +36273,22 @@
       "source": "recipe jugcraft:jimtafacts/network/energy_level_emitter"
     },
     "jugcraft:jimta_energy_meter": {
-      "numerator": 2255,
+      "numerator": 815,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_energy_meter"
     },
     "jugcraft:jimta_energy_pack": {
-      "numerator": 58384,
+      "numerator": 53335,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_energy_pack"
     },
     "jugcraft:jimta_energy_storage_upgrade": {
-      "numerator": 16513,
+      "numerator": 4993,
       "denominator": 24,
       "source": "recipe jugcraft:jimtafacts_upgrades/energy_storage"
     },
     "jugcraft:jimta_energy_vendor": {
-      "numerator": 28825,
+      "numerator": 25945,
       "denominator": 6,
       "source": "recipe jugcraft:jimtafacts_personal/energy_vendor"
     },
@@ -35908,7 +36318,7 @@
       "source": "recipe jugcraft:jimta_eternal_steak_campfire_cooking"
     },
     "jugcraft:jimta_ev_transformer": {
-      "numerator": 363793,
+      "numerator": 207949,
       "denominator": 54,
       "source": "recipe jugcraft:jimtafacts_services/jimta_ev_transformer"
     },
@@ -35933,7 +36343,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:jimta_factory_debugger": {
-      "numerator": 2051,
+      "numerator": 611,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_factory/jimta_factory_debugger"
     },
@@ -35943,7 +36353,7 @@
       "source": "recipe jugcraft:jimtafacts_factory/frame"
     },
     "jugcraft:jimta_factory_goggles": {
-      "numerator": 2569,
+      "numerator": 649,
       "denominator": 4,
       "source": "recipe jugcraft:jimtafacts_factory/factory_goggles"
     },
@@ -35968,7 +36378,7 @@
       "source": "recipe jugcraft:jimtafacts_factory/jimta_factory_heat_middle"
     },
     "jugcraft:jimta_factory_heat_start": {
-      "numerator": 4437,
+      "numerator": 2517,
       "denominator": 4,
       "source": "recipe jugcraft:jimtafacts_factory/jimta_factory_heat_start"
     },
@@ -36008,8 +36418,8 @@
       "source": "recipe jugcraft:jimtafacts_factory/panel_warning"
     },
     "jugcraft:jimta_factory_pump": {
-      "numerator": 4199,
-      "denominator": 4,
+      "numerator": 37929,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_factory/jimta_factory_pump"
     },
     "jugcraft:jimta_fe_p2p_tunnel": {
@@ -36028,7 +36438,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:jimta_filler_planner": {
-      "numerator": 772,
+      "numerator": 292,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_factory/filler_planner"
     },
@@ -36143,8 +36553,8 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:jimta_fluid_bottler": {
-      "numerator": 2967,
-      "denominator": 2,
+      "numerator": 93449,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_matter/jimta_fluid_bottler"
     },
     "jugcraft:jimta_fluid_cell": {
@@ -36163,7 +36573,7 @@
       "source": "recipe jugcraft:jimtafacts_services/fluid_distributor"
     },
     "jugcraft:jimta_fluid_ejector_upgrade": {
-      "numerator": 14051,
+      "numerator": 10211,
       "denominator": 8,
       "source": "recipe jugcraft:jimtafacts_upgrades/fluid_ejector"
     },
@@ -36173,13 +36583,13 @@
       "source": "recipe jugcraft:jimtafacts/network/fluid_export_bus"
     },
     "jugcraft:jimta_fluid_filter": {
-      "numerator": 1600,
+      "numerator": 1120,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_automation/jimta_fluid_filter"
     },
     "jugcraft:jimta_fluid_heat_generator": {
-      "numerator": 55141,
-      "denominator": 24,
+      "numerator": 777259,
+      "denominator": 384,
       "source": "recipe jugcraft:jimtafacts_heat/fluid_heat_generator"
     },
     "jugcraft:jimta_fluid_import_bus": {
@@ -36193,8 +36603,8 @@
       "source": "recipe jugcraft:jimtafacts/network/fluid_p2p_tunnel"
     },
     "jugcraft:jimta_fluid_regulator": {
-      "numerator": 1943,
-      "denominator": 2,
+      "numerator": 27913,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_services/fluid_regulator"
     },
     "jugcraft:jimta_fluid_storage_bus": {
@@ -36343,7 +36753,7 @@
       "source": "recipe jugcraft:jimtafacts_production/fragile_fluid_shard"
     },
     "jugcraft:jimta_frequency_transmitter": {
-      "numerator": 1728,
+      "numerator": 1248,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_infrastructure/transmitter"
     },
@@ -36393,24 +36803,24 @@
       "source": "recipe jugcraft:jimtafacts_automation/jimta_gate_expansion_timer"
     },
     "jugcraft:jimta_gate_gold_and": {
-      "numerator": 9088,
+      "numerator": 7648,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_industry/integrate_gate_and_gold"
     },
     "jugcraft:jimta_gate_gold_or": {
-      "numerator": 9088,
+      "numerator": 7648,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_industry/integrate_gate_or_gold"
     },
     "jugcraft:jimta_gate_iron_and": {
-      "numerator": 1092,
-      "denominator": 1,
-      "source": "recipe jugcraft:jimtafacts_automation/jimta_gate_iron_and"
+      "numerator": 2272,
+      "denominator": 3,
+      "source": "recipe jugcraft:jimtafacts_industry/integrate_gate_and_iron"
     },
     "jugcraft:jimta_gate_iron_or": {
-      "numerator": 1088,
-      "denominator": 1,
-      "source": "recipe jugcraft:jimtafacts_automation/jimta_gate_iron_or"
+      "numerator": 2272,
+      "denominator": 3,
+      "source": "recipe jugcraft:jimtafacts_industry/integrate_gate_or_iron"
     },
     "jugcraft:jimta_gate_modifier_diamond": {
       "numerator": 16896,
@@ -36448,7 +36858,7 @@
       "source": "recipe jugcraft:jimtafacts_industry/jimta_generator_housing"
     },
     "jugcraft:jimta_geothermal_generator": {
-      "numerator": 3978,
+      "numerator": 3498,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_industry/jimta_geothermal_generator_housing"
     },
@@ -36603,8 +37013,8 @@
       "source": "recipe jugcraft:jimtafacts_industry/heat_conductor"
     },
     "jugcraft:jimta_heat_exchanger": {
-      "numerator": 1865,
-      "denominator": 2,
+      "numerator": 84361,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_reactor/jimta_heat_exchanger"
     },
     "jugcraft:jimta_heat_plating": {
@@ -36613,8 +37023,8 @@
       "source": "recipe jugcraft:jimtafacts_reactor/jimta_heat_plating"
     },
     "jugcraft:jimta_heat_vent": {
-      "numerator": 1609,
-      "denominator": 2,
+      "numerator": 67977,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_reactor/jimta_heat_vent"
     },
     "jugcraft:jimta_helium_flamingo": {
@@ -36638,7 +37048,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:jimta_hv_transformer": {
-      "numerator": 91460,
+      "numerator": 46019,
       "denominator": 27,
       "source": "recipe jugcraft:jimtafacts_services/jimta_hv_transformer"
     },
@@ -36708,17 +37118,17 @@
       "source": "recipe jugcraft:jimtafacts_gear/jimta_industrial_bronze_sword"
     },
     "jugcraft:jimta_industrial_chainsaw": {
-      "numerator": 13265,
-      "denominator": 6,
+      "numerator": 559643,
+      "denominator": 384,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_industrial_chainsaw"
     },
     "jugcraft:jimta_industrial_drill": {
-      "numerator": 8365,
-      "denominator": 6,
+      "numerator": 246043,
+      "denominator": 384,
       "source": "recipe jugcraft:jimtafacts_industry/lathed_drill"
     },
     "jugcraft:jimta_industrial_night_vision_goggles": {
-      "numerator": 23113,
+      "numerator": 18793,
       "denominator": 9,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_industrial_night_vision_goggles"
     },
@@ -36758,7 +37168,7 @@
       "source": "recipe jugcraft:jimtafacts_cables/insulated_tin"
     },
     "jugcraft:jimta_integration_table": {
-      "numerator": 7378,
+      "numerator": 5938,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_industry/jimta_integration_table_housing"
     },
@@ -36793,8 +37203,8 @@
       "source": "recipe jugcraft:jimtafacts_industry/iridium_composite"
     },
     "jugcraft:jimta_iridium_drill": {
-      "numerator": 287777,
-      "denominator": 6,
+      "numerator": 16558235,
+      "denominator": 384,
       "source": "recipe jugcraft:jimtafacts_industry/iridium_drill_composite"
     },
     "jugcraft:jimta_iridium_shard": {
@@ -36868,7 +37278,7 @@
       "source": "recipe jugcraft:jimtafacts/network/item_cell_housing"
     },
     "jugcraft:jimta_item_filter": {
-      "numerator": 896,
+      "numerator": 416,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_automation/jimta_item_filter"
     },
@@ -36903,8 +37313,8 @@
       "source": "recipe jugcraft:jimtafacts/network/item_storage_cell_64k"
     },
     "jugcraft:jimta_kinetic_dynamo": {
-      "numerator": 6055,
-      "denominator": 6,
+      "numerator": 98203,
+      "denominator": 384,
       "source": "recipe jugcraft:jimtafacts_engines/kinetic_dynamo"
     },
     "jugcraft:jimta_kitty_slippers": {
@@ -36913,12 +37323,12 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:jimta_lap_pack": {
-      "numerator": 6628,
+      "numerator": 5188,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_lap_pack"
     },
     "jugcraft:jimta_lapis_condensator": {
-      "numerator": 4224,
+      "numerator": 3744,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_reactor/jimta_lapis_condensator"
     },
@@ -36933,7 +37343,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:jimta_lapotron_crystal": {
-      "numerator": 58250,
+      "numerator": 53201,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_lapotron_crystal"
     },
@@ -37128,7 +37538,7 @@
       "source": "recipe jugcraft:jimtafacts/network/light_p2p_tunnel"
     },
     "jugcraft:jimta_light_sensor": {
-      "numerator": 1679,
+      "numerator": 1199,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_automation/jimta_light_sensor"
     },
@@ -37168,8 +37578,8 @@
       "source": "recipe jugcraft:jimtafacts/network/lime_smart_dense_cable"
     },
     "jugcraft:jimta_liquid_heat_exchanger": {
-      "numerator": 39781,
-      "denominator": 24,
+      "numerator": 531499,
+      "denominator": 384,
       "source": "recipe jugcraft:jimtafacts_heat/liquid_heat_exchanger"
     },
     "jugcraft:jimta_lithium_cell": {
@@ -37243,7 +37653,7 @@
       "source": "recipe jugcraft:jimtafacts/network/magenta_smart_dense_cable"
     },
     "jugcraft:jimta_magnetizer": {
-      "numerator": 1643,
+      "numerator": 683,
       "denominator": 2,
       "source": "recipe jugcraft:jimtafacts_infrastructure/magnetizer"
     },
@@ -37263,7 +37673,7 @@
       "source": "recipe jugcraft:jimtafacts_factory/marker_connector"
     },
     "jugcraft:jimta_mass_fabricator": {
-      "numerator": 10770,
+      "numerator": 8364,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_matter/jimta_mass_fabricator"
     },
@@ -37278,12 +37688,12 @@
       "source": "recipe jugcraft:jimtafacts/network/matter_cannon"
     },
     "jugcraft:jimta_matter_replicator": {
-      "numerator": 10840,
+      "numerator": 8434,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_matter/jimta_matter_replicator"
     },
     "jugcraft:jimta_matter_scanner": {
-      "numerator": 11159,
+      "numerator": 8753,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_matter/jimta_matter_scanner"
     },
@@ -37328,17 +37738,17 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:jimta_mfe": {
-      "numerator": 48218,
+      "numerator": 44609,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_industry/jimta_mfe_housing"
     },
     "jugcraft:jimta_mfsu": {
-      "numerator": 48290,
+      "numerator": 44681,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_industry/jimta_mfsu_housing"
     },
     "jugcraft:jimta_mfsu_upgrade_kit": {
-      "numerator": 2590,
+      "numerator": 184,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_utilities/mfsu_upgrade_kit"
     },
@@ -37348,7 +37758,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:jimta_mining_laser": {
-      "numerator": 40505,
+      "numerator": 31847,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_mining_laser"
     },
@@ -37413,7 +37823,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:jimta_mv_transformer": {
-      "numerator": 3221,
+      "numerator": 1781,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_services/jimta_mv_transformer"
     },
@@ -37428,27 +37838,27 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:jimta_nano_boots": {
-      "numerator": 13421,
+      "numerator": 8372,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_nano_boots"
     },
     "jugcraft:jimta_nano_chestplate": {
-      "numerator": 16493,
+      "numerator": 11444,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_nano_chestplate"
     },
     "jugcraft:jimta_nano_helmet": {
-      "numerator": 14189,
+      "numerator": 9140,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_nano_helmet"
     },
     "jugcraft:jimta_nano_leggings": {
-      "numerator": 15725,
+      "numerator": 10676,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_nano_leggings"
     },
     "jugcraft:jimta_nano_saber": {
-      "numerator": 34928,
+      "numerator": 29879,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_nano_saber"
     },
@@ -37508,12 +37918,12 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:jimta_nuclear_charge": {
-      "numerator": 16631,
+      "numerator": 8951,
       "denominator": 16,
       "source": "recipe jugcraft:jimtafacts_industry/jimta_nuclear_charge"
     },
     "jugcraft:jimta_obscurator": {
-      "numerator": 14387,
+      "numerator": 4763,
       "denominator": 8,
       "source": "recipe jugcraft:jimtafacts_utilities/obscurator"
     },
@@ -37578,18 +37988,18 @@
       "source": "recipe jugcraft:jimtafacts/network/orange_smart_dense_cable"
     },
     "jugcraft:jimta_ore_scanner": {
-      "numerator": 5315,
+      "numerator": 3875,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_ore_scanner"
     },
     "jugcraft:jimta_ore_washing_plant": {
-      "numerator": 2697,
+      "numerator": 2217,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_industry/jimta_ore_washing_plant_housing"
     },
     "jugcraft:jimta_overclocked_heat_vent": {
-      "numerator": 5193,
-      "denominator": 2,
+      "numerator": 297353,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_reactor/jimta_overclocked_heat_vent"
     },
     "jugcraft:jimta_overclocker_upgrade": {
@@ -37643,7 +38053,7 @@
       "source": "recipe jugcraft:jimtafacts/network/pattern_provider"
     },
     "jugcraft:jimta_pattern_storage": {
-      "numerator": 10833,
+      "numerator": 8427,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_matter/jimta_pattern_storage"
     },
@@ -37738,42 +38148,42 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:jimta_pipe_daizuli_item": {
-      "numerator": 17889,
+      "numerator": 17409,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_transport/jimta_pipe_daizuli_item"
     },
     "jugcraft:jimta_pipe_diamond_fluid": {
-      "numerator": 272405,
+      "numerator": 264725,
       "denominator": 16,
       "source": "recipe jugcraft:jimtafacts_transport/waterproof_diamond_fluid"
     },
     "jugcraft:jimta_pipe_diamond_item": {
-      "numerator": 17025,
+      "numerator": 16545,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_transport/jimta_pipe_diamond_item"
     },
     "jugcraft:jimta_pipe_diamond_power": {
-      "numerator": 17089,
+      "numerator": 16609,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_transport/jimta_pipe_diamond_power"
     },
     "jugcraft:jimta_pipe_diamond_wood_fluid": {
-      "numerator": 272533,
+      "numerator": 264853,
       "denominator": 16,
       "source": "recipe jugcraft:jimtafacts_transport/waterproof_diamond_wood_fluid"
     },
     "jugcraft:jimta_pipe_diamond_wood_item": {
-      "numerator": 17033,
+      "numerator": 16553,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_transport/jimta_pipe_diamond_wood_item"
     },
     "jugcraft:jimta_pipe_diamond_wood_power": {
-      "numerator": 17097,
+      "numerator": 16617,
       "denominator": 8,
       "source": "recipe jugcraft:jimtafacts_transport/jimta_pipe_diamond_wood_power"
     },
     "jugcraft:jimta_pipe_emzuli_item": {
-      "numerator": 33409,
+      "numerator": 32929,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_transport/jimta_pipe_emzuli_item"
     },
@@ -37828,7 +38238,7 @@
       "source": "recipe jugcraft:jimtafacts_transport/jimta_pipe_obsidian_item"
     },
     "jugcraft:jimta_pipe_power_adaptor": {
-      "numerator": 123163,
+      "numerator": 88603,
       "denominator": 72,
       "source": "recipe jugcraft:jimtafacts_transport/pipe_power_adaptor"
     },
@@ -37878,7 +38288,7 @@
       "source": "recipe jugcraft:jimtafacts_transport/jimta_pipe_stone_power"
     },
     "jugcraft:jimta_pipe_stripes_item": {
-      "numerator": 4737,
+      "numerator": 4257,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_transport/jimta_pipe_stripes_item"
     },
@@ -37983,17 +38393,17 @@
       "source": "recipe jugcraft:jimtafacts_transport/jimta_pipe_wire_yellow"
     },
     "jugcraft:jimta_pipe_wood_fluid": {
-      "numerator": 10517,
+      "numerator": 2837,
       "denominator": 16,
       "source": "recipe jugcraft:jimtafacts_transport/waterproof_wood_fluid"
     },
     "jugcraft:jimta_pipe_wood_item": {
-      "numerator": 657,
+      "numerator": 177,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_transport/jimta_pipe_wood_item"
     },
     "jugcraft:jimta_pipe_wood_power": {
-      "numerator": 721,
+      "numerator": 241,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_transport/jimta_pipe_wood_power"
     },
@@ -38003,7 +38413,7 @@
       "source": "recipe jugcraft:jimtafacts_production/plant_ball"
     },
     "jugcraft:jimta_plasma_launcher": {
-      "numerator": 55462,
+      "numerator": 41755,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_plasma_launcher"
     },
@@ -38018,12 +38428,12 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:jimta_pocket_computer_advanced": {
-      "numerator": 116423,
+      "numerator": 58679,
       "denominator": 24,
       "source": "recipe jugcraft:jimta_pocket_computer_advanced"
     },
     "jugcraft:jimta_pocket_computer_normal": {
-      "numerator": 67271,
+      "numerator": 9527,
       "denominator": 24,
       "source": "recipe jugcraft:jimta_pocket_computer_normal"
     },
@@ -38088,13 +38498,13 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:jimta_power_tester": {
-      "numerator": 2688,
+      "numerator": 2208,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_factory/jimta_power_tester"
     },
     "jugcraft:jimta_power_unit": {
-      "numerator": 19183,
-      "denominator": 6,
+      "numerator": 476443,
+      "denominator": 384,
       "source": "recipe jugcraft:jimtafacts_industry/power_unit"
     },
     "jugcraft:jimta_printed_book": {
@@ -38138,17 +38548,17 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:jimta_programming_table": {
-      "numerator": 4135,
+      "numerator": 526,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_tables/programming"
     },
     "jugcraft:jimta_pulling_upgrade": {
-      "numerator": 7915,
+      "numerator": 4075,
       "denominator": 8,
       "source": "recipe jugcraft:jimtafacts_upgrades/pulling"
     },
     "jugcraft:jimta_pulsar": {
-      "numerator": 1099,
+      "numerator": 619,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_automation/jimta_pulsar"
     },
@@ -38193,12 +38603,12 @@
       "source": "recipe jugcraft:jimtafacts_cables/quad_insulated_iron"
     },
     "jugcraft:jimta_quantum_boots": {
-      "numerator": 247555,
+      "numerator": 233848,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_quantum_boots"
     },
     "jugcraft:jimta_quantum_chestplate": {
-      "numerator": 250627,
+      "numerator": 236920,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_quantum_chestplate"
     },
@@ -38208,12 +38618,12 @@
       "source": "recipe jugcraft:jimtafacts/network/quantum_entangled_singularity"
     },
     "jugcraft:jimta_quantum_helmet": {
-      "numerator": 248323,
+      "numerator": 234616,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_quantum_helmet"
     },
     "jugcraft:jimta_quantum_leggings": {
-      "numerator": 249859,
+      "numerator": 236152,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_quantum_leggings"
     },
@@ -38313,13 +38723,13 @@
       "source": "recipe jugcraft:jimtafacts/network/quartz_wall"
     },
     "jugcraft:jimta_radioisotope_generator": {
-      "numerator": 55213,
-      "denominator": 24,
+      "numerator": 778411,
+      "denominator": 384,
       "source": "recipe jugcraft:jimtafacts_heat/radioisotope_generator"
     },
     "jugcraft:jimta_radioisotope_heat_generator": {
-      "numerator": 48997,
-      "denominator": 24,
+      "numerator": 678955,
+      "denominator": 384,
       "source": "recipe jugcraft:jimtafacts_heat/radioisotope_heat_generator"
     },
     "jugcraft:jimta_raw_crystal_memory": {
@@ -38348,8 +38758,8 @@
       "source": "recipe jugcraft:jimtafacts_reactor/fluid_port"
     },
     "jugcraft:jimta_reactor_heat_vent": {
-      "numerator": 1801,
-      "denominator": 2,
+      "numerator": 80265,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_reactor/jimta_reactor_heat_vent"
     },
     "jugcraft:jimta_reactor_plating": {
@@ -38413,7 +38823,7 @@
       "source": "recipe jugcraft:jimtafacts/network/redstone_card"
     },
     "jugcraft:jimta_redstone_condensator": {
-      "numerator": 1024,
+      "numerator": 544,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_reactor/jimta_redstone_condensator"
     },
@@ -38423,7 +38833,7 @@
       "source": "recipe jugcraft:jimtafacts_engines/redstone_engine"
     },
     "jugcraft:jimta_redstone_inverter_upgrade": {
-      "numerator": 5667,
+      "numerator": 1827,
       "denominator": 8,
       "source": "recipe jugcraft:jimtafacts_upgrades/redstone_inverter"
     },
@@ -38548,68 +38958,68 @@
       "source": "recipe jugcraft:jimtafacts_robots/program_stripes"
     },
     "jugcraft:jimta_robot_bomber": {
-      "numerator": 6557,
-      "denominator": 2,
+      "numerator": 230665,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_robots/robot_bomber"
     },
     "jugcraft:jimta_robot_breaker": {
-      "numerator": 6685,
-      "denominator": 2,
+      "numerator": 238857,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_robots/robot_breaker"
     },
     "jugcraft:jimta_robot_builder": {
-      "numerator": 6301,
-      "denominator": 2,
+      "numerator": 214281,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_robots/robot_builder"
     },
     "jugcraft:jimta_robot_butcher": {
-      "numerator": 6301,
-      "denominator": 2,
+      "numerator": 214281,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_robots/robot_butcher"
     },
     "jugcraft:jimta_robot_carrier": {
-      "numerator": 6301,
-      "denominator": 2,
+      "numerator": 214281,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_robots/robot_carrier"
     },
     "jugcraft:jimta_robot_clean": {
-      "numerator": 6269,
-      "denominator": 2,
+      "numerator": 212233,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_robots/robot_clean"
     },
     "jugcraft:jimta_robot_crafter": {
-      "numerator": 6237,
-      "denominator": 2,
+      "numerator": 210185,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_robots/robot_crafter"
     },
     "jugcraft:jimta_robot_delivery": {
-      "numerator": 6181,
-      "denominator": 2,
+      "numerator": 206601,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_robots/robot_delivery"
     },
     "jugcraft:jimta_robot_farmer": {
-      "numerator": 7213,
-      "denominator": 2,
+      "numerator": 272649,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_robots/robot_farmer"
     },
     "jugcraft:jimta_robot_fluid_carrier": {
-      "numerator": 7709,
-      "denominator": 2,
+      "numerator": 304393,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_robots/robot_fluid_carrier"
     },
     "jugcraft:jimta_robot_harvester": {
-      "numerator": 6221,
-      "denominator": 2,
+      "numerator": 209161,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_robots/robot_harvester"
     },
     "jugcraft:jimta_robot_knight": {
-      "numerator": 7205,
-      "denominator": 2,
+      "numerator": 272137,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_robots/robot_knight"
     },
     "jugcraft:jimta_robot_leafcutter": {
-      "numerator": 7197,
-      "denominator": 2,
+      "numerator": 271625,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_robots/robot_leafcutter"
     },
     "jugcraft:jimta_robot_linker": {
@@ -38618,38 +39028,38 @@
       "source": "recipe jugcraft:jimtafacts_robots/robot_linker"
     },
     "jugcraft:jimta_robot_lumberjack": {
-      "numerator": 6237,
-      "denominator": 2,
+      "numerator": 210185,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_robots/robot_lumberjack"
     },
     "jugcraft:jimta_robot_miner": {
-      "numerator": 7725,
-      "denominator": 2,
+      "numerator": 305417,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_robots/robot_miner"
     },
     "jugcraft:jimta_robot_picker": {
-      "numerator": 8861,
-      "denominator": 2,
+      "numerator": 378121,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_robots/robot_picker"
     },
     "jugcraft:jimta_robot_planter": {
-      "numerator": 6205,
-      "denominator": 2,
+      "numerator": 208137,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_robots/robot_planter"
     },
     "jugcraft:jimta_robot_pump": {
-      "numerator": 6175,
-      "denominator": 2,
+      "numerator": 206217,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_robots/robot_pump"
     },
     "jugcraft:jimta_robot_shovelman": {
-      "numerator": 6701,
-      "denominator": 2,
+      "numerator": 239881,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_robots/robot_shovelman"
     },
     "jugcraft:jimta_robot_stripes": {
-      "numerator": 6175,
-      "denominator": 2,
+      "numerator": 206217,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_robots/robot_stripes"
     },
     "jugcraft:jimta_rooted_boots": {
@@ -38993,8 +39403,8 @@
       "source": "recipe jugcraft:jimtafacts_reactor/plutonium_small_divide"
     },
     "jugcraft:jimta_small_power_unit": {
-      "numerator": 4513,
-      "denominator": 6,
+      "numerator": 183835,
+      "denominator": 384,
       "source": "recipe jugcraft:jimtafacts_industry/small_power_unit"
     },
     "jugcraft:jimta_small_quartz_bud": {
@@ -39093,13 +39503,13 @@
       "source": "recipe jugcraft:jimtafacts_industry/jimta_solar_generator_housing"
     },
     "jugcraft:jimta_solar_helmet": {
-      "numerator": 4400,
+      "numerator": 2960,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_solar_helmet"
     },
     "jugcraft:jimta_solid_canner": {
-      "numerator": 3477,
-      "denominator": 2,
+      "numerator": 126089,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_matter/jimta_solid_canner"
     },
     "jugcraft:jimta_solid_heat_generator": {
@@ -39108,7 +39518,7 @@
       "source": "recipe jugcraft:jimtafacts_heat/solid_heat_generator"
     },
     "jugcraft:jimta_sorting_machine": {
-      "numerator": 896,
+      "numerator": 416,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_factory/jimta_sorting_machine_housing"
     },
@@ -40948,12 +41358,12 @@
       "source": "recipe jugcraft:jimtafacts_guides/workshop_guide"
     },
     "jugcraft:jimta_splitter_cable": {
-      "numerator": 7103,
+      "numerator": 4697,
       "denominator": 2,
       "source": "recipe jugcraft:jimtafacts_cables/splitter"
     },
     "jugcraft:jimta_static_boots": {
-      "numerator": 2054,
+      "numerator": 614,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_static_boots"
     },
@@ -40968,12 +41378,12 @@
       "source": "recipe jugcraft:jimtafacts_services/steam_condenser"
     },
     "jugcraft:jimta_steam_generator": {
-      "numerator": 1037,
+      "numerator": 557,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_industry/assembled_boiler"
     },
     "jugcraft:jimta_steam_kinetic_generator": {
-      "numerator": 673,
+      "numerator": 193,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_industry/assembled_turbine"
     },
@@ -41008,13 +41418,13 @@
       "source": "recipe jugcraft:jimtafacts_engines/stirling_engine"
     },
     "jugcraft:jimta_stirling_generator": {
-      "numerator": 45061,
-      "denominator": 24,
+      "numerator": 615979,
+      "denominator": 384,
       "source": "recipe jugcraft:jimtafacts_heat/stirling_generator"
     },
     "jugcraft:jimta_stirling_kinetic_generator": {
-      "numerator": 45085,
-      "denominator": 24,
+      "numerator": 616363,
+      "denominator": 384,
       "source": "recipe jugcraft:jimtafacts_heat/stirling_kinetic_generator"
     },
     "jugcraft:jimta_stone_dust": {
@@ -41053,7 +41463,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:jimta_teleporter": {
-      "numerator": 12814,
+      "numerator": 10408,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_infrastructure/teleporter"
     },
@@ -41068,27 +41478,27 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:jimta_terraform_blank": {
-      "numerator": 708,
+      "numerator": 228,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_terraforming/blank"
     },
     "jugcraft:jimta_terraform_chilling": {
-      "numerator": 709,
+      "numerator": 229,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_terraforming/chilling"
     },
     "jugcraft:jimta_terraform_cultivation": {
-      "numerator": 724,
+      "numerator": 244,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_terraforming/cultivation"
     },
     "jugcraft:jimta_terraform_desertification": {
-      "numerator": 709,
+      "numerator": 229,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_terraforming/desertification"
     },
     "jugcraft:jimta_terraform_flatification": {
-      "numerator": 972,
+      "numerator": 492,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_terraforming/flatification"
     },
@@ -41098,17 +41508,17 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:jimta_terraform_mushroom": {
-      "numerator": 740,
+      "numerator": 260,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_terraforming/mushroom"
     },
     "jugcraft:jimta_tesla": {
-      "numerator": 4382,
+      "numerator": 773,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_infrastructure/tesla"
     },
     "jugcraft:jimta_thermal_centrifuge": {
-      "numerator": 7987,
+      "numerator": 769,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_industry/jimta_thermal_centrifuge"
     },
@@ -41128,9 +41538,9 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:jimta_timer": {
-      "numerator": 8768,
+      "numerator": 8672,
       "denominator": 1,
-      "source": "recipe jugcraft:jimtafacts_industry/chipset_quartz_timer"
+      "source": "recipe jugcraft:jimtafacts_automation/jimta_timer"
     },
     "jugcraft:jimta_tin_cable": {
       "numerator": 3584,
@@ -41163,7 +41573,7 @@
       "source": "recipe jugcraft:jimtafacts_utilities/toolbox"
     },
     "jugcraft:jimta_transformer_upgrade": {
-      "numerator": 6155,
+      "numerator": 2315,
       "denominator": 8,
       "source": "recipe jugcraft:jimtafacts_upgrades/transformer"
     },
@@ -41288,12 +41698,12 @@
       "source": "recipe jugcraft:jimtafacts_industry/jimta_volume_beacon"
     },
     "jugcraft:jimta_volume_box": {
-      "numerator": 1637,
+      "numerator": 1157,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_factory/volume_box"
     },
     "jugcraft:jimta_volume_marker": {
-      "numerator": 1572,
+      "numerator": 1092,
       "denominator": 1,
       "source": "recipe jugcraft:jimtafacts_civil/volume_marker"
     },
@@ -41308,8 +41718,8 @@
       "source": "recipe jugcraft:jimtafacts_factory/water_gel_seed"
     },
     "jugcraft:jimta_water_kinetic_generator": {
-      "numerator": 37669,
-      "denominator": 24,
+      "numerator": 497707,
+      "denominator": 384,
       "source": "recipe jugcraft:jimtafacts_heat/water_kinetic_generator"
     },
     "jugcraft:jimta_weed": {
@@ -41368,12 +41778,12 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:jimta_wind_kinetic_generator": {
-      "numerator": 198959,
-      "denominator": 72,
+      "numerator": 2868353,
+      "denominator": 1152,
       "source": "recipe jugcraft:jimtafacts_heat/wind_kinetic_generator"
     },
     "jugcraft:jimta_wind_meter": {
-      "numerator": 2195,
+      "numerator": 755,
       "denominator": 3,
       "source": "recipe jugcraft:jimtafacts_gear/jimta_wind_meter"
     },
@@ -41448,8 +41858,8 @@
       "source": "recipe jugcraft:jimtafacts_laser/emitter"
     },
     "jugcraft:jimta_workshop_robot": {
-      "numerator": 6037,
-      "denominator": 2,
+      "numerator": 197385,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_robots/robot_frame"
     },
     "jugcraft:jimta_yellow_covered_cable": {
@@ -41488,7 +41898,7 @@
       "source": "recipe jugcraft:jimtafacts/network/yellow_smart_dense_cable"
     },
     "jugcraft:jimta_zone_planner": {
-      "numerator": 6981,
+      "numerator": 5061,
       "denominator": 4,
       "source": "recipe jugcraft:jimtafacts_factory/jimta_zone_planner"
     },
@@ -46432,6 +46842,31 @@
       "denominator": 1,
       "source": "recipe jugcraft:kestrel_rifle"
     },
+    "jugcraft:ketamine": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:ketamine_active": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:ketamine_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:ketamine_reagent_blend": {
+      "numerator": 1057,
+      "denominator": 1,
+      "source": "recipe jugcraft:ketamine_reagent_blend"
+    },
+    "jugcraft:ketamine_stock": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:key_blank": {
       "numerator": 1280,
       "denominator": 9,
@@ -46538,7 +46973,7 @@
       "source": "recipe jugcraft:kreuzer_pistol"
     },
     "jugcraft:lab_analyzer": {
-      "numerator": 5659,
+      "numerator": 3739,
       "denominator": 4,
       "source": "recipe jugcraft:lab_analyzer"
     },
@@ -46561,6 +46996,11 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:laboratory_analyzer": {
+      "numerator": 101227,
+      "denominator": 384,
+      "source": "recipe jugcraft:laboratory_analyzer"
     },
     "jugcraft:ladder_tray": {
       "numerator": 160,
@@ -49333,7 +49773,7 @@
       "source": "recipe jugcraft:landship"
     },
     "jugcraft:lantern_musket": {
-      "numerator": 58565,
+      "numerator": 15005,
       "denominator": 36,
       "source": "recipe jugcraft:lantern_musket"
     },
@@ -49383,13 +49823,13 @@
       "source": "reference tag minecraft:logs"
     },
     "jugcraft:large_bio_generator": {
-      "numerator": 15573,
-      "denominator": 2,
+      "numerator": 838793,
+      "denominator": 128,
       "source": "recipe jugcraft:large_bio_generator"
     },
     "jugcraft:large_gas_burning_generator": {
-      "numerator": 15569,
-      "denominator": 2,
+      "numerator": 838537,
+      "denominator": 128,
       "source": "recipe jugcraft:large_gas_burning_generator"
     },
     "jugcraft:large_ghost_fern": {
@@ -49448,7 +49888,7 @@
       "source": "recipe jugcraft:ldpe_process_insert"
     },
     "jugcraft:lead_acid_battery_bank": {
-      "numerator": 2194,
+      "numerator": 754,
       "denominator": 3,
       "source": "recipe jugcraft:battery_lead_acid_battery_bank"
     },
@@ -49528,7 +49968,7 @@
       "source": "recipe jugcraft:leaded_glass"
     },
     "jugcraft:leaf_blower": {
-      "numerator": 748,
+      "numerator": 268,
       "denominator": 1,
       "source": "recipe jugcraft:leaf_blower"
     },
@@ -49643,6 +50083,26 @@
       "source": "recipe jugcraft:battery_lfp_cathode_mix"
     },
     "jugcraft:lichs_crown": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:lidded_twined_basket": {
+      "numerator": 120,
+      "denominator": 1,
+      "source": "recipe jugcraft:lidded_twined_basket"
+    },
+    "jugcraft:lidocaine": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:lidocaine_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:lidocaine_stock": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -50448,12 +50908,12 @@
       "source": "recipe jugcraft:rocket_assembly/line_rocket"
     },
     "jugcraft:lined_fluorochemical_reactor": {
-      "numerator": 1299,
-      "denominator": 1,
+      "numerator": 17417,
+      "denominator": 64,
       "source": "recipe jugcraft:lined_fluorochemical_reactor"
     },
     "jugcraft:linesman": {
-      "numerator": 11693,
+      "numerator": 4475,
       "denominator": 6,
       "source": "recipe jugcraft:linesman"
     },
@@ -50478,7 +50938,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:lithium_battery_bank": {
-      "numerator": 48290,
+      "numerator": 44681,
       "denominator": 3,
       "source": "recipe jugcraft:lithium_battery_bank"
     },
@@ -50513,7 +50973,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:lithography_station": {
-      "numerator": 3087,
+      "numerator": 1884,
       "denominator": 1,
       "source": "recipe jugcraft:lithography_station"
     },
@@ -50543,7 +51003,7 @@
       "source": "recipe jugcraft:locomotive"
     },
     "jugcraft:logic_controller": {
-      "numerator": 32851,
+      "numerator": 3979,
       "denominator": 12,
       "source": "recipe jugcraft:logic_controller"
     },
@@ -50602,7 +51062,32 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:lsd": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:lsd_active": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:lsd_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:lsd_stock": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:lubricant_bucket": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:lucid_imprint": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -50668,7 +51153,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:magnesium_electrolysis_cell": {
-      "numerator": 2776,
+      "numerator": 1336,
       "denominator": 3,
       "source": "recipe jugcraft:magnesium_electrolysis_cell"
     },
@@ -50788,7 +51273,7 @@
       "source": "reference tag minecraft:logs"
     },
     "jugcraft:main_control_board": {
-      "numerator": 59515,
+      "numerator": 30643,
       "denominator": 8,
       "source": "recipe jugcraft:main_control_board"
     },
@@ -50952,14 +51437,24 @@
       "denominator": 6,
       "source": "recipe jugcraft:marshmallow_on_a_stick"
     },
+    "jugcraft:mash_conditioning_barrel": {
+      "numerator": 784,
+      "denominator": 1,
+      "source": "recipe jugcraft:mash_conditioning_barrel"
+    },
+    "jugcraft:mash_jug": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:mashed_potatoes_and_gravy": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
     "jugcraft:mashing_station": {
-      "numerator": 10165,
-      "denominator": 2,
+      "numerator": 554121,
+      "denominator": 128,
       "source": "recipe jugcraft:mashing_station"
     },
     "jugcraft:mason_jar": {
@@ -50972,13 +51467,48 @@
       "denominator": 54,
       "source": "recipe jugcraft:mason_jar_candle"
     },
+    "jugcraft:masterwork_blend": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:masterwork_conditioning_insert": {
+      "numerator": 2137,
+      "denominator": 8,
+      "source": "recipe jugcraft:masterwork_conditioning_insert"
+    },
+    "jugcraft:masterwork_reserve": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:masterwork_reserve_concentrate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:masterwork_reserve_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:masterwork_unconditioned_concentrate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:mayflower_model_ship": {
+      "numerator": 36,
+      "denominator": 1,
+      "source": "recipe jugcraft:mayflower_model_ship"
+    },
     "jugcraft:mcc_lineup": {
       "numerator": 2399,
       "denominator": 8,
       "source": "recipe jugcraft:mcc_lineup"
     },
     "jugcraft:mecha_workbench": {
-      "numerator": 1053,
+      "numerator": 573,
       "denominator": 1,
       "source": "recipe jugcraft:mecha_workbench"
     },
@@ -51027,6 +51557,26 @@
       "denominator": 1,
       "source": "recipe jugcraft:mercurial_eye"
     },
+    "jugcraft:mescaline": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:mescaline_active": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:mescaline_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:mescaline_stock": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:metal_press": {
       "numerator": 27046,
       "denominator": 3,
@@ -51043,6 +51593,46 @@
       "source": "recipe jugcraft:cryo_methane_cooling_module"
     },
     "jugcraft:methane_tank": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:methylphenidate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:methylphenidate_active": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:methylphenidate_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:methylphenidate_reagent_blend": {
+      "numerator": 929,
+      "denominator": 1,
+      "source": "recipe jugcraft:methylphenidate_reagent_blend"
+    },
+    "jugcraft:methylphenidate_stock": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:methylphenidate_xr": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:methylphenidate_xr_core": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:methylphenidate_xr_formula_plate": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -51093,8 +51683,8 @@
       "source": "recipe jugcraft:mind_stone"
     },
     "jugcraft:mineral_conditioner": {
-      "numerator": 7589,
-      "denominator": 2,
+      "numerator": 327817,
+      "denominator": 128,
       "source": "recipe jugcraft:mineral_conditioner"
     },
     "jugcraft:mini_pumpkin_stack": {
@@ -51103,7 +51693,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:mining_drill": {
-      "numerator": 1804,
+      "numerator": 601,
       "denominator": 1,
       "source": "recipe jugcraft:mining_drill"
     },
@@ -51157,6 +51747,46 @@
       "denominator": 2,
       "source": "recipe jugcraft:mobius_fuel_block"
     },
+    "jugcraft:modafinil": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:modafinil_active": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:modafinil_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:modafinil_reagent_blend": {
+      "numerator": 641,
+      "denominator": 1,
+      "source": "recipe jugcraft:modafinil_reagent_blend"
+    },
+    "jugcraft:modafinil_stock": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:modafinil_xr": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:modafinil_xr_core": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:modafinil_xr_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:moisture_separator_reheater": {
       "numerator": 1635,
       "denominator": 8,
@@ -51177,14 +51807,19 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:mongolian_horse_spawn_egg": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:monitored_lattice_tower": {
-      "numerator": 21983,
+      "numerator": 2735,
       "denominator": 4,
       "source": "recipe jugcraft:monitored_lattice_tower"
     },
     "jugcraft:monomer_preparation_unit": {
-      "numerator": 10690,
-      "denominator": 3,
+      "numerator": 487003,
+      "denominator": 192,
       "source": "recipe jugcraft:monomer_preparation_unit"
     },
     "jugcraft:monomethylhydrazine_bucket": {
@@ -51202,10 +51837,30 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:moonshine": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:moonshine_still": {
+      "numerator": 1049,
+      "denominator": 1,
+      "source": "recipe jugcraft:moonshine_still"
+    },
     "jugcraft:mooring_post": {
       "numerator": 801,
       "denominator": 1,
       "source": "recipe jugcraft:mooring_post"
+    },
+    "jugcraft:morphine": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:morphine_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:mortar": {
       "numerator": 11,
@@ -51517,12 +52172,32 @@
       "denominator": 36,
       "source": "recipe jugcraft:muzzle_brake"
     },
+    "jugcraft:mycelium_catalyst": {
+      "numerator": 385,
+      "denominator": 24,
+      "source": "recipe jugcraft:mycelium_catalyst"
+    },
     "jugcraft:n2o4_tank": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
     "jugcraft:nachos": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:naloxone": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:naloxone_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:naloxone_stock": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -51542,6 +52217,11 @@
       "denominator": 9,
       "source": "recipe jugcraft:narwhal_lance"
     },
+    "jugcraft:naval_cutlass": {
+      "numerator": 1217,
+      "denominator": 2,
+      "source": "recipe jugcraft:naval_cutlass"
+    },
     "jugcraft:navvy_shotgun": {
       "numerator": 399,
       "denominator": 2,
@@ -51553,14 +52233,19 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:neodymium_drone_motor": {
-      "numerator": 1819,
-      "denominator": 6,
+      "numerator": 8363,
+      "denominator": 48,
       "source": "recipe jugcraft:neodymium_drone_motor"
     },
     "jugcraft:neodymium_magnet": {
-      "numerator": 515,
-      "denominator": 4,
-      "source": "recipe jugcraft:alloying/neodymium_magnet_from_ferroboron"
+      "numerator": 2057,
+      "denominator": 32,
+      "source": "recipe jugcraft:alloying/sands_neodymium_magnet"
+    },
+    "jugcraft:neodymium_oxide": {
+      "numerator": 1,
+      "denominator": 8,
+      "source": "local rare-earth maximum coproduct allocation"
     },
     "jugcraft:nereids_hood": {
       "numerator": 193,
@@ -51603,7 +52288,7 @@
       "source": "recipe jugcraft:netherite_paxel"
     },
     "jugcraft:network_terminal": {
-      "numerator": 17305,
+      "numerator": 2869,
       "denominator": 12,
       "source": "recipe jugcraft:network_terminal"
     },
@@ -51643,7 +52328,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:nis_cabinet": {
-      "numerator": 9994,
+      "numerator": 9034,
       "denominator": 1,
       "source": "recipe jugcraft:nis_cabinet"
     },
@@ -53782,6 +54467,16 @@
       "denominator": 1,
       "source": "recipe jugcraft:oak_cabinet"
     },
+    "jugcraft:oak_conditioning_insert": {
+      "numerator": 68,
+      "denominator": 1,
+      "source": "recipe jugcraft:oak_conditioning_insert"
+    },
+    "jugcraft:oak_settle": {
+      "numerator": 88,
+      "denominator": 1,
+      "source": "recipe jugcraft:oak_settle"
+    },
     "jugcraft:oat_porridge": {
       "numerator": 25,
       "denominator": 3,
@@ -53813,7 +54508,7 @@
       "source": "recipe jugcraft:observatory"
     },
     "jugcraft:office_copier": {
-      "numerator": 7939,
+      "numerator": 6019,
       "denominator": 4,
       "source": "recipe jugcraft:office_copier"
     },
@@ -53907,6 +54602,16 @@
       "denominator": 1,
       "source": "recipe jugcraft:oneiric_censer"
     },
+    "jugcraft:oneiric_imprint": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:oneiric_stock": {
+      "numerator": 581,
+      "denominator": 1,
+      "source": "recipe jugcraft:oneiric_stock"
+    },
     "jugcraft:onion": {
       "numerator": 1,
       "denominator": 1,
@@ -53943,7 +54648,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:operator_console": {
-      "numerator": 82339,
+      "numerator": 20899,
       "denominator": 256,
       "source": "recipe jugcraft:operator_console"
     },
@@ -54018,12 +54723,12 @@
       "source": "recipe jugcraft:orchard_ladder"
     },
     "jugcraft:ore_drill": {
-      "numerator": 25877,
+      "numerator": 24917,
       "denominator": 1,
       "source": "recipe jugcraft:ore_drill"
     },
     "jugcraft:ore_washer": {
-      "numerator": 2697,
+      "numerator": 2217,
       "denominator": 1,
       "source": "recipe jugcraft:ore_washer"
     },
@@ -54038,6 +54743,11 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:organic_fertilizer_carrier": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:organic_process_stock_bucket": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -54098,13 +54808,13 @@
       "source": "recipe jugcraft:oval_table"
     },
     "jugcraft:overclock_module": {
-      "numerator": 3592,
+      "numerator": 2389,
       "denominator": 1,
       "source": "recipe jugcraft:overclock_module"
     },
     "jugcraft:overhead_crane": {
-      "numerator": 12103,
-      "denominator": 18,
+      "numerator": 459601,
+      "denominator": 1152,
       "source": "recipe jugcraft:overhead_crane"
     },
     "jugcraft:owl_plush": {
@@ -54618,6 +55328,16 @@
       "source": "recipe jugcraft:paper_cartridge"
     },
     "jugcraft:paprika": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:paracetamol": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:paracetamol_formula_plate": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -56262,6 +56982,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:patina_plate_stairs"
     },
+    "jugcraft:pattern_imprint": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:pea_soup": {
       "numerator": 73,
       "denominator": 1,
@@ -56327,6 +57052,21 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:pegasus_spawn_egg": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:penicillin": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:penicillin_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:penny_pistol": {
       "numerator": 517,
       "denominator": 1,
@@ -56346,6 +57086,11 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:perception_substrate": {
+      "numerator": 101,
+      "denominator": 1,
+      "source": "recipe jugcraft:perception_substrate"
     },
     "jugcraft:perforated_patina_plate": {
       "numerator": 1216,
@@ -56497,6 +57242,16 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:pewter_chamberstick": {
+      "numerator": 5237,
+      "denominator": 18,
+      "source": "recipe jugcraft:pewter_chamberstick"
+    },
+    "jugcraft:pewter_pitcher_and_basin": {
+      "numerator": 4873,
+      "denominator": 9,
+      "source": "recipe jugcraft:pewter_pitcher_and_basin"
+    },
     "jugcraft:phantom_pipe_organ": {
       "numerator": 1,
       "denominator": 1,
@@ -56526,6 +57281,26 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:pharmaceutical_base": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:pharmaceutical_separator": {
+      "numerator": 887899,
+      "denominator": 384,
+      "source": "recipe jugcraft:pharmaceutical_separator"
+    },
+    "jugcraft:pharmaceutical_starch": {
+      "numerator": 66,
+      "denominator": 1,
+      "source": "recipe jugcraft:pharmaceutical_starch"
+    },
+    "jugcraft:pharmacy_patch_backing": {
+      "numerator": 101,
+      "denominator": 4,
+      "source": "recipe jugcraft:pharmacy_patch_backing"
     },
     "jugcraft:philosophers_stone": {
       "numerator": 12937,
@@ -56606,6 +57381,11 @@
       "numerator": 625,
       "denominator": 4,
       "source": "recipe jugcraft:pilgrim_dress_costume"
+    },
+    "jugcraft:pilgrim_peg_rail": {
+      "numerator": 105,
+      "denominator": 1,
+      "source": "recipe jugcraft:pilgrim_peg_rail"
     },
     "jugcraft:pinata_stick": {
       "numerator": 101,
@@ -56698,12 +57478,12 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:plant_display_wall": {
-      "numerator": 1481165,
+      "numerator": 188621,
       "denominator": 256,
       "source": "recipe jugcraft:plant_display_wall"
     },
     "jugcraft:plant_map_screen": {
-      "numerator": 451055,
+      "numerator": 328175,
       "denominator": 256,
       "source": "recipe jugcraft:plant_map_screen"
     },
@@ -57348,8 +58128,8 @@
       "source": "recipe jugcraft:poker_table_saloon"
     },
     "jugcraft:polar_crane": {
-      "numerator": 17735,
-      "denominator": 18,
+      "numerator": 820049,
+      "denominator": 1152,
       "source": "recipe jugcraft:polar_crane"
     },
     "jugcraft:polished_brass_plate": {
@@ -57403,8 +58183,8 @@
       "source": "recipe jugcraft:ceramics_polishing_head"
     },
     "jugcraft:polymer_extruder": {
-      "numerator": 4168,
-      "denominator": 3,
+      "numerator": 69595,
+      "denominator": 192,
       "source": "recipe jugcraft:polymer_extruder"
     },
     "jugcraft:polymer_fitting": {
@@ -57418,13 +58198,13 @@
       "source": "recipe jugcraft:film_cushioned_housing"
     },
     "jugcraft:polymer_molding_press": {
-      "numerator": 1492,
-      "denominator": 1,
+      "numerator": 29769,
+      "denominator": 64,
       "source": "recipe jugcraft:polymer_molding_press"
     },
     "jugcraft:polymer_reclaimer": {
-      "numerator": 1431,
-      "denominator": 1,
+      "numerator": 25865,
+      "denominator": 64,
       "source": "recipe jugcraft:polymer_reclaimer"
     },
     "jugcraft:polymer_vehicle_panel": {
@@ -57433,8 +58213,8 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:polymerization_kettle": {
-      "numerator": 5536,
-      "denominator": 1,
+      "numerator": 288585,
+      "denominator": 64,
       "source": "recipe jugcraft:polymerization_kettle"
     },
     "jugcraft:polymerization_reactor": {
@@ -57563,12 +58343,12 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:power_bow": {
-      "numerator": 1327,
+      "numerator": 124,
       "denominator": 1,
       "source": "recipe jugcraft:power_bow"
     },
     "jugcraft:power_katana": {
-      "numerator": 1292,
+      "numerator": 89,
       "denominator": 1,
       "source": "recipe jugcraft:power_katana"
     },
@@ -57578,9 +58358,14 @@
       "source": "recipe jugcraft:ceramics_precision_bearing"
     },
     "jugcraft:precision_finisher": {
-      "numerator": 2897,
-      "denominator": 2,
+      "numerator": 26985,
+      "denominator": 64,
       "source": "recipe jugcraft:precision_finisher"
+    },
+    "jugcraft:precision_process_module": {
+      "numerator": 406,
+      "denominator": 1,
+      "source": "recipe jugcraft:precision_process_module"
     },
     "jugcraft:precision_shaft": {
       "numerator": 1,
@@ -57608,9 +58393,29 @@
       "source": "recipe jugcraft:pressurizer"
     },
     "jugcraft:printer": {
-      "numerator": 8707,
+      "numerator": 6787,
       "denominator": 4,
       "source": "recipe jugcraft:printer"
+    },
+    "jugcraft:prism_cactus_fruit": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:prism_cactus_seeds": {
+      "numerator": 241,
+      "denominator": 12,
+      "source": "recipe jugcraft:prism_cactus_seeds"
+    },
+    "jugcraft:prismatic_concentrate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:prize_pumpkin_display": {
+      "numerator": 17134,
+      "denominator": 45,
+      "source": "recipe jugcraft:prize_pumpkin_display"
     },
     "jugcraft:prize_ribbon_board": {
       "numerator": 9641,
@@ -57623,7 +58428,7 @@
       "source": "recipe jugcraft:prize_wheel"
     },
     "jugcraft:processor": {
-      "numerator": 1289,
+      "numerator": 86,
       "denominator": 1,
       "source": "recipe jugcraft:circuit_assembly/ceramics_processor_on_alumina"
     },
@@ -57638,12 +58443,12 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:prospector": {
-      "numerator": 25633,
+      "numerator": 14113,
       "denominator": 24,
       "source": "recipe jugcraft:prospector"
     },
     "jugcraft:protection_rack": {
-      "numerator": 14491,
+      "numerator": 6811,
       "denominator": 8,
       "source": "recipe jugcraft:protection_rack"
     },
@@ -57651,6 +58456,26 @@
       "numerator": 8264,
       "denominator": 1,
       "source": "recipe jugcraft:psalm_smg"
+    },
+    "jugcraft:psilocybin": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:psilocybin_active": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:psilocybin_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:psilocybin_stock": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:ptfe_fitting": {
       "numerator": 1,
@@ -57703,7 +58528,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:ptfe_sintering_oven": {
-      "numerator": 2596,
+      "numerator": 1156,
       "denominator": 3,
       "source": "recipe jugcraft:ptfe_sintering_oven"
     },
@@ -57718,8 +58543,8 @@
       "source": "recipe jugcraft:pulverizer"
     },
     "jugcraft:pump_skid": {
-      "numerator": 2631,
-      "denominator": 8,
+      "numerator": 7097,
+      "denominator": 128,
       "source": "recipe jugcraft:pump_skid"
     },
     "jugcraft:pumpjack": {
@@ -57756,6 +58581,11 @@
       "numerator": 337,
       "denominator": 2,
       "source": "recipe jugcraft:pumpkin_candle_centerpiece"
+    },
+    "jugcraft:pumpkin_carving_bench": {
+      "numerator": 1750,
+      "denominator": 9,
+      "source": "recipe jugcraft:pumpkin_carving_bench"
     },
     "jugcraft:pumpkin_crate": {
       "numerator": 20,
@@ -57993,7 +58823,7 @@
       "source": "recipe jugcraft:quilt_rail"
     },
     "jugcraft:radiation_control_board": {
-      "numerator": 73867,
+      "numerator": 44995,
       "denominator": 12,
       "source": "recipe jugcraft:radiation_control_board"
     },
@@ -58028,7 +58858,7 @@
       "source": "recipe jugcraft:ceramics_range_finder"
     },
     "jugcraft:range_module": {
-      "numerator": 1292,
+      "numerator": 89,
       "denominator": 1,
       "source": "recipe jugcraft:range_module"
     },
@@ -58308,12 +59138,12 @@
       "source": "recipe jugcraft:raw_zinc_block"
     },
     "jugcraft:rcs_control_board": {
-      "numerator": 49245,
+      "numerator": 29997,
       "denominator": 8,
       "source": "recipe jugcraft:rcs_control_board"
     },
     "jugcraft:reactor_control_console": {
-      "numerator": 30889,
+      "numerator": 2017,
       "denominator": 8,
       "source": "recipe jugcraft:reactor_control_console"
     },
@@ -58323,17 +59153,17 @@
       "source": "recipe jugcraft:reactor_coolant_pipe"
     },
     "jugcraft:reactor_coolant_pump": {
-      "numerator": 1407,
-      "denominator": 2,
+      "numerator": 55049,
+      "denominator": 128,
       "source": "recipe jugcraft:reactor_coolant_pump"
     },
     "jugcraft:reactor_link_card": {
-      "numerator": 1286,
+      "numerator": 83,
       "denominator": 1,
       "source": "recipe jugcraft:reactor_link_card"
     },
     "jugcraft:reactor_pressure_vessel": {
-      "numerator": 1342,
+      "numerator": 139,
       "denominator": 1,
       "source": "recipe jugcraft:reactor_pressure_vessel"
     },
@@ -58562,6 +59392,11 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:redleaf_medical_stock": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:redstar_cleaver": {
       "numerator": 1,
       "denominator": 1,
@@ -58612,6 +59447,26 @@
       "denominator": 1,
       "source": "reference tag minecraft:logs"
     },
+    "jugcraft:refined_beverage_stock_bucket": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:refined_spirits": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:refined_spirits_concentrate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:refined_spirits_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:reflex_sight": {
       "numerator": 6683,
       "denominator": 72,
@@ -58638,8 +59493,8 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:refueling_machine": {
-      "numerator": 3239,
-      "denominator": 2,
+      "numerator": 18313,
+      "denominator": 128,
       "source": "recipe jugcraft:refueling_machine"
     },
     "jugcraft:reg_transformer": {
@@ -58656,6 +59511,16 @@
       "numerator": 204,
       "denominator": 1,
       "source": "recipe jugcraft:regatta_flag"
+    },
+    "jugcraft:rehydration_salts": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:rehydration_salts_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:reinforced_concrete": {
       "numerator": 1,
@@ -58678,7 +59543,7 @@
       "source": "recipe jugcraft:relay"
     },
     "jugcraft:relay_cabinet": {
-      "numerator": 5683,
+      "numerator": 1843,
       "denominator": 16,
       "source": "recipe jugcraft:relay_cabinet"
     },
@@ -58698,9 +59563,29 @@
       "source": "recipe jugcraft:relay_mk3"
     },
     "jugcraft:relay_panel": {
-      "numerator": 12835,
+      "numerator": 5155,
       "denominator": 8,
       "source": "recipe jugcraft:relay_panel"
+    },
+    "jugcraft:release_coater": {
+      "numerator": 95449,
+      "denominator": 128,
+      "source": "recipe jugcraft:release_coater"
+    },
+    "jugcraft:release_control_die": {
+      "numerator": 4841,
+      "denominator": 8,
+      "source": "recipe jugcraft:release_control_die"
+    },
+    "jugcraft:release_matrix": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:release_matrix_blend": {
+      "numerator": 281,
+      "denominator": 4,
+      "source": "recipe jugcraft:release_matrix_blend"
     },
     "jugcraft:reliquary_shrine": {
       "numerator": 425,
@@ -58708,7 +59593,7 @@
       "source": "recipe jugcraft:reliquary_shrine"
     },
     "jugcraft:remote_shutdown_panel": {
-      "numerator": 50315,
+      "numerator": 31067,
       "denominator": 8,
       "source": "recipe jugcraft:remote_shutdown_panel"
     },
@@ -58726,6 +59611,21 @@
       "numerator": 34,
       "denominator": 1,
       "source": "recipe jugcraft:research_notes"
+    },
+    "jugcraft:reserve_whiskey": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:reserve_whiskey_concentrate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:reserve_whiskey_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:resonant_ring": {
       "numerator": 1,
@@ -58763,33 +59663,33 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:ribbits_mossy_oak_door": {
-      "numerator": 1,
+      "numerator": 16,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "recipe jugcraft:ribbits_mossy_oak_door"
     },
     "jugcraft:ribbits_mossy_oak_planks": {
-      "numerator": 1,
+      "numerator": 8,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "reference tag minecraft:planks"
     },
     "jugcraft:ribbits_mossy_oak_planks_fence": {
-      "numerator": 4,
-      "denominator": 1,
+      "numerator": 40,
+      "denominator": 3,
       "source": "recipe jugcraft:newest/ribbits/mossy_oak_planks_fence"
     },
     "jugcraft:ribbits_mossy_oak_planks_fence_gate": {
-      "numerator": 18,
+      "numerator": 32,
       "denominator": 1,
       "source": "recipe jugcraft:newest/ribbits/mossy_oak_planks_fence_gate"
     },
     "jugcraft:ribbits_mossy_oak_planks_slab": {
-      "numerator": 1,
-      "denominator": 2,
+      "numerator": 4,
+      "denominator": 1,
       "source": "recipe jugcraft:newest/ribbits/mossy_oak_planks_slab"
     },
     "jugcraft:ribbits_mossy_oak_planks_stairs": {
-      "numerator": 3,
-      "denominator": 2,
+      "numerator": 12,
+      "denominator": 1,
       "source": "recipe jugcraft:newest/ribbits/mossy_oak_planks_stairs"
     },
     "jugcraft:ribbits_red_toadstool": {
@@ -58992,6 +59892,11 @@
       "denominator": 5,
       "source": "recipe jugcraft:roasted_pumpkin_seeds"
     },
+    "jugcraft:roasted_root_vegetables": {
+      "numerator": 201,
+      "denominator": 1,
+      "source": "recipe jugcraft:roasted_root_vegetables"
+    },
     "jugcraft:roasted_sunflower_seeds": {
       "numerator": 1,
       "denominator": 1,
@@ -59013,7 +59918,7 @@
       "source": "recipe jugcraft:rocket_assembly/rocket_casing_from_titanium"
     },
     "jugcraft:rocket_launcher": {
-      "numerator": 4543,
+      "numerator": 934,
       "denominator": 3,
       "source": "recipe jugcraft:rocket_launcher"
     },
@@ -59028,7 +59933,7 @@
       "source": "recipe jugcraft:rocket_assembly/rocket_nozzle"
     },
     "jugcraft:rocket_pack": {
-      "numerator": 21545,
+      "numerator": 16733,
       "denominator": 4,
       "source": "recipe jugcraft:rocket_pack"
     },
@@ -59038,7 +59943,7 @@
       "source": "recipe jugcraft:rocket_pad"
     },
     "jugcraft:rocket_workshop": {
-      "numerator": 9578,
+      "numerator": 8375,
       "denominator": 1,
       "source": "recipe jugcraft:rocket_workshop"
     },
@@ -59058,12 +59963,12 @@
       "source": "recipe jugcraft:ronin_exosuit_boots_from_exosuit_boots"
     },
     "jugcraft:ronin_exosuit_chestplate": {
-      "numerator": 6686,
+      "numerator": 4280,
       "denominator": 1,
       "source": "recipe jugcraft:ronin_exosuit_chestplate_from_exosuit_chestplate"
     },
     "jugcraft:ronin_exosuit_helmet": {
-      "numerator": 5437,
+      "numerator": 625,
       "denominator": 4,
       "source": "recipe jugcraft:ronin_exosuit_helmet_from_exosuit_helmet"
     },
@@ -59073,7 +59978,7 @@
       "source": "recipe jugcraft:ronin_exosuit_leggings_from_exosuit_leggings"
     },
     "jugcraft:ronin_katana": {
-      "numerator": 5175,
+      "numerator": 363,
       "denominator": 4,
       "source": "recipe jugcraft:ronin_katana_from_power_katana"
     },
@@ -59297,6 +60202,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:runecarvers_pattern"
     },
+    "jugcraft:rush_floor_mat": {
+      "numerator": 109,
+      "denominator": 4,
+      "source": "recipe jugcraft:rush_floor_mat"
+    },
     "jugcraft:rust_grating": {
       "numerator": 96,
       "denominator": 1,
@@ -59397,6 +60307,21 @@
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
+    "jugcraft:salbutamol": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:salbutamol_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:salbutamol_stock": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:salicylic_acid": {
       "numerator": 1,
       "denominator": 1,
@@ -59488,9 +60413,14 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:sawmill": {
-      "numerator": 3995,
-      "denominator": 2,
+      "numerator": 159241,
+      "denominator": 128,
       "source": "recipe jugcraft:jimtafacts_industry/jimta_block_cutting_machine_restore"
+    },
+    "jugcraft:scalloped_potatoes": {
+      "numerator": 137,
+      "denominator": 1,
+      "source": "recipe jugcraft:scalloped_potatoes"
     },
     "jugcraft:scarab_boots": {
       "numerator": 1,
@@ -59583,7 +60513,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:seam_cutter": {
-      "numerator": 6677,
+      "numerator": 1865,
       "denominator": 4,
       "source": "recipe jugcraft:seam_cutter"
     },
@@ -59603,7 +60533,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:secondary_control_board": {
-      "numerator": 49245,
+      "numerator": 29997,
       "denominator": 8,
       "source": "recipe jugcraft:secondary_control_board"
     },
@@ -59678,8 +60608,8 @@
       "source": "recipe jugcraft:sentry_pistol"
     },
     "jugcraft:server_rack": {
-      "numerator": 2575,
-      "denominator": 2,
+      "numerator": 206,
+      "denominator": 1,
       "source": "recipe jugcraft:server_rack"
     },
     "jugcraft:service_pedestal": {
@@ -59731,6 +60661,11 @@
       "numerator": 32,
       "denominator": 1,
       "source": "reference tag minecraft:saplings"
+    },
+    "jugcraft:shire_horse_spawn_egg": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
     },
     "jugcraft:shooting_gallery": {
       "numerator": 232,
@@ -59868,7 +60803,7 @@
       "source": "recipe jugcraft:silk_spool_stack"
     },
     "jugcraft:silk_touch_module": {
-      "numerator": 66824,
+      "numerator": 65621,
       "denominator": 1,
       "source": "recipe jugcraft:silk_touch_module"
     },
@@ -59991,6 +60926,11 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:skillet_corn_cakes": {
+      "numerator": 25,
+      "denominator": 3,
+      "source": "recipe jugcraft:skillet_corn_cakes"
     },
     "jugcraft:skull_firework": {
       "numerator": 340,
@@ -60503,13 +61443,13 @@
       "source": "recipe jugcraft:starter_workshop/small_crucible_furnace"
     },
     "jugcraft:small_modular_reactor": {
-      "numerator": 1313,
+      "numerator": 110,
       "denominator": 1,
       "source": "recipe jugcraft:small_modular_reactor"
     },
     "jugcraft:small_turbine_generator": {
-      "numerator": 11887,
-      "denominator": 8,
+      "numerator": 155193,
+      "denominator": 128,
       "source": "recipe jugcraft:small_turbine_generator"
     },
     "jugcraft:smoke_detector": {
@@ -60563,7 +61503,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:soe_printer": {
-      "numerator": 771,
+      "numerator": 291,
       "denominator": 1,
       "source": "recipe jugcraft:soe_printer"
     },
@@ -60578,13 +61518,13 @@
       "source": "recipe jugcraft:solar_panel"
     },
     "jugcraft:solar_receiver": {
-      "numerator": 41297,
+      "numerator": 22049,
       "denominator": 16,
       "source": "recipe jugcraft:solar_receiver"
     },
     "jugcraft:solar_tracker": {
-      "numerator": 9910,
-      "denominator": 3,
+      "numerator": 979163,
+      "denominator": 384,
       "source": "recipe jugcraft:solar_tracker"
     },
     "jugcraft:solder_block": {
@@ -60608,7 +61548,7 @@
       "source": "recipe jugcraft:starter_workshop/soldering_tool"
     },
     "jugcraft:solenoid_rifle": {
-      "numerator": 17623,
+      "numerator": 3187,
       "denominator": 12,
       "source": "recipe jugcraft:solenoid_rifle"
     },
@@ -60738,7 +61678,7 @@
       "source": "recipe jugcraft:spiderweb_cupcake"
     },
     "jugcraft:spikedriver": {
-      "numerator": 17117,
+      "numerator": 2681,
       "denominator": 12,
       "source": "recipe jugcraft:spikedriver"
     },
@@ -60756,6 +61696,11 @@
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
+    },
+    "jugcraft:spinning_top": {
+      "numerator": 17,
+      "denominator": 2,
+      "source": "recipe jugcraft:spinning_top"
     },
     "jugcraft:spinning_wheel": {
       "numerator": 48,
@@ -60868,7 +61813,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:ssps_cabinet": {
-      "numerator": 26291,
+      "numerator": 3203,
       "denominator": 8,
       "source": "recipe jugcraft:ssps_cabinet"
     },
@@ -62138,7 +63083,7 @@
       "source": "recipe jugcraft:station_battery"
     },
     "jugcraft:station_charger": {
-      "numerator": 9609,
+      "numerator": 8649,
       "denominator": 1,
       "source": "recipe jugcraft:station_charger"
     },
@@ -62158,7 +63103,7 @@
       "source": "recipe jugcraft:station_tiles_stairs"
     },
     "jugcraft:status_screen": {
-      "numerator": 282863,
+      "numerator": 159983,
       "denominator": 256,
       "source": "recipe jugcraft:status_screen"
     },
@@ -62577,12 +63522,32 @@
       "denominator": 4,
       "source": "recipe jugcraft:steel_zweihander"
     },
+    "jugcraft:sterile_carrier": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:sterile_filler": {
+      "numerator": 234907,
+      "denominator": 384,
+      "source": "recipe jugcraft:sterile_filler"
+    },
+    "jugcraft:sterile_vial": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:stillage_bucket": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
     },
     "jugcraft:stimulant": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:stimulant_formula_plate": {
       "numerator": 1,
       "denominator": 1,
       "source": "fallback (balance pending)"
@@ -62616,6 +63581,11 @@
       "numerator": 323,
       "denominator": 2,
       "source": "recipe jugcraft:stone_fireplace"
+    },
+    "jugcraft:stone_headed_hatchet": {
+      "numerator": 28,
+      "denominator": 1,
+      "source": "recipe jugcraft:stone_headed_hatchet"
     },
     "jugcraft:stone_paxel": {
       "numerator": 31,
@@ -65568,7 +66538,7 @@
       "source": "recipe jugcraft:stormglass"
     },
     "jugcraft:stormlock_rifle": {
-      "numerator": 21809,
+      "numerator": 7289,
       "denominator": 12,
       "source": "recipe jugcraft:stormlock_rifle"
     },
@@ -65947,6 +66917,16 @@
       "denominator": 3,
       "source": "recipe jugcraft:structural_module"
     },
+    "jugcraft:study_canvas": {
+      "numerator": 227,
+      "denominator": 1,
+      "source": "recipe jugcraft:study_canvas"
+    },
+    "jugcraft:stuffed_mushrooms": {
+      "numerator": 144,
+      "denominator": 1,
+      "source": "recipe jugcraft:stuffed_mushrooms"
+    },
     "jugcraft:stuffed_potato": {
       "numerator": 66,
       "denominator": 1,
@@ -66013,17 +66993,17 @@
       "source": "recipe jugcraft:superconducting_conduit"
     },
     "jugcraft:superconducting_lift_fan": {
-      "numerator": 20429,
-      "denominator": 12,
+      "numerator": 41755,
+      "denominator": 96,
       "source": "recipe jugcraft:superconducting_lift_fan"
     },
     "jugcraft:superconducting_motor": {
-      "numerator": 20345,
-      "denominator": 12,
+      "numerator": 41083,
+      "denominator": 96,
       "source": "recipe jugcraft:superconducting_motor"
     },
     "jugcraft:superconducting_pylon": {
-      "numerator": 86165,
+      "numerator": 9173,
       "denominator": 8,
       "source": "recipe jugcraft:superconducting_pylon"
     },
@@ -67473,7 +68453,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:survey_rocket": {
-      "numerator": 22743,
+      "numerator": 3495,
       "denominator": 16,
       "source": "recipe jugcraft:rocket_assembly/survey_rocket"
     },
@@ -67563,7 +68543,7 @@
       "source": "recipe jugcraft:switchgear_lineup"
     },
     "jugcraft:synthesis_converter": {
-      "numerator": 10363,
+      "numerator": 739,
       "denominator": 8,
       "source": "recipe jugcraft:synthesis_converter"
     },
@@ -67763,7 +68743,7 @@
       "source": "recipe jugcraft:tank_shell_section"
     },
     "jugcraft:tank_workbench": {
-      "numerator": 1045,
+      "numerator": 565,
       "denominator": 1,
       "source": "recipe jugcraft:tank_workbench"
     },
@@ -67887,6 +68867,26 @@
       "denominator": 1,
       "source": "recipe jugcraft:thallite_sword"
     },
+    "jugcraft:thc": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:thc_active": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:thc_formula_plate": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
+    "jugcraft:thc_stock": {
+      "numerator": 1,
+      "denominator": 1,
+      "source": "fallback (balance pending)"
+    },
     "jugcraft:theremin": {
       "numerator": 712,
       "denominator": 3,
@@ -67958,9 +68958,14 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:tilt_rotor_nacelle": {
-      "numerator": 2863,
-      "denominator": 6,
+      "numerator": 16715,
+      "denominator": 48,
       "source": "recipe jugcraft:tilt_rotor_nacelle"
+    },
+    "jugcraft:timber_harvest_arch": {
+      "numerator": 287,
+      "denominator": 1,
+      "source": "recipe jugcraft:timber_harvest_arch"
     },
     "jugcraft:timber_revetment": {
       "numerator": 8,
@@ -68043,8 +69048,8 @@
       "source": "recipe jugcraft:titanium_chestplate"
     },
     "jugcraft:titanium_chlorinator": {
-      "numerator": 10501,
-      "denominator": 3,
+      "numerator": 474907,
+      "denominator": 192,
       "source": "recipe jugcraft:titanium_chlorinator"
     },
     "jugcraft:titanium_crate": {
@@ -68098,8 +69103,8 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:titanium_reduction_retort": {
-      "numerator": 5470,
-      "denominator": 1,
+      "numerator": 284361,
+      "denominator": 64,
       "source": "recipe jugcraft:titanium_reduction_retort"
     },
     "jugcraft:titanium_sand": {
@@ -68208,7 +69213,7 @@
       "source": "recipe jugcraft:town_commission_board"
     },
     "jugcraft:training_screen": {
-      "numerator": 167471,
+      "numerator": 44591,
       "denominator": 256,
       "source": "recipe jugcraft:training_screen"
     },
@@ -68228,8 +69233,8 @@
       "source": "recipe jugcraft:transmutation_tablet"
     },
     "jugcraft:travelling_water_screen": {
-      "numerator": 1805,
-      "denominator": 2,
+      "numerator": 80521,
+      "denominator": 128,
       "source": "recipe jugcraft:travelling_water_screen"
     },
     "jugcraft:treated_process_water_bucket": {
@@ -68243,7 +69248,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:tree_farm": {
-      "numerator": 2505,
+      "numerator": 2025,
       "denominator": 1,
       "source": "recipe jugcraft:tree_farm"
     },
@@ -68303,27 +69308,27 @@
       "source": "recipe jugcraft:trumpeting_angel"
     },
     "jugcraft:tsc_area_monitor": {
-      "numerator": 10795,
+      "numerator": 3115,
       "denominator": 8,
       "source": "recipe jugcraft:tsc_area_monitor"
     },
     "jugcraft:tsc_card_reader": {
-      "numerator": 448,
+      "numerator": 208,
       "denominator": 1,
       "source": "recipe jugcraft:tsc_card_reader"
     },
     "jugcraft:tsc_class_board": {
-      "numerator": 6018,
+      "numerator": 5538,
       "denominator": 1,
       "source": "recipe jugcraft:tsc_class_board"
     },
     "jugcraft:tsc_comms_console": {
-      "numerator": 110947,
+      "numerator": 49507,
       "denominator": 128,
       "source": "recipe jugcraft:tsc_comms_console"
     },
     "jugcraft:tsc_console": {
-      "numerator": 94691,
+      "numerator": 33251,
       "denominator": 128,
       "source": "recipe jugcraft:tsc_console"
     },
@@ -68333,7 +69338,7 @@
       "source": "recipe jugcraft:tsc_frisker"
     },
     "jugcraft:tsc_nrc_desk": {
-      "numerator": 82419,
+      "numerator": 20979,
       "denominator": 128,
       "source": "recipe jugcraft:tsc_nrc_desk"
     },
@@ -68353,7 +69358,7 @@
       "source": "recipe jugcraft:tsc_status_board"
     },
     "jugcraft:tsc_video_wall": {
-      "numerator": 164591,
+      "numerator": 41711,
       "denominator": 256,
       "source": "recipe jugcraft:tsc_video_wall"
     },
@@ -68433,19 +69438,24 @@
       "source": "recipe jugcraft:turban_squash_seeds"
     },
     "jugcraft:turbine_control_board": {
-      "numerator": 49245,
+      "numerator": 29997,
       "denominator": 8,
       "source": "recipe jugcraft:turbine_control_board"
     },
     "jugcraft:turbine_generator": {
-      "numerator": 7631,
-      "denominator": 2,
+      "numerator": 453385,
+      "denominator": 128,
       "source": "recipe jugcraft:turbine_generator"
     },
     "jugcraft:turbocharger": {
       "numerator": 231,
       "denominator": 16,
       "source": "recipe jugcraft:turbocharger"
+    },
+    "jugcraft:turkey_pull_toy": {
+      "numerator": 401,
+      "denominator": 4,
+      "source": "recipe jugcraft:turkey_pull_toy"
     },
     "jugcraft:turkey_slice": {
       "numerator": 1,
@@ -69762,6 +70772,11 @@
       "denominator": 32,
       "source": "recipe jugcraft:newest/twigworks/yellow_silt_shingles"
     },
+    "jugcraft:twined_pack_basket": {
+      "numerator": 87,
+      "denominator": 1,
+      "source": "recipe jugcraft:twined_pack_basket"
+    },
     "jugcraft:two_headed_snake_jar": {
       "numerator": 661,
       "denominator": 9,
@@ -69778,12 +70793,12 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:uhv_tower": {
-      "numerator": 27295,
+      "numerator": 3235,
       "denominator": 4,
       "source": "recipe jugcraft:uhv_tower"
     },
     "jugcraft:uhvdc_tower": {
-      "numerator": 75653,
+      "numerator": 8285,
       "denominator": 8,
       "source": "recipe jugcraft:uhvdc_tower"
     },
@@ -69808,7 +70823,7 @@
       "source": "recipe jugcraft:starter_workshop/unfired_insulator"
     },
     "jugcraft:unit_substation": {
-      "numerator": 72083,
+      "numerator": 14339,
       "denominator": 24,
       "source": "recipe jugcraft:unit_substation"
     },
@@ -69983,7 +70998,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:vital_inverter": {
-      "numerator": 1999,
+      "numerator": 316,
       "denominator": 1,
       "source": "recipe jugcraft:vital_inverter"
     },
@@ -70008,7 +71023,7 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:votive_rifle": {
-      "numerator": 11069,
+      "numerator": 1445,
       "denominator": 8,
       "source": "recipe jugcraft:votive_rifle"
     },
@@ -70018,7 +71033,7 @@
       "source": "recipe jugcraft:wall_conduit"
     },
     "jugcraft:wall_display": {
-      "numerator": 164335,
+      "numerator": 41455,
       "denominator": 256,
       "source": "recipe jugcraft:wall_display"
     },
@@ -70298,8 +71313,8 @@
       "source": "recipe jugcraft:werewolf_rug"
     },
     "jugcraft:wet_processing_bench": {
-      "numerator": 10312,
-      "denominator": 3,
+      "numerator": 462811,
+      "denominator": 192,
       "source": "recipe jugcraft:wet_processing_bench"
     },
     "jugcraft:wet_superphosphate": {
@@ -73572,6 +74587,11 @@
       "denominator": 1,
       "source": "recipe jugcraft:wooden_basket"
     },
+    "jugcraft:wooden_corn_mortar": {
+      "numerator": 70,
+      "denominator": 1,
+      "source": "recipe jugcraft:wooden_corn_mortar"
+    },
     "jugcraft:wooden_pole": {
       "numerator": 5645,
       "denominator": 24,
@@ -73586,6 +74606,11 @@
       "numerator": 65,
       "denominator": 4,
       "source": "recipe jugcraft:wooden_stock"
+    },
+    "jugcraft:woodland_hunting_bow": {
+      "numerator": 177,
+      "denominator": 4,
+      "source": "recipe jugcraft:woodland_hunting_bow"
     },
     "jugcraft:woodstove": {
       "numerator": 1800,
@@ -73712,6 +74737,11 @@
       "denominator": 1,
       "source": "reference tag minecraft:logs"
     },
+    "jugcraft:yttrium_oxide": {
+      "numerator": 1,
+      "denominator": 8,
+      "source": "local rare-earth maximum coproduct allocation"
+    },
     "jugcraft:yucca_fence": {
       "numerator": 40,
       "denominator": 3,
@@ -73803,14 +74833,14 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:zirconia_blank": {
-      "numerator": 1,
+      "numerator": 2,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local zirconia finishing accounting"
     },
     "jugcraft:zirconia_charge": {
-      "numerator": 1,
+      "numerator": 2,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local zirconia finishing accounting"
     },
     "jugcraft:zirconia_insert": {
       "numerator": 1,
@@ -73818,14 +74848,14 @@
       "source": "fallback (balance pending)"
     },
     "jugcraft:zirconia_powder": {
-      "numerator": 1,
+      "numerator": 2,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local zirconia finishing accounting"
     },
     "jugcraft:zirconia_precursor": {
-      "numerator": 1,
+      "numerator": 2,
       "denominator": 1,
-      "source": "fallback (balance pending)"
+      "source": "local zirconia finishing accounting"
     },
     "jugcraft:zucchini": {
       "numerator": 1,
