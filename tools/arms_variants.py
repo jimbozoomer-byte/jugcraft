@@ -147,6 +147,7 @@ DREAD_MAX = 256        # the most foes remembered as lately filled with dread
 # the conventional bosses, every lair boss (tools/check_mod_data.py checks each one with a boss bar is here) and the
 # Headless Horseman, summoned or in his lair.
 FRIGHTLESS = ("#c:bosses", "jugcraft:vesperine", "jugcraft:tatterlace", "jugcraft:yeti_king", "jugcraft:cinder_tyrant",
+              "jugcraft:glass_abbot",
               "jugcraft:mire_hag", "jugcraft:crypt_lich", "jugcraft:iron_dreadnought", "jugcraft:alpha_werewolf",
               "jugcraft:cydonian_sentinel", "jugcraft:pumpkin_king", "jugcraft:headless_horseman",
               "jugcraft:hessian_horseman", "jugcraft:storm_roc")

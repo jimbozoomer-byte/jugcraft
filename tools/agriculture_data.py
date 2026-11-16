@@ -67,6 +67,7 @@ import pumpkin_king_data
 import hessian_horseman_data
 import cydonian_sentinel_data
 import storm_roc_data
+import glass_abbot_data
 import vesperine_data
 import decor18_data
 import decor19_data
@@ -345,6 +346,7 @@ def assets(root, write, lang):
     hessian_horseman_data.assets(root, write, lang)
     cydonian_sentinel_data.assets(root, write, lang)
     storm_roc_data.assets(root, write, lang)
+    glass_abbot_data.assets(root, write, lang)
     ofrenda_data.assets(root, write, lang)
     graveyard_data.assets(root, write, lang)
     kitchen_data.assets(root, write, lang)
@@ -524,6 +526,7 @@ def loot(data, write):
     hessian_horseman_data.loot(out, write)
     cydonian_sentinel_data.loot(out, write)
     storm_roc_data.loot(out, write)
+    glass_abbot_data.loot(out, write)
     ferris_wheel_data.loot(out, write)
     hot_air_balloon_data.loot(out, write)
     theremin_data.loot(out, write)
@@ -614,6 +617,7 @@ def recipes(out, write):
     pumpkin_king_data.recipes(out, write, conditions)
     cydonian_sentinel_data.recipes(out, write, conditions)
     storm_roc_data.recipes(out, write, conditions)
+    glass_abbot_data.recipes(out, write, conditions)
     kitchen_data.recipes(out, write, conditions)
 
 
@@ -679,6 +683,7 @@ def tags(tags):
     hessian_horseman_data.tags(tags)
     cydonian_sentinel_data.tags(tags)
     storm_roc_data.tags(tags)
+    glass_abbot_data.tags(tags)
     ferris_wheel_data.tags(tags)
     hot_air_balloon_data.tags(tags)
     regatta_data.tags(tags)
@@ -745,6 +750,7 @@ def advancements(data, write):
     hessian_horseman_data.advancements(data, write)
     cydonian_sentinel_data.advancements(data, write)
     storm_roc_data.advancements(data, write)
+    glass_abbot_data.advancements(data, write)
 
 
 def worldgen(data, write):

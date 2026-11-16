@@ -44,6 +44,7 @@ import pumpkin_king
 import hessian_horseman
 import cydonian_sentinel
 import storm_roc
+import glass_abbot
 import vesperine
 import kitchen
 import feasts
@@ -2938,7 +2939,7 @@ def all_blocks():
             + decor4_blocks() + decor5_blocks() + decor6_blocks() + decor7_blocks() + decor8_blocks() + decor9_blocks() + decor10_blocks()
             + decor11_blocks() + decor12_blocks() + decor13_blocks() + decor14_blocks() + chandlery_blocks() + cider_blocks() + pantry_blocks()
             + firework_blocks() + feast_blocks() + maze_blocks() + candy_blocks() + foraging_blocks() + bat_blocks() + [KNITTING["wheel"]] + pie_blocks() + [SPIRIT_BOARD["block"], TURKEYS["roast"], THEREMIN["block"], OFRENDA["block"]] + list(OFRENDA["decor"]) + graveyard.blocks() + [WOLFSBANE["block"], potted(WOLFSBANE["block"])] + WEREWOLF_RUGS + midway.blocks() + ferris_wheel.blocks() + hot_air_balloon.blocks() + plants.blocks() + decor15.blocks() + decor16.blocks() + decor17.blocks() + decor18.blocks() + decor19.blocks() + decor20.blocks() + thanksgiving_decor.blocks() + pumpkin_patch.display_blocks() + pumpkin_patch.extra_blocks() + orchard_harvest.blocks() + barn_tools.blocks() + fall_garden.blocks() + hearth.blocks() + haunted_midway.blocks() + front_yard.blocks() + party_table.blocks() + clockwork.blocks() + harvest_festival.blocks() + kitchen.blocks() + feasts.blocks() + menu.blocks() + rice.blocks() + soil.blocks() + orchard.blocks() + cakes.blocks() + pies_and_tarts.blocks() + milkshakes.blocks() + garden.blocks()
-            + herbs.blocks() + spices.blocks() + lairs.blocks() + vesperine.blocks() + pumpkin_king.blocks()
+            + herbs.blocks() + spices.blocks() + lairs.blocks() + vesperine.blocks() + pumpkin_king.blocks() + glass_abbot.blocks()
             + adam_ondi_ahman.blocks_registered())
 
 
@@ -2954,7 +2955,7 @@ def all_items():
             + herbs.items() + spices.items() + lairs.items() + vesperine.items() + tatterlace.items()
             + yeti_king.items() + cinder_tyrant.items() + mire_hag.items() + crypt_lich.items()
             + iron_dreadnought.items() + alpha_werewolf.items() + pumpkin_king.items() + hessian_horseman.items()
-            + cydonian_sentinel.items() + storm_roc.items())
+            + cydonian_sentinel.items() + storm_roc.items() + glass_abbot.items())
 
 
 def owns(entry_id):
