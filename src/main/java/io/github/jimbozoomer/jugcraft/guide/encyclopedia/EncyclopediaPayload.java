@@ -91,8 +91,11 @@ public record EncyclopediaPayload(int sequence, List<Component> notices, List<Pa
 	/** One page: its id (for the views' tabs and for links), its title and its rows. */
 	public record Page(String id, Component title, List<Row> rows) {
 		public static final int MAX_ID = 32;
-		/** Bounded for the complete 61-species menagerie directory and its introductory topics. */
-		public static final int MAX_ROWS = 160;
+		/**
+		 * Bounded for the complete 61-species menagerie directory and its introductory topics, and for every lair's dossier,
+		 * found and beaten, with the bestiary's creatures after them (Concordance Chunk E, E4: ten keepers, room for more).
+		 */
+		public static final int MAX_ROWS = 384;
 		public static final StreamCodec<RegistryFriendlyByteBuf, Page> STREAM_CODEC = StreamCodec.composite(
 				ByteBufCodecs.stringUtf8(MAX_ID), Page::id,
 				ComponentSerialization.TRUSTED_STREAM_CODEC, Page::title,
