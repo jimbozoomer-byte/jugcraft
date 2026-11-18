@@ -635,7 +635,7 @@
         {
           "item": "minecraft:golden_carrot",
           "count": 2,
-          "price": 6,
+          "price": 24,
           "themes": [
             "harvest"
           ]

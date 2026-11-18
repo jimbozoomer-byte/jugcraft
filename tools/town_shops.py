@@ -89,7 +89,7 @@ SHOPS = {
             ["minecraft:soul_lantern", 2, 18, ["halloween"]], ["minecraft:skeleton_skull", 1, 200, ["halloween"]],
             ["minecraft:zombie_head", 1, 200, ["halloween"]],
             ["minecraft:cake", 1, 18, ["harvest", "december"]], ["minecraft:baked_potato", 8, 4, ["harvest"]],
-            ["minecraft:golden_carrot", 2, 6, ["harvest"]], ["minecraft:honey_bottle", 2, 4, ["harvest"]],
+            ["minecraft:golden_carrot", 2, 24, ["harvest"]], ["minecraft:honey_bottle", 2, 4, ["harvest"]],
             ["minecraft:red_candle", 2, 3, ["december"]], ["minecraft:green_candle", 2, 3, ["december"]],
             ["minecraft:spruce_sapling", 2, 3, ["december", "winter"]], ["minecraft:red_wool", 4, 3, ["december"]],
         ],

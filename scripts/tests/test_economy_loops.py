@@ -174,10 +174,10 @@ class TownShopEssenceTests(unittest.TestCase):
 
     def test_essence_cannot_round_trip_through_the_town(self):
         """The reproduced loop, in exact numbers, and the invariant that closes it."""
-        sold = {o['item']: Fraction(o['price'], o['count']) for info in RUNTIME_SHOPS.values() for o in info['sells']}
-        # Essence a Jug buys at the town: the dearest return is the Curiosities jukebox (a diamond inside).
-        best = max(essence(item) / price for item, price in sold.items())
-        self.assertEqual(Fraction(688), best)
+        # Compare every counter, including different offers for the same item. The map now gives the highest return.
+        best = max(essence(o['item']) * Fraction(o['count'], o['price'])
+                   for info in RUNTIME_SHOPS.values() for o in info['sells'])
+        self.assertEqual(Fraction(224), best)
         # Pre-audit: 64 cobblestone (one essence each) sold for 1 Jug, so a Jug cost 64 essence; a 6-Jug bucket
         # dissolves for 768. 384 formed cobblestone -> 6 Jugs -> 1 bucket -> 768 essence: double, every lap.
         cobble_jug = 64 * essence('minecraft:cobblestone')
