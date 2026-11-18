@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.event.player.UseItemCallback;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.core.registries.Registries;
@@ -53,14 +54,30 @@ public final class TownProtection {
 
 	public static void register() {
 		PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, blockEntity) -> {
-			if (denies(player, level, pos)) {
+			if (denies(player, level, pos) && !ApartmentRentals.mayRetrieve(player,level,pos)) {
 				tell(player);
 				return false;
 			}
 			return true;
 		});
 		AttackBlockCallback.EVENT.register((player, level, hand, pos, direction) ->
-				!level.isClientSide() && denies(player, level, pos) ? InteractionResult.FAIL : InteractionResult.PASS);
+				!level.isClientSide() && denies(player, level, pos) && !ApartmentRentals.mayRetrieve(player,level,pos) ? InteractionResult.FAIL : InteractionResult.PASS);
+		PlayerBlockBreakEvents.AFTER.register((level,player,pos,state,entity) -> ApartmentRentals.removed(level,pos));
+		// Enforce parcel privacy before other mods' public-use callbacks can open a container or place an item.
+		var apartmentPhase = io.github.jimbozoomer.jugcraft.Jugcraft.id("rental_interiors");
+		UseBlockCallback.EVENT.addPhaseOrdering(io.github.jimbozoomer.jugcraft.Jugcraft.id("apartment_survey"),apartmentPhase);
+		UseBlockCallback.EVENT.addPhaseOrdering(apartmentPhase,net.fabricmc.fabric.api.event.Event.DEFAULT_PHASE);
+		UseBlockCallback.EVENT.register(apartmentPhase,(p,l,h,hit) -> {
+			if (l.isClientSide() || io.github.jimbozoomer.jugcraft.server.OperatorRegions.tool(p.getItemInHand(h))) return InteractionResult.PASS;
+			var at=hit.getBlockPos();
+			if (p instanceof ServerPlayer server && p.isShiftKeyDown() && p.getItemInHand(h).isEmpty()
+					&& l.getBlockState(at).getBlock() instanceof net.minecraft.world.level.block.DoorBlock) {
+				var inspected=ApartmentCommands.readDoor(server,at);
+				if (inspected.consumesAction()) return inspected;
+			}
+			return ApartmentRentals.protects(l,at) || ApartmentRentals.protects(l,at.relative(hit.getDirection()))
+				? useBlock(p,l,h,hit) : InteractionResult.PASS;
+		});
 		UseBlockCallback.EVENT.register(TownProtection::useBlock);
 		UseItemCallback.EVENT.register(TownProtection::useItem);
 		AttackEntityCallback.EVENT.register((player, level, hand, entity, hit) -> attack(player, level, entity));
@@ -81,12 +98,12 @@ public final class TownProtection {
 
 	/** Whether the town stops this player changing this block. */
 	public static boolean denies(Player player, Level level, BlockPos pos) {
-		return !level.isClientSide() && enabled() && Town.isProtected(level, pos) && !exempt(player);
+		return !level.isClientSide() && shieldsBlock(level,pos) && !exempt(player);
 	}
 
 	/** Whether the town shields a block from explosions, fire and pistons. */
 	public static boolean shieldsBlock(Level level, BlockPos pos) {
-		return !level.isClientSide() && enabled() && Town.isProtected(level, pos);
+		return !level.isClientSide() && (enabled() && Town.isProtected(level, pos) || ApartmentRentals.protects(level,pos) || io.github.jimbozoomer.jugcraft.server.OperatorRegions.protects(level, pos));
 	}
 
 	private static InteractionResult useBlock(Player player, Level level, InteractionHand hand, BlockHitResult hit) {
@@ -99,8 +116,30 @@ public final class TownProtection {
 			return InteractionResult.PASS;
 		}
 		if (player.isSpectator()) return InteractionResult.FAIL;
+        if (player.getItemInHand(hand).getItem() instanceof QuarryInstrument instrument && level instanceof ServerLevel serverLevel) {
+            instrument.read(serverLevel,player,pos,hit.getDirection(),player.getItemInHand(hand));
+            return InteractionResult.SUCCESS;
+        }
+		BlockState clicked = level.getBlockState(pos);
+		// Execute the giving tree's exact hand action. Its own check covers claims, operator regions
+		// and private apartments across every section and the held item never gets a placement fallback.
+		if (clicked.getBlock() instanceof io.github.jimbozoomer.jugcraft.agriculture.HarbourGiftFir fir
+				&& !io.github.jimbozoomer.jugcraft.server.OperatorRegions.tool(player.getItemInHand(hand))) {
+			return fir.interact(clicked, level, pos, player, hand);
+		}
+		InteractionResult apartment = ApartmentRentals.use(player,level,hand,hit);
+		if (apartment != InteractionResult.PASS) return apartment;
 		BlockState state = level.getBlockState(pos);
 		boolean holding = !player.getMainHandItem().isEmpty() || !player.getOffhandItem().isEmpty();
+		// Only the season ledger's own servings are public, never arbitrary stored food.
+		if (level instanceof net.minecraft.server.level.ServerLevel server && TownFeast.managed(server, pos)) {
+			if (TownFeast.mayPublicEat(server, pos, player)
+					&& io.github.jimbozoomer.jugcraft.finance.LandRegistry.mayBuild(player, level, pos)) {
+				InteractionResult result = state.useWithoutItem(level, player, hit);
+				return result.consumesAction() ? result : InteractionResult.FAIL;
+			}
+			return InteractionResult.FAIL;
+		}
 		// Execute only the block's ordinary interaction, never the held item's use-on-block
 		// fallback (placing, stripping, dyeing, waterlogging, etc.). Claim checks still apply.
 		if (publicBlock(level, pos, state)
@@ -116,8 +155,12 @@ public final class TownProtection {
 
 	/** Public amenities do not expose persistent inventories; unknown block entities stay private. */
 	public static boolean publicBlock(Level level, BlockPos pos, BlockState state) {
+		// A set-down meal's empty-hand interaction removes it into inventory. Treat it like a flower pot,
+		// not a door; the managed public feast has its own serving-only permission above this fallback.
+		if (state.getBlock() instanceof io.github.jimbozoomer.jugcraft.agriculture.PlacedDishBlock) return false;
 		// This is the player's personal inventory, explicitly provided by the bank.
 		if (state.is(net.minecraft.world.level.block.Blocks.ENDER_CHEST)) return true;
+        if (state.getBlock() instanceof io.github.jimbozoomer.jugcraft.boardgames.TableBlock) return true;
         // Public enchanting uses an isolated vanilla menu; it never exposes the
         // owner's new persistent table inventory (OwnerEnchantingMenuMixin).
         if (state.is(net.minecraft.world.level.block.Blocks.ENCHANTING_TABLE) && state.is(USABLE)) return true;
@@ -144,6 +187,7 @@ public final class TownProtection {
 
 	/** Lets native furniture perform its ordinary public interaction, not modification with tools/items. */
 	public static boolean allowsPublicUse(Player player, Level level, BlockPos pos) {
+		if (ApartmentRentals.privateFixture(level,pos)) return ApartmentRentals.mayUseFurniture(player,level,pos);
 		return denies(player, level, pos) && publicBlock(level, pos, level.getBlockState(pos))
 				&& io.github.jimbozoomer.jugcraft.finance.LandRegistry.mayBuild(player, level, pos);
 	}

@@ -1,0 +1,35 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "jugcraft:chemical_reaction",
+  "capability": "jugcraft:precision_preparation",
+  "items": [
+    {
+      "ingredient": "jugcraft:perception_substrate",
+      "count": 1
+    }
+  ],
+  "fluids": [
+    {
+      "fluid": "jugcraft:organic_process_stock",
+      "amount": 500
+    }
+  ],
+  "results": [
+    {
+      "id": "jugcraft:lsd_stock",
+      "count": 4
+    }
+  ],
+  "tool": "jugcraft:precision_process_module",
+  "energy_per_tick": 96,
+  "time": 240
+}

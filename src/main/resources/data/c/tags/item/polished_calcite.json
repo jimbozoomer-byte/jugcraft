@@ -31,6 +31,12 @@
     {
       "id": "regions_unexplored:polished_calcite",
       "required": false
+    },
+    "jugcraft:twigworks_polished_calcite",
+    "jugcraft:stoneworks_polished_calcite",
+    {
+      "id": "minecraft:polished_calcite",
+      "required": false
     }
   ]
 }

@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "minecraft:snowball",
+    "minecraft:snowball",
+    "minecraft:snowball"
+  ],
+  "result": {
+    "id": "jugcraft:shovelled_snow_pile",
+    "count": 2
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jugcraft:glass_reliquary",
+    "minecraft:glass_pane"
+  ],
+  "result": {
+    "id": "jugcraft:lantern_lens",
+    "count": 1
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jugcraft:old_plastic_crate"
+  ],
+  "result": {
+    "id": "jugcraft:plastic_pellets",
+    "count": 4
+  }
+}

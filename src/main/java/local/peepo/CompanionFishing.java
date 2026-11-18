@@ -16,7 +16,6 @@ import net.minecraft.world.item.*;
 import net.minecraft.world.item.enchantment.*;
 import net.minecraft.world.level.*;
 import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.level.storage.*;
 import net.minecraft.world.level.storage.loot.*;
 import net.minecraft.world.level.storage.loot.parameters.*;
@@ -125,7 +124,6 @@ public final class CompanionFishing {
         public CompanionStatus workStatus(PeepoEntity other){
             if(other!=npc || !assigned(target))return CompanionStatus.MISSING;
             if(!CompanionJobs.permitted(npc,stationPosition()) || !CompanionJobs.permitted(npc,target.fishingWater()))return CompanionStatus.FORBIDDEN;
-            if(!((ServerLevel)npc.level()).getGameRules().get(GameRules.MOB_GRIEFING))return CompanionStatus.GARDEN_DISABLED;
             if(!availableTo(other))return CompanionStatus.OCCUPIED;
             if(!CompanionWater.source(npc.level(),target.fishingWater()))return CompanionStatus.NO_WATER_SOURCE;
             if(!rod(npc.assignedHand()))return CompanionStatus.NEEDS_ROD;

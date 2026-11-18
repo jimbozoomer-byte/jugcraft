@@ -1,0 +1,27 @@
+{
+  "values": [
+    "jugcraft:caffeine_formula_plate",
+    "jugcraft:aspirin_formula_plate",
+    "jugcraft:paracetamol_formula_plate",
+    "jugcraft:rehydration_salts_formula_plate",
+    "jugcraft:activated_charcoal_formula_plate",
+    "jugcraft:stimulant_formula_plate",
+    "jugcraft:methylphenidate_formula_plate",
+    "jugcraft:amphetamine_formula_plate",
+    "jugcraft:modafinil_formula_plate",
+    "jugcraft:refined_spirits_formula_plate",
+    "jugcraft:reserve_whiskey_formula_plate",
+    "jugcraft:high_proof_spirits_formula_plate",
+    "jugcraft:caffeine_xr_formula_plate",
+    "jugcraft:methylphenidate_xr_formula_plate",
+    "jugcraft:amphetamine_xr_formula_plate",
+    "jugcraft:modafinil_xr_formula_plate",
+    "jugcraft:fentanyl_patch_formula_plate",
+    "jugcraft:masterwork_reserve_formula_plate",
+    "jugcraft:thc_formula_plate",
+    "jugcraft:psilocybin_formula_plate",
+    "jugcraft:mescaline_formula_plate",
+    "jugcraft:lsd_formula_plate",
+    "jugcraft:dmt_formula_plate"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "minecraft:stick",
+    "minecraft:stick",
+    "minecraft:stick",
+    "jugcraft:flax",
+    "jugcraft:corn",
+    "jugcraft:corn",
+    "jugcraft:corn"
+  ],
+  "result": {
+    "id": "jugcraft:corn_drying_frame",
+    "count": 1
+  }
+}

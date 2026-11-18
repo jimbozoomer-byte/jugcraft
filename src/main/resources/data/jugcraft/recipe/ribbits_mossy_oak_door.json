@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "group": "wooden_door",
+  "pattern": [
+    "##",
+    "##",
+    "##"
+  ],
+  "key": {
+    "#": "jugcraft:ribbits_mossy_oak_planks"
+  },
+  "result": {
+    "id": "jugcraft:ribbits_mossy_oak_door",
+    "count": 3
+  }
+}

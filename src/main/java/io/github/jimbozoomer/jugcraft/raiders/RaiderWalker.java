@@ -11,10 +11,17 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import java.util.EnumSet;
+import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.SpawnGroupData;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.level.pathfinder.Path;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
@@ -26,6 +33,7 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
@@ -38,11 +46,30 @@ import org.jspecify.annotations.Nullable;
  * anything {@value JugcraftRaiders#WALKER_LAUNCH_MIN} to {@value JugcraftRaiders#WALKER_LAUNCH_MAX} blocks off, every
  * {@value JugcraftRaiders#WALKER_LAUNCH_COOLDOWN} ticks. It shrugs off knockback and climbs a block and a half. Raiders
  * never break blocks.
+ *
+ * <p>Its driver ({@link RaiderCrew}) sits head and shoulders out of the open hatch on its roof. Without its driver a
+ * crewed walker stalls, smokes and goes down; when it falls, the driver climbs out and fights on foot. It charges only
+ * a defender it can reach on foot; one it cannot (behind a gate, say) it engages with its hull launcher from a standoff
+ * in sight of them, {@value #STANDOFF} to {@value JugcraftRaiders#WALKER_LAUNCH_MAX} - 4 blocks off, on its own side of
+ * the town wall ({@link RaidStandoff}), rather than grinding against the wall. In a raid it tries
+ * {@value RaidEngagement#STANDOFF_TRIES} standoffs, then gives that defender up and marches on ({@link RaidEngagement}).
  */
 public class RaiderWalker extends Monster implements Raider {
 	private static final EntityDataAccessor<Integer> PUNCHED_AT = SynchedEntityData.defineId(RaiderWalker.class, EntityDataSerializers.INT);
+	/** Where it engages a defender it cannot reach: at least this far off, within its launcher's reach. */
+	static final int STANDOFF = 10;
+	/** Ticks between its checks whether its target can be reached on foot. */
+	static final int REACH_CHECK_TICKS = 20;
 	private final RaidMember member = new RaidMember();
+	/** Its memory of its fight in a raid (made when first asked for: goals are set up before field initialisers run). */
+	private @Nullable RaidEngagement engagement;
 	private int launch = JugcraftRaiders.WALKER_LAUNCH_COOLDOWN;
+	/** Whether it has had a crew (saved): a walker that has lost its crew fails; one that never had one walks as before. */
+	private boolean crewed;
+	private int abandoned;
+	private int reachCheckedAt = -REACH_CHECK_TICKS;
+	private @Nullable LivingEntity reachChecked;
+	private boolean reachable;
 	/** Client side: blocks walked, for the legs' swing. */
 	private final io.github.jimbozoomer.jugcraft.walker.WalkerStride gait = new io.github.jimbozoomer.jugcraft.walker.WalkerStride();
 	private int swungAt = -100;
@@ -64,17 +91,48 @@ public class RaiderWalker extends Monster implements Raider {
 		builder.define(PUNCHED_AT, -100);
 	}
 
+	/** Guards only ({@link RaiderTargets}); in a raid, on the ground and not given up ({@link RaidEngagement#allows}). */
 	@Override
 	public boolean canAttack(net.minecraft.world.entity.LivingEntity target) {
-		return RaiderTargets.allowed(target) && super.canAttack(target);
+		return RaiderTargets.allowed(target) && engagement().allows(target) && super.canAttack(target);
+	}
+
+	@Override
+	public RaidEngagement engagement() {
+		if (engagement == null) {
+			engagement = new RaidEngagement(this);
+		}
+		return engagement;
 	}
 
 	@Override
 	protected void registerGoals() {
 		goalSelector.addGoal(1, new FloatGoal(this));
-		goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.0, true));
-		goalSelector.addGoal(4, new MarchGoal(this, () -> member.objective, 1.0));
-		goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.6));
+		// A crewed walker that has lost its driver (stalled) does nothing but smoke until it goes down.
+		goalSelector.addGoal(2, new MeleeAttackGoal(this, 1.0, true) {
+			@Override
+			public boolean canUse() {
+				return !stalled() && reachesTarget() && super.canUse();
+			}
+
+			@Override
+			public boolean canContinueToUse() {
+				return !stalled() && reachesTarget() && super.canContinueToUse();
+			}
+		});
+		goalSelector.addGoal(3, new StandoffGoal());
+		goalSelector.addGoal(1, new MarchGoal(this, () -> stalled() ? null : member.objective, 1.0));
+		goalSelector.addGoal(6, new WaterAvoidingRandomStrollGoal(this, 0.6) {
+			@Override
+			public boolean canUse() {
+				return !stalled() && !engagement().holding() && super.canUse();
+			}
+
+			@Override
+			public boolean canContinueToUse() {
+				return !stalled() && !engagement().holding() && super.canContinueToUse();
+			}
+		});
 		goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 16.0F));
 		targetSelector.addGoal(1, new HurtByTargetGoal(this, RaiderInfantry.class, RaiderWalker.class, RaiderBlimp.class));
 		targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, io.github.jimbozoomer.jugcraft.town.Townsfolk.class, true));
@@ -93,12 +151,75 @@ public class RaiderWalker extends Monster implements Raider {
 		}
 	}
 
+	public boolean crewed() {
+		return crewed;
+	}
+
+	/** Whether it had a driver and has lost them: it stands, smoking, until it goes down (RaiderCrew.abandoned). */
+	public boolean stalled() {
+		return crewed && RaiderCrew.crew(this) == null;
+	}
+
+	void setCrewed(boolean crewed) {
+		this.crewed = crewed;
+	}
+
+	@Override
+	protected boolean canAddPassenger(Entity passenger) {
+		return passenger instanceof RaiderInfantry && getPassengers().isEmpty();
+	}
+
+	@Override
+	protected Vec3 getPassengerAttachmentPoint(Entity passenger, EntityDimensions dimensions, float scale) {
+		return RaiderCrew.WALKER_SEAT.yRot(-getYRot() * net.minecraft.util.Mth.DEG_TO_RAD);
+	}
+
+	/** The walker walks itself (its driver is crew, not a rider the game hands control to). */
+	@Override
+	public @Nullable LivingEntity getControllingPassenger() {
+		return null;
+	}
+
+	@Override
+	public @Nullable SpawnGroupData finalizeSpawn(ServerLevelAccessor level, DifficultyInstance difficulty, EntitySpawnReason reason,
+			@Nullable SpawnGroupData group) {
+		SpawnGroupData data = super.finalizeSpawn(level, difficulty, reason, group);
+		RaiderCrew.crewOnSpawn(level.getLevel(), this, reason);
+		return data;
+	}
+
+	/**
+	 * Whether its target can be reached on foot (a path that gets there, or it is already in reach), checked at most
+	 * every {@value #REACH_CHECK_TICKS} ticks for a given target.
+	 */
+	boolean reachesTarget() {
+		LivingEntity target = getTarget();
+		if (target == null || !target.isAlive()) {
+			return false;
+		}
+		if (target != reachChecked || tickCount - reachCheckedAt >= REACH_CHECK_TICKS) {
+			reachChecked = target;
+			reachCheckedAt = tickCount;
+			Path path = getNavigation().createPath(target, 0);
+			reachable = path != null && path.canReach() || distanceToSqr(target) < 16.0;
+		}
+		return reachable;
+	}
+
 	@Override
 	protected void customServerAiStep(ServerLevel level) {
 		super.customServerAiStep(level);
 		if (member.checkRaid(level, this)) {
 			return;
 		}
+		if (stalled()) {
+			// No driver: it stalls where it stands, smoking, and goes down.
+			getNavigation().stop();
+			RaiderCrew.abandoned(level, this, ++abandoned);
+			return;
+		}
+		abandoned = 0;
+		engagement().tick();
 		LivingEntity target = getTarget();
 		if (--launch <= 0 && target != null && target.isAlive()) {
 			double distance = distanceTo(target);
@@ -115,6 +236,9 @@ public class RaiderWalker extends Monster implements Raider {
 	/** Its punch: the arm swings on every client. */
 	@Override
 	public boolean doHurtTarget(ServerLevel level, Entity target) {
+		if (stalled()) {
+			return false;
+		}
 		entityData.set(PUNCHED_AT, tickCount);
 		level.playSound(null, getX(), getY() + 2, getZ(), SoundEvents.ANVIL_LAND, SoundSource.HOSTILE, 0.6F, 0.6F);
 		return super.doHurtTarget(level, target);
@@ -145,6 +269,7 @@ public class RaiderWalker extends Monster implements Raider {
 	public void die(DamageSource source) {
 		super.die(source);
 		if (level() instanceof ServerLevel level) {
+			RaiderCrew.bailOut(this);
 			level.sendParticles(ParticleTypes.LARGE_SMOKE, getX(), getY() + 2.5, getZ(), 30, 1.0, 1.2, 1.0, 0.03);
 			RaiderRaids.fallen(level, this);
 		}
@@ -194,11 +319,103 @@ public class RaiderWalker extends Monster implements Raider {
 	protected void addAdditionalSaveData(ValueOutput output) {
 		super.addAdditionalSaveData(output);
 		member.save(output);
+		output.putBoolean("crewed", crewed);
 	}
 
 	@Override
 	protected void readAdditionalSaveData(ValueInput input) {
 		super.readAdditionalSaveData(input);
 		member.load(input);
+		crewed = input.getBooleanOr("crewed", false);
+	}
+
+	/**
+	 * A defender it cannot reach on foot: it holds wherever it has them in sight and in its launcher's reach (backing off
+	 * if they are nearer than its least range), and otherwise walks to a standoff in sight of them ({@link RaidStandoff},
+	 * on its own side of the town wall). A standoff it gets no nearer for six seconds, or reaches without sight of them,
+	 * is swapped for another further round; in a raid, after {@value RaidEngagement#STANDOFF_TRIES} it gives the defender
+	 * up ({@link RaidEngagement#nextStandoff}). It never loads a chunk to look for one.
+	 */
+	private final class StandoffGoal extends Goal {
+		private int repath;
+		private @Nullable Vec3 spot;
+		private double nearest;
+		private int stalls;
+
+		StandoffGoal() {
+			setFlags(EnumSet.of(Goal.Flag.MOVE, Goal.Flag.LOOK));
+		}
+
+		@Override
+		public boolean canUse() {
+			LivingEntity target = getTarget();
+			return !stalled() && target != null && target.isAlive() && !reachesTarget();
+		}
+
+		@Override
+		public boolean canContinueToUse() {
+			return canUse();
+		}
+
+		@Override
+		public void start() {
+			repath = 0;
+			spot = null;
+			nearest = Double.MAX_VALUE;
+			stalls = 0;
+		}
+
+		@Override
+		public void stop() {
+			getNavigation().stop();
+			spot = null;
+		}
+
+		@Override
+		public boolean requiresUpdateEveryTick() {
+			return true;
+		}
+
+		@Override
+		public void tick() {
+			LivingEntity target = getTarget();
+			if (target == null) {
+				return;
+			}
+			getLookControl().setLookAt(target, 10.0F, 10.0F);
+			if (--repath > 0) {
+				return;
+			}
+			repath = 20;
+			double dx = getX() - target.getX();
+			double dz = getZ() - target.getZ();
+			double distance = Math.sqrt(dx * dx + dz * dz);
+			if (distance >= JugcraftRaiders.WALKER_LAUNCH_MIN && distance <= JugcraftRaiders.WALKER_LAUNCH_MAX - 4 && hasLineOfSight(target)) {
+				getNavigation().stop();   // in reach and in sight: hold and let the launcher work
+				spot = null;
+				return;
+			}
+			if (spot != null) {
+				double gap = position().distanceToSqr(spot);
+				if (gap < 4.0) {
+					spot = null;   // there, and still no shot: another, further round
+				} else if (gap < nearest - 1.0) {
+					nearest = gap;
+					stalls = 0;
+				} else if (++stalls >= 6) {
+					spot = null;   // no nearer for six seconds (a wall, a ditch): another, further round
+				}
+			}
+			if (spot == null) {
+				spot = engagement().nextStandoff(target, STANDOFF, JugcraftRaiders.WALKER_LAUNCH_MAX - 4);
+				nearest = Double.MAX_VALUE;
+				stalls = 0;
+				if (spot == null) {
+					getNavigation().stop();
+					return;
+				}
+			}
+			getNavigation().moveTo(spot.x, spot.y, spot.z, 0.9);
+		}
 	}
 }

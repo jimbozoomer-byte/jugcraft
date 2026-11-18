@@ -1,5 +1,7 @@
 # Bloodthorn Armor: the first of the owner's armor tiers
 
+**Update, 28 October 2026:** no longer creative-only. Bloodthorn and the other smithed tiers are made from a crafted pattern and a netherite piece, and the Hades set only drops from the Cinder Tyrant ([armor-tier-sources.md](armor-tier-sources.md)).
+
 Status: implemented on `claude/bloodthorn-armor`, awaiting review. It is stacked on `claude/knight-armor` (#227), whose 3D armor engine it uses. **Not yet compiled, game-tested or played:** the Java compiles only in CI.
 Proposal issue: none. The owner sent five armor designs of their own on 6 October 2026 ("Can we start implementing the next 5 that I created. Again want you to use the the complex armor for each one to capture the shape of each piece like I have... Lets do these 1 by 1"). This is the first, a crimson set with no title on its picture, which the owner named:
 - the name: "Bloodthorn Armor";

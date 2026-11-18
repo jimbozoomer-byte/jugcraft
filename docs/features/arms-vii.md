@@ -1,5 +1,7 @@
 # Arms VII: variant arms, crafted styles and boss trophies (batch 56)
 
+**Update, 28 October 2026:** the armour sets' arms and shield are no longer creative-only: each drops only from its set's boss ([armor-tier-sources.md](armor-tier-sources.md)).
+
 Status: implemented on `claude/arms-variants`, awaiting review. Compiles and tests in CI only; **not yet played**.
 Proposal issue: the owner, 4 October 2026, after the arms restyle ([arms-restyle.md](arms-restyle.md)): "refine and make more variants". Asked how, they chose:
 - **New weapon items:** "they dont all need recipes yet a bunch can be drops from bosses ill make later you can theme them around them though example: Yeti King".

@@ -9,9 +9,41 @@ which turns surplus into Jugs at the player's own pace. Everything for sale is d
 sold is needed for progression. No shop sells anything any shop buys, so no item can be bought and sold back at a
 profit (tools/check_mod_data.py checks it, and that per-item sale prices beat buy prices for anything in both lists).
 Emeralds are bought, never sold, so villager trading cannot be looped through the town either.
+
+No shop buys anything the transmutation tablet, condensers or density gems may form (the jugcraft:tablet_outputs tag,
+docs/features/convenience-transmutation.md); the server refuses such a sale too (town/ShopMenu.java). Essence is
+renewable and any dissolved item becomes essence, so a formable buy offer would turn essence into Jugs. Cobblestone at
+64 for 1 Jug did exactly that: one essence formed one cobblestone, so 64 essence made a Jug, while a 6-Jug bucket
+dissolves for 768 essence, doubling essence and Jugs on every lap (2026-11-12 economy audit). Logs (64 for 1) and
+white wool (32 for 1) let daylight collectors mint Jugs the same way, at 2,048 and 1,536 essence a Jug.
 """
 
+import json
+from pathlib import Path
+import deepstead_shop_goods as guild
+
+# The server-owned convenience catalogue: the items transmutation may form (concordance/assay/TabletOutputs.java).
+TABLET_OUTPUTS = Path(__file__).resolve().parents[1] / "src/main/resources/data/jugcraft/tags/item/tablet_outputs.json"
+
 SHOPS = {
+    **{shop: {"name": guild.SHOPS[shop], "sells": [["jugcraft:"+key, count, price] for key,count,price,_,_ in stock], "buys": []}
+       for shop,stock in guild.STOCK.items()},
+    "deepstead_lampwright": {
+        "name": "Deepstead Lampwright",
+        "sells": [
+            ["jugcraft:miners_knot_tile", 4, 2], ["jugcraft:geode_reading_lamp", 1, 5],
+            ["jugcraft:gallery_chimes", 1, 7],
+        ],
+        "buys": [],
+    },
+    "deepstead_outfitter": {
+        "name": "Deepstead Survey Outfitters",
+        "sells": [
+            ["jugcraft:shaft_plummet", 1, 8], ["jugcraft:surveyors_reel", 1, 12],
+            ["jugcraft:miners_knot_tile", 4, 2],
+        ],
+        "buys": [],
+    },
     "general": {
         "name": "General Store",
         "sells": [
@@ -28,10 +60,10 @@ SHOPS = {
             ["minecraft:beetroot", 64, 1], ["minecraft:pumpkin", 32, 1], ["minecraft:melon_slice", 64, 1],
             ["minecraft:sugar_cane", 64, 1], ["minecraft:cocoa_beans", 64, 1], ["minecraft:sweet_berries", 64, 1],
             ["minecraft:apple", 32, 1], ["minecraft:egg", 16, 1], ["minecraft:leather", 16, 1],
-            ["minecraft:white_wool", 32, 1], ["minecraft:feather", 64, 1], ["minecraft:string", 64, 1],
+            # No white wool, oak/spruce/birch logs or cobblestone: the tablet can form them (see the docstring).
+            ["minecraft:feather", 64, 1], ["minecraft:string", 64, 1],
             ["minecraft:bone", 64, 1], ["minecraft:rotten_flesh", 64, 1], ["minecraft:gunpowder", 32, 1],
-            ["minecraft:honeycomb", 16, 1], ["minecraft:oak_log", 64, 1], ["minecraft:spruce_log", 64, 1],
-            ["minecraft:birch_log", 64, 1], ["minecraft:cobblestone", 64, 1], ["minecraft:coal", 32, 1],
+            ["minecraft:honeycomb", 16, 1], ["minecraft:coal", 32, 1],
             ["minecraft:copper_ingot", 32, 1], ["minecraft:iron_ingot", 16, 2], ["minecraft:gold_ingot", 4, 4],
             ["minecraft:redstone", 64, 1], ["minecraft:lapis_lazuli", 32, 1], ["minecraft:emerald", 4, 1],
             ["minecraft:amethyst_shard", 32, 1], ["minecraft:cod", 32, 1], ["minecraft:salmon", 32, 1],
@@ -97,6 +129,11 @@ SHOPS = {
 # keeper goes out for the evening (town/TownRoutine.java). The taverns never shut: at any hour their innkeepers sell the
 # General Store's ESSENTIALS, at the store's own prices, so nobody is ever left without light, food or a bed.
 HOURS = {shop: [1000, 12000] for shop in SHOPS}
+# The guild counter below daylight serves all three mine shifts.
+HOURS["deepstead_lampwright"] = [0, 24000]
+HOURS["deepstead_outfitter"] = [0, 24000]
+for shop in guild.SHOPS:
+    HOURS[shop] = [0, 24000]
 ESSENTIALS_FROM = "general"
 ESSENTIALS = ["minecraft:torch", "minecraft:bread", "minecraft:cooked_beef", "minecraft:white_bed"]
 
@@ -119,8 +156,8 @@ TRADE_RANGE = 8
 ATM_RANGE = 6
 
 
-def offers(shop, side):
-    for offer in SHOPS[shop][side]:
+def offers(shop, side, shops=None):
+    for offer in (SHOPS if shops is None else shops)[shop][side]:
         item, count, price = offer[:3]
         themes = offer[3] if len(offer) > 3 else None
         yield item, count, price, themes
@@ -141,28 +178,42 @@ def data():
     return out
 
 
-def loop_errors():
-    """No item is both sold and bought, and any per-item buy price stays under every per-item sale price."""
+def tablet_outputs(path=TABLET_OUTPUTS):
+    """The item IDs in the jugcraft:tablet_outputs tag (its entries are plain item IDs)."""
+    return {value if isinstance(value, str) else value["id"]
+            for value in json.loads(Path(path).read_text(encoding="utf-8"))["values"]}
+
+
+def loop_errors(shops=None, formable=None):
+    """No item is both sold and bought, any per-item buy price stays under every per-item sale price, and no shop buys
+    an item transmutation may form. Defaults to SHOPS and the tablet_outputs tag; tests pass other data."""
+    shops = SHOPS if shops is None else shops
+    formable = tablet_outputs() if formable is None else set(formable)
     errors = []
     sold, bought = {}, {}
-    for shop in SHOPS:
-        for item, count, price, _ in offers(shop, "sells"):
+    for shop in shops:
+        for item, count, price, _ in offers(shop, "sells", shops):
             sold.setdefault(item, []).append(price / count)
-        for item, count, price, _ in offers(shop, "buys"):
+        for item, count, price, _ in offers(shop, "buys", shops):
             bought.setdefault(item, []).append(price / count)
+            if item in formable:
+                errors.append(f"{shop} buys {item} ({count} for {price}): transmutation can form it, so essence would become Jugs")
     for item in sold.keys() & bought.keys():
         if max(bought[item]) >= min(sold[item]):
             errors.append(f"{item}: bought at {max(bought[item]):.3f} a piece, sold at {min(sold[item]):.3f}")
         errors.append(f"{item} is both sold and bought by the town")
-    for shop in SHOPS:
+    for shop in shops:
         for side in ("sells", "buys"):
-            for item, count, price, themes in offers(shop, side):
+            for item, count, price, themes in offers(shop, side, shops):
                 if count < 1 or count > 64 or price < 1:
                     errors.append(f"{shop} {side} {item}: count {count}, price {price}")
         open_at, close_at = HOURS[shop]
-        if not 0 <= open_at < close_at <= 18000:
+        if shop in ("deepstead_lampwright", "deepstead_outfitter", *guild.SHOPS):
+            if [open_at, close_at] != [0, 24000]:
+                errors.append("Deepstead's shift counter must cover the whole day")
+        elif not 0 <= open_at < close_at <= 18000:
             errors.append(f"{shop}: hours {open_at}-{close_at} must fall between dawn and midnight")
-    always = {item for item, _, _, themes in offers(ESSENTIALS_FROM, "sells") if themes is None}
+    always = {item for item, _, _, themes in offers(ESSENTIALS_FROM, "sells", shops) if themes is None}
     for item in ESSENTIALS:
         if item not in always:
             errors.append(f"essential {item} is not always on sale at the {ESSENTIALS_FROM} shop")

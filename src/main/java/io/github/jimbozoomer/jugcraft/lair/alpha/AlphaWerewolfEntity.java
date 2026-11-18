@@ -8,11 +8,13 @@ import com.geckolib.animation.RawAnimation;
 import com.geckolib.animation.object.LoopType;
 import com.geckolib.util.GeckoLibUtil;
 import io.github.jimbozoomer.jugcraft.agriculture.Werewolf;
+import io.github.jimbozoomer.jugcraft.lair.Encounter;
 import io.github.jimbozoomer.jugcraft.lair.JugcraftLairs;
 import io.github.jimbozoomer.jugcraft.lair.Lair;
 import io.github.jimbozoomer.jugcraft.lair.LairBosses;
 import io.github.jimbozoomer.jugcraft.lair.LairExitBlock;
 import io.github.jimbozoomer.jugcraft.lair.LairInstance;
+import io.github.jimbozoomer.jugcraft.lair.LairRewards;
 import io.github.jimbozoomer.jugcraft.lair.Lairs;
 import io.github.jimbozoomer.jugcraft.lair.MoonlitRing;
 import io.github.jimbozoomer.jugcraft.lair.MoonlitRing.Bell;
@@ -20,7 +22,6 @@ import io.github.jimbozoomer.jugcraft.lair.RakedTurfBlock;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -87,8 +88,10 @@ import org.jspecify.annotations.Nullable;
  * he slips through the trees to another clearing, leaving a second trail; his tells stay as long.
  *
  * <p>Every attack has a wind-up you can read, a strike and a recovery ({@link Attack}); the numbers are here and in
- * tools/alpha_werewolf.py. Poison, Wither, drowning, knockback and falls never harm or move him. Each participant
- * (whoever hurt him or his pack, or rang the bell that flushed him) gets their own loot ({@link AlphaWerewolfLoot}). Left
+ * tools/alpha_werewolf.py. Poison, Wither, drowning, knockback and falls never harm or move him. Each player who
+ * qualified in his fight (lair/Encounter, since Concordance Chunk E, E4: a blow to him or his pack, their own or a
+ * creature's they tamed, healing or a ward on another player, or ringing the bell that flushed him) gets their own loot
+ * ({@link AlphaWerewolfLoot}), once, paid through lair/LairRewards. Left
  * alone he slinks back to his stone, healed; his pack melts into the trees, his trail knits, and who hurt him is
  * forgotten. Bound to a lair instance he vanishes with it; one with no instance (a test's) keeps to the ring laid out from
  * the origin he was given. The only blocks he changes are the clearing's moss (raked turf, which knits back) and, on his
@@ -268,9 +271,8 @@ public class AlphaWerewolfEntity extends Monster implements GeoEntity {
 	private @Nullable UUID foe;
 	private int abandoned;
 	private int staggerTicks;
-	private final Map<UUID, Float> damageBy = new HashMap<>();
-	/** Whoever rang the bell that flushed him: participants too. */
-	private final Set<UUID> helpers = new HashSet<>();
+	/** This fight: who took part and how (lair/Encounter, since Concordance Chunk E, E4); his ring is the arena. */
+	private final Encounter encounter = new Encounter(this, this::centre);
 	private final Map<UUID, Long> hideWords = new HashMap<>();
 	// His rule, the Hunt.
 	private Hunt hunt = Hunt.NONE;
@@ -584,6 +586,9 @@ public class AlphaWerewolfEntity extends Monster implements GeoEntity {
 			discard();
 			return;
 		}
+		if (phase != Phase.WAITING && isAlive() && !encounter.underway()) {
+			encounter.begin();  // a fight back from a save keeps a fresh record of who takes part
+		}
 		if (landOnLoad) {
 			landOnLoad = false;
 			Vec3 down = downSpot(null);
@@ -661,6 +666,7 @@ public class AlphaWerewolfEntity extends Monster implements GeoEntity {
 		setAction(Action.WAKE);
 		entityData.set(EYES, true);
 		bossBar.setName(barName());
+		encounter.begin();
 		bossBar.setVisible(true);
 		huntIn = HUNT_EVERY;
 		level.playSound(null, getX(), getY(), getZ(), sound("entity.wolf.howl", SoundEvents.ZOMBIE_AMBIENT), SoundSource.HOSTILE, 6.0F, 0.5F);
@@ -1106,9 +1112,7 @@ public class AlphaWerewolfEntity extends Monster implements GeoEntity {
 	 * for {@value #FLUSHED_TICKS}, and his pack cowers for {@value #COWER_TICKS}. Whoever rang it takes part.
 	 */
 	public void flush(ServerLevel level, Bell bell, @Nullable Player ringer) {
-		if (ringer != null) {
-			helpers.add(ringer.getUUID());
-		}
+		deed(ringer, "bell");
 		hunt = Hunt.NONE;
 		huntTicks = 0;
 		ambushTicks = 0;
@@ -1617,20 +1621,32 @@ public class AlphaWerewolfEntity extends Monster implements GeoEntity {
 
 	/** Whoever hurt him or his pack has taken part. */
 	public void took(ServerPlayer player, float amount) {
-		damageBy.merge(player.getUUID(), amount, Float::sum);
+		encounter.damage(player, amount);
 	}
 
-	/** His participants: everyone who hurt him or his pack, or rang the bell that flushed him, and is near. */
+	/** His participants: everyone who qualified in his fight (lair/Encounter) and is alive near his ring. */
 	public List<ServerPlayer> participants(ServerLevel level) {
 		List<ServerPlayer> out = new ArrayList<>();
 		Vec3 centre = centre();
-		for (ServerPlayer player : level.players()) {
-			boolean part = damageBy.getOrDefault(player.getUUID(), 0.0F) > 0.0F || helpers.contains(player.getUUID());
-			if (player.isAlive() && part && player.position().distanceTo(centre) <= 64.0) {
+		for (UUID id : encounter.qualified()) {
+			ServerPlayer player = level.getServer().getPlayerList().getPlayer(id);
+			if (player != null && player.isAlive() && player.level() == level && player.position().distanceTo(centre) <= Encounter.REACH) {
 				out.add(player);
 			}
 		}
 		return out;
+	}
+
+	/** This fight: who took part and how. */
+	public Encounter encounter() {
+		return encounter;
+	}
+
+	/** {@code player} did one of the deeds his fight names: a part in it (lair/Encounter), keyed by what, who and when. */
+	private void deed(@Nullable Player player, String what) {
+		if (player instanceof ServerPlayer server) {
+			encounter.deed(server, what + " " + server.getUUID() + " " + server.level().getGameTime());
+		}
 	}
 
 	// ---------------------------------------------------------------- abandoned, and defeated
@@ -1656,8 +1672,7 @@ public class AlphaWerewolfEntity extends Monster implements GeoEntity {
 		flushedTicks = 0;
 		cowerTicks = 0;
 		huntIn = HUNT_EVERY;
-		damageBy.clear();
-		helpers.clear();
+		encounter.abandon();
 		Arrays.fill(cooldowns, 0);
 		setHealth(getMaxHealth());
 		entityData.set(EYES, false);
@@ -1685,17 +1700,27 @@ public class AlphaWerewolfEntity extends Monster implements GeoEntity {
 	public void die(DamageSource source) {
 		super.die(source);
 		if (level() instanceof ServerLevel level) {
+			// A killing blow gets here inside super.hurtServer, before hurtServer's own took(): its striker (or the owner of
+			// the tamed creature that struck) has taken part before the fall is paid. Any amount qualifies.
+			if (Encounter.striker(source) instanceof ServerPlayer player) {
+				took(player, Float.MIN_VALUE);
+			}
 			defeated(level);
 		}
 	}
 
 	/**
-	 * He has fallen: his pack melts away, each participant gets their loot, his trail knits, his lair's instance ends (it
-	 * closes once everyone has left), and Grey Mist opens on the Howling Stone.
+	 * He has fallen: his pack melts away, each player who qualified is paid their loot (lair/LairRewards: now, or kept for
+	 * one who died or left the game in it), his trail knits, his lair's instance ends (it closes once everyone has left),
+	 * and Grey Mist opens on the Howling Stone.
 	 */
 	private void defeated(ServerLevel level) {
+		// However often the fall is reported, it is answered once: one reward each (lair/Encounter's claim).
+		if (!encounter.claim()) {
+			return;
+		}
 		dismiss(level);
-		AlphaWerewolfLoot.reward(level, this, participants(level));
+		LairRewards.pay(level, AlphaWerewolfLoot.BOSS, encounter, position(), centre(), EXPERIENCE);
 		knitTurf(level);
 		inTrees = false;
 		setInvisible(false);
@@ -1750,7 +1775,7 @@ public class AlphaWerewolfEntity extends Monster implements GeoEntity {
 			hideTurns(level, source);
 		}
 		boolean hurt = super.hurtServer(level, source, dealt);
-		if (hurt && source.getEntity() instanceof ServerPlayer player) {
+		if (hurt && Encounter.striker(source) instanceof ServerPlayer player) {
 			took(player, dealt);
 		}
 		return hurt;

@@ -4,6 +4,7 @@ import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.lair.ArchiveLecternBlock;
 import io.github.jimbozoomer.jugcraft.lair.GraveSealBlock;
 import io.github.jimbozoomer.jugcraft.lair.Lair;
+import io.github.jimbozoomer.jugcraft.lair.LairRewards;
 import io.github.jimbozoomer.jugcraft.lair.Lairs;
 import io.github.jimbozoomer.jugcraft.lair.NameStoneBlock.Rune;
 import io.github.jimbozoomer.jugcraft.weapons.DescribedItem;
@@ -67,6 +68,8 @@ public final class JugcraftLich {
 				DataComponents.EQUIPPABLE, Equippable.builder(EquipmentSlot.HEAD).setEquipSound(SoundEvents.ARMOR_EQUIP_IRON).build()));
 
 		Lairs.onPlaced(Lair.CRYPT_ARCHIVE, CryptLichEntity::summon);
+		// Concordance Chunk E (E4): its fall pays through lair/LairRewards, now or later.
+		LairRewards.payer(CryptLichLoot.BOSS, CryptLichLoot::pay);
 		GraveSealBlock.onUsed(JugcraftLich::sealUsed);
 		ArchiveLecternBlock.onRead(JugcraftLich::read);
 		EmptiedPhylactery.register();

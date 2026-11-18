@@ -20,7 +20,7 @@ public final class CompanionOrders {
     private long nextCommand;
     CompanionOrders(PeepoEntity npc){this.npc=npc;}
     public boolean tamed(){return owner!=null;}
-    java.util.UUID ownerId(){return owner;}
+    public java.util.UUID ownerId(){return owner;}
     Player ownerPlayer(){return owner!=null && npc.level() instanceof net.minecraft.server.level.ServerLevel level?level.getServer().getPlayerList().getPlayer(owner):null;}
     public boolean owner(Player p){return p.getUUID().equals(owner);}
     public boolean allowed(Player p){return owner(p) || owner!=null && party && JugcraftParties.sameParty(owner,p.getUUID());}
@@ -109,6 +109,12 @@ public final class CompanionOrders {
         return local(pos)?Vec3.atBottomCenterOf(pos.pos()):null;
     }
     public boolean targetAvailable(){Vec3 target=target();return target!=null && npc.level().hasChunkAt(BlockPos.containing(target));}
+    /** Follow/Stay already own movement. Permit an idle overlay only after reaching their current target. */
+    boolean holdsDancePosition(){return mode==Mode.STAY || mode==Mode.FOLLOW;}
+    boolean allowsIdleDance(){
+        if(!holdsDancePosition())return true;
+        Vec3 at=target();return at!=null && npc.position().distanceToSqr(at)<=(mode==Mode.STAY?.25:4);
+    }
     public boolean routineAllowed(){return !tamed() || (mode==Mode.HOME || mode==Mode.WORK || mode==Mode.PORTER) && targetAvailable();}
     public void save(ValueOutput out){
         if(owner==null)return;

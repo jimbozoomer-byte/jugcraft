@@ -50,7 +50,11 @@ public final class OreSurvey {
 	 * One reading: the ore family's icon, a signal of 1 (traces) to 5 (rich), a depth band (0 shallow, 1 middle, 2 deep),
 	 * and a translation key for its name, or "" to name it after the icon.
 	 */
-	public record Reading(Identifier icon, int signal, int depth, String label) {
+	public record Reading(Identifier icon, int signal, int depth, String label, int distanceLow, int distanceHigh,
+            String direction, int depthLow, int depthHigh) {
+        public Reading(Identifier icon, int signal, int depth, String label) {
+            this(icon, signal, depth, label, -1, -1, "", 0, 0);
+        }
 		public Reading(Identifier icon, int signal, int depth) {
 			this(icon, signal, depth, "");
 		}
@@ -134,7 +138,7 @@ public final class OreSurvey {
 	 * Oil reservoirs under the surveyed chunks (see {@link OilReservoirs}): one reading for pumpable oil (middle depth)
 	 * and one for shale oil (deep), from how much is left, as vaguely as the ores.
 	 */
-	private static void oil(ServerLevel level, int middleX, int middleZ, int radius, RandomSource random, List<Reading> readings) {
+	static void oil(ServerLevel level, int middleX, int middleZ, int radius, RandomSource random, List<Reading> readings) {
 		long conventional = 0;
 		long shale = 0;
 		for (int cx = middleX - radius; cx <= middleX + radius; cx++) {

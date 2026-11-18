@@ -6,6 +6,11 @@ Every change to Jugcraft, newest first, grouped by pull request. For what each t
 
 ## Unreleased
 
+### Existing-world spawn-relative climate
+- Existing worlds can opt into persistent north/south climate bands for newly generated terrain, without deleting or repainting old chunks.
+- Preserve the original seed, terrain generator, cave biomes, Nether/End and saved valley state; add an operator climate status command and an offline migration preparation tool.
+- [Migration and validation record](docs/features/existing-world-climate.md). Live activation requires an approved maintenance restart.
+
 No numbered release yet. Entries on feature branches remain proposed until their pull requests merge.
 
 ### Unmerged: Magic interfaces, unit 2
@@ -43,6 +48,24 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - Unit 6 built and merged into the cohort after unit 5, **not yet compiled or run in CI**: Amdusias's 26 server tests and his 35 client shots are written and wait for their first run. Checked locally by the repository's Python checks and audits (with their mutations) and scratch harnesses of the canopy's rule and of Marax's advice under it. Not played by a person.
 - **A spirit's matter and its answer plates come first on its kept page** (GC-10 unit 7, GC-P145): above the first task, so a small window keeps them in view.
 - Unit 7 (GC-10) built, **not yet compiled or run in CI**: a server test walking one survival player through all six garden pacts from the codex to their departures, a garden load card (opted in under `load_card`), a two-client test at Buer's perch sharing one second-client helper with the pact hall's, the seven pact spirits lined up and a roster of seven in pictures, the garden classes in the opted-in run without the optional integrations, and the records, checkpoint draft and handoff. Checked locally by the repository's Python checks and audits, with their mutations. Not played by a person.
+### Unmerged: Beardshy
+- **Beardshy**, the shy side of Beardson (the Retro Trader): a villager-bodied NPC in a pink hoodie, round glasses and a ginger beard. Walk up and he hurries off with an apology; crouch and he stays to talk (18 lines about stolen land, Denali, internet sayings and over-explaining). Hit, he apologises and runs; he never fights back. He trades and drops nothing and doesn't spawn on his own yet: use his spawn egg (a pink egg with ginger spots, in the Spawn Eggs tab) or `/summon jugcraft:beardshy`.
+- The Harvest Feast story that would make him the Thanksgiving event's antagonist (he wants the feast cancelled) is laid out for the owner's approval, not built. Record: [beardshy.md](docs/features/beardshy.md).
+
+### Unmerged: the walker cockpit (all three walkers)
+- **The view from the seat:**
+  - The Armoured Walker's pilot stands up in the roof hatch, and the Howitzer Walker's sits in a commander's seat over the roof. Before, both looked out from inside their hulls.
+  - Pilots' hands are hidden in every walker.
+  - Turning with left/right turns the view with the hull (for the Howitzer, only while turning by hand).
+  - Third person sits back past each hull.
+- **Telegraphs**, drawn in the world for the pilot:
+  - the Armoured cannon's and the Howitzer's arc and landing ring, with the Howitzer's laying shown against a crosshair mark;
+  - the fist's, ram's and stomp's reach, with what they would hit outlined;
+  - the drill's block.
+- **The Armoured Walker's cannon** now lands on what the crosshair is on (raised for its fall, up to 96 blocks), with no spread.
+- **Gauges** at the top left: fuel, hull wear, reload and shells, and whether the attack is ready. They replace the fuel message every two seconds.
+- Record: [walker-cockpit.md](docs/features/walker-cockpit.md).
+- **Checked:** the record's Verification. Game tests and screenshots run in CI only; not played by hand.
 
 ### Unmerged: Harvest Festival Grounds, part 4 (Harvest Bunting and the Sack-Race Sack)
 - **Harvest Bunting**: a new strand for the String Light Hooks, a twine cord hung with leaf-shaped pennants, a red maple leaf, a gold aspen leaf and a hessian pennant in turn.
@@ -362,6 +385,74 @@ No numbered release yet. Entries on feature branches remain proposed until their
 - **What they are for:** Pumpkin Crates and Farm Stands, the Crowfield's harvest, compost, and (the three squashes) any recipe that takes a vegetable.
 - **Drawn by the owner's rules:** shaped models, skins in the vanilla manner (one colour stepped into tones, regular grooves, warts and specks on an even lattice, no noise or gradient), and 16×16 seed icons drawn from maps. Record: [pumpkin-patch-market.md](docs/features/pumpkin-patch-market.md).
 - **Checked:** see the record's Verification. The game tests and client screenshots run in CI only; not played by hand.
+### Unmerged: The Cinder Tyrant's heat and cooling package (Concordance Chunk E)
+- **The Quench Flask:** a glass bottle shaken with three snowballs, thrown. Its splash puts out and **Cooled** everyone within 2.5 blocks for 10 seconds, strikes fire-born creatures (blazes, magma cubes, his Cinderlings) for 6, puts out fire and his burning patches, and never quenches him. Cooled spares hot ground and burning, but not fire itself: it is no Fire Resistance. Record: [cinder-tyrant-concordance.md](docs/features/cinder-tyrant-concordance.md).
+- **Quench (Rime, support):** taught with Rimebind and Preserve. Touch a creature to put it out and cool it for 5 seconds. That makes 14 invocations.
+- **The schools answer him:** a Rimebind on him while he is quenched keeps his seams dark 2 seconds longer, once a quench, and a Brace halves his sweep's and slam's push. Each is its caster's deed in his fight.
+- **His objective (B-P4):** whoever opens the sluice he is quenched in has done a deed. His JEI pages now name an objective, and his dossier names the flask (always) and the Concordance's answers (while it is on).
+- **Tempering:** Hearthspark on an Alembic Crucible holds its heat at hot for 60 seconds, whatever is beneath; this counts as a hearth kind kindled.
+- **Checked:** the Python audits and unit tests pass locally; the game tests run in CI. Not played by hand.
+### Unmerged: Faster replays and a loadout measurement (Concordance Chunk E, E4)
+- **A cheaper token for every keeper:** the Alpha Werewolf's pelt and three bones make a Howling Totem with no silver; the Pumpkin King's ember, an heirloom pumpkin and a hay bale make a Harvest Crown; the Headless Horseman's lantern and two leather make a Hessian's Bridle. Each is shown in his dossier, optional after a win. A share gives one and a token takes one, so none is a loop.
+- **When a fight starts over:** every met keeper's dossier says that with nobody near who can fight them for 10 seconds, the keeper goes back healed and the fight starts again from nothing.
+- **How long each keeper takes:** a new record, [lair-loadouts.md](docs/features/lair-loadouts.md), works out from the game's own numbers how many seconds of hitting each keeper takes, alone, with a steel sword, a steel battle axe, the silver dagger, the Lance of Dawn, a Garrison Rifle and a Ranger Rifle, with its rule answered and not. In short:
+  - answering the rule halves the time or better against seven keepers;
+  - guns are quickest;
+  - the silver dagger loses half its blows to the hurt cooldown;
+  - the Lance alone is support.
+
+  It is a model, not a playtest.
+- **Checked:**
+  - **Passing locally:** the Python audits, with a new `check_lair_loadouts`.
+  - **CI only, not yet run:** the game tests.
+  - **Not done:** timing fights by hand.
+
+### Unmerged: A dossier for every lair, with lore, preparation and the way home (Concordance Chunk E, E4)
+- **Seven more dossiers:** the encyclopedia's Expeditions page now covers the Lantern Fen, the Archive of Last Names, the Foundry Trench, the Moonlit Ring, the Cydonian Sanctum, the Crowfield and the Church Bridge (whose rite works only out of the Halloween season, as the dossier says), as it did the first four lairs: the rite and its recipes, when it works, the keeper's credit, trophies and loot, and the way home (and where Grey or Red Mist opens when the keeper falls).
+- **Lore and preparation in every dossier:** each found lair gives a line of lore, a clue to its keeper's rule that never names them, and what readies a player for the fight, with the game's numbers and the piece of the keeper's loot that helps (the Golden Thimble, the Emptied Phylactery, the Grounding Strap, the Packfinder Charm, the Lowfall Core).
+- **The page's room:** recipes past the page's twelve grids are shown by their items instead, and the page holds more rows.
+- Record: [lair-dossiers.md](docs/features/lair-dossiers.md).
+- **Checked:**
+  - **Passing locally:** the Python audits, with `check_encyclopedia` extended.
+  - **CI only, not yet run:** the game tests, including seven new ones in `EncyclopediaGameTests`.
+  - **Not done:** playing it by hand.
+
+### Unmerged: Every lair keeper pays its support (Concordance Chunk E, E4)
+- **Five more keepers share fairly:** the Mire Hag, the Crypt Lich, the Iron Dreadnought, the Alpha Werewolf and the Cydonian Sentinel used to pay only players who hurt them (or did their one helping job). They now use the lairs' shared credit, as Vesperine, Madame Tatterlace, the Yeti King and the Cinder Tyrant do:
+  - healing a friend 4 or more of what the boss's side did, or warding them against it, earns a share;
+  - a tamed creature's blow is its owner's;
+  - the killing blow counts;
+  - a player who dies in the fight is paid once back on their feet, and one who leaves the game is paid when they next join.
+
+  Record: [lair-encounter-credit.md](docs/features/lair-encounter-credit.md#concordance-chunk-e-every-keeper).
+- **Their objectives are deeds:** breaking the Lich's seals, reading his names back or striking his bolt back; routing the Dreadnought's discharge or working a fouled breaker; ringing the bell that flushes the Alpha. New: relighting a lamp that shows the Mire Hag now earns a share.
+- **JEI pages for their loot:** every item those five, the Pumpkin King and the Headless Horseman of the Church Bridge give now has a page saying where it comes from, how likely it is with the default data, and who earns a share. The Horseman's Lantern's page also names the Horseman who rides the Overworld in the Halloween season, who drops one too.
+- **Checked:**
+  - **Passing locally:** the Python audits, including a new `check_keeper_credit`.
+  - **CI only, not yet run:** the game tests, including a new `KeeperCreditGameTests`.
+  - **Not done:** playing it by hand.
+### Unmerged: Star-bred lines, phase 1: star-born animals and the Astrawand
+- **Every farm animal carries a line:** cows, mooshrooms, sheep, pigs, chickens, goats, rabbits and turkeys. A line is four numbers, each two copies (one from each parent, graded 0 to 5), plus hidden gifts.
+  - **Yield:** more meat and wool, and eggs that come as two.
+  - **Vigour:** health, speed, and babies that grow up sooner.
+  - **Fertility:** less rest after breeding.
+  - **Hardiness:** spared from thorns, then freezing, falling, drowning, burning and lightning.
+  - **4 or below is exactly vanilla**, and every wild animal is (wild copies are graded 0 to 2), so ordinary farms and every other feature's animals are unchanged. Grades 3 to 5 come only from the sky.
+- **Hidden gifts** are recessive: two carriers have one baby in four that shows the gift. The first six:
+  - Double Yolk (chickens, turkeys);
+  - Moonfleece (sheep: more wool shorn on an open night);
+  - Angora goats and Woolly Coat pigs, shorn for wool once a day;
+  - Lucky Foot (rabbits);
+  - Heavy Hide (cows, mooshrooms).
+- **The sky pushes.** A baby born under the open sky while a celestial pattern is up takes its sign, which raises the weaker copy of one trait by one grade:
+  - the Full Moon raises Yield;
+  - the New Moon raises Fertility;
+  - the Lantern Star raises Vigour;
+  - the Echo Comet raises Hardiness and wakes a gift.
+- **The Astrawand** (an amethyst shard, a bone and a gold ingot) is a conductor's baton in the manner of the Wind Waker: a fan homage, drawn new.
+  - Point it at an animal and use it: you conduct a little flourish, gold sparkles and notes rise, and its line is read out.
+  - Readers who understand Celestial Attunement see which traits breed true. Masters learn when it carries a gift it does not show.
+- Record: [star-bred-lines.md](docs/features/star-bred-lines.md). Plan: [star-bred-lines-2026-10-28.md](docs/plans/star-bred-lines-2026-10-28.md).
 
 ### Unmerged: The Blood Moon
 - **A Blood Moon rises every fourth night of the Halloween season, and on Halloween night:** the night sky turns blood red with a red haze about you, zombies and skeletons put on costumes far more often (40%), costumed mobs drop double candy, will-o'-wisps gather thick, and the Headless Horseman rides by everyone who hasn't seen him that day. Being out when it rises earns **Bad Moon Rising**.
@@ -460,6 +551,18 @@ No numbered release yet. Entries on feature branches remain proposed until their
 ### Unmerged: Guns, armour piercing for slices 15A's and 15B's guns
 - The **Vesper Rifle**, **Onrush SMG**, **Kreuzer Pistol** and **Psalm SMG** now pass through some of a target's armour, as the owner's gun data gives them: 4.5, 3, 1 and 1 points. A creature without armour takes the same damage as before. Their tooltips say so.
 - Record: [guns.md, the armour-piercing follow-up](docs/features/guns.md#follow-up-armour-piercing-for-slices-15as-and-15bs-guns).
+### Unmerged: The Storm Roc (the seventh boss, part 2)
+- **The Storm Roc,** the Crown of Thunder's boss: an eagle as big as a cart, slate-grey with a storm-blue sheen, eyes of electric blue, his flight feathers tipped white like lightning. He waits in his nest and wakes when a player steps onto the summit: 400 health scaled for the party, armour 8, never harmed by lightning or falls. Left alone, he flies back to his nest, healed.
+- **His rule, the Storm Rods:** about every 16 seconds a rod charges (named on his bar) and he climbs over the edge behind it; a line of sparks marks his lane through his foe and follows them for 2 seconds, then he dives (12 damage). If the lane passes within 2.5 blocks of the charged rod before the player, the rod grounds him: he crashes, stunned for 6 seconds, every blow doing half as much again.
+- **His attacks:** the Wing Buffet (a gust in a cone), Lightning Marks (rings that a bolt strikes; the Grounding Strap halves them); at half health the Squall Rises, adding Wind Strips (arrows on the floor, a push toward the edge, boulders shelter) and up to three Gale Fledglings; below a fifth, the Eye of the Storm, diving oftener with five rings.
+- **His loot, per participant:** Roc Feathers (four feathers each, or two make a Thunder Vane without its lightning rod), a 15% Stormcaller or Galefeather (certain on a first kill), the Weather-Vane Lens (offhand weather forecast, 25%), the Roc's Crest costume (20%), 300 experience and the advancement Eye of the Storm. When he falls, the Grey Mist opens at the foot of his crag. His cry is the owner's bald eagle's. Record: [storm-roc.md](docs/features/storm-roc.md).
+### Unmerged: The Glass Abbot (part 2)
+- **The Glass Abbot** kneels at his lectern in the Glass Chapel: a faceless monk in grey wool under a mantle of leaded glass, a rose window glowing where his face should be. A player stepping into the nave wakes him. His whole mantle turns three quarters of every blow. His rule, the Beam: every 20 seconds he marks two of the three mirrors, and ten seconds later gathers the sun at his lectern; turned to their pair's angles, the mirrors send his own light home and crack his mantle for 8 seconds, and a beam gone astray burns whoever stands in it. He throws a Shard Fan and draws a Prism Line. At half health the Veil falls: Glass Images that move as he does, a veiled mirror, mirrors he turns himself; below a fifth, the Breaking. Radiance's First Light shows the beam's path ahead; Strata's Brace halves his shards' push.
+- **His loot,** each participant's own (whoever hurt him or an image, turned the mirrors for a beam that came home, or healed or warded others): Prism Shards (one in four glass makes four glowing **Abbey Glass**; two and a spyglass make a Glass Accord), the **Glass Reliquary** (certain on a first win: with a glass pane the **Lantern Lens**, which shows its holder invisible creatures and the true Abbot among his images; with an amethyst shard the **Mirror Inscription**, which under a ward turns a small shot back at its shooter), the **Abbot's Cowl** costume, and the advancement Seen Clearly. Record: [glass-abbot.md](docs/features/glass-abbot.md).
+
+### Unmerged: The Glass Chapel and the Glass Accord (the Glass Abbot, part 1)
+- **The Glass Accord:** a disc of leaded glass round a spyglass's lens, from four glass, two amethyst shards, two gold ingots and a spyglass (or, for one who understands First Light, from a spyglass and a block of glass at the Lampwright's Bench for 8 Radiance). Held up by day, in clear weather, standing in sunlight that falls through glass, it opens the Glass Chapel and raises a Grey Mist full of light that others can follow for a minute. Refused, it says why and is kept.
+- **The Glass Chapel,** the Glass Abbot's lair: an abandoned chapel of pale stone with a narthex, a rood screen, a 31-wide nave, an apse with the Abbot's Lectern under a rose window, stained-glass lancets, four pillars and three **Chapel Mirrors** on turntables that any player turns with a use. The mirrors' angles and the copper lines in the floor are laid out for the Abbot's beam (part 2): for each pair of mirrors, one setting sends it home. Record: [glass-chapel.md](docs/features/glass-chapel.md).
 
 ### Unmerged: Keep your inventory in boss fights
 - **Dying in a lair costs nothing:** as with the keepInventory rule, but only in lairs (every boss fight). No items or experience fall; you respawn outside with every slot as it was (armour and offhand worn), the same held slot and all your experience. Dying anywhere else is unchanged. No grave is ever placed in a lair; Grave Goods still catch anything another mod drops there. Record: [lair-keep-inventory.md](docs/features/lair-keep-inventory.md).

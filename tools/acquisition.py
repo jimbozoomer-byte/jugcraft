@@ -3,36 +3,47 @@ docs/features/concordance-first-loadout.md; the Yeti King and the Cinder Tyrant 
 
 JEI shows a crafting or machine recipe for most things. The Adept's Wand and, since Concordance Chunk C, the Rooted
 Thallite Foundation (each made by a ritual) and what the lair bosses give (rolled from their loot tables when they fall:
-Vesperine, Madame Tatterlace, the Yeti King and the Cinder Tyrant) have none, so each gets an information page instead,
-written here from the generators' own tables (tools/vesperine.py, tools/tatterlace.py, tools/yeti_king.py,
-tools/cinder_tyrant.py, tools/concordance_rituals.py, tools/lairs.py and tools/biomes.py) so that its numbers are the
-data's.
+Vesperine, Madame Tatterlace, the Yeti King and the Cinder Tyrant; since Concordance Chunk E, E4, the Mire Hag, the Crypt
+Lich, the Iron Dreadnought, the Alpha Werewolf, the Cydonian Sentinel, the Pumpkin King and the Headless Horseman of the
+Church Bridge) have none, so each gets an
+information page instead, written here from the generators' own tables (tools/vesperine.py, tools/tatterlace.py,
+tools/yeti_king.py, tools/cinder_tyrant.py, the other keepers' own, tools/concordance_rituals.py, tools/lairs.py and
+tools/biomes.py) so that its numbers are the data's.
 
 The pages are a client copy of the default data, as the rest of recipe_view.json is: a server whose data pack changes a
 boss's loot table or the Adept's Attunement is not reflected, so every page says "with the default data". A player's
 first victory bringing the boss's trophy is code (each boss's loot class: VesperineLoot, TatterlaceLoot, YetiKingLoot,
-CinderTyrantLoot), not data; so is the Halloween event's extra, which only the Witching Season's two bosses have.
+CinderTyrantLoot and the others'), not data; so is the Halloween event's extra, which only the Witching Season's three
+bosses (Vesperine, Madame Tatterlace and the Pumpkin King) have.
 
 Written by generate_material_data.py: the rows to assets/jugcraft/recipe_view.json "acquisition_info" (read by
 client/compat/JugcraftJeiPlugin, which adds each as an information page) and the words to the language file, as
 jei.jugcraft.acquire.<key>. The first magic loadout the record recommends is listed here too (LOADOUT), so the checker
 can confirm survival already makes every piece of it (with its optional branches: the Wayfaring trinkets and, since
-Chunk B, the Rime travel kit), and so are the owner's armour tiers that stay creative-only
-(CREATIVE_ONLY), so it can confirm nothing gives them yet, and, since Concordance Chunk C (C-10), the living workshop's
-things (WORKSHOP; the factory's parts in FACTORY; Chunk C's own items in CHUNK_C_ITEMS), so it can confirm survival makes
-each as its row says. tools/check_mod_data.py (check_acquisition) ties each page, the loadout, the workshop and the
-creative-only tiers to the files on disk.
+Chunk B, the Rime travel kit), and, since Concordance Chunk C (C-10), the living workshop's things (WORKSHOP; the
+factory's parts in FACTORY; Chunk C's own items in CHUNK_C_ITEMS), so it can confirm survival makes each as its row says.
+tools/check_mod_data.py (check_acquisition) ties each page, the loadout and the workshop to the files on disk, and the
+owner's armour tiers to their one source each (tools/gear.py TIER_BOSSES and TIER_PATTERNS).
 
 Pure data: it imports only the generators' tables, which import nothing of the generator's.
 """
+import alpha_werewolf as aw
 import biomes
 import cinder_tyrant as ct
 import concordance_ember as ember
 import concordance_rime_kit as rime_kit
 import concordance_rituals as rituals
 import concordance_trinkets as trinkets
+import crypt_lich as cl
+import cydonian_sentinel as cs
 import gear
+import glass_abbot as ga
+import hessian_horseman as hh
+import iron_dreadnought as idn
 import lairs
+import mire_hag as mh
+import pumpkin_king as pk
+import storm_roc as sr
 import tatterlace as tt
 import vesperine as vs
 import yeti_king as yk
@@ -52,16 +63,18 @@ OBJECTIVE = "an objective"
 # opened; the loot class that pays each share (its path under src/main/java/io/github/jimbozoomer/jugcraft, which the
 # checker reads: the Yeti King's is lair/yeti/YetiKingLoot.java, not one built from his name) and the loot table it
 # rolls for each share (its TABLE); whether their fight has an objective (a deed); the material every share holds
-# (item, (fewest, most)); the chance of each single thing; their trophies, either "first" (one trophy, among the
+# (item, (fewest, most)); the chance of each single thing; their trophy table where it is not bosses/<their id>
+# ("trophy_table"); their trophies, either "first" (one trophy, among the
 # chances, that a player's first victory always brings) or "trophies" (two that share one pool, (items, chance), of which
-# a first victory always brings one); and, for the Witching Season's bosses only, the Halloween event's extra chance
-# (item, chance).
+# a first victory always brings one); for the Witching Season's bosses only, the Halloween event's extra chance
+# (item, chance); and any item another loot table gives too ("also": item -> (that table, the sentence its page adds)).
+# (item, chance); and the pieces of the armor set only they give, of which every share holds one ("set").
 BOSSES = {
     "vesperine": {"name": vs.ENTITIES["vesperine"], "pronouns": ("her", "her"),
                   "lair": lairs.LAIRS["hollow_acre"]["display"], "opened": "which the Last Rites open at night",
                   "loot_class": "lair/vesperine/VesperineLoot.java", "table": "entities/vesperine", "objective": True,
                   "first": "vesper_scythe", "count": ("reaper_shade", vs.SHADE), "chances": vs.CHANCES,
-                  "event": ("reaper_hood", vs.EVENT_HOOD_CHANCE)},
+                  "event": ("reaper_hood", vs.EVENT_HOOD_CHANCE), "set": vs.SET_PIECES},
     "tatterlace": {"name": tt.ENTITIES["tatterlace"], "pronouns": ("her", "her"),
                    "lair": lairs.LAIRS["spindle_loft"]["display"],
                    "opened": f"which a {lairs.ITEMS['cursed_spindle']} used on a Spinning Wheel opens at night",
@@ -72,16 +85,88 @@ BOSSES = {
                   "lair": lairs.LAIRS["glacier_hall"]["display"],
                   "opened": f"which a {lairs.ITEMS['frost_horn']} blown on snow or ice opens at night",
                   "loot_class": "lair/yeti/YetiKingLoot.java", "table": "entities/yeti_king", "objective": True,
-                  "trophies": (yk.TROPHIES, yk.TROPHY_CHANCE), "count": ("yeti_fur", yk.FUR), "chances": yk.CHANCES},
+                  "trophies": (yk.TROPHIES, yk.TROPHY_CHANCE), "count": ("yeti_fur", yk.FUR), "chances": yk.CHANCES,
+                  "set": yk.SET_PIECES},
     "cinder_tyrant": {"name": ct.ENTITIES["cinder_tyrant"], "pronouns": ("his", "him"),
                       "lair": lairs.LAIRS["cinder_kiln"]["display"],
                       "opened": (f"which a {lairs.ITEMS['kiln_seal']} pressed into a magma block in the Nether, "
                                  + " or ".join(f"the {biomes.BIOMES[land.split(':')[1]]['display']}"
                                                for land in lairs.SEAL_LANDS) + " opens at any hour"),
                       "loot_class": "lair/tyrant/CinderTyrantLoot.java", "table": "entities/cinder_tyrant",
-                      "objective": False, "trophies": (ct.TROPHIES, ct.TROPHY_CHANCE), "count": ("tyrant_scale", ct.SCALES),
-                      "chances": ct.CHANCES},
+                      "objective": True, "trophies": (ct.TROPHIES, ct.TROPHY_CHANCE), "count": ("tyrant_scale", ct.SCALES),
+                      "chances": ct.CHANCES, "set": ct.SET_PIECES},
+    # Concordance Chunk E (E4): the other keepers, each paid through lair/LairRewards from its fight's Encounter since.
+    "mire_hag": {"name": mh.ENTITIES["mire_hag"], "pronouns": ("her", "her"),
+                 "lair": lairs.LAIRS["lantern_fen"]["display"],
+                 "opened": f"which a {lairs.ITEMS['hag_stone']} looked through at night, standing in shallow water or on "
+                           "mud in a wetland, opens",
+                 "loot_class": "lair/hag/MireHagLoot.java", "table": "entities/mire_hag", "objective": True,
+                 "trophies": (mh.TROPHIES, mh.TROPHY_CHANCE), "count": ("hagmoss", mh.HAGMOSS), "chances": mh.CHANCES},
+    "crypt_lich": {"name": cl.ENTITIES["crypt_lich"], "pronouns": ("his", "him"),
+                   "lair": lairs.LAIRS["crypt_archive"]["display"],
+                   "opened": f"which a {lairs.ITEMS['exhumation_writ']} served on a stone sarcophagus under a roof opens at "
+                             "any hour",
+                   "loot_class": "lair/lich/CryptLichLoot.java", "table": "entities/crypt_lich", "objective": True,
+                   "trophies": (cl.TROPHIES, cl.TROPHY_CHANCE), "count": ("grave_dust", cl.GRAVE_DUST),
+                   "chances": cl.CHANCES, "set": cl.SET_PIECES},
+    "iron_dreadnought": {"name": idn.ENTITIES["iron_dreadnought"], "pronouns": ("his", "him"),
+                         "lair": lairs.LAIRS["foundry_trench"]["display"],
+                         "opened": f"which {lairs.ITEMS['sealed_orders']} used on a Field Telephone in a trench under the "
+                                   "open sky open at any hour",
+                         "loot_class": "lair/dreadnought/IronDreadnoughtLoot.java", "table": "entities/iron_dreadnought",
+                         "objective": True, "trophies": (idn.TROPHIES, idn.TROPHY_CHANCE),
+                         "count": ("salvaged_coil", idn.SALVAGED_COIL), "chances": idn.CHANCES},
+    "alpha_werewolf": {"name": aw.ENTITIES["alpha_werewolf"], "pronouns": ("his", "him"),
+                       "lair": lairs.LAIRS["moonlit_ring"]["display"],
+                       "opened": f"which a {lairs.ITEMS['howling_totem']} used in werewolf country under the night sky "
+                                 "opens",
+                       "loot_class": "lair/alpha/AlphaWerewolfLoot.java", "table": "entities/alpha_werewolf",
+                       "trophy_table": "bosses/werewolf_alpha", "objective": True,
+                       "trophies": (aw.TROPHIES, aw.TROPHY_CHANCE), "count": ("alpha_pelt", (1, 1)),
+                       "chances": aw.CHANCES},
+    "cydonian_sentinel": {"name": cs.ENTITIES["cydonian_sentinel"], "pronouns": ("its", "it"),
+                          "lair": lairs.LAIRS["cydonian_sanctum"]["display"],
+                          "opened": f"which an {lairs.ITEMS['altar_keystone']} set into the Ancient Altar at night opens",
+                          "loot_class": "lair/sentinel/SentinelLoot.java", "table": "entities/cydonian_sentinel",
+                          "objective": False, "trophies": (cs.TROPHIES, cs.TROPHY_CHANCE),
+                          "count": ("cydonian_shard", cs.SHARDS), "chances": cs.CHANCES, "set": cs.SET_PIECES},
+    # Already paid through lair/LairRewards (its Witching Season package); its pages since Concordance Chunk E (E4).
+    "pumpkin_king": {"name": pk.ENTITIES["pumpkin_king"], "pronouns": ("his", "him"),
+                     "lair": lairs.LAIRS["crowfield"]["display"],
+                     "opened": f"which a {lairs.ITEMS['harvest_crown']} used on a scarecrow that wears a head opens at "
+                               "night",
+                     "loot_class": "lair/king/PumpkinKingLoot.java", "table": "entities/pumpkin_king", "objective": True,
+                     "trophies": (pk.TROPHIES, pk.TROPHY_CHANCE), "count": ("kings_ember", (1, 1)),
+                     "chances": pk.CHANCES, "event": ("pumpkin_kings_crown", pk.EVENT_CROWN_CHANCE)},
+    # Main's #537 put him on the shared credit with his lair; his pages since Concordance Chunk E (E4). His lair opens only
+    # out of the Halloween season, so no event chance.
+    "hessian_horseman": {"name": hh.ENTITIES["hessian_horseman"], "pronouns": ("his", "him"),
+                         "lair": lairs.LAIRS["church_bridge"]["display"],
+                         "opened": f"which a {lairs.ITEMS['hessians_bridle']} used on a jack-o'-lantern on a post at night, "
+                                   "out of the Halloween season, opens",
+                         "loot_class": "lair/horseman/HorsemanLoot.java", "table": "entities/hessian_horseman",
+                         "objective": True, "trophies": (hh.TROPHIES, hh.TROPHY_CHANCE),
+                         "count": (hh.ALWAYS[0], (1, 1)), "chances": hh.CHANCES,
+                         "also": {hh.ALWAYS[0]: ("entities/headless_horseman",
+                                                 "The Headless Horseman who rides the Overworld in the Halloween season "
+                                                 "drops one too when a player brings him down")}},
 }
+
+
+BOSSES.update({
+    "storm_roc": {"name": sr.ENTITIES["storm_roc"], "pronouns": ("his", "him"),
+                  "lair": lairs.LAIRS["crown_of_thunder"]["display"],
+                  "opened": "which a Thunder Vane used under an open mountain sky at Y120 or higher while it rains or thunders opens",
+                  "loot_class": "lair/roc/RocLoot.java", "table": "entities/storm_roc", "objective": True,
+                  "credit": "roc", "trophies": (sr.TROPHIES, sr.TROPHY_CHANCE),
+                  "count": ("roc_feather", sr.FEATHERS), "chances": sr.CHANCES},
+    "glass_abbot": {"name": ga.ENTITIES["glass_abbot"], "pronouns": ("his", "him"),
+                    "lair": lairs.LAIRS["glass_chapel"]["display"],
+                    "opened": "which a Glass Accord held in clear daylight beneath glass in the Overworld opens",
+                    "loot_class": "lair/abbot/AbbotLoot.java", "table": "entities/glass_abbot", "objective": True,
+                    "first": "glass_reliquary", "count": ("prism_shard", ga.SHARDS_DROPPED),
+                    "chances": {"glass_reliquary": ga.RELIQUARY_CHANCE, **ga.CHANCES}},
+})
 
 
 def _crafted(key, recipes, names):
@@ -108,11 +193,6 @@ LOADOUT = {"initiate_wand": "recipe", "lampwright_bench": "recipe", "kindled_lan
            **{piece: "recipe" for piece in ember.ARMOR}, "lesser_fire_focus": "recipe", "fire_bangle": "recipe"}
 OPTIONAL = {**{item: "recipe" for item in trinkets.TRINKETS}, "fire_focus": "recipe",
             **{item: "recipe" for item in rime_kit.ITEMS}}  # Rime's travel kit (Chunk B, B-10), made the same way
-# The owner's armour tiers (tools/gear.py ARMOR_TIERS, the Wayfarer among them) that no recipe, drop, shop or trade gives:
-# all of them, as the owner asked when each was made (6 October 2026: "for now just make the armor we can figure that out
-# later"; the later designs likewise, as tools/gear.py records). The first loadout leaves that as it is. When the owner
-# settles how a tier is won, take it out of here and out of the record's creative-only table.
-CREATIVE_ONLY = list(gear.ARMOR_TIERS)
 # Concordance Chunk C (C-10): the living workshop's route (tools/concordance_journey.py WORKSHOP). WORKSHOP: every
 # Concordance thing it makes or places, each made in survival as it is: by the crafting recipe of its own name ("recipe"),
 # the recipe named ("recipe:<file>": the Thallite plate's is thallite_plate_by_hand), a Lampwright's Bench working
@@ -182,8 +262,18 @@ def _a(name):
 
 def share(info):
     """A boss page's last sentence: who is paid, by the kinds of part its fight credits."""
+    if info.get("credit") == "roc":
+        return ("A share goes to each player who hurt him or his fledglings, or helped at the rod that grounded him, "
+                "and is alive within 64 blocks of the summit when he falls. Healing, wards and deferred rewards "
+                "are not credited in this encounter.")
     parts = list(PARTS) + ([OBJECTIVE] if info["objective"] else [])
     return f"A share goes to each player who earns it in the fight by {', '.join(parts[:-1])} or {parts[-1]}."
+
+
+def holds(count):
+    """How many of its material each share holds, as a page writes it: "3 to 6", or "1" when it is always one."""
+    low, high = count
+    return f"{low}" if low == high else f"{low} to {high}"
 
 
 def pair_roll(info):
@@ -193,6 +283,13 @@ def pair_roll(info):
     return f"a {pct(chance)} chance of one of {his} two trophies ({pct(chance / 2)} each)"
 
 
+def set_roll(info):
+    """What a page of a piece of a boss's armor set says of its pool: every share holds one piece, each as likely."""
+    pieces = info["set"]
+    name = gear.ARMOR_TIERS[pieces[0].rsplit("_", 1)[0]]["display"]
+    return f"always holds one piece of {name} armor, each piece as likely ({pct(1 / len(pieces))})"
+
+
 def _boss_pages():
     pages = {}
     for info in BOSSES.values():
@@ -200,7 +297,7 @@ def _boss_pages():
         subject = info["name"] + ("," if "," in info["name"] else "")
         his, him = info["pronouns"]
         item, (low, high) = info["count"]
-        rolls = {item: f"each share of {his} reward holds {low} to {high}"}
+        rolls = {item: f"each share of {his} reward holds {holds((low, high))}"}
         for thing, chance in info["chances"].items():
             rolls[thing] = f"each share of {his} reward has a {pct(chance)} chance of it"
         if "trophies" in info:
@@ -209,6 +306,8 @@ def _boss_pages():
                                 f"{him} always brings one of the two")
         else:
             rolls[info["first"]] += f", and a player's first victory over {him} always brings it"
+        for thing in info.get("set", ()):
+            rolls[thing] = f"each share of {his} reward {set_roll(info)}"
         if "event" in info:
             thing, chance = info["event"]
             rolls[thing] += (f", and another {pct(chance)} chance during the Halloween event unless the server turns "
@@ -219,8 +318,9 @@ def _boss_pages():
                 lead = f"Crafted from {count} {name}. {subject} also gives it"
             else:
                 lead = f"Not crafted or traded. {subject} gives it"
+            also = f"{info['also'][thing][1]}. " if thing in info.get("also", {}) else ""
             pages[thing] = (f"{lead} in {_the(info['lair'])}, {info['opened']}. {DEFAULT.capitalize()}, {roll}. "
-                            f"{share(info)}")
+                            f"{also}{share(info)}")
     return pages
 
 

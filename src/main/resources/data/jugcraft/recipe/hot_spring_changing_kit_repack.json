@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jugcraft:hot_spring_bench",
+    "jugcraft:hot_spring_peg_rail",
+    "jugcraft:hot_spring_boot_tray"
+  ],
+  "result": {
+    "id": "jugcraft:hot_spring_changing_kit"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "jugcraft:homeworks_oak_grandfather_clock",
+    "minecraft:glass",
+    "minecraft:glass",
+    "minecraft:glass",
+    "minecraft:glass"
+  ],
+  "result": {
+    "id": "jugcraft:homeworks_glass_grandfather_clock",
+    "count": 1
+  }
+}

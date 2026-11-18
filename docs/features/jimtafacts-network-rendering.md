@@ -46,3 +46,47 @@ all ten mesh/UV definitions and the exact inside texture. The combined client
 playtest must inspect all four facings, cell insertion/removal, empty/occupied/full
 LEDs, moving inscriber faces and charger item alignment. This rendering work does
 not claim broader AE API or storage-format compatibility.
+
+## Held and inventory cell LEDs (13 November 2026)
+
+Local work, AI assistance: Claude Opus 5.5. The supplied cell item definitions
+tint the status LED layer with `ae2:storage_cell_state` and, on portable cells,
+the screen layer with `ae2:portable_cell_color`. The runtime copies had dropped
+both, so the LED showed its raw white sprite. `tools/jimtafacts_network.py` now
+copies each supplied tint list, mapping those two types to the native
+`jugcraft:jimta_storage_cell_state` and `jugcraft:jimta_portable_cell_color`
+sources (`DigitalCellTints`, registered with the other storage client hooks).
+`DigitalCellLeds` reads the saved cell contents, charge and dye. Its colours are
+the supplied `CellState` values (black uncharged portable cell, green empty, blue
+holding items, orange no room for another type, red full) and the supplied
+`AEItems` portable default `0x80CAFF`, read through the dyed-colour component as
+`AbstractPortableCell.getColor` does. Jugcraft cells charge no space per type, so
+orange means all 63 types are used with room left; the drive and ME chest LEDs
+use the same rule. Validation: `scripts/tests/test_jimtafacts_cell_tints.py`
+(run) and `JimtafactsCellLedGameTests` (written, not run). The rendered colours
+remain to be inspected in a client.
+
+## Drive cell and Color Applicator geometry audit (13 November 2026)
+
+Local work, AI assistance: Claude Opus 5.5. A November 12 face probe reported
+left-out faces on the ten drive cell chassis and on both Color Applicator models.
+
+- **Drive cells: intentional, unchanged.** The supplied chassis also leave out
+  their east, west and south faces. At the supplied bay origins the sides lie flush
+  against the side panels and middle strut (or the ME chest walls) and the back
+  faces a bay closed by the separators and back panel, so none can be seen from
+  outside. The runtime copies stay identical to the supplied models.
+- **Color Applicator: confirmed, fixed.** The supplied models expose no left-out
+  face. The runtime copies had been through the generic coplanar separation pass,
+  which pushed boxes that rely on flush neighbours past those neighbours and opened
+  see-through slits up to 0.2 px wide (24 faces on the plain model, 30 on the
+  coloured one, measured on a 0.025 px grid). Both models now use the supplied
+  elements, faces and UVs. The pass existed only for art_check Z1/N1 overlaps, all
+  between faces buried inside opaque neighbours, so the generator instead leaves
+  out those buried faces (the 45-degree hose elbows' tops and bottoms and the
+  nozzle-side hose ends' fronts; `jimtafacts_model_repairs.BURIED`).
+
+`scripts/tests/test_jimtafacts_storage_geometry.py` (run) flood-fills each drive
+bay and the ME chest slot, checks the applicators against the supplied models,
+proves each left-out face is buried and applies art_check's per-model rules. The
+in-game look of both items remains to be inspected in a client.

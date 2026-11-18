@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "PSP",
+    "W W"
+  ],
+  "key": {
+    "S": "minecraft:stick",
+    "P": "#minecraft:planks",
+    "W": "#minecraft:wool"
+  },
+  "result": {
+    "id": "jugcraft:hot_spring_peg_rail"
+  }
+}

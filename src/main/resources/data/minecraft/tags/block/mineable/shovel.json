@@ -2,6 +2,8 @@
   "replace": false,
   "values": [
     "jugcraft:sandbags",
+    "jugcraft:wind_carved_snowdrift",
+    "jugcraft:shovelled_snow_pile",
     "jugcraft:sandbags_slab",
     "jugcraft:sandbags_stairs",
     "jugcraft:oil_sand",

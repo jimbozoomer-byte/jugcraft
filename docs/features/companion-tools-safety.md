@@ -13,7 +13,7 @@ Eating temporarily owns the displayed hand. Sleeping, sitting, wheel running, so
 Companion ground paths reject vanilla recognized damaging blocks and lava, including fire, magma, lit campfires, cactus, berry bushes, wither roses and powder snow. The following data-pack tags extend the same checks for project-specific and future blocks:
 
 - `peepo_companion:harmful_blocks`: ember beds and barbed wire.
-- `peepo_companion:harmful_when_lit`: kitchen stoves and Halloween bonfires; applies only when the standard `lit` state is true.
+- `peepo_companion:harmful_when_lit`: kitchen stoves, woodstoves and Halloween bonfires; applies only when the standard `lit` state is true.
 
 Unlit stoves and bonfires remain usable surfaces. A harmless machine is not classified as damaging just because it is lit. Pathfinding checks the prospective cell and its floor; damaging path types are also assigned an impassable cost. Every ten ticks, staggered by companion ID, navigation checks at most three upcoming path nodes for newly introduced hazards and stops an unsafe route so the existing goals can replan. It allows the current cell to be left if a hazard appears beneath the companion.
 

@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "facing=north,struck=none": {
+      "model": "jugcraft:block/harvest_percussion_set"
+    },
+    "facing=north,struck=drum": {
+      "model": "jugcraft:block/harvest_percussion_set_struck_drum"
+    },
+    "facing=north,struck=washboard": {
+      "model": "jugcraft:block/harvest_percussion_set_struck_washboard"
+    },
+    "facing=north,struck=shaker": {
+      "model": "jugcraft:block/harvest_percussion_set_struck_shaker"
+    },
+    "facing=east,struck=none": {
+      "model": "jugcraft:block/harvest_percussion_set",
+      "y": 90
+    },
+    "facing=east,struck=drum": {
+      "model": "jugcraft:block/harvest_percussion_set_struck_drum",
+      "y": 90
+    },
+    "facing=east,struck=washboard": {
+      "model": "jugcraft:block/harvest_percussion_set_struck_washboard",
+      "y": 90
+    },
+    "facing=east,struck=shaker": {
+      "model": "jugcraft:block/harvest_percussion_set_struck_shaker",
+      "y": 90
+    },
+    "facing=south,struck=none": {
+      "model": "jugcraft:block/harvest_percussion_set",
+      "y": 180
+    },
+    "facing=south,struck=drum": {
+      "model": "jugcraft:block/harvest_percussion_set_struck_drum",
+      "y": 180
+    },
+    "facing=south,struck=washboard": {
+      "model": "jugcraft:block/harvest_percussion_set_struck_washboard",
+      "y": 180
+    },
+    "facing=south,struck=shaker": {
+      "model": "jugcraft:block/harvest_percussion_set_struck_shaker",
+      "y": 180
+    },
+    "facing=west,struck=none": {
+      "model": "jugcraft:block/harvest_percussion_set",
+      "y": 270
+    },
+    "facing=west,struck=drum": {
+      "model": "jugcraft:block/harvest_percussion_set_struck_drum",
+      "y": 270
+    },
+    "facing=west,struck=washboard": {
+      "model": "jugcraft:block/harvest_percussion_set_struck_washboard",
+      "y": 270
+    },
+    "facing=west,struck=shaker": {
+      "model": "jugcraft:block/harvest_percussion_set_struck_shaker",
+      "y": 270
+    }
+  }
+}

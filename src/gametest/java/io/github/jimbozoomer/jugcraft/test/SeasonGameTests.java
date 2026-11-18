@@ -32,6 +32,52 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 /** Seasons: the server's calendar and events, the operator's settings and command, the palette, the biome tags and winter snow. */
 public class SeasonGameTests {
+    @GameTest
+    public void thanksgivingTruceIsOnlyTheHoliday(GameTestHelper helper) {
+        var settings = SeasonCalendar.Settings.DEFAULT;
+        for (int year = 2026; year <= 2032; year++) {
+            var day = SeasonCalendar.harvestFeastDay(SeasonCalendar.Feast.US, year);
+            helper.assertTrue(settings.thanksgivingTruceOn(day), "Holiday truce " + year);
+            helper.assertTrue(!settings.thanksgivingTruceOn(day.minusDays(1)) && !settings.thanksgivingTruceOn(day.plusDays(1)), "No extra truce days");
+        }
+        var preview=settings.withFixedDate(MonthDay.of(11,26));
+        helper.assertTrue(preview.thanksgivingTruceOn(LocalDate.of(2026,6,1)), "Server date preview controls truce");
+        var off=new SeasonCalendar.Settings(settings.mode(),false,settings.zone(),false,2,SeasonCalendar.Feast.OFF,4,null,null);
+        helper.assertTrue(!off.thanksgivingTruceOn(LocalDate.of(2026,11,26)), "Disabled feast does not force a truce");
+        var canada=new SeasonCalendar.Settings(settings.mode(),false,settings.zone(),false,2,SeasonCalendar.Feast.CANADA,4,null,null);
+        helper.assertTrue(canada.thanksgivingTruceOn(LocalDate.of(2026,10,12)) && !canada.thanksgivingTruceOn(LocalDate.of(2026,11,26)), "Configured Canadian holiday respected");
+        helper.succeed();
+    }
+
+	@GameTest
+	public void generationTestClockSpansMidnightAndRestoresItsScope(GameTestHelper helper) {
+		var settings = JugcraftSeasons.settings();
+		try (TestSeasonClock beforeMidnight = TestSeasonClock.freezeAt(Instant.parse("2026-11-01T23:59:59Z"))) {
+			LocalDate date = TestSeasonClock.frozenInstant().atZone(settings.zone()).toLocalDate();
+			equal(helper, JugcraftSeasons.date(), date, "frozen date uses configured zone");
+			equal(helper, JugcraftSeasons.today(), settings.dayOn(date), "generation day before midnight");
+			equal(helper, TestSeasonClock.frozenInstant().atZone(ZoneId.of("Pacific/Auckland")).toLocalDate(),
+					LocalDate.of(2026, 11, 2), "the same instant retains zone semantics");
+			boolean refused = false;
+			try (var nested = TestSeasonClock.freezeAt(Instant.parse("2026-11-02T00:00:01Z"))) {
+				// A second live scope would change the date seen by parallel generation tasks.
+			} catch (IllegalStateException expected) { refused = true; }
+			helper.assertTrue(refused, "A concurrent clock scope must be refused");
+			equal(helper, JugcraftSeasons.date(), date, "a refused scope leaves the original date");
+		}
+		try (var afterMidnight = TestSeasonClock.freezeAt(Instant.parse("2026-11-02T00:00:01Z"))) {
+			LocalDate date = TestSeasonClock.frozenInstant().atZone(settings.zone()).toLocalDate();
+			equal(helper, JugcraftSeasons.date(), date, "a new scope after midnight");
+			equal(helper, JugcraftSeasons.today(), settings.dayOn(date), "generation day after midnight");
+		}
+		equal(helper, JugcraftSeasons.settings(), settings, "freezing the clock leaves operator settings unchanged");
+		LocalDate realBefore = LocalDate.now(settings.zone());
+		LocalDate restored = JugcraftSeasons.date();
+		LocalDate realAfter = LocalDate.now(settings.zone());
+		helper.assertTrue(restored.equals(realBefore) || restored.equals(realAfter), "Closing the test scope restores the real clock, even across midnight");
+		helper.succeed();
+	}
+
 	@GameTest
 	public void seasonDaysFollowTheCalendar(GameTestHelper helper) {
 		// 20 October is peak autumn in the north and spring (half a year on) in the south.
@@ -71,7 +117,7 @@ public class SeasonGameTests {
 		helper.succeed();
 	}
 
-	@GameTest
+	@GameTest(environment="jugcraft-test:season_restart")
 	public void overridesLastUntilRestart(GameTestHelper helper) {
 		// The test server's config file has the defaults. Overrides change the settings in memory only, and a server
 		// starting (a restart, or the next world opened in the same game) begins from the file again.

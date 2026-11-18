@@ -3,7 +3,8 @@
 The Hearthbinders keep fire and use it with control: heat for hearths, kilns and forges, never wildfire. Part 1 is
 their research entry, Hearthbinding, and four invocations written in the shared grammar (roadmap step 10's rules):
 
-- Hearthspark (utility): kindles an unlit campfire, candle or candle cake where you look, as flint and steel would;
+- Hearthspark (utility): kindles an unlit campfire, candle or candle cake where you look, as flint and steel would
+  (since Chunk E, E3: on an Alembic Crucible it tempers it, TEMPER_TICKS of heat held at hot);
 - Hearthguard (defense): Fire Resistance;
 - Cinderbolt (damage): fire damage that grows with fire Spell Power, and Smoulder;
 - Hearthflare (damage, once mastered): a burst of fire round you, and Smoulder.
@@ -51,10 +52,16 @@ EMBER_SPECIMENS = {
 OBSERVED_DISTINCT = 3
 
 # The practice Hearthbinding is mastered by (Java: ember/Ember.ACTIVITY): each kind of hearth kindled with Hearthspark
-# counts once (Java: Ember.hearth). Three of the four are had in the Overworld; the soul campfire needs the Nether.
+# counts once (Java: Ember.hearth). All but the soul campfire are had in the Overworld; the soul campfire needs the
+# Nether. Since Concordance Chunk E (E3), an Alembic Crucible kindled is tempered, and counts as a kind of hearth too.
 HEARTHKEEPING = rid("hearthkeeping")
 HEARTHS = {"campfire": "a campfire", "soul_campfire": "a soul campfire", "candle": "a candle",
-           "candle_cake": "a candle cake"}
+           "candle_cake": "a candle cake", "crucible": "an Alembic Crucible (tempered)"}
+# Chunk E, E3 (Java: Ember.TEMPER_TICKS, CrucibleBlockEntity.temper): Hearthspark on an Alembic Crucible tempers it: its
+# heat climbs toward hot (the Crucible Stand's hot target, tools/concordance_alchemy.py) for TEMPER_TICKS, whatever is
+# beneath; a hotter source beneath still has its way, and Preserve's hold still keeps its band. Controlled heat, Preserve's
+# counterpart: the Hearthbinders' workshop use.
+TEMPER_TICKS = 1200
 HEARTH_MASTERY = 3
 
 # Smoulder (Java: ember/SmoulderEffect): whenever the creature's fire has burnt out, it is relit for FIRE_TICKS (a
@@ -117,7 +124,8 @@ COMPONENTS = {
     "kindling": {"slot": "operation", "requires": _UNDERSTOOD, "authored": True, "capacity": 1, "focus": 2,
                  "operation": {"effect": "alteration", "intent": "helpful", "principle": "ember",
                                "school": "spell_power:fire"},
-                 "name": "Kindling", "text": "Hearthspark's spark: kindles an unlit campfire, candle or candle cake."},
+                 "name": "Kindling", "text": "Hearthspark's spark: kindles an unlit campfire, candle or candle cake, "
+                                             "or tempers an Alembic Crucible."},
     "hearthguard_ward": {"slot": "operation", "requires": _UNDERSTOOD, "authored": True, "capacity": 2, "focus": 4,
                          "operation": {"effect": "status", "intent": "helpful", "principle": "ember", "magnitude": 0,
                                        "duration": HEARTHGUARD_TICKS, "status": "minecraft:fire_resistance"},
@@ -144,10 +152,13 @@ INVOCATIONS = {
         "animation": ("kindle_cast", "kindle_release"), "sounds": ("concordance.ember_gather", "concordance.hearthspark"),
         "particle": "minecraft:flame", "icon": "minecraft:flint_and_steel",
         "description": f"A spark that kindles the unlit campfire, candle or candle cake you look at, up to "
-                       f"{HEARTHSPARK_RANGE} blocks away.",
+                       f"{HEARTHSPARK_RANGE} blocks away; on an Alembic Crucible it tempers it: its heat climbs to hot "
+                       f"and holds there {TEMPER_TICKS // 20} seconds, whatever is beneath.",
         "counter": "It kindles only hearths you could light by hand there, never sets anything else alight, and a "
-                   "waterlogged hearth will not catch.",
-        "fizzle": "Nothing there to kindle: Hearthspark needs an unlit campfire, candle or candle cake within %s blocks",
+                   "waterlogged hearth will not catch. A tempered crucible is never hotter than hot, and Preserve's hold "
+                   "still keeps its band.",
+        "fizzle": "Nothing there to kindle: Hearthspark needs an unlit campfire, candle or candle cake, or an Alembic "
+                  "Crucible, within %s blocks",
     },
     "hearthguard": {
         "name": "Hearthguard", "role": "defense", "composition": "here struck hearthguard_ward", "stage": "understood",
@@ -414,6 +425,11 @@ def codex():
                 ("text", "Kindling",
                  "Hearthspark lights a hearth as flint and steel would, and only where you could light it by hand: "
                  "claims, protected towns and spawn protection refuse it. It never places fire."),
+                ("text", "Tempering",
+                 f"Hearthspark on an **Alembic Crucible** tempers it: for {TEMPER_TICKS // 20} seconds its heat climbs "
+                 "to hot and holds there, with nothing beneath it, and a hotter source beneath still has its way. It is "
+                 "Preserve's counterpart: Preserve holds the band a crucible is in; tempering brings it to hot. Held by "
+                 "Preserve, a crucible keeps its band. A tempered crucible counts as a kind of hearth kindled."),
             ],
         },
         ("hearth", "regalia"): {

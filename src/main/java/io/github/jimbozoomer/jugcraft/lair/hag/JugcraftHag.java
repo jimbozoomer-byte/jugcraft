@@ -3,6 +3,7 @@ package io.github.jimbozoomer.jugcraft.lair.hag;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.lair.FenLampBlock;
 import io.github.jimbozoomer.jugcraft.lair.Lair;
+import io.github.jimbozoomer.jugcraft.lair.LairRewards;
 import io.github.jimbozoomer.jugcraft.lair.Lairs;
 import io.github.jimbozoomer.jugcraft.weapons.DescribedItem;
 import net.fabricmc.fabric.api.creativetab.v1.CreativeModeTabEvents;
@@ -72,6 +73,8 @@ public final class JugcraftHag {
 				DataComponents.EQUIPPABLE, Equippable.builder(EquipmentSlot.HEAD).setEquipSound(SoundEvents.ARMOR_EQUIP_LEATHER).build()));
 
 		Lairs.onPlaced(Lair.LANTERN_FEN, MireHagEntity::summon);
+		// Concordance Chunk E (E4): its fall pays through lair/LairRewards, now or later.
+		LairRewards.payer(MireHagLoot.BOSS, MireHagLoot::pay);
 		FenLampBlock.onLitByHand(JugcraftHag::lampLit);
 		HagRootsEntity.register();
 		HagsEye.register();

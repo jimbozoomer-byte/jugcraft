@@ -36,13 +36,29 @@ public final class TownCommand {
 	private static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(Commands.literal("jugcraft")
 				.then(Commands.literal("town")
+						.then(WesternDistrict.command())
+                        .then(Commands.literal("upperfloors").requires(TownCommand::isOperator)
+                            .executes(c -> UpperTown.retrofit(c.getSource(), false))
+                            .then(Commands.literal("apply").executes(c -> UpperTown.retrofit(c.getSource(), true))))
 						.executes(context -> info(context.getSource()))
+                        .then(Commands.literal("feast").requires(TownCommand::isOperator)
+                                .executes(c -> feastReport(c.getSource(), false))
+                                .then(Commands.literal("dryrun").executes(c -> feastReport(c.getSource(), true))))
+                        .then(Commands.literal("harvest-crafts").requires(TownCommand::isOperator)
+                                .executes(c -> harvestCraftsReport(c.getSource(), false))
+                                .then(Commands.literal("dryrun").executes(c -> harvestCraftsReport(c.getSource(), true))))
 						.then(Commands.literal("upgrade").requires(TownCommand::isOperator)
                                 .executes(c -> TownUpgrades.status(c.getSource()))
                                 .then(Commands.literal("preview").executes(c -> TownUpgrades.status(c.getSource())))
                                 .then(Commands.literal("apply").executes(c -> TownUpgrades.request(c.getSource()))))
                         .then(Commands.literal("place").requires(TownCommand::isOperator).executes(TownCommand::place))
-						.then(Commands.literal("theme").requires(TownCommand::isOperator)
+						.then(Commands.literal("decor-preview").requires(TownCommand::isOperator)
+                                .then(Commands.argument("theme", StringArgumentType.word())
+                                    .suggests((context, builder) -> {
+                                        TownData.get().themes.forEach(builder::suggest);
+                                        return builder.buildFuture();
+                                    }).executes(TownCommand::decorPreview)))
+                        .then(Commands.literal("theme").requires(TownCommand::isOperator)
 								.then(Commands.argument("theme", StringArgumentType.word())
 										.suggests((context, builder) -> {
 											builder.suggest("auto");
@@ -61,6 +77,20 @@ public final class TownCommand {
 										.then(Commands.argument("amount", LongArgumentType.longArg(1))
 												.executes(context -> change(context, false)))))));
 	}
+
+	private static int feastReport(CommandSourceStack source, boolean dryRun) {
+		for (String line : TownFeast.report(source.getServer().overworld(), dryRun)) {
+			source.sendSuccess(() -> Component.literal(line), false);
+		}
+		return 1;
+	}
+
+    private static int harvestCraftsReport(CommandSourceStack source, boolean dryRun) {
+        for (String line : TownHarvestCrafts.report(source.getServer().overworld(), dryRun)) {
+            source.sendSuccess(() -> Component.literal(line), false);
+        }
+        return 1;
+    }
 
 	private static boolean isOperator(CommandSourceStack source) {
 		return Commands.LEVEL_GAMEMASTERS.check(source.permissions());
@@ -96,6 +126,26 @@ public final class TownCommand {
 		source.sendSuccess(() -> Component.translatable("command.jugcraft.town.placed"), true);
 		return 1;
 	}
+
+    private static int decorPreview(CommandContext<CommandSourceStack> context) {
+        String theme = StringArgumentType.getString(context, "theme");
+        var source = context.getSource();
+        if (!TownData.get().themes.contains(theme)) {
+            source.sendFailure(Component.translatable("command.jugcraft.town.no_theme", theme));
+            return 0;
+        }
+        var level = source.getServer().overworld();
+        if (TownState.get(level).origin() == null) {
+            source.sendFailure(Component.translatable("command.jugcraft.town.none"));
+            return 0;
+        }
+        var report = TownDecor.preview(level, theme);
+        source.sendSuccess(() -> Component.literal("Town decor preview (" + theme + "): "
+            + report.replacements() + " cells would change, " + report.unchanged() + " already match, "
+            + report.preserved() + " protected/owner-edited cells skipped, " + report.unloadedSites()
+            + " unloaded sites deferred. No blocks or themes changed."), false);
+        return 1;
+    }
 
 	private static int theme(CommandContext<CommandSourceStack> context) {
 		String theme = StringArgumentType.getString(context, "theme");

@@ -2,6 +2,8 @@
 
 Status: implemented on the contributor's fork, pending CI and review.
 
+**Current behavior:** [Early pharmacy — Batch 1](pharmacology-early-pharmacy.md) replaces the short Regeneration/nausea-cleanse effect below with 12 minutes of Fortitude (10% physical damage reduction), a five-second onset and 10 strain through the shared dosing ledger. Existing item IDs, ingredient routes and recipe yields are preserved. The remainder of this record describes the original implementation and its historical verification.
+
 Proposal issue: none. TODO item: "Plan acetylsalicylic-acid medicine with independently reachable precursors and defined game effects; keep pharmacy optional to industrial progression."
 
 **This change's choices:** the precursors, quantities and the tablet's effect, listed below for the owner to review.
@@ -64,5 +66,5 @@ Fork Build run [38805626684](https://github.com/mmme123-spec/jugcraftfork/action
 
 ## Rollout and open questions
 
-- The quantities, the effect and the 30-second wait await the owner's review.
+- The owner-directed early pharmacy batch supersedes the original effect/cooldown; its feature record tracks current balance and verification.
 - Other medicines (the TODO's preservatives, adhesives and drinks) are separate items.

@@ -3,8 +3,10 @@ package io.github.jimbozoomer.jugcraft.test;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.gear.JugcraftGear;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -12,12 +14,23 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemAttributeModifiers;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.SmithingRecipe;
+import net.minecraft.world.item.crafting.SmithingRecipeInput;
 import net.minecraft.world.item.equipment.EquipmentAssets;
+import net.minecraft.world.level.storage.loot.LootParams;
+import net.minecraft.world.level.storage.loot.LootTable;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 /**
  * In-game tests for the armor-only tiers (docs/features/bloodthorn-armor.md): the owner's armor designs, each a tier
@@ -94,6 +107,103 @@ public class ArmorTiersGameTests {
 			new Tier("scarab", new int[] {3, 8, 6, 3}, new int[] {440, 640, 600, 520}, 2.0, 0.1, 25,
 					"minecraft:lapis_lazuli", false));
 
+	/** A tier only its boss gives (docs/features/armor-tier-sources.md): the boss's share table and the set's arms. */
+	private record BossTier(String id, String boss, List<String> arms) {
+	}
+
+	private static final List<BossTier> BOSS_TIERS = List.of(
+			new BossTier("reaper", "vesperine", List.of("reaper_scythe")),
+			new BossTier("frost_knight", "yeti_king", List.of("frost_knight_greatsword")),
+			new BossTier("hades", "cinder_tyrant", List.of("hades_scythe")),
+			new BossTier("wight_king", "crypt_lich", List.of("wight_king_zweihander")),
+			new BossTier("sentinel", "cydonian_sentinel", List.of("sentinel_longsword", "sentinel_shield")));
+	/** Shares of a boss's loot rolled per tier: a piece is 25% a share and an arm at least 7.5%, so 200 miss one about
+	 * once in six million. */
+	private static final int SHARES = 200;
+
+	/**
+	 * How each tier is won (docs/features/armor-tier-sources.md). Every tier but a boss's: its pattern's recipe loads,
+	 * and at a smithing table the pattern, an enchanted, worn netherite piece (the Banana's, iron) and the tier's repair
+	 * item make that tier's piece, keeping the enchantment and wear; a diamond piece makes nothing. A boss's tier: no
+	 * recipe of its name makes a piece or arm, every share of its boss's loot holds exactly one piece, and the shares
+	 * hold every piece and arm.
+	 */
+	@GameTest
+	public void eachTierIsSmithedOrDroppedByItsBoss(GameTestHelper helper) {
+		ServerLevel level = helper.getLevel();
+		List<String> wrong = new ArrayList<>();
+		var protection = level.registryAccess().lookupOrThrow(Registries.ENCHANTMENT)
+				.getOrThrow(ResourceKey.create(Registries.ENCHANTMENT, Identifier.withDefaultNamespace("protection")));
+		List<String> bossTiers = BOSS_TIERS.stream().map(BossTier::id).toList();
+		for (Tier tier : TIERS) {
+			if (bossTiers.contains(tier.id())) {
+				continue;
+			}
+			if (level.recipeAccess().byKey(recipe(tier.id() + "_pattern")).isEmpty()) {
+				wrong.add(tier.id() + "_pattern has no recipe");
+			}
+			ItemStack pattern = new ItemStack(item(tier.id() + "_pattern"));
+			ItemStack addition = new ItemStack(BuiltInRegistries.ITEM.getValue(Identifier.parse(tier.repair())));
+			String base = tier.id().equals("banana") ? "iron" : "netherite";
+			for (String piece : PIECES) {
+				ItemStack plain = new ItemStack(vanilla(base + "_" + piece));
+				plain.enchant(protection, 4);
+				plain.setDamageValue(37);
+				ItemStack made = smith(level, pattern.copy(), plain, addition.copy());
+				if (!made.is(item(tier.id() + "_" + piece)) || made.getDamageValue() != 37
+						|| net.minecraft.world.item.enchantment.EnchantmentHelper.getItemEnchantmentLevel(protection, made) != 4) {
+					wrong.add(tier.id() + "_pattern, a " + base + " " + piece + " and " + tier.repair() + " made " + made
+							+ " (damage " + made.getDamageValue() + ")");
+				}
+				if (!smith(level, pattern.copy(), new ItemStack(vanilla("diamond_" + piece)), addition.copy()).isEmpty()) {
+					wrong.add(tier.id() + "_pattern made something from a diamond " + piece);
+				}
+			}
+		}
+		ServerPlayer player = helper.makeMockServerPlayerInLevel();
+		try {
+			for (BossTier tier : BOSS_TIERS) {
+				List<String> things = new ArrayList<>();
+				for (String piece : PIECES) {
+					things.add(tier.id() + "_" + piece);
+				}
+				things.addAll(tier.arms());
+				for (String thing : things) {
+					if (level.recipeAccess().byKey(recipe(thing)).isPresent()) {
+						wrong.add(thing + " has a recipe, but only " + tier.boss() + " gives it");
+					}
+				}
+				LootTable table = level.getServer().reloadableRegistries().getLootTable(
+						ResourceKey.create(Registries.LOOT_TABLE, Jugcraft.id("entities/" + tier.boss())));
+				Set<String> dropped = new HashSet<>();
+				for (int share = 0; share < SHARES; share++) {
+					LootParams params = new LootParams.Builder(level).withParameter(LootContextParams.ORIGIN, player.position())
+							.withParameter(LootContextParams.THIS_ENTITY, player).create(LootContextParamSets.GIFT);
+					int pieces = 0;
+					for (ItemStack stack : table.getRandomItems(params)) {
+						String id = BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath();
+						dropped.add(id);
+						if (things.subList(0, PIECES.length).contains(id)) {
+							pieces += stack.getCount();
+						}
+					}
+					if (pieces != 1) {
+						wrong.add("a share of " + tier.boss() + "'s loot held " + pieces + " " + tier.id() + " pieces, not one");
+					}
+				}
+				for (String thing : things) {
+					if (!dropped.contains(thing)) {
+						wrong.add(SHARES + " shares of " + tier.boss() + "'s loot held no " + thing);
+					}
+				}
+			}
+		} finally {
+			player.discard();
+		}
+		helper.assertTrue(wrong.isEmpty(), "Armor tier sources: " + String.join("; ", wrong));
+		helper.succeed();
+	}
+
 	/** Every tier's four pieces have its numbers, repair, fire resistance, slot, look and tags. */
 	@GameTest
 	public void armorTiersHaveTheirNumbers(GameTestHelper helper) {
@@ -161,6 +271,21 @@ public class ArmorTiersGameTests {
 
 	private static Item vanilla(String path) {
 		return BuiltInRegistries.ITEM.getValue(Identifier.withDefaultNamespace(path));
+	}
+
+	private static Item item(String path) {
+		return BuiltInRegistries.ITEM.getValue(Jugcraft.id(path));
+	}
+
+	private static ResourceKey<Recipe<?>> recipe(String path) {
+		return ResourceKey.create(Registries.RECIPE, Jugcraft.id(path));
+	}
+
+	/** What a smithing table makes from these three, as vanilla's smithing menu asks, or an empty stack if no recipe matches. */
+	private static ItemStack smith(ServerLevel level, ItemStack template, ItemStack base, ItemStack addition) {
+		SmithingRecipeInput input = new SmithingRecipeInput(template, base, addition);
+		Optional<RecipeHolder<SmithingRecipe>> recipe = level.recipeAccess().getRecipeFor(RecipeType.SMITHING, input, level);
+		return recipe.isPresent() ? recipe.get().value().assemble(input) : ItemStack.EMPTY;
 	}
 
 	/** A data component's value on a stack, by the component's ID ("minecraft:repairable"), or null if absent or unknown. */

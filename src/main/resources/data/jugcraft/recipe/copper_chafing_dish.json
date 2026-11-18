@@ -1,0 +1,22 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "minecraft:copper_ingot",
+    "minecraft:copper_ingot",
+    "minecraft:copper_ingot",
+    "minecraft:iron_nugget",
+    "minecraft:iron_nugget",
+    "minecraft:candle"
+  ],
+  "result": {
+    "id": "jugcraft:copper_chafing_dish",
+    "count": 1
+  }
+}

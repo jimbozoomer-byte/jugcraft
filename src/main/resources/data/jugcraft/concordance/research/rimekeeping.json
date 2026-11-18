@@ -57,7 +57,8 @@
     "understood": {
       "invocations": [
         "jugcraft:rimebind",
-        "jugcraft:preserve"
+        "jugcraft:preserve",
+        "jugcraft:quench"
       ]
     }
   }

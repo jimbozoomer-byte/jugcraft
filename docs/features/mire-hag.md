@@ -80,7 +80,7 @@ If no player she can fight is within 38 blocks of the marsh's middle for 10 seco
 
 ### Her loot
 
-Each participant rolls their own loot. A participant is a player who hurt her, her Likenesses or the Root Knot and is within 64 blocks of the marsh's middle when she falls. The loot goes straight into their inventory, and what does not fit lands at their feet. "Her hoard of the fen is yours".
+Each participant rolls their own loot. A participant is a player who hurt her, her Likenesses or the Root Knot, or relit a lamp that showed her (a deed, since Concordance Chunk E), and is within 64 blocks of the marsh's middle when she falls. Since Concordance Chunk E (E4, [lair-encounter-credit.md](lair-encounter-credit.md)) her fight's credit and reward are the lairs' shared ones: a player also qualifies by healing other players 4 or more of what her side's blows took from them, or by a ward on another player that soaks 4 or more of those blows, and a blow by a creature they tamed is theirs. Whoever dies in the fight is paid once back on their feet, and whoever leaves the game in it when they next join, still kept under the name `mire_hag` (saved, so never renamed). Each fall pays each player once. The loot goes straight into their inventory, and what does not fit lands at their feet. "Her hoard of the fen is yours".
 
 | Loot | Chance |
 | --- | --- |

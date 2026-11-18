@@ -40,7 +40,10 @@ def texture_sources():
         elif isinstance(value, dict):
             source, runtime = value.get('source'), value.get('runtime')
             if isinstance(source, str) and isinstance(runtime, str) and runtime.endswith('.png'):
-                if source.startswith('art/owner-library/originals/Oct23/Jimtafacts/'):
+                # The accessory importer now uses the owner's newer artifacts
+                # folder; keep the same provenance and byte-equality requirement.
+                if source.startswith(('art/owner-library/originals/Oct23/Jimtafacts/',
+                                      'art/owner-library/originals/Edited-2026-10-29/artifacts/')):
                     result[runtime] = source
             for row in value.values():
                 if isinstance(row, (dict, list)): visit(row)
@@ -51,8 +54,9 @@ def texture_sources():
 def original_texture(path):
     """An exception applies only while the exact supplied pixels remain intact."""
     path = Path(path).resolve()
-    if not path.is_relative_to(ROOT): return False
-    source = texture_sources().get(path.relative_to(ROOT).as_posix())
+    root = ROOT.resolve()
+    if not path.is_relative_to(root): return False
+    source = texture_sources().get(path.relative_to(root).as_posix())
     return bool(source and (ROOT / source).is_file() and path.read_bytes() == (ROOT / source).read_bytes())
 
 def original_inward_shell(path, elements):

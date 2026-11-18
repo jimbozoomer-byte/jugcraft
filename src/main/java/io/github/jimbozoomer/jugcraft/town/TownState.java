@@ -34,7 +34,11 @@ public final class TownState extends SavedData {
 			Codec.STRING.optionalFieldOf("theme", "").forGetter(s -> s.theme),
 			Codec.LONG.optionalFieldOf("theme_since", 0L).forGetter(s -> s.themeSince),
 			Codec.BOOL.optionalFieldOf("styx_district", false).forGetter(s -> s.styxDistrict),
-			Codec.INT.optionalFieldOf("town_map", -1).forGetter(s -> s.townMap))
+			Codec.INT.optionalFieldOf("town_map", -1).forGetter(s -> s.townMap),
+            Codec.BOOL.optionalFieldOf("original_upper_floors",false).forGetter(s -> s.newUpperFloors),
+            Codec.BOOL.optionalFieldOf("original_jetty_floors",false).forGetter(s -> s.newJettyFloors),
+            Codec.STRING.listOf().optionalFieldOf("retrofitted_roofs",List.of()).forGetter(s -> List.copyOf(s.retrofittedRoofs)),
+            Codec.unboundedMap(Codec.STRING,UpperRoofMove.CODEC).optionalFieldOf("pending_roof_moves",Map.of()).forGetter(s -> s.pendingRoofs))
 			.apply(i, TownState::new));
 	static final SavedDataType<TownState> TYPE = new SavedDataType<>(Jugcraft.id("town"), TownState::new, CODEC, null);
 
@@ -47,15 +51,30 @@ public final class TownState extends SavedData {
 	private long themeSince;
 	private boolean styxDistrict;
 	private int townMap;
+    private boolean newUpperFloors;
+    private boolean newJettyFloors;
+    boolean newJettyFloors() { return newJettyFloors; }
+    private final Set<String> retrofittedRoofs = new HashSet<>();
+    private final Map<String,UpperRoofMove> pendingRoofs = new HashMap<>();
+    boolean newUpperFloors() { return newUpperFloors; }
+    boolean raised(String house) { return retrofittedRoofs.contains(house); }
+    UpperRoofMove pendingRoof(String house) { return pendingRoofs.get(house); }
+    void stageRoof(String house,UpperRoofMove move) { pendingRoofs.put(house,move); setDirty(); }
+    void markRaised(String house) { retrofittedRoofs.add(house); pendingRoofs.remove(house); setDirty(); }
 	public int townMap() { return townMap; }
 	public void setTownMap(int id) { townMap = id; setDirty(); }
 
 	TownState() {
-		this(Optional.empty(), List.of(), List.of(), Map.of(), List.of(), "", 0L, false, -1);
+		this(Optional.empty(), List.of(), List.of(), Map.of(), List.of(), "", 0L, false, -1,false,false,List.of(),Map.of());
 	}
 
 	TownState(Optional<BlockPos> origin, List<Long> built, List<String> siteThemes, Map<String, UUID> townsfolk,
-			List<UUID> welcomed, String theme, long themeSince, boolean styxDistrict, int townMap) {
+			List<UUID> welcomed, String theme, long themeSince, boolean styxDistrict, int townMap,
+            boolean newUpperFloors, boolean newJettyFloors, List<String> retrofittedRoofs, Map<String,UpperRoofMove> pendingRoofs) {
+		this.newUpperFloors = newUpperFloors;
+        this.newJettyFloors = newJettyFloors;
+        this.retrofittedRoofs.addAll(retrofittedRoofs);
+        this.pendingRoofs.putAll(pendingRoofs);
 		this.townMap = townMap;
 		this.styxDistrict = styxDistrict;
 		this.origin = origin.orElse(null);
@@ -99,6 +118,10 @@ public final class TownState extends SavedData {
 	/** Only newly planned towns reserve the east district; missing fields in old saves stay false. */
 	public void place(BlockPos origin, boolean styxDistrict) {
 		townMap = -1;
+        newUpperFloors = true;
+        newJettyFloors = true;
+        retrofittedRoofs.clear();
+        pendingRoofs.clear();
 		this.styxDistrict = styxDistrict;
 		this.origin = origin.immutable();
 		built.clear();
@@ -110,6 +133,10 @@ public final class TownState extends SavedData {
 	/** Forgets the town (for tests and `/jugcraft town forget`): its blocks stay, its protection and NPC care end. */
 	public void forget() {
 		townMap = -1;
+        newUpperFloors = false;
+        newJettyFloors = false;
+        retrofittedRoofs.clear();
+        pendingRoofs.clear();
 		styxDistrict = false;
 		origin = null;
 		built.clear();

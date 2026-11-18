@@ -31,12 +31,13 @@ import net.minecraft.world.phys.Vec3;
 import org.jspecify.annotations.Nullable;
 
 /**
- * Mock players for the Concordance's server game tests, logged out once their test is over. The game's own
+ * Mock players for server game tests, logged out once their test is over. The game's own
  * {@code makeMockServerPlayerInLevel} logs a player in for the rest of the run: each one keeps its chunks loaded and its
  * inventory synced, and by Concordance Chunk C the suite's 1,428 left the game test server out of heap (CI run
  * 40003960812). A player made here leaves the game ({@code PlayerList.remove}, as the town and alchemy tests do by hand)
- * when its test passes or fails: the test framework tells its listeners on the tick after the test is done, never during
- * it. A player its test has already logged out (to stand for one who is away) is left alone.
+ * when its test passes or fails: the framework notifies listeners after the test's work finishes. The test-only
+ * GameTestHelper mixin also registers direct calls to the vanilla helper, so they cannot bypass that cleanup.
+ * A player its test has already logged out (to stand for one who is away) is left alone.
  * <p>
  * Concordance Chunk D adds the players its tests of absence need. Vanilla's mock is creative for good (its gameMode()
  * always answers creative, GameTestHelper.makeMockServerPlayerInLevel). {@link #survivor} joins an ordinary ServerPlayer
@@ -74,6 +75,7 @@ public final class TestPlayers {
 			throw new IllegalStateException(player.getUUID() + " is not in the game");
 		}
 		list.remove(player);
+		MockPlayerChannels.dispose(player);
 	}
 
 	/** The person {@code id} joins again after {@link #leave}: the same identity, their saved data and statistics read back. */
@@ -113,8 +115,11 @@ public final class TestPlayers {
 		return track(helper, player);
 	}
 
-	/** Logs {@code player} out when the test ends. */
-	private static ServerPlayer track(GameTestHelper helper, ServerPlayer player) {
+	/** Logs a mock {@code player} out when this test ends; repeated registration and non-mock clients are harmless. */
+	public static ServerPlayer track(GameTestHelper helper, ServerPlayer player) {
+		if (!MockPlayerChannels.isMock(player)) {
+			return player;
+		}
 		List<ServerPlayer> made = MADE.get(helper);
 		if (made == null) {
 			made = new ArrayList<>();
@@ -143,7 +148,9 @@ public final class TestPlayers {
 				});
 			}
 		}
-		made.add(player);
+		if (!made.contains(player)) {
+			made.add(player);
+		}
 		return player;
 	}
 
@@ -153,6 +160,7 @@ public final class TestPlayers {
 			if (list.getPlayer(player.getUUID()) == player) {
 				list.remove(player);
 			}
+			MockPlayerChannels.dispose(player);
 		}
 		players.clear();
 	}

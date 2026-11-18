@@ -72,7 +72,7 @@ its own step).
 | compose | Required | a spell inscribed on a carried instrument | understand, wand | - | - | `composition/composing` (first_light understood) | `theRouteFollowsTheResearch`, `spellcraftShowsWhatIsHeld` |
 | support | Recommended | an inscription that wards someone other than its caster (ward, with or without modifiers, not delivered here) | compose | - | - | - | `theRouteFollowsTheResearch`, `aWardForAFriendIsComposedAndCast` |
 | equip | Recommended | a Kindled Lantern, a fire-set piece, a fire focus or the Fire Bangle carried or worn | understand | recommended: `jugcraft:lesser_fire_focus` (2 string, 2 gold ingot, 2 #coals, 1 amethyst shard)<br>recommended: `jugcraft:fire_bangle` (4 gold ingot, 1 #coals, 1 amethyst shard)<br>the sets, named when each of these exists: `jugcraft:pyromancers_hat`, `jugcraft:pyromancers_robes`, `jugcraft:pyromancers_leggings`, `jugcraft:pyromancers_boots`, `jugcraft:pyromaniacs_hood`, `jugcraft:pyromaniacs_tunic`, `jugcraft:pyromaniacs_pants`, `jugcraft:pyromaniacs_shoes` | general: `minecraft:lantern` | - | `theFirstLoadoutIsMadeInSurvival` |
-| lair | Optional: after a boss | a first win over any lair's keeper: The Last Harvest, Unravelled, Abominable or Tempered | compose | - | - | - | `aBossIsHiddenUntilDiscovered`, `aWinOverAnyKeeperIsTheLairStep` |
+| lair | Optional: after a boss | a first win over any lair's keeper: The Last Harvest, Unravelled, Abominable, Tempered, Seen Through, Nameless, Grounded, Hunter's Moon, Red Planet, Uncrowned or Laid to Rest | compose | - | - | - | `aBossIsHiddenUntilDiscovered`, `aWinOverAnyKeeperIsTheLairStep` |
 <!-- first-route:end -->
 
 How a step is placed: done when the player's own state says so; otherwise waiting (Later) until the steps it waits for
@@ -247,8 +247,10 @@ Known limits:
 
 - Discovery is read, not saved: a player who entered a lair, left, and used up their token (a Cursed Spindle, a Frost
   Horn or a Kiln Seal) reads as not having found it until they carry one again or win.
-- The dossiers cover all four lairs (the Glacier Hall and the Cinder Kiln since Chunk B, B-02); the lair step shows when
-  any token's recipe is on the server.
+- The dossiers cover every lair the game has: the first four (the Glacier Hall and the Cinder Kiln since Chunk B, B-02),
+  and since Concordance Chunk E (E4, [lair-dossiers.md](lair-dossiers.md)) the Lantern Fen, the Archive of Last Names,
+  the Foundry Trench, the Moonlit Ring, the Cydonian Sanctum, the Crowfield and the Church Bridge; the lair step shows when any token's
+  recipe is on the server, and any keeper's first win does it.
 - The Inspect page is read when the encyclopedia opens; refreshing keeps the block it was opened on.
 - The route's equip step is done by carrying or wearing a Kindled Lantern, a fire-set piece, a fire focus or the Fire
   Bangle (the wand and the bench are steps of their own).

@@ -63,6 +63,9 @@ def assets(root, write, lang):
     lang[f"tooltip.{MOD}.tyrant_scale"] = "A scale of the Cinder Tyrant's obsidian: crushes into magma cream, and makes a cheaper Kiln Seal"
     lang[f"tooltip.{MOD}.salamander_charm"] = "In the offhand, hot ground never burns you: magma blocks and molten slag"
     lang[f"tooltip.{MOD}.tyrant_crest"] = "A costume: counts for trick-or-treating and the costume contest"
+    lang[f"tooltip.{MOD}.quench_flask"] = ("Thrown, it splashes meltwater: puts out fire and cools everyone it reaches (hot "
+                                           "ground and burning pass them by), and fire-born creatures hiss and gutter")
+    lang[f"entity.{MOD}.quench_flask"] = "Quench Flask"
 
     for key, text in ct.MESSAGES.items():
         lang[f"message.{MOD}.cinder_tyrant.{key}"] = text
@@ -87,6 +90,9 @@ def loot(out, write):
         "type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": low, "max": high}}}], "rolls": 1}]
     pools.append(chance(ct.TROPHIES, ct.TROPHY_CHANCE))
     pools += [chance((item,), p) for item, p in ct.CHANCES.items()]
+    # Its armor set: one sure pool, so every share holds one piece, each as likely (armor-tier-sources.md).
+    pools.append({"entries": [{"type": "minecraft:item", "name": rid(piece)} for piece in ct.SET_PIECES],
+                  "rolls": 1})
     write(out.parent / "entities" / "cinder_tyrant.json", {"type": "minecraft:gift",
                                                             "random_sequence": rid("entities/cinder_tyrant"), "pools": pools})
 
@@ -105,6 +111,9 @@ def tags(tags):
     for item in ct.COSTUMES:
         tags.add("item", COSTUME_TAG, rid(item))
         tags.add("item", COSTUME_HAT_TAG, rid(item))
+    # The creatures born of fire a Quench Flask strikes (Concordance Chunk E, E2).
+    for entity in ct.QUENCHABLE:
+        tags.add("entity_type", f"{MOD}:quenchable", entity)
 
 
 def advancements(data, write):

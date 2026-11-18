@@ -1,0 +1,137 @@
+{
+  "parent": "minecraft:block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "p": "jugcraft:block/harvest_centerpiece",
+    "particle": "jugcraft:block/harvest_centerpiece"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0.75
+      ],
+      "to": [
+        0.75,
+        5.1,
+        7.25
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            14.375,
+            12.75,
+            14.4728,
+            13.363
+          ],
+          "texture": "#p"
+        },
+        "south": {
+          "uv": [
+            15.7772,
+            12.75,
+            15.875,
+            13.363
+          ],
+          "texture": "#p"
+        },
+        "east": {
+          "uv": [
+            4.875,
+            13.625,
+            5.75,
+            14.238
+          ],
+          "texture": "#p"
+        },
+        "up": {
+          "uv": [
+            12.9022,
+            10.625,
+            13.0,
+            11.5
+          ],
+          "texture": "#p"
+        }
+      }
+    },
+    {
+      "from": [
+        0.0,
+        1.0,
+        3.75
+      ],
+      "to": [
+        6.0,
+        2.0,
+        4.25
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            5.75,
+            15.5,
+            6.5,
+            15.625
+          ],
+          "texture": "#p"
+        },
+        "south": {
+          "uv": [
+            5.75,
+            15.5,
+            6.5,
+            15.625
+          ],
+          "texture": "#p"
+        },
+        "east": {
+          "uv": [
+            9.375,
+            15.5,
+            9.5,
+            15.625
+          ],
+          "texture": "#p"
+        },
+        "west": {
+          "uv": [
+            9.375,
+            15.5,
+            9.5,
+            15.625
+          ],
+          "texture": "#p"
+        },
+        "up": {
+          "uv": [
+            5.75,
+            15.5,
+            6.5,
+            15.625
+          ],
+          "texture": "#p"
+        },
+        "down": {
+          "uv": [
+            5.75,
+            15.5,
+            6.5,
+            15.625
+          ],
+          "texture": "#p"
+        }
+      },
+      "rotation": {
+        "origin": [
+          0.0,
+          1.5,
+          4.0
+        ],
+        "axis": "z",
+        "angle": -22.5
+      }
+    }
+  ]
+}

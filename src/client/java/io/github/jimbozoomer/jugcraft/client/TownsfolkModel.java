@@ -12,6 +12,7 @@ import net.minecraft.client.model.geom.builders.LayerDefinition;
 import net.minecraft.client.model.geom.builders.MeshDefinition;
 import net.minecraft.client.model.geom.builders.PartDefinition;
 import net.minecraft.util.Mth;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A townsperson's body: the same boxes as a player's (classic arms), with the outer layer (hat, jacket, sleeves,
@@ -22,9 +23,35 @@ import net.minecraft.util.Mth;
  */
 public class TownsfolkModel extends HumanoidModel<TownsfolkRenderer.State> {
 	public static final ModelLayerLocation LAYER = new ModelLayerLocation(Jugcraft.id("townsfolk"), "main");
+	/**
+	 * The townsfolk's own layer ({@link TownsfolkRenderer}): the same body, with classic and slim arms to choose between
+	 * per person, for custom NPCs wearing a player's skin ({@link #createSkinnableLayer()}).
+	 */
+	public static final ModelLayerLocation SKINNABLE_LAYER = new ModelLayerLocation(Jugcraft.id("townsfolk"), "skinnable");
+	/**
+	 * How far (pixels) the arms' pivots move, inwards and down, while slim arms show, as vanilla's slim player model
+	 * places them: down half a pixel as its slim arms hang, and in half a pixel as it moves the hand for a held item.
+	 * The slim arm boxes are offset back out by as much, so they stand exactly where vanilla's do; the arm's pivot, which
+	 * the held item, worn layers and the arm's own turning share, is then where vanilla holds a slim hand's item.
+	 */
+	public static final float SLIM_SHIFT = 0.5F;
+
+	/** The arms' classic and slim versions (null in {@link #createLayer()}, which has classic arms only). */
+	private final @Nullable ModelPart rightWide, rightSlim, leftWide, leftSlim;
+	/** A named guest's head accessories ({@link GuestBody}); null in {@link #createLayer()}. */
+	private final GuestBody.@Nullable Head guestHead;
+	/** A named guest's gown or robe flare ({@link GuestBody}); null in {@link #createLayer()}. */
+	private final GuestBody.@Nullable Flare guestFlare;
 
 	public TownsfolkModel(ModelPart root) {
 		super(root);
+		boolean skinnable = rightArm.hasChild("wide");
+		rightWide = skinnable ? rightArm.getChild("wide") : null;
+		rightSlim = skinnable ? rightArm.getChild("slim") : null;
+		leftWide = skinnable ? leftArm.getChild("wide") : null;
+		leftSlim = skinnable ? leftArm.getChild("slim") : null;
+		guestHead = GuestBody.Head.of(head);
+		guestFlare = GuestBody.Flare.of(body);
 	}
 
 	public static LayerDefinition createLayer() {
@@ -59,9 +86,78 @@ public class TownsfolkModel extends HumanoidModel<TownsfolkRenderer.State> {
 		return LayerDefinition.create(mesh, 64, 64);
 	}
 
+	/**
+	 * {@link #createLayer()} with both classic (4 px) and slim (3 px) arms, as a player model has; the classic ones show
+	 * unless the state says slim ({@code TownsfolkRenderer.State.slim}), when the arms' pivots move by {@link #SLIM_SHIFT}
+	 * and the slim boxes stand where vanilla's slim arms do. Also the named guests' parts ({@link GuestBody}).
+	 */
+	public static LayerDefinition createSkinnableLayer() {
+		MeshDefinition mesh = new MeshDefinition();
+		PartDefinition root = mesh.getRoot();
+		CubeDeformation none = CubeDeformation.NONE;
+		CubeDeformation outer = new CubeDeformation(0.25F);
+		PartDefinition head = root.addOrReplaceChild("head",
+				CubeListBuilder.create().texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, none), PartPose.ZERO);
+		head.addOrReplaceChild("hat",
+				CubeListBuilder.create().texOffs(32, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, new CubeDeformation(0.5F)), PartPose.ZERO);
+		PartDefinition body = root.addOrReplaceChild("body",
+				CubeListBuilder.create().texOffs(16, 16).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, none), PartPose.ZERO);
+		body.addOrReplaceChild("jacket",
+				CubeListBuilder.create().texOffs(16, 32).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, outer), PartPose.ZERO);
+		GuestBody.addParts(body);
+		PartDefinition rightArm = root.addOrReplaceChild("right_arm", CubeListBuilder.create(), PartPose.offset(-5.0F, 2.0F, 0.0F));
+		rightArm.addOrReplaceChild("wide",
+				CubeListBuilder.create().texOffs(40, 16).addBox(-3.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, none), PartPose.ZERO)
+				.addOrReplaceChild("right_sleeve",
+						CubeListBuilder.create().texOffs(40, 32).addBox(-3.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, outer), PartPose.ZERO);
+		rightArm.addOrReplaceChild("slim",
+				CubeListBuilder.create().texOffs(40, 16).addBox(-2.0F, -2.0F, -2.0F, 3.0F, 12.0F, 4.0F, none), PartPose.offset(-SLIM_SHIFT, 0.0F, 0.0F))
+				.addOrReplaceChild("right_sleeve",
+						CubeListBuilder.create().texOffs(40, 32).addBox(-2.0F, -2.0F, -2.0F, 3.0F, 12.0F, 4.0F, outer), PartPose.ZERO);
+		PartDefinition leftArm = root.addOrReplaceChild("left_arm", CubeListBuilder.create(), PartPose.offset(5.0F, 2.0F, 0.0F));
+		leftArm.addOrReplaceChild("wide",
+				CubeListBuilder.create().texOffs(32, 48).addBox(-1.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, none), PartPose.ZERO)
+				.addOrReplaceChild("left_sleeve",
+						CubeListBuilder.create().texOffs(48, 48).addBox(-1.0F, -2.0F, -2.0F, 4.0F, 12.0F, 4.0F, outer), PartPose.ZERO);
+		leftArm.addOrReplaceChild("slim",
+				CubeListBuilder.create().texOffs(32, 48).addBox(-1.0F, -2.0F, -2.0F, 3.0F, 12.0F, 4.0F, none), PartPose.offset(SLIM_SHIFT, 0.0F, 0.0F))
+				.addOrReplaceChild("left_sleeve",
+						CubeListBuilder.create().texOffs(48, 48).addBox(-1.0F, -2.0F, -2.0F, 3.0F, 12.0F, 4.0F, outer), PartPose.ZERO);
+		PartDefinition rightLeg = root.addOrReplaceChild("right_leg",
+				CubeListBuilder.create().texOffs(0, 16).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, none), PartPose.offset(-1.9F, 12.0F, 0.0F));
+		rightLeg.addOrReplaceChild("right_pants",
+				CubeListBuilder.create().texOffs(0, 32).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, outer), PartPose.ZERO);
+		PartDefinition leftLeg = root.addOrReplaceChild("left_leg",
+				CubeListBuilder.create().texOffs(16, 48).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, none), PartPose.offset(1.9F, 12.0F, 0.0F));
+		leftLeg.addOrReplaceChild("left_pants",
+				CubeListBuilder.create().texOffs(0, 48).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 12.0F, 4.0F, outer), PartPose.ZERO);
+		GuestBody.addHeadParts(head);
+		return LayerDefinition.create(mesh, 64, 64);
+	}
+
 	@Override
 	public void setupAnim(TownsfolkRenderer.State state) {
 		super.setupAnim(state);
+		if (guestHead != null) {
+			// The guest a skin belongs to in any outfit (guest_<id> or guest_<id>_<outfit>); none over a player skin.
+			guestHead.setup(state.skin, state.playerSkin != null);
+		}
+		if (guestFlare != null) {
+			guestFlare.setup(state.skin, state.playerSkin != null, body, rightLeg, leftLeg);
+		}
+		if (rightWide != null && rightSlim != null && leftWide != null && leftSlim != null) {
+			// Set every frame: one model draws everyone (and every part's pose is reset before each frame's posing).
+			rightWide.visible = leftWide.visible = !state.slim;
+			rightSlim.visible = leftSlim.visible = state.slim;
+			if (state.slim) {
+				// Vanilla's slim arms: the item in the hand (ItemInHandLayer, from this arm's pose) no longer sits half a
+				// pixel out, and layers drawn on the arm sit on the slim arm, not half a pixel above it.
+				rightArm.x += SLIM_SHIFT;
+				leftArm.x -= SLIM_SHIFT;
+				rightArm.y += SLIM_SHIFT;
+				leftArm.y += SLIM_SHIFT;
+			}
+		}
 		if (state.activity == TownRoutine.Activity.NONE) {
 			return;
 		}

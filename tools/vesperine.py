@@ -56,6 +56,11 @@ CRESCENT = {"SPEED": 1.0}
 # Her loot, rolled for each participant (VesperineLoot): Reaper's Shade 3 to 6, and the chance of each of the rest.
 SHADE = (3, 6)
 CHANCES = {"vesper_scythe": 0.15, "dirge_skull": 0.5, "requiem_skull": 0.5, "reaper_hood": 0.2}
+# The Reaper armor set (tools/gear.py TIER_BOSSES; docs/features/armor-tier-sources.md): nothing else
+# gives it. Every share holds one of its pieces, each as likely; its arm rolls as a trophy does.
+SET_PIECES = ("reaper_helmet", "reaper_chestplate",
+              "reaper_leggings", "reaper_boots")
+CHANCES.update({"reaper_scythe": 0.15})
 EVENT_HOOD_CHANCE = 0.1   # one more chance at the hood during the Halloween event
 ADVANCEMENT = {"key": "the_last_harvest", "title": "The Last Harvest", "icon": "jugcraft:vesper_scythe",
                "description": "Bring down Vesperine, the Last Reaper, in the Hollow Acre", "frame": "challenge"}

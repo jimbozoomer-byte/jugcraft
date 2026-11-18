@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Choose which client game test classes a change needs, and share them out between CI's client jobs.
 
-The client game tests start a real game and photograph showrooms, distributed across sixteen CI jobs.
+The client game tests start a real game and photograph showrooms, distributed across twenty CI jobs.
 Most pull requests change a few blocks, so a pull request runs only the classes that
 show what it changed; main and a manual run of the Build workflow run them all (docs/TESTING.md).
 
@@ -33,6 +33,7 @@ Usage: select_client_tests.py [--base REV] [--head REV] [--all] [--shards N] [--
 Without --base, or with --all, every class runs. Prints a summary and one line per shard.
 """
 import argparse
+from functools import cache
 import json
 import pathlib
 import re
@@ -44,7 +45,8 @@ MOD_JSON = "src/gametest/resources/fabric.mod.json"
 TEST_DIR = ROOT / "src" / "gametest" / "java"
 CODE_DIRS = (ROOT / "src" / "main" / "java", ROOT / "src" / "client" / "java")
 
-# Rough seconds each class takes on a CI runner, to share them out evenly; others are estimated from their length.
+# Rough seconds each class takes on a CI runner, to share them out evenly; ordinary
+# classes use a startup allowance plus source length, and tree subclasses retain harness work.
 # Estimates from the client jobs' logs of October 2026, not measurements per class: with the biome tour at 600, its
 # job took 22 minutes and the others 15 and 14. Biome, Guns, Styx, Arms and ArmorTiers are measured, from run
 # 37980438983's logs (565, 261, 221, 125 and 123 s; their length put the last four at 13 to 28), after three of them in
@@ -53,7 +55,17 @@ CODE_DIRS = (ROOT / "src" / "main" / "java", ROOT / "src" / "client" / "java")
 # jobs one still reached 29:32 (run 37989465048); the client tests then shared four jobs. With 131 classes the
 # estimates passed 25 minutes a job (the Cinder Kiln's), so they now share five.
 WEIGHTS = {
-    "BiomeClientGameTests": 570,
+    # Run 41937102882: the expanded natural-world tour was still active at
+    # both 20 and 30 minutes; its 19-class job exhausted the one-hour limit.
+    # Give the tour its own process instead of combining it with more galleries.
+    "BiomeClientGameTests": 2200,
+
+    "MachineConsolidationClientGameTests": 720,
+    "StarterChemistryClientGameTests": 240,
+    "DryCountryTreeClientGameTests": 480,
+    "TropicalTreeClientGameTests": 480,
+    "HangingFruitClientGameTests": 300,
+    "OrchardWorldgenClientGameTests": 180,
     # Run 38936177915: gun assertions alone span 17:22:33–17:52:09 (~30 minutes),
     # before setup/teardown. The growing all-gun gallery no longer fits its old 260 s estimate.
     "GunsClientGameTests": 2000,
@@ -66,6 +78,10 @@ WEIGHTS = {
     "TownClientGameTests": 120,
     "GuideScreenshotGameTests": 120,
     "SeasonClientGameTests": 90,
+    # Climate generation creates/reopens real worlds and samples distant chunks; provisional estimates.
+    "ClimateBandsAuditClientGameTests": 480,
+    "ClimateDesignClientGameTests": 240,
+    "ClimateExportClientGameTests": 180,
     # Concordance Chunk B unit 4: about 25 shots at 2 s each and 200 ticks of the Yeti King's frost on the player, which
     # its length would put far lower (an estimate, not a measurement).
     "ConcordanceWinterClientGameTests": 120,
@@ -89,7 +105,10 @@ WEIGHTS = {
     # Concordance Chunk D unit 5 (D-09, D-S22): a dedicated server's start, a second client JVM's start and join (as
     # OwnerCollectionsNetworkTests does), and the stranger's steps at the holder's perch with three shots: an estimate,
     # not a measurement.
-    "ConcordancePactNetworkTests": 300,
+    # This suite starts another client JVM. Isolate its peak resource demand
+    # from the retained world/render state of a long mixed gallery process.
+    # This is resource headroom, not a measured 1,000-second runtime.
+    "ConcordancePactNetworkTests": 1000,
     # GC-10 unit 7
     # Concordance garden cohort, GC-10 unit 7 (GC-P142): a dedicated server's start, a second client JVM's start and join
     # (SecondClient), two thinks over two beds and three shots: an estimate, not a measurement.
@@ -146,6 +165,15 @@ WEIGHTS = {
     "PeepoHearthClientTests": 240,
     "PeepoWorkSessionClientTests": 240,
     "PeepoDeliveryClientTests": 240,
+    # PR #611, run 41884611786 shard 6: these completed worlds took ~876 s
+    # (nuclear) and ~585 s (stock), while length-based estimates were ~20 s.
+    # Keep all selected classes and the 60-minute job limit; spread the real work.
+    # Run 41919904118: two natural mineral-sand surveys occupied ~21 minutes
+    # (22:00-22:20), leaving its 25-class group at the one-hour limit during upload.
+    # Give this discovery suite its own shard, keeping every test and the 60m limit.
+    "MineralSandClientGameTests": 1500,
+    "NuclearClientGameTests": 1000,
+    "PeepoProductionStockClientTests": 660,
     "PeepoKitchenAnimationClientTests": 120,
     "PeepoGardenExpansionClientTests": 60,  # focused local runs: about 55 seconds
     "PeepoSuppliesClientTests": 60,
@@ -154,7 +182,28 @@ WEIGHTS = {
     "PeepoIntegrationClientTests": 300,
     "TransportCrateClientTests": 60,
     "TikiTorchClientTests": 30,
+    # Expanded-catalog CI run 41279398482: physical processor batches took five
+    # minutes, mineral-sand reopen checks thirteen, and independent clients need
+    # about three minutes just to initialize. Source length hid this workload.
+    "PeepoProcessorBatchClientTests": 420,
+    "MineralSandClientGameTests": 900,
+    "UndergroundDepositClientGameTests": 600,
+    "OwnerCollectionsNetworkTests": 360,
+    # Dedicated server plus a second client, then five rider/observer views. Estimate pending the combined local run.
+    "HorseBreedsNetworkTests": 600,
+    "HerobrineNetworkTests": 360,
+    "AlphaWerewolfClientGameTests": 300,
+    "CinderTyrantClientGameTests": 240,
+    # Run 41308506140 exhausted its hour while reaching the expanded gallery
+    # and regional tree survey. Source length understated both workloads.
+    "OwnerCollectionsClientGameTests": 900,
+    "TreeBatchSixClientGameTests": 600,
 }
+
+# Second JVMs, the gun gallery and the expanded biome tour need their own
+# host budget. Small local shard counts still retain every class.
+ISOLATED_CLIENTS = {"OwnerCollectionsNetworkTests", "HerobrineNetworkTests", "ConcordancePactNetworkTests",
+                    "GunsClientGameTests", "BiomeClientGameTests", "ConcordanceGardenNetworkTests", "HorseBreedsNetworkTests", "MineralSandClientGameTests"}
 # Classes a client test shows without naming them (registered by another class, or reached through an optional
 # integration), by the classes that show them: Stolas's renderer (his glowmask layer, scale, culling and departure) and
 # his perch's and anchor's Jade provider (the unit review, D2), and since the garden cohort, the pact spirits' renderer table
@@ -417,14 +466,25 @@ def select(changed, tests, newly_listed, base=None, head=None):
 
 def share(classes, tests, shards):
     """Longest first, then swap small classes to reduce any remaining imbalance."""
+    @cache
     def weight(name):
         if name in WEIGHTS:
             return WEIGHTS[name]
         path = tests[name]["source"]
-        return 8 + (len(path.read_text(encoding="utf-8").splitlines()) // 15 if path.is_file() else 0)
+        source = path.read_text(encoding="utf-8") if path.is_file() else ""
+        # Short subclasses still run the entire natural-world tree harness,
+        # including regional generation, inspection and save/reopen validation.
+        if name == "TreeBatchTwoClientGameTests" or re.search(
+                r"\bclass\s+\w+\s+extends\s+TreeBatchTwoClientGameTests\b", strip_comments(source)):
+            return 300
+        return 30 + len(source.splitlines()) // 15
 
-    jobs = [[0, []] for _ in range(shards)]
-    for name in sorted(classes, key=lambda n: (-weight(n), n)):
+    isolated = sorted(set(classes) & ISOLATED_CLIENTS)
+    if shards <= len(isolated):
+        isolated = []
+    reserved = [[weight(name), [name]] for name in isolated]
+    jobs = [[0, []] for _ in range(shards - len(reserved))]
+    for name in sorted(set(classes) - set(isolated), key=lambda n: (-weight(n), n)):
         job = min(jobs, key=lambda j: j[0])
         job[0] += weight(name)
         job[1].append(name)
@@ -444,7 +504,7 @@ def share(classes, tests, shards):
         heavy[1][heavy[1].index(a)], light[1][light[1].index(b)] = b, a
         heavy[0] -= delta
         light[0] += delta
-    return jobs
+    return jobs + reserved
 
 
 def listed_at(rev):
@@ -459,7 +519,7 @@ def main():
     parser.add_argument("--base", help="compare against this revision (a pull request's base)")
     parser.add_argument("--head", default="HEAD")
     parser.add_argument("--all", action="store_true", help="run every class")
-    parser.add_argument("--shards", type=int, default=16)
+    parser.add_argument("--shards", type=int, default=24)
     parser.add_argument("--github-output", help="append shard0..shardN-1 (comma-separated classes) to this file")
     args = parser.parse_args()
 

@@ -160,6 +160,10 @@ public final class PetroItems {
 	public static Item ABRASIVE_HEAD;
 	public static Item POLISHING_HEAD;
 
+	// Simplified regional mineral-sand processing; no extra machines or fluids.
+	public static Item NEODYMIUM_OXIDE, CERIUM_OXIDE, YTTRIUM_OXIDE, GARNET_GRIT;
+	public static Item CERIUM_POLISHING_HEAD, GARNET_ABRASIVE_HEAD, GARNET_SANDING_BLOCK;
+
 	// Chemical and structural alloy components, owner package 2.
 	public static Item CHROMITE_CONCENTRATE;
 	public static Item STAINLESS_FITTING;
@@ -212,6 +216,9 @@ public final class PetroItems {
 	public static Item STORABLE_BIPROPELLANT_MOTOR;
 	public static Item PROPELLANT_RESIDUE;
 	public static Item MMH_TANK;
+	public static Item OLD_PLASTIC_BOTTLE;
+	public static Item PLASTIC_DUCK;
+	public static Item OLD_PLASTIC_CRATE;
 	public static Item COBALT_CONCENTRATE;
 	public static Item COBALT_INGOT;
 	public static Item COBALT_CATALYST_BED;
@@ -355,6 +362,13 @@ public final class PetroItems {
 		POLISHED_LENS = JugcraftRegistry.item("polished_lens");
 		ABRASIVE_HEAD = JugcraftRegistry.item("abrasive_head", properties -> new Item(properties.stacksTo(1)));
 		POLISHING_HEAD = JugcraftRegistry.item("polishing_head", properties -> new Item(properties.stacksTo(1)));
+		NEODYMIUM_OXIDE = JugcraftRegistry.item("neodymium_oxide");
+		CERIUM_OXIDE = JugcraftRegistry.item("cerium_oxide");
+		YTTRIUM_OXIDE = JugcraftRegistry.item("yttrium_oxide");
+		GARNET_GRIT = JugcraftRegistry.item("garnet_grit");
+		CERIUM_POLISHING_HEAD = JugcraftRegistry.item("cerium_polishing_head", properties -> new Item(properties.stacksTo(1)));
+		GARNET_ABRASIVE_HEAD = JugcraftRegistry.item("garnet_abrasive_head", properties -> new Item(properties.stacksTo(1)));
+		GARNET_SANDING_BLOCK = JugcraftRegistry.item("garnet_sanding_block", properties -> new Item(properties.stacksTo(1)));
 
 		CHROMITE_CONCENTRATE = JugcraftRegistry.item("chromite_concentrate");
 		STAINLESS_FITTING = JugcraftRegistry.item("stainless_fitting");
@@ -422,6 +436,11 @@ public final class PetroItems {
 		PROPELLANT_RESIDUE = JugcraftRegistry.item("propellant_residue", DescribedItem::new);
 		// MMH (docs/features/cola-and-mmh.md): the storable bipropellant's second fuel.
 		MMH_TANK = JugcraftRegistry.item("mmh_tank", DescribedItem::new);
+		// Found plastic (docs/features/found-plastic.md): chest loot only, broken down by hand into plastic pellets.
+		OLD_PLASTIC_BOTTLE = JugcraftRegistry.item("old_plastic_bottle", DescribedItem::new);
+		PLASTIC_DUCK = JugcraftRegistry.item("plastic_duck", DescribedItem::new);
+		OLD_PLASTIC_CRATE = JugcraftRegistry.item("old_plastic_crate", DescribedItem::new);
+		FoundPlastic.register();
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> {
 			output.accept(HIGH_PURITY_SILICON);
@@ -518,6 +537,13 @@ public final class PetroItems {
 			output.accept(POLISHED_LENS);
 			output.accept(ABRASIVE_HEAD);
 			output.accept(POLISHING_HEAD);
+			output.accept(NEODYMIUM_OXIDE);
+			output.accept(CERIUM_OXIDE);
+			output.accept(YTTRIUM_OXIDE);
+			output.accept(GARNET_GRIT);
+			output.accept(CERIUM_POLISHING_HEAD);
+			output.accept(GARNET_ABRASIVE_HEAD);
+			output.accept(GARNET_SANDING_BLOCK);
 
 			output.accept(FLUORITE_CONCENTRATE);
 			output.accept(CALCIUM_SULFATE);
@@ -600,6 +626,9 @@ public final class PetroItems {
 			output.accept(RUTHENIUM_POWDER);
 			output.accept(RUTHENIUM_CATALYST_BED);
 			output.accept(VANADIUM_CONTACT_BED);
+			output.accept(OLD_PLASTIC_BOTTLE);
+			output.accept(PLASTIC_DUCK);
+			output.accept(OLD_PLASTIC_CRATE);
 		});
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> output.accept(COLA));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.COMBAT).register(output -> {

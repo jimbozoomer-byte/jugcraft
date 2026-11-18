@@ -103,8 +103,13 @@ def write(path, obj):
     if path.is_relative_to(RES):
         WRITTEN_RESOURCES.add(path.relative_to(RES).as_posix())
     if isinstance(obj, dict) and obj.get("elements") and "models" in path.parts:
+        import newest_original_art
         if any(path.stem == name or path.stem.startswith(name + "_") for name in NUCLEAR_CLOSED_MODELS):
             model_writer.finish_closed(obj["elements"])
+        elif newest_original_art.intentional_reversed_elements(path, obj["elements"]):
+            # The NEWEST collection's authored two-sided shells (paper lanterns, lunch baskets, the whirlwind ring, the
+            # upside-down potato) keep the supplied geometry exactly, reversed boxes and all, as the art check expects.
+            pass
         else:
             model_writer.finish_elements(obj["elements"])
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -198,12 +203,18 @@ def assets():
     arms.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import arms_variants
     arms_variants.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import thanksgiving_weapons  # Thanksgiving weapons (docs/features/thanksgiving-weapons.md): models, item definitions, recipes, lang
+    thanksgiving_weapons.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import hot_spring_furniture
+    hot_spring_furniture.write_all(write, ASSETS, DATA / MOD, lang)
     import arms_motion
     arms_motion.write_all(write, ASSETS)
     import grapple
     grapple.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import field_chemistry
     field_chemistry.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import pharmacology
+    pharmacology.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import construction
     construction.write_all(write, ASSETS, DATA / MOD, lang, condition, self_drop)
     import electroplating
@@ -249,6 +260,8 @@ def assets():
     raiders.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import zeppelin
     zeppelin.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import pirate_ship
+    pirate_ship.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import mech
     mech.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import landship
@@ -322,13 +335,22 @@ def assets():
     cursed_mirror.write_all(write, ASSETS, DATA / MOD, lang, self_drop)
     import chima_data
     chima_data.write_all(write, RES, lang)
+    import pegasus_data
+    pegasus_data.write_all(write, RES, lang)
+    import winter_trimmings
+    lang.update(winter_trimmings.LANGUAGE)
+    import winter_market_counters
+    winter_market_counters.generate()
+    lang.update(winter_market_counters.LANGUAGE)
+    import horse_breeds_data
+    horse_breeds_data.write_all(write, RES, lang)
     import vanilla_logs
     vanilla_logs.write_all(write, ASSETS)
     write(ASSETS / "lang" / "en_us.json", dict(sorted(lang.items())))
 
 
 def seasons_assets(lang):
-    """Seasonal snow: vanilla snow layers' models (layers 1-7, then a full block), its name and its drops."""
+    """Seasonal snow: vanilla snow layers' models (layers 1-7, then a full block), its name and its drops; Beardshy's lines."""
     import seasons
     block = seasons.SNOW_BLOCK
     models = {layers: f"minecraft:block/snow_height{layers * 2}" for layers in range(1, 8)}
@@ -336,6 +358,10 @@ def seasons_assets(lang):
     write(ASSETS / "blockstates" / f"{block}.json",
           {"variants": {f"layers={layers}": {"model": model} for layers, model in models.items()}})
     lang[f"block.{MOD}.{block}"] = seasons.SNOW_DISPLAY
+    # Beardshy, the Harvest Feast's shy antagonist (tools/beardshy.py, Beardshy.java).
+    import beardshy
+    beardshy.lang(lang)
+    beardshy.egg_assets(write, ASSETS)
     # Broken by a player or mob, a snowball per layer, like vanilla snow layers (never the block itself).
     write(DATA / MOD / "loot_table" / "blocks" / f"{block}.json", {"type": "minecraft:block", "pools": [{
         "condition": {"type": "minecraft:entity_properties", "entity": "this", "predicate": {}},
@@ -1323,6 +1349,10 @@ def recipes():
         recipe = shaped(MACHINE_FEATURE, pattern, key, result, count)
         recipe["fabric:load_conditions"] = condition(MACHINE_FEATURE) + condition("crude_oil")
         write(out / f"{name}.json", recipe)
+    # The unprepared starter circuit is also craftable before building an assembler.
+    starter_circuit = shapeless(MACHINE_FEATURE, [rid("silicon"), "#c:ingots/copper", "#c:ingots/tin"], "basic_circuit", 1)
+    starter_circuit["fabric:load_conditions"] = condition(MACHINE_FEATURE) + condition("silicon") + condition("tin")
+    write(out / "basic_circuit.json", starter_circuit)
     machine_recipe_files(out)
     import petro
     for kind, name, data in petro.fluid_recipe_files(condition):
@@ -1572,6 +1602,12 @@ def tags():
     for block in machine_blocks():
         if block not in CROPS:
             tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+    # Industrial forms inherit the furnace's correct-tool requirement too.
+    import industrial_forms
+    for block in industrial_forms.FORMS:
+        tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+    import hot_spring_furniture
+    hot_spring_furniture.mining_tags(tags)
     # Crops grow on farmland, take bone meal and fertilizer, and keep the farmland under them.
     for crop, info in CROPS.items():
         tags.add("block", "minecraft:crops", rid(crop))
@@ -1599,8 +1635,20 @@ def tags():
     for block in town_assets.blocks():
         tool = "axe" if block == "town_commission_board" else "pickaxe"
         tags.add("block", f"minecraft:mineable/{tool}", rid(block))
+    from deepstead_wares import BLOCKS as guild_furnishings
+    for block in guild_furnishings:
+        tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+    import deepstead_shop_goods as guild
+    for block in guild.FURNISHINGS:
+        tool = "axe" if block in guild.WOOD else "pickaxe"
+        tags.add("block", f"minecraft:mineable/{tool}", rid(block))
     for value in town_assets.USABLE:
         tags.add("block", "jugcraft:town_usable", value)
+    for tool, blocks in (("shovel", ("wind_carved_snowdrift", "shovelled_snow_pile")),
+                         ("pickaxe", ("eave_icicle_fringe", "peppermint_lane_lamp", "peppermint_boulevard_lamp")),
+                         ("axe", ("harbour_gift_fir",))):
+        for block in blocks:
+            tags.add("block", f"minecraft:mineable/{tool}", rid(block))
     tags.add("block", "minecraft:mineable/axe", rid(ph.CABINET))
     for tag in ph.BIOME_TAGS:
         tags.add("worldgen/biome", tag, rid("pixel_hollows"))
@@ -1671,6 +1719,12 @@ def tags():
     for crop in tags.entries[("item", f"{MOD}:fermentable")]:
         if crop not in {rid("lemon"), rid("orange")}:
             tags.add("item", f"{MOD}:compact_fermentable", crop)
+    import pharmacology
+    tags.add("block", "minecraft:mineable/pickaxe", rid("dream_study_plinth"))
+    for crop in pharmacology.blocks():
+        if crop.endswith('_crop'):
+            tags.add("block", "minecraft:crops", rid(crop))
+            tags.add("block", "minecraft:maintains_farmland", rid(crop))
     tags.write()
 
 
@@ -1918,6 +1972,8 @@ def main():
         write(instrument_tag, json.loads(instrument_tag.read_text(encoding='utf-8')))
     language = json.loads((ASSETS / "lang/en_us.json").read_text(encoding="utf-8"))
     language.update(spellbook_language)
+    import powered_equipment
+    language.update(powered_equipment.LANG)
     write(ASSETS / "lang/en_us.json", language)
     # Imported walls/fences are generated after the shared pass and need the same connections.
     import diagonal_connections
@@ -1925,10 +1981,52 @@ def main():
     import walnut_data
     walnut_data.reconcile(write)
     import newest_building
-    newest_building.generate(write)
+    def write_imported_building(path, data):
+        # Keep supplied meshes intact until their bounded finishing passes.
+        if path.is_relative_to(RES):
+            WRITTEN_RESOURCES.add(path.relative_to(RES).as_posix())
+        newest_building.write(path, data)
+    newest_building.generate(write_imported_building)
+    import newest_ribbits
+    newest_ribbits.import_data_resources(writer=write)
+    import newest_supplementaries
+    newest_supplementaries.write_native_recipes(write)
+    import newest_acquisition_recipes
+    newest_acquisition_recipes.main(writer=write)
+    import acquisition_repairs
+    acquisition_repairs.generate(write)
     diagonal_connections.write_all(write, ASSETS, RES / "assets/minecraft")
+    import newest_model_finishing
+    newest_model_finishing.generate(write)
+    import board_game_data
+    board_game_data.generate(write)
+    import thanksgiving_data
+    thanksgiving_data.generate(write)
+    import food_servings
+    def write_food_serving(path, data):
+        # Food geometry already uses the closed-mesh finish and rests at y=0.
+        WRITTEN_RESOURCES.add(path.relative_to(RES).as_posix())
+        food_servings.write(path, data)
+    food_servings.generate(write_food_serving)
+    import authored_resource_reconciliation
+    authored_resource_reconciliation.apply(write)
+    import newest_model_finishing
+    newest_model_finishing.generate(write)
     import model_atlas
-    model_atlas.generate(write)
+    model_atlas.generate(write, retain=lambda path: WRITTEN_RESOURCES.add(path.relative_to(RES).as_posix()))
+    # Keep native player grips after both authored and owner-library model writers.
+    import held_equipment
+    held_equipment.generate()
+    # Separately authored importers also contribute to these shared resources;
+    # preserve their enumerated additions after the final tag and atlas writers.
+    owner_resource_patches.apply(phase='final')
+    # Finished pharmacy maps own only their named items after the final shared model passes.
+    import pharmacy_item_art
+    pharmacy_item_art.write_all(write, ASSETS)
+
+    # Resolve duplicate display names after every resource writer.
+    import display_names
+    display_names.apply(write, ASSETS)
     from generated_resource_cleanup import prune
     prune(RES, previous, WRITTEN_RESOURCES)
     # Include finished server recipes after removing obsolete generated recipes.

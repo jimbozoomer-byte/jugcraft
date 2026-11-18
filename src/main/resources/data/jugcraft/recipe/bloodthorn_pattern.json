@@ -1,0 +1,24 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "FRF",
+    "RPR",
+    "FRF"
+  ],
+  "key": {
+    "F": "minecraft:crimson_fungus",
+    "R": "minecraft:redstone",
+    "P": "minecraft:paper"
+  },
+  "result": {
+    "id": "jugcraft:bloodthorn_pattern",
+    "count": 4
+  }
+}

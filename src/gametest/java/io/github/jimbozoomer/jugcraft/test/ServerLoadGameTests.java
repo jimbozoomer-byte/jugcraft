@@ -40,6 +40,10 @@ import net.minecraft.world.level.block.state.BlockState;
  * the whole load, on top of the ticks the server gives it anyway. The times are a CI runner's, shared with every other
  * test running at once: an indication, not a profile. The bounds asserted are a whole server tick (50 ms) for each load's
  * round, there to catch a change that makes the work grow, not to time the runner.
+ * <p>
+ * {@link #workloadBenchmark} is the opt-in measurement ({@link WorkloadBenchmark}): with the system property
+ * {@value WorkloadBenchmark#PROPERTY} set it measures a factory, a crowd and a raid-like fight over real server ticks,
+ * with their heap and allocation; in every other run it passes at once.
  */
 public class ServerLoadGameTests {
 	public static final int MACHINES_PER_KIND = 16;
@@ -49,11 +53,49 @@ public class ServerLoadGameTests {
 	/** A whole server tick, in microseconds: the budget for one round of each load. */
 	private static final long TICK_MICROS = 50_000;
 
-	private record Fed(MachineKind kind, Item input) {
+	/** A machine kind and something it works. */
+	record Fed(MachineKind kind, Item input) {
 	}
 
-	private static Item item(String path) {
+	static Item item(String path) {
 		return BuiltInRegistries.ITEM.getValue(Jugcraft.id(path));
+	}
+
+	/** The factory's five working machine kinds, each with what it is fed (shared with the workload benchmark). */
+	static List<Fed> factoryKinds() {
+		return List.of(new Fed(MachineKind.ELECTRIC_FURNACE, Items.RAW_IRON), new Fed(MachineKind.CRUSHER, item("tin_ore")),
+				new Fed(MachineKind.PULVERIZER, item("tin_ore")), new Fed(MachineKind.SAWMILL, Items.OAK_LOG),
+				new Fed(MachineKind.SIEVE, Items.GRAVEL));
+	}
+
+	/** The crowd's four costumed villains (shared with the workload benchmark). */
+	static List<EntityType<? extends Mob>> villains() {
+		return List.of(ScaryMod.SPACE_KOOK, ScaryMod.CAPTAIN_CUTLER, ScaryMod.PHANTOM_SHADOW, ScaryMod.BLACK_KNIGHT);
+	}
+
+	/**
+	 * The opt-in workload benchmark (docs/features/server-load-benchmark.md, "Opt-in workload benchmark"): a baseline, a
+	 * factory, a crowd and a raid-like fight, each warmed up and then sampled over real server ticks, in a batch of its
+	 * own. Without {@value WorkloadBenchmark#PROPERTY} it passes at once, so ordinary runs are not lengthened.
+	 */
+	@GameTest(structure = "jugcraft-test:tatterlace_arena", maxTicks = WorkloadBenchmark.MAX_TICKS, skyAccess = true,
+			environment = WorkloadBenchmark.ENVIRONMENT)
+	public void workloadBenchmark(GameTestHelper helper) {
+		if (WorkloadBenchmark.selected().isEmpty()) {
+			helper.succeed();
+			return;
+		}
+		new WorkloadBenchmark(helper).begin();
+	}
+
+	/** The benchmarks' statistics (nearest-rank percentiles, means, the JSON they write) on runs with known answers. */
+	@GameTest
+	public void benchmarkArithmetic(GameTestHelper helper) {
+		List<String> wrong = BenchmarkStats.check();
+		helper.assertTrue(wrong.isEmpty(), "The benchmark arithmetic is right: " + wrong);
+		helper.assertTrue(BenchmarkStats.of(new long[] {60_000_000L, 1_000_000L}, BenchmarkStats.TICK_NANOS).over() == 1,
+				"A sample over a whole tick is counted");
+		helper.succeed();
 	}
 
 	@GameTest(structure = "jugcraft-test:tatterlace_arena", maxTicks = 100)
@@ -66,9 +108,7 @@ public class ServerLoadGameTests {
 		}
 
 		// The factory: five rows of machines, each charged full and fed a stack of something it works.
-		List<Fed> kinds = List.of(new Fed(MachineKind.ELECTRIC_FURNACE, Items.RAW_IRON), new Fed(MachineKind.CRUSHER, item("tin_ore")),
-				new Fed(MachineKind.PULVERIZER, item("tin_ore")), new Fed(MachineKind.SAWMILL, Items.OAK_LOG),
-				new Fed(MachineKind.SIEVE, Items.GRAVEL));
+		List<Fed> kinds = factoryKinds();
 		List<BlockPos> machines = new ArrayList<>();
 		for (int row = 0; row < kinds.size(); row++) {
 			Fed fed = kinds.get(row);
@@ -89,8 +129,7 @@ public class ServerLoadGameTests {
 		}
 
 		// The crowd: the four costumed villains, in a pen at the far end, thinking and moving.
-		List<EntityType<? extends Mob>> villains = List.of(ScaryMod.SPACE_KOOK, ScaryMod.CAPTAIN_CUTLER, ScaryMod.PHANTOM_SHADOW,
-				ScaryMod.BLACK_KNIGHT);
+		List<EntityType<? extends Mob>> villains = villains();
 		List<Runnable> crowd = new ArrayList<>();
 		for (int kind = 0; kind < villains.size(); kind++) {
 			for (int i = 0; i < MOBS_PER_KIND; i++) {

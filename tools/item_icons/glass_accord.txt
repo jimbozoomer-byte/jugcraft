@@ -1,0 +1,20 @@
+# Glass Accord: a disc of leaded glass in a gold rim, a spyglass's amethyst lens set in its middle where the lead lines
+# cross. Lit from the top left; the panes shade toward the bottom right. Flat, face on.
+# materials: main=tech_glass second=gold stone=amethyst
+# family: compact
+................
+.....gggggg.....
+...ggYYFFFFgg...
+..gYYHHLLMMFfg..
+..gYHHLDLMMMfg..
+.gYHLLLDMMMMMfg.
+.gYLDDDaaDDDMfg.
+.gFLLLaAAaMMMfg.
+.gFMMMaAaaMMDfg.
+.gFMDDDaaDDDDfg.
+.gfMMMMDMMMMDfg.
+..gfMMMDMMMDfg..
+..gfDMMDMMDDfg..
+...ggffffffgg...
+.....gggggg.....
+................

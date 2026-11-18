@@ -1,0 +1,21 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "#minecraft:logs",
+    "minecraft:bowl",
+    "minecraft:bowl",
+    "jugcraft:corn",
+    "jugcraft:cranberries"
+  ],
+  "result": {
+    "id": "jugcraft:carved_bowls_and_spoons",
+    "count": 1
+  }
+}

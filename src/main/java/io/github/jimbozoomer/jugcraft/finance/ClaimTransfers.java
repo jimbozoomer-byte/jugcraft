@@ -10,6 +10,8 @@ public final class ClaimTransfers {
         return !io.github.jimbozoomer.jugcraft.jimtafacts.network.SpatialReservation.reserved(level,from)
                 &&!io.github.jimbozoomer.jugcraft.jimtafacts.network.SpatialReservation.reserved(level,to)
                 &&level.hasChunkAt(from) && level.hasChunkAt(to) && !LandRegistry.crossesBoundary(level, from, to)
+                &&!io.github.jimbozoomer.jugcraft.town.ApartmentRentals.privateFixture(level,from)
+                &&!io.github.jimbozoomer.jugcraft.town.ApartmentRentals.privateFixture(level,to)
                 && intactEndpoint(level, from) && intactEndpoint(level, to);
     }
     private static boolean intactEndpoint(Level level, BlockPos pos) {

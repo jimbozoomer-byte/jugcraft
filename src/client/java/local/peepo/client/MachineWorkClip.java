@@ -36,15 +36,17 @@ final class MachineWorkClip {
         float lift=smooth(Mth.clamp((t-.14F)/.46F,0,1));
         float gather=smooth(Math.min(1,t/.14F))*(1-lift);
         float strike=smooth(Mth.clamp((t-.60F)/.31F,0,1));
-        float settle=smooth(Mth.clamp((t-.91F)/.09F,0,1));
         float follow=smooth(Mth.clamp((t-.65F)/.33F,0,1));
         float windup=lift*(1-strike);
         x=windup*.12F;zRot=0;
         // Gather low, sweep above the brow, then strike without a frozen pose at the top.
-        xRot=Mth.lerp(strike,Mth.lerp(lift,.65F+gather*.20F,-.65F),2.30F-settle*.10F);
-        // After impact, ease the handle back around the planted blade rather than through the soil.
-        float contactY=groundY+HOE_REACH*Mth.cos(xRot);
-        float contactZ=cropZ+HOE_REACH*Mth.sin(xRot);
+        float contactPitch=2.05F;
+        xRot=Mth.lerp(strike,Mth.lerp(lift,.65F+gather*.20F,-.65F),contactPitch);
+        // Lower both hands toward one fixed landing grip. A moving angular target made them
+        // dip below that grip then rise while the hoe flipped around them at the end.
+        // Hold the blade and grip after contact; only the torso finishes settling.
+        float contactY=groundY+HOE_REACH*Mth.cos(contactPitch);
+        float contactZ=cropZ+HOE_REACH*Mth.sin(contactPitch);
         y=Mth.lerp(strike,19.4F+gather*.40F-lift*4.0F,contactY);
         z=Mth.lerp(strike,-3.4F-lift*.8F,contactZ);
         // Weight and shoulders follow the hands a little later, giving the downstroke some heft.

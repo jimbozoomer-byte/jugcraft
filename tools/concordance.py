@@ -237,7 +237,7 @@ RESEARCH = {
         },
         "unlocks": {"understood": {"invocations": [f"{MOD}:kindle", f"{MOD}:aegis", f"{MOD}:revelation"],
                                    "workings": [f"{MOD}:kindle_lantern", f"{MOD}:infuse_lantern",
-                                                f"{MOD}:channel_lantern"]},
+                                                f"{MOD}:channel_lantern", f"{MOD}:glass_accord"]},
                     "mastered": {"invocations": [f"{MOD}:lance", f"{MOD}:flashstep", f"{MOD}:lanternward"]}},
     },
 }
@@ -341,6 +341,10 @@ WORKINGS = {
                        "result": f"{MOD}:kindled_lantern", "radiance": LANTERN_START},
     "infuse_lantern": {"type": "infuse", "work": f"{MOD}:kindled_lantern", "specimens": SPECIMENS},
     "channel_lantern": {"type": "channel", "work": f"{MOD}:kindled_lantern", "conversion": f"{MOD}:focus_to_radiance"},
+    # The Glass Chapel's summoning (docs/features/glass-chapel.md), cheaper here than at a crafting table (tools/lairs.py
+    # RECIPES glass_accord): a spyglass's lens and a block of glass, bound with Radiance instead of gold and amethyst.
+    "glass_accord": {"type": "craft", "work": "minecraft:spyglass", "specimen": "minecraft:glass",
+                     "result": f"{MOD}:glass_accord", "radiance": 8},
 }
 
 # Explicit conversions between resource types (Java: resource/Conversion, ConversionTable). Nothing converts without
@@ -371,7 +375,8 @@ EFFECT_KINDS = {
 # Creatures that harmful control (pushes and statuses) does not move or slow, and those it reaches at half strength.
 EFFECT_IMMUNE = ["minecraft:ender_dragon", "minecraft:wither", "minecraft:warden", "minecraft:elder_guardian"]
 EFFECT_RESISTANT = ["minecraft:iron_golem", "minecraft:ravager", "minecraft:piglin_brute",
-                    f"{MOD}:yeti_king", f"{MOD}:cinder_tyrant"]  # B-P8: only these two lair keepers
+                    f"{MOD}:yeti_king", f"{MOD}:cinder_tyrant",  # B-P8: only these two of the first six lair keepers
+                    f"{MOD}:glass_abbot"]  # his own plan (docs/branches/BOSSES.md, "The Glass Abbot: the plan")
 # Blocks an interaction effect may use as a player would, and plants a harvesting effect may gather (besides ripe
 # crops, which are always gathered and replanted).
 # Vanilla tags are optional entries, so a renamed tag in a later version empties the entry instead of breaking the list.
@@ -789,7 +794,7 @@ def operation_summary(op):
         return f"{STATUS_NAMES.get(op['status'], op['status'])} for {seconds(op['duration'])} seconds"
     if effect == "alteration":
         if op.get("school") == ember.COMPONENTS["kindling"]["operation"]["school"]:
-            return "kindles a hearth"
+            return "kindles a hearth, or tempers an Alembic Crucible"
         if op.get("school") == rime.COMPONENTS[rime.PRESERVE_WORD]["operation"]["school"]:
             return (f"holds an Alembic Crucible's heat in its band for {seconds(rime.PRESERVE_HOLD_TICKS)} seconds (longer with "
                     "a focus of water)")
@@ -822,7 +827,7 @@ def invocation_codex():
     positions = {("first_light", "understood"): [(2, 0), (2, 2), (0, 2)],
                  ("first_light", "mastered"): [(4, 0), (4, 2), (4, 4)],
                  ("hearthbinding", "understood"): [(0, 6), (2, 6), (4, 6)], ("hearthbinding", "mastered"): [(6, 6)],
-                 ("rimekeeping", "understood"): [(0, 8), (2, 8)], ("stratawrighting", "understood"): [(0, 10)]}
+                 ("rimekeeping", "understood"): [(0, 8), (2, 8), (4, 8)], ("stratawrighting", "understood"): [(0, 10)]}
     for key, info in INVOCATIONS.items():
         research = info["research"].split(":")[1]
         teacher = RESEARCH[research]["name"]
@@ -1672,11 +1677,11 @@ SCREEN_TEXT = {
     "bench.charge": "Radiance: %s / %s",
     "bench.help": "Hover a button to see what it needs",
     "focus.hud": "Focus %s/%s",
-    "config.title": "Jugcraft: Arcane Concordance",
+    "config.title": "Jugcraft display settings",
     "config.hud": "Show the Focus bar",
     "config.hud.tooltip": "Shows your Focus above the hotbar while you hold a Concordance instrument",
     "config.reduced_motion": "Reduced motion",
-    "config.reduced_motion.tooltip": "Fewer and calmer particles from Kindled light and the bench",
+    "config.reduced_motion.tooltip": "Calmer Concordance particles and interfaces; disables drug visual sway",
 }
 
 TOOLTIPS = {
@@ -1856,7 +1861,7 @@ def lang_entries(lang):
     # JEI's bench category (client/compat/JugcraftJeiPlugin): what a working leaves in the lantern.
     lang[f"jei.{MOD}.concordance.craft"] = "Kindled with %s Radiance; needs First Light"
     lang[f"jei.{MOD}.concordance.infuse"] = "+%s Radiance; needs First Light"
-    lang[f"key.{MOD}.concordance_config"] = "Concordance settings"
+    lang[f"key.{MOD}.concordance_config"] = "Jugcraft display settings"
 
 
 def bench_model():

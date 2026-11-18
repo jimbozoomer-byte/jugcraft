@@ -227,7 +227,7 @@ public class IndustrialFermenterGameTests {
 	}
 
 	/**
-	 * The Fermenter runs exactly its one capability recipe, and the Chemical Reactor never runs it. Its construction: 4
+	 * The Fermenter runs its six capability recipes; the Chemical Reactor cannot collect their fermentation gas. Its construction: 4
 	 * steel plates, glass, a Steel Tank, an electric motor, a basic circuit and a Machine Casing.
 	 */
 	@GameTest(structure = ARENA)
@@ -235,8 +235,15 @@ public class IndustrialFermenterGameTests {
 		ServerLevel level = helper.getLevel();
 		FormMachineBlockEntity machine = place(helper, new BlockPos(6, 1, 2), Direction.NORTH);
 		List<FluidRecipes.Entry> own = machine.recipes(level.getServer());
-		helper.assertTrue(own.size() == 4 && own.stream().map(FluidRecipes.Entry::id).collect(java.util.stream.Collectors.toSet()).equals(java.util.Set.of(Jugcraft.id("chemical_reaction/fermenter_bioethanol"), Jugcraft.id("chemical_reaction/ferment_crop_mash"), Jugcraft.id("jimtafacts_crops/ferment_hops"), Jugcraft.id("jimtafacts_production/ferment_biochaff"))) && own.get(0).id().equals(Jugcraft.id("chemical_reaction/fermenter_bioethanol"))
-				&& own.get(0).recipe().time() == TICKS, "Original fermentation remains first beside the expanded mash route: " + own.stream().map(FluidRecipes.Entry::id).toList());
+		var expected = java.util.Set.of(Jugcraft.id("chemical_reaction/fermenter_bioethanol"),
+				Jugcraft.id("chemical_reaction/ferment_crop_mash"), Jugcraft.id("jimtafacts_crops/ferment_hops"),
+				Jugcraft.id("jimtafacts_production/ferment_biochaff"), Jugcraft.id("chemical_reaction/beverage_wash"),
+				Jugcraft.id("chemical_reaction/sterile_azure_culture"));
+		helper.assertTrue(own.size() == expected.size()
+				&& own.stream().map(FluidRecipes.Entry::id).collect(java.util.stream.Collectors.toSet()).equals(expected),
+				"All six fermentation routes remain available: " + own.stream().map(FluidRecipes.Entry::id).toList());
+		helper.assertTrue(own.stream().filter(entry -> entry.id().equals(Jugcraft.id("chemical_reaction/fermenter_bioethanol")))
+				.findFirst().orElseThrow().recipe().time() == TICKS, "Original bioethanol processing time is preserved");
 		// The reactor ferments crops into bioethanol without collecting the gas; collecting it is the Fermenter's. (Other
 		// reactor recipes may give carbon dioxide from minerals, such as cement and calcite.)
 		long reactor = FluidRecipes.recipes(level.getServer(), MachineKind.CHEMICAL_REACTOR).stream()

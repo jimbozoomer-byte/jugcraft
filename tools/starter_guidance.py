@@ -83,7 +83,11 @@ LESSONS = {
  topic("Ivo Brook - Curios", ["Ask Ivo about the Scale, transmutation, essence and useful magical gear. No free valuables or mentor rewards are added."], links=[link("Ivo's alchemy lesson", "alchemy_start")]),
  topic("Osric Finch - Town Hall", ["Speak to the mayor for this directory. Academy instructors retain their existing lessons; sneak-interact with the Radiance instructor for the shared magic starting guide."], links=[route("Technology reference", "technology"), route("Magic reference", "magic")])]
 }
-def generate(write): write(PATH, LESSONS)
+def generate(write):
+    write(PATH, LESSONS)
+    # The Encyclopedia's route maps share these lessons' loader path and are written beside them.
+    import encyclopedia_progression
+    encyclopedia_progression.generate(write)
 if __name__ == "__main__":
     PATH.parent.mkdir(parents=True,exist_ok=True)
     PATH.write_text(json.dumps(LESSONS,indent=2)+"\n",encoding="utf-8")

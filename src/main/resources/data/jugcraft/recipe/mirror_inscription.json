@@ -1,0 +1,18 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jugcraft:glass_reliquary",
+    "minecraft:amethyst_shard"
+  ],
+  "result": {
+    "id": "jugcraft:mirror_inscription",
+    "count": 1
+  }
+}

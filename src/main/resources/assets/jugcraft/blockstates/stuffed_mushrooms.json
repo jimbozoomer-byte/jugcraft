@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jugcraft:block/stuffed_mushrooms",
+      "y": 180
+    },
+    "facing=east": {
+      "model": "jugcraft:block/stuffed_mushrooms",
+      "y": 270
+    },
+    "facing=south": {
+      "model": "jugcraft:block/stuffed_mushrooms"
+    },
+    "facing=west": {
+      "model": "jugcraft:block/stuffed_mushrooms",
+      "y": 90
+    }
+  }
+}

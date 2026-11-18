@@ -32,6 +32,7 @@ public final class ConcordanceClientOptions {
 	private static Presentation.Intensity intensity = Presentation.Intensity.FULL;
 	/** The pact spirits (their counterparts, entity ids) whose three beats this player has paged through. */
 	private static final Set<String> heardBeats = new LinkedHashSet<>();
+	private static DrugVisualOptions drugVisuals = DrugVisualOptions.DEFAULT;
 
 	private ConcordanceClientOptions() {
 	}
@@ -64,6 +65,9 @@ public final class ConcordanceClientOptions {
 	public static Presentation.Intensity intensity() {
 		return intensity;
 	}
+
+	public static DrugVisualOptions drugVisuals() { return drugVisuals; }
+	public static void setDrugVisuals(DrugVisualOptions options) { drugVisuals = options; save(); }
 
 	public static void set(boolean showHud, boolean calm, boolean exact, boolean simple, boolean trinkets, Presentation.Intensity chosen) {
 		hud = showHud;
@@ -134,6 +138,7 @@ public final class ConcordanceClientOptions {
 				heardBeats.add(spirit.trim());
 			}
 		}
+		drugVisuals = DrugVisualOptions.read(properties);
 		Presentation.configure(intensity, reducedMotion);
 		save();
 	}
@@ -148,6 +153,7 @@ public final class ConcordanceClientOptions {
 		properties.setProperty("concordance.worn_trinkets", Boolean.toString(wornTrinkets));
 		properties.setProperty("concordance.visual_intensity", intensity.id());
 		properties.setProperty("concordance.heard_beats", String.join(",", heardBeats));
+		drugVisuals.write(properties);
 		try (Writer writer = Files.newBufferedWriter(path)) {
 			properties.store(writer, "Jugcraft client display settings (kept on this computer): concordance.hud shows Focus while"
 					+ " a Concordance instrument is held; concordance.reduced_motion makes Kindled light, the bench and the journal"

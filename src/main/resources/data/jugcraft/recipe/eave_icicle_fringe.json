@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "minecraft:ice",
+    "minecraft:snowball"
+  ],
+  "result": {
+    "id": "jugcraft:eave_icicle_fringe",
+    "count": 4
+  }
+}

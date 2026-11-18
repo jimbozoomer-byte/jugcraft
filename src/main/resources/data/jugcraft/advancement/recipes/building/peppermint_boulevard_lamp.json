@@ -1,0 +1,1 @@
+{"parent":"minecraft:recipes/root","criteria":{"has_ingredient":{"trigger":"minecraft:inventory_changed","conditions":{"items":[{"items":"jugcraft:peppermint_lane_lamp"}]}}},"rewards":{"recipes":["jugcraft:peppermint_boulevard_lamp"]}}

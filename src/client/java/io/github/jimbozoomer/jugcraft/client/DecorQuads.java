@@ -46,7 +46,8 @@ import org.jspecify.annotations.Nullable;
  * Crank Ghost's crank, ghost, eyes, arms and wire, the Clockwork Raven's flywheel, head, lower beak, eyes and wings,
  * the Pumpkin-Headed Drummer's forearms, head and face, and the Show Controller's programme drum, needle, lamp, beacon and
  * knife switch) and harvest_festival_quads.json (tools/harvest_festival_data.py: the Steam Traction Engine's flywheel,
- * crank, connecting rod, crosshead, governor and fire).
+ * crank, connecting rod, crosshead, governor and fire) and pirate_ship_quads.json (tools/pirate_ship.py: the moving
+ * pirate ship's hull, sails, flag, wheel, rudder and cannon).
  */
 public final class DecorQuads {
 	private static final List<Identifier> FILES = List.of(Jugcraft.id("decor_quads.json"), Jugcraft.id("decor7_quads.json"),
@@ -59,7 +60,8 @@ public final class DecorQuads {
 			Jugcraft.id("decor19_quads.json"), Jugcraft.id("decor20_quads.json"), Jugcraft.id("raider_quads.json"),
 			Jugcraft.id("armoured_walker_quads.json"), Jugcraft.id("companion_wheel_quads.json"),
 			Jugcraft.id("howitzer_walker_quads.json"), Jugcraft.id("train_quads.json"), Jugcraft.id("haunted_midway_quads.json"),
-			Jugcraft.id("clockwork_quads.json"), Jugcraft.id("harvest_festival_quads.json"));
+			Jugcraft.id("clockwork_quads.json"), Jugcraft.id("harvest_festival_quads.json"),
+			Jugcraft.id("pirate_ship_quads.json"));
 	private static @Nullable Map<String, QuadModel> models;
 
 	private DecorQuads() {

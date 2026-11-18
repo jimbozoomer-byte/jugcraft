@@ -15,6 +15,7 @@ import net.minecraft.world.level.storage.ValueOutput;
  */
 public class CandyCornDispenserBlockEntity extends DecorationBlockEntity {
 	private int count;
+	public final local.peepo.DisplayCompanion displayCompanion = new local.peepo.DisplayCompanion(this);
 
 	public CandyCornDispenserBlockEntity(BlockPos pos, BlockState state) {
 		super(JugcraftAgriculture.CANDY_CORN_DISPENSER_ENTITY, pos, state);
@@ -23,6 +24,20 @@ public class CandyCornDispenserBlockEntity extends DecorationBlockEntity {
 	/** How many pieces it holds. */
 	public int count() {
 		return count;
+	}
+
+	/** Transaction snapshots preserve the native count without changing its visible fill. */
+	public void restoreCompanionCount(int value) {
+		count = Math.clamp(value, 0, CandyCornDispenserBlock.CAPACITY);
+	}
+
+	public void companionChanged() {
+		setChanged();
+		if (level != null && !level.isClientSide() && !isRemoved() && level.hasChunkAt(worldPosition)
+				&& level.getBlockEntity(worldPosition) == this && getBlockState().getBlock() instanceof CandyCornDispenserBlock) {
+			level.setBlock(worldPosition, getBlockState().setValue(CandyCornDispenserBlock.FILL, CandyCornDispenserBlock.fill(count)), net.minecraft.world.level.block.Block.UPDATE_ALL);
+		}
+		local.peepo.CompanionReadiness.invalidate(this);
 	}
 
 	/** Pours in as much of {@code candy} as fits; returns how many went in ({@code candy} is that many fewer). */
@@ -59,11 +74,13 @@ public class CandyCornDispenserBlockEntity extends DecorationBlockEntity {
 	protected void loadAdditional(ValueInput input) {
 		super.loadAdditional(input);
 		count = Math.clamp(input.getIntOr("count", 0), 0, CandyCornDispenserBlock.CAPACITY);
+		displayCompanion.load(input);
 	}
 
 	@Override
 	protected void saveAdditional(ValueOutput output) {
 		super.saveAdditional(output);
 		output.putInt("count", count);
+		displayCompanion.save(output);
 	}
 }

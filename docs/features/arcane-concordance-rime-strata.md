@@ -33,10 +33,11 @@ utility (Preserve).
 
   The hall and the brew are the "winter survey": First Light alone gates them, so either can come before snow is ever
   examined, and counts once it is.
-- Understood, Rimekeeping teaches **Rimebind** and **Preserve**. **Mastery** is three kinds of cold work, each counted
+- Understood, Rimekeeping teaches **Rimebind** and **Preserve**, and since Concordance Chunk E **Quench**
+  ([cinder-tyrant-concordance.md](cinder-tyrant-concordance.md)). **Mastery** is three kinds of cold work, each counted
   once: Preserve a crucible holding a mixture while it is cold, Preserve one while it is warm or hotter, and Rimebind a
   hostile creature. Only someone who understands the **Alembic Arts** puts water in a crucible by hand, so mastery needs
-  them too. Mastered, both cost a point less Focus.
+  them too. Mastered, each costs a point less Focus.
 - **Stratawrighting** is the other new entry. Once First Light is understood, sneak and use **granite, diorite,
   andesite, tuff or raw Thallite** to examine it. The same examination also begins the Balancewrights' **Assay** (these
   are raw matter too). Three different ones observe it; studying one at the bench, or reading notes, understands it.

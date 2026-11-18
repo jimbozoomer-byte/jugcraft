@@ -1,0 +1,208 @@
+# Town square feast (Thanksgiving phase 6, scene half)
+
+Status: implemented as an isolated service on the review branch `claude/nov10-a-feast-tables`. Written with Claude Code on 10 November 2026. **Not wired and not run.**
+- The town's tick, command and protection do not call it yet. Codex wires those hooks; the proposed wiring is delivered separately, not committed.
+- Nothing here has been compiled or run in a game: this environment cannot reach the Fabric or Mojang build hosts.
+
+Proposal issue: none. This is the owner's phase 6 request in [the Thanksgiving festival record](thanksgiving-festival-nov1.md). Codex approved layout A on 10 November 2026.
+Owner: jimbozoomer-byte
+Target milestone and tier: the spawn town's seasonal scene (no progression tier).
+Primary specialty and supported player role: a shared town event for every player.
+
+## Player experience
+
+The north plaza of the town square holds a feast from 4 to 30 November, while the town's theme is `harvest`. It sits between the Church of Notch and the main road.
+
+| Site | What | Where (town coordinates, feet at y 1) | Food |
+| --- | --- | --- | --- |
+| W1 | Linen Feast Table, 6 lengths | x 85–90, z 89 | 12 dishes: mashed potatoes and gravy, harvest pea casserole, candied sweet potatoes, dinner rolls, cranberry sauce, cornbread stuffing, each twice |
+| E2 | Linen Feast Table, 4 lengths | x 106–109, z 89 | 8 dishes: turkey slices ×2, dinner rolls, cranberry sauce, cornbread stuffing, candied sweet potatoes, pumpkin pie ×2 |
+| T | Giant Turkey Feast | x 103–105, z 88–90; master (103, 1, 90), facing south | 24 portions |
+
+- **Amount:** four servings on each dish, so 80 at the tables, plus the turkey's 24 portions. The feast is set out **once a season**.
+- **Who may eat:** anyone with both hands empty, where the land claim allows it.
+- **What the town refuses:**
+  - sneaking (taking a dish away, or packing the turkey);
+  - a held item in either hand (serving food onto a town table);
+  - breaking anything.
+- **After eating:** what is eaten stays eaten for the rest of the season. Bowl meals give the eater their bowl, as at any Feast Table.
+- **Taking down:** when the season ends (or the theme leaves `harvest`), the feast is taken down. Anything a player changed stays: food or cloth they added, or a moved piece.
+
+## Layout and clearances
+
+Every cell is open blueprint ground, inside the wall, off every decor site and every townsperson's place.
+
+Clearances are measured as clear blocks between footprints at feet level: the Chebyshev distance less one, over every pair of cells, from blueprint revision 4. `scripts/tests/test_town_feast_layout.py` checks them against `town.json.gz`.
+
+| Clear blocks to | W1 | E2 | T |
+| --- | --- | --- | --- |
+| Church building (front wall z 84; furniture inside is at least one block further) | 4 | 4 | 3 |
+| Church door path (x 95–98, z 85–92) | 4 | 7 | 4 |
+| Nearest market stall | 5 (NW) | 3 (NE) | 7 (NE) |
+| Main east–west gate road (z 93–97) | 3 | 3 | 2 |
+| South gate road | 22 | 22 | 21 |
+| Centrepiece site (legacy harvest and harvest_v2) | 11 | 11 | 10 |
+| Nearest guard or guard walker | 3 | 4 | 4 |
+| Flak-guard stations | > 40 | > 40 | > 40 |
+
+- **Paths:** the church path and every lamp post and café set stay clear.
+- **Sightlines:** guards' eyes clear the 13-pixel tables and the turkey, about 1.2 blocks tall.
+- **The centrepiece:** it is untouched, whether the legacy harvest scene or harvest_v2.
+
+## How it works (`town/TownFeast.java`)
+
+**A saved ledger** (`jugcraft:town_feast`, keyed by season and site) records each site's state:
+- `placed`, with what each dish was laid with;
+- `removed`;
+- `preserved`, with the reason;
+- `skipped`, with the reason.
+
+The season key is the calendar year of the date.
+
+**Setting out.** A site is set out only if, at the time, all of these hold:
+- the theme is `harvest` and the date is 4–30 November (the season calendar's date, or the operator's preview date);
+- the site has no entry this season, or only a `skipped` one;
+- the preflight passes for the whole site.
+
+**The preflight**, all or nothing per site:
+- **Loaded:** every cell of the site, and of the ground two blocks round it from the floor to one block above, is loaded. A chunk is never loaded to check.
+- **Blueprint:** every such cell still equals the blueprint of the revision its chunk was built or upgraded to (`TownUpgrades.version` and `historical`). Decor sites change with the theme, so the blueprint doesn't own them and they are not compared.
+- **Owner marks:** no cell has an owner override (`TownUpgrades.progress(level).preservedDecor`, read only).
+- **The site's own cells:**
+  - open blueprint air on a solid floor;
+  - no block entity;
+  - no casino furniture within two blocks (`TownUpgrades.fixtureNearby`);
+  - nothing standing in them.
+
+Failures are handled two ways:
+- An unloaded chunk or someone standing in the way is waited out.
+- Anything else records `skipped`. A skipped site is tried again while the season lasts: it was never set out, so setting it out later is not a refill.
+
+**Placing.**
+- Tables are set with `TownBuilder.set`, each length with its own joined part (start, middle, end), and their dishes are served once.
+- The turkey is set part by part, master first, with 24 portions.
+
+**Stamped servings.** Every serving the town lays carries a private mark: `custom_data` `jugcraft_town_feast` = "season/site".
+- The mark changes nothing else. A stamped serving eats like any other, and one taken anywhere is still only food.
+- A Feast Table merges a dish only with the same item and components, so a player's plain food never joins the town's servings.
+- A dish counts as the town's only while it is empty or holds only the stamped serving, no more of it than was laid. Plain food of the same kind, even below the laid count, is the player's.
+
+**Never refilled.** A site placed or removed in a season is never set out again that season. Nothing tops up a dish or the turkey. This holds through:
+- reloads, restarts and chunk reloads;
+- town revision upgrades;
+- the theme leaving and coming back;
+- re-runs.
+
+**Taking down.** This happens when the date leaves the window or the theme leaves `harvest`, and also for an earlier season's leftovers.
+- **The check:** a site is removed only while it is still what was set out, less what was eaten:
+  - every table length is a linen Feast Table along x;
+  - each dish is empty, or holds no more of the same food than was laid;
+  - every turkey part is in place, facing as set, with one portion count (any value from 24 to 0).
+  Cells already empty count as gone.
+- **Removal:** a Feast Table spills its dishes when removed, so its dishes are emptied in code first. The turkey's master goes first: removing another part first makes the master drop the packed feast.
+- **When the check fails** (more food, other food, another runner, a moved or missing turkey part), the site is left as it is and recorded as `preserved`.
+
+**The legacy harvest scene and harvest_v2** are not touched. The feast never comes within ten blocks of the 7 × 7 × 13 centrepiece site. Neither `tools/town_decor.py` nor `town.json.gz` changes.
+
+## Hooks for Codex to wire
+
+Nothing calls these yet:
+
+| Call | Where | What |
+| --- | --- | --- |
+| `TownFeast.tick(ServerLevel)` | the end of each server tick, for example in `TownDecor.register` | Acts every 100 ticks on the overworld. It reads `TownState.get(level).origin()` and `theme()` and the season calendar. No chunk hook is needed: unloaded sites wait for the next check. |
+| `TownFeast.managed(ServerLevel, BlockPos)` | `TownProtection.useBlock`, before `publicBlock` | Whether a cell belongs to the town's set-out feast. |
+| `TownFeast.mayPublicEat(ServerLevel, BlockPos, Player)` | `TownProtection.useBlock`, before `publicBlock` | Whether the town lets a player eat there now: a managed cell, both hands empty, not sneaking, and on a table length only the town's own stamped food. |
+| `TownFeast.report(ServerLevel, boolean dryRun)` | a `/jugcraft town feast` (and `feast dryrun`) subcommand | Lines to print: the ledger, and with `dryRun` what a run would do now, changing nothing. |
+
+**Checks against the blueprint.** `TownFeast.authored(ServerLevel, BlockPos)` says whether a cell holds the feast exactly as the town set it out: not air, a cell of a site the ledger has `placed`, and that whole site passing the same identity check as taking down. `TownGameTests.testTownIsBuiltAndKept` uses it, so its block-by-block and drift comparisons accept the town's own feast cells in season and still fail on any other difference, including a feast site an owner has changed.
+
+**Claims stay in force.** `mayPublicEat` is never an alternative to the land claim check. The caller requires both, `mayPublicEat(...) && LandRegistry.mayBuild(player, level, pos)`, so a managed cell never bypasses a claim. When both hold, it runs only the block's own empty-hand use (`useWithoutItem`); otherwise it refuses, with no fallback to an item's use.
+
+**Permissions.** No `#jugcraft:town_usable` entry and no `TownProtection` change is made here, and `FeastTableBlock` is unchanged. Inside the protected town (decided 10 November):
+
+| Block | Who may use it | Still refused |
+| --- | --- | --- |
+| Giant turkey, anyone's | Everyone may eat with an empty hand, through the existing `publicBlock` rule: the turkey has no block entity, so it is a public non-container interaction, as the owner asked. | Packing it up (sneaking), breaking it, and the held item's own use, such as carving with a knife. As with any public block, a click while holding something runs only the turkey's own eating. |
+| Managed feast table (W1, E2) | Everyone may eat, one serving per click, through `TownFeast.mayPublicEat` with both hands empty, ANDed with the claim check. | An item in either hand (including serving onto it), sneaking (taking a dish), refilled or added food, and another's claim. |
+| An owner's feast table | Private: its block entity keeps it out of `publicBlock`. | Everything, for anyone who may not build there. |
+
+The town's own turkey is also a managed cell, so the feast hook answers for it first, with the stricter rule: both hands empty, not sneaking.
+
+**Testing.** The core (`TownFeast.run`, `preflight`, `removable`, and the ledger-taking `managed` and `mayPublicEat`) takes the town origin, theme, date, a `Baseline` and a ledger, so it can be tested without a built town.
+
+## Implementation choices (10 November)
+
+- **Theme flips.** A theme change away from `harvest` during the window also takes the feast down. It is then not set out again that season, so a forced theme cannot refill it.
+- **`preserved` is final.** It is not retried; the operator decides what to do with it.
+- **The ledger belongs to one town origin.** A new origin starts it afresh, as `TownUpgrades.progress` does.
+- **A shared margin is allowed, for the managed neighbour only.** E2 and T share part of their two-block margins. A margin cell may hold the other site's blocks only when that site is positively the town's own: `placed` this season in the ledger, the cell one of its cells, and the whole site passing the same check as taking down (unchanged, or only eaten). Any other feast table or turkey there, an owner's for example, is a change like any other and skips the site.
+- **Take-downs first.** Each run takes down everything due before setting anything out, so an earlier season's leftovers never stand in a neighbour's margin.
+- **Stamping, not tracking.** Servings are stamped rather than every change to a table being tracked. The table's own merge rule already keeps stamped and plain food apart, and nothing needs to hook into its transactions.
+  - Nothing a player can do to a town table loses the stamp.
+  - An operator could forge it with `/data`. That would only make their own food look like the town's for the take-down.
+- **Name differences from the description.** None: `TownBuilder.set`, `TownUpgrades.fixtureNearby`, `TownUpgrades.progress(level).preservedDecor`, `TownUpgrades.version` and `historical`, and `TownState.get(level).origin()` and `theme()` are as at the base. `preservedDecor` is package-private, so the service lives in the town package.
+
+## Connections
+
+- Existing input producer: the harvest festival dishes and the Giant Turkey Feast (agriculture).
+- Existing output consumer: players' hunger and the Feast Table's shared feast blessing.
+- No new item, recipe, currency or unlock. The food is the town's, once a season.
+
+## Balance and automation
+
+- Per season: 80 servings and 24 turkey portions in the one town, shared by everyone.
+- No automation. Nothing refills it, and town protection keeps pipes and hoppers away.
+- A player's companion restocking a town table makes that length private and keeps the site at take-down.
+
+## Multiplayer and persistence
+
+- **The server decides everything.**
+- **Saved state:** the ledger is saved with the overworld; the tables keep their dishes in their block entities, and the turkey keeps its portions in its block state.
+- **Disabling:** removing the hooks stops new feasts but leaves any set-out feast as it is.
+
+## Dependencies and assets
+
+None.
+
+## Verification
+
+`TownFeastGameTests` holds nine server game tests. Each runs in an arena standing for the north plaza and drives the service directly. All passed within the November 9 combined 3,718-case server run (`build/nov9-final-combined-server.log`); the native interaction path also passed the rendered client fixture below.
+
+| Test | What it checks |
+| --- | --- |
+| `setsOutTheWholeFeastOnceWithExactlyItsServings` | A dry run changes nothing. Every table length and dish, 80 servings, the turkey's 18 parts at 24 portions, and nothing dropped. All 28 cells are `authored`; a cell outside the layout, or one a ledger never set out, is not. |
+| `eatenServingsAreNeverRefilledOnAnyReEntry` | After eating, nothing is refilled through a re-run, a dry run, a reload of the saved ledger, another blueprint revision, or a theme flip and back. |
+| `consumedStaysConsumedAndIsStillTakenDown` | An empty dish and an eaten-out turkey stay so, are still taken down without spills, and the next November brings a new feast. |
+| `anOwnerOrFixtureChangeSkipsTheWholeSite` | An owner block in the margin, casino furniture within two blocks, or an owner mark skips that whole site. It is set out once the ground is clear. |
+| `takingDownSpillsNothingAndKeepsPlayersFoodAndCloth` | A player's bread and a player's runner keep their sites; the partly eaten turkey is taken down; nothing is spilled. |
+| `theTurkeyGoesMasterFirst` | The service drops nothing. Removing a part first drops one packed feast, which is why the order matters. |
+| `onlyManagedFeastCellsArePubliclyEdible` | Through `managed` and `mayPublicEat`, both hands empty: eating at a managed table and at the turkey is allowed. Refused: an item in the offhand, an item in the main hand, sneaking, a length refilled with the player's own same food, a length with other food added, and an owner's table. Nothing is managed after take-down. |
+| `aPlayersOwnFoodIsNeverMistakenForTheTowns` | A stamped serving is eaten like any other. The owner's plain identical food can't merge into a stamped dish. A dish refilled with it below the laid count makes the table preserved, through a save and reload of the table and the ledger, and cleanup leaves the owner's food in place. A site with the owner's food on it is no longer `authored`. |
+| `onlyAPositivelyManagedNeighbourMayStandInAMargin` | An owner's feast table in E2's margin skips E2 (and T, whose cell it stands on). Once it is gone, E2 and the turkey are set out side by side, each accepting the other. |
+
+`TownFeastClientTests` is a rendered client fixture. Passed locally with the crew and real-ship client fixtures on November 9 (`build/nov9-feast-pirate-client.log`, 6m55s). Screenshots are retained in `build/nov9-feast-pirate-review/screenshots`. It drives the same service on a flat floor laid as the north plaza.
+- **Stand-ins** sit at their true town positions: the church's front wall with its doorway, the quartz church door path, and the north-west and north-east stalls.
+- **Clear lanes:** it asserts the door path, the doorway and both stalls' front and side lanes stay clear.
+- **Screenshots:** three, at eye height (`town_feast_church_door_path`, `town_feast_nw_stall_access`, `town_feast_ne_stall_access`).
+- **Eating:** three servings and five turkey portions, through `mayPublicEat` with both hands empty.
+- **The real use path (needs Codex's `TownProtection` wiring; meant for the integrated tree, it fails on this branch alone):** survival right-clicks through `ServerPlayerGameMode.useItemOn`, the method the use-item-on packet handler calls, where Fabric's `UseBlockCallback` and so `TownProtection.useBlock` run first. The town origin is set for that one server task and forgotten before it ends, so no town tick acts on the test world.
+  - With both hands empty, a click eats exactly one serving at E2's table and exactly one portion at the turkey.
+  - On another's claim, both are refused although `mayPublicEat` alone would allow them. A visitor with no permissions makes these clicks, since claims never bind an admin and the world's host is an operator.
+  - Food in the main hand, at the table and the turkey, is refused. So is food in the offhand, for either hand's click.
+  - Sneaking is refused at both: no dish is taken and the turkey is not packed.
+  - An owner's feast table elsewhere in town is refused.
+  - After E2's first dish is eaten out one click at a time, food can't be served onto it.
+- **No refill:** after three re-runs, three ledger reloads, and closing and reopening the world, no count ever rises.
+
+`scripts/tests/test_town_feast_layout.py` checks the layout against the blueprint: the cells, the decor sites and places, and every clearance above.
+
+## World and event applicability
+
+- The spawn town's square only, in November, while the theme is `harvest`.
+- It sets out nothing outside the town and changes no chunk generation.
+
+## Rollout and open questions
+
+- **Wiring:** integrated locally by Codex: server tick, managed eat-only interactions before the public-block fallback, shared claim check, and operator status/dry-run commands. The menu and servings are as approved and can be tuned in `TownFeast.LAYOUT` and `SERVINGS`.
+- **Snow:** snow lying on the square before the 4th would read as a change from the blueprint, and the site would be skipped until it clears.

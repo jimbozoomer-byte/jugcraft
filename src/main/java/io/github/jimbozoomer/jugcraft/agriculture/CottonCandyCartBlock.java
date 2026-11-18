@@ -87,6 +87,7 @@ public class CottonCandyCartBlock extends MultiDecorationBlock implements Entity
 				level.setBlock(at, there.setValue(property, value), Block.UPDATE_ALL);
 			}
 		}
+		if (level.getBlockEntity(master) instanceof DecorationBlockEntity cart) local.peepo.CompanionReadiness.invalidate(cart);
 	}
 
 	/** Sugar is spun into floss while it runs; Paper winds a serving of floss onto a cone. */
@@ -124,6 +125,8 @@ public class CottonCandyCartBlock extends MultiDecorationBlock implements Entity
 	@Override
 	protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
 		if (!level.isClientSide()) {
+			if (player.isShiftKeyDown() && level.getBlockEntity(masterPos(pos,state)) instanceof DecorationBlockEntity cart
+				&& cart.confection != null && cart.confection.collect(player)) return InteractionResult.SUCCESS;
 			boolean running = !state.getValue(LIT);
 			setAll(level, masterPos(pos, state), state.getValue(FACING), LIT, running);
 			level.playSound(null, pos, SoundEvents.LEVER_CLICK, SoundSource.BLOCKS, 0.6F, running ? 0.8F : 0.6F);
@@ -131,6 +134,8 @@ public class CottonCandyCartBlock extends MultiDecorationBlock implements Entity
 		}
 		return InteractionResult.SUCCESS;
 	}
+
+	@Override protected boolean isPathfindable(BlockState state, net.minecraft.world.level.pathfinder.PathComputationType type) { return false; }
 
 	@Override
 	public @Nullable BlockEntity newBlockEntity(BlockPos pos, BlockState state) {

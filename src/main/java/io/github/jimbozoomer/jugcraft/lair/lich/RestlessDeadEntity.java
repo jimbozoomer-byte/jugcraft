@@ -7,6 +7,7 @@ import com.geckolib.animation.AnimationController;
 import com.geckolib.animation.RawAnimation;
 import com.geckolib.animation.object.LoopType;
 import com.geckolib.util.GeckoLibUtil;
+import io.github.jimbozoomer.jugcraft.lair.Encounter;
 import java.util.UUID;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.particles.ParticleTypes;
@@ -150,7 +151,7 @@ public class RestlessDeadEntity extends Monster implements GeoEntity {
 		}
 		boolean hurt = super.hurtServer(level, source, amount);
 		CryptLichEntity master = lich(level);
-		if (hurt && master != null && source.getEntity() instanceof ServerPlayer player) {
+		if (hurt && master != null && Encounter.striker(source) instanceof ServerPlayer player) {
 			master.took(player, amount);
 		}
 		return hurt;

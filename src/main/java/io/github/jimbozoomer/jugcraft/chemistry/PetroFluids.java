@@ -137,6 +137,10 @@ public final class PetroFluids {
 	public static Entry VANADIUM_ELECTROLYTE;
 	/** Crops fermented in the chemical reactor (batch 26): fuel for the gas turbine and the advanced engine. */
 	public static Entry BIOETHANOL;
+	public static Entry ANTIBIOTIC_BROTH;
+	public static Entry ORGANIC_PROCESS_STOCK;
+	public static Entry BEVERAGE_WASH;
+	public static Entry REFINED_BEVERAGE_STOCK;
 	/** Refinery upgrades (batch 29): hydrotreated diesel, gasoline blended with bioethanol, and the sour gas left over. */
 	public static Entry PREMIUM_DIESEL;
 	public static Entry PREMIUM_GASOLINE;
@@ -302,6 +306,11 @@ public final class PetroFluids {
 		// Hydrazine methylated with methyl chloride (docs/features/cola-and-mmh.md).
 		MONOMETHYLHYDRAZINE = fluid("monomethylhydrazine", 8, 3, 1, 0xFF5A6A58, MapColor.COLOR_LIGHT_GRAY);
 		METHYL_CHLORIDE = gas("methyl_chloride", 0xFF9ABA98);
+		// Append new fluids in the same order as tools/petro.py, preserving earlier registrations.
+		ANTIBIOTIC_BROTH = fluid("antibiotic_broth", 5, 4, 1, 0xFF366D7F, MapColor.WATER);
+		ORGANIC_PROCESS_STOCK = fluid("organic_process_stock", 5, 4, 1, 0xFF705231, MapColor.WOOD);
+		BEVERAGE_WASH = fluid("beverage_wash", 5, 4, 1, 0xFF805627, MapColor.WOOD);
+		REFINED_BEVERAGE_STOCK = fluid("refined_beverage_stock", 5, 4, 1, 0xFF9D7936, MapColor.SAND);
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.TOOLS_AND_UTILITIES).register(output -> {
 			for (Entry entry : FLUIDS.values()) {

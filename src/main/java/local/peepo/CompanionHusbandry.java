@@ -15,7 +15,6 @@ import net.minecraft.world.entity.animal.Animal;
 import net.minecraft.world.entity.monster.Enemy;
 import net.minecraft.world.item.*;
 import net.minecraft.world.level.entity.EntityTypeTest;
-import net.minecraft.world.level.gamerules.GameRules;
 import net.minecraft.world.phys.Vec3;
 
 /** Explicit species rules; planning is cached, population-changing actions re-count under the shared budget. */
@@ -154,7 +153,6 @@ final class CompanionHusbandry {
         public boolean availableTo(PeepoEntity other){return other==npc && assigned() && (firstId==null || usable());}
         public CompanionStatus workStatus(PeepoEntity other){
             if(other!=npc || !assigned())return CompanionStatus.MISSING;
-            if(!((ServerLevel)npc.level()).getGameRules().get(GameRules.MOB_GRIEFING))return CompanionStatus.GARDEN_DISABLED;
             if(!find())return status;
             if(kill && !weapon(npc.assignedHand()))return CompanionStatus.NEEDS_WEAPON;
             if(!kill && foodCount(first(),second())<2)return CompanionStatus.NEEDS_BREEDING_FOOD;
@@ -178,7 +176,7 @@ final class CompanionHusbandry {
             heldFirst=heldSecond=null;firstHold=secondHold=null;firstId=secondId=null;approach=null;phase=progress=0;npc.setWorkAnimal(-1);
         }
         public CompanionStatus work(PeepoEntity other){
-            if(!occupy(other) || !((ServerLevel)npc.level()).getGameRules().get(GameRules.MOB_GRIEFING))return CompanionStatus.IDLE;
+            if(!occupy(other))return CompanionStatus.IDLE;
             var animal=current();
             if(kill && !weapon(npc.assignedHand()))return CompanionStatus.NEEDS_WEAPON;
             if(!kill && foodCount(first(),second())<2)return CompanionStatus.NEEDS_BREEDING_FOOD;

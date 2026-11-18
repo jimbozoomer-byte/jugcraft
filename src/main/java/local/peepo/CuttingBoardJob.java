@@ -9,6 +9,8 @@ import net.minecraft.world.phys.*;
 
 /** A front-facing, two-handed cut. One real knife wear/recipe operation per forty work ticks. */
 public final class CuttingBoardJob implements CompanionJob {
+    public boolean finishLoadedBatch(PeepoEntity npc){return planningStatus(npc)==CompanionStatus.READY;}
+    public boolean collectAfterWork(){return true;}
     private final BlockEntity board;
     private final KitchenCompanionPort kitchen;
     private int effort;

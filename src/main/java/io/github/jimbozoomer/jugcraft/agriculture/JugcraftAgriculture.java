@@ -282,6 +282,8 @@ public final class JugcraftAgriculture {
 			"bamboo", "crimson", "warped");
 	/** The food displays' block entity (plates, platters and serving trays: {@link FoodDisplayBlock}). */
 	public static BlockEntityType<ShowcaseBlockEntity> FOOD_DISPLAY_ENTITY;
+	/** Persistent companion filters for the native blockstate-counted serving displays. */
+	public static BlockEntityType<ServingDisplayBlockEntity> SERVING_DISPLAY_ENTITY;
 	/** The use-block event phase that sets a vanilla pie down as a pie: after the default phase, as {@link #KNIFE_PHASE}. */
 	private static final Identifier SET_DOWN_PHASE = Jugcraft.id("set_down_pie");
 	public static BlockEntityType<CarvedPumpkinBlockEntity> CARVED_PUMPKIN_ENTITY;
@@ -894,6 +896,7 @@ public final class JugcraftAgriculture {
 		wild("wild_turnip");
 		wild("wild_mandrake");
 		Mandrakes.register();
+		MultiDecorationBlock.registerProtection();
 		registerFruitCrops();
 		registerGarden();
 		registerVegetables();
@@ -917,6 +920,8 @@ public final class JugcraftAgriculture {
 		registerOrchards();
 		registerMilkshakes();
 		registerPlacedDishes();
+		// The Thanksgiving side dishes (tools/thanksgiving_dishes.py): foods in the food tab, set down as the menu's dishes are.
+		ThanksgivingDishes.register(JugcraftAgriculture::registerBlock, (id, factory, props) -> registerItem(id, factory, props, FOOD_TAB), SET_DOWN_PHASE);
 
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.NATURAL_BLOCKS).register(output -> SEEDS_TAB.forEach(output::accept));
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.FOOD_AND_DRINKS).register(output -> FOOD_TAB.forEach(output::accept));
@@ -1962,7 +1967,7 @@ public final class JugcraftAgriculture {
 		SPOOKY_SIGN_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("spooky_sign"),
 				FabricBlockEntityTypeBuilder.create(SpookySignBlockEntity::new, sign).build());
 		Block archway = registerBlock("haunted_archway", HauntedArchwayBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.STONE)
-				.strength(2.0F, 6.0F).sound(SoundType.STONE).noOcclusion().lightLevel(HauntedArchwayBlock::light).pushReaction(PushReaction.IMMOVEABLE));
+				.strength(2.0F, 6.0F).sound(SoundType.STONE).noOcclusion().forceSolidOn().lightLevel(HauntedArchwayBlock::light).pushReaction(PushReaction.IMMOVEABLE));
 		Block tree = registerBlock("dead_hollow_tree", DeadHollowTreeBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BROWN)
 				.strength(2.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().lightLevel(DeadHollowTreeBlock::light)
 				.pushReaction(PushReaction.IMMOVEABLE));
@@ -2443,6 +2448,15 @@ public final class JugcraftAgriculture {
 		registerPartyTable();
 		registerClockwork();
 		registerHarvestFestival();
+		registerThanksgivingDecor();
+		registerThanksgivingHomestead();
+		// The woodland harvest crafts (WoodlandHarvestCrafts; tools/thanksgiving_woodland.py), each with its item.
+		for (Block block : WoodlandHarvestCrafts.register(JugcraftAgriculture::registerBlock)) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+		registerThanksgivingTown();
+		FestivalToys.register(JugcraftAgriculture::registerBlock, (id, factory, props) -> registerItem(id, factory, props, BUILDING_TAB));
 	}
 
 	/**
@@ -2827,6 +2841,7 @@ public final class JugcraftAgriculture {
 		Block cart = registerBlock("orchard_handcart", OrchardHandcartBlock::new, displayProperties());
 		FRUIT_STORE_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("fruit_store"),
 				FabricBlockEntityTypeBuilder.create(FruitStoreBlockEntity::new, bin, bag, cart).build());
+		net.fabricmc.fabric.api.transfer.v1.item.ItemStorage.SIDED.registerForBlockEntity((store, side) -> store.storage, FRUIT_STORE_ENTITY);
 		List<Block> gear = new ArrayList<>(List.of(ladder, bin, bag, cart));
 		// Part 2: the apple crates and the windfall apples.
 		for (String kind : new String[] {"red", "green", "golden"}) {
@@ -2883,6 +2898,7 @@ public final class JugcraftAgriculture {
 		CORN_CRIB_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("corn_crib"),
 				FabricBlockEntityTypeBuilder.<FruitStoreBlockEntity>create((pos, state) -> new FruitStoreBlockEntity(CORN_CRIB_ENTITY, pos, state), crib)
 						.build());
+		net.fabricmc.fabric.api.transfer.v1.item.ItemStorage.SIDED.registerForBlockEntity((store, side) -> store.storage, CORN_CRIB_ENTITY);
 		for (Block block : List.of(rack, crib)) {
 			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
 					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
@@ -2912,6 +2928,7 @@ public final class JugcraftAgriculture {
 		FEED_TROUGH_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("feed_trough"),
 				FabricBlockEntityTypeBuilder.<FruitStoreBlockEntity>create((pos, state) -> new FruitStoreBlockEntity(FEED_TROUGH_ENTITY, pos, state),
 						trough).build());
+		net.fabricmc.fabric.api.transfer.v1.item.ItemStorage.SIDED.registerForBlockEntity((store, side) -> store.storage, FEED_TROUGH_ENTITY);
 		Block lantern = registerBlock("barn_lantern", BarnLanternBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.METAL).strength(1.0F)
 				.sound(SoundType.LANTERN).noOcclusion().pushReaction(PushReaction.POPPED)
 				.lightLevel(state -> state.getValue(BarnLanternBlock.LIT) ? BarnLanternBlock.LIGHT : 0));
@@ -2992,6 +3009,7 @@ public final class JugcraftAgriculture {
 				.strength(2.0F, 6.0F).sound(SoundType.METAL).noOcclusion().pushReaction(PushReaction.IMMOVEABLE));
 		FIREWOOD_RACK_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("firewood_rack"),
 				FabricBlockEntityTypeBuilder.create(FirewoodRackBlockEntity::new, rack).build());
+		net.fabricmc.fabric.api.transfer.v1.item.ItemStorage.SIDED.registerForBlockEntity((store, side) -> store.storage, FIREWOOD_RACK_ENTITY);
 		Block chopping = registerBlock("chopping_block", ChoppingBlockBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
 				.strength(2.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE));
 		CHOPPING_BLOCK_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("chopping_block"),
@@ -3162,6 +3180,8 @@ public final class JugcraftAgriculture {
 		Block goblets = registerBlock("skull_goblets", SkullGobletsBlock::new, BlockBehaviour.Properties.of()
 				.mapColor(MapColor.SAND).strength(0.5F).sound(SoundType.DECORATED_POT).noOcclusion().lightLevel(SkullGobletsBlock::light)
 				.pushReaction(PushReaction.POPPED));
+		SERVING_DISPLAY_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("serving_display"),
+				FabricBlockEntityTypeBuilder.create(ServingDisplayBlockEntity::new, tower, platter, tray, cauldron, goblets, mould, tree).build());
 		for (Block block : List.of(dispenser, tower, platter, tray, cauldron, mould, tree, goblets)) {
 			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
 					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
@@ -3223,7 +3243,8 @@ public final class JugcraftAgriculture {
 	 * The Harvest Festival Grounds (decor set 10; tools/harvest_festival.py): part 1's Giant Cornucopia; part 2's Giant
 	 * Vegetable Show (a Giant Cabbage, Marrow, Turnip and Carrot, each with its entry card) and the Prize Ribbon Board;
 	 * part 3's Steam Traction Engine, its firebox a block entity on its first block, and the Hay Wagon; part 4's Harvest
-	 * Bunting, a strand for the String Light Hooks, and the Sack-Race Sack, worn on the legs.
+	 * Bunting, a strand for the String Light Hooks, and the Sack-Race Sack, worn on the legs; and part 5's Harvest
+	 * Centerpiece, five by three by five, the town square's November centrepiece.
 	 */
 	private static void registerHarvestFestival() {
 		Block cornucopia = registerBlock("giant_cornucopia", GiantCornucopiaBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
@@ -3257,6 +3278,13 @@ public final class JugcraftAgriculture {
 			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
 					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
 		}
+		// Part 5: the Harvest Centerpiece, the town square's November centrepiece (no block entity); its lantern blocks
+		// light while lit.
+		Block centerpiece = registerBlock("harvest_centerpiece", HarvestCenterpieceBlock::new, BlockBehaviour.Properties.of()
+				.mapColor(MapColor.WOOD).strength(1.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava()
+				.lightLevel(HarvestCenterpieceBlock::light).pushReaction(PushReaction.IMMOVEABLE));
+		registerItem("harvest_centerpiece", props -> new BlockItem(centerpiece, props), new Item.Properties().useBlockDescriptionPrefix(),
+				BUILDING_TAB);
 		// Part 4: the bunting, and the sack (tools/harvest_festival.py SACK): worn on the legs, it slows its wearer, takes
 		// away their step so they hop up every block, and lifts their jump a little, short of clearing a fence.
 		registerItem("harvest_bunting", props -> new StringLightsItem(props, StringLightHookBlockEntity.Strand.HARVEST), new Item.Properties(),
@@ -3272,6 +3300,144 @@ public final class JugcraftAgriculture {
 						.add(Attributes.JUMP_STRENGTH, new AttributeModifier(Jugcraft.id("sack_race_jump"), SACK_JUMP,
 								AttributeModifier.Operation.ADD_VALUE), EquipmentSlotGroup.LEGS)
 						.build()), BUILDING_TAB);
+	}
+
+	/** The Amber Jar Lantern's light (tools/thanksgiving_decor.py PROPS). */
+	public static final int AMBER_JAR_LANTERN_LIGHT = 13;
+
+	/**
+	 * The Thanksgiving decorations (tools/thanksgiving_decor.py; docs/features/thanksgiving-decor.md): batch D's harvest
+	 * market and garden, E's feast table, F's warm town and interiors and G's playful statement pieces, each of the
+	 * table's kind and shape (PROPS). They are plain decorations, craftable from the start and kept all year; nothing
+	 * here follows the calendar or asks for research. The Autumn Leaf Table Runner is a Feast Table cloth
+	 * ({@link FeastTableBlock.Runner#LEAVES}).
+	 */
+	private static void registerThanksgivingDecor() {
+		List<Block> decor = new ArrayList<>();
+		// D: the harvest market and garden.
+		decor.add(registerBlock("pumpkin_and_gourd_stack", props -> new FacingDecorationBlock(props, new double[] {0.5, 0.0, 0.5, 15.5, 12.5, 15.5}),
+				decorProperties(MapColor.COLOR_ORANGE, SoundType.WOOD, 0.8F).ignitedByLava()));
+		decor.add(registerBlock("wicker_apple_basket", props -> new FacingDecorationBlock(props, new double[] {2.0, 0.0, 3.0, 14.0, 13.0, 13.0}),
+				decorProperties(MapColor.WOOD, SoundType.WOOD, 0.5F).ignitedByLava()));
+		decor.add(registerBlock("pear_basket", props -> new FacingDecorationBlock(props, new double[] {1.0, 0.0, 0.5, 15.0, 10.0, 12.5}),
+				decorProperties(MapColor.WOOD, SoundType.WOOD, 0.5F).ignitedByLava()));
+		decor.add(registerBlock("root_vegetable_hamper", props -> new FacingDecorationBlock(props, new double[] {1.5, 0.0, 2.5, 14.5, 16.0, 15.0}),
+				decorProperties(MapColor.WOOD, SoundType.WOOD, 0.6F).ignitedByLava()));
+		// E: the feast table.
+		decor.add(registerBlock("harvest_place_setting", props -> new FacingDecorationBlock(props, new double[] {1.5, 0.0, 2.5, 15.0, 5.5, 14.5}),
+				decorProperties(MapColor.TERRACOTTA_WHITE, SoundType.DECORATED_POT, 0.3F)));
+		decor.add(registerBlock("napkin_and_cutlery_caddy", props -> new FacingDecorationBlock(props, new double[] {3.5, 0.0, 5.5, 12.5, 9.0, 10.5}),
+				decorProperties(MapColor.WOOD, SoundType.WOOD, 0.5F).ignitedByLava()));
+		decor.add(registerBlock("bread_basket", props -> new FacingDecorationBlock(props, new double[] {1.5, 0.0, 3.0, 14.5, 6.5, 13.0}),
+				decorProperties(MapColor.WOOD, SoundType.WOOD, 0.5F).ignitedByLava()));
+		decor.add(registerBlock("gravy_boat", props -> new FacingDecorationBlock(props, new double[] {4.0, 0.0, 2.5, 12.0, 5.0, 13.5}),
+				decorProperties(MapColor.TERRACOTTA_WHITE, SoundType.DECORATED_POT, 0.3F)));
+		decor.add(registerBlock("covered_butter_dish", props -> new FacingDecorationBlock(props, new double[] {3.5, 0.0, 2.5, 12.5, 5.5, 11.5}),
+				decorProperties(MapColor.TERRACOTTA_WHITE, SoundType.DECORATED_POT, 0.3F)));
+		decor.add(registerBlock("pie_stand", props -> new FacingDecorationBlock(props, new double[] {1.5, 0.0, 1.5, 14.5, 14.0, 14.5}),
+				decorProperties(MapColor.WOOD, SoundType.WOOD, 0.6F).ignitedByLava()));
+		// F: the warm town and its interiors.
+		decor.add(registerBlock("autumn_leaf_wall_garland", props -> new LeafGarlandBlock(props, 3.5, 0.0, 16.0),
+				decorProperties(MapColor.COLOR_ORANGE, SoundType.GRASS, 0.2F).ignitedByLava().noCollision()));
+		decor.add(registerBlock("amber_jar_lantern", LanternBlock::new,
+				decorProperties(MapColor.COLOR_ORANGE, SoundType.GLASS, 0.4F).lightLevel(state -> AMBER_JAR_LANTERN_LIGHT)));
+		decor.add(registerBlock("pumpkin_candle_centerpiece", props -> new CandleCenterpieceBlock(props, new double[] {1.0, 0.0, 4.5, 15.0, 10.0, 13.5}),
+				decorProperties(MapColor.WOOD, SoundType.WOOD, 0.5F).ignitedByLava().lightLevel(CandleCenterpieceBlock::light)));
+		decor.add(registerBlock("harvest_market_sign", props -> new WallDecorationBlock(props, 5.5, 1.0, 15.0),
+				decorProperties(MapColor.WOOD, SoundType.WOOD, 0.8F).ignitedByLava().noCollision()));
+		decor.add(registerBlock("copper_pan_rack", props -> new WallDecorationBlock(props, 4.0, 1.0, 15.0),
+				decorProperties(MapColor.COLOR_ORANGE, SoundType.COPPER, 1.0F)));
+		// G: the playful statement pieces.
+		decor.add(registerBlock("turkey_statuette", props -> new FacingDecorationBlock(props, new double[] {1.0, 0.0, 3.0, 15.0, 15.0, 14.0}),
+				decorProperties(MapColor.COLOR_BROWN, SoundType.WOOD, 0.8F).ignitedByLava()));
+		decor.add(registerBlock("acorn_leaf_mobile", props -> new HangingGhostBlock(props, Block.box(2.0, 0.5, 2.0, 15.0, 16.0, 14.0)),
+				decorProperties(MapColor.COLOR_BROWN, SoundType.WOOD, 0.2F).ignitedByLava().noCollision()));
+		decor.add(registerBlock("squirrel_acorn_figurine", props -> new FacingDecorationBlock(props, new double[] {4.5, 0.0, 5.0, 11.5, 11.0, 15.0}),
+				decorProperties(MapColor.COLOR_ORANGE, SoundType.WOOD, 0.5F).ignitedByLava()));
+		decor.add(registerBlock("table_cornucopia", props -> new FacingDecorationBlock(props, new double[] {0.0, 0.0, 2.0, 14.5, 8.5, 13.5}),
+				decorProperties(MapColor.WOOD, SoundType.WOOD, 0.5F).ignitedByLava()));
+		for (Block block : decor) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+		registerItem(FeastTableBlock.LEAF_RUNNER, Item::new, new Item.Properties(), BUILDING_TAB);
+	}
+
+	/** The Pewter Chamberstick's light while lit (tools/thanksgiving_homestead.py PROPS). */
+	public static final int PEWTER_CHAMBERSTICK_LIGHT = 10;
+
+	/**
+	 * The Thanksgiving homestead and feast room (tools/thanksgiving_homestead.py; docs/features/thanksgiving-homestead.md):
+	 * the High-Backed Oak Settle (two seats) and the Carved Dish Dresser, each two blocks across and two up, placed and
+	 * broken as one; the Pewter Pitcher and Basin and the Pewter Chamberstick (lit by flint and steel, snuffed by hand);
+	 * the Pilgrim Peg Rail and the Embroidered Harvest Sampler on the wall. Decorations, craftable from the start and kept
+	 * all year; nothing here follows the calendar or asks for research.
+	 */
+	private static void registerThanksgivingHomestead() {
+		List<Block> homestead = new ArrayList<>();
+		homestead.add(registerBlock("oak_settle", props -> new HomesteadSettleBlock(props,
+				new double[] {1.5, 0.0, 3.5, 30.5, 8.5, 14.0},
+				new double[] {1.5, 0.0, 12.5, 30.5, 25.5, 15.5},
+				new double[] {0.0, 0.0, 3.0, 2.0, 13.0, 15.5},
+				new double[] {30.0, 0.0, 3.0, 32.0, 13.0, 15.5},
+				new double[] {0.0, 13.0, 8.0, 1.5, 25.5, 15.5},
+				new double[] {30.5, 13.0, 8.0, 32.0, 25.5, 15.5},
+				new double[] {0.0, 25.5, 10.0, 32.0, 27.5, 15.75},
+				new double[] {11.0, 27.5, 11.5, 21.0, 29.5, 14.5}),
+				BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava()
+						.pushReaction(PushReaction.IMMOVEABLE)));
+		homestead.add(registerBlock("carved_dish_dresser", props -> new HomesteadFurnitureBlock(props,
+				new double[] {0.25, 0.0, 6.75, 31.75, 13.0, 16.0},
+				new double[] {0.0, 13.0, 6.5, 32.0, 14.0, 16.0},
+				new double[] {0.5, 14.0, 10.5, 31.5, 30.0, 16.0},
+				new double[] {8.0, 14.0, 7.0, 24.0, 18.5, 10.5},
+				new double[] {0.0, 30.0, 9.5, 32.0, 32.0, 16.0}),
+				BlockBehaviour.Properties.of().mapColor(MapColor.WOOD).strength(2.0F).sound(SoundType.WOOD).noOcclusion().ignitedByLava()
+						.pushReaction(PushReaction.IMMOVEABLE)));
+		homestead.add(registerBlock("pilgrim_peg_rail", props -> new WallDecorationBlock(props, 8.5, 0.5, 15.5),
+				decorProperties(MapColor.COLOR_BROWN, SoundType.WOOL, 0.6F).ignitedByLava().noCollision()));
+		homestead.add(registerBlock("pewter_pitcher_and_basin", props -> new FacingDecorationBlock(props, new double[] {1.5, 0.0, 1.5, 14.5, 9.0, 14.5}),
+				decorProperties(MapColor.METAL, SoundType.LANTERN, 0.8F)));
+		homestead.add(registerBlock("pewter_chamberstick", props -> new CandleCenterpieceBlock(props, new double[] {3.5, 0.0, 3.5, 15.0, 10.5, 12.5}),
+				decorProperties(MapColor.METAL, SoundType.LANTERN, 0.5F)
+						.lightLevel(state -> state.getValue(CandleCenterpieceBlock.LIT) ? PEWTER_CHAMBERSTICK_LIGHT : 0)));
+		homestead.add(registerBlock("harvest_sampler", props -> new WallDecorationBlock(props, 2.5, 1.0, 15.0),
+				decorProperties(MapColor.WOOL, SoundType.WOOD, 0.4F).ignitedByLava().noCollision()));
+		for (Block block : homestead) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+	}
+
+	/**
+	 * The Thanksgiving harvest town details (tools/thanksgiving_town.py; docs/features/thanksgiving-town-details.md): the
+	 * Timber Harvest Arch ({@link HarvestTownArchBlock}), the Hanging Crock and Herb Rack ({@link HarvestTownHangingBlock}),
+	 * the Folded Linen Stack and the Pumpkin Carving Bench ({@link FacingDecorationBlock}) and the Copper Chafing Dish (a
+	 * {@link CandleCenterpieceBlock} whose burner lights, {@link HarvestTownDecor#chafingDishLight}). Player-placed
+	 * decorations, craftable from the start and kept all year; nothing here follows the calendar, asks for research or
+	 * decorates a town by itself.
+	 */
+	private static void registerThanksgivingTown() {
+		List<Block> decor = new ArrayList<>();
+		decor.add(registerBlock("timber_harvest_arch", HarvestTownArchBlock::new, BlockBehaviour.Properties.of().mapColor(MapColor.WOOD)
+				.strength(2.0F).sound(SoundType.WOOD).noOcclusion().forceSolidOn().ignitedByLava().pushReaction(PushReaction.IMMOVEABLE)));
+		decor.add(registerBlock("hanging_crock_rack", props -> new HarvestTownHangingBlock(props, new double[] {1.0, 0.5, 1.5, 15.0, 16.0, 14.5}),
+				decorProperties(MapColor.TERRACOTTA_ORANGE, SoundType.WOOD, 0.5F).ignitedByLava().noCollision()));
+		decor.add(registerBlock("folded_linen_stack", props -> new FacingDecorationBlock(props, new double[] {1.5, 0.0, 3.0, 15.0, 8.0, 11.5}),
+				decorProperties(MapColor.TERRACOTTA_WHITE, SoundType.WOOL, 0.3F).ignitedByLava()));
+		decor.add(registerBlock("copper_chafing_dish", props -> new CandleCenterpieceBlock(props, new double[] {1.5, 0.0, 4.0, 14.5, 13.0, 12.0}),
+				decorProperties(MapColor.COLOR_ORANGE, SoundType.COPPER, 0.8F).lightLevel(HarvestTownDecor::chafingDishLight)));
+		decor.add(registerBlock("pumpkin_carving_bench", props -> new FacingDecorationBlock(props, new double[] {0.5, 0.0, 1.0, 15.5, 13.5, 13.5}),
+				decorProperties(MapColor.WOOD, SoundType.WOOD, 0.8F).ignitedByLava()));
+		for (Block block : decor) {
+			registerItem(BuiltInRegistries.BLOCK.getKey(block).getPath(), props -> new BlockItem(block, props),
+					new Item.Properties().useBlockDescriptionPrefix(), BUILDING_TAB);
+		}
+	}
+
+	/** A small decoration: noOcclusion, popped off by a piston. */
+	private static BlockBehaviour.Properties decorProperties(MapColor color, SoundType sound, float strength) {
+		return BlockBehaviour.Properties.of().mapColor(color).strength(strength).sound(sound).noOcclusion().pushReaction(PushReaction.POPPED);
 	}
 
 	/** A prize show vegetable: soft, and popped off by a piston. */
@@ -4157,7 +4323,7 @@ public final class JugcraftAgriculture {
 		VoxelShape[] shapes = GOURD_SHAPES.get(id);
 		// Pumpkins are whole blocks, like vanilla's; the smaller gourds let light and faces past them.
 		BlockBehaviour.Properties properties = BlockBehaviour.Properties.ofFullCopy(Blocks.PUMPKIN).mapColor(color);
-		Block gourd = registerBlock(id, props -> new GourdBlock(props, shapes[0], shapes[1]),
+		Block gourd = registerBlock(id, props -> new GourdBlock(props, shapes[0], shapes[1], seedId),
 				shapes[0] == Shapes.block() ? properties : properties.noOcclusion());
 		registerItem(id, props -> new BlockItem(gourd, props), new Item.Properties().useBlockDescriptionPrefix().compostable(COMPOST_MEDIUM),
 				SEEDS_TAB);

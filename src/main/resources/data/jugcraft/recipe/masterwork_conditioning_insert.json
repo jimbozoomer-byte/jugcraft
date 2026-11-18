@@ -1,0 +1,37 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "nickel"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "silicon"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "PAP",
+    "COC",
+    "PSP"
+  ],
+  "key": {
+    "P": "jugcraft:stainless_steel_plate",
+    "A": "minecraft:amethyst_shard",
+    "C": "jugcraft:advanced_circuit",
+    "O": "jugcraft:oak_conditioning_insert",
+    "S": "jugcraft:silicone"
+  },
+  "result": {
+    "id": "jugcraft:masterwork_conditioning_insert"
+  }
+}

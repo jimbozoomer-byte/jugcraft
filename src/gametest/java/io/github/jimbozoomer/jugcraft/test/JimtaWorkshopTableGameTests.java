@@ -126,6 +126,13 @@ public final class JimtaWorkshopTableGameTests {
         h.assertTrue(node.getItem(0).is(Terraforming.PLANS.get("irrigation"))&&node.getItem(0).getCount()==1,"Terraforming plans are reusable");
         node.cursor=0;node.running=true;node.step(h.getLevel());h.assertTrue(node.energy.getAmount()==4096&&node.fluid.millibuckets()==250,"Already moist soil costs no further resources");h.succeed();
     }
+    @GameTest public void industrialCablesCarryWhatTheirMetalDoes(GameTestHelper h) {
+        long copper=io.github.jimbozoomer.jugcraft.energy.CableBlock.COPPER_RATE;
+        h.assertTrue(IndustrialCables.SPECS.get("copper").rate()==copper&&IndustrialCables.SPECS.get("insulated_copper").rate()==copper,"Industrial copper carries what Jugcraft copper does");
+        for(String iron:new String[]{"iron","insulated_iron","double_insulated_iron","quad_insulated_iron"})h.assertTrue(IndustrialCables.SPECS.get(iron).rate()==64,"Iron is a poor conductor: "+iron);
+        h.assertTrue(IndustrialCables.SPECS.get("tin").rate()<IndustrialCables.SPECS.get("iron").rate()&&IndustrialCables.SPECS.get("iron").rate()<copper,"Tin, then iron, then copper");
+        h.succeed();
+    }
     @GameTest public void closedSplitterDoesNotStallTheLocalBranch(GameTestHelper h) {
         var level=h.getLevel();
         h.setBlock(new BlockPos(1,2,1),IndustrialCables.BLOCKS.get("copper"));

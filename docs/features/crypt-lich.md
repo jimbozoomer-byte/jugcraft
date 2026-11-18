@@ -78,7 +78,7 @@ If no player he can fight is within 38 blocks of the dais for 10 seconds: "The C
 
 ### His loot
 
-Each participant rolls their own loot. A participant is a player who hurt him or his dead, broke one of his seals, read a name back at the lectern or struck back one of his bolts, and is within 64 blocks of the dais when he falls. The loot goes straight into their inventory, and what does not fit lands at their feet. "His grave goods are yours".
+Each participant rolls their own loot. A participant is a player who hurt him or his dead, broke one of his seals, read a name back at the lectern or struck back one of his bolts, and is within 64 blocks of the dais when he falls (each of those is a deed in his fight since Concordance Chunk E). Since Concordance Chunk E (E4, [lair-encounter-credit.md](lair-encounter-credit.md)) his fight's credit and reward are the lairs' shared ones: a player also qualifies by healing other players 4 or more of what his side's blows took from them, or by a ward on another player that soaks 4 or more of those blows, and a blow by a creature they tamed is theirs. Whoever dies in the fight is paid once back on their feet, and whoever leaves the game in it when they next join, still kept under the name `crypt_lich` (saved, so never renamed). Each fall pays each player once. The loot goes straight into their inventory, and what does not fit lands at their feet. "His grave goods are yours".
 
 | Loot | Chance |
 | --- | --- |

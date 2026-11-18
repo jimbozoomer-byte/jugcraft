@@ -8,6 +8,7 @@ import com.geckolib.animation.RawAnimation;
 import com.geckolib.animation.object.LoopType;
 import com.geckolib.util.GeckoLibUtil;
 import io.github.jimbozoomer.jugcraft.lair.DischargeBreakerBlock;
+import io.github.jimbozoomer.jugcraft.lair.Encounter;
 import io.github.jimbozoomer.jugcraft.lair.FoundryTrench;
 import io.github.jimbozoomer.jugcraft.lair.FoundryTrench.Pylon;
 import io.github.jimbozoomer.jugcraft.lair.GroundTerminalBlock;
@@ -16,6 +17,7 @@ import io.github.jimbozoomer.jugcraft.lair.Lair;
 import io.github.jimbozoomer.jugcraft.lair.LairBosses;
 import io.github.jimbozoomer.jugcraft.lair.LairExitBlock;
 import io.github.jimbozoomer.jugcraft.lair.LairInstance;
+import io.github.jimbozoomer.jugcraft.lair.LairRewards;
 import io.github.jimbozoomer.jugcraft.lair.Lairs;
 import io.github.jimbozoomer.jugcraft.lair.PylonCrownBlock;
 import java.util.ArrayList;
@@ -88,9 +90,10 @@ import org.jspecify.annotations.Nullable;
  * {@value #RED_DISCHARGE_EVERY} ticks.
  *
  * <p>Every attack has a wind-up you can read, a strike and a recovery ({@link Attack}); the numbers are here, in one place,
- * and in tools/iron_dreadnought.py. Poison, Wither, drowning, knockback and falls never harm him. Each participant (whoever
- * hurt him or his Sparkers, routed a discharge or worked at a fouled breaker) gets their own loot
- * ({@link IronDreadnoughtLoot}). Left alone he returns to his gantry, healed: his Sparkers burn out, the pylons go dark,
+ * and in tools/iron_dreadnought.py. Poison, Wither, drowning, knockback and falls never harm him. Each player who
+ * qualified in his fight (lair/Encounter, since Concordance Chunk E, E4: a blow to him or his Sparkers, their own or a
+ * creature's they tamed, healing or a ward on another player, or a deed: routing a discharge or working at a fouled
+ * breaker) gets their own loot ({@link IronDreadnoughtLoot}), once, paid through lair/LairRewards. Left alone he returns to his gantry, healed: his Sparkers burn out, the pylons go dark,
  * the breakers are cleared and open, and who hurt him is forgotten. Bound to a lair instance he vanishes with it; one with
  * no instance (a test's) keeps to the trench laid out from the origin he was given. The only blocks he changes are the
  * trench's crowns, breakers and terminals, and on his fall the Grey Mist in the gantry.
@@ -263,9 +266,8 @@ public class IronDreadnoughtEntity extends Monster implements GeoEntity {
 	private @Nullable UUID foe;
 	private int abandoned;
 	private int staggerTicks;
-	private final Map<UUID, Float> damageBy = new HashMap<>();
-	/** Whoever routed a discharge or worked at a fouled breaker: participants too. */
-	private final Set<UUID> helpers = new HashSet<>();
+	/** This fight: who took part and how (lair/Encounter, since Concordance Chunk E, E4); his trench is the arena. */
+	private final Encounter encounter = new Encounter(this, this::centre);
 	private final Map<UUID, Long> platedWords = new HashMap<>();
 	// His rule.
 	private int dischargeIn = DISCHARGE_EVERY;
@@ -552,6 +554,9 @@ public class IronDreadnoughtEntity extends Monster implements GeoEntity {
 			discard();
 			return;
 		}
+		if (phase != Phase.WAITING && isAlive() && !encounter.underway()) {
+			encounter.begin();  // a fight back from a save keeps a fresh record of who takes part
+		}
 		if (landOnLoad) {
 			landOnLoad = false;
 			Vec3 woke = woke();
@@ -635,6 +640,7 @@ public class IronDreadnoughtEntity extends Monster implements GeoEntity {
 		phaseTicks = 0;
 		setAction(Action.WAKE);
 		entityData.set(EYE, true);
+		encounter.begin();
 		bossBar.setVisible(true);
 		dischargeIn = DISCHARGE_EVERY;
 		level.playSound(null, getX(), getY(), getZ(), SoundEvents.FIRE_EXTINGUISH, SoundSource.HOSTILE, 3.0F, 0.5F);
@@ -783,7 +789,7 @@ public class IronDreadnoughtEntity extends Monster implements GeoEntity {
 			return false;
 		}
 		if (state.getValue(DischargeBreakerBlock.FOULED)) {
-			helpers.add(player.getUUID());
+			deed(player, "breaker");
 			clearUses++;
 			level.playSound(null, pos, SoundEvents.ANVIL_LAND, SoundSource.BLOCKS, 0.8F, 1.4F);
 			level.sendParticles(ParticleTypes.CRIT, pos.getX() + 0.5, pos.getY() + 0.8, pos.getZ() + 0.5, 6, 0.2, 0.2, 0.2, 0.1);
@@ -807,9 +813,7 @@ public class IronDreadnoughtEntity extends Monster implements GeoEntity {
 	 * the ground through the terminal, and the surge comes back into him: he overloads.
 	 */
 	public void route(ServerLevel level, Pylon pylon, @Nullable Player player) {
-		if (player != null) {
-			helpers.add(player.getUUID());
-		}
+		deed(player, "route");
 		BlockPos breaker = breaker(pylon);
 		DischargeBreakerBlock.set(level, breaker, DischargeBreakerBlock.THROWN, true);
 		GroundTerminalBlock.setLive(level, terminal(pylon), true);
@@ -1565,20 +1569,32 @@ public class IronDreadnoughtEntity extends Monster implements GeoEntity {
 
 	/** Whoever hurt him or his Sparkers has taken part. */
 	public void took(ServerPlayer player, float amount) {
-		damageBy.merge(player.getUUID(), amount, Float::sum);
+		encounter.damage(player, amount);
 	}
 
-	/** His participants: everyone who hurt him or his Sparkers, routed a discharge or worked at a fouled breaker, and is near. */
+	/** His participants: everyone who qualified in his fight (lair/Encounter) and is alive near his trench. */
 	public List<ServerPlayer> participants(ServerLevel level) {
 		List<ServerPlayer> out = new ArrayList<>();
 		Vec3 centre = centre();
-		for (ServerPlayer player : level.players()) {
-			boolean part = damageBy.getOrDefault(player.getUUID(), 0.0F) > 0.0F || helpers.contains(player.getUUID());
-			if (player.isAlive() && part && player.position().distanceTo(centre) <= 64.0) {
+		for (UUID id : encounter.qualified()) {
+			ServerPlayer player = level.getServer().getPlayerList().getPlayer(id);
+			if (player != null && player.isAlive() && player.level() == level && player.position().distanceTo(centre) <= Encounter.REACH) {
 				out.add(player);
 			}
 		}
 		return out;
+	}
+
+	/** This fight: who took part and how. */
+	public Encounter encounter() {
+		return encounter;
+	}
+
+	/** {@code player} did one of the deeds his fight names: a part in it (lair/Encounter), keyed by what, who and when. */
+	private void deed(@Nullable Player player, String what) {
+		if (player instanceof ServerPlayer server) {
+			encounter.deed(server, what + " " + server.getUUID() + " " + server.level().getGameTime());
+		}
 	}
 
 	// ---------------------------------------------------------------- abandoned, and defeated
@@ -1602,8 +1618,7 @@ public class IronDreadnoughtEntity extends Monster implements GeoEntity {
 		stunTicks = 0;
 		springIn = 0;
 		dischargeIn = DISCHARGE_EVERY;
-		damageBy.clear();
-		helpers.clear();
+		encounter.abandon();
 		Arrays.fill(cooldowns, 0);
 		setHealth(getMaxHealth());
 		entityData.set(EYE, false);
@@ -1656,17 +1671,27 @@ public class IronDreadnoughtEntity extends Monster implements GeoEntity {
 	public void die(DamageSource source) {
 		super.die(source);
 		if (level() instanceof ServerLevel level) {
+			// A killing blow gets here inside super.hurtServer, before hurtServer's own took(): its striker (or the owner of
+			// the tamed creature that struck) has taken part before the fall is paid. Any amount qualifies.
+			if (Encounter.striker(source) instanceof ServerPlayer player) {
+				took(player, Float.MIN_VALUE);
+			}
 			defeated(level);
 		}
 	}
 
 	/**
-	 * He has fallen: his Sparkers burn out and his things are gone, each participant gets their loot, the pylons go dark,
-	 * his lair's instance ends (it closes once everyone has left), and Grey Mist opens in the gantry he came from.
+	 * He has fallen: his Sparkers burn out and his things are gone, each player who qualified is paid their loot
+	 * (lair/LairRewards: now, or kept for one who died or left the game in it), the pylons go dark, his lair's instance
+	 * ends (it closes once everyone has left), and Grey Mist opens in the gantry he came from.
 	 */
 	private void defeated(ServerLevel level) {
+		// However often the fall is reported, it is answered once: one reward each (lair/Encounter's claim).
+		if (!encounter.claim()) {
+			return;
+		}
 		dismiss(level);
-		IronDreadnoughtLoot.reward(level, this, participants(level));
+		LairRewards.pay(level, IronDreadnoughtLoot.BOSS, encounter, position(), centre(), EXPERIENCE);
 		restoreFixtures(level);
 		entityData.set(EYE, false);
 		level.sendParticles(ParticleTypes.CLOUD, getX(), getY() + 2.0, getZ(), 40, 1.6, 1.4, 1.6, 0.03);
@@ -1715,7 +1740,7 @@ public class IronDreadnoughtEntity extends Monster implements GeoEntity {
 			plated(level, source);
 		}
 		boolean hurt = super.hurtServer(level, source, dealt);
-		if (hurt && source.getEntity() instanceof ServerPlayer player) {
+		if (hurt && Encounter.striker(source) instanceof ServerPlayer player) {
 			took(player, dealt);
 		}
 		return hurt;

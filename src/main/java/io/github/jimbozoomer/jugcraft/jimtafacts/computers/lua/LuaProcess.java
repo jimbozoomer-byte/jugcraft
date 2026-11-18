@@ -20,6 +20,7 @@ public final class LuaProcess implements AutoCloseable {
     private DataOutputStream output;
     private volatile CompletableFuture<Reply> pending;
     private volatile long deadline;
+    private boolean firstResponse = true;
     public static synchronized LuaProcess open(String source) {
         if(ACTIVE.size()>=4)throw new IllegalArgumentException("Four Lua computers are already running. Stop one and retry.");
         if(source.length()>8192)throw new IllegalArgumentException("Lua source limit is 8192 characters");
@@ -39,7 +40,10 @@ public final class LuaProcess implements AutoCloseable {
                 if(worker.closed){launched.destroyForcibly();throw new IOException("Computer stopped");}
                 worker.input=new DataInputStream(launched.getInputStream());worker.output=new DataOutputStream(launched.getOutputStream());
                 worker.output.writeUTF(source);worker.output.flush();
-                return new Reply(0,"");
+                // JVM startup and Lua compilation belong to the startup budget, not the first response slice.
+                int status=worker.input.readUnsignedByte();String ready=worker.input.readUTF();
+                if((status!=0&&status!=3)||ready.length()>4096||(status==0&&!ready.isEmpty()))throw new IOException("Invalid Lua startup response");
+                return new Reply(status,ready);
             }catch(Exception e){worker.close();throw new CompletionException(e);}
         },IO); } catch(RejectedExecutionException rejected){worker.close();throw new IllegalArgumentException("Lua workers are still shutting down; retry shortly.");}
         return worker;
@@ -62,7 +66,10 @@ public final class LuaProcess implements AutoCloseable {
     public void resume(boolean success,String text) {
         if(closed||pending!=null)throw new IllegalStateException("Lua worker is not ready");
         if(text.length()>4096)throw new IllegalArgumentException("Lua reply exceeds 4096 characters");
-        deadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(2);
+        // Process.start only launches the JVM. Its first response also loads Cobalt
+        // and the bundled ROM; subsequent program steps keep the two-second bound.
+        deadline=System.nanoTime()+TimeUnit.SECONDS.toNanos(firstResponse ? 10 : 2);
+        firstResponse=false;
         try { pending=CompletableFuture.supplyAsync(()->{
             try{output.writeBoolean(success);output.writeUTF(text);output.flush();int status=input.readUnsignedByte();String value=input.readUTF();if(status>3||value.length()>4096)throw new IOException("Invalid Lua response");return new Reply(status,value);}
             catch(IOException e){close();throw new CompletionException(e);}

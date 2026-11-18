@@ -1,0 +1,29 @@
+{
+  "values": [
+    "jugcraft:landscape_alpine_highlands",
+    "jugcraft:landscape_forested_highlands",
+    "jugcraft:landscape_temperate_highlands",
+    "jugcraft:landscape_windswept_spires",
+    "minecraft:windswept_forest",
+    "minecraft:windswept_gravelly_hills",
+    "minecraft:windswept_hills",
+    "jugcraft:landscape_granite_cliffs",
+    "jugcraft:landscape_white_cliffs",
+    "jugcraft:basin",
+    "jugcraft:landscape_basalt_cliffs",
+    "jugcraft:landscape_stony_spires",
+    "jugcraft:landscape_highlands",
+    "jugcraft:landscape_hot_springs",
+    "jugcraft:landscape_haze_mountain",
+    "jugcraft:highland",
+    "jugcraft:landscape_crag",
+    "jugcraft:landscape_highland",
+    "jugcraft:shield",
+    "jugcraft:landscape_yellowstone",
+    "jugcraft:landscape_yosemite_cliffs",
+    "jugcraft:hot_springs",
+    "jugcraft:landscape_caldera",
+    "minecraft:cherry_grove",
+    "minecraft:meadow"
+  ]
+}

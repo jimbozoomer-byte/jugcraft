@@ -22,6 +22,7 @@ import net.minecraft.world.level.storage.*;
 /** Hidden companion-only workspace. Vanilla player crafting is untouched; no independent block ticker. */
 public final class CraftingTableCompanionBlockEntity extends BlockEntity {
     public static final int WORK_TICKS=60, EFFORT=4, BATCHES=8;
+    static final int PLANNING_PAGE_SIZE=256;
     public record Plan(Identifier id,List<ItemStack> pattern,List<RecipeSupplies.Part> parts,ItemStack result) {}
     public final CompanionRecipeFilter filter=new CompanionRecipeFilter();
     public final CraftingTableJob job=new CraftingTableJob(this);
@@ -67,11 +68,11 @@ public final class CraftingTableCompanionBlockEntity extends BlockEntity {
         cachedPlan=new Plan(recipe.id(),pattern.stream().map(ItemStack::copy).toList(),parts,result);return cachedPlan;
     }
     public void prepare(Storage<ItemVariant> source,ToDoubleFunction<ItemStack> priority){
-        if(!live() || hasInputs() || !filter.stock.incoming().isEmpty())return;
+        if(!live() || hasInputs() || filter.stock.hasIncoming(this))return;
         var choices=new ArrayList<>(recipes().choices(filter));if(choices.isEmpty()){selected=null;entry=null;pattern=List.of();cachedPlan=null;touch();return;}
         var scores=new HashMap<Item,Double>();ToDoubleFunction<CraftingTableRecipes.Entry> score=e->priority==null?0:scores.computeIfAbsent(e.icon().getItem(),i->priority.applyAsDouble(e.icon()));
         choices.sort(Comparator.<CraftingTableRecipes.Entry>comparingDouble(score).reversed().thenComparingInt(e->e.id().equals(selected)?0:1));
-        var supplies=RecipeSupplies.available(source);int limit=Math.min(256,choices.size());
+        var supplies=RecipeSupplies.available(source);int limit=Math.min(PLANNING_PAGE_SIZE,choices.size());
         // With no filter, continue a bounded page if a huge catalog has no available recipe on its first page.
         int start=filter.empty() && priority==null?Math.floorMod(cursor,choices.size()):0;
         for(int i=0;i<limit;i++){
@@ -121,6 +122,8 @@ public final class CraftingTableCompanionBlockEntity extends BlockEntity {
         public Identifier plan(){var p=CraftingTableCompanionBlockEntity.this.plan();return accessible(npc) && p!=null?p.id():null;}
         public void prepare(Storage<ItemVariant> source){if(accessible(npc))CraftingTableCompanionBlockEntity.this.prepare(source,null);}
         public int needed(ItemStack stack){return accessible(npc)?CraftingTableCompanionBlockEntity.this.needed(stack):0;}
+        public boolean acceptsSupplyBatch(){return !complete() && !hasOutput() && !filter.stock.hasIncoming(CraftingTableCompanionBlockEntity.this);}
+        public int pickupNeeded(ItemStack stack){return acceptsSupplyBatch()?needed(stack):0;}
         public Storage<ItemVariant> inputs(){return new InsertionOnlyStorage<>(){public long insert(ItemVariant item,long amount,TransactionContext tx){return accessible(npc)?CraftingTableCompanionBlockEntity.this.inputs.insert(item,amount,tx):0;}};}
         public Storage<ItemVariant> outputs(){return accessible(npc)?outputs:Storage.empty();}
         public CompanionStatus status(){return accessible(npc)?CraftingTableCompanionBlockEntity.this.status():CompanionStatus.FORBIDDEN;}

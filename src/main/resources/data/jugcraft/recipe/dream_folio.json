@@ -1,0 +1,19 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:book",
+    "minecraft:amethyst_shard",
+    "minecraft:compass"
+  ],
+  "result": {
+    "id": "jugcraft:dream_folio",
+    "count": 1
+  }
+}

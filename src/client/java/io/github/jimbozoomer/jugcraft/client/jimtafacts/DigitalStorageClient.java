@@ -16,7 +16,7 @@ import net.minecraft.world.entity.player.Inventory;
 /** A compact engineering terminal: searchable stock, real counts, crafting and inventory in one view. */
 public final class DigitalStorageClient {
     private DigitalStorageClient() {}
-    public static void register() { DigitalExplorationClient.register(); MenuScreens.register(DigitalTerminal.TYPE, TerminalScreen::new); MenuScreens.register(DigitalTerminal.DRIVE, DriveScreen::new); MenuScreens.register(DigitalControls.TYPE, ControlScreen::new); MenuScreens.register(PatternEncoding.TYPE, PatternScreen::new); MenuScreens.register(DigitalJobs.TYPE, JobsScreen::new); }
+    public static void register() { DigitalExplorationClient.register(); DigitalCellTints.register(); MenuScreens.register(DigitalTerminal.TYPE, TerminalScreen::new); MenuScreens.register(DigitalTerminal.DRIVE, DriveScreen::new); MenuScreens.register(DigitalControls.TYPE, ControlScreen::new); MenuScreens.register(PatternEncoding.TYPE, PatternScreen::new); MenuScreens.register(DigitalJobs.TYPE, JobsScreen::new); }
     private static void panel(GuiGraphicsExtractor g, int x, int y, int w, int h) {
         g.fill(x - 2, y - 2, x + w + 2, y + h + 2, 0xFF090E15);
         g.fill(x, y, x + w, y + h, 0xFF8996A0);

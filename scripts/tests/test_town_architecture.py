@@ -112,6 +112,10 @@ class TownArchitectureTests(unittest.TestCase):
         for old,new in zip(previous['sites'],self.town.sites):
             if old['kind']=='tower_flag':
                 self.assertEqual(new['kind'],'retired');self.assertEqual(old['blocks'],new['blocks'])
+            elif old['kind']=='centerpiece':
+                self.assertEqual(new['facing'],old['facing'])
+                self.assertEqual(new['blocks'][:len(old['blocks'])],old['blocks'])
+                self.assertEqual(len({b[3] for b in new['blocks']}),len(new['blocks']))
             else:self.assertEqual(old,new)
         for spot in self.town.spots[len(previous['spots']):]:
             x,y,z=spot['pos']

@@ -1,0 +1,39 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "jugcraft:chemical_reaction",
+  "capability": "jugcraft:drug_formulation",
+  "items": [
+    {
+      "ingredient": "jugcraft:pharmaceutical_base",
+      "count": 2
+    },
+    {
+      "ingredient": "jugcraft:pharmaceutical_starch",
+      "count": 2
+    }
+  ],
+  "fluids": [
+    {
+      "fluid": "minecraft:water",
+      "amount": 250
+    }
+  ],
+  "results": [
+    {
+      "id": "jugcraft:paracetamol",
+      "count": 8
+    }
+  ],
+  "tool": "jugcraft:paracetamol_formula_plate",
+  "energy_per_tick": 64,
+  "time": 160
+}

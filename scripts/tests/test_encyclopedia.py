@@ -1,9 +1,10 @@
 """Factory expansion links into the shared encyclopedia, without a second protocol."""
-import json, sys, unittest
+import json, re, sys, unittest
 from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / 'tools'))
 import encyclopedia_routes
+import encyclopedia
 import industrial_forms
 
 class EncyclopediaCatalogTests(unittest.TestCase):
@@ -17,12 +18,18 @@ class EncyclopediaCatalogTests(unittest.TestCase):
         self.assertEqual([r['id'] for r in self.book['routes']], ['technology', 'magic'])
 
     def test_every_technology_link_resolves_to_a_real_page(self):
+        registered_pages = set(re.findall(r'page\("([^"]+)"', (ROOT / 'src/main/java/io/github/jimbozoomer/jugcraft/guide/encyclopedia/Encyclopedia.java').read_text()))
         route = self.book['routes'][0]
         for entry in route['chapters'] + route['milestones']:
             link = entry['link']
-            self.assertEqual(link['type'], 'handbook')
-            page = self.handbook['chapters'][link['chapter']]['pages'][link['page']]
-            self.assertTrue(page['title'])
+            self.assertIn(link['type'], ('handbook', 'page'))
+            if link['type'] == 'page':
+                self.assertIn(link['target'], registered_pages, entry)
+                self.assertIn(link['target'], encyclopedia.SERVER_PAGES)
+                self.assertTrue(encyclopedia.PAGES[link['target']])
+            else:
+                page = self.handbook['chapters'][link['chapter']]['pages'][link['page']]
+                self.assertTrue(page['title'])
             self.assertTrue(entry['icon'])
 
     def test_every_expanded_machine_is_discoverable(self):

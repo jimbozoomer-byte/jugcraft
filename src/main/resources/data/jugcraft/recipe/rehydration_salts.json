@@ -1,0 +1,28 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "salt"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "SGS",
+    "BWB"
+  ],
+  "key": {
+    "S": "jugcraft:salt",
+    "G": "minecraft:sugar",
+    "B": "minecraft:paper",
+    "W": "minecraft:water_bucket"
+  },
+  "result": {
+    "id": "jugcraft:rehydration_salts",
+    "count": 2
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jugcraft:block/scalloped_potatoes",
+      "y": 180
+    },
+    "facing=east": {
+      "model": "jugcraft:block/scalloped_potatoes",
+      "y": 270
+    },
+    "facing=south": {
+      "model": "jugcraft:block/scalloped_potatoes"
+    },
+    "facing=west": {
+      "model": "jugcraft:block/scalloped_potatoes",
+      "y": 90
+    }
+  }
+}

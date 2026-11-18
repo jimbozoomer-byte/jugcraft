@@ -6,6 +6,7 @@ import com.geckolib.animatable.manager.AnimatableManager;
 import com.geckolib.animation.AnimationController;
 import com.geckolib.animation.RawAnimation;
 import com.geckolib.util.GeckoLibUtil;
+import io.github.jimbozoomer.jugcraft.lair.Encounter;
 import io.github.jimbozoomer.jugcraft.lair.LairBosses;
 import java.util.UUID;
 import net.minecraft.core.UUIDUtil;
@@ -184,7 +185,7 @@ public class SparkerEntity extends Monster implements GeoEntity {
 	public boolean hurtServer(ServerLevel level, DamageSource source, float amount) {
 		boolean hurt = super.hurtServer(level, source, amount);
 		IronDreadnoughtEntity master = dreadnought(level);
-		if (hurt && master != null && source.getEntity() instanceof ServerPlayer player) {
+		if (hurt && master != null && Encounter.striker(source) instanceof ServerPlayer player) {
 			master.took(player, amount);
 		}
 		return hurt;

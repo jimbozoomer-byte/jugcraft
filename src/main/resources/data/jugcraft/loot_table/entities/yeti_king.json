@@ -61,6 +61,40 @@
         }
       ],
       "rolls": 1
+    },
+    {
+      "condition": {
+        "type": "minecraft:random_chance",
+        "chance": 0.15
+      },
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:frost_knight_greatsword"
+        }
+      ],
+      "rolls": 1
+    },
+    {
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:frost_knight_helmet"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:frost_knight_chestplate"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:frost_knight_leggings"
+        },
+        {
+          "type": "minecraft:item",
+          "name": "jugcraft:frost_knight_boots"
+        }
+      ],
+      "rolls": 1
     }
   ]
 }

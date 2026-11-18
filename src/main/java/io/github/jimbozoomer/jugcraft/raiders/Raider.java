@@ -20,4 +20,10 @@ public interface Raider {
 
 	/** Joins a raid headed for {@code objective}. */
 	void joinRaid(UUID raid, BlockPos objective);
+
+	/**
+	 * What it remembers of its fight in a raid: the defenders and approaches it has given up, and its bounded recovery
+	 * ({@link RaidEngagement}). Not saved.
+	 */
+	RaidEngagement engagement();
 }

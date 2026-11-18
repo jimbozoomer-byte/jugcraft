@@ -1,0 +1,38 @@
+{
+  "values": [
+    "jugcraft:cave/landscape_andesite_caves",
+    "jugcraft:cave/landscape_deep_caves",
+    "jugcraft:cave/landscape_diorite_caves",
+    "jugcraft:cave/landscape_frostfire_caves",
+    "jugcraft:cave/landscape_fungal_caves",
+    "jugcraft:cave/landscape_granite_caves",
+    "jugcraft:cave/landscape_infested_caves",
+    "jugcraft:cave/landscape_mantle_caves",
+    "jugcraft:cave/landscape_thermal_caves",
+    "jugcraft:cave/landscape_tuff_caves",
+    "jugcraft:cave/landscape_underground_jungle",
+    "jugcraft:cavern_abyssal_chasm",
+    "jugcraft:cavern_candy_cavity",
+    "jugcraft:cavern_forlorn_hollows",
+    "jugcraft:cavern_magnetic_caves",
+    "jugcraft:cavern_primordial_caves",
+    "jugcraft:cavern_toxic_caves",
+    "jugcraft:glowcap_grotto",
+    "jugcraft:landscape_glowing_grotto",
+    "jugcraft:landscape_spider_nest",
+    "jugcraft:pixel_hollows",
+    "jugcraft:spider_nest",
+    "minecraft:deep_dark",
+    "minecraft:dripstone_caves",
+    "minecraft:lush_caves",
+    "minecraft:sulfur_caves",
+    {
+      "id": "#c:is_cave",
+      "required": false
+    },
+    {
+      "id": "#c:is_underground",
+      "required": false
+    }
+  ]
+}

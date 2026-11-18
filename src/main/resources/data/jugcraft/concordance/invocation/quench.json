@@ -1,0 +1,14 @@
+{
+  "schema": 1,
+  "spell": "jugcraft:quench",
+  "principle": "rime",
+  "research": "jugcraft:rimekeeping",
+  "stage": "understood",
+  "focus": 3,
+  "mastered_focus": 2,
+  "role": "support",
+  "composition": "touch struck quenching",
+  "tunings": [],
+  "work": 2,
+  "persists": 100
+}

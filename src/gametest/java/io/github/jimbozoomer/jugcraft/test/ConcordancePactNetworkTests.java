@@ -134,6 +134,7 @@ public final class ConcordancePactNetworkTests implements FabricClientGameTest {
 					InProcessServerConfigs.beforeAdditionalClient(server);
 					peer = launchPeer(server.computeOnServer(MinecraftServer::getPort));
 					Process joining = peer;
+					PeerClientStartup.await(() -> context.waitTicks(1), joining, CLIENT.coordination());
 					server.waitFor(minecraft -> {
 						if (!joining.isAlive()) {
 							throw failure("The second client exited before joining: " + joining.exitValue());
@@ -490,9 +491,9 @@ public final class ConcordancePactNetworkTests implements FabricClientGameTest {
 		return CLIENT.failure(message);
 	}
 
-	/** OwnerCollectionsNetworkTests.launchPeer (#435), with this class's names, as SecondClient launches it: its heap 2 GiB as before. */
+	/** OwnerCollectionsNetworkTests.launchPeer (#435), with this class's names, as SecondClient launches it, with the shared second-client heap. */
 	private static Process launchPeer(int port) throws IOException {
-		return CLIENT.launch(port, "-Xmx2G");
+		return CLIENT.launch(port, PeerClientStartup.HEAP_OPTION);
 	}
 
 	private static void check(boolean condition, String message) {

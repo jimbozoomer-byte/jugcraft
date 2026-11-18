@@ -48,6 +48,7 @@ import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponentMap;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.FluidTags;
@@ -181,6 +182,8 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	private NonNullList<ItemStack> items;
 	private int progress;
 	private int maxProgress;
+	/** Compact fluid work belongs to one recipe; full outputs pause rather than discard paid ticks. */
+	private @Nullable Identifier fluidWorkRecipe;
 	private int industrialHeat, industrialHeatTarget;
     private int bladeRequired;
 	private int burn;
@@ -201,6 +204,10 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	/** mB in the machine's tank: water for the steam generator and ore washer, lava for the geothermal generator. Saved as "water". */
 	private int tank;
 	int companionTankAmount(){return tank;}
+	/** mB in the machine's {@link MachineKind#tankCapacity()} tank, which holds only {@link MachineKind#tankFluid()}. */
+	public int tankAmount() {
+		return tank;
+	}
 	/** Processors: which faces take input or give output, and whether results are pushed out. */
 	private final SideConfig sides;
 	/** Ore drill: the next block to check, counted from the top layer below the drill (see {@link OreDrilling}). */
@@ -299,12 +306,9 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			default -> null;
 		};
 		this.inlet = switch (kind) {
-			case STEAM_GENERATOR -> new TankInlet(Fluids.WATER, MachineKind.STEAM_TANK);
-			case LARGE_STEAM_ENGINE -> new TankInlet(Fluids.WATER, MachineKind.LARGE_ENGINE_TANK);
-			case GEOTHERMAL_GENERATOR -> new TankInlet(Fluids.LAVA, MachineKind.GEOTHERMAL_TANK);
-			case ORE_WASHER -> new TankInlet(Fluids.WATER, MachineKind.WASHER_TANK);
-			case HYDROPONIC_BAY -> new TankInlet(PetroFluids.NUTRIENT_SOLUTION.source(), MachineKind.HYDROPONIC_TANK);
-			case ELECTROPLATING_BATH -> new TankInlet(PetroFluids.SULFURIC_ACID.source(), Electroplating.TANK);
+			// One-fluid tanks: the fluid and size come from MachineKind, which the screen's gauge reads too.
+			case STEAM_GENERATOR, LARGE_STEAM_ENGINE, GEOTHERMAL_GENERATOR, ORE_WASHER, HYDROPONIC_BAY, ELECTROPLATING_BATH ->
+					new TankInlet(kind.tankFluid(), kind.tankCapacity());
 			case STEEL_FOUNDRY -> new TankInlet(PetroFluids.OXYGEN.fluid(), MachineKind.BOOST_TANK);
 			case ARC_FURNACE -> new TankInlet(PetroFluids.ARGON.fluid(), MachineKind.BOOST_TANK);
 			default -> null;
@@ -352,6 +356,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	}
 	public void companionRecipeChanged() {
 		progress = 0;
+		fluidWorkRecipe = null;
 		resetCompanionEffort();
 		setChanged();
 	}
@@ -1086,31 +1091,56 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 				? companionPort.recipe() instanceof FluidRecipe selected && selected.itemsMatch(inputs) && selected.fluidsMatch(tanks)
 						? Optional.of(selected) : Optional.empty()
 				: FluidRecipes.find(level.getServer(), kind, inputs, tanks);
-		if (found.isEmpty() || !found.get().fluidResultsFit(tanks) || !itemResultsFit(found.get())) {
-			processorStatus(found.isEmpty() ? local.peepo.CompanionStatus.NO_INPUT : local.peepo.CompanionStatus.FULL);
-			if (progress != 0) {
+		if (found.isEmpty()) {
+			processorStatus(local.peepo.CompanionStatus.NO_INPUT);
+			if (progress != 0 || fluidWorkRecipe != null) {
 				progress = 0;
+				fluidWorkRecipe = null;
 				setChanged();
 			}
 			return false;
 		}
+		FluidRecipe recipe = found.get();
+		Identifier recipeId = FluidRecipes.entries(level.getServer(), kind).stream()
+				.filter(entry -> entry.recipe() == recipe).map(FluidRecipes.Entry::id).findFirst().orElse(null);
+		if (fluidWorkRecipe != null && (!fluidWorkRecipe.equals(recipeId) || maxProgress != recipe.time())) {
+			// Changing only fluid feeds or automatic selection bypasses setItem's input-change reset.
+			// A different valid recipe must never inherit the preceding job's paid work.
+			progress = 0;
+			fluidWorkRecipe = null;
+			resetCompanionEffort();
+			setChanged();
+		}
+		if (progress > 0 && fluidWorkRecipe == null && recipeId != null) {
+			// Legacy saves had no work id. Bind their matching recipe without erasing saved paid ticks.
+			fluidWorkRecipe = recipeId;
+			setChanged();
+		}
+		maxProgress = recipe.time();
+		if (!recipe.fluidResultsFit(tanks) || !itemResultsFit(recipe)) {
+			processorStatus(local.peepo.CompanionStatus.FULL);
+			return false; // Keep paid progress; spend and roll nothing while maximum output space is unavailable.
+		}
 		if (!sides.redstone().allows(poweredByRedstone(level, pos, state))) {
 			return false;
 		}
-		FluidRecipe recipe = found.get();
         if (recipe.tool().isPresent() && (!kind.hasProcessTool()
                 || !recipe.tool().get().test(items.get(kind.slots)))) {
             processorStatus(local.peepo.CompanionStatus.MACHINE_TOOL);
-            if (progress != 0) { progress = 0; setChanged(); }
+            if (progress != 0 || fluidWorkRecipe != null) { progress = 0; fluidWorkRecipe = null; setChanged(); }
             return false;
         }
-		maxProgress = recipe.time();
 		if (energy.getAmount() < kind.usePerTick) {
 			return false; // Keeps progress; resumes when power returns.
 		}
+		fluidWorkRecipe = recipeId;
 		energy.setAmount(energy.getAmount() - kind.usePerTick);
 		if ((progress += 1 + companionBonus(kind.usePerTick, maxProgress - progress - 1, recipe.companionEffort())) >= maxProgress) {
+			// All maximum outputs were checked before work. There is no save/tick boundary between these independent
+			// rolls, input consumption and result insertion; failed rolls still complete and spend the batch once.
+			List<ItemStack> rolledResults = recipe.rollResults(level.getRandom()::nextDouble);
 			progress = 0;
+			fluidWorkRecipe = null;
 			for (int slot = 0; slot < recipe.items().size(); slot++) {
 				items.get(slot).shrink(recipe.items().get(slot).count());
 			}
@@ -1120,8 +1150,9 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 			for (int i = 0; i < recipe.fluidResults().size(); i++) {
 				tanks.output(recipe.resultTank(i)).fill(recipe.fluidResults().get(i).fluid(), recipe.fluidResults().get(i).amount());
 			}
-			for (int i = 0; i < recipe.results().size(); i++) {
-				ItemStack result = recipe.results().get(i).create();
+			for (int i = 0; i < rolledResults.size(); i++) {
+				ItemStack result = rolledResults.get(i);
+				if (result.isEmpty()) continue;
 				ItemStack held = items.get(kind.outputSlot() + i);
 				if (held.isEmpty()) {
 					items.set(kind.outputSlot() + i, result);
@@ -2082,6 +2113,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		if ((kind.isProcessor() || kind.isFluidProcessor()) && (slot < kind.outputSlot() || (kind.hasProcessTool() && slot == kind.slots))
 				&& !ItemStack.isSameItemSameComponents(items.get(slot), stack)) {
 			progress = 0;
+			fluidWorkRecipe = null;
 			resetCompanionEffort();
 		}
 		super.setItem(slot, stack);
@@ -2211,7 +2243,13 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	protected void loadAdditional(ValueInput input) {
 		super.loadAdditional(input);
 		items = NonNullList.withSize(kind.containerSize(), ItemStack.EMPTY);
-		ContainerHelper.loadAllItems(input, items);
+		if (kind == MachineKind.CHEMICAL_REACTOR && input.getIntOr("item_layout", 0) == 0) {
+			// Layout zero held two input slots and one output. Retain all three indices and append empty outputs;
+			// neither tank migration nor an old running recipe may reinterpret that saved output as another input.
+			NonNullList<ItemStack> oldItems = NonNullList.withSize(3, ItemStack.EMPTY);
+			ContainerHelper.loadAllItems(input, oldItems);
+			for (int slot = 0; slot < oldItems.size(); slot++) items.set(slot, oldItems.get(slot));
+		} else ContainerHelper.loadAllItems(input, items);
 		companionPort.load(input);
 		batteryMode = Math.clamp(input.getIntOr("batteryMode", 0), 0, 3);
 		batteryReserve = Math.clamp(input.getIntOr("batteryReserve", 0), 0, 90);
@@ -2219,6 +2257,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		int savedOutput = input.getIntOr("batteryOutput", 100);
 		batteryOutput = savedOutput == 25 || savedOutput == 50 ? savedOutput : 100;
 		progress = input.getInt("progress").orElse(0);
+		fluidWorkRecipe = input.read("fluid_work_recipe", Identifier.CODEC).orElse(null);
 		industrialHeat = Math.clamp(input.getInt("industrialHeat").orElse(0), 0, 5000);
 		assistedArgonTicks = Math.clamp(input.getIntOr("CompanionArgonTicks", 0), 0, MachineKind.ASU_ARGON_INTERVAL - 1);
 		maxProgress = input.getInt("max_progress").orElse(0);
@@ -2252,6 +2291,7 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 	protected void saveAdditional(ValueOutput output) {
 		super.saveAdditional(output);
 		ContainerHelper.saveAllItems(output, items);
+		if (kind == MachineKind.CHEMICAL_REACTOR) output.putInt("item_layout", 1);
 		companionPort.save(output);
 		if (kind.isBattery()) {
 			output.putInt("batteryMode", batteryMode);
@@ -2261,6 +2301,8 @@ public class MachineBlockEntity extends BaseContainerBlockEntity implements Worl
 		}
 		output.putLong("energy", energy.getAmount());
 		output.putInt("progress", progress);
+		if (kind.isFluidProcessor() && progress > 0 && fluidWorkRecipe != null)
+			output.store("fluid_work_recipe", Identifier.CODEC, fluidWorkRecipe);
 		if (kind == MachineKind.JIMTA_THERMAL_CENTRIFUGE) output.putInt("industrialHeat", industrialHeat);
 		if (kind == MachineKind.DEPOSIT_DRILL) {
 			output.putInt("depositDepth", depositDepth);

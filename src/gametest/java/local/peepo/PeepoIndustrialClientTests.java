@@ -124,13 +124,18 @@ public final class PeepoIndustrialClientTests implements FabricClientGameTest {
             server.runCommand(String.format(Locale.ROOT,"tp @a %.1f %d %.1f",base.getX()+.5,base.getY(),base.getZ()-8.5));
             var forms=new ArrayList<FormMachineBlock>();
             for(var field:IndustrialForms.class.getFields())if(field.getType()==FormMachineBlock.class)try {forms.add((FormMachineBlock)field.get(null));}catch(ReflectiveOperationException e){throw new AssertionError(e);}
+            // Pharmacy assistance is a separate opt-in: reusable precision modules
+            // occupy upgrade slots, which companion tool delivery does not handle yet.
+            var manualPharmacy = Set.of(IndustrialForms.LABORATORY_ANALYZER, IndustrialForms.PHARMACEUTICAL_SEPARATOR,
+                IndustrialForms.FORMULATION_PRESS, IndustrialForms.AUTOCLAVE, IndustrialForms.STERILE_FILLER,
+                IndustrialForms.MASH_CONDITIONING_BARREL, IndustrialForms.MOONSHINE_STILL, IndustrialForms.RELEASE_COATER);
             int enabled=0;
             for(var block:forms) {
-                if(!block.form().companionAssistance()) {check(block.form().generator() || block==IndustrialForms.COASTAL_SEAWATER_INTAKE,"only generators and special pump excluded");continue;}
+                if(!block.form().companionAssistance()) {check(block.form().generator() || block==IndustrialForms.COASTAL_SEAWATER_INTAKE || manualPharmacy.contains(block),"only explicitly excluded forms lack companion assistance: "+block.form().id());continue;}
                 phase("ports: "+block.form().id());var facing=Direction.from2DDataValue(enabled++%4);
                 server.runOnServer(s->ports(s.overworld(),block,facing));
             }
-            check(enabled==40,"all forty registered processors enabled");
+            check(enabled==40,"all forty supported processors enabled");
             phase("native automation and full-footprint permissions");server.runOnServer(s->automation(s.overworld()));
             phase("physical ingredients/tool to processor to Output");delivery(server);
             phase("four-lane bulk assistance");bulk(server);

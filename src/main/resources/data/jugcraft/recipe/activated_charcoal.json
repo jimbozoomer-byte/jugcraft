@@ -1,0 +1,20 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:charcoal",
+    "minecraft:charcoal",
+    "minecraft:redstone",
+    "minecraft:paper"
+  ],
+  "result": {
+    "id": "jugcraft:activated_charcoal",
+    "count": 2
+  }
+}

@@ -52,10 +52,30 @@ public class EncyclopediaScreen extends Screen {
     private final java.util.ArrayList<Section> sections = new java.util.ArrayList<>();
     private long turnedAt = net.minecraft.util.Util.getMillis();
     private record Section(Component title, List<EncyclopediaPayload.Row> rows) { }
+    /** The contents' chapters as laid out (tests read them), and how far that list was scrolled. */
+    private final java.util.ArrayList<String> chapters = new java.util.ArrayList<>();
+    private double chapterScroll;
+    private boolean homeLaidOut;
+
+    /** A route screen this page was opened from (its Map tab or a lesson link); a button leads back to it. */
+    private @Nullable Screen returnTo;
+    /** The route step to show once its page is laid out (a route map's Live recipe), or -1. */
+    private int pendingStep = -1;
 
     public boolean isHome() { return home; }
-    public void showPage(String id) { emptyPage = ""; home = false; section = 0; scroll = 0; turnTo(id); dirty = true; }
-    public void showContents() { emptyPage = ""; home = true; dirty = true; }
+    public void showPage(String id) { emptyPage = ""; home = false; section = 0; scroll = 0; pendingStep = -1; turnTo(id); dirty = true; }
+    public void showContents() { emptyPage = ""; home = true; returnTo = null; pendingStep = -1; dirty = true; }
+    /** Opens {@code page} at the topic of its {@code step}-th route step (0 is the first): a route map's live recipe. */
+    public void showStep(String page, int step) { showPage(page); pendingStep = step; }
+    /** Shows a button back to {@code screen} (cleared by Contents and by using it). */
+    public void returnTo(@Nullable Screen screen) { returnTo = screen; dirty = true; }
+    public @Nullable Screen returnTo() { return returnTo; }
+    /** The topic being read (0 is the first; tests read it). */
+    public int section() { return section; }
+    private void backToRoute() {
+        Screen target = returnTo; returnTo = null;
+        if (target != null) minecraft.gui.setScreen(target);
+    }
     private static Component ui(String key, Object... args) { return ComposerScreen.ui(key, args); }
 
 
@@ -83,6 +103,12 @@ public class EncyclopediaScreen extends Screen {
         pageWidth = bookWidth / 2 - 34;
         left = bookLeft + bookWidth / 2 + 15; contentWidth = pageWidth - 6;
         int footer = bookTop + bookHeight - 29;
+        if (homeLaidOut && contents != null) chapterScroll = contents.scrollAmount();
+        homeLaidOut = home;
+        // A chapter chosen before the server's pages came: open it once they are here.
+        if (!home && !emptyPage.isEmpty() && EncyclopediaClient.navigator().pages().stream().anyMatch(p -> p.id().equals(emptyPage))) {
+            String id = emptyPage; emptyPage = ""; section = 0; scroll = 0; turnTo(id);
+        }
         paperButton("home", bookLeft + 16, footer, Math.min(94, pageWidth), 18, ui("contents"), "", () -> showContents());
         paperButton("done", bookLeft + bookWidth - 37, bookTop + 14, 17, 17, Component.literal("×"), "", () -> onClose());
         if (home) { initHome(); body = null; return; }
@@ -102,6 +128,11 @@ public class EncyclopediaScreen extends Screen {
         else if (!current.equals(laidOut)) { scroll = 0; section = 0; }
         EncyclopediaPayload.Page page = emptyPage.isEmpty() ? EncyclopediaClient.navigator().current() : null;
         split(page);
+        if (pendingStep >= 0 && page != null) {
+            int at = stepSection(pendingStep);
+            if (at >= 0) { section = at; scroll = 0; }
+            pendingStep = -1;
+        }
         section = Math.max(0, Math.min(section, sections.size() - 1));
         contents = addRenderableWidget(new ComposerScroll(minecraft, bookLeft + 18, bookTop + 58, pageWidth + 4,
             Math.max(20, footer - bookTop - 66), this::focused));
@@ -113,10 +144,16 @@ public class EncyclopediaScreen extends Screen {
             contents.add(keyed("section:" + i, tab), cy); cy += 29;
         }
         contents.arrange(Math.max(0, (section - 2) * 29));
+        int stacked = 0;
         if (page != null && page.rows().stream().anyMatch(row -> row.link().isPresent() && row.link().get().kind() == EncyclopediaPayload.Link.COMPOSER)) {
             contents.setHeight(Math.max(20, contents.getHeight() - 24));
             paperButton("compose", bookLeft + 18, footer - 23, pageWidth - 7, 20,
                 Component.translatable("encyclopedia.jugcraft.link.composer"), "", () -> ComposerClient.open(minecraft, this));
+            stacked++;
+        }
+        if (returnTo != null) {
+            contents.setHeight(Math.max(20, contents.getHeight() - 24));
+            paperButton("route_back", bookLeft + 18, footer - 23 - 24 * stacked, pageWidth - 7, 20, ui("book.back_to_route"), "", this::backToRoute);
         }
         body = addRenderableWidget(new ComposerScroll(minecraft, left, bodyTop, contentWidth + SCROLLBAR,
             Math.max(ROW, footer - 7 - bodyTop), this::focused));
@@ -129,6 +166,16 @@ public class EncyclopediaScreen extends Screen {
         } else line(ly, ui(EncyclopediaClient.navigator().received() ? "book.empty" : "book.loading"), 0, "empty");
         body.arrange(scroll); laidOut = current;
         for (var control : keys.entrySet()) if (control.getValue().equals(focus)) { refocus(control.getKey()); break; }
+    }
+
+    /** The topic that starts with the page's {@code step}-th step row, or -1 (sections must be split already). */
+    private int stepSection(int step) {
+        int seen = 0;
+        for (int i = 0; i < sections.size(); i++) {
+            List<EncyclopediaPayload.Row> rows = sections.get(i).rows();
+            if (!rows.isEmpty() && rows.getFirst().kindOf() == EncyclopediaPayload.Kind.STEP && seen++ == step) return i;
+        }
+        return -1;
     }
 
     /** Opens the topic containing an existing row/link; also used by the keyboard integration test. */
@@ -146,36 +193,72 @@ public class EncyclopediaScreen extends Screen {
         return addRenderableWidget(keyed(key, new BookArt.Tab(x, y, w, h, label, Component.empty(), icon, false, false, unused -> action.run())));
     }
 
+    /** The chapter ids the contents spread lists: the two guides, then every page the server sent (or the usual four before it answers). */
+    private static List<String> chapterIds() {
+        java.util.ArrayList<String> ids = new java.util.ArrayList<>(List.of("technology", "magic"));
+        var pages = EncyclopediaClient.navigator().pages();
+        if (pages.isEmpty()) ids.addAll(List.of("discover", "spellcraft", "expedition", "keys"));
+        else for (var page : pages) ids.add(page.id());
+        return ids;
+    }
+
     private void initHome() {
-        contents = addRenderableWidget(new ComposerScroll(minecraft, left, bookTop + 123, pageWidth + 4,
-                Math.max(30, bookHeight - 162), this::focused));
-        int y = 0;
-        for (int i = 0; i < 2; i++) {
+        chapters.clear(); chapters.addAll(chapterIds());
+        int row = Math.min(40, (bookHeight - 80) / 6);
+        // Every chapter is listed; the list scrolls once there are more than fit.
+        contents = addRenderableWidget(new ComposerScroll(minecraft, left, bookTop + 43, pageWidth + 4, row * 6, this::focused));
+        for (int i = 0; i < chapters.size(); i++) {
+            String id = chapters.get(i);
             int route = i;
-            String id = i == 0 ? "technology" : "magic";
-            var tab = new BookArt.Tab(left, bookTop + 43 + i * 39, pageWidth - 7, 36, ui("book." + id), ui("book." + id + ".hint"),
-                    i == 0 ? "jugcraft:steel_ingot" : "jugcraft:initiate_wand", false, false, unused -> {
-                var guide = new EncyclopediaRoutesScreen(this); minecraft.gui.setScreen(guide); guide.showRoute(route);
-            });
-            addRenderableWidget(keyed("chapter:" + id, tab));
+            EncyclopediaPayload.@Nullable Page page = EncyclopediaClient.navigator().pages().stream().filter(p -> p.id().equals(id)).findFirst().orElse(null);
+            Component label = net.minecraft.locale.Language.getInstance().has("ui.jugcraft.book." + id) || page == null ? ui("book." + id) : page.title();
+            Component subtitle = net.minecraft.locale.Language.getInstance().has("ui.jugcraft.book." + id + ".hint") ? ui("book." + id + ".hint") : Component.empty();
+            BookArt.Tab tab = new BookArt.Tab(left, 0, chapters.size() > 6 ? pageWidth - 7 : pageWidth, row - 2,
+                label, subtitle, chapterIcon(id, page), false, false, unused -> {
+                    if (route < 2) { EncyclopediaRoutesScreen guide = new EncyclopediaRoutesScreen(this); minecraft.gui.setScreen(guide); guide.showRoute(route); }
+                    else if (EncyclopediaClient.navigator().pages().stream().anyMatch(p -> p.id().equals(id))) showPage(id);
+                    else { emptyPage = id; home = false; body = null; dirty = true; }
+                });
+            contents.add(keyed("chapter:" + id, tab), i * row);
         }
-        // Every delivered guide is reachable; additions cannot silently disappear behind a fixed six-card home.
-        for (var page : EncyclopediaClient.navigator().pages()) {
-            String id = page.id();
-            String icon = switch(id) {
-                case "technology_start", "jimta_network" -> "jugcraft:coal_generator";
-                case "magic_start", "discover", "spellcraft", "nouveau" -> "jugcraft:initiate_wand";
-                case "alchemy_start" -> "jugcraft:philosophers_stone";
-                case "botanical", "botanical_flowers" -> "jugcraft:jugtania_pure_daisy";
-                case "expedition", "menagerie", "beasts" -> "minecraft:bone";
-                case "mentors" -> "minecraft:bell";
-                default -> "minecraft:book";
-            };
-            var tab = new BookArt.Tab(left, 0, pageWidth - 7, 26, page.title(), Component.empty(), icon,
-                    false, false, unused -> showPage(id));
-            contents.add(keyed("chapter:" + id, tab), y); y += 28;
+        contents.arrange(chapterScroll);
+    }
+
+    private static String chapterIcon(String id, EncyclopediaPayload.@Nullable Page page) {
+        String known = switch (id) {
+            case "technology" -> "jugcraft:steel_ingot"; case "magic" -> "jugcraft:initiate_wand"; case "discover" -> "minecraft:lantern";
+            case "spellcraft" -> "minecraft:amethyst_shard"; case "expedition" -> "minecraft:bone"; case "keys" -> "minecraft:compass";
+            case "inspect" -> "minecraft:spyglass"; case "household" -> "jugcraft:household_workbench"; case "habitats" -> "minecraft:oak_sapling";
+            case "beasts" -> "jugcraft:beast_animal_dictionary"; case "caverns" -> "jugcraft:cavern_cave_book"; default -> "";
+        };
+        if (!known.isEmpty()) return known;
+        if (page != null) for (var row : page.rows()) if (!row.icons().isEmpty())
+            return net.minecraft.core.registries.BuiltInRegistries.ITEM.getKey(row.icons().getFirst()).toString();
+        return "minecraft:book";
+    }
+
+    /**
+     * Presses a contents chapter's tab as a click does. Tests use it: the tabs sit in the scrolling chapter list, inside
+     * which the test framework's search for a button by name does not look.
+     */
+    public void pressChapter(String id) {
+        for (var control : keys.entrySet()) {
+            if (control.getValue().equals("chapter:" + id) && control.getKey() instanceof Button button) {
+                button.onPress(null);
+                return;
+            }
         }
-        contents.arrange(0);
+        throw new IllegalArgumentException("No chapter " + id + " on the contents spread");
+    }
+
+    /** The chapters the contents spread lists, in order (tests read them). */
+    public List<String> chapters() {
+        return List.copyOf(chapters);
+    }
+
+    /** The current page's topic titles, in order (tests read them). */
+    public List<Component> topics() {
+        return sections.stream().map(Section::title).toList();
     }
 
     /** Headings and progression steps become topics; only the selected topic's detail is laid out. */
@@ -184,10 +267,13 @@ public class EncyclopediaScreen extends Screen {
         Component title = page.title();
         java.util.ArrayList<EncyclopediaPayload.Row> rows = new java.util.ArrayList<>();
         for (EncyclopediaPayload.Row row : page.rows()) {
-            if ((row.kindOf() == EncyclopediaPayload.Kind.HEADING || row.kindOf() == EncyclopediaPayload.Kind.STEP) && !rows.isEmpty()) {
-                sections.add(new Section(title, List.copyOf(rows))); rows.clear();
+            boolean starts = row.kindOf() == EncyclopediaPayload.Kind.HEADING || row.kindOf() == EncyclopediaPayload.Kind.STEP;
+            // Headings with nothing under them yet lead the next topic rather than standing alone as an empty one.
+            boolean headingsOnly = rows.stream().allMatch(r -> r.kindOf() == EncyclopediaPayload.Kind.HEADING);
+            if (starts && !rows.isEmpty() && !headingsOnly) {
+                sections.add(new Section(title, List.copyOf(rows))); rows.clear(); headingsOnly = true;
             }
-            if (rows.isEmpty() && (row.kindOf() == EncyclopediaPayload.Kind.HEADING || row.kindOf() == EncyclopediaPayload.Kind.STEP)) title = row.text();
+            if (starts && (rows.isEmpty() || row.kindOf() == EncyclopediaPayload.Kind.STEP && headingsOnly)) title = row.text();
             rows.add(row);
         }
         if (!rows.isEmpty()) sections.add(new Section(title, List.copyOf(rows)));
@@ -287,6 +373,7 @@ public class EncyclopediaScreen extends Screen {
 		ChatFormatting colour = switch (edge) {
 			case RECOMMENDED -> ChatFormatting.DARK_AQUA;
 			case TRADE -> ChatFormatting.GOLD;
+			case ALTERNATIVE -> ChatFormatting.BLUE;
 			case OPTIONAL_BOSS -> ChatFormatting.DARK_PURPLE;
 			default -> ChatFormatting.DARK_GRAY;
 		};
@@ -384,7 +471,14 @@ public class EncyclopediaScreen extends Screen {
 		} else if (key == InputConstants.KEY_RIGHT) {
 			turn(1);
 		} else if (key == InputConstants.KEY_BACKSPACE) {
-			showContents();
+			// Back to the page read before (a link or a chapter followed), as the help says; from the first, the contents.
+			if (!home && emptyPage.isEmpty() && EncyclopediaClient.navigator().back()) {
+				section = 0;
+				scroll = 0;
+				dirty = true;
+			} else {
+				showContents();
+			}
 		} else if (key == InputConstants.KEY_PAGEUP && body != null) {
 			body.setScrollAmount(body.scrollAmount() - body.getHeight() + ROW);
 		} else if (key == InputConstants.KEY_PAGEDOWN && body != null) {

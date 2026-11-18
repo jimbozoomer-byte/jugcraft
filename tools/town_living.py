@@ -70,7 +70,10 @@ class Plan:
         self.town, self.L = town, L
         self.top = L.HEIGHT + L.Y_MIN
         self.site_cells = {(b[0], b[1], b[2]) for site in town.sites for b in site["blocks"]}
-        self.site_columns = {(x, z) for x, _, z in self.site_cells}
+        # High branches of the civic fir reserve their own cells. Projecting the whole canopy
+        # to pavement would reroll the seeded street furniture throughout an existing town.
+        self.site_columns = {(x, z) for site in town.sites for x, y, z, slot in site["blocks"]
+                             if site["kind"] != "centerpiece" or slot < 637}
         self.low_sites = {(x, z) for x, y, z in self.site_cells if y <= 1}
         self.spots = [(s["pos"][0], s["pos"][2]) for s in town.spots if s["pos"][1] == 1]
         self.signs = [(s["pos"][0], s["pos"][2]) for s in town.signs]

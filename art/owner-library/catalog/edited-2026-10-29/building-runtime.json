@@ -105,7 +105,7 @@
       "blocks": 256,
       "items": 3,
       "runtime": "newest/twigworks",
-      "changes": "Native block behaviors; remapped identifiers; original model coordinates and texture bytes retained"
+      "changes": "Native block behaviors; remapped identifiers; original model coordinates and texture bytes retained; paper-lantern inverted inner cubes unfolded into six inward-facing planes with identical surface positions and UV mapping"
     },
     {
       "folder": "home",
@@ -229,5 +229,5 @@
       ]
     }
   ],
-  "validation": "Native registration and data reload passed in combined run; gameplay and rendered-client validation ongoing."
+  "validation": "pending combined checks"
 }

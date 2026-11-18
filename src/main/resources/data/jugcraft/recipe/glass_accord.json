@@ -1,0 +1,25 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "GAG",
+    "oSo",
+    "GAG"
+  ],
+  "key": {
+    "G": "minecraft:glass",
+    "A": "minecraft:amethyst_shard",
+    "o": "minecraft:gold_ingot",
+    "S": "minecraft:spyglass"
+  },
+  "result": {
+    "id": "jugcraft:glass_accord",
+    "count": 1
+  }
+}

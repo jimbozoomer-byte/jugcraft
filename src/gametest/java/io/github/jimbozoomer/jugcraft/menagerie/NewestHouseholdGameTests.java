@@ -19,6 +19,31 @@ import net.minecraft.world.level.storage.TagValueInput;
 
 /** Inventory conservation and authority checks for the new household adapters. */
 public final class NewestHouseholdGameTests {
+    private static void clibanoFire(GameTestHelper h,String source,int expected) {
+        var level=h.getLevel();var actor=TestPlayers.survivor(h);
+        var middle=h.absolutePos(new BlockPos(2,2,2));var front=middle.south();
+        var blocks=io.github.jimbozoomer.jugcraft.arcane.ForbiddenArcane.BLOCKS;
+        for(int x=-1;x<=1;x++)for(int y=-1;y<=1;y++)for(int z=-1;z<=1;z++) {
+            var at=middle.offset(x,y,z);
+            var state=x==0&&y==0&&z==0?Blocks.AIR.defaultBlockState():
+                blocks.get(at.equals(front)?"clibano_core":x!=0&&y!=0&&z!=0?"polished_darkstone":"polished_darkstone_bricks").defaultBlockState();
+            level.setBlockAndUpdate(at,state);
+        }
+        h.assertTrue(io.github.jimbozoomer.jugcraft.arcane.ArcaneClibano.form(actor,front,Direction.SOUTH),"Complete native Clibano forms");
+        var machine=(io.github.jimbozoomer.jugcraft.arcane.ArcaneClibano)level.getBlockEntity(middle);
+        var input=source.equals("coal")?new ItemStack(Items.COAL,2):new ItemStack(io.github.jimbozoomer.jugcraft.arcane.ForbiddenArcane.ITEMS.get(source),2);
+        machine.setItem(1,input);machine.setItem(2,new ItemStack(Items.COAL));machine.setItem(3,new ItemStack(Items.RAW_IRON));
+        io.github.jimbozoomer.jugcraft.arcane.ArcaneClibano.tick(level,middle,level.getBlockState(middle),machine);
+        h.assertTrue(machine.data(0)>0,"Actual native input starts combustion with ordinary fuel");
+        h.assertTrue(machine.data(3)==expected,"Loaded soul tags choose the expected native fire tier: "+source);
+        h.assertTrue(machine.getItem(1).getCount()==(expected==0?2:1),"Only a valid soul is consumed when special fire starts");
+        h.assertTrue((machine.data(2)>0)==(expected>0),"Special fire duration starts only from a supported soul");
+        h.succeed();
+    }
+    @GameTest public void clibanoOrdinarySoulStartsSoulFire(GameTestHelper h){clibanoFire(h,"soul",1);}
+    @GameTest public void clibanoCorruptSoulStartsSoulFire(GameTestHelper h){clibanoFire(h,"corrupt_soul",1);}
+    @GameTest public void clibanoEnchantedSoulStartsEnchantedFire(GameTestHelper h){clibanoFire(h,"enchanted_soul",2);}
+    @GameTest public void clibanoOrdinaryItemCannotCreateSoulFire(GameTestHelper h){clibanoFire(h,"coal",0);}
     private static OwnerSupplementData node(GameTestHelper h,String kind) {
         var pos=h.absolutePos(new BlockPos(1,2,1));
         h.getLevel().setBlockAndUpdate(pos,OwnerSupplementaries.BLOCKS.get(kind).defaultBlockState());

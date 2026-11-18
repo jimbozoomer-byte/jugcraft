@@ -1,0 +1,26 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "LCL",
+    "PGP",
+    "HHH"
+  ],
+  "key": {
+    "L": "minecraft:lantern",
+    "C": "jugcraft:corn",
+    "P": "minecraft:pumpkin",
+    "G": "jugcraft:giant_cornucopia",
+    "H": "minecraft:hay_block"
+  },
+  "result": {
+    "id": "jugcraft:harvest_centerpiece",
+    "count": 1
+  }
+}

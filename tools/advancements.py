@@ -30,7 +30,7 @@ TREE = {
     "mining_drill": ("charging_station", "mining_drill", "Power Drill", "Make a mining drill", "task"),
     "chainsaw": ("charging_station", "chainsaw", "Timber!", "Make a chainsaw", "task"),
     "upgrade": ("mining_drill", ["overclock_module", "range_module", "capacity_module", "silk_touch_module",
-                                 "fortune_module"], "Tinkerer", "Make an upgrade module for a powered tool", "task"),
+                                 "fortune_module", "efficiency_module"], "Tinkerer", "Make an upgrade module for a powered tool", "task"),
     "rocket_pack": ("charging_station", "rocket_pack", "Rocketeer", "Make a rocket pack and take to the air", "challenge"),
     # Batch 25: gear.
     # A Kaiser piece is steel armor too (docs/features/steampunk-and-kaiser-armor.md), so one got by trade counts.

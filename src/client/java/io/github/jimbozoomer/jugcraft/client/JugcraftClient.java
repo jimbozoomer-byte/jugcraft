@@ -90,6 +90,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.nuclear.StorageTanks.GATE_ENTITY, RailingGateRenderer::new);
 		BlockEntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.nuclear.StorageTanks.HATCH_ENTITY, StorageTankHatchRenderer::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.machine.form.JugcraftForms.MENU, FormMachineScreen::new);
+		MenuScreens.register(io.github.jimbozoomer.jugcraft.pharmacology.DreamStudies.MENU, DreamStudyScreen::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.workshop.JugcraftWorkshop.MENU, WorkshopScreen::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.storage.JugcraftStorage.STORAGE_CRATE_MENU, StorageCrateScreen::new);
 		WorkshopScreen.registerOverlayCompatibility();
@@ -97,6 +98,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRenderers.register(io.github.jimbozoomer.jugcraft.vehiclebay.VehicleBays.ENTITY, VehicleBayRenderer::new);
 		BlockEntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.machine.form.IndustrialForms.ENTITY, FormMachineRenderer::new);
 		MenuScreens.register(JugcraftAgriculture.COOKING_POT_MENU, CookingPotScreen::new);
+        MenuScreens.register(JugcraftTools.CHARGING_STATION_MENU, ChargingStationScreen::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.ROCKET_PAD_MENU, RocketPadScreen::new);
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.rocketry.JugcraftRocketry.ZIPLINE_RIDER,
 				net.minecraft.client.renderer.entity.NoopRenderer::new);
@@ -118,6 +120,9 @@ public final class JugcraftClient implements ClientModInitializer {
 		PumpkinKingClient.register();
 		HessianHorsemanClient.register();
 		CydonianSentinelClient.register();
+		StormRocClient.register();
+		GlassAbbotClient.register();
+		AstrawandClient.register();
 		BlockEntityRendererRegistry.register(JugcraftMachines.MACHINE_ENTITY, WindTurbineRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftKinetics.BELT_PULLEY_ENTITY, BeltRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftKinetics.SHAFT_ENTITY, KineticRotorRenderer::new);
@@ -126,14 +131,21 @@ public final class JugcraftClient implements ClientModInitializer {
 		BlockEntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.powerline.JugcraftPowerLines.ANCHOR_ENTITY, context -> new LineRenderer());
 		// Every MBS item shows a see-through copy of what it would place (the power lines' preview among them).
 		MbsPreview.register();
+        PoweredToolPreview.register();
 		WallRunModel.register();
 		io.github.jimbozoomer.jugcraft.nuclear.StorageTanks.openScreen = pos -> net.minecraft.client.Minecraft.getInstance().gui.setScreen(new StorageTankScreen(pos));
 		WallRunOverlay.register();
 		RocketPackClient.register();
 		FinanceClient.register();
 		BroomstickClient.register();
+		io.github.jimbozoomer.jugcraft.client.pegasus.PegasusClient.register();
+		// The horse breeds' layers and renderers, and the Pegasus's pack layer (docs/features/horse-breeds.md).
+		io.github.jimbozoomer.jugcraft.client.horses.HorseBreedsClient.register();
 		BalloonClient.register();
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.airship.JugcraftAirships.ZEPPELIN, ZeppelinRenderer::new);
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.menagerie.PirateShips.SHIP, PirateShipRenderer::new);
+		PirateShipRenderer.register();
+		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.menagerie.PirateShips.DECK, net.minecraft.client.renderer.entity.NoopRenderer::new);
 		// The raider faction (batch 57): infantry in uniform, the walker and blimp in raider paint, and their bombs.
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRUNT, RaiderRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.raiders.JugcraftRaiders.GRENADIER, RaiderRenderer::new);
@@ -151,6 +163,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers.ARMOURED_WALKER, ArmouredWalkerRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.walker.JugcraftWalkers.HOWITZER_WALKER, HowitzerWalkerRenderer::new);
 		WalkerClient.register();
+		WalkerCockpitClient.register();
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.landship.JugcraftLandships.LANDSHIP, LandshipRenderer::new);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.landship.JugcraftLandships.SHELL, ThrownItemRenderer::new);
 		LandshipClient.register();
@@ -236,9 +249,15 @@ public final class JugcraftClient implements ClientModInitializer {
 		RadiationNeedle.register();
 		GhostSheetLayer.register();
 		CostumeLayer.register();
+        HarvestCostumeLayer.register();
+        BoardGameScreen.register();
+        PetInventoryScreen.register();
+        TownDispatchScreen.register();
+        BlockEntityRenderers.register(io.github.jimbozoomer.jugcraft.boardgames.BoardGames.ENTITY,BoardTableRenderer::new);
 		FacePaintLayer.register();
 		RetroTraderLayer.register();
 		RetroTraderClient.register();
+		BeardshyRenderer.register();
 		WornModelLayer.register();
 		BlockEntityRendererRegistry.register(JugcraftKinetics.HAND_CRANK_ENTITY, KineticRotorRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftKinetics.ELECTRIC_MOTOR_ENTITY, KineticRotorRenderer::new);
@@ -253,6 +272,7 @@ public final class JugcraftClient implements ClientModInitializer {
 		net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			if (client.player != null) {
 				io.github.jimbozoomer.jugcraft.placement.StructureReach.update(client.player);
+                PoweredToolPreview.tick(client);
 			}
 		});
 		ItemTooltipCallback.EVENT.register((stack, context, flag, lines) -> {
@@ -272,6 +292,13 @@ public final class JugcraftClient implements ClientModInitializer {
 				lines.add(net.minecraft.network.chat.Component.translatable("tooltip.jugcraft.plating.repair")
 						.withStyle(net.minecraft.ChatFormatting.GRAY));
 			}
+			// The hydroponic bay runs on nutrient solution only; piped water is refused (docs/features/hydroponics.md).
+			var hydroponicBay = io.github.jimbozoomer.jugcraft.machine.JugcraftMachines.MACHINES
+					.get(io.github.jimbozoomer.jugcraft.machine.MachineKind.HYDROPONIC_BAY);
+			if (hydroponicBay != null && stack.is(hydroponicBay.asItem())) {
+				lines.add(net.minecraft.network.chat.Component.translatable("tooltip.jugcraft.hydroponic_bay")
+						.withStyle(net.minecraft.ChatFormatting.GRAY));
+			}
 		});
 		EngineersHandbookItem.openScreen = () -> Minecraft.getInstance().gui.setScreen(new HandbookScreen());
 		// Gear traits' descriptions show while Shift is held (gear/TraitTooltips.java, docs/features/trait-details.md).
@@ -283,12 +310,21 @@ public final class JugcraftClient implements ClientModInitializer {
 		PartyClient.register();
 		ConcordanceClient.register();
 		GunsClient.register();
+		EchoViewClient.register();
+		DrugVisuals.register();
+		StrainClient.register();
+		DreamSenseClient.register();
 		JugcraftKeyBindings.register();
 		// The Jugcraft Encyclopedia: its key, its inventory button and its screen (Concordance Chunk A, A-04).
 		EncyclopediaClient.register();
         CraftingChoicesClient.register();
-		ClientPlayNetworking.registerGlobalReceiver(SurveyPayload.TYPE,
-				(payload, context) -> Minecraft.getInstance().gui.setScreen(new ProspectorScreen(payload.readings())));
+		ClientPlayNetworking.registerGlobalReceiver(SurveyPayload.TYPE, (payload, context) -> {
+			// Surveys finish seconds after the click: never replace a screen opened since (a chest, chat). The result is saved
+			// on the scanner, which shows it again on Shift-use (Shift+Sprint for the advanced one).
+			var client = Minecraft.getInstance();
+			if (client.gui.screen() == null) client.gui.setScreen(new ProspectorScreen(payload));
+			else if (client.player != null) client.player.sendOverlayMessage(net.minecraft.network.chat.Component.literal("Survey complete: Shift-use the scanner to view it"));
+		});
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.CARVED_PUMPKIN_ENTITY, CarvedPumpkinRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.GIANT_PUMPKIN_ENTITY, GiantPumpkinRenderer::new);
 		BlockEntityRendererRegistry.register(JugcraftAgriculture.SCARECROW_ENTITY, ScarecrowRenderer::new);
@@ -471,6 +507,8 @@ public final class JugcraftClient implements ClientModInitializer {
 		ClientPlayNetworking.registerGlobalReceiver(OpenCarvingPayload.TYPE,
 				(payload, context) -> Minecraft.getInstance().gui.setScreen(new CarvingScreen(payload)));
 		ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            ProspectorScreen.clearHistory();
+            PoweredToolPreview.clear();
 			HarvestMoon.clientActive = false;
 			BloodMoon.clientActive = false;
 			client.execute(CarvingTextures::clear);
@@ -486,13 +524,17 @@ public final class JugcraftClient implements ClientModInitializer {
 		net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.tower.JugcraftTower.SEAT, net.minecraft.client.renderer.entity.NoopRenderer::new);
 		// The walled town: townsfolk, the shop and ATM screens.
 		net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry.registerModelLayer(TownsfolkModel.LAYER, TownsfolkModel::createLayer);
+		net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry.registerModelLayer(TownsfolkModel.SKINNABLE_LAYER, TownsfolkModel::createSkinnableLayer);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.town.JugcraftTown.TOWNSFOLK, TownsfolkRenderer::new);
+        DeepsteadDwarfRenderer.register();
         EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.town.JugcraftTown.GUARD_MECHA, TownGuardMechaRenderer::new);
 		net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry.registerModelLayer(StyxModel.LAYER, StyxModel::createLayer);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.styx.JugcraftStyx.WIZARD, StyxRenderer::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.town.JugcraftTown.SHOP_MENU, ShopScreen::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.town.JugcraftTown.ATM_MENU, AtmScreen::new);
         MenuScreens.register(io.github.jimbozoomer.jugcraft.town.JugcraftTown.COMMISSION_MENU, CommissionScreen::new);
+        MenuScreens.register(io.github.jimbozoomer.jugcraft.town.WinterMarket.MENU, WinterMarketScreen::new);
+		MenuScreens.register(io.github.jimbozoomer.jugcraft.town.guests.GuestService.MENU, GuestScreen::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.control.JugcraftControl.CONTROLLER_MENU, LogicControllerScreen::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialGateParameters.TYPE, io.github.jimbozoomer.jugcraft.client.jimtafacts.GateParametersScreen::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.jimtafacts.industry.CompactReactor.MENU, CompactReactorScreen::new);

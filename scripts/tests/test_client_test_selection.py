@@ -2,6 +2,7 @@
 import importlib.util
 import json
 import re
+from tempfile import TemporaryDirectory
 from pathlib import Path
 import unittest
 from unittest.mock import patch
@@ -31,13 +32,13 @@ class ClientTestSelectionTests(unittest.TestCase):
         self.assertIn("PeepoDeliveryClientTests", shown)
 
     def test_full_run_assigns_every_class_exactly_once(self):
-        jobs = selection.share(set(self.tests), self.tests, 16)
+        jobs = selection.share(set(self.tests), self.tests, 24)
         assigned = [name for _, names in jobs for name in names]
         self.assertCountEqual(assigned, self.tests)
         self.assertEqual(len(assigned), len(set(assigned)))
         # The all-gun gallery takes about 30 minutes on its own. Retain setup/slow-runner
         # headroom under the unchanged 60-minute CI limit without understating that weight.
-        durations = [seconds for seconds, _ in jobs]
+        durations = [seconds for seconds, names in jobs if not set(names) & selection.ISOLATED_CLIENTS]
         self.assertLess(max(durations), 40 * 60)
         self.assertLessEqual(max(durations), max(sum(durations) / len(durations) + 30, max(selection.WEIGHTS.values())))
         gun_job = next(names for _, names in jobs if "GunsClientGameTests" in names)
@@ -46,6 +47,42 @@ class ClientTestSelectionTests(unittest.TestCase):
             next(i for i, (_, names) in enumerate(jobs) if "PeepoCompanionClientTests" in names),
             next(i for i, (_, names) in enumerate(jobs) if "BiomeClientGameTests" in names),
         )
+
+    def test_network_clients_are_isolated_without_losing_small_shard_coverage(self):
+        selected = selection.ISOLATED_CLIENTS | {"PeepoCompanionClientTests", "BiomeClientGameTests"}
+        for count in (1, 2, 3, 4, 16):
+            jobs = selection.share(selected, self.tests, count)
+            self.assertEqual(count, len(jobs))
+            self.assertCountEqual([name for _, names in jobs for name in names], selected)
+            if count > len(selection.ISOLATED_CLIENTS):
+                for name in selection.ISOLATED_CLIENTS:
+                    self.assertEqual(next(names for _, names in jobs if name in names), [name])
+
+    def test_hour_limit_cohorts_are_separated(self):
+        jobs = selection.share(set(self.tests), self.tests, 16)
+        group = lambda name: next(names for _, names in jobs if name in names)
+        self.assertEqual(['BiomeClientGameTests'], group('BiomeClientGameTests'))
+        self.assertNotIn('MachineConsolidationClientGameTests', group('NuclearClientGameTests'))
+        self.assertNotIn('DryCountryTreeClientGameTests', group('NuclearClientGameTests'))
+        self.assertNotIn('TropicalTreeClientGameTests', group('BiomeClientGameTests'))
+
+    def test_local_shards_isolate_only_the_selected_long_suites(self):
+        peers = {'ConcordancePactNetworkTests', 'HerobrineNetworkTests', 'OwnerCollectionsNetworkTests'}
+        selected = peers | {'PeepoHearthClientTests'}
+        jobs = selection.share(selected, self.tests, 4)
+        self.assertCountEqual([name for _, names in jobs for name in names], selected)
+        for name in peers:
+            self.assertEqual([name], next(names for _, names in jobs if name in names))
+
+    def test_short_tree_subclass_retains_its_inherited_world_work(self):
+        with TemporaryDirectory() as directory:
+            tree = Path(directory) / 'NewTree.java'
+            plain = Path(directory) / 'Small.java'
+            tree.write_text('class NewTree extends TreeBatchTwoClientGameTests {}', encoding='utf-8')
+            plain.write_text('class Small implements FabricClientGameTest {}', encoding='utf-8')
+            tree_cost = selection.share({'NewTree'}, {'NewTree': {'source': tree}}, 1)[0][0]
+            plain_cost = selection.share({'Small'}, {'Small': {'source': plain}}, 1)[0][0]
+            self.assertGreater(tree_cost, 4 * plain_cost)
 
     def test_unweighted_companion_uses_its_actual_source_length(self):
         name = "PeepoWorkSessionClientTests"
@@ -176,12 +213,26 @@ class ClientTestSelectionTests(unittest.TestCase):
         chosen, _ = selection.select(["src/main/resources/assets/jugcraft/textures/gui/sprites/magic/plate.png"], self.tests, set())
         self.assertIn("ConcordanceGardenNetworkTests", chosen)
 
+    def test_measured_long_suites_do_not_share_one_shard(self):
+        # Use the actual full-suite layout: the old estimates put both long
+        # suites together in shard 6 alongside 21 other classes.
+        classes = set(self.tests)
+        jobs = selection.share(classes, self.tests, 24)
+        assigned = [name for _, names in jobs for name in names]
+        self.assertCountEqual(classes, assigned)
+        self.assertFalse(any({"NuclearClientGameTests", "PeepoProductionStockClientTests"} <= set(names)
+                             for _, names in jobs))
+        for name in ("MineralSandClientGameTests", "BiomeClientGameTests", "ConcordancePactNetworkTests"):
+            with self.subTest(isolated=name):
+                isolated_job = next(names for _, names in jobs if name in names)
+                self.assertEqual([name], isolated_job)
+
     def test_workflow_runs_every_selected_shard(self):
         workflow = (ROOT / ".github/workflows/build.yml").read_text()
         matrix = re.search(r"shard: \[([\d, ]+)\]", workflow)
         self.assertIsNotNone(matrix)
         indices = [int(value) for value in matrix.group(1).split(",")]
-        self.assertEqual(indices, list(range(16)))
+        self.assertEqual(indices, list(range(24)))
         outputs = {int(value) for value in re.findall(r"^\s+shard(\d+):", workflow, re.MULTILINE)}
         self.assertEqual(outputs, set(indices))
         self.assertEqual(re.findall(r"--shards (\d+)", workflow), [str(len(indices))] * 2)

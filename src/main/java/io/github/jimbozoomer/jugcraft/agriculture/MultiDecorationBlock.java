@@ -1,7 +1,12 @@
 package io.github.jimbozoomer.jugcraft.agriculture;
 
+import io.github.jimbozoomer.jugcraft.concordance.Authority;
+import io.github.jimbozoomer.jugcraft.finance.LandRegistry;
+import io.github.jimbozoomer.jugcraft.town.TownProtection;
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.function.BiConsumer;
+import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -12,6 +17,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
@@ -35,9 +41,17 @@ import org.jspecify.annotations.Nullable;
  * it fills, counted to the right of the player who placed it and up from the block they aimed at. Part 0 is the master,
  * which alone drops the prop. Breaking any block breaks it all. Use any block to light or put out its lanterns
  * ({@link #LIT}, on every part).
+ *
+ * <p>So a prop is protected as a whole: a player may place it only where they may change every one of its blocks, and
+ * break any of its blocks only where they may change all of them ({@link #mayChangeWhole}, the before-break check
+ * {@link #registerProtection} adds, as WorkshopBlock does for its stations); and an explosion breaks none of its blocks
+ * while a land claim or the protected town shields any of them. A prop reaching from open land into a claim or the
+ * town is then never torn down from its unprotected side. These only refuse; they allow nothing that was refused.
  */
 public abstract class MultiDecorationBlock extends Block {
 	public static final int MASTER = 0;
+	/** Set while {@link #registerProtection}'s check asks about a prop's blocks, so it does not ask again of each. */
+	private static final ThreadLocal<Boolean> CHECKING_BREAK = ThreadLocal.withInitial(() -> false);
 	public static final EnumProperty<Direction> FACING = HorizontalDirectionalBlock.FACING;
 	public static final BooleanProperty LIT = BlockStateProperties.LIT;
 
@@ -181,7 +195,61 @@ public abstract class MultiDecorationBlock extends Block {
 				return null;
 			}
 		}
+		Player player = context.getPlayer();
+		if (player != null && !mayChangeWhole(level, master, facing, player)) {
+			return null;
+		}
 		return defaultBlockState().setValue(FACING, facing).setValue(partProperty(), MASTER);
+	}
+
+	/**
+	 * Whether {@code player} may change every block of a prop with its master at {@code master}, facing {@code facing}:
+	 * what breaking each with their own hands would face (Authority.mayChange: land claims, the protected town and every
+	 * other before-break rule). On the client this only predicts; the server decides.
+	 */
+	public boolean mayChangeWhole(Level level, BlockPos master, Direction facing, Player player) {
+		for (int part = 0; part < cells().length; part++) {
+			if (!Authority.mayChange(level, player, partPos(master, facing, part))) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Breaking one block of a prop brings down all of them, so a player, in survival or creative, may break one only
+	 * where they may change every one ({@link #mayChangeWhole}). Registered once, on the before-break event land and town
+	 * protection use (JugcraftAgriculture.register).
+	 */
+	public static void registerProtection() {
+		PlayerBlockBreakEvents.BEFORE.register((level, player, pos, state, blockEntity) -> {
+			if (!(state.getBlock() instanceof MultiDecorationBlock prop) || CHECKING_BREAK.get()) {
+				return true;
+			}
+			CHECKING_BREAK.set(true);
+			try {
+				return prop.mayChangeWhole(level, prop.masterPos(pos, state), state.getValue(FACING), player);
+			} finally {
+				CHECKING_BREAK.set(false);
+			}
+		});
+	}
+
+	/**
+	 * An explosion breaks none of a prop's blocks while a land claim or the protected town shields any of them (they
+	 * keep explosions off their own blocks, but breaking this one would bring theirs down with it).
+	 */
+	@Override
+	protected void onExplosionHit(BlockState state, ServerLevel level, BlockPos pos, Explosion explosion, BiConsumer<ItemStack, BlockPos> drops) {
+		BlockPos master = masterPos(pos, state);
+		Direction facing = state.getValue(FACING);
+		for (int part = 0; part < cells().length; part++) {
+			BlockPos at = partPos(master, facing, part);
+			if (TownProtection.shieldsBlock(level, at) || LandRegistry.isClaimed(level, at)) {
+				return;
+			}
+		}
+		super.onExplosionHit(state, level, pos, explosion, drops);
 	}
 
 	/** Fills in the rest of the prop. */
@@ -246,6 +314,15 @@ public abstract class MultiDecorationBlock extends Block {
 			Direction facing = state.getValue(FACING);
 			if (!isPart(level, master, MASTER, facing)) {
 				return InteractionResult.PASS;
+			}
+			// A cosmetic toggle still changes every part. Keep private claims intact
+			// when the clicked part is outside one, while preserving public town use.
+			for (int part = 0; part < cells().length; part++) {
+				BlockPos at = partPos(master, facing, part);
+				if (!LandRegistry.mayBuild(player, level, at)
+						|| (TownProtection.denies(player, level, at) && !TownProtection.allowsPublicUse(player, level, at))) {
+					return InteractionResult.FAIL;
+				}
 			}
 			boolean lit = !level.getBlockState(master).getValue(LIT);
 			for (int part = 0; part < cells().length; part++) {

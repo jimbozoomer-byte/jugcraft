@@ -1,0 +1,427 @@
+{
+  "variants": {
+    "facing=north,spin=0": {
+      "model": "jugcraft:block/spinning_top"
+    },
+    "facing=north,spin=1": {
+      "model": "jugcraft:block/spinning_top_wobble"
+    },
+    "facing=north,spin=2": {
+      "model": "jugcraft:block/spinning_top_wobble",
+      "y": 90
+    },
+    "facing=north,spin=3": {
+      "model": "jugcraft:block/spinning_top_wobble",
+      "y": 180
+    },
+    "facing=north,spin=4": {
+      "model": "jugcraft:block/spinning_top_wobble",
+      "y": 270
+    },
+    "facing=north,spin=5": {
+      "model": "jugcraft:block/spinning_top_wobble"
+    },
+    "facing=north,spin=6": {
+      "model": "jugcraft:block/spinning_top_wobble",
+      "y": 90
+    },
+    "facing=north,spin=7": {
+      "model": "jugcraft:block/spinning_top_wobble",
+      "y": 180
+    },
+    "facing=north,spin=8": {
+      "model": "jugcraft:block/spinning_top_wobble",
+      "y": 270
+    },
+    "facing=north,spin=9": {
+      "model": "jugcraft:block/spinning_top_spin1"
+    },
+    "facing=north,spin=10": {
+      "model": "jugcraft:block/spinning_top_spin2"
+    },
+    "facing=north,spin=11": {
+      "model": "jugcraft:block/spinning_top_spin3"
+    },
+    "facing=north,spin=12": {
+      "model": "jugcraft:block/spinning_top_spin0"
+    },
+    "facing=north,spin=13": {
+      "model": "jugcraft:block/spinning_top_spin1"
+    },
+    "facing=north,spin=14": {
+      "model": "jugcraft:block/spinning_top_spin2"
+    },
+    "facing=north,spin=15": {
+      "model": "jugcraft:block/spinning_top_spin3"
+    },
+    "facing=north,spin=16": {
+      "model": "jugcraft:block/spinning_top_spin0"
+    },
+    "facing=north,spin=17": {
+      "model": "jugcraft:block/spinning_top_spin1"
+    },
+    "facing=north,spin=18": {
+      "model": "jugcraft:block/spinning_top_spin2"
+    },
+    "facing=north,spin=19": {
+      "model": "jugcraft:block/spinning_top_spin3"
+    },
+    "facing=north,spin=20": {
+      "model": "jugcraft:block/spinning_top_spin0"
+    },
+    "facing=north,spin=21": {
+      "model": "jugcraft:block/spinning_top_spin1"
+    },
+    "facing=north,spin=22": {
+      "model": "jugcraft:block/spinning_top_spin2"
+    },
+    "facing=north,spin=23": {
+      "model": "jugcraft:block/spinning_top_spin3"
+    },
+    "facing=north,spin=24": {
+      "model": "jugcraft:block/spinning_top_spin0"
+    },
+    "facing=north,spin=25": {
+      "model": "jugcraft:block/spinning_top_spin1"
+    },
+    "facing=north,spin=26": {
+      "model": "jugcraft:block/spinning_top_spin2"
+    },
+    "facing=north,spin=27": {
+      "model": "jugcraft:block/spinning_top_spin3"
+    },
+    "facing=north,spin=28": {
+      "model": "jugcraft:block/spinning_top_spin0"
+    },
+    "facing=north,spin=29": {
+      "model": "jugcraft:block/spinning_top_spin1"
+    },
+    "facing=north,spin=30": {
+      "model": "jugcraft:block/spinning_top_spin2"
+    },
+    "facing=north,spin=31": {
+      "model": "jugcraft:block/spinning_top_spin3"
+    },
+    "facing=north,spin=32": {
+      "model": "jugcraft:block/spinning_top_spin0"
+    },
+    "facing=east,spin=0": {
+      "model": "jugcraft:block/spinning_top",
+      "y": 90
+    },
+    "facing=east,spin=1": {
+      "model": "jugcraft:block/spinning_top_wobble",
+      "y": 90
+    },
+    "facing=east,spin=2": {
+      "model": "jugcraft:block/spinning_top_wobble",
+      "y": 180
+    },
+    "facing=east,spin=3": {
+      "model": "jugcraft:block/spinning_top_wobble",
+      "y": 270
+    },
+    "facing=east,spin=4": {
+      "model": "jugcraft:block/spinning_top_wobble"
+    },
+    "facing=east,spin=5": {
+      "model": "jugcraft:block/spinning_top_wobble",
+      "y": 90
+    },
+    "facing=east,spin=6": {
+      "model": "jugcraft:block/spinning_top_wobble",
+      "y": 180
+    },
+    "facing=east,spin=7": {
+      "model": "jugcraft:block/spinning_top_wobble",
+      "y": 270
+    },
+    "facing=east,spin=8": {
+      "model": "jugcraft:block/spinning_top_wobble"
+    },
+    "facing=east,spin=9": {
+      "model": "jugcraft:block/spinning_top_spin1"
+    },
+    "facing=east,spin=10": {
+      "model": "jugcraft:block/spinning_top_spin2"
+    },
+    "facing=east,spin=11": {
+      "model": "jugcraft:block/spinning_top_spin3"
+    },
+    "facing=east,spin=12": {
+      "model": "jugcraft:block/spinning_top_spin0"
+    },
+    "facing=east,spin=13": {
+      "model": "jugcraft:block/spinning_top_spin1"
+    },
+    "facing=east,spin=14": {
+      "model": "jugcraft:block/spinning_top_spin2"
+    },
+    "facing=east,spin=15": {
+      "model": "jugcraft:block/spinning_top_spin3"
+    },
+    "facing=east,spin=16": {
+      "model": "jugcraft:block/spinning_top_spin0"
+    },
+    "facing=east,spin=17": {
+      "model": "jugcraft:block/spinning_top_spin1"
+    },
+    "facing=east,spin=18": {
+      "model": "jugcraft:block/spinning_top_spin2"
+    },
+    "facing=east,spin=19": {
+      "model": "jugcraft:block/spinning_top_spin3"
+    },
+    "facing=east,spin=20": {
+      "model": "jugcraft:block/spinning_top_spin0"
+    },
+    "facing=east,spin=21": {
+      "model": "jugcraft:block/spinning_top_spin1"
+    },
+    "facing=east,spin=22": {
+      "model": "jugcraft:block/spinning_top_spin2"
+    },
+    "facing=east,spin=23": {
+      "model": "jugcraft:block/spinning_top_spin3"
+    },
+    "facing=east,spin=24": {
+      "model": "jugcraft:block/spinning_top_spin0"
+    },
+    "facing=east,spin=25": {
+      "model": "jugcraft:block/spinning_top_spin1"
+    },
+    "facing=east,spin=26": {
+      "model": "jugcraft:block/spinning_top_spin2"
+    },
+    "facing=east,spin=27": {
+      "model": "jugcraft:block/spinning_top_spin3"
+    },
+    "facing=east,spin=28": {
+      "model": "jugcraft:block/spinning_top_spin0"
+    },
+    "facing=east,spin=29": {
+      "model": "jugcraft:block/spinning_top_spin1"
+    },
+    "facing=east,spin=30": {
+      "model": "jugcraft:block/spinning_top_spin2"
+    },
+    "facing=east,spin=31": {
+      "model": "jugcraft:block/spinning_top_spin3"
+    },
+    "facing=east,spin=32": {
+      "model": "jugcraft:block/spinning_top_spin0"
+    },
+    "facing=south,spin=0": {
+      "model": "jugcraft:block/spinning_top",
+      "y": 180
+    },
+    "facing=south,spin=1": {
+      "model": "jugcraft:block/spinning_top_wobble",
+      "y": 180
+    },
+    "facing=south,spin=2": {
+      "model": "jugcraft:block/spinning_top_wobble",
+      "y": 270
+    },
+    "facing=south,spin=3": {
+      "model": "jugcraft:block/spinning_top_wobble"
+    },
+    "facing=south,spin=4": {
+      "model": "jugcraft:block/spinning_top_wobble",
+      "y": 90
+    },
+    "facing=south,spin=5": {
+      "model": "jugcraft:block/spinning_top_wobble",
+      "y": 180
+    },
+    "facing=south,spin=6": {
+      "model": "jugcraft:block/spinning_top_wobble",
+      "y": 270
+    },
+    "facing=south,spin=7": {
+      "model": "jugcraft:block/spinning_top_wobble"
+    },
+    "facing=south,spin=8": {
+      "model": "jugcraft:block/spinning_top_wobble",
+      "y": 90
+    },
+    "facing=south,spin=9": {
+      "model": "jugcraft:block/spinning_top_spin1"
+    },
+    "facing=south,spin=10": {
+      "model": "jugcraft:block/spinning_top_spin2"
+    },
+    "facing=south,spin=11": {
+      "model": "jugcraft:block/spinning_top_spin3"
+    },
+    "facing=south,spin=12": {
+      "model": "jugcraft:block/spinning_top_spin0"
+    },
+    "facing=south,spin=13": {
+      "model": "jugcraft:block/spinning_top_spin1"
+    },
+    "facing=south,spin=14": {
+      "model": "jugcraft:block/spinning_top_spin2"
+    },
+    "facing=south,spin=15": {
+      "model": "jugcraft:block/spinning_top_spin3"
+    },
+    "facing=south,spin=16": {
+      "model": "jugcraft:block/spinning_top_spin0"
+    },
+    "facing=south,spin=17": {
+      "model": "jugcraft:block/spinning_top_spin1"
+    },
+    "facing=south,spin=18": {
+      "model": "jugcraft:block/spinning_top_spin2"
+    },
+    "facing=south,spin=19": {
+      "model": "jugcraft:block/spinning_top_spin3"
+    },
+    "facing=south,spin=20": {
+      "model": "jugcraft:block/spinning_top_spin0"
+    },
+    "facing=south,spin=21": {
+      "model": "jugcraft:block/spinning_top_spin1"
+    },
+    "facing=south,spin=22": {
+      "model": "jugcraft:block/spinning_top_spin2"
+    },
+    "facing=south,spin=23": {
+      "model": "jugcraft:block/spinning_top_spin3"
+    },
+    "facing=south,spin=24": {
+      "model": "jugcraft:block/spinning_top_spin0"
+    },
+    "facing=south,spin=25": {
+      "model": "jugcraft:block/spinning_top_spin1"
+    },
+    "facing=south,spin=26": {
+      "model": "jugcraft:block/spinning_top_spin2"
+    },
+    "facing=south,spin=27": {
+      "model": "jugcraft:block/spinning_top_spin3"
+    },
+    "facing=south,spin=28": {
+      "model": "jugcraft:block/spinning_top_spin0"
+    },
+    "facing=south,spin=29": {
+      "model": "jugcraft:block/spinning_top_spin1"
+    },
+    "facing=south,spin=30": {
+      "model": "jugcraft:block/spinning_top_spin2"
+    },
+    "facing=south,spin=31": {
+      "model": "jugcraft:block/spinning_top_spin3"
+    },
+    "facing=south,spin=32": {
+      "model": "jugcraft:block/spinning_top_spin0"
+    },
+    "facing=west,spin=0": {
+      "model": "jugcraft:block/spinning_top",
+      "y": 270
+    },
+    "facing=west,spin=1": {
+      "model": "jugcraft:block/spinning_top_wobble",
+      "y": 270
+    },
+    "facing=west,spin=2": {
+      "model": "jugcraft:block/spinning_top_wobble"
+    },
+    "facing=west,spin=3": {
+      "model": "jugcraft:block/spinning_top_wobble",
+      "y": 90
+    },
+    "facing=west,spin=4": {
+      "model": "jugcraft:block/spinning_top_wobble",
+      "y": 180
+    },
+    "facing=west,spin=5": {
+      "model": "jugcraft:block/spinning_top_wobble",
+      "y": 270
+    },
+    "facing=west,spin=6": {
+      "model": "jugcraft:block/spinning_top_wobble"
+    },
+    "facing=west,spin=7": {
+      "model": "jugcraft:block/spinning_top_wobble",
+      "y": 90
+    },
+    "facing=west,spin=8": {
+      "model": "jugcraft:block/spinning_top_wobble",
+      "y": 180
+    },
+    "facing=west,spin=9": {
+      "model": "jugcraft:block/spinning_top_spin1"
+    },
+    "facing=west,spin=10": {
+      "model": "jugcraft:block/spinning_top_spin2"
+    },
+    "facing=west,spin=11": {
+      "model": "jugcraft:block/spinning_top_spin3"
+    },
+    "facing=west,spin=12": {
+      "model": "jugcraft:block/spinning_top_spin0"
+    },
+    "facing=west,spin=13": {
+      "model": "jugcraft:block/spinning_top_spin1"
+    },
+    "facing=west,spin=14": {
+      "model": "jugcraft:block/spinning_top_spin2"
+    },
+    "facing=west,spin=15": {
+      "model": "jugcraft:block/spinning_top_spin3"
+    },
+    "facing=west,spin=16": {
+      "model": "jugcraft:block/spinning_top_spin0"
+    },
+    "facing=west,spin=17": {
+      "model": "jugcraft:block/spinning_top_spin1"
+    },
+    "facing=west,spin=18": {
+      "model": "jugcraft:block/spinning_top_spin2"
+    },
+    "facing=west,spin=19": {
+      "model": "jugcraft:block/spinning_top_spin3"
+    },
+    "facing=west,spin=20": {
+      "model": "jugcraft:block/spinning_top_spin0"
+    },
+    "facing=west,spin=21": {
+      "model": "jugcraft:block/spinning_top_spin1"
+    },
+    "facing=west,spin=22": {
+      "model": "jugcraft:block/spinning_top_spin2"
+    },
+    "facing=west,spin=23": {
+      "model": "jugcraft:block/spinning_top_spin3"
+    },
+    "facing=west,spin=24": {
+      "model": "jugcraft:block/spinning_top_spin0"
+    },
+    "facing=west,spin=25": {
+      "model": "jugcraft:block/spinning_top_spin1"
+    },
+    "facing=west,spin=26": {
+      "model": "jugcraft:block/spinning_top_spin2"
+    },
+    "facing=west,spin=27": {
+      "model": "jugcraft:block/spinning_top_spin3"
+    },
+    "facing=west,spin=28": {
+      "model": "jugcraft:block/spinning_top_spin0"
+    },
+    "facing=west,spin=29": {
+      "model": "jugcraft:block/spinning_top_spin1"
+    },
+    "facing=west,spin=30": {
+      "model": "jugcraft:block/spinning_top_spin2"
+    },
+    "facing=west,spin=31": {
+      "model": "jugcraft:block/spinning_top_spin3"
+    },
+    "facing=west,spin=32": {
+      "model": "jugcraft:block/spinning_top_spin0"
+    }
+  }
+}

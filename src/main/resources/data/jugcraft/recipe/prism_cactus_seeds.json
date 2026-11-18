@@ -1,0 +1,19 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:cactus",
+    "minecraft:amethyst_shard",
+    "minecraft:bone_meal"
+  ],
+  "result": {
+    "id": "jugcraft:prism_cactus_seeds",
+    "count": 2
+  }
+}
