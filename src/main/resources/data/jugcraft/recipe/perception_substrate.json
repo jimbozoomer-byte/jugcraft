@@ -1,0 +1,23 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jugcraft:dream_concentrate",
+    "jugcraft:dream_concentrate",
+    "jugcraft:dream_concentrate",
+    "jugcraft:dream_concentrate",
+    "jugcraft:lucid_imprint",
+    "minecraft:redstone",
+    "minecraft:amethyst_shard"
+  ],
+  "result": {
+    "id": "jugcraft:perception_substrate",
+    "count": 1
+  }
+}

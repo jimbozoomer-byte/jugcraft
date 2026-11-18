@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    " C ",
+    "BCC",
+    "BBB"
+  ],
+  "key": {
+    "B": "minecraft:polished_basalt",
+    "C": "minecraft:copper_ingot"
+  },
+  "result": {
+    "id": "jugcraft:hot_spring_overflow_spout"
+  }
+}

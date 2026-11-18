@@ -85,7 +85,7 @@ public class PolymerGameTests {
                 checked++;
             }
         }
-        h.assertTrue(checked == 23, "All new process and molding recipes exercised, found " + checked);
+        h.assertTrue(checked == 24, "All new process and molding recipes exercised, found " + checked);
         h.succeed();
     }
 

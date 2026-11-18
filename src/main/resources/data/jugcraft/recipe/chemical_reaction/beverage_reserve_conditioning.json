@@ -1,0 +1,33 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "jugcraft:chemical_reaction",
+  "capability": "jugcraft:beverage_barrel",
+  "items": [
+    {
+      "ingredient": "jugcraft:refined_spirits_concentrate",
+      "count": 4
+    },
+    {
+      "ingredient": "minecraft:honeycomb",
+      "count": 1
+    }
+  ],
+  "results": [
+    {
+      "id": "jugcraft:reserve_whiskey_concentrate",
+      "count": 4
+    }
+  ],
+  "tool": "jugcraft:oak_conditioning_insert",
+  "energy_per_tick": 1,
+  "time": 2400
+}

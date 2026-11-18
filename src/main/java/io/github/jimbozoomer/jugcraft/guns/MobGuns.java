@@ -181,6 +181,14 @@ public final class MobGuns {
 			return true;
 		}
 
+		/**
+		 * Makes for a target it cannot shoot yet (out of reach or out of sight): straight at it. Raiders override this
+		 * (raiders/RaidEngagement#close) to hold a standoff in sight of a target they cannot walk up to.
+		 */
+		protected void close(LivingEntity target) {
+			mob.getNavigation().moveTo(target, speed);
+		}
+
 		@Override
 		public void tick() {
 			LivingEntity target = mob.getTarget();
@@ -199,7 +207,7 @@ public final class MobGuns {
 			if (near && seen >= SIGHTED) {
 				mob.getNavigation().stop();
 			} else {
-				mob.getNavigation().moveTo(target, speed);
+				close(target);
 			}
 			mob.getLookControl().setLookAt(target, 30.0F, 30.0F);
 			if (reloading > 0) {

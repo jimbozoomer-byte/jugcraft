@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jugcraft:block/apple_cranberry_crisp",
+      "y": 180
+    },
+    "facing=east": {
+      "model": "jugcraft:block/apple_cranberry_crisp",
+      "y": 270
+    },
+    "facing=south": {
+      "model": "jugcraft:block/apple_cranberry_crisp"
+    },
+    "facing=west": {
+      "model": "jugcraft:block/apple_cranberry_crisp",
+      "y": 90
+    }
+  }
+}

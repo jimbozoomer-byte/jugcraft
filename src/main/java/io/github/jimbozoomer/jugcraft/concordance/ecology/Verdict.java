@@ -96,7 +96,8 @@ public record Verdict(Growth growth, Map<Factor, Fit> fits, boolean strained) {
 	/**
 	 * One line for each factor that is not ideal, stopping factors first: its value and what the organism needs
 	 * ({@code compose.jugcraft.ecology.short}, {@code excess}, {@code tolerable}); where harvest strain decided the
-	 * disturbance fit (Concordance Chunk C, C-08), the line says how much strain counted ({@code ecology.strained.*}).
+	 * disturbance fit (Concordance Chunk C, C-08), the line says how much strain counted ({@code ecology.strained.*}), against
+	 * the unsheltered area (the garden cohort, GC-09: the value the strained judgement read).
 	 */
 	public List<Text> reasons(Niche niche, Habitat habitat) {
 		List<Text> lines = new ArrayList<>();
@@ -104,7 +105,8 @@ public record Verdict(Growth growth, Map<Factor, Fit> fits, boolean strained) {
 			Niche.Range range = niche.range(factor);
 			Text.Ref name = new Text.Ref("factor", factor.id);
 			if (strained && factor == Factor.DISTURBANCE) {
-				lines.add(Text.of("ecology.strained.excess", name, habitat.get(factor), habitat.strain(), range.max()));
+				// GC-09: the strain was counted against the unsheltered area (Habitat.strained), so that is the value shown.
+				lines.add(Text.of("ecology.strained.excess", name, habitat.unsheltered(), habitat.strain(), range.max()));
 			} else {
 				lines.add(fit(factor) == Fit.SHORT ? Text.of("ecology.short", name, habitat.get(factor), range.min())
 						: Text.of("ecology.excess", name, habitat.get(factor), range.max()));
@@ -114,7 +116,7 @@ public record Verdict(Growth growth, Map<Factor, Fit> fits, boolean strained) {
 			Niche.Range range = niche.range(factor);
 			Text.Ref name = new Text.Ref("factor", factor.id);
 			if (strained && factor == Factor.DISTURBANCE) {
-				lines.add(Text.of("ecology.strained.tolerable", name, habitat.get(factor), habitat.strain(), range.idealMin(), range.idealMax()));
+				lines.add(Text.of("ecology.strained.tolerable", name, habitat.unsheltered(), habitat.strain(), range.idealMin(), range.idealMax()));
 			} else {
 				lines.add(Text.of("ecology.tolerable", name, habitat.get(factor), range.idealMin(), range.idealMax()));
 			}

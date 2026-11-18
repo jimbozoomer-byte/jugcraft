@@ -30,10 +30,12 @@ import io.github.jimbozoomer.jugcraft.concordance.rules.ResearchState;
 import io.github.jimbozoomer.jugcraft.energy.CreativeEnergyCellBlock;
 import io.github.jimbozoomer.jugcraft.fluid.ElectricPumpBlockEntity;
 import io.github.jimbozoomer.jugcraft.fluid.JugcraftFluids;
+import io.github.jimbozoomer.jugcraft.guide.encyclopedia.Encyclopedia;
 import io.github.jimbozoomer.jugcraft.guide.encyclopedia.EncyclopediaPayload;
 import io.github.jimbozoomer.jugcraft.lair.JugcraftLairs;
 import io.github.jimbozoomer.jugcraft.lair.Lair;
 import io.github.jimbozoomer.jugcraft.lair.LairDossiers;
+import io.github.jimbozoomer.jugcraft.lair.hag.MireHagLoot;
 import io.github.jimbozoomer.jugcraft.lair.tyrant.CinderTyrantLoot;
 import io.github.jimbozoomer.jugcraft.lair.yeti.YetiKingLoot;
 import io.github.jimbozoomer.jugcraft.machine.JugcraftMachines;
@@ -87,6 +89,7 @@ import net.minecraft.world.level.material.Fluids;
  * Concordance Chunk A (A-04) in a real client on a dedicated server, so every encyclopedia request and answer is encoded,
  * sent and decoded. Results are logged with the prefix "[encyclopedia-check]". One client.
  * <ul>
+ * <li><b>The welcome.</b> The first join is greeted with the encyclopedia's key (a tag keeps it to the first).</li>
  * <li><b>The key.</b> No other loaded key shares its default (F3 debug combinations aside, A-D7). From the game it
  * opens on Discover, where finding something that glows is next (screenshot {@code jugcraft_encyclopedia_discover_new});
  * the key again, or Esc, closes it; typing its letter in chat does not open it.</li>
@@ -126,7 +129,8 @@ import net.minecraft.world.level.material.Fluids;
  * screen at GUI scale 4 and in a small window ({@code jugcraft_encyclopedia_scale4}, {@code jugcraft_encyclopedia_small}).
  * Since Concordance Chunk B (B-11), with the Frost Horn and the Kiln Seal carried and both keepers beaten, Expeditions
  * scrolled to the Glacier Hall's and the Cinder Kiln's dossiers ({@code jugcraft_encyclopedia_expedition_glacier_hall},
- * {@code jugcraft_encyclopedia_expedition_cinder_kiln}).</li>
+ * {@code jugcraft_encyclopedia_expedition_cinder_kiln}) and, since Concordance Chunk E (E4), the Lantern Fen's
+ * ({@code jugcraft_encyclopedia_expedition_lantern_fen}).</li>
  * </ul>
  */
 public class EncyclopediaClientGameTests implements FabricClientGameTest {
@@ -147,6 +151,7 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 				server.runCommand("gamerule minecraft:spawn_mobs false");
 				server.runCommand("gamemode survival @a");
 				context.waitTicks(20);
+				welcome(server);
 				theKey(context);
 				theInventoryButton(context, server);
 				theRoute(context, server);
@@ -161,6 +166,13 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 				sizes(context);
 			}
 		}
+	}
+
+	/** A first join is welcomed, pointing at the encyclopedia's key, and tagged so it is not repeated. */
+	private static void welcome(TestDedicatedServerContext server) {
+		boolean welcomed = server.computeOnServer(minecraft -> first(minecraft).entityTags().contains(Encyclopedia.WELCOMED_TAG));
+		Jugcraft.LOGGER.info("[encyclopedia-check] welcomed on first join: {}", welcomed);
+		check(welcomed, "A first join should be welcomed with the encyclopedia's key");
 	}
 
 	private static void theKey(ClientGameTestContext context) {
@@ -189,9 +201,20 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
                 context.waitTicks(2);
                 context.takeScreenshot("jugcraft_encyclopedia_discover_new");
         check(context.computeOnClient(client -> ((EncyclopediaScreen) client.gui.screen()).isHome()), "The guide should open on the simple contents spread");
-        context.runOnClient(client -> ((EncyclopediaScreen) client.gui.screen()).showPage("discover"));
+        context.runOnClient(client -> ((EncyclopediaScreen) client.gui.screen()).pressChapter("discover"));
         context.waitTicks(3);
         check(context.computeOnClient(client -> !((EncyclopediaScreen) client.gui.screen()).isHome()), "First steps should open the topic directory");
+		List<String> unlisted = context.computeOnClient(client -> {
+			List<String> shown = ((EncyclopediaScreen) client.gui.screen()).chapters();
+			return EncyclopediaClient.navigator().pages().stream().map(EncyclopediaPayload.Page::id).filter(id -> !shown.contains(id)).toList();
+		});
+		Jugcraft.LOGGER.info("[encyclopedia-check] pages without a chapter on the contents: {}", unlisted);
+		check(unlisted.isEmpty(), "Every page should have a chapter on the contents spread: missing " + unlisted);
+		List<String> topics = context.computeOnClient(client -> ((EncyclopediaScreen) client.gui.screen()).topics().stream().map(Component::getString).toList());
+		String firstStep = context.computeOnClient(client -> EncyclopediaClient.navigator().current().rows().stream()
+				.filter(row -> row.kindOf() == EncyclopediaPayload.Kind.STEP).findFirst().map(row -> row.text().getString()).orElse(""));
+		Jugcraft.LOGGER.info("[encyclopedia-check] Discover's topics: {}", topics);
+		check(!topics.isEmpty() && topics.getFirst().equals(firstStep), "Discover's first topic should be its first step, not a heading alone: " + topics);
         context.takeScreenshot("jugcraft_field_guide_first_steps");
 
 		context.getInput().pressKey(key);
@@ -894,13 +917,15 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 
 		// Concordance Chunk B (B-11): the Glacier Hall's and the Cinder Kiln's dossiers (their tokens carried, their keepers
 		// beaten), each opened as its own section of the book (each dossier starts with a heading named after its lair)
-		// and scrolled to the top of the page's body.
+		// and scrolled to the top of the page's body; since Concordance Chunk E (E4) the Lantern Fen's too, its lore first.
 		server.runOnServer(minecraft -> {
 			ServerPlayer player = first(minecraft);
 			player.getInventory().add(new ItemStack(JugcraftLairs.FROST_HORN));
 			player.getInventory().add(new ItemStack(JugcraftLairs.KILN_SEAL));
+			player.getInventory().add(new ItemStack(JugcraftLairs.HAG_STONE));
 			TrickOrTreat.award(player, YetiKingLoot.ADVANCEMENT);
 			TrickOrTreat.award(player, CinderTyrantLoot.ADVANCEMENT);
+			TrickOrTreat.award(player, MireHagLoot.ADVANCEMENT);
 		});
 		context.waitTicks(10);
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
@@ -911,13 +936,13 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 			EncyclopediaClient.changed();
 		});
 		context.waitTicks(5);
-		for (Lair lair : List.of(Lair.GLACIER_HALL, Lair.CINDER_KILN)) {
+		for (Lair lair : List.of(Lair.GLACIER_HALL, Lair.CINDER_KILN, Lair.LANTERN_FEN)) {
 			context.runOnClient(client -> ((EncyclopediaScreen) client.gui.screen()).showSectionContaining(LairDossiers.name(lair)));
 			context.waitTicks(3);
 			String placed = context.computeOnClient(client -> scrollTo(client, LairDossiers.name(lair)));
 			Jugcraft.LOGGER.info("[encyclopedia-check] the {} dossier on the Expeditions page: {}", lair.id, placed);
 			check(placed.startsWith("ok"), "The Expeditions page does not show the " + lair.id + " dossier: " + placed);
-			context.runOnClient(client -> client.gui.toastManager().clear());   // the two advancements' toasts
+			context.runOnClient(client -> client.gui.toastManager().clear());   // the advancements' toasts
 			context.waitTicks(5);
 			context.takeScreenshot("jugcraft_encyclopedia_expedition_" + lair.id);
 		}
@@ -943,6 +968,12 @@ public class EncyclopediaClientGameTests implements FabricClientGameTest {
 		context.runOnClient(client -> client.gui.toastManager().clear());
                 context.waitTicks(2);
                 context.takeScreenshot("jugcraft_encyclopedia_keys");
+		// Backspace goes back to the page read before, as the help says.
+		context.getInput().pressKey(InputConstants.KEY_BACKSPACE);
+		context.waitTicks(3);
+		String backTo = context.computeOnClient(client -> ((EncyclopediaScreen) client.gui.screen()).page());
+		Jugcraft.LOGGER.info("[encyclopedia-check] Backspace from Keys: {}", backTo);
+		check(backTo.equals("expedition"), "Backspace should go back to the page read before: " + backTo);
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 		context.waitForScreen(null);
 	}

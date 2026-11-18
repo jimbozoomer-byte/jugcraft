@@ -1,0 +1,25 @@
+{
+  "forge_tier": 1,
+  "main_ingredient": {
+    "item": "jugcraft:forbidden_arcane_crystal"
+  },
+  "inputs": [
+    {
+      "amount": 1,
+      "ingredient": {
+        "item": "jugcraft:forbidden_corrupt_soul"
+      }
+    }
+  ],
+  "essences": {
+    "aureal": 400,
+    "blood": 200,
+    "experience": 200,
+    "souls": 3
+  },
+  "magic_circle": "jugcraft:forbidden_create_item",
+  "result": {
+    "type": "jugcraft:forbidden_create_item",
+    "result_item": "jugcraft:forbidden_corrupted_arcane_crystal"
+  }
+}

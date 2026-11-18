@@ -212,7 +212,7 @@ def geometry(name,family,im):
 def write(path,data):
     path.parent.mkdir(parents=True,exist_ok=True);path.write_text(json.dumps(data,indent=2,ensure_ascii=False)+'\n',encoding='utf-8')
 
-def generate(writer=None):
+def generate(writer=None, only=None):
     emit=writer or write
     catalog=ROOT/'tools/food_servings_catalog.json'
     if catalog.exists():rows=json.loads(catalog.read_text(encoding='utf-8'))
@@ -226,11 +226,17 @@ def generate(writer=None):
             rows.append({'id':r['id'],'family':f})
         if unknown:raise ValueError('Unclassified: '+str(unknown))
         write(catalog,rows)
-    manifest=[];counts={}
+    manifest_path=RES/'jugcraft/food_servings.json'
+    manifest=[] if only is None else [r for r in json.loads(manifest_path.read_text()) if r['id'] not in only]
+    counts={}
     atlaspath=RES/'assets/minecraft/atlases/blocks.json'
     atlas=json.loads(atlaspath.read_text(encoding='utf-8'))
-    atlas['sources']=[v for v in atlas['sources'] if not v.get('sprite','').startswith('jugcraft:block/food_serving_material/')]
+    prefix='jugcraft:block/food_serving_material/'
+    replacing=None if only is None else {prefix+i.replace(':','/') for i in only}
+    atlas['sources']=[v for v in atlas['sources'] if not (v.get('sprite','').startswith(prefix)
+                       and (replacing is None or v['sprite'] in replacing))]
     for row in rows:
+        if only is not None and row['id'] not in only:continue
         item=row['id'];family=row['family'];ref,d,tex,im=source(item)
         ns,n=item.split(':');path='food_serving/'+ns+'/'+n
         elems=geometry(n,family,im)
@@ -258,10 +264,11 @@ def generate(writer=None):
         emit(RES/'assets/jugcraft/blockstates'/f'{path}.json',{'variants':{f'facing={f}':{'model':'jugcraft:block/'+path,'y':a} for f,a in [('north',0),('east',90),('south',180),('west',270)]}})
         emit(RES/'data/jugcraft/loot_table/blocks'/f'{path}.json',{'type':'minecraft:block','pools':[]})
         counts[family]=counts.get(family,0)+1
-    write(catalog,rows);emit(RES/'jugcraft/food_servings.json',manifest)
+    write(catalog,rows);emit(manifest_path,manifest)
     langpath=RES/'assets/jugcraft/lang/en_us.json'
     lang=json.loads(langpath.read_text(encoding='utf-8'))
     for row in rows:
+        if only is not None and row['id'] not in only:continue
         ns,n=row['id'].split(':'); name=lang.get('item.'+ns+'.'+n,lang.get('block.'+ns+'.'+n,n.replace('_',' ').title()))
         lang['block.jugcraft.food_serving.'+ns+'.'+n]='Placed '+name
     emit(langpath,lang)

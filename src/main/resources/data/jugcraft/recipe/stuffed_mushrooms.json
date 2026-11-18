@@ -1,0 +1,22 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "minecraft:bowl",
+    "minecraft:brown_mushroom",
+    "minecraft:brown_mushroom",
+    "minecraft:bread",
+    "jugcraft:garlic",
+    "jugcraft:thyme"
+  ],
+  "result": {
+    "id": "jugcraft:stuffed_mushrooms",
+    "count": 1
+  }
+}

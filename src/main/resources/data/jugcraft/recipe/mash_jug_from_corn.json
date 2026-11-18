@@ -1,0 +1,28 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    },
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    "jugcraft:corn",
+    "jugcraft:corn",
+    "jugcraft:corn",
+    "jugcraft:corn",
+    "minecraft:sugar",
+    "minecraft:sugar",
+    "minecraft:water_bucket",
+    "jugcraft:empty_mash_jug"
+  ],
+  "result": {
+    "id": "jugcraft:mash_jug",
+    "count": 1
+  }
+}

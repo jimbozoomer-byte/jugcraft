@@ -1,8 +1,4 @@
 {
-  "required": true,
-  "minVersion": "0.8",
-  "package": "io.github.jimbozoomer.jugcraft.mixin.client",
-  "compatibilityLevel": "JAVA_21",
   "client": [
     "BotanicalArmorLayerMixin",
     "OwnerEnchantmentLightMixin",
@@ -59,9 +55,19 @@
     "OwnerAntiqueHandsMixin",
     "OwnerAntiqueFrameMixin",
     "OwnerZoomHudMixin",
-    "OwnerLecternPageAccess"
+    "OwnerLecternPageAccess",
+    "DrugVisionMixin",
+    "DrugPostPassMixin",
+    "PharmacologyAimMixin",
+    "DrillMiningClientMixin",
+    "PegasusSprintKeyMixin",
+    "PharmacyOverlayLayoutMixin"
   ],
+  "compatibilityLevel": "JAVA_21",
   "injectors": {
     "defaultRequire": 1
-  }
+  },
+  "minVersion": "0.8",
+  "package": "io.github.jimbozoomer.jugcraft.mixin.client",
+  "required": true
 }

@@ -27,7 +27,9 @@ final class EncyclopediaKeys {
 		List<EncyclopediaPayload.Row> rows = new ArrayList<>();
 		rows.add(row(EncyclopediaPayload.Kind.HEADING, Component.translatable("encyclopedia.jugcraft.keys.jugcraft"), null));
 		for (KeyMapping mapping : client.options.keyMappings) {
-			if (!mapping.getCategory().equals(PartyClient.CATEGORY)) {
+			// Jugcraft's keys, and the Pegasus's own category (docs/features/pegasus.md).
+			if (!mapping.getCategory().equals(PartyClient.CATEGORY)
+					&& !mapping.getCategory().equals(io.github.jimbozoomer.jugcraft.client.pegasus.PegasusClient.CATEGORY)) {
 				continue;
 			}
 			Component bound = mapping.isUnbound() ? Component.translatable("encyclopedia.jugcraft.keys.unbound") : mapping.getTranslatedKeyMessage();

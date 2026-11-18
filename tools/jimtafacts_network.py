@@ -60,6 +60,23 @@ ITEMS += ['creative_storage_cell']  # Creative-only original item; deliberately 
 def ids():
     return ['jimta_' + n for n in BLOCKS + ITEMS + equipment.ITEMS + paint.ITEMS + exploration.ITEMS + facades.ITEMS]
 
+# Supplied item tint types and their native sources (client DigitalCellTints, rules in DigitalCellLeds).
+TINT_TYPES = {'ae2:storage_cell_state': 'jugcraft:jimta_storage_cell_state',
+              'ae2:portable_cell_color': 'jugcraft:jimta_portable_cell_color'}
+
+def item_tints(name):
+    """The supplied definition's tint list for an item, with each ae2 tint type mapped to its native source.
+    The storage cells colour their status LED layer, portable cells also their screen layer."""
+    supplied = SOURCE / f'items/{name}.json'
+    tints = json.loads(supplied.read_text(encoding='utf-8'))['model'].get('tints') if supplied.is_file() else None
+    if not tints:
+        return {}
+    native = [dict(tint, type=TINT_TYPES.get(tint['type'], tint['type'])) for tint in tints]
+    unsupported = [tint['type'] for tint in native if not tint['type'].startswith(('minecraft:', 'jugcraft:'))]
+    if unsupported:
+        raise ValueError(f'{supplied}: tint types without a native source: {unsupported}')
+    return {'tints': native}
+
 def dump(path, data):
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + '\n', encoding='utf-8')
@@ -117,9 +134,12 @@ def generate():
                 if face.get('texture') in data.get('textures', {}): face['texture'] = '#' + face['texture']
         data.pop('render_type', None)
         dest = ASSETS / ('models/' + PREFIX + path + '.json')
-        from jimtafacts_model_repairs import repair, REPAIRED, CLOSED
+        from jimtafacts_model_repairs import repair, REPAIRED, CLOSED, BURIED
         dump(dest, repair(PREFIX+path, data))
-        copies.append({'source': src.relative_to(ROOT).as_posix(), 'runtime': dest.relative_to(ROOT).as_posix(), 'changes': 'Namespace references and native emission metadata; original elements and pixels retained.' + (' Audited overlapping faces separated and exposed box faces closed for the native renderer, UVs pinned.' if PREFIX+path in REPAIRED | CLOSED else ' Geometry and UVs unchanged.')})
+        geometry = (' Audited overlapping faces separated and exposed box faces closed for the native renderer, UVs pinned.' if PREFIX+path in REPAIRED | CLOSED
+                    else ' Geometry and UVs unchanged; only the audited faces buried inside opaque neighbours are left out.' if PREFIX+path in BURIED
+                    else ' Geometry and UVs unchanged.')
+        copies.append({'source': src.relative_to(ROOT).as_posix(), 'runtime': dest.relative_to(ROOT).as_posix(), 'changes': 'Namespace references and native emission metadata; original elements and pixels retained.' + geometry})
         return target
 
     sources = {
@@ -213,7 +233,7 @@ def generate():
         multipart.append({'when': {direction: 'true'}, 'apply': {'model': arm, 'x': x, 'y': y}})
     dump(ASSETS / 'blockstates/jimta_fluix_glass_cable.json', {'multipart': multipart})
     for name in ITEMS + ['fluix_glass_cable']:
-        dump(ASSETS / f'items/jimta_{name}.json', {'model': {'type': 'minecraft:model', 'model': model('item/' + name)}})
+        dump(ASSETS / f'items/jimta_{name}.json', {'model': {'type': 'minecraft:model', 'model': model('item/' + name), **item_tints(name)}})
 
     language = json.loads((ASSETS / 'lang/en_us.json').read_text(encoding='utf-8'))
     language['encyclopedia.jugcraft.page.jimta_network'] = 'Digital Storage Networks'

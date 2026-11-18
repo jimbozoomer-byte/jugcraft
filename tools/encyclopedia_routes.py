@@ -150,3 +150,6 @@ def build(book):
 
 def lang(entries):
     entries.update(LANG)
+    # The route maps' words (tools/encyclopedia_progression.py: server route pages and the client's Route map tab).
+    import encyclopedia_progression
+    encyclopedia_progression.lang(entries)

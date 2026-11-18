@@ -137,6 +137,9 @@ def loot(out, write):
     pools = [{"entries": [{"type": "minecraft:item", "name": rid("reaper_shade"), "modifier": {
         "type": "minecraft:set_count", "count": {"type": "minecraft:uniform", "min": low, "max": high}}}], "rolls": 1}]
     pools += [chance(item, p) for item, p in vs.CHANCES.items()]
+    # Its armor set: one sure pool, so every share holds one piece, each as likely (armor-tier-sources.md).
+    pools.append({"entries": [{"type": "minecraft:item", "name": rid(piece)} for piece in vs.SET_PIECES],
+                  "rolls": 1})
     write(out.parent / "entities" / "vesperine.json", {"type": "minecraft:gift", "random_sequence": rid("entities/vesperine"),
                                                         "pools": pools})
     for name in vs.TROPHIES:

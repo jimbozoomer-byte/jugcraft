@@ -80,7 +80,7 @@ public class ForagingGameTests {
 
 	/**
 	 * A mushroom stands on grass, not stone. Spreading (as bone meal makes it, in any light) it puts out another of its
-	 * kind, one at a time, until five are near, and no more. The jack o'lantern mushroom glows.
+	 * kind, one at a time, until five are near, and no more, nor another kind among them. The jack o'lantern mushroom glows.
 	 */
 	@GameTest(maxTicks = 20)
 	public void mushroomsGrowOnSoilAndSpread(GameTestHelper helper) {
@@ -97,6 +97,14 @@ public class ForagingGameTests {
 		}
 		helper.assertTrue(count(helper, porcini.getBlock()) == WildMushroomBlock.SPREAD_CAP, "It spreads to five");
 		helper.assertTrue(!WildMushroomBlock.spread(level, helper.absolutePos(at), porcini, level.getRandom(), false), "and no further");
+		BlockPos beside = at.east();
+		while (!helper.getBlockState(beside).isAir()) {
+			beside = beside.south();
+		}
+		BlockState chanterelle = mushroom("chanterelle");
+		helper.setBlock(beside, chanterelle);
+		helper.assertTrue(!WildMushroomBlock.spread(level, helper.absolutePos(beside), chanterelle, level.getRandom(), false),
+				"nor does another kind among them");
 		helper.assertTrue(mushroom("jack_o_lantern_mushroom").getLightEmission() == 9 && porcini.getLightEmission() == 0,
 				"The jack o'lantern mushroom glows");
 		helper.succeed();
@@ -105,7 +113,7 @@ public class ForagingGameTests {
 	/**
 	 * Eight fly agarics round a circle make a fairy ring (seven don't). At its centre a player is blessed: Luck II, Away with
 	 * the Fairies, once a night. A mushroom sprouts a whole ring of its kind round a circle it stands on, and none where one
-	 * stands already.
+	 * stands already or beside one.
 	 */
 	@GameTest(maxTicks = 20)
 	public void fairyRingsSproutAndBless(GameTestHelper helper) {
@@ -142,6 +150,10 @@ public class ForagingGameTests {
 			ring |= FairyRings.ring(level, helper.absolutePos(seed.offset(-point[0], 0, -point[1])));
 		}
 		helper.assertTrue(planted >= FairyRings.RING_MUSHROOMS - 1 && ring, "One chanterelle sprouts a ring round it: " + planted);
+		for (int i = 0; i < 16; i++) {
+			helper.assertTrue(FairyRings.sprout(level, helper.absolutePos(seed), chanterelle, level.getRandom()) == 0,
+					"A mushroom of a ring, or beside one, sprouts no new ring: rings do not breed rings");
+		}
 		helper.succeed();
 	}
 

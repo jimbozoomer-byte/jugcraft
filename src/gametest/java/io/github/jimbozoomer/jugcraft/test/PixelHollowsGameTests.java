@@ -372,15 +372,26 @@ public class PixelHollowsGameTests {
 	}
 
 	/** An unemployed villager next to a cabinet walks to it and becomes a Retro Trader. */
-	@GameTest(maxTicks = 1800)
+	@GameTest(maxTicks = 1800, environment = "jugcraft-test:arcade_job_claim")
 	public void villagerClaimsTheArcadeCabinet(GameTestHelper helper) {
+		// Other trader fixtures create villagers and cabinets in the same 50-test
+		// batch. Exercise natural job acquisition alone, during working hours,
+		// so another test's villager cannot reserve this test's only workstation.
+		for (int x = 0; x <= 5; x++) for (int z = 0; z <= 5; z++)
+			helper.setBlock(new BlockPos(x, 0, z), Blocks.STONE);
 		helper.setBlock(new BlockPos(1, 1, 1), RetroTrader.ARCADE_CABINET.defaultBlockState().setValue(ArcadeCabinetBlock.FACING,
 				Direction.SOUTH));
 		helper.setBlock(new BlockPos(1, 2, 1), RetroTrader.ARCADE_CABINET.defaultBlockState()
 				.setValue(ArcadeCabinetBlock.FACING, Direction.SOUTH).setValue(ArcadeCabinetBlock.HALF, DoubleBlockHalf.UPPER));
 		Villager villager = spawnVillager(helper, new BlockPos(4, 1, 4));
-		helper.succeedWhen(() -> helper.assertTrue(villager.getVillagerData().profession().is(RetroTrader.PROFESSION),
-				"The villager is still " + villager.getVillagerData().profession()));
+		helper.succeedWhen(() -> {
+			helper.assertTrue(villager.getVillagerData().profession().is(RetroTrader.PROFESSION),
+					"The villager is still " + villager.getVillagerData().profession());
+			helper.assertTrue(villager.getBrain().getMemory(net.minecraft.world.entity.ai.memory.MemoryModuleType.JOB_SITE)
+					.filter(site -> site.dimension().equals(helper.getLevel().dimension())
+							&& site.pos().equals(helper.absolutePos(new BlockPos(1, 1, 1)))).isPresent(),
+					"The villager must claim this cabinet, not a workstation from another fixture");
+		});
 	}
 
 	/**

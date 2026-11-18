@@ -2,6 +2,8 @@
   "replace": false,
   "values": [
     "jugcraft:sandbags",
+    "jugcraft:wind_carved_snowdrift",
+    "jugcraft:shovelled_snow_pile",
     "jugcraft:sandbags_slab",
     "jugcraft:sandbags_stairs",
     "jugcraft:oil_sand",
@@ -39,6 +41,9 @@
     "jugcraft:holidayworks_snowy_grass_block",
     "jugcraft:holidayworks_unmeltable_snow",
     "jugcraft:twigworks_rocky_dirt",
-    "jugcraft:twigworks_silt"
+    "jugcraft:twigworks_silt",
+    "jugcraft:aquatic_farmland",
+    "jugcraft:wilds_raked_sand",
+    "jugcraft:wilds_red_raked_sand"
   ]
 }

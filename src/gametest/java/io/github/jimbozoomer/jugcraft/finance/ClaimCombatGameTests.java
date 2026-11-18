@@ -190,6 +190,7 @@ public final class ClaimCombatGameTests {
         var connection = new net.minecraft.network.Connection(net.minecraft.network.protocol.PacketFlow.SERVERBOUND);
         new io.netty.channel.embedded.EmbeddedChannel(connection);
         h.getLevel().getServer().getPlayerList().placeNewPlayer(connection, p, net.minecraft.server.network.CommonListenerCookie.createInitial(profile, false));
+        io.github.jimbozoomer.jugcraft.test.TestPlayers.track(h, p);
         p.setGameMode(GameType.SURVIVAL);
         p.getInventory().clearContent();
         h.assertFalse(p.isCreative(), "Survival player fixture");

@@ -23,6 +23,8 @@ def extend(root, edge, evidence, items):
 
     # Only wood families actually registered as strippable logs; not arbitrary
     # item names containing "stripped" (candy cane geometry is different).
+    for wood in ("livingwood", "dreamwood"):
+        route(java + "botany/Jugtania.java", ["jugtania_" + wood + "_log", "#minecraft:axes"], ["jugtania_stripped_" + wood + "_log"])
     import agriculture as ag
     for wood in ag.WOOD_SETS:
         for suffix in ('log',):
@@ -66,6 +68,16 @@ def extend(root, edge, evidence, items):
             route('tools/agriculture.py:PIES/' + name, ['raw_' + pie, ag.PIES['oven'], '#minecraft:coals'], [pie], 'hearth_baking')
         if j(pie + '_slice') in items:
             route('tools/agriculture.py:PIES/' + name, [pie, '#jugcraft:knives'], [pie + '_slice'], 'slicing')
+    # Pharmacy crops use the shared native crop block; studies exchange a canvas
+    # only after a valid plinth/folio lesson under the corresponding active dose.
+    import psychedelic_pharmacy
+    for name, (_, produce) in psychedelic_pharmacy.CROPS.items():
+        route(java + 'pharmacology/PsychedelicPharmacy.java', [name + '_seeds'], [produce], 'crop_growth')
+    for reward, doses in (('lucid_imprint', ['psilocybin', 'lsd', 'dmt']),
+                          ('pattern_imprint', ['lsd', 'dmt']), ('oneiric_imprint', ['dmt'])):
+        route(java + 'pharmacology/DreamStudyMenu.java',
+              ['dream_study_plinth', 'dream_folio', 'study_canvas', doses], [reward],
+              'complete_authorized_overworld_dream_lesson')
     route('tools/agriculture.py:CIDER', ['cider_press', 'minecraft:apple', 'minecraft:glass_bottle'], ['sweet_cider', 'apple_pomace'], 'cider_press')
     route('tools/agriculture.py:CIDER', ['cider_barrel', 'sweet_cider'], ['sparkling_cider', 'aged_cider'], 'fermentation')
     for base, products in ag.CANDY['makes'].items():
@@ -169,9 +181,13 @@ def extend(root, edge, evidence, items):
             fluid = group + '_' + name
             route(java + 'chemistry/PetroFluids.java', ['fluid:' + j(fluid), 'minecraft:bucket'], [fluid + '_bucket'], 'fluid_filling')
 
-    import gear
-    exclusions = {j(tier + '_' + part): 'Deferred acquisition design: owner requested preview armor only on October 6; tools/gear.py ARMOR_TIERS records the still-unassigned recipe/drop choice.'
-                  for tier in gear.ARMOR_TIERS for part in ('helmet', 'chestplate', 'leggings', 'boots')}
+    # Found plastic (docs/features/found-plastic.md): Java adds its pool to the listed structure chests.
+    found(['old_plastic_bottle', 'plastic_duck', 'old_plastic_crate'], java + 'chemistry/FoundPlastic.java',
+          'Structure-chest loot added by LootTableEvents.MODIFY; each generated chest fills once.')
+
+    # The owner's armour tiers are smithed or dropped by their boss since 28 October 2026 (tools/gear.py TIER_PATTERNS
+    # and TIER_BOSSES; docs/features/armor-tier-sources.md), so the graph follows their recipes and loot like any item.
+    exclusions = {}
     # Only the retired basic forms are compatibility-only. Recovered furniture,
     # boats and the edible walnut remain active survival items.
     from walnut_data import ALIASES
@@ -212,4 +228,12 @@ def extend(root, edge, evidence, items):
               ['artisan_furniture'], 'design_at_workstation_and_pay_server_computed_material_cost')
     from survival_jimtafacts_routes import extend as collection_routes
     exclusions.update(collection_routes(root, edge, evidence, items))
+    from survival_newest_routes import extend as newest_routes
+    exclusions.update(newest_routes(root, edge, evidence, items))
+    from survival_newest_storage_routes import extend as newest_storage_routes
+    exclusions.update(newest_storage_routes(root, edge, evidence, items))
+    from survival_newest_interactions import extend as newest_interactions
+    exclusions.update(newest_interactions(root, edge, evidence, items))
+    from survival_supps_routes import extend as supps_routes
+    exclusions.update(supps_routes(root, edge, evidence, items))
     return exclusions

@@ -23,19 +23,24 @@ import io.github.jimbozoomer.jugcraft.town.TownProtection;
 public final class AssignmentTool extends Item {
     public static Item ITEM;
     public static java.util.function.Consumer<InteractionHand> openPlanner=hand->{};
-    public static int zoneKind(ItemStack stack){return stack.is(ITEM)?Math.clamp(data(stack).getIntOr("ZoneKind",data(stack).getBooleanOr("ZoneMode",false)?1:0),0,4):0;}
+    public static int zoneKind(ItemStack stack){return stack.is(ITEM)?Math.clamp(data(stack).getIntOr("ZoneKind",data(stack).getBooleanOr("ZoneMode",false)?1:0),0,5):0;}
     public static boolean zoneMode(ItemStack stack){return zoneKind(stack)!=0;}
     public static BlockPos firstCorner(ItemStack stack){var tag=data(stack);return tag.getBooleanOr("HasCorner",false)?BlockPos.of(tag.getLongOr("Corner",0)):null;}
     public static void plannerAction(ServerPlayer player,int hand,int action){
-        if(hand<0 || hand>1 || action<0 || action>6 || player.isSpectator())return;var stack=player.getItemInHand(InteractionHand.values()[hand]);if(!stack.is(ITEM) || player.getCooldowns().isOnCooldown(stack))return;
+        if(hand<0 || hand>1 || action<0 || action>7 || player.isSpectator())return;var stack=player.getItemInHand(InteractionHand.values()[hand]);if(!stack.is(ITEM) || player.getCooldowns().isOnCooldown(stack))return;
         var npc=selected(player.level(),stack);if(action!=3 && (npc==null || !npc.orders.allowed(player) || npc.distanceToSqr(player)>128*128))return;
         player.getCooldowns().addCooldown(stack,5);
         if(action==3){stack.remove(DataComponents.CUSTOM_DATA);player.sendOverlayMessage(Component.literal("Companion selection cleared."));return;}
-        var tag=data(stack);tag.putInt("ZoneKind",action==2?zoneKind(stack):action==1?1:action==4?2:action==5?3:action==6?4:0);tag.remove("ZoneMode");tag.remove("HasCorner");tag.remove("Corner");CustomData.set(DataComponents.CUSTOM_DATA,stack,tag);
-        player.sendOverlayMessage(Component.literal(action==6?"Fishing: click a dry shore/dock block, then source water within 10 blocks.":action==4?"Farmland: click two ground corners (maximum 16 x 16).":action==5?"Orchard: click two ground corners (maximum 16 x 16).":action==1?"Livestock Management: click two ground corners (maximum 16 x 16).":action==2?"Corner selection cancelled.":"Normal assignments selected."));
+        var tag=data(stack);tag.putInt("ZoneKind",action==2?zoneKind(stack):action==1?1:action==4?2:action==5?3:action==6?4:action==7?5:0);tag.remove("ZoneMode");tag.remove("HasCorner");tag.remove("Corner");CustomData.set(DataComponents.CUSTOM_DATA,stack,tag);
+        player.sendOverlayMessage(Component.literal(action==7?"Staff Post: click furniture or a safe block to stand on. One post per companion.":action==6?"Fishing: click a dry shore/dock block, then source water within 10 blocks.":action==4?"Farmland: click two ground corners (maximum 16 x 16).":action==5?"Orchard: click two ground corners (maximum 16 x 16).":action==1?"Livestock Management: click two ground corners (maximum 16 x 16).":action==2?"Corner selection cancelled.":"Normal assignments selected."));
     }
     private static void chooseCorner(Player player,ItemStack stack,PeepoEntity npc,BlockPos pos){
         var first=firstCorner(stack);var tag=data(stack);
+        if(zoneKind(stack)==5){
+            int before=npc.assignments.loadedStations().size();
+            player.sendOverlayMessage(Component.literal(npc.assignments.assignStaffPost(pos,player.getDirection().getOpposite())));
+            if(npc.assignments.loadedStations().size()>before){tag.putInt("ZoneKind",0);tag.remove("HasCorner");tag.remove("Corner");CustomData.set(DataComponents.CUSTOM_DATA,stack,tag);}return;
+        }
         if(zoneKind(stack)==4){
             if(first==null){
                 if(!CompanionJobs.permitted(npc,pos) || !npc.level().getBlockState(pos).isFaceSturdy(npc.level(),pos,Direction.UP))return;
@@ -66,7 +71,7 @@ public final class AssignmentTool extends Item {
     static void select(Player player,ItemStack stack,PeepoEntity npc){
         var tag=new CompoundTag();tag.putString("Companion",npc.getUUID().toString());tag.putString("Dimension",npc.level().dimension().identifier().toString());tag.putInt("EntityId",npc.getId());tag.putString("Name",npc.getDisplayName().getString());
         CustomData.set(DataComponents.CUSTOM_DATA,stack,tag);
-        player.sendOverlayMessage(Component.literal("Selected "+npc.getDisplayName().getString()+". Shift-right-click to choose a zone or fishing spot. Click source water for Water collection. Containers cycle Supply (blue) / Output (yellow). Left-click removes."));
+        player.sendOverlayMessage(Component.literal("Selected "+npc.getDisplayName().getString()+". Shift-right-click for zones, fishing or a Staff Post. Click source water for Water collection. Containers cycle Supply (blue) / Output (yellow). Left-click removes."));
     }
     @Override public Component getName(ItemStack stack){String name=data(stack).getStringOr("Name","");return name.isEmpty()?super.getName(stack):Component.literal("Companion Planner: "+name);}
     @Override public InteractionResult use(Level level,Player player,InteractionHand hand){
@@ -117,7 +122,7 @@ public final class AssignmentTool extends Item {
             var stack=player.getItemInHand(hand);if(!stack.is(ITEM))return InteractionResult.PASS;
             if(player.isShiftKeyDown()){if(level.isClientSide())openPlanner.accept(hand);return InteractionResult.SUCCESS;}
             if(entity instanceof net.minecraft.world.entity.animal.Animal animal && CompanionLivestock.assignmentType(animal)!=null){
-                if(zoneMode(stack)){if(!level.isClientSide())player.sendOverlayMessage(Component.literal("Click two ground blocks to define the selected zone."));return InteractionResult.SUCCESS;}
+                if(zoneMode(stack)){if(!level.isClientSide())player.sendOverlayMessage(Component.literal(zoneKind(stack)==5?"Click one furniture or support block for the Staff Post.":zoneKind(stack)==4?"Click a dry support block, then source water for fishing.":"Click two ground blocks to define the selected zone."));return InteractionResult.SUCCESS;}
                 if(level.isClientSide() || player.isSpectator())return InteractionResult.SUCCESS;
                 if(player.getCooldowns().isOnCooldown(stack))return InteractionResult.SUCCESS;
                 player.getCooldowns().addCooldown(stack,5);

@@ -32,7 +32,16 @@ class HarvestAssets(unittest.TestCase):
   for n in ['pilgrim_coat_costume','pilgrim_dress_costume']:
    self.assertIn('jugcraft:'+n,tags)
    self.assertTrue((t.RES/'data/jugcraft/recipe'/(n+'.json')).exists())
-  self.assertEqual(json.loads((t.RES/'assets/jugcraft/equipment/harvest_costume.json').read_text()),{'layers':{}})
+  layers=json.loads((t.RES/'assets/jugcraft/equipment/harvest_costume.json').read_text())['layers']
+  self.assertTrue(layers,'26.3 requires a nonempty layer map')
+  from PIL import Image
+  for entries in layers.values():
+   self.assertTrue(entries,'26.3 requires nonempty layer lists')
+   for entry in entries:
+    namespace,name=entry['texture'].split(':')
+    with Image.open(t.RES/f'assets/{namespace}/textures/entity/equipment/humanoid/{name}.png') as image:
+     self.assertEqual(image.size,(64,32))
+     self.assertEqual(image.getchannel('A').getextrema(),(0,0),'Custom geometry alone draws the costume')
  def test_recipe_portion_conservation(self):
   d=json.loads((t.RES/'data/jugcraft/recipe/giant_turkey_feast.json').read_text())
   self.assertEqual(d['ingredients'],['jugcraft:roast_turkey']*4)

@@ -1,5 +1,6 @@
 package io.github.jimbozoomer.jugcraft.agriculture;
 
+import io.github.jimbozoomer.jugcraft.Jugcraft;
 import java.util.EnumMap;
 import java.util.Map;
 import net.minecraft.core.BlockPos;
@@ -61,6 +62,11 @@ public class PlanterBlock extends HorizontalDirectionalBlock implements EntityBl
 
 	/** What grows in a planter: vanilla's small flowers tag (26.3 has no ItemTags field for it). */
 	public static final TagKey<Item> SMALL_FLOWERS = TagKey.create(Registries.ITEM, Identifier.withDefaultNamespace("small_flowers"));
+	/**
+	 * Small harvest pieces a planter takes besides small flowers (tools/thanksgiving_town.py PLANTER_HARVEST): block items
+	 * whose own model fits inside every planter at its scale, the Warty Gourd.
+	 */
+	public static final TagKey<Item> HARVEST = TagKey.create(Registries.ITEM, Jugcraft.id("planter_harvest"));
 
 	private final Planter planter;
 	private final Map<Direction, VoxelShape> shapes = new EnumMap<>(Direction.class);
@@ -78,9 +84,9 @@ public class PlanterBlock extends HorizontalDirectionalBlock implements EntityBl
 		return planter;
 	}
 
-	/** Whether {@code stack} can be planted in a planter: a small flower that is a block. */
+	/** Whether {@code stack} can be planted in a planter: a small flower, or a small harvest piece, that is a block. */
 	public static boolean plantable(ItemStack stack) {
-		return stack.is(SMALL_FLOWERS) && stack.getItem() instanceof BlockItem;
+		return (stack.is(SMALL_FLOWERS) || stack.is(HARVEST)) && stack.getItem() instanceof BlockItem;
 	}
 
 	@Override

@@ -11,6 +11,7 @@ import net.minecraft.world.entity.EntitySpawnReason;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
@@ -35,10 +36,27 @@ public class Seat extends Entity {
 	public interface Sittable {
 		/** How high above the block's base the sitter's seat is, in blocks. */
 		double seatHeight(BlockState state);
+
+		/**
+		 * The block whose seat using {@code pos} means: the seat's one canonical cell, where its sitter's Seat stands and
+		 * where a companion's reservation is kept (CompanionSeats). A seat of one block is its own; a seat reached from
+		 * more than one block (a high-backed settle's half) answers its lower block from each of them.
+		 */
+		default BlockPos seatCell(BlockGetter level, BlockPos pos, BlockState state) {
+			return pos;
+		}
 	}
 
 	/** Sits {@code player} on the seat at {@code pos}, unless someone already sits there. Server side only. */
 	public static boolean sit(ServerLevel level, BlockPos pos, BlockState state, Player player) {
+		// Always at the seat's canonical cell, whichever of its blocks was used, so one sitter, player or companion, a seat.
+		if (state.getBlock() instanceof Sittable seatBlock) {
+			BlockPos cell = seatBlock.seatCell(level, pos, state);
+			if (!cell.equals(pos)) {
+				pos = cell;
+				state = level.getBlockState(cell);
+			}
+		}
 		if (local.peepo.CompanionSeats.isReserved(level,pos)) return false;
 		if (!(state.getBlock() instanceof Sittable sittable) || player.isPassenger() || player.isSecondaryUseActive()) {
 			return false;

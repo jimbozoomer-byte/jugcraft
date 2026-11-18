@@ -1,0 +1,397 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "axis": "z"
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_middle"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "north": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_north_joined"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "north": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_north_bound"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "east": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_east_joined"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "east": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_east_bound"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "south": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_south_joined"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "south": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_south_bound"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "west": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_west_joined"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "west": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_west_bound"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "north": "true",
+        "west": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_north_west_joined"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "axis": "z",
+            "north": "false"
+          },
+          {
+            "axis": "z",
+            "west": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_north_west_bound"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "north": "true",
+        "east": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_north_east_joined"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "axis": "z",
+            "north": "false"
+          },
+          {
+            "axis": "z",
+            "east": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_north_east_bound"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "south": "true",
+        "west": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_south_west_joined"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "axis": "z",
+            "south": "false"
+          },
+          {
+            "axis": "z",
+            "west": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_south_west_bound"
+      }
+    },
+    {
+      "when": {
+        "axis": "z",
+        "south": "true",
+        "east": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_south_east_joined"
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "axis": "z",
+            "south": "false"
+          },
+          {
+            "axis": "z",
+            "east": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_south_east_bound"
+      }
+    },
+    {
+      "when": {
+        "axis": "x"
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_middle",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "east": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_north_joined",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "east": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_north_bound",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "south": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_east_joined",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "south": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_east_bound",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "west": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_south_joined",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "west": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_south_bound",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "north": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_west_joined",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "north": "false"
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_west_bound",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "east": "true",
+        "north": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_north_west_joined",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "axis": "x",
+            "east": "false"
+          },
+          {
+            "axis": "x",
+            "north": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_north_west_bound",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "east": "true",
+        "south": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_north_east_joined",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "axis": "x",
+            "east": "false"
+          },
+          {
+            "axis": "x",
+            "south": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_north_east_bound",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "west": "true",
+        "north": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_south_west_joined",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "axis": "x",
+            "west": "false"
+          },
+          {
+            "axis": "x",
+            "north": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_south_west_bound",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "axis": "x",
+        "west": "true",
+        "south": "true"
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_south_east_joined",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "OR": [
+          {
+            "axis": "x",
+            "west": "false"
+          },
+          {
+            "axis": "x",
+            "south": "false"
+          }
+        ]
+      },
+      "apply": {
+        "model": "jugcraft:block/rush_floor_mat_south_east_bound",
+        "y": 90
+      }
+    }
+  ]
+}

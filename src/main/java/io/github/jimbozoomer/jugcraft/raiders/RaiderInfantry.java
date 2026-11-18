@@ -20,7 +20,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.LookAtPlayerGoal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
-import net.minecraft.world.entity.ai.goal.RangedAttackGoal;
 import net.minecraft.world.entity.ai.goal.WaterAvoidingRandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.target.HurtByTargetGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
@@ -64,6 +63,8 @@ public class RaiderInfantry extends Monster implements RangedAttackMob, Raider, 
 	private double closest = Double.MAX_VALUE;
 	/** A gunner's gunfire (set as its goals are, by the constructor of Mob; so no initialiser here). */
 	private MobGuns.@Nullable FireGoal gunfire;
+	/** Its memory of its fight in a raid (made when first asked for; no initialiser, as for the gunfire). */
+	private @Nullable RaidEngagement engagement;
 
 	public RaiderInfantry(EntityType<? extends RaiderInfantry> type, Level level) {
 		super(type, level);
@@ -101,9 +102,23 @@ public class RaiderInfantry extends Monster implements RangedAttackMob, Raider, 
 		return other instanceof Raider;
 	}
 
+	/** Guards only ({@link RaiderTargets}); in a raid, on the ground and not given up ({@link RaidEngagement#allows}). */
 	@Override
 	public boolean canAttack(net.minecraft.world.entity.LivingEntity target) {
-		return RaiderTargets.allowed(target) && super.canAttack(target);
+		return RaiderTargets.allowed(target) && engagement().allows(target) && super.canAttack(target);
+	}
+
+	@Override
+	public void setTarget(@Nullable LivingEntity target) {
+		super.setTarget(target != null && !engagement().canAcquire(target) ? null : target);
+	}
+
+	@Override
+	public RaidEngagement engagement() {
+		if (engagement == null) {
+			engagement = new RaidEngagement(this);
+		}
+		return engagement;
 	}
 
 	/** Aboard a raider machine (RaiderCrew): it faces the way the machine does, on both sides, so it is drawn so. */
@@ -137,17 +152,35 @@ public class RaiderInfantry extends Monster implements RangedAttackMob, Raider, 
 		goalSelector.addGoal(1, new FloatGoal(this));
 		// Aboard a raider machine (RaiderCrew) it fights and marches only with the machine: these stand idle until it is
 		// on foot again.
+		// The ranged kinds close on what they fight through RaidEngagement.close: in a raid, to a standoff in sight of a
+		// defender they cannot walk up to, never pressing against the foot of a wall below it.
 		if (role() == Role.GRENADIER) {
 			goalSelector.addGoal(2, new RaiderCrew.Afoot(this,
-					new RangedAttackGoal(this, 1.0, JugcraftRaiders.GRENADE_COOLDOWN, JugcraftRaiders.GRENADE_MAX_RANGE)));
+					new RaiderThrowGoal(this, 1.0, JugcraftRaiders.GRENADE_COOLDOWN, JugcraftRaiders.GRENADE_MAX_RANGE)));
 		} else if (role() == Role.GUNNER) {
-			gunfire = new MobGuns.FireGoal(this, 1.0);
+			gunfire = new MobGuns.FireGoal(this, 1.0) {
+				@Override
+				protected void close(LivingEntity target) {
+					double reach = getMainHandItem().getItem() instanceof io.github.jimbozoomer.jugcraft.guns.GunItem gun ? MobGuns.reach(gun) : 8;
+					engagement().close(target, 1.0, reach);
+				}
+			};
 			goalSelector.addGoal(2, new RaiderCrew.Afoot(this, gunfire));
 		} else {
 			goalSelector.addGoal(2, new RaiderCrew.Afoot(this, new MeleeAttackGoal(this, 1.15, false)));
 		}
-		goalSelector.addGoal(4, new RaiderCrew.Afoot(this, new MarchGoal(this, () -> member.objective, 1.0)));
-		goalSelector.addGoal(6, new RaiderCrew.Afoot(this, new WaterAvoidingRandomStrollGoal(this, 0.8)));
+		goalSelector.addGoal(1, new RaiderCrew.Afoot(this, new MarchGoal(this, () -> member.objective, 1.0)));
+		goalSelector.addGoal(6, new RaiderCrew.Afoot(this, new WaterAvoidingRandomStrollGoal(this, 0.8) {
+			@Override
+			public boolean canUse() {
+				return !engagement().holding() && super.canUse();
+			}
+
+			@Override
+			public boolean canContinueToUse() {
+				return !engagement().holding() && super.canContinueToUse();
+			}
+		}));
 		goalSelector.addGoal(7, new LookAtPlayerGoal(this, Player.class, 12.0F));
 		targetSelector.addGoal(1, new HurtByTargetGoal(this, RaiderInfantry.class, RaiderWalker.class, RaiderBlimp.class).setAlertOthers());
         // Melee troops must be able to reach a defender. A visible guard on a
@@ -161,6 +194,9 @@ public class RaiderInfantry extends Monster implements RangedAttackMob, Raider, 
 		super.customServerAiStep(level);
 		if (member.checkRaid(level, this)) {
 			return;
+		}
+		if (!isPassenger()) {
+			engagement().tick();
 		}
 		if (role() == Role.GRUNT && !isPassenger()) {
 			climbWalls(level);
@@ -180,7 +216,8 @@ public class RaiderInfantry extends Monster implements RangedAttackMob, Raider, 
 	 * it for {@value JugcraftRaiders#LADDER_STUCK} ticks with a wall in front of it, on that side, props a ladder up the
 	 * wall, up to {@value JugcraftRaiders#LADDER_MAX} blocks or the top of the wall, and climbs. A blocked path leaves a
 	 * mob standing at the wall rather than pushing into it, so this goes by progress rather than by collisions. Only
-	 * where mob griefing is on.
+	 * where mob griefing is on, and never on or against a protected block (the town and its margin, an operator's
+	 * region) or claimed land: a raid on the city comes through its gates, and owners' builds are left as they are.
 	 */
 	private void climbWalls(ServerLevel level) {
 		BlockPos goal = getTarget() != null ? getTarget().blockPosition() : member.objective;
@@ -211,7 +248,7 @@ public class RaiderInfantry extends Monster implements RangedAttackMob, Raider, 
 			BlockPos spot = at.above(dy);
 			BlockPos wall = spot.relative(facing);
 			if (!level.getBlockState(wall).isFaceSturdy(level, wall, facing.getOpposite()) || !level.getBlockState(spot).isAir()
-					&& !SiegeLadderBlock.is(level.getBlockState(spot))) {
+					&& !SiegeLadderBlock.is(level.getBlockState(spot)) || !mayLean(level, spot) || !mayLean(level, wall)) {
 				break;
 			}
 			if (!SiegeLadderBlock.is(level.getBlockState(spot))) {
@@ -223,6 +260,12 @@ public class RaiderInfantry extends Monster implements RangedAttackMob, Raider, 
 		if (placed > 0) {
 			level.playSound(null, getX(), getY(), getZ(), SoundEvents.LADDER_PLACE, SoundSource.HOSTILE, 1.0F, 0.8F);
 		}
+	}
+
+	/** Whether a siege ladder may stand at (or lean on) {@code pos}: not in the town's protection, an operator's region or a claim. */
+	static boolean mayLean(ServerLevel level, BlockPos pos) {
+		return !io.github.jimbozoomer.jugcraft.town.TownProtection.shieldsBlock(level, pos)
+				&& !io.github.jimbozoomer.jugcraft.finance.LandRegistry.isClaimed(level, pos);
 	}
 
 	/** A grenadier throws a grenade, or clubs a target too close to throw at. */

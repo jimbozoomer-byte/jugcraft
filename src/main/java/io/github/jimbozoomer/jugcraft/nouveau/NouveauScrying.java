@@ -33,7 +33,7 @@ public final class NouveauScrying {
         MENU=Registry.register(BuiltInRegistries.MENU,Jugcraft.id("nouveau_scrying"),new MenuType<>(Menu::new,FeatureFlags.DEFAULT_FLAGS));
         PayloadTypeRegistry.clientboundPlay().register(View.TYPE,View.CODEC);
         PayloadTypeRegistry.serverboundPlay().register(Exit.TYPE,Exit.CODEC);
-        ServerPlayNetworking.registerGlobalReceiver(Exit.TYPE,(packet,context)->close(context.player()));
+        ServerPlayNetworking.registerGlobalReceiver(Exit.TYPE,(packet,context)->{if(io.github.jimbozoomer.jugcraft.pharmacology.EchoView.active(context.player()))io.github.jimbozoomer.jugcraft.pharmacology.EchoView.cancel(context.player());else close(context.player());});
         ServerTickEvents.END_SERVER_TICK.register(server->{for(var p:server.getPlayerList().getPlayers()){
             var s=SESSIONS.get(p.getUUID());if(s==null)continue;
             if(!JugNouveau.enabled()||!p.isAlive()||p.isSpectator()||p.isPassenger()||p.level().getGameTime()>s.until||p.position().distanceToSqr(s.body)>1||!valid(p,s.crystal)){close(p);continue;}
@@ -44,12 +44,12 @@ public final class NouveauScrying {
         ServerPlayConnectionEvents.DISCONNECT.register((h,s)->SESSIONS.remove(h.getPlayer().getUUID()));
         ServerLifecycleEvents.SERVER_STOPPED.register(s->SESSIONS.clear());
     }
-    public static boolean active(ServerPlayer p){return SESSIONS.containsKey(p.getUUID());}
+    public static boolean active(ServerPlayer p){return SESSIONS.containsKey(p.getUUID())||io.github.jimbozoomer.jugcraft.pharmacology.EchoView.active(p);}
     public static Vec3 viewPosition(ServerPlayer p){var s=SESSIONS.get(p.getUUID());return s==null?p.position():Vec3.atCenterOf(s.crystal.pos()).add(0,.35,0);}
     public static ChunkPos viewChunk(ServerPlayer p){return active(p)?new ChunkPos(net.minecraft.core.SectionPos.blockToSectionCoord(viewPosition(p).x),net.minecraft.core.SectionPos.blockToSectionCoord(viewPosition(p).z)):p.chunkPosition();}
     public static boolean valid(ServerPlayer p,GlobalPos pos){return p.level().dimension().equals(pos.dimension())&&p.level().hasChunkAt(pos.pos())&&p.level().getBlockEntity(pos.pos()) instanceof NouveauWorkshop crystal&&crystal.kind().equals("scryers_crystal")&&crystal.permitted(p);}
     public static boolean open(ServerPlayer p,GlobalPos crystal){
-        if(!JugNouveau.enabled()||p.isSpectator()||p.isPassenger()||!p.isAlive()||!valid(p,crystal)||!RateGate.allow(p,"nouveau_scry",10))return false;
+        if(!JugNouveau.enabled()||p.isSpectator()||p.isPassenger()||!p.isAlive()||io.github.jimbozoomer.jugcraft.pharmacology.EchoView.active(p)||!valid(p,crystal)||!RateGate.allow(p,"nouveau_scry",10))return false;
         p.closeContainer();SESSIONS.put(p.getUUID(),new Session(crystal,p.position(),p.level().getGameTime()+2400));
         p.level().getChunkSource().move(p);ServerPlayNetworking.send(p,new View(true,crystal.pos()));return true;
     }

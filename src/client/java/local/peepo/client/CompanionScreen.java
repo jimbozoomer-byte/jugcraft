@@ -81,6 +81,7 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
     private Button handLock,renameCompanion,detailsBack,nameSave;
     private EditBox nameBox;
     private final Button[] renameJobs=new Button[4],zoneOptions=new Button[4],animalTasks=new Button[5],gardenTasks=new Button[2];
+    private Button staffPose,staffLeft,staffRight;
     private static final String[] ANIMAL_TASKS={"Shearing","Milking","Eggs","Breeding","Slaughter"};
     private Button populationOpen,populationBack,populationRefresh,populationType,populationAdd;
     private final Button[] populationAdjust=new Button[4];
@@ -142,6 +143,12 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
             gardenTasks[i]=addRenderableWidget(Button.builder(Component.empty(),b->sendDetails(bit)).bounds(leftPos+104+i*181,topPos+158,176,20).build());}
         tip(gardenTasks[0],"Repair only previously observed farmland, using a hoe. Never tills paths or arbitrary dirt.");
         tip(gardenTasks[1],"Use available bone meal, bat guano or superphosphate. Carry at most 4; one application per zone every 20 seconds and per crop every 60 seconds. Harvest and planting come first.");
+        staffPose=addRenderableWidget(Button.builder(Component.literal("Pose: Automatic"),b->sendDetails(128)).bounds(leftPos+104,topPos+133,222,20).build());
+        staffLeft=addRenderableWidget(Button.builder(Component.literal("< Turn left"),b->sendDetails(129)).bounds(leftPos+104,topPos+160,108,20).build());
+        staffRight=addRenderableWidget(Button.builder(Component.literal("Turn right >"),b->sendDetails(130)).bounds(leftPos+218,topPos+160,108,20).build());
+        tip(staffPose,"Automatic changes between safe standing and sitting poses every 30-90 seconds. Ordinary blocks support standing only.");
+        tip(staffLeft,"Rotate the post's facing direction a quarter turn. Leave access and clearance at the chosen side.");
+        tip(staffRight,"Rotate the post's facing direction a quarter turn. Leave access and clearance at the chosen side.");
         initPopulation();
     }
     private void openDetails(int row,boolean zone){
@@ -160,11 +167,17 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
         for(int i=0;i<4;i++){
             var job=npc==null?null:npc.assignments.view().get(i+1);
             renameJobs[i].visible=panel==0 && !filtering;renameJobs[i].active=job!=null;
-            zoneOptions[i].visible=panel==0 && !filtering && job!=null && (job.care() || job.gardenZone()!=null && !job.orchard());
+            zoneOptions[i].visible=panel==0 && !filtering && job!=null && (job.staffPost() || job.care() || job.gardenZone()!=null && !job.orchard());
+            zoneOptions[i].setMessage(Component.literal(job!=null && job.staffPost()?"Staff Post options":"Zone options"));
+            tip(zoneOptions[i],job!=null && job.staffPost()?"Staff Post options":"Zone options");
         }
         for(int i=0;i<5;i++){var b=animalTasks[i];b.visible=zone && target!=null && target.care();b.active=valid;b.setMessage(Component.literal(ANIMAL_TASKS[i]+": "+(target!=null && target.task(1<<i)?"On":"Off")));}
         for(int i=0;i<2;i++){var b=gardenTasks[i];b.visible=zone && target!=null && target.gardenZone()!=null && !target.orchard();b.active=valid;
             b.setMessage(Component.literal((i==0?"Repair farmland: ":"Fertilizing: ")+(npc!=null && npc.assignments.gardenMaintenance(detailRow,i==0?CompanionAssignments.REPAIR:CompanionAssignments.FERTILIZE)?i==0?"On":"Auto":"Off")));}
+        boolean staff=zone && target!=null && target.staffPost();
+        staffPose.visible=staffLeft.visible=staffRight.visible=staff;
+        staffPose.active=staffLeft.active=staffRight.active=staff && valid;
+        if(staff)staffPose.setMessage(Component.literal("Pose: "+new String[]{"Automatic","Standing","Sitting"}[Math.clamp(target.staffPose(),0,2)]));
         if(!naming && getFocused()==nameBox)setFocused(null);
     }
     public CompanionScreen(CompanionMenu menu,Inventory inventory,Component title){super(menu,inventory,title,CompanionMenu.WIDTH,CompanionMenu.HEIGHT);}
@@ -293,14 +306,18 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
             sparklingCider.setMessage(Component.literal(aged?"Sparkling":"Sparkling (selected)"));
             agedCider.setMessage(Component.literal(aged?"Aged (selected)":"Aged"));
         }
-        for(int i=0;i<4;i++)filters[i].visible=panel==0 && !filtering && menu.value(25+i)>0 && menu.value(25+i)!=4;
+        for(int i=0;i<4;i++){
+            var target=npc()==null?null:npc().assignments.view().get(i+1);
+            filters[i].visible=panel==0 && !filtering && menu.value(25+i)>0 && menu.value(25+i)!=4 && (target==null || !target.staffPost());
+        }
         for(var b:buttons)if(b!=null)b.visible=!filtering;
         tab.setMessage(Component.literal(panel==1?"< Jobs":"Routine"));supplyTab.setMessage(Component.literal(panel==2?"< Jobs":"Supplies"));
         for(var setting:settings)setting.visible=panel==1;
         var npc=npc();
         for(int i=0;i<8;i++){
             int value=menu.value(31+i),mode=Math.min(2,value&3),reason=value>>2;
-            var b=transport[i];b.visible=panel==0 && !filtering;b.active=npc!=null && npc.assignments.view().get(1+i/2)!=null && reason!=3;
+            var target=npc==null?null:npc.assignments.view().get(1+i/2);
+            var b=transport[i];b.visible=panel==0 && !filtering && (target==null || !target.staffPost());b.active=target!=null && reason!=3;
             b.setMessage(Component.literal((i%2==0?"Supply: ":"Out: ")+new String[]{"Auto","On","Off"}[mode]).withColor(reason==2?0xFFCC66:reason==1?0xAAAAAA:0xFFFFFF));
             String state=switch(reason){case 1->"Disabled by you.";case 2->"External item automation detected; Peepo yields this direction.";case 3->"This station has no companion item transport for this direction.";case 4->"No available, loaded station.";case 5->"No complete allowed recipe is available from the current inputs and Supply.";default->"Peepo may handle this direction when there is work to do.";};
             tip(b,state+" Click to cycle Auto / On / Off. Auto recognizes connected transport and recent machine transfers. On overrides detection; Off stops this direction. Speed assistance is unchanged.");
@@ -338,6 +355,7 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
             String text=target==null?"Use the Companion Planner to select this companion, then right-click a "+(row==0?"bed.":row==5?"lunch crate or lunch cover.":row==6?"container for Supply (blue); click again to switch roles.":row==7?"container for Output (yellow); click again to switch roles.":"workstation or farmland."):
                 npc.assignments.label(row)+" at "+target.at().pos().toShortString()+" in "+target.at().dimension().identifier()+" - "+CompanionStatus.from(menu.value(CompanionMenu.assignmentData(row))).label;
             if(row>0 && row<5 && target!=null)text+=". Priority "+row+" (top is highest).";
+            if(target!=null && target.staffPost())text+=" Staff this spot while on shift. Lower jobs wait while this post is available; place it last to fill idle time. Use the gear to choose poses and facing. One Staff Post per companion.";
             if(target!=null && target.garden())text+=target.gardenZone()!=null?(target.orchard()?" Orchard fruit picking, with linked Output. Leave safe access below the canopy.":" Garden zone: farmland, planters, awakened Verdant Beds, cane, bamboo, cactus, berries, cocoa, pumpkins, melons and flooded rice. Supply brings planting items; Output takes surplus. Select a crop to establish new ground plantings. The gear opens optional farmland repair and limited fertilizing."):CompanionGarden.hanging(target)?" Up to 8 saved hanging spots. Supply brings ready-made bundles; Output takes dried herbs. Fresh bundles dry naturally.":CompanionGarden.mushrooms(target)?" Up to 8 connected mushroom soil blocks. Shears or a knife in Hand are required for picking. Supply brings mushrooms; Output takes surplus harvests.":" Up to 8 connected farmland or planter boxes. A hoe in Hand halves work time. Supply brings seeds; Output takes surplus harvests.";
             if(target!=null && target.block().equals(local.peepo.PeepoMod.id("sprinkler")))text+=" Supply water buckets and Fertilizer; Output receives empty buckets. Keeps up to four fertilizer stocked. Uses one work slot; pipe and hopper inputs still work.";
             if(target!=null && target.treeTap())text+=" Supply empty glass bottles; Output receives latex bottles. Leave safe ground in front of the tap. Bucket upgrades remain manual.";
@@ -403,7 +421,8 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
         for(int i=0;i<4;i++){tools[i].visible=visible && supplyView==0;tools[i].active=storageRemove[i].active;tools[i].setMessage(Component.literal("Tools").withColor((menu.value(41)&(1<<i))!=0?0x80FF80:0xFFFFFF));}
         handLock.visible=visible && supplyView==0;handLock.setMessage(Component.literal(menu.value(42)==1?"Hand: Locked":"Hand: Auto tools"));
         for(int i=0;i<40;i++){
-            var b=links[i];b.visible=visible && supplyView==1;b.active=npc!=null && npc.assignments.view().get(1+i/10)!=null;
+            var target=npc==null?null:npc.assignments.view().get(1+i/10);
+            var b=links[i];b.visible=visible && supplyView==1 && (target==null || !target.staffPost());b.active=target!=null && !target.staffPost();
             int mask=menu.value(43+i/10*2+(i%10)/5),choice=i%5;boolean selected=choice==0?mask==0:mask==0 || (mask&(1<<(choice-1)))!=0;
             b.setMessage(Component.literal(choice==0?"All":Integer.toString(choice)).withColor(selected?0x80FF80:0xFFFFFF));
         }
@@ -428,7 +447,11 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
             g.text(font,"Planner: click to switch roles",288,198,0xFF404040,false);
         }else if(supplyView==1){
             g.text(font,"Job",101,100,0xFF404040,false);g.text(font,"Supplies",191,100,0xFF404040,false);g.text(font,"Outputs",332,100,0xFF404040,false);
-            for(int i=0;i<4;i++){var t=npc==null?null:npc.assignments.view().get(i+1);g.text(font,fit((i+1)+" "+(t==null?"Unassigned":npc.assignments.label(i+1)),85),101,117+i*23,0xFF404040,false);}
+            for(int i=0;i<4;i++){
+                var t=npc==null?null:npc.assignments.view().get(i+1);
+                g.text(font,fit((i+1)+" "+(t==null?"Unassigned":npc.assignments.label(i+1)),85),101,117+i*23,0xFF404040,false);
+                if(t!=null && t.staffPost())g.text(font,"No Supply or Output needed",191,117+i*23,0xFF555555,false);
+            }
         }else {
             g.text(font,"Source",133,98,0xFF404040,false);g.text(font,"Destination",247,98,0xFF404040,false);
             for(int i=0;i<4;i++)g.text(font,Integer.toString(i+1),109,115+i*24,0xFF404040,false);
@@ -532,9 +555,16 @@ public final class CompanionScreen extends AbstractContainerScreen<CompanionMenu
         }
         if(panel==5){
             var companion=npc();
-            g.text(font,"Zone options",188,83,0xFF404040,false);
-            g.text(font,companion==null?"":fit(companion.assignments.label(detailRow),350),104,107,0xFF404040,false);
             var target=companion==null?null:companion.assignments.view().get(detailRow);
+            g.text(font,target!=null && target.staffPost()?"Staff Post options":"Zone options",188,83,0xFF404040,false);
+            g.text(font,companion==null?"":fit(companion.assignments.label(detailRow),350),104,107,0xFF404040,false);
+            if(target!=null && target.staffPost()){
+                g.text(font,"Facing: "+target.face().getName(),337,166,0xFF404040,false);
+                g.text(font,"Automatic uses the poses supported by this surface.",104,191,0xFF404040,false);
+                g.text(font,"Place this job last to staff the post between other work.",104,205,0xFF404040,false);
+                g.text(font,"Food, rest, schedules and your commands still apply.",104,219,0xFF404040,false);
+                return;
+            }
             boolean garden=target!=null && target.gardenZone()!=null;
             g.text(font,garden?"Garden maintenance (optional)":"Livestock Management tasks",104,139,0xFF404040,false);
             if(garden)g.text(font,"Harvesting and replanting take priority.",104,190,0xFF404040,false);

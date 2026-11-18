@@ -18,12 +18,13 @@ Combat (a fire bolt and a burst), defense (Fire Resistance) and utility (lightin
   someone's Research Notes, understands it.
 - Understood, it teaches three **invocations**, cast with any Concordance instrument like First Light's:
   - **Hearthspark** (utility, 3 Focus): kindles the unlit campfire, candle or candle cake you look at, up to 16 blocks
-    away, as flint and steel would. It never places fire.
+    away, as flint and steel would. It never places fire. Since Concordance Chunk E it also tempers an Alembic Crucible:
+    its heat climbs toward hot and holds there for 60 seconds ([cinder-tyrant-concordance.md](cinder-tyrant-concordance.md)).
   - **Hearthguard** (defense, 5 Focus): Fire Resistance for 30 seconds (tuned with Prolong, 60).
   - **Cinderbolt** (damage, 5 Focus): a burning shard, 3 fire damage to the first creature on its line (+0.5 per point
     of fire Spell Power), which then **smoulders** for 3 seconds.
 - **Mastery** is practice: kindle **three different kinds of hearth** with Hearthspark (campfire, soul campfire, candle,
-  candle cake; a second campfire counts for nothing more). Mastered, it teaches **Hearthflare** (damage, 6 Focus): 4
+  candle cake, and since Chunk E a tempered crucible; a second campfire counts for nothing more). Mastered, it teaches **Hearthflare** (damage, 6 Focus): 4
   fire damage and Smoulder to the four nearest creatures within 3 blocks of you, never you. Mastery also lowers each
   Ember invocation's cost by one.
 - **Smoulder** is a new status: while it lasts the creature burns as anything on fire does (vanilla's damage, a point a

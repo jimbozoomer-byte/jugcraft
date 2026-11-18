@@ -1,0 +1,342 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "jugcraft:block/guild/limestone",
+    "archmark": "jugcraft:block/guild/archmark",
+    "basalt": "jugcraft:block/guild/basalt",
+    "brass": "jugcraft:block/deepstead_hammered_brass",
+    "limestone": "jugcraft:block/guild/limestone"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        2
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#limestone"
+        },
+        "south": {
+          "texture": "#limestone"
+        },
+        "east": {
+          "texture": "#limestone"
+        },
+        "west": {
+          "texture": "#limestone"
+        },
+        "up": {
+          "texture": "#limestone"
+        },
+        "down": {
+          "texture": "#limestone"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        0,
+        0.9
+      ],
+      "to": [
+        3,
+        16,
+        2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#basalt"
+        },
+        "south": {
+          "texture": "#basalt"
+        },
+        "east": {
+          "texture": "#basalt"
+        },
+        "west": {
+          "texture": "#basalt"
+        },
+        "up": {
+          "texture": "#basalt"
+        },
+        "down": {
+          "texture": "#basalt"
+        }
+      }
+    },
+    {
+      "from": [
+        13,
+        0,
+        0.9
+      ],
+      "to": [
+        16,
+        16,
+        2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#basalt"
+        },
+        "south": {
+          "texture": "#basalt"
+        },
+        "east": {
+          "texture": "#basalt"
+        },
+        "west": {
+          "texture": "#basalt"
+        },
+        "up": {
+          "texture": "#basalt"
+        },
+        "down": {
+          "texture": "#basalt"
+        }
+      }
+    },
+    {
+      "from": [
+        5,
+        0,
+        0.4
+      ],
+      "to": [
+        11,
+        4,
+        2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#limestone"
+        },
+        "south": {
+          "texture": "#limestone"
+        },
+        "east": {
+          "texture": "#limestone"
+        },
+        "west": {
+          "texture": "#limestone"
+        },
+        "up": {
+          "texture": "#limestone"
+        },
+        "down": {
+          "texture": "#limestone"
+        }
+      }
+    },
+    {
+      "from": [
+        4,
+        4,
+        0.4
+      ],
+      "to": [
+        12,
+        9,
+        2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#limestone"
+        },
+        "south": {
+          "texture": "#limestone"
+        },
+        "east": {
+          "texture": "#limestone"
+        },
+        "west": {
+          "texture": "#limestone"
+        },
+        "up": {
+          "texture": "#limestone"
+        },
+        "down": {
+          "texture": "#limestone"
+        }
+      }
+    },
+    {
+      "from": [
+        3,
+        9,
+        0.4
+      ],
+      "to": [
+        13,
+        14,
+        2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#limestone"
+        },
+        "south": {
+          "texture": "#limestone"
+        },
+        "east": {
+          "texture": "#limestone"
+        },
+        "west": {
+          "texture": "#limestone"
+        },
+        "up": {
+          "texture": "#limestone"
+        },
+        "down": {
+          "texture": "#limestone"
+        }
+      }
+    },
+    {
+      "from": [
+        2,
+        14,
+        0.4
+      ],
+      "to": [
+        14,
+        16.1,
+        2.1
+      ],
+      "faces": {
+        "north": {
+          "texture": "#limestone",
+          "uv": [
+            2.0,
+            0.0,
+            14.0,
+            2.0
+          ]
+        },
+        "south": {
+          "texture": "#limestone",
+          "uv": [
+            2.0,
+            0.0,
+            14.0,
+            2.0
+          ]
+        },
+        "east": {
+          "texture": "#limestone",
+          "uv": [
+            14.0,
+            0.0,
+            15.6,
+            2.0
+          ]
+        },
+        "west": {
+          "texture": "#limestone",
+          "uv": [
+            0.4,
+            0.0,
+            2.0,
+            2.0
+          ]
+        },
+        "up": {
+          "texture": "#limestone",
+          "uv": [
+            2.0,
+            0.4,
+            14.0,
+            2.0
+          ]
+        },
+        "down": {
+          "texture": "#limestone",
+          "uv": [
+            2.0,
+            14.0,
+            14.0,
+            15.6
+          ]
+        }
+      }
+    },
+    {
+      "from": [
+        4.3,
+        13.7,
+        0.08
+      ],
+      "to": [
+        11.7,
+        14.4,
+        0.4
+      ],
+      "faces": {
+        "north": {
+          "texture": "#brass"
+        },
+        "south": {
+          "texture": "#brass"
+        },
+        "east": {
+          "texture": "#brass"
+        },
+        "west": {
+          "texture": "#brass"
+        },
+        "up": {
+          "texture": "#brass"
+        },
+        "down": {
+          "texture": "#brass"
+        }
+      }
+    },
+    {
+      "from": [
+        5.2,
+        4.8,
+        0.08
+      ],
+      "to": [
+        10.8,
+        13.1,
+        0.4
+      ],
+      "faces": {
+        "north": {
+          "texture": "#archmark",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#limestone"
+        },
+        "east": {
+          "texture": "#limestone"
+        },
+        "west": {
+          "texture": "#limestone"
+        },
+        "up": {
+          "texture": "#limestone"
+        },
+        "down": {
+          "texture": "#limestone"
+        }
+      }
+    }
+  ]
+}

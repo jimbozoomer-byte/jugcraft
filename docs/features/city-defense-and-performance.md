@@ -37,6 +37,10 @@ Defense acquisition uses loaded entities, a 250-block radius, line of sight and
 one scan per second. Automatic defense shells spare players, pets, civilians and
 friendly summons. They do not break terrain. Gun solutions and spotter marks use
 250 blocks; heavier shell speeds and flak fuse duration now support that reach.
+Since 10 November 2026 every firing solution steps a shell as the game flies it
+(gravity, then drag, then the move): a Heavy Shell's low arc reaches about 254
+blocks on level ground, but a mortar, which cannot fire below 45 degrees, lobs
+about 243, as its shells always did.
 Tank machine guns and Howitzer Walker aiming also use 250 blocks. Low-arc aiming
 solves height at the horizontal target crossing, including rising shots at blimps;
 mortars can elevate to 89 degrees to retain close-range shots with the longer-range

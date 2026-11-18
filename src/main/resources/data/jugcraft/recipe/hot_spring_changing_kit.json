@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "W W",
+    "LSL",
+    "BHB"
+  ],
+  "key": {
+    "W": "#minecraft:wool",
+    "L": "#minecraft:logs",
+    "S": "minecraft:string",
+    "B": "minecraft:polished_basalt",
+    "H": "minecraft:leather"
+  },
+  "result": {
+    "id": "jugcraft:hot_spring_changing_kit"
+  }
+}

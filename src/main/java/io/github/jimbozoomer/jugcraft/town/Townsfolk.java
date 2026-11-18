@@ -59,11 +59,14 @@ public class Townsfolk extends PathfinderMob {
 	private static final ResolvableProfile NO_PROFILE = ResolvableProfile.createUnresolved("");
 	public static final int DECORATOR_REACH = 96;
 	public static final int DECORATE_TIMEOUT = 900;
+	/** Where a custom NPC's town-guest id is saved. */
+	public static final String GUEST_KEY = "jugcraft_guest";
 
 	private String role = "townsfolk";
 	private String shop = "";
 	private BlockPos home = BlockPos.ZERO;
 	private int spot = -1;
+    int civicPost;
 	private int lastTalk;
 	private @Nullable Player listener;
 	private int listeningUntil;
@@ -74,6 +77,8 @@ public class Townsfolk extends PathfinderMob {
 	private @Nullable BlockPos nightRest;
 	/** An operator's custom NPC or guard ({@link CustomNpcs}); null for the town's own residents. */
 	private CustomNpcs.@Nullable Data custom;
+	/** The town guest this custom NPC is ({@code guests.GuestRoster} id, saved as {@code jugcraft_guest}); null if none. */
+	private @Nullable String guest;
 
 	public Townsfolk(EntityType<? extends Townsfolk> type, Level level) {
 		super(type, level);
@@ -121,7 +126,8 @@ public class Townsfolk extends PathfinderMob {
 		goalSelector.addGoal(1, new io.github.jimbozoomer.jugcraft.creatures.herobrine.HerobrineGlanceGoal(this, this::isGuard));
 		goalSelector.addGoal(2, new CustomNpcs.PatrolGoal(this));
 		goalSelector.addGoal(2, new ReturnToPlaceGoal());
-        goalSelector.addGoal(1, new GateDefenseGoal());
+        goalSelector.addGoal(0, new CityGuardVantage.WatchGoal(this));
+        goalSelector.addGoal(0, new GateDefenseGoal());
 		goalSelector.addGoal(3, new DecorateGoal());
 		goalSelector.addGoal(5, new StrollNearPlaceGoal());
 		goalSelector.addGoal(6, new FacePlaceGoal());
@@ -188,6 +194,10 @@ public class Townsfolk extends PathfinderMob {
 	}
 
     @Override public boolean canAttack(net.minecraft.world.entity.LivingEntity target) {
+        if (civicPost!=0 && (target instanceof Player || target instanceof Townsfolk ||
+                target instanceof net.minecraft.world.entity.Mob mob && io.github.jimbozoomer.jugcraft.pets.Pets.owner(mob)!=null)) return false;
+        if (civicPost!=0 && isGuard() && (!home.closerThan(target.blockPosition(),32)
+                || Math.abs(target.getY()-home.getY())>8)) return false;
         if (custom != null && (target instanceof Player || target instanceof net.minecraft.world.entity.Mob mob && io.github.jimbozoomer.jugcraft.pets.Pets.owner(mob) != null)) return false;
         return super.canAttack(target);
     }
@@ -208,6 +218,16 @@ public class Townsfolk extends PathfinderMob {
 
 	/** A custom NPC's player skin (synced); meaningful only while {@link #skin()} is {@link CustomNpcs#PLAYER_SKIN}. */
 	public boolean isCustomNpc() { return entityData.get(CUSTOM_NPC); }
+
+	/** The town guest this is (a {@code guests.GuestRoster} id), or null; server side. */
+	public @Nullable String guest() {
+		return guest;
+	}
+
+	/** Marks it as a town guest; only before it is added ({@code CustomNpcs.create}). */
+	void guest(@Nullable String id) {
+		guest = id;
+	}
 
 	public ResolvableProfile profile() {
 		return entityData.get(PROFILE);
@@ -272,6 +292,14 @@ public class Townsfolk extends PathfinderMob {
 
 	/** Where they belong now: work by day, their gathering in the evening, their bed (or where they rest) at night. */
 	public BlockPos anchor() {
+        var civic=DistrictResidents.post(civicPost);
+        if(civic!=null) return DistrictResidents.patrolAnchor(this,civic);
+		// A guest's activity (an outing, a visit, a ceremony) holds it at the activity's place until it ends.
+		BlockPos activity = guest != null && level() instanceof ServerLevel server
+				? io.github.jimbozoomer.jugcraft.town.guests.GuestActivity.anchor(server, this) : null;
+		if (activity != null) {
+			return activity;
+		}
 		if (custom != null) {
 			return CustomNpcs.anchor(this, custom);
 		}
@@ -319,6 +347,11 @@ public class Townsfolk extends PathfinderMob {
 
 	/** How far from their place a role wanders. */
 	public int range() {
+        if(civicPost!=0) return isGuard()?2:role.equals("apartment_manager")?0:1;
+		if (guest != null && level() instanceof ServerLevel server
+				&& io.github.jimbozoomer.jugcraft.town.guests.GuestActivity.anchor(server, this) != null) {
+			return io.github.jimbozoomer.jugcraft.town.guests.GuestActivity.RANGE;
+		}
 		if (custom != null) {
 			return CustomNpcs.range(custom);
 		}
@@ -348,7 +381,12 @@ public class Townsfolk extends PathfinderMob {
 	@Override
 	protected void customServerAiStep(ServerLevel level) {
 		super.customServerAiStep(level);
+        if(civicPost!=0 && tickCount%20==1 && DistrictResidents.retireIfStale(level,this)) return;
 		if (custom != null && tickCount % 20 == 0 && CustomNpcs.tick(level, this, custom)) {
+			return;
+		}
+		// A guest whose identity another entity holds is a duplicate and leaves (GuestService.tick).
+		if (guest != null && tickCount % 20 == 10 && io.github.jimbozoomer.jugcraft.town.guests.GuestService.tick(level, this)) {
 			return;
 		}
 		// Asleep only in their own bed and only at night: one loaded asleep in daylight (or whose bed has moved) wakes.
@@ -397,7 +435,8 @@ public class Townsfolk extends PathfinderMob {
 	/**
 	 * A player speaks to this townsperson (every interaction comes here: no leads, name tags or other items work on
 	 * them). Shopkeepers open their shop in its hours and say when it opens otherwise; innkeepers open the essentials
-	 * counter at any hour; everyone else says something for the season or about their day.
+	 * counter at any hour; in the Halloween season a resident with an errand asks for it (HalloweenQuests); everyone
+	 * else says something for the season or about their day.
 	 */
 	public InteractionResult talkTo(Player player, InteractionHand hand) {
 		if (!(player instanceof ServerPlayer server) || hand != InteractionHand.MAIN_HAND) {
@@ -410,6 +449,14 @@ public class Townsfolk extends PathfinderMob {
         }
         listener = player;
 		listeningUntil = tickCount + 80;
+        if(role.equals("apartment_manager") && civicPost!=0) {
+            ApartmentCommands.desk(server,1);
+            return InteractionResult.SUCCESS;
+        }
+		// A guest opens its menu; an operator sneaking still selects it for /npc.
+		if (guest != null && !(custom != null && player.isShiftKeyDown() && CustomNpcs.isOperator(server.createCommandSourceStack()))) {
+			return io.github.jimbozoomer.jugcraft.town.guests.GuestService.talk(this, server);
+		}
 		if (custom != null) {
 			return CustomNpcs.talk(this, server, custom);
 		}
@@ -449,6 +496,11 @@ public class Townsfolk extends PathfinderMob {
 			return InteractionResult.SUCCESS;
 		}
 		lastTalk = tickCount;
+		// In the Halloween season a resident with an errand asks for it, or takes it (HalloweenQuests).
+		if (HalloweenQuests.talk(server, this)) {
+			level().playSound(null, blockPosition(), SoundEvents.VILLAGER_AMBIENT, SoundSource.NEUTRAL, 0.5F, 1.2F);
+			return InteractionResult.SUCCESS;
+		}
 		String theme = TownDecor.theme();
 		// Half the time something for the season, half the time something about their day.
 		int line = Math.floorMod(getUUID().hashCode() + tickCount / 200, 6);
@@ -480,8 +532,12 @@ public class Townsfolk extends PathfinderMob {
 		output.putString("skin", skin());
 		output.store("home", BlockPos.CODEC, home);
 		output.putInt("spot", spot);
+        if(civicPost!=0) output.putInt("civic_post",civicPost);
 		if (custom != null) {
 			output.store(CustomNpcs.SAVE_KEY, CustomNpcs.Data.CODEC, custom);
+		}
+		if (guest != null) {
+			output.putString(GUEST_KEY, guest);
 		}
 	}
 
@@ -494,7 +550,10 @@ public class Townsfolk extends PathfinderMob {
 		entityData.set(SKIN, input.getStringOr("skin", "townsfolk_1"));
 		home = input.read("home", BlockPos.CODEC).orElse(blockPosition());
 		spot = input.getIntOr("spot", -1);
+        civicPost=input.getIntOr("civic_post",0);
 		custom = input.read(CustomNpcs.SAVE_KEY, CustomNpcs.Data.CODEC).orElse(null);
+		String savedGuest = input.getStringOr(GUEST_KEY, "");
+		guest = custom == null || savedGuest.isEmpty() ? null : savedGuest;
         entityData.set(CUSTOM_NPC, custom != null);
 		if (custom != null) {
 			CustomNpcs.loaded(this);
@@ -576,11 +635,11 @@ public class Townsfolk extends PathfinderMob {
 
     /** Meet active ground raids at a gate instead of staring through a wall corner. */
     private class GateDefenseGoal extends Goal {
-        private BlockPos gate;
+        private net.minecraft.world.level.pathfinder.Path gatePath;
         private int checkAt;
         GateDefenseGoal() { setFlags(EnumSet.of(Flag.MOVE)); }
         @Override public boolean canUse() {
-            if (custom != null || !isGuard() || role.equals("flak_guard") || isPassenger() || getTarget() != null
+            if (custom != null || civicPost!=0 || !isGuard() || role.equals("flak_guard") || isPassenger() || visibleOpponent()
                     || tickCount < checkAt || !(level() instanceof ServerLevel level)) return false;
             checkAt = tickCount + 40;
             BlockPos origin = Town.origin(level);
@@ -597,11 +656,12 @@ public class Townsfolk extends PathfinderMob {
                 }
             }
             if (nearest == null) return false;
-            gate = io.github.jimbozoomer.jugcraft.raiders.CityRaidRoute.nearest(origin, nearest.position()).inside();
-            return level.isLoaded(gate);
+            gatePath = TownDefense.gatePath(Townsfolk.this, origin, nearest.position());
+            return gatePath != null;
         }
-        @Override public boolean canContinueToUse() { return getTarget() == null && tickCount < checkAt; }
-        @Override public void start() { if (!within(gate, 3)) getNavigation().moveTo(gate.getX()+.5, gate.getY(), gate.getZ()+.5, 1.1); else getNavigation().stop(); }
+        private boolean visibleOpponent() { return getTarget() != null && getTarget().isAlive() && getSensing().hasLineOfSight(getTarget()); }
+        @Override public boolean canContinueToUse() { return !visibleOpponent() && tickCount < checkAt && !getNavigation().isDone(); }
+        @Override public void start() { getNavigation().moveTo(gatePath, 1.1); }
         @Override public void stop() { getNavigation().stop(); }
     }
 
@@ -619,6 +679,12 @@ public class Townsfolk extends PathfinderMob {
 		}
 
 		private int slack() {
+            if(civicPost!=0) return 1;
+			// A guest held by an activity walks straight to its place instead of strolling there.
+			if (guest != null && level() instanceof ServerLevel server
+					&& io.github.jimbozoomer.jugcraft.town.guests.GuestActivity.anchor(server, Townsfolk.this) != null) {
+				return 1;
+			}
 			return places() == null ? 4 : 3;
 		}
 

@@ -20,6 +20,8 @@ An additive companion block entity stores each table's filter, stock settings, n
 
 The recipe catalog is shared through a weak cache keyed by the native server RecipeManager, which is replaced on data reload. Output indexing and bounded selection avoid per-tick catalog scans. Reloaded/removed recipes invalidate incompatible plans and make actual staged ingredients recoverable; there is no background search for workers or containers.
 
+The expanded-catalogue CI follow-up uses the loaded recipe count to bound the discovery fixture's complete search, instead of assuming 32 pages. Each planning call still checks at most 256 candidates. Headless regressions verify eventual discovery from a real oak log without consuming it, and no plan from empty Supply. Prepared with OpenAI Codex (GPT-6), 1 November 2026; see [PR 600 CI repairs](pr-600-ci-repairs.md).
+
 ## Crafting animation
 
 Both characters use an **assemble and inspect** clip synchronized to the three-second paid work cycle:

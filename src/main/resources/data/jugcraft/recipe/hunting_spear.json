@@ -1,0 +1,24 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "equipment",
+  "pattern": [
+    "  F",
+    " ST",
+    "S  "
+  ],
+  "key": {
+    "F": "minecraft:flint",
+    "T": "minecraft:string",
+    "S": "minecraft:stick"
+  },
+  "result": {
+    "id": "jugcraft:hunting_spear",
+    "count": 1
+  }
+}

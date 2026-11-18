@@ -3,6 +3,7 @@ package io.github.jimbozoomer.jugcraft.lair.alpha;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
 import io.github.jimbozoomer.jugcraft.agriculture.Werewolf;
 import io.github.jimbozoomer.jugcraft.lair.Lair;
+import io.github.jimbozoomer.jugcraft.lair.LairRewards;
 import io.github.jimbozoomer.jugcraft.lair.Lairs;
 import io.github.jimbozoomer.jugcraft.lair.WardenBellBlock;
 import io.github.jimbozoomer.jugcraft.weapons.DescribedItem;
@@ -72,6 +73,8 @@ public final class JugcraftAlpha {
 				DataComponents.EQUIPPABLE, Equippable.builder(EquipmentSlot.HEAD).setEquipSound(SoundEvents.ARMOR_EQUIP_LEATHER).build()));
 
 		Lairs.onPlaced(Lair.MOONLIT_RING, AlphaWerewolfEntity::summon);
+		// Concordance Chunk E (E4): its fall pays through lair/LairRewards, now or later.
+		LairRewards.payer(AlphaWerewolfLoot.BOSS, AlphaWerewolfLoot::pay);
 		WardenBellBlock.onRung(JugcraftAlpha::bellRung);
 		ServerTickEvents.END_LEVEL_TICK.register(JugcraftAlpha::charms);
 		CreativeModeTabEvents.modifyOutputEvent(CreativeModeTabs.INGREDIENTS).register(output -> output.accept(ALPHA_PELT));

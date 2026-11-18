@@ -4,11 +4,12 @@ the season, in that order (TownDecor.theme()).
 
 For every kind of site but the centrepiece, a theme gives one list of choices per slot; the mod picks
 choices[site index % len(choices)], so neighbouring sites differ. "{facing}" and "{rotation}" in a state are the site's
-own. The centrepiece (7 x 7 columns by 13 high on the square) is a whole scene per theme: slot = dx + 7 dz + 49 dy.
+own. The centrepiece gives one scene per theme. Its original plinth keeps its 7 x 7 x 13 slot numbering. The city fir
+extends that site with the occupied positions of its wider canopy and crown (tools/civic_fir.py).
 
-Everything is vanilla blocks that stand on their own (pots, leaves kept persistent, full blocks, wall banners on a
-wall), so no decoration pops off when something next to it changes.
+Decor uses persistent foliage and freestanding blocks alongside the town’s authored multiblock displays.
 """
+import civic_fir
 from town_voxels import S
 
 THEMES = ["spring", "summer", "autumn", "winter", "halloween", "harvest", "december"]
@@ -241,9 +242,27 @@ def tree_of_lights():
     return out
 
 
+def harvest_centerpiece():
+    """Versioned November display; preserve harvest_display(feast=True) for saved-world ownership checks.
+
+    The 5x3x5 supplied-style woven horn fits inside the existing 7x7 site with a one-block margin.
+    North-facing master at (5,1,1); MultiDecorationBlock parts run west, up, south.
+    No serving inventories are created or replenished by seasonal changes.
+    """
+    out = {}
+    for away in range(5):
+        for up in range(3):
+            for right in range(5):
+                part = right + 5 * (up + 3 * away)
+                out[slot(5-right, 1+up, 1+away)] = (
+                    f"jugcraft:harvest_centerpiece[facing=north,lit=true,part={part}]")
+    return out
+
+
 CENTERPIECES = {
     "spring": maypole, "summer": flower_bed, "autumn": harvest_display, "winter": snowman,
     "halloween": jack_pile, "harvest": lambda: harvest_display(feast=True), "december": tree_of_lights,
+    "harvest_v2": harvest_centerpiece, "december_v2": civic_fir.scene,
 }
 
 

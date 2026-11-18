@@ -40,6 +40,7 @@ public final class JugcraftTown {
 	}
 
 	public static void register() {
+        CounterweightLift.register();
 		ResourceKey<Block> atmKey = ResourceKey.create(Registries.BLOCK, Jugcraft.id("atm"));
 		ATM = Registry.register(BuiltInRegistries.BLOCK, atmKey, new AtmBlock(BlockBehaviour.Properties.ofFullCopy(Blocks.IRON_BLOCK)
 				.strength(5.0F, 1200.0F).noOcclusion().pushReaction(PushReaction.IMMOVEABLE).setId(atmKey)));
@@ -66,14 +67,20 @@ public final class JugcraftTown {
         ResourceKey<Item> boardItem=ResourceKey.create(Registries.ITEM,Jugcraft.id("town_commission_board"));
         Registry.register(BuiltInRegistries.ITEM,boardItem,new BlockItem(COMMISSION_BOARD,new Item.Properties().setId(boardItem).useBlockDescriptionPrefix()));
         COMMISSION_MENU=Registry.register(BuiltInRegistries.MENU,Jugcraft.id("town_commissions"),new ExtendedMenuType<>(CommissionMenu::new,net.minecraft.core.BlockPos.STREAM_CODEC));
+        ApartmentCommands.register();
+        DeepsteadDwarf.register();
+        DeepsteadWares.register();
+        DistrictResidents.register();
         TownProtection.register();
 		TownBuilder.register();
         TownUpgrades.register();
+        WesternDistrict.register();
 		TownPlanner.register();
 		TownDecor.register();
 		TownsfolkCare.register();
 		TownCommand.register();
 		CustomNpcs.register();
+		io.github.jimbozoomer.jugcraft.town.guests.GuestService.register();
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			ShopMenu.clear();
 			AtmMenu.clear();

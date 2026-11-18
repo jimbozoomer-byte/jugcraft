@@ -1,0 +1,22 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "minecraft:pumpkin",
+    "#minecraft:wooden_slabs",
+    "jugcraft:flax",
+    "minecraft:orange_dye",
+    "minecraft:gold_nugget",
+    "minecraft:paper"
+  ],
+  "result": {
+    "id": "jugcraft:prize_pumpkin_display",
+    "count": 1
+  }
+}

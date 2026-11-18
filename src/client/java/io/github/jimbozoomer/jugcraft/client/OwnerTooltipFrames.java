@@ -5,11 +5,28 @@ import net.minecraft.client.gui.*;
 import net.minecraft.client.gui.screens.inventory.tooltip.*;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.world.item.*;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
 
 /** Supplied frame atlas, native item preview and centered titles, without replacing tooltip text/data. */
 public final class OwnerTooltipFrames {
     private static final net.minecraft.resources.Identifier BORDER=Jugcraft.id("textures/gui/newest/tooltip_borders.png");
     private OwnerTooltipFrames(){}
+    /** Keep authored descriptions readable at small GUI sizes without dropping text or its styles. */
+    public static List<Component> boundedLines(Font font,List<Component> original,int guiWidth){
+        int maximum=Math.max(40,Math.min(320,guiWidth-32));
+        if(original.stream().allMatch(line->font.width(line)<=maximum))return original;
+        var result=new ArrayList<Component>();
+        for(var line:original){
+            if(font.width(line)<=maximum){result.add(line);continue;}
+            for(var wrapped:font.getSplitter().splitLines(line,maximum,Style.EMPTY)){
+                var copy=Component.empty();
+                wrapped.visit((style,text)->{copy.append(Component.literal(text).withStyle(style));return Optional.empty();},Style.EMPTY);
+                result.add(copy);
+            }
+        }
+        return result;
+    }
     public static List<ClientTooltipComponent> components(List<ClientTooltipComponent> original,ItemStack stack,Font font){
         if(stack.isEmpty()||original.isEmpty())return original;
         var result=new ArrayList<>(original);int width=Math.max(48,result.stream().mapToInt(c->c.getWidth(font)).max().orElse(0));
@@ -24,13 +41,9 @@ public final class OwnerTooltipFrames {
             public int getHeight(Font f){return 38;}
             public int getWidth(Font f){return 38;}
             public void extractImage(Font f,int x,int y,int w,int h,GuiGraphicsExtractor g){
-                var mc=net.minecraft.client.Minecraft.getInstance();
-                if(mc.level==null){g.item(stack,x+(w-16)/2,y+8);return;}
-                var item=new net.minecraft.world.entity.item.ItemEntity(mc.level,0,0,0,stack.copyWithCount(1));
-                var state=mc.getEntityRenderDispatcher().extractEntity(item,0);
-                if(state instanceof net.minecraft.client.renderer.entity.state.ItemEntityRenderState dropped)dropped.bobOffset=0;
-                float angle=ConcordanceClientOptions.reducedMotion()?0:(System.nanoTime()%12_000_000_000L)/12_000_000_000F*(float)(Math.PI*2);
-                g.entity(state,38,new org.joml.Vector3f(0,-.1F,0),new org.joml.Quaternionf().rotationXYZ(.2F,angle,(float)Math.PI),null,x+(w-38)/2,y,x+(w+38)/2,y+38);
+                // GUI previews must not create an unregistered ItemEntity: the dispatcher
+                // requires a world-assigned entity ID, including inside merchant tooltips.
+                g.item(stack,x+(w-16)/2,y+8);
             }
         });return result;
     }

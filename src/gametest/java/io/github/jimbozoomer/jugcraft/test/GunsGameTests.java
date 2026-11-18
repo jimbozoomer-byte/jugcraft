@@ -327,9 +327,10 @@ public class GunsGameTests {
 					"After the Drover the pig had lost " + (200.0F - pig.getHealth()) + ", not " + expected);
 			shooter.getInventory().add(new ItemStack(JugcraftGuns.ROUNDS.get("rifle_round"), 3));
 			helper.assertTrue(drover.byShell() && GunShots.reload(shooter), "The Drover's round-at-a-time reload did not start");
-			helper.runAfterDelay(drover.shellStart() + drover.shellEach() + 1, () -> helper.assertTrue(
-					GunItem.loaded(shooter.getMainHandItem()) == 1, "One round's time in, not one round loaded"));
 		});
+		// Queue up front: adding callbacks from a running callback mutates 26.3's live scheduler map.
+		helper.runAfterDelay(longhorn.interval() + 1 + drover.shellStart() + drover.shellEach() + 1, () -> helper.assertTrue(
+				GunItem.loaded(shooter.getMainHandItem()) == 1, "One round's time in, not one round loaded"));
 		helper.runAfterDelay(longhorn.interval() + 1 + drover.reloadTicks(3) + 3, () -> {
 			helper.assertTrue(GunItem.loaded(shooter.getMainHandItem()) == 3, "The Drover did not load the three rounds");
 			helper.assertFalse(GunShots.reloading(shooter), "Still reloading after the last round");
@@ -432,9 +433,9 @@ public class GunsGameTests {
 					"After the Marshal the pig had lost " + (200.0F - pig.getHealth()) + ", not " + expected);
 			shooter.getInventory().add(new ItemStack(JugcraftGuns.ROUNDS.get("light_round"), 2));
 			helper.assertTrue(marshal.byShell() && GunShots.reload(shooter), "The Marshal's round-at-a-time reload did not start");
-			helper.runAfterDelay(marshal.shellStart() + marshal.shellEach() + 1, () -> helper.assertTrue(
-					GunItem.loaded(shooter.getMainHandItem()) == 1, "One round's time in, not one round loaded"));
 		});
+		helper.runAfterDelay(marshalAt + marshal.shellStart() + marshal.shellEach() + 1, () -> helper.assertTrue(
+				GunItem.loaded(shooter.getMainHandItem()) == 1, "One round's time in, not one round loaded"));
 		int sapperAt = marshalAt + marshal.reloadTicks(2) + 4;
 		helper.runAfterDelay(sapperAt, () -> {
 			helper.assertTrue(GunItem.loaded(shooter.getMainHandItem()) == 2, "The Marshal did not load the two rounds there were");

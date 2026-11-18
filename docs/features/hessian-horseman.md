@@ -101,6 +101,8 @@ A participant is a player who hurt him (or whose tamed creature did), healed or 
 
 The Horseman's Lantern and the summoned Horseman's cloak still drop from the summoned Horseman in the season; the lair is the lantern's off-season route, and nothing core needs it.
 
+Since Concordance Chunk E (E4, [lair-dossiers.md](lair-dossiers.md)), his lantern and two leather make a **cheaper Hessian's Bridle** (shapeless, `hessians_bridle_from_lantern`), saving its jack-o'-lantern and iron. One lantern a share, and nothing makes a lantern, so it is no loop. His dossier shows it as optional after a win. A lantern from the summoned Horseman of the season makes one too: it calls him in his lair out of season.
+
 ### Settings
 
 As at every lair: `lairs.boss_health` and `lairs.boss_damage` scale his health and his attacks' damage (0.25 to 4, 1 by default). Nothing of his has a setting of its own.

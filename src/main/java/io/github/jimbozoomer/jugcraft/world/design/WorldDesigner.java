@@ -35,6 +35,9 @@ public final class WorldDesigner {
 	public static void register() {
 		Registry.register(BuiltInRegistries.DENSITY_FUNCTION_TYPE, Jugcraft.id("design_density"), DesignDensity.CODEC);
 		Registry.register(BuiltInRegistries.BIOME_SOURCE, Jugcraft.id("design"), DesignBiomeSource.CODEC);
+		// Shared climate codec for authored worlds and the explicit existing-world migration.
+		Registry.register(BuiltInRegistries.BIOME_SOURCE, Jugcraft.id("climate"), io.github.jimbozoomer.jugcraft.world.climate.ClimateBiomeSource.CODEC);
+		io.github.jimbozoomer.jugcraft.world.climate.ClimateWorlds.register();
 		Registry.register(BuiltInRegistries.STRUCTURE_PLACEMENT, Jugcraft.id("design_pin"), DesignPlacement.CODEC);
 		CommandRegistrationCallback.EVENT.register((dispatcher, access, environment) -> dispatcher.register(Commands.literal("jugcraft")
 				.then(Commands.literal("design").requires(s -> Commands.LEVEL_GAMEMASTERS.check(s.permissions()))
@@ -43,6 +46,7 @@ public final class WorldDesigner {
 							var source = c.getSource().getServer().overworld().getChunkSource().getGenerator().getBiomeSource();
 							c.getSource().sendSuccess(() -> Component.literal(source instanceof DesignBiomeSource design
 									? "Designed world: spawn " + design.spawn().toShortString() + "; town " + design.town().map(BlockPos::toShortString).orElse("none")
+											+ design.climate().map(p -> "; climate bands from " + p.anchorX() + " " + p.anchorZ()).orElse("")
 									: "This world does not use the Jugcraft designed-world preset."), false);
 							return 1;
 						})))));
@@ -76,6 +80,9 @@ public final class WorldDesigner {
 		// Use the established seeded Overworld climate source, including Jugcraft's existing region integration.
 		JsonObject base = new JsonObject(); base.addProperty("type", "minecraft:multi_noise"); base.addProperty("preset", "minecraft:overworld");
 		root.add("biomeSource", base);
+		// This build reads a design's climate field (schema 1); the editor refuses to export climate to builds without it.
+		JsonObject climate = new JsonObject(); climate.addProperty("schema", 1);
+		root.add("climate", climate);
 		return root;
 	}
 	private static int export(CommandSourceStack source) {

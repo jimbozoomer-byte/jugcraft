@@ -56,6 +56,7 @@ public final class MachineUpgrades {
 
 	/** Automation is supported by formed processors only; extra cards have no stacking effect. */
     public static boolean isFormUpgrade(ItemStack stack) {
+        if (stack.getItem() instanceof io.github.jimbozoomer.jugcraft.pharmacology.PrecisionPharmacy.ProcessModule) return true;
         if (stack.getItem() instanceof io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialUpgrades.Upgrade upgrade)
             return upgrade.kind == io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialUpgrades.Kind.OVERCLOCKER;
         return isUpgrade(stack) || (AUTOMATION != null && stack.is(AUTOMATION));

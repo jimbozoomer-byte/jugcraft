@@ -38,19 +38,37 @@ public class PoweredToolItem extends Item implements Chargeable {
 		return capacity;
 	}
 
-	/** JE per block: doubled, then tripled, by overclock modules. */
+	/** Overclock is priced first; Efficiency then saves 15% or 30%, rounded up. */
 	public long energyPerBlock(ItemStack stack) {
-		return energyPerBlock * (1 + ToolUpgrades.level(stack, ToolUpgrades.Kind.OVERCLOCK));
+		return efficientCost(stack, (energyPerBlock * (2 + ToolUpgrades.level(stack, ToolUpgrades.Kind.OVERCLOCK)) + 1) / 2);
+	}
+
+    /** Integer ceiling without multiplying a potentially large JE amount by 100. Actions never become free. */
+    public static long efficientCost(ItemStack stack, long cost) {
+        int percent = 100 - 15 * ToolUpgrades.level(stack, ToolUpgrades.Kind.EFFICIENCY);
+        return Math.max(1, cost / 100 * percent + (cost % 100 * percent + 99) / 100);
+    }
+
+	/**
+	 * JE for breaking this block. The same as {@link #energyPerBlock(ItemStack)} unless the price depends on the block (the
+	 * chainsaw's leaf clearing). Machines that drive a tool without a block in view pay {@link #energyPerBlock(ItemStack)}.
+	 */
+	public long energyPerBlock(ItemStack stack, BlockState state) {
+		return energyPerBlock(stack);
 	}
 
 	protected boolean charged(ItemStack stack) {
 		return Chargeable.energy(stack) >= energyPerBlock(stack);
 	}
 
+	protected boolean charged(ItemStack stack, BlockState state) {
+		return Chargeable.energy(stack) >= energyPerBlock(stack, state);
+	}
+
 	/** Each overclock module adds half the base speed again. */
 	@Override
 	public float getDestroySpeed(ItemStack stack, BlockState state) {
-		if (!charged(stack)) {
+		if (!charged(stack, state)) {
 			return 1.0F;
 		}
 		float speed = super.getDestroySpeed(stack, state);
@@ -59,13 +77,13 @@ public class PoweredToolItem extends Item implements Chargeable {
 
 	@Override
 	public boolean isCorrectToolForDrops(ItemStack stack, BlockState state) {
-		return charged(stack) && super.isCorrectToolForDrops(stack, state);
+		return charged(stack, state) && super.isCorrectToolForDrops(stack, state);
 	}
 
 	@Override
 	public boolean mineBlock(ItemStack stack, Level level, BlockState state, BlockPos pos, LivingEntity miner) {
 		if (level instanceof ServerLevel serverLevel && state.getDestroySpeed(level, pos) != 0.0F) {
-			boolean paid = Chargeable.drain(stack, energyPerBlock(stack));
+			boolean paid = Chargeable.drain(stack, energyPerBlock(stack, state));
 			if (paid && !breakingExtra && miner instanceof ServerPlayer player) {
 				breakingExtra = true;
 				try {
@@ -85,7 +103,9 @@ public class PoweredToolItem extends Item implements Chargeable {
 	/** Breaks one extra block as the player would, if the tool still has the charge and is right for it. */
 	protected boolean breakExtra(ItemStack stack, ServerLevel level, BlockPos pos, ServerPlayer player) {
 		BlockState state = level.getBlockState(pos);
-		if (state.isAir() || state.getDestroySpeed(level, pos) < 0 || !charged(stack) || !isCorrectToolForDrops(stack, state)) {
+		if (!level.hasChunkAt(pos) || state.isAir() || state.hasBlockEntity() || state.getDestroySpeed(level, pos) < 0
+				|| !io.github.jimbozoomer.jugcraft.concordance.Authority.mayChange(level, player, pos)
+				|| !charged(stack, state) || !isCorrectToolForDrops(stack, state)) {
 			return false;
 		}
 		return player.gameMode.destroyBlock(pos);
@@ -111,13 +131,14 @@ public class PoweredToolItem extends Item implements Chargeable {
 			TooltipFlag flag) {
 		tooltip.accept(energyLine(stack));
 		ToolUpgrades.appendTooltip(stack, tooltip);
+        tooltip.accept(Component.literal(energyPerBlock(stack) + " JE/block; approximately " + Chargeable.energy(stack) / energyPerBlock(stack) + " blocks remaining"));
 	}
 
 	/** Amber, like the machines' energy bars. */
 	public static final int BAR_COLOR = 0xFFB8740A;
 
 	public static int barWidth(ItemStack stack) {
-		return (int) Math.round(13.0 * Chargeable.energy(stack) / Math.max(1, Chargeable.capacity(stack)));
+		return (int) Math.clamp(Math.round(13.0 * Chargeable.energy(stack) / Math.max(1, Chargeable.capacity(stack))), 0, 13);
 	}
 
 	public static Component energyLine(ItemStack stack) {

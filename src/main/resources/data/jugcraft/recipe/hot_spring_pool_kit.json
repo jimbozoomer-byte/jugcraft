@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "CLC",
+    "BWB",
+    "BCB"
+  ],
+  "key": {
+    "C": "minecraft:copper_ingot",
+    "L": "minecraft:lantern",
+    "W": "#minecraft:logs",
+    "B": "minecraft:polished_basalt"
+  },
+  "result": {
+    "id": "jugcraft:hot_spring_pool_kit"
+  }
+}

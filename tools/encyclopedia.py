@@ -41,9 +41,11 @@ PAGES = {
     "caverns": "Cave Exploration",
     "jimta_network": "Digital Workshops",
     "jimta_guides": "Workshop Guides",
+    "route_technology": "Technology Route Map",
+    "route_magic": "Magic Route Map",
     "keys": "Keys",
 }
-SERVER_PAGES = ["technology_start", "magic_start", "alchemy_start", "mentors", "discover", "spellcraft", "expedition", "inspect", "nouveau", "botanical", "botanical_flowers", "menagerie", "woodland", "household", "habitats", "beasts", "caverns", "jimta_network", "jimta_guides"]
+SERVER_PAGES = ["technology_start", "magic_start", "alchemy_start", "mentors", "discover", "spellcraft", "expedition", "inspect", "nouveau", "botanical", "botanical_flowers", "menagerie", "woodland", "household", "habitats", "beasts", "caverns", "jimta_network", "jimta_guides", "route_technology", "route_magic"]
 
 # Where a step of a route stands for a player (EncyclopediaPayload.StepState, NONE aside), in words.
 STATES = {
@@ -59,6 +61,8 @@ EDGES = {
     "recommended": "Recommended",
     "trade": "Trade",
     "optional_boss": "Optional: after a boss",
+    # Another way to the same item (a route map's other recipe or unpowered station); appended to keep ordinals.
+    "alternative": "Alternative",
 }
 
 # The First Light route (FirstLightRoute.java), in order. Each step: how much it matters, when it is done, what it waits
@@ -100,7 +104,8 @@ FIRST_ROUTE = [
                ("recommended", "jugcraft:pyromaniacs_pants"), ("recommended", "jugcraft:pyromaniacs_shoes")],
      "trades": [("general", "minecraft:lantern")], "codex": [], "tests": ["theFirstLoadoutIsMadeInSurvival"]},
     {"id": "lair", "edge": "optional_boss", "done": "a first win over any lair's keeper: The Last Harvest, Unravelled, "
-     "Abominable or Tempered", "after": ["compose"],
+     "Abominable, Tempered, Seen Through, Nameless, Grounded, Hunter's Moon, Red Planet, Uncrowned or Laid to Rest",
+     "after": ["compose"],
      "recipes": [], "trades": [], "codex": [], "tests": ["aBossIsHiddenUntilDiscovered", "aWinOverAnyKeeperIsTheLairStep"]},
 ]
 
@@ -108,7 +113,10 @@ FIRST_ROUTE = [
 # first-win advancement and trophies (one, or one of two at random: loot_table/bosses/<boss>.json), the class whose check
 # is the rite and the words it gives when refused out of the Halloween season (None: it works all year), the tokens, the
 # recipes the rite needs (the first makes a token), the town sales that help, the cheaper recipes for a token the loot
-# opens ("after_win") and the pieces made of the loot ("made_from").
+# opens ("after_win") and the pieces made of the loot ("made_from"). A keeper whose trophy table has another name says
+# so ("trophy_table", as tools/acquisition.py's rows do); a lair that opens only out of the Halloween season gives the
+# words its rite refuses with in the season ("in_season"). Concordance Chunk E (E4): every keeper the game has, in the
+# order the page shows them (LairDossiers.Boss).
 DOSSIERS = {
     "vesperine": {"lair": "hollow_acre", "advancement": "the_last_harvest", "trophies": ["vesper_scythe"],
                   "rite_class": "LastRites", "off_season": f"message.{MOD}.lair.rite.off_season",
@@ -116,7 +124,8 @@ DOSSIERS = {
                   "rite": ["death_knell", "mourning_wreath", "gothic_headstone_from_stonecutting"],
                   "trades": [("florist", "minecraft:lily_of_the_valley"), ("curios", "minecraft:candle")],
                   "after_win": ["mourning_wreath_from_shade"], "made_from": ["reaper_hood"],
-                  "loot": ["reaper_shade", "vesper_scythe", "reaper_hood", "dirge_skull", "requiem_skull"]},
+                  "loot": ["reaper_shade", "vesper_scythe", "reaper_hood", "dirge_skull", "requiem_skull",
+                           "reaper_helmet", "reaper_chestplate", "reaper_leggings", "reaper_boots", "reaper_scythe"]},
     "tatterlace": {"lair": "spindle_loft", "advancement": "unravelled", "trophies": ["needle_rapier"],
                    "rite_class": "SpindleRite", "off_season": f"message.{MOD}.lair.spindle.off_season",
                    "tokens": ["cursed_spindle"], "rite": ["cursed_spindle", "spinning_wheel"], "trades": [],
@@ -126,13 +135,66 @@ DOSSIERS = {
                   "rite_class": "FrostHornRite", "off_season": None,
                   "tokens": ["frost_horn"], "rite": ["frost_horn"], "trades": [("seasonal", "minecraft:snow_block")],
                   "after_win": ["frost_horn_from_fur"], "made_from": [],
-                  "loot": ["yeti_fur", "glacier_maul", "rimeclaw", "yeti_mitten", "yeti_king_crown"]},
+                  "loot": ["yeti_fur", "glacier_maul", "rimeclaw", "yeti_mitten", "yeti_king_crown",
+                           "frost_knight_helmet", "frost_knight_chestplate", "frost_knight_leggings",
+                           "frost_knight_boots", "frost_knight_greatsword"]},
     "cinder_tyrant": {"lair": "cinder_kiln", "advancement": "tempered", "trophies": ["cinderbrand", "magmaw"],
                       "rite_class": "KilnSealRite", "off_season": None,
                       "tokens": ["kiln_seal"], "rite": ["kiln_seal"], "trades": [],
                       "after_win": ["kiln_seal_from_scales"], "made_from": [],
-                      "loot": ["tyrant_scale", "cinderbrand", "magmaw", "salamander_charm", "tyrant_crest"]},
+                      "loot": ["tyrant_scale", "cinderbrand", "magmaw", "salamander_charm", "tyrant_crest", "hades_helmet", "hades_chestplate", "hades_leggings", "hades_boots", "hades_scythe"]},
+    "mire_hag": {"lair": "lantern_fen", "advancement": "seen_through", "trophies": ["hagthorn", "bogfang"],
+                 "rite_class": "HagStoneRite", "off_season": None,
+                 "tokens": ["hag_stone"], "rite": ["hag_stone"], "trades": [],
+                 "after_win": ["hag_stone_from_hagmoss"], "made_from": [],
+                 "loot": ["hagmoss", "hagthorn", "bogfang", "hags_eye", "hags_shawl"]},
+    "crypt_lich": {"lair": "crypt_archive", "advancement": "nameless", "trophies": ["soulreaver", "gravewarden"],
+                   "rite_class": "ExhumationRite", "off_season": None,
+                   "tokens": ["exhumation_writ"], "rite": ["exhumation_writ", "stone_brick_sarcophagus"], "trades": [],
+                   "after_win": ["exhumation_writ_from_grave_dust"], "made_from": [],
+                   "loot": ["grave_dust", "soulreaver", "gravewarden", "emptied_phylactery", "lichs_crown",
+                            "wight_king_helmet", "wight_king_chestplate", "wight_king_leggings", "wight_king_boots", "wight_king_zweihander"]},
+    "iron_dreadnought": {"lair": "foundry_trench", "advancement": "grounded", "trophies": ["dynamo_halberd", "piston_hammer"],
+                         "rite_class": "OrdersRite", "off_season": None,
+                         "tokens": ["sealed_orders"], "rite": ["sealed_orders", "field_telephone"],
+                         "trades": [("curios", "minecraft:bell")],
+                         "after_win": ["sealed_orders_from_salvaged_coil"], "made_from": [],
+                         "loot": ["salvaged_coil", "dynamo_halberd", "piston_hammer", "grounding_strap", "dreadnought_visor"]},
+    "alpha_werewolf": {"lair": "moonlit_ring", "advancement": "hunters_moon", "trophies": ["moonfang", "howler"],
+                       "trophy_table": "werewolf_alpha", "rite_class": "HowlingTotemRite", "off_season": None,
+                       "tokens": ["howling_totem"], "rite": ["howling_totem"], "trades": [],
+                       "after_win": ["howling_totem_from_alpha_pelt"], "made_from": [],
+                       "loot": ["alpha_pelt", "moonfang", "howler", "packfinder_charm", "alphas_hood"]},
+    "cydonian_sentinel": {"lair": "cydonian_sanctum", "advancement": "red_planet", "trophies": ["corelance", "redstar_cleaver"],
+                          "rite_class": "AltarKeystoneRite", "off_season": None,
+                          "tokens": ["altar_keystone"], "rite": ["altar_keystone", "altar_keystone_from_dreamglass"], "trades": [],
+                          "after_win": ["altar_keystone_from_cydonian_shards"], "made_from": [],
+                          "loot": ["cydonian_shard", "corelance", "redstar_cleaver", "lowfall_core", "sentinels_visor",
+                                   "sentinel_helmet", "sentinel_chestplate", "sentinel_leggings", "sentinel_boots", "sentinel_longsword", "sentinel_shield"]},
+    "pumpkin_king": {"lair": "crowfield", "advancement": "uncrowned", "trophies": ["hallowreap", "crowbill"],
+                     "rite_class": "HarvestCrownRite", "off_season": f"message.{MOD}.lair.crown.off_season",
+                     "tokens": ["harvest_crown"], "rite": ["harvest_crown", "scarecrow"], "trades": [("seasonal", "minecraft:hay_block")],
+                     "after_win": ["harvest_crown_from_ember"], "made_from": ["kings_lantern"],
+                     "loot": ["kings_ember", "hallowreap", "crowbill", "crowward_charm", "pumpkin_kings_crown"]},
+    "hessian_horseman": {"lair": "church_bridge", "advancement": "laid_to_rest", "trophies": ["hollowflail", "hessian_sabre"],
+                         "rite_class": "HessiansBridleRite", "off_season": None,
+                         "in_season": f"message.{MOD}.lair.bridle.in_season",
+                         "tokens": ["hessians_bridle"], "rite": ["hessians_bridle"], "trades": [],
+                         "after_win": ["hessians_bridle_from_lantern"], "made_from": [],
+                         "loot": ["horseman_lantern", "hollowflail", "hessian_sabre", "hessians_spur", "hessians_tricorn"]},
 }
+
+DOSSIERS.update({
+    "storm_roc": {"lair": "crown_of_thunder", "advancement": "eye_of_the_storm", "trophies": ["stormcaller", "galefeather"],
+                  "rite_class": "ThunderVaneRite", "off_season": None, "tokens": ["thunder_vane"],
+                  "rite": ["thunder_vane"], "trades": [], "after_win": ["thunder_vane_from_roc_feathers"], "made_from": [],
+                  "loot": ["roc_feather", "stormcaller", "galefeather", "weather_vane_lens", "rocs_crest"]},
+    "glass_abbot": {"lair": "glass_chapel", "advancement": "seen_clearly", "trophies": ["glass_reliquary"],
+                    "first_win_item": "glass_reliquary", "rite_class": "GlassAccordRite", "off_season": None,
+                    "tokens": ["glass_accord"], "rite": ["glass_accord"], "trades": [],
+                    "after_win": ["glass_accord_from_prism_shards"], "made_from": ["lantern_lens", "mirror_inscription", "abbey_glass"],
+                    "loot": ["prism_shard", "glass_reliquary", "abbots_cowl"]},
+})
 
 # What each Jugcraft key does, for the Keys page (key.jugcraft.<name>; every key the client registers).
 KEY_HELP = {
@@ -151,7 +213,7 @@ KEY_HELP = {
     "encyclopedia": "Opens this encyclopedia from the game",
     "concordance_journal": "Opens your Concordance Journal: research, stage, and Compose",
     "concordance_composer": "Opens the Spell Composer straight away (not bound at first)",
-    "concordance_config": "Opens the Concordance's settings on this computer (not bound at first)",
+    "concordance_config": "Opens display settings, including drug visuals, on this computer (not bound at first)",
     "concordance_roster": "Opens your roster: pacts, agreements, familiars, spirits, constructs and courier requests, and what each waits for (not bound at first)",
     "party": "Opens the Party screen",
     "gem_abilities": "Opens worn Gem armor abilities (not bound at first)",
@@ -289,6 +351,16 @@ INSPECT = {
 }
 
 DOSSIER = {
+    "crown_of_thunder.rite": "In the Overworld, use a Thunder Vane under the open sky in mountain or hill country at Y120 or higher while rain or thunder falls. The vane is consumed when Grey Mist opens; enter it to reach the summit.",
+    "crown_of_thunder.lore": "Travellers tell of a vast winged shadow above the mountain storms, and four rods that can drag lightning out of the sky.",
+    "crown_of_thunder.prepare": "Watch which Storm Rod charges. Put it between yourself and the diving bird so his marked lane crosses it; when the lightning grounds him, close in before he takes flight. Keep away from the summit's edges and deal with the fledglings.",
+    "crown_of_thunder.credit": "Hurt the keeper or his fledglings, or help at the rod that grounds him. You must be alive within 64 blocks of the summit when he falls to receive your share; this encounter does not credit healing or wards, or retain rewards for absent players.",
+    "crown_of_thunder.leave": "Grey Mist in the stone arch on the terrace's south edge takes you home at any time. When the keeper falls, another exit opens at the foot of his nest's crag.",
+    "glass_chapel.rite": "In clear Overworld daylight, hold up a Glass Accord while sunlight reaches your head through clear or stained glass within 16 blocks overhead. Tinted glass does not work. The accord is consumed when Grey Mist opens into the chapel.",
+    "glass_chapel.lore": "An abandoned chapel keeps a congregation of reflections. Its guardian wears the windows as a mantle; light sent home through the mirrors can break it.",
+    "glass_chapel.prepare": "Turn the marked mirrors to return the gathered beam to its source, then strike while the mantle is broken. Use the pillars against shard fans. During the veil, distinguish the real figure from its images; a Lantern Lens helps on return visits.",
+    "glass_chapel.credit": "A share goes to those who strike the keeper or his images, restore %s health lost to his side, ward %s damage for a friend, or turn a mirror that sends his beam home, within %s blocks. Qualified fallen or disconnected players keep their rewards for their return.",
+    "glass_chapel.leave": "Grey Mist in the south doorway behind the arrival takes you home at any time. When the keeper falls, another exit opens behind the lectern.",
     "hollow_acre.rite": "The Last Rites, at night in the Overworld: lay a Mourning Wreath on a grave (any headstone) or "
                         "within %s blocks of it, light %s or more candles within %s blocks of the grave, and ring the "
                         "Death Knell within %s blocks of it",
@@ -317,10 +389,113 @@ DOSSIER = {
                            "long as it is held",
     "cinder_kiln.prepare.charm": "Against his slag: the Salamander Charm from his loot, held in the other hand, keeps hot "
                                  "ground from burning its holder for as long as it is held",
+    # Concordance Chunk E (E-03): an ordinary answer to his flame, always; the Concordance's own while it is on.
+    "cinder_kiln.prepare.flask": "Against his slag and fire, with no magic: a Quench Flask, a glass bottle shaken with "
+                                 "three snowballs and thrown, cools everyone it splashes for %s seconds, so their burning "
+                                 "goes out and his slag does not hurt them, though his flame still does; it puts out fire "
+                                 "and his burning patches where it lands, and fire-born creatures, his Cinderlings among "
+                                 "them, gutter in it",
+    "cinder_kiln.prepare.concordance": "With the Arcane Concordance: Quench cools a friend against his slag; Rimebind on "
+                                       "him while he is quenched holds his plates dark %s seconds longer, once a quench; "
+                                       "Brace halves the shove of his sweep and slam; Hearthguard turns his fire",
+    # Concordance Chunk E (E4): the rites of the lairs found since, and a tomb, the place the writ is served.
+    "lantern_fen.rite": "At night in the Overworld, look through the Hag Stone standing in shallow water or on mud in a "
+                        "wetland (any swamp, the Floodplain or the Muskeg): a lantern burns far off in the mist, the mist "
+                        "rises round you and you wake on the fen's jetty, and the stone is used up. If a step is missing "
+                        "it says which and nothing is used up. While the mist hangs, friends follow by using it",
+    "crypt_archive.rite": "At any hour, serve the Writ of Exhumation on a stone sarcophagus in the Overworld, in a crypt: "
+                          "under a roof, so that no sky shows over either half of it. The lid grinds aside and you go down "
+                          "the stair to the archive's landing, and the writ is used up. If a step is missing it says which "
+                          "and nothing is used up. While the mist wells up, friends follow by using it, or the open "
+                          "sarcophagus with an empty hand",
+    "foundry_trench.rite": "At any hour, use the Sealed Orders on a Field Telephone in the Overworld that stands in a "
+                           "trench: under the open sky, with %s or more trench-works blocks (sandbags, timber revetment, "
+                           "duckboards, and their slabs and stairs) within %s blocks of it. The bell rings and you go over "
+                           "the top into the trench's dugout, and the orders are used up. If a step is missing they say "
+                           "which and nothing is used up. While the line stays open, friends follow by using it, or the "
+                           "telephone with an empty hand",
+    "moonlit_ring.rite": "At night in the Overworld, howl the Howling Totem in the woods, under the open sky, standing on "
+                         "woodland floor, with no wolfsbane growing or potted within %s blocks: something far off "
+                         "answers, you come to in the ring's camp, and the totem is used up. Any night will do, not only "
+                         "a full moon's. If a step is missing it says which and nothing is used up. While the Grey Mist "
+                         "curls up, friends follow by using it",
+    "cydonian_sanctum.rite": "At night in the Overworld, set the Altar Keystone into the Ancient Altar of Adam-ondi-Ahman: "
+                             "the keystone crumbles, the three altars under it kindle with red fire one after another, "
+                             "and a red mist opens over it. Stay within %s blocks of the altar to step through to Mars. "
+                             "If a step is missing it says which and nothing is used up. While the mist is open, friends "
+                             "follow by using it, or the altar with an empty hand",
+    "church_bridge.rite": "At night in the Overworld, out of the Halloween season, use the Hessian's Bridle on a "
+                          "jack-o'-lantern (or a lit carved pumpkin) standing on a fence or wall post under the open sky. "
+                          "Hoofbeats come out of the dark, the lantern flares and you come to on the wood road; the "
+                          "bridle is used up, and the lantern and its post are left as they were. If a step is missing "
+                          "it says which and nothing is used up. While the Grey Mist rises, friends follow by using it",
+    "crowfield.rite": "At night in the Overworld, set the Harvest Crown on a scarecrow that wears a head, its head under "
+                      "the open sky, among %s or more blocks of harvest (pumpkins, squashes and gourds) within %s blocks "
+                      "of it. The crows burst up crying and you come to in the farmyard; the crown is used up, and the "
+                      "scarecrow and the crops are left as they were. If a step is missing it says which and nothing is "
+                      "used up. While the Grey Mist rises, friends follow by using it",
+    # Concordance Chunk E (E4): what readies a player for each keeper, as text and icons, no recipe grid (B-P29).
+    "hollow_acre.prepare": "Against her: a Grief Bolt you hit flies back at the skull that sent it. In Death's Harvest "
+                           "strike her souls down, or light her wards to burn them up, before they reach her and heal "
+                           "her, and be %s blocks or more from the circle's middle when she slams down",
+    "spindle_loft.prepare": "Against her: lace that frays drops away, and knits back %s seconds later; strike her "
+                            "Binding Thread, or sprint-jump against it, to snap it. The Golden Thimble from her loot, held "
+                            "in the other hand, turns aside the first thimble, pin, thread or arrow that would hit you, "
+                            "then rests %s seconds",
+    "lantern_fen.prepare": "Against her: the light finds her. Within %s blocks of a burning fen lamp her Likenesses fade "
+                           "and she glows; relight a lamp she has put out and she shows for %s seconds wherever she is, "
+                           "and every Likeness in its light bursts. Her Poison Brew poisons, but never kills",
+    "crypt_archive.prepare": "Against him: break the lit name's seal, one name at a time, and his phylactery cracks; read "
+                             "a name scraped from its stone back at the Lectern of Last Names; strike his Soul Bolt back "
+                             "at him. The Emptied Phylactery from his loot, held in the other hand, keeps Wither from "
+                             "taking hold of you",
+    "foundry_trench.prepare": "Against him: his plating turns most of a blow until his vents blow open, so throw the lit "
+                              "pylon's breaker as his coils whine; spread out, for his Coil Arc jumps to anyone within "
+                              "%s blocks of the last it struck. The Grounding Strap from his loot, held in the other hand, "
+                              "lets only %s%% of an electric blow through, his arcs among them",
+    "moonlit_ring.prepare": "Against him: his hide halves every blow but silver's. Ring his clearing's Warden Bell before "
+                            "he springs and he is flushed, his hide failing him for %s seconds. A sprig of wolfsbane in "
+                            "either hand keeps his Packmates from biting, though not him. The Packfinder Charm from his "
+                            "loot, held in the other hand, makes every werewolf within %s blocks glow",
+    "cydonian_sanctum.prepare": "Against the Red Storm: when it names the storm's side, shelter in the lee of a standing "
+                                "stone or under the rim on the windward side, never more than %s blocks away. As it "
+                                "charges its Core Lance its chest opens, and a blow of %s or more there staggers it. The "
+                                "Lowfall Core from its loot, held in the other hand, spares you every fall",
+    "church_bridge.prepare": "Against him: while %s or more braziers are dark every blow does him only %s%%. When he "
+                             "snuffs them, light every one of the snuffing again within %s seconds and he is revealed: "
+                             "for %s seconds every blow does %s%% more. Step out of the blue lines his Phantom Riders "
+                             "gallop down",
+    "crowfield.prepare": "Against him: pick the gourds he calls before they ripen through, for each that splits frees a "
+                         "Jack-o'-Straw or feeds him, and pick a whole harvest to leave him bereft. Fire does him %s%% "
+                         "more harm: a burning arrow, Fire Aspect, or an arm that sets alight",
+    # Concordance Chunk E (E4): each found lair's lore, a clue to its keeper's rule that never names the keeper.
+    "hollow_acre.lore": "Mourners' lore: the reaper of the Hollow Acre speaks through two skulls, and what they loose can "
+                        "be struck back",
+    "spindle_loft.lore": "Seamstresses' lore: the loft's floor is its mistress's own lace; what she unravels she knits "
+                         "again, and any thread she binds you with can be snapped",
+    "glacier_hall.lore": "Trappers' lore: the hall's king charges blind across his lake; lead him into a column of ice "
+                         "and he crashes into it",
+    "cinder_kiln.lore": "Smiths' lore: the kiln's slag never cools while its master lives; its shelves and dry troughs "
+                        "are the firm footing",
+    "lantern_fen.lore": "Fen-folk's lore: what waits in the fen walks in many shapes, but the true one casts a shadow and "
+                        "rings the water round her feet",
+    "crypt_archive.lore": "Clerks' lore: the archive keeps the last names of the dead, and while three names bind its "
+                          "master's chains, no blow, arrow or spell can touch him",
+    "foundry_trench.lore": "Sappers' lore: the trench's pylons were raised to earth a walking fortress; throw the right "
+                           "breaker as his coils whine, and his plating opens",
+    "moonlit_ring.lore": "Hunters' lore: his hide turns the blow; silver bites deeper, or flush him with a bell",
+    "cydonian_sanctum.lore": "Explorers' lore: the standing stones of the crater break the red wind, and from anywhere on "
+                             "its floor shelter is never far",
+    "church_bridge.lore": "Villagers' lore: the rider of the hollow puts out the lights to hide in the dark, and the "
+                          "braziers lit again in time show him",
+    "crowfield.lore": "Farmers' lore: the oldest scarecrow is the one the crows answer, and a harvest left on the vine "
+                      "burns",
     "grave": "A grave: any headstone, such as a %s",
+    "tomb": "A tomb: a stone brick, deepslate or blackstone sarcophagus, such as a %s",
     "any_night": "The rite works on any night",
     "in_season": "The rite works now, in the Halloween season",
     "all_year": "This rite works all year, not only in the Halloween season",
+    "out_of_season": "This rite works only out of the Halloween season",
     "party": "A lair holds %s players; its gate stays open %s seconds for friends to follow",
     "hollow_acre.credit": "A share of her reward goes to everyone who strikes her, her skulls Dirge and Requiem or a "
                           "Soul of the Harvest (not her Grave Thralls), gives friends back %s or more of the health her "
@@ -337,14 +512,40 @@ DOSSIER = {
                            "of his lake",
     "cinder_kiln.credit": "A share of his reward goes to everyone who strikes him or his Cinderlings, gives friends back "
                           "%s or more of the health his side took from them (blows, gobs, cinders and flame; not burning "
-                          "afterwards, nor slag), or wards a friend against %s or more health of those, within %s blocks "
-                          "of his bowl",
+                          "afterwards, nor slag), wards a friend against %s or more health of those, opens the sluice "
+                          "whose water quenches him, braces a friend against his sweep or slam, or binds him with Rimebind "
+                          "while he is quenched, within %s blocks of his bowl",
     "credit.wards": "Cast a ward after the keeper wakes: one cast before is not counted. Those who fall are paid when "
                     "they are back on their feet, and those who leave the game when they come back",
     # Concordance Chunk C (C-02, C-P8): after credit.wards, while the Concordance's Verdance brews Regeneration.
     "credit.poultice": "A Stillroot Poultice you put on a friend in the fight counts as healing: each health its "
                        "Regeneration then gives back of what the keeper's side took from them, while they stay in the "
                        "fight. One on yourself earns nothing, and two on one friend heal, and earn, no faster than one",
+    "lantern_fen.credit": "A share of her reward goes to everyone who strikes her, her Likenesses or the Root Knot, "
+                          "gives friends back %s or more of the health her side's blows took, wards a friend against %s "
+                          "or more health of those blows, or relights a fen lamp that shows her, within %s blocks of the "
+                          "marsh's middle",
+    "crypt_archive.credit": "A share of his reward goes to everyone who strikes him or his dead, gives friends back %s or "
+                            "more of the health his side's blows took, wards a friend against %s or more health of those "
+                            "blows, breaks one of his seals, reads a name back at the Lectern of Last Names, or strikes "
+                            "his Soul Bolt back, within %s blocks of his dais",
+    "foundry_trench.credit": "A share of his reward goes to everyone who strikes him or his Sparkers, gives friends back "
+                             "%s or more of the health his side's blows took, wards a friend against %s or more health of "
+                             "those blows, throws the breaker that earths his discharge, or works a fouled breaker, within "
+                             "%s blocks of his pit's middle",
+    "moonlit_ring.credit": "A share of his reward goes to everyone who strikes him or his Packmates, gives friends back %s "
+                           "or more of the health his side's blows took, wards a friend against %s or more health of "
+                           "those blows, or rings the Warden Bell that flushes him, within %s blocks of his clearing",
+    "cydonian_sanctum.credit": "A share of its reward goes to everyone who strikes it or its Shard Sentries, gives friends "
+                               "back %s or more of the health its side's blows took, or wards a friend against %s or more "
+                               "health of those blows, within %s blocks of its crater",
+    "crowfield.credit": "A share of his reward goes to everyone who strikes him or his Jack-o'-Straws, gives friends back "
+                        "%s or more of the health his side's blows took, wards a friend against %s or more health of "
+                        "those blows, or picks a gourd of a harvest picked clean before any lights, within %s blocks of "
+                        "his field's middle",
+    "church_bridge.credit": "A share of his reward goes to everyone who strikes him, gives friends back %s or more of the "
+                            "health his side's blows took, wards a friend against %s or more health of those blows, or "
+                            "lights a brazier of a snuffing that reveals him, within %s blocks of the hollow's middle",
     "won": "You have beaten this keeper: %s",
     "first_win": "A first win always brings the %s",
     "first_win.pair": "A first win always brings one of two trophies, at random: the %s or the %s",
@@ -357,6 +558,23 @@ DOSSIER = {
                           "of a fight; when he falls, Grey Mist stands in the middle of the lake too",
     "cinder_kiln.leave": "The Grey Mist in the arch of kiln brick behind the arrival takes you home at any time, in or "
                          "out of a fight; when he falls, Grey Mist stands in the middle of the bowl too",
+    "lantern_fen.leave": "The Grey Mist between the two dead willows at the jetty's end takes you home at any time, in "
+                         "or out of a fight; when she falls, Grey Mist opens in the middle of the marsh too",
+    "crypt_archive.leave": "The Grey Mist in the doorway of the stair back up takes you home at any time, in or out of a "
+                           "fight; when he falls, Grey Mist opens on the dais where his phylactery stood",
+    "foundry_trench.leave": "The Grey Mist in the dugout's back doorway takes you home at any time, in or out of a fight; "
+                            "when he falls, Grey Mist opens at the back of his gantry",
+    "moonlit_ring.leave": "The Grey Mist on the trail behind the camp takes you home at any time; when he falls, Grey "
+                          "Mist opens on the Howling Stone's top",
+    "cydonian_sanctum.leave": "The Red Mist in the arch behind the gate chamber's arrival takes you home at any time; when "
+                              "it falls, Red Mist opens in the crater's middle",
+    "crowfield.leave": "The Grey Mist where the lane behind the farmyard ends takes you home at any time; when he falls, "
+                       "Grey Mist opens at the foot of his mound, on the farmyard side",
+    "church_bridge.leave": "The Grey Mist at the wood road's end behind the arrival takes you home at any time; when he "
+                           "falls, Grey Mist opens on the covered bridge over the brook",
+    # Concordance Chunk E (E4): when a fight starts over (each keeper's own ABANDON_TICKS, LairDossiers.resetSeconds).
+    "reset": "If nobody who can fight the keeper stays near for %s seconds, the keeper goes back to where they waited, "
+             "healed, their helpers gone, and the fight starts again from nothing: what anyone did in it is forgotten",
     "grave_goods": "Dying in a lair costs nothing: you respawn with everything you carried, worn and held as it was, "
                    "and all your experience",
     "owed": "A share of the keeper's spoils is kept for you",
@@ -412,6 +630,8 @@ GENERAL = {
 
 CLIENT = {
     "key.jugcraft.encyclopedia": "Jugcraft Encyclopedia",
+    "message.jugcraft.encyclopedia.welcome": "Welcome to Jugcraft! Press %s, or the scroll button in your inventory, to open the "
+                                             "Encyclopedia: your first steps, the machinery and magic routes, and every key.",
     "screen.jugcraft.encyclopedia.title": "Jugcraft Encyclopedia",
     "screen.jugcraft.encyclopedia.refresh": "Refresh",
     "screen.jugcraft.encyclopedia.loading": "Asking the server...",

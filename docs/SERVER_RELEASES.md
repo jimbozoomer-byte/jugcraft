@@ -5,6 +5,8 @@ and Java 25 remain pinned. Player updates are offered in the Minecraft title men
 
 ## Current distribution: one pack import, in-game updates
 
+For the in-game join bulletin, put the release's player-facing changes in `distribution/RELEASE-NOTES.md` between the existing `<!-- player-notes -->` markers. Use one `- ` bullet per change and retain the `<!-- /player-notes -->` closing marker. Gradle packages the file in the mod. The running server supplies these notes and its configured MOTD when a player joins. See [The Town Dispatch](features/town-dispatch.md).
+
 Share the versioned `.mrpack` directly; see the [in-game updater guide](features/direct-player-updater.md).
 Players import once in Modrinth App. The title-menu updater finds that same
 instance automatically, offers verified downloads, then applies after the player

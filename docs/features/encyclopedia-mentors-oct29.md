@@ -79,4 +79,6 @@ This is a unified directory over current implemented guides, not a claim that
 every registered item has an exhaustive bespoke article. Deep research reference
 and journal retain their existing screens/discovery rules. Full quest rewards,
 pan/zoom dependency graphs and progression balancing remain separate TODO work.
+November 12 follow-up: data-derived Technology and Magic route maps (a Map tab and
+two live route pages) are recorded in [the route-map record](encyclopedia-progression-routes.md).
 Existing source art/UI is reused without new textures or dependencies.

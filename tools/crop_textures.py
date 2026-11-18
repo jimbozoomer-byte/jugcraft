@@ -816,6 +816,16 @@ def crop_textures():
     out.update(harvest_festival_textures())
     from thanksgiving_decor_data import textures as thanksgiving_decor_textures  # and the Thanksgiving decorations
     out.update(thanksgiving_decor_textures())
+    from thanksgiving_homestead_data import textures as thanksgiving_homestead_textures  # and the homestead's
+    out.update(thanksgiving_homestead_textures())
+    from thanksgiving_woodland_data import textures as thanksgiving_woodland_textures  # and the woodland harvest crafts
+    out.update(thanksgiving_woodland_textures())
+    from thanksgiving_town_data import textures as thanksgiving_town_textures  # and the Thanksgiving harvest town details
+    out.update(thanksgiving_town_textures())
+    from thanksgiving_toys_data import textures as thanksgiving_toys_textures  # and the Thanksgiving festival toys
+    out.update(thanksgiving_toys_textures())
+    from thanksgiving_dishes_data import textures as thanksgiving_dishes_textures  # and the Thanksgiving side dishes
+    out.update(thanksgiving_dishes_textures())
     from lair_textures import lair_textures  # and the lairs' blocks, the Mourning Wreath and the Death Knell
     out.update(lair_textures())
     from adam_ondi_ahman_textures import adam_ondi_ahman_textures  # and Adam-ondi-Ahman's Ancient Altar
@@ -840,8 +850,14 @@ def crop_textures():
     out.update(pumpkin_king_textures())
     from hessian_horseman_art import hessian_horseman_textures  # and the Headless Horseman in his lair, and his loot
     out.update(hessian_horseman_textures())
+    from lineage_art import lineage_textures  # and the Astrawand of the star-bred lines
+    out.update(lineage_textures())
     from cydonian_sentinel_art import cydonian_sentinel_textures  # and the Cydonian Sentinel, its sentries, shards,
     out.update(cydonian_sentinel_textures())                      # spikes and meteors, and its loot
+    from storm_roc_art import storm_roc_textures  # and the Storm Roc, his fledglings, and his loot
+    out.update(storm_roc_textures())
+    from glass_abbot_art import glass_abbot_textures  # and the Glass Abbot, his images, and his loot
+    out.update(glass_abbot_textures())
     from orchard_textures import orchard_textures  # and the orchards' fruit trees
     out.update(orchard_textures())
     from cake_art import cake_textures  # and the cakes, rebuilt from the owner's drawing of them

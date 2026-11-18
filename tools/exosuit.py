@@ -16,25 +16,25 @@ PIECES = ["helmet", "chestplate", "leggings", "boots"]
 EQUIP_TAGS = {"helmet": "head_armor", "chestplate": "chest_armor", "leggings": "leg_armor", "boots": "foot_armor"}
 
 # Energy (Java: Exosuit). Each piece holds CAPACITY JE (more with capacity modules) and charges at the charging station.
-CAPACITY = 400_000
+CAPACITY = 500_000
 NIGHT_VISION_PER_TICK = 2      # helmet, only while it is dark
 SHIELD_POINTS = 8              # chestplate: up to 4 hearts of absorption...
 SHIELD_INTERVAL = 10           # ...regrown one point (half a heart) every 10 ticks
-SHIELD_PER_POINT = 4_000       # ...for 4,000 JE a point
+SHIELD_PER_POINT = 1_000       # ...for 4,000 JE a point
 SPEED_PER_TICK = 1             # leggings: +30% walking speed
 SPEED_BONUS = 0.3
-BOOTS_PER_TICK = 1             # boots: no fall damage, step up a full block
+FALL_PER_POINT = 50             # boots: no fall damage, step up a full block
 STEP_BONUS = 0.5
 
 # Smithing additions that go with each livery template.
 LIVERY_DYE = {"ronin": "minecraft:red_dye", "vanguard": "minecraft:cyan_dye"}
 
 ABILITIES = {
-    "helmet": "Night vision in the dark (2 JE/t while dark)",
-    "chestplate": "Energy shield: regrows up to 4 hearts of absorption (4,000 JE per half heart). Hold jump in the "
+    "helmet": "Night vision in the dark (2 JE/t while active). Shift-use the held helmet to toggle",
+    "chestplate": "Energy shield: regrows up to 4 hearts of absorption (1,000 JE per half heart). Hold jump in the "
                   "air to fly, like the rocket pack",
-    "leggings": "+30% walking speed (1 JE/t)",
-    "boots": "No fall damage, and steps up a full block (1 JE/t)",
+    "leggings": "+30% walking speed (1 JE/t of boosted movement)",
+    "boots": "Cushions falls (100 JE per heart prevented); free full-block stepping while charged",
 }
 
 

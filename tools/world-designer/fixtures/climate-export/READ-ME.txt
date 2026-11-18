@@ -1,0 +1,5 @@
+Requires Jugcraft with World Designer and the same Minecraft/mod collection used to export the catalog.
+Create a NEW world; add this ZIP in Data Packs, enable it, then choose Jugcraft Designed in World Type. Keep structures enabled.
+The painted surface sits above original deep caves; outer two grid cells blend to procedural terrain.
+Structure pins choose start chunks, not exact building corners; biome and terrain constraints still apply. Native random structures remain enabled. One Jugcraft walled city is supported.
+Do not replace this pack in an established world: already generated chunks are not regenerated.

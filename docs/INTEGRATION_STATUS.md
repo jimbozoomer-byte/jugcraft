@@ -15,9 +15,77 @@ consolidation and recipe-picker playtest remains outside this batch.
 
 Updated 11 October 2026 for [integration PR #320](https://github.com/jimbozoomer-byte/jugcraft/pull/320) (source PRs #299–308 and #310–319), following [integration PR #277](https://github.com/jimbozoomer-byte/jugcraft/pull/277) and [follow-up PR #298](https://github.com/jimbozoomer-byte/jugcraft/pull/298). This is the owner-facing index: feature records contain the detailed behavior and historical test evidence. The PRs' current GitHub states determine which combined work has reached `main`.
 
-## Not merged: Concordance Chunk D (pact hall)
+## Not merged: Concordance garden cohort, units 1 to 7 (Buer, Bathin, Marax, Foras, Bifrons, Amdusias, and the evidence)
 
-Stacked on Chunk C, on branch `claude/chunk-d-pact-hall`; not merged; pull request [jimbozoomer-byte/jugcraft#474](https://github.com/jimbozoomer-byte/jugcraft/pull/474), the third of the stack. Units 1
+On branch `claude/garden-cohort`; draft pull request [jimbozoomer-byte/jugcraft#526](https://github.com/jimbozoomer-byte/jugcraft/pull/526)
+against main; not merged. Unit 1 (GC-01 to GC-04) of seven is built: one pact spirit base with a perch for many spirits
+and a chooser (Stolas unchanged), facing whoever speaks, the garden groundwork and The Garden's Regard, and Buer, the first
+garden spirit. In CI run [40605564166](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40605564166) on `4ca363d38` every unit-1 server test passed with and without
+the optional integrations (the `mod` job passed all 3,109 required tests), and the garden client class passed; that
+run's one remaining failure is main's `HerobrineClientGameTests` (its placement found no visible spot, on the first
+attempt and the re-run); main's Herobrine grove test failed once without the optional integrations, as on main, and passed
+on the re-run. The run before,
+40597482976, failed three unit-1 server tests, each a fault of the test, fixed in `4ca363d38`. No person has played it;
+one client, not two ([the contract's evidence](features/concordance-garden-cohort.md#unit-1-as-built-and-its-evidence)).
+Unit 2 (GC-05) is built too: Bathin, the second garden spirit, with the accord machinery (a spirit's matter answered at
+its perch) and the bed index's Hearts, Gleaners and pylons. In CI run
+[40777920181](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40777920181) on `8af703330` the whole run passed:
+both server jobs passed all 3,206 required tests, unit 2's 38 among them, and the garden client class passed; its 34
+pictures of Bathin were looked at ([the contract's evidence](features/concordance-garden-cohort.md#unit-2-as-built-and-its-evidence)).
+Not played by a person; one client, not two.
+Unit 3 (GC-06) is built, recorded and run in CI: Marax, the third garden spirit, with the
+standing station beside a perch and the synced work target his familiar flies to. His shared prefix (GC-06a, GC-06b)
+was in the head of run 40777920181, which passed in full; on `be76fd419` and `1a15984d4` the server suite without the optional integrations and `ConcordanceGardenPactClientGameTests` passed (runs 41506566691, 41506582568 and 41521655013), his server tests as that suite runs them and his client
+shots among them; his pictures are not yet looked at. Checked locally by the repository's Python checks and audits and a
+scratch harness of his one-change rule ([the contract's evidence](features/concordance-garden-cohort.md#unit-3-as-built-and-its-evidence)).
+Unit 4 (GC-07) is built and recorded (on its own line from unit 3's shared prefix, merged after unit 3): Foras, a
+garden spirit who keeps grafts, with the graft in one place and the bed index's stores. Run
+[40840353835](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40840353835) passed in full on `3bfd63a97` (the magic interfaces'
+polish, before unit 4); in run [40852556175](https://github.com/jimbozoomer-byte/jugcraft/actions/runs/40852556175) on
+`5e93bb0a7` (unit 4 merged, his reload test thinking first and the server suite given 6G) both server jobs and all 16
+client shards passed (the 16th, holding main's `PeepoPopulationClientTests`, on its re-run).
+Checked locally by the repository's Python checks and audits
+([the contract's evidence](features/concordance-garden-cohort.md#unit-4-as-built-and-its-evidence)).
+Unit 5 (GC-08) is built and recorded on its own line from unit 3's head and merged after unit 4, and run in CI:
+Bifrons, a garden spirit who runs roots between beds by night, with feeding by hand as a garden act. On `be76fd419` and `1a15984d4` the server suite without the optional integrations and `ConcordanceGardenPactClientGameTests` passed (runs 41506566691, 41506582568 and 41521655013),
+his server tests as that suite runs them and his 36 client shots among them; his pictures are not yet looked at. Checked
+locally by the repository's Python checks and audits
+([the contract's evidence](features/concordance-garden-cohort.md#unit-5-as-built-and-its-evidence)).
+Unit 6 (GC-09) is built and recorded on its own line from the cohort with units 1 to 4, beside unit 5's, and merged
+after unit 5, **not yet compiled or run in CI**: Amdusias, the bending canopy, with a canopy's shelter in the pure ecology
+rule, the garden's memory of canopies, a cue a beat late and a quota worded as a cap. On `be76fd419` (main merged), which
+the merged line descends from, the server suite without the optional integrations passed in runs 41506566691 and
+41506582568, and `ConcordanceGardenPactClientGameTests` passed in both; his 26 server tests and 35 client shots wait for
+their first run. Checked locally by the repository's Python checks and audits and scratch harnesses
+([the contract's evidence](features/concordance-garden-cohort.md#unit-6-as-built-and-its-evidence)).
+Unit 7 (GC-10) is built and recorded on its own line from the cohort head, **not yet compiled or run in CI**: the
+whole path (`theGardenPactsFromCodexToDeparture`), the garden load card, the garden two-client test with a shared
+second-client helper, the line-up of seven and a roster of seven, the matter's plates above the first task, the face
+rows for Foras and Bifrons, a tidy client yard, two opted-in workflow steps, and the checkpoint draft. Checked locally by
+the repository's Python checks and audits, with their mutations; no load figure, second client or picture exists yet
+([the contract's evidence](features/concordance-garden-cohort.md#unit-7-as-built-and-its-evidence)).
+
+| Area | Implemented change | Record |
+| --- | --- | --- |
+| One perch, many spirits (GC-01) | A shared pact spirit base and service interface; an empty perch's owner who may invite two or more spirits chooses among them, each "ready" or with what is missing; Jade, the roster and the journal name each spirit; a garden spirit's terms never name an astrolabe; Stolas's ids, keys, words and tests unchanged but for three test lines | [contract](features/concordance-garden-cohort.md), [Stolas](features/stolas-pact.md) |
+| Facing (GC-02) | Pact spirits arrive facing whoever invites them and turn to whoever speaks at their perch; server only, no sensor added | [contract](features/concordance-garden-cohort.md), [Stolas](features/stolas-pact.md) |
+| The garden groundwork (GC-03) | The bed index (loaded chunks only, 64 beds, 200 ticks), whose land a service may touch, two read-only bed reads, first obligations; The Garden's Regard | [workers](features/arcane-concordance-workers.md), [ecology](features/arcane-concordance-ecology.md) |
+| Buer (GC-04) | Strain tending by daylight, one bed at a time by each bed's own rule; the overworked bed; Mendvetch a week; the owner's Decor Blossom as his body | [Buer](features/buer-pact.md) |
+| Bathin (GC-05) | Verdance carried at once from your Hearts to a far Gleaner or into a Ley Pylon away from them (3 for 2), 12 moves a day, nothing ever on the way; four Verdant Chaff a week; a body built for Jugcraft from the owner's paintings' colours | [Bathin](features/bathin-pact.md) |
+| A matter to settle (GC-05) | A pact spirit may raise a choice its holder answers at the perch; the answer is kept by the perch and may be changed; until then the spirit takes the safe course and the roster says "awaiting your answer" | [Bathin](features/bathin-pact.md#his-matter-two-roads-from-one-heart-the-accord), [workers](features/arcane-concordance-workers.md) |
+| A spirit beside its perch (GC-06b) | A standing spirit takes the first clear side two blocks out, never between its inviter and the perch; a spirit may show the block it means to every client while its answer is on screen (synced, never saved); a work's on-request choice drawn on the kept page. Not yet run in CI | [contract](features/concordance-garden-cohort.md#gc-06-marax-unit-3), [workers](features/arcane-concordance-workers.md) |
+| Marax (GC-06) | Asked at his perch, his familiar reads your planted beds from their last samples and names one change for the worst, changing nothing; a bed named three times with nothing changed is passed over; two readings a day, for you alone; two sheets of paper a week; his first obligation completes The Garden's Regard's mastery with Buer's and Bathin's. Not yet run in CI | [Marax](features/marax-pact.md) |
+| The graft in one place (GC-07b) | Grafting by hand ends in the one graft a spirit makes too (`Grafting.apply`), with the same checks, messages and spent donor; the bed index also holds the plain containers touching a perch (16). Both server jobs passed in run 40852556175 on `5e93bb0a7` | [Foras](features/foras-pact.md#what-changed-in-shared-code), [ecology](features/arcane-concordance-ecology.md) |
+| Foras (GC-07) | Beside his perch with a chest touching it, he grafts your Sunpetals and your party's with Dewmoss from the chest where Dewlit helps them, one Dewmoss a graft, 8 a day, and names the hosts it would not help, asking at the perch whether to graft them anyway; a honeycomb a week; a body built for Jugcraft with the owner's acorn cap. Both server jobs passed in run 40852556175 on `5e93bb0a7` | [Foras](features/foras-pact.md) |
+| Feeding by hand (GC-08b) | Bone meal by hand on a Verdant Bed, or on the crop growing on one, is a garden act a pact spirit may ask as its first task; SG12's shared cases think at each spirit's first hour. Not yet run in CI | [Bifrons](features/bifrons-pact.md#what-changed-in-shared-code), [ecology](features/arcane-concordance-ecology.md) |
+| Bifrons (GC-08) | By night, while you are near, he runs one root at a time from a full Verdant Bed of yours or your party's to the hungriest, measuring both first: 2 nutrients taken, 1 given, the other lost; a bed with a crop growing on it is a reserve until you answer at the perch; at most 24 runs a game day; two logs a week; a body built for Jugcraft from the owner's paintings' colours. Not yet run in CI | [Bifrons](features/bifrons-pact.md), [economy](features/arcane-concordance-economy.md) |
+| A canopy's shelter (GC-09b) and a late cue and capped quota (GC-09d) | A crop's reading may carry a canopy's shelter: the stir read lower, never below nothing, harvest strain still counted against the unsheltered stir, the largest canopy never a sum, kept in memory only; a spirit's cue may sound a beat after its gesture; a service may word its quota as a cap. With no canopy every reading is as before. Not yet run in CI | [Amdusias](features/amdusias-pact.md#the-canopys-shelter-gc-09b), [ecology](features/arcane-concordance-ecology.md) |
+| Amdusias (GC-09) | Beside his perch with a log within 2, he bends his tree's shelter over the crops of up to 16 of your and your party's beds within 6, each reading the stir up to 2 lower; a Gloamcap, which wants the stir, he spares until you answer; a sapling a week; a body built for Jugcraft with the owner's flower crown. Not yet run in CI | [Amdusias](features/amdusias-pact.md) |
+| The evidence (GC-10) | One survival player through all six garden pacts in one server test; a garden load card (opted in); two clients at Buer's perch; the line-up and roster of seven in pictures; a spirit's matter and plates above the first task. Not yet run in CI | [contract](features/concordance-garden-cohort.md#unit-7-as-built-and-its-evidence) |
+
+## Merged with #494: Concordance Chunk D (pact hall)
+
+Built on branch `claude/chunk-d-pact-hall`, stacked on Chunk C; on main since 27 October 2026 through the owner's #494 (`46bac6b34`, Chunks B to D in one squashed commit with the October 26 community batch); its own pull request [jimbozoomer-byte/jugcraft#474](https://github.com/jimbozoomer-byte/jugcraft/pull/474) was closed without merging. Units 1
 to 5 (D-01 to D-09) are built. The candidate `48d99c904` was run in CI run 40133540741: every job passed on the first
 attempt, two client JVMs at one perch among the client classes (passed in shard 3 and in the opt-in job without the
 optional integrations); the pact hall load card: the hall added +0.098 ms to the median and +0.311 ms to the p95 server
@@ -38,9 +106,9 @@ two people or accounts ([the chunk's evidence and handoff](features/concordance-
 | The roster (unit 3, D-07) | One native screen (its key not bound at first) lists every pact, agreement, familiar, spirit, construct and courier request of the player, with what each waits for, and suspends, resumes, ends (asked first), cancels or recovers through the existing authorities, each re-checked by the server; the journal's Pacts section lists the pacts kept and the last departures. Its server game tests and client tests first ran in CI run 40121823509 on `040d73ece` and passed (after run 40120355940 failed to compile the roster client test), and passed again in run 40133540741. Played by no one | [workers](features/arcane-concordance-workers.md#the-roster-screen-concordance-chunk-d-d-07), [contract](features/concordance-chunk-d.md) |
 | Evidence and handoff (unit 5, D-09) | the composer's subtitles (unseen: CI has no sound) and two audit fixes; one server test walks Styx to departure; an opt-in pact hall load card (the hall added +0.098 ms to the median and +0.311 ms to the p95 server tick on CI's runner, within the proposed budget); client shots of Stolas from his front, a timed refusal, the roster and a workshop hand at work; two client JVMs at one perch (a stranger refused accepting, ending and naming the holder's pact); an opt-in client run without the optional integrations (passed). Every job passed on the first attempt in run 40133540741; three defects its pictures showed fixed in `b773913c4` and `d00fa2167` (run 40140478331: every job passed; seen fixed). Played by no one | [contract](features/concordance-chunk-d.md#unit-5-evidence-and-handoff-d-09), [record](features/stolas-pact.md) |
 
-## Not merged: Concordance Chunk C (living workshop)
+## Merged with #494: Concordance Chunk C (living workshop)
 
-Stacked on Chunk B, on branch `claude/chunk-c-living-workshop`; not merged, no pull request. Units 1 to 5 (C-01 to C-10)
+Built on branch `claude/chunk-c-living-workshop`, stacked on Chunk B; on main since 27 October 2026 through the owner's #494 (its own pull request, #466, was closed without merging). Units 1 to 5 (C-01 to C-10)
 are built and recorded on this branch (units 3 and 4 were built side by side from unit 2's head and are joined by a
 merge). In CI, the candidate `bb856f873` (units 1 to 5) passed every job in run 38774859294, after one re-run of a
 client shard for main's `PeepoPopulationClientTests` cow-breeding flake (fixed in main's Peepo code by #357, merged in
@@ -68,13 +136,13 @@ handoff](features/concordance-chunk-c.md#unit-5-evidence-and-handoff-c-10)).
 | Dewlit, one graft (unit 4, C-09) | A Greenwarden's plain use of a Dewmoss on a Sunpetal crop spends the Dewmoss and grafts Dewlit onto its bed: a Sunpetal there bears shade (light from 9) but wants a wetter bed (moisture from 4), through every harvest, replanting and restart until another plant grows there; its produce, cost and alchemy are unchanged. The reports, the Inspect page and Jade name it. Tests passed in CI (runs 38726242149 and 38774859294) | [ecology](features/arcane-concordance-ecology.md), [the contract](features/concordance-chunk-c.md) |
 | The measured workshop (unit 5, C-10) | No new block, item or behaviour. The workshop's route from a manual start is checked step by step and played with real blocks in a server game test; a measured small-workshop load card (opt-in; a manual Build run can ask for it, a workflow change for the owner's review) gives the server's tick time with and without the workshop: in run 38774859294, on CI's runner (AMD EPYC 7763, 4 logical CPUs, Java 25), +0.240 ms median and +0.550 ms p95 a tick, net, and +0 MiB retained heap beyond the baseline's change. In the same run's `mod` job (its runner: 4 processors, amd64, Java VM 25.0.4.1+1-LTS), a Gleaner's starved Heart search took 333 µs a pulse, over the proposed 250 µs line. A client test (passed in shard 4) takes shots of the whole workshop, the stand lit and dark, the crucible's Inspect page on its stand and Root and Rivet under way; the workshop, the lit stand and the crucible's Inspect page were viewed; the dark stand and Root and Rivet's Inspect pages were not. All passed in run 38774859294 | [the contract](features/concordance-chunk-c.md#unit-5-evidence-and-handoff-c-10), [journey](features/arcane-concordance-journey.md) |
 
-## Not merged: Concordance Chunk B (winter and stone)
+## Merged with #494: Concordance Chunk B (winter and stone)
 
-On branch `claude/chunk-b-winter-stone`, not merged. Units 1 to 5 pass their tests in CI: run 38591108210 on
+Built on branch `claude/chunk-b-winter-stone`; on main since 27 October 2026 through the owner's #494 (its own pull request, #465, was closed without merging). Units 1 to 5 pass their tests in CI: run 38591108210 on
 `25644502a` passed every job on its second attempt (all 1682 required server game tests, with and without the optional
 integrations, and every client test class); its first attempt failed two tests outside Chunk B (a nuclear plant's
 radiation reading, a Peepo delivery client test), which passed when re-run. Units 1 to 4 also passed run 38549876709
-on `b012875ab`. The evidence is recorded and the owner's checkpoint is awaited; Chunk C, stacked on it, is under way
+on `b012875ab`. The evidence is recorded and the owner's checkpoint is awaited; Chunk C, built on it, reached main with it in #494
 (above). Not played by hand or with two clients ([the chunk's contract](features/concordance-chunk-b.md),
 [its evidence](features/concordance-chunk-b.md#unit-5-evidence-and-handoff-b-09-b-11)).
 

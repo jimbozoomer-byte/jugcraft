@@ -100,6 +100,7 @@ def updateHelperJar = tasks.register('updateHelperJar', Jar) {
     manifest { attributes 'Main-Class': 'io.github.jimbozoomer.jugcraft.update.UpdateApplier' }
 }
 processResources {
+    from('distribution/RELEASE-NOTES.md') { into 'jugcraft/bulletin' }
     dependsOn updateHelperJar
     from(updateHelperJar.flatMap { it.archiveFile }) { into 'jugcraft' }
 	from('tools/world-designer') {
@@ -147,6 +148,13 @@ tasks.register('boardRulesTest', JavaExec) {
 }
 tasks.named('check') { dependsOn tasks.named('boardRulesTest') }
 
+tasks.register('pirateLogicTest', JavaExec) {
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'io.github.jimbozoomer.jugcraft.menagerie.PirateLogicTests'
+}
+tasks.named('check') { dependsOn tasks.named('pirateLogicTest') }
+
 tasks.register('gameUpdaterTest', JavaExec) {
     dependsOn tasks.named('testClasses')
     classpath = sourceSets.test.runtimeClasspath
@@ -154,6 +162,22 @@ tasks.register('gameUpdaterTest', JavaExec) {
     args layout.buildDirectory.file('update-helper/updater-helper.jar').get().asFile.absolutePath
 }
 tasks.named('check') { dependsOn tasks.named('gameUpdaterTest') }
+
+// The Pegasus's flight arithmetic (docs/features/pegasus.md): state machine, input bits, curves, wing pose.
+tasks.register('pegasusFlightTest', JavaExec) {
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'io.github.jimbozoomer.jugcraft.pegasus.PegasusFlightTests'
+}
+tasks.named('check') { dependsOn tasks.named('pegasusFlightTest') }
+
+// The horse breeds' rules (docs/features/horse-breeds.md): traits and caps, ancestry, the flight rule, cargo overflow.
+tasks.register('horseLineageTest', JavaExec) {
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'io.github.jimbozoomer.jugcraft.horses.HorseLineageTests'
+}
+tasks.named('check') { dependsOn tasks.named('horseLineageTest') }
 
 // In-game tests (src/gametest): a headless server runs them as part of `./gradlew build`.
 fabricApi {
@@ -221,9 +245,69 @@ def clientTests = providers.gradleProperty("clientTests").getOrElse("")
 // The complete content/biome suite needs the same practical heap floor as a modded client.
 // Bound both test JVMs explicitly: the full server suite also retains substantial
 // world state. Fail on exhaustion so CI preserves the cause instead of hanging.
+// The server suite runs its tests fifty at once; its last batch (the Jimtafacts network, survival, collection and
+// storage classes together) outgrew 4G when the garden cohort filled it (3251 tests, PR #526), so it has 6G.
 tasks.matching { it.name in ["runGameTest", "runClientGameTest"] }.configureEach {
-	maxHeapSize = name == "runClientGameTest" ? "6G" : "4G"
+	// Both expanded server batches and rendered biome tours need the measured headroom.
+	maxHeapSize = "6G"
 	jvmArgs "-XX:+ExitOnOutOfMemoryError"
+}
+// Opt-in measurements (docs/features/server-load-benchmark.md); CI never sets these, and the benchmark tests pass at once.
+// -PjugcraftBenchmark=all (or any of machines,crowd,raid) makes runGameTest run only the workload benchmark;
+// -PjugcraftBenchmarkWarmup, -PjugcraftBenchmarkSamples, -PjugcraftBenchmarkTrials and -PjugcraftBenchmarkScale shape it.
+def workloadBenchmark = providers.gradleProperty("jugcraftBenchmark").getOrElse("")
+List<String> workloadBenchmarkArgs = []
+if (!workloadBenchmark.isEmpty()) {
+	workloadBenchmarkArgs += ["-Djugcraft.benchmark=${workloadBenchmark}".toString(),
+			"-Dfabric-api.gametest.filter=jugcraft-test:server_load_game_tests_workload_benchmark"]
+	["Warmup", "Samples", "Trials", "Scale"].each { key ->
+		String value = providers.gradleProperty("jugcraftBenchmark${key}").getOrElse("")
+		if (!value.isEmpty()) {
+			workloadBenchmarkArgs += "-Djugcraft.benchmark.${key.toLowerCase()}=${value}".toString()
+		}
+	}
+}
+tasks.matching { it.name == "runGameTest" }.configureEach {
+	if (!workloadBenchmarkArgs.isEmpty()) {
+		jvmArgs workloadBenchmarkArgs
+	}
+}
+// -PjugcraftFrameBenchmark=true with -PclientTests=FrameBenchmarkClientGameTests draws the client frame benchmark's scene;
+// -PjugcraftFrameBenchmarkWarmup, -PjugcraftFrameBenchmarkSamples and -PjugcraftFrameBenchmarkTrials shape it.
+def frameBenchmark = providers.gradleProperty("jugcraftFrameBenchmark").getOrElse("")
+List<String> frameBenchmarkArgs = []
+if (!frameBenchmark.isEmpty()) {
+	frameBenchmarkArgs += "-Djugcraft.frameBenchmark=${frameBenchmark}".toString()
+	["Warmup", "Samples", "Trials"].each { key ->
+		String value = providers.gradleProperty("jugcraftFrameBenchmark${key}").getOrElse("")
+		if (!value.isEmpty()) {
+			frameBenchmarkArgs += "-Djugcraft.frameBenchmark.${key.toLowerCase()}=${value}".toString()
+		}
+	}
+}
+tasks.matching { it.name == "runClientGameTest" }.configureEach {
+	if (!frameBenchmarkArgs.isEmpty()) {
+		jvmArgs frameBenchmarkArgs
+	}
+}
+// Local full-suite budget and diagnostics (docs/features/server-load-benchmark.md, "Full-suite memory"); CI sets none.
+// -PjugcraftGameTestHeap=6G replaces the server test JVM's 4G; -PjugcraftHeapDump=<dir> writes a heap dump there if the
+// heap is exhausted (before -XX:+ExitOnOutOfMemoryError stops it); -PjugcraftGcLog=<file> logs every collection (a
+// relative path lands in build/run/gameTest, which the next run clears; no drive letter, -Xlog splits on colons).
+def gameTestHeap = providers.gradleProperty("jugcraftGameTestHeap").getOrElse("")
+def heapDumpDir = providers.gradleProperty("jugcraftHeapDump").getOrElse("")
+def heapDumpPath = heapDumpDir.isEmpty() ? "" : file(heapDumpDir).absolutePath
+def gcLogFile = providers.gradleProperty("jugcraftGcLog").getOrElse("")
+tasks.matching { it.name == "runGameTest" }.configureEach {
+	if (!gameTestHeap.isEmpty()) {
+		maxHeapSize = gameTestHeap
+	}
+	if (!heapDumpPath.isEmpty()) {
+		jvmArgs "-XX:+HeapDumpOnOutOfMemoryError", "-XX:HeapDumpPath=${heapDumpPath}".toString()
+	}
+	if (!gcLogFile.isEmpty()) {
+		jvmArgs "-Xlog:gc*:file=${gcLogFile}:time,uptime,level,tags".toString()
+	}
 }
 def clientTestShard = providers.gradleProperty("clientTestShard").getOrElse("")
 def clientTestShards = providers.gradleProperty("clientTestShards").getOrElse("")
@@ -267,9 +351,26 @@ tasks.named("processGametestResources", ProcessResources) {
 		def simpleName = { String name -> name.substring(name.lastIndexOf('.') + 1) }
 		mine = early.collectMany { name -> mine.findAll { simpleName(it) == name } } + mine.findAll { !early.contains(simpleName(it)) }
 		json.entrypoints["fabric-client-gametest"] = mine
-		manifest.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(json))
+		// Loader 0.19.5 scans ahead for schemaVersion before parsing the rest. Keep
+		// it first even after JsonSlurper reshuffles keys: the complete entrypoint
+		// catalogue exceeds the loader's 8 KiB look-ahead buffer.
+		def ordered = new LinkedHashMap([schemaVersion: json.schemaVersion])
+		ordered.putAll(json)
+		manifest.text = groovy.json.JsonOutput.prettyPrint(groovy.json.JsonOutput.toJson(ordered))
 		task.logger.lifecycle("Client game tests: ${mine.size()} of ${all.size()} classes: ${mine}")
 	}
+}
+
+tasks.register('gameTestMetadataTest', JavaExec) {
+	dependsOn tasks.named('testClasses'), tasks.named('processGametestResources')
+	classpath = sourceSets.test.runtimeClasspath
+	mainClass = 'io.github.jimbozoomer.jugcraft.build.GameTestMetadataTests'
+	args file('src/gametest/resources/fabric.mod.json').absolutePath,
+		layout.buildDirectory.file('resources/gametest/fabric.mod.json').get().asFile.absolutePath
+}
+tasks.named('check') { dependsOn tasks.named('gameTestMetadataTest') }
+tasks.matching { it.name in ['runGameTest', 'runClientGameTest'] }.configureEach {
+	dependsOn tasks.named('gameTestMetadataTest')
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -320,3 +421,12 @@ tasks.register('verifyEmbeddedLibraries') {
 }
 tasks.named('compileJava') { dependsOn 'verifyEmbeddedLibraries' }
 tasks.named('processResources') { dependsOn 'verifyEmbeddedLibraries' }
+
+// Existing-world climate validation and deterministic multi-noise lookup access.
+loom { accessWidenerPath = file('src/main/resources/jugcraft.accesswidener') }
+tasks.register('climateBandsTest', JavaExec) {
+    dependsOn tasks.named('testClasses')
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'io.github.jimbozoomer.jugcraft.world.climate.ClimateBandsTests'
+}
+tasks.named('check') { dependsOn tasks.named('climateBandsTest') }

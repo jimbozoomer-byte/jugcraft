@@ -1,5 +1,175 @@
 {
   "shops": {
+    "deepstead_stonewright": {
+      "name": "Stonewright's Hall",
+      "sells": [
+        {
+          "item": "jugcraft:guild_border_paver",
+          "count": 4,
+          "price": 2
+        },
+        {
+          "item": "jugcraft:archmasters_keystone",
+          "count": 1,
+          "price": 3
+        },
+        {
+          "item": "jugcraft:scrollwork_corbel",
+          "count": 1,
+          "price": 4
+        },
+        {
+          "item": "jugcraft:survey_benchmark",
+          "count": 1,
+          "price": 5
+        },
+        {
+          "item": "jugcraft:quarry_sample_cabinet",
+          "count": 1,
+          "price": 7
+        },
+        {
+          "item": "jugcraft:stonemasons_cutting_bench",
+          "count": 1,
+          "price": 12
+        },
+        {
+          "item": "jugcraft:fault_sounding_hammer",
+          "count": 1,
+          "price": 9
+        },
+        {
+          "item": "jugcraft:masons_spirit_level",
+          "count": 1,
+          "price": 8
+        },
+        {
+          "item": "jugcraft:folding_span_rule",
+          "count": 1,
+          "price": 7
+        },
+        {
+          "item": "jugcraft:lampwatch_photometer",
+          "count": 1,
+          "price": 6
+        }
+      ],
+      "buys": [],
+      "hours": [
+        0,
+        24000
+      ]
+    },
+    "deepstead_copper_kettle": {
+      "name": "The Copper Kettle",
+      "sells": [
+        {
+          "item": "jugcraft:ember_onion_pasty",
+          "count": 2,
+          "price": 3
+        },
+        {
+          "item": "jugcraft:saltcap_skewers",
+          "count": 3,
+          "price": 3
+        },
+        {
+          "item": "jugcraft:golden_leek_tart",
+          "count": 2,
+          "price": 4
+        },
+        {
+          "item": "jugcraft:emberpepper_hotpot",
+          "count": 1,
+          "price": 4
+        },
+        {
+          "item": "jugcraft:caveberry_shrub",
+          "count": 1,
+          "price": 3
+        },
+        {
+          "item": "jugcraft:glowroot_steep",
+          "count": 1,
+          "price": 4
+        },
+        {
+          "item": "jugcraft:copper_samovar",
+          "count": 1,
+          "price": 8
+        },
+        {
+          "item": "jugcraft:braided_bread_basket",
+          "count": 1,
+          "price": 4
+        },
+        {
+          "item": "jugcraft:tankard_tree",
+          "count": 1,
+          "price": 5
+        },
+        {
+          "item": "jugcraft:shift_supper_gong",
+          "count": 1,
+          "price": 7
+        }
+      ],
+      "buys": [],
+      "hours": [
+        0,
+        24000
+      ]
+    },
+    "deepstead_lampwright": {
+      "name": "Deepstead Lampwright",
+      "sells": [
+        {
+          "item": "jugcraft:miners_knot_tile",
+          "count": 4,
+          "price": 2
+        },
+        {
+          "item": "jugcraft:geode_reading_lamp",
+          "count": 1,
+          "price": 5
+        },
+        {
+          "item": "jugcraft:gallery_chimes",
+          "count": 1,
+          "price": 7
+        }
+      ],
+      "buys": [],
+      "hours": [
+        0,
+        24000
+      ]
+    },
+    "deepstead_outfitter": {
+      "name": "Deepstead Survey Outfitters",
+      "sells": [
+        {
+          "item": "jugcraft:shaft_plummet",
+          "count": 1,
+          "price": 8
+        },
+        {
+          "item": "jugcraft:surveyors_reel",
+          "count": 1,
+          "price": 12
+        },
+        {
+          "item": "jugcraft:miners_knot_tile",
+          "count": 4,
+          "price": 2
+        }
+      ],
+      "buys": [],
+      "hours": [
+        0,
+        24000
+      ]
+    },
     "general": {
       "name": "General Store",
       "sells": [
@@ -141,11 +311,6 @@
           "price": 1
         },
         {
-          "item": "minecraft:white_wool",
-          "count": 32,
-          "price": 1
-        },
-        {
           "item": "minecraft:feather",
           "count": 64,
           "price": 1
@@ -173,26 +338,6 @@
         {
           "item": "minecraft:honeycomb",
           "count": 16,
-          "price": 1
-        },
-        {
-          "item": "minecraft:oak_log",
-          "count": 64,
-          "price": 1
-        },
-        {
-          "item": "minecraft:spruce_log",
-          "count": 64,
-          "price": 1
-        },
-        {
-          "item": "minecraft:birch_log",
-          "count": 64,
-          "price": 1
-        },
-        {
-          "item": "minecraft:cobblestone",
-          "count": 64,
           "price": 1
         },
         {

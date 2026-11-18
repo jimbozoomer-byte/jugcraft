@@ -93,7 +93,7 @@ public class SurvivalRecipeGameTests {
                 for(var value:data.getAsJsonArray("ingredients"))stacks.add(ingredient(h,value));
                 height=(stacks.size()+2)/3;while(stacks.size()<width*height)stacks.add(ItemStack.EMPTY);
             }
-            if(data.get("type").getAsString().equals("jugcraft:botanical_water_shaped"))for(var stack:stacks)if(stack.is(Items.POTION))
+            if(data.get("type").getAsString().equals("jugcraft:botanical_water_crafting"))for(var stack:stacks)if(stack.is(Items.POTION))
                 stack.set(net.minecraft.core.component.DataComponents.POTION_CONTENTS,new net.minecraft.world.item.alchemy.PotionContents(net.minecraft.world.item.alchemy.Potions.WATER));
             var input=CraftingInput.of(width,height,stacks);
             h.assertTrue(recipe.matches(input,h.getLevel()),"Restored recipe matches: "+name);

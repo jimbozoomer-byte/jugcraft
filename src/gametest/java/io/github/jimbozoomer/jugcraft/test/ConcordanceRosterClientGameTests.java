@@ -2,6 +2,7 @@ package io.github.jimbozoomer.jugcraft.test;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import io.github.jimbozoomer.jugcraft.Jugcraft;
+import io.github.jimbozoomer.jugcraft.client.KeepFirstConfirmScreen;
 import io.github.jimbozoomer.jugcraft.client.PactScreen;
 import io.github.jimbozoomer.jugcraft.client.RosterClient;
 import io.github.jimbozoomer.jugcraft.client.RosterScreen;
@@ -48,6 +49,7 @@ import net.fabricmc.fabric.api.transfer.v1.item.ItemStorage;
 import net.fabricmc.fabric.api.transfer.v1.item.ItemVariant;
 import net.fabricmc.fabric.api.transfer.v1.storage.Storage;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.InputType;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.AbstractWidget;
@@ -55,6 +57,7 @@ import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.ConfirmScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.GlobalPos;
 import net.minecraft.network.chat.Component;
@@ -91,6 +94,13 @@ import org.jspecify.annotations.Nullable;
  * <li><b>Full</b>: 32 roster entries, 32 Bound Wills and 16 requests: 64 rows listed and the rest counted, eight pages turned
  * with Page Down ({@code jugcraft_roster_full}, {@code jugcraft_roster_full_small}).</li>
  * </ul>
+ * Since the magic interfaces' unit 2 (docs/features/magic-interfaces.md, spec 1.1 and 2.14) the roster is two columns of
+ * relic cards: before each shot the page is read once it is settled (MagicScreen.settled, no answer awaited) and held to the
+ * roster's budget of 70 words drawn, with no card's words cut; the end confirmation, on the scroll, to its 25. Since its
+ * review, End is also pressed with the mouse (a click on an action reaches it, not the card under it), the full roster's
+ * "more" line is checked in view, and a page of request cards is read with an answer in its title row. Since the unit 3
+ * fixes each card's tip is held to its state's and its fact's sentences, at most 20 words and three lines, and every
+ * picture is taken with the cursor parked where no control is and the mouse the last input, so no tip covers the page.
  * The narrator is not heard, and one client is not two.
  */
 public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
@@ -104,6 +114,17 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 	private static final int TEST_KEY = InputConstants.KEY_F7;
 	/** D-09: ticks the workshop hand may take to claim, carry and deliver one request. */
 	private static final int WORK_WAIT = 1200;
+	/** The roster's word budget (spec 1.1: a page of eight cards, its title, page and footer, at most 70 words drawn). */
+	private static final int BUDGET = 70;
+	/** The end confirmation's (spec 1.1, as the pact's). */
+	private static final int CONFIRM_BUDGET = 25;
+	/**
+	 * A card's tip (spec 1.1: at most two lines and twenty words; the unit 3 fixes, CI's pictures: every sentence of its row,
+	 * nine lines over half the page): its state's sentence and its fact's, at most this many words in all and lines
+	 * (RosterScreen.TIP_WORDS and TIP_LINES).
+	 */
+	private static final int TIP_WORDS = 20;
+	private static final int TIP_LINES = 2;
 
 	private record Setup(BlockPos second, BlockPos destination, UUID pact, UUID shade, UUID shadeBody, long stranded, long open) {
 	}
@@ -249,10 +270,12 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 
 	private static void empty(ClientGameTestContext context) {
 		openByKey(context);
+		settled(context);
 		check(context.computeOnClient(client -> RosterClient.state().rows().isEmpty() && RosterClient.state().more() == 0
 				&& screen(client).control("empty") != null), "Before anything is kept the roster says it is empty");
 		fits(context, "the empty roster");
 		named(context);
+		reads(context, "the empty roster");
 		shot(context, "jugcraft_roster_empty");
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 		context.waitForScreen(null);
@@ -292,6 +315,7 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 		// Back to the first row, so the shot below shows the roster from its top.
 		tabTo(context, "row:" + shown.getFirst());
 		context.waitTicks(2);
+		settled(context);
 		List<UUID> unworded = context.computeOnClient(ConcordanceRosterClientGameTests::unworded);
 		check(unworded.isEmpty(), "Every row says its state in words beside its mark: " + unworded);
 		check(context.computeOnClient(client -> screen(client).getNarrationMessage().getString()
@@ -299,6 +323,7 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 				"The screen says which page it shows");
 		fits(context, "the roster at GUI scale 2");
 		named(context);
+		reads(context, "the roster at GUI scale 2");
 		shot(context, "jugcraft_roster");
 	}
 
@@ -315,10 +340,12 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 		check(applied == 4, "The high-scale shot is at GUI scale 4: " + applied);
 		fits(context, "the roster at GUI scale 4");
 		named(context);
+		reads(context, "the roster at GUI scale 4");
 		shot(context, "jugcraft_roster_scale4");
 		smallest(context);
 		fits(context, "the roster in the smallest GUI");
 		named(context);
+		reads(context, "the roster in the smallest GUI");
 		shot(context, "jugcraft_roster_small");
 		context.getInput().resizeWindow(width, height);
 		context.runOnClient(client -> {
@@ -339,6 +366,7 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 		check(suspended.done() && "suspended".equals(suspended.reason()) && server.computeOnServer(m -> hold(m, setup.pact())) == BoundWill.Hold.HOLDER,
 				"Suspend from the roster holds Stolas's pact on its Bound Will: " + suspended.reason());
 		context.waitFor(client -> row(STOLAS).offers(RosterRequestPayload.RESUME) && row(STOLAS).icon() == RosterStatePayload.SUSPENDED, WAIT);
+		reads(context, "Stolas's pact suspended");
 		shot(context, "jugcraft_roster_suspended");
 		context.waitTicks(SETTLE);
 		tabTo(context, "resume:" + id);
@@ -359,12 +387,37 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 		check(context.computeOnClient(client -> client.gui.screen() instanceof ConfirmScreen confirm
 				&& confirm.getNarrationMessage().getString().contains(Component.translatable("entity.jugcraft.gathering_shade").getString())),
 				"It names who leaves, in the server's words");
+		// Unit 2: it asks on the scroll (KeepFirstConfirmScreen.magic), within its budget.
+		List<String> asked = context.computeOnClient(client -> client.gui.screen() instanceof KeepFirstConfirmScreen confirm ? confirm.drawn() : List.of());
+		Jugcraft.LOGGER.info("[roster-check] the end confirmation: {} words drawn: {}", words(asked), asked);
+		check(!asked.isEmpty() && words(asked) <= CONFIRM_BUDGET, "The end confirmation is drawn on the scroll within " + CONFIRM_BUDGET
+				+ " words: " + words(asked) + " " + asked);
 		shot(context, "jugcraft_roster_end_confirm");
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 		context.waitForScreen(RosterScreen.class);
 		context.waitTicks(10);
 		check(context.computeOnClient(client -> RosterClient.lastAnswer()) == heard
 				&& server.computeOnServer(m -> BoundWills.of(m).ledger().get(setup.shade()) != null), "Esc keeps the agreement: nothing is sent");
+		// The magic interfaces unit 2's review (C1): the mouse on End presses End, not the card it sits on; it asks first too.
+		settled(context);
+		check(context.computeOnClient(client -> screen(client).inView("end:" + id)), "The shade's End is in view");
+		double[] at = context.computeOnClient(client -> {
+			AbstractWidget end = screen(client).control("end:" + id);
+			int scale = client.getWindow().getGuiScale();
+			return new double[] {(end.getX() + end.getWidth() / 2.0) * scale, (end.getY() + end.getHeight() / 2.0) * scale};
+		});
+		context.getInput().setCursorPos(at[0], at[1]);
+		context.waitTicks(2);
+		context.getInput().pressMouse(InputConstants.MOUSE_BUTTON_LEFT);
+		context.waitForScreen(KeepFirstConfirmScreen.class);
+		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
+		context.waitForScreen(RosterScreen.class);
+		// The cursor off the panel again, so no hover shows in the shots below.
+		context.getInput().setCursorPos(0.0, 0.0);
+		context.waitTicks(10);
+		check(context.computeOnClient(client -> RosterClient.lastAnswer()) == heard
+				&& server.computeOnServer(m -> BoundWills.of(m).ledger().get(setup.shade()) != null),
+				"A click on End asks first, and Esc keeps the agreement: nothing is sent");
 		tabTo(context, "end:" + id);
 		context.getInput().pressKey(InputConstants.KEY_RETURN);
 		context.waitFor(client -> client.gui.screen() instanceof ConfirmScreen, WAIT);
@@ -381,6 +434,7 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 		context.waitFor(client -> row(SHADE) == null, WAIT);
 		check(context.computeOnClient(client -> screen(client).focusedKey().startsWith("row:")),
 				"The keyboard stays on the roster, on the row now in the ended one's place");
+		reads(context, "the shade's agreement ended");
 		shot(context, "jugcraft_roster_ended");
 	}
 
@@ -395,6 +449,7 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 		check(recovered.done() && "recovered".equals(recovered.reason()) && after.equals("true 2"),
 				"Recover hands the two stranded glowstone to the player once and closes the request: " + after);
 		context.waitFor(client -> stranded() == null, WAIT);
+		reads(context, "the stranded cargo recovered");
 		shot(context, "jugcraft_roster_recovered");
 		UUID openId = context.computeOnClient(client -> open().id());
 		context.waitTicks(SETTLE);
@@ -503,15 +558,18 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 			context.getInput().pressKey(InputConstants.KEY_PAGEDOWN);
 			context.waitTicks(2);
 		}
-		check(context.computeOnClient(client -> screen(client).page() == 7 && screen(client).control("more") != null),
-				"Page Down reaches the last page, which says how many more there are");
+		settled(context);
+		check(context.computeOnClient(client -> screen(client).page() == 7 && screen(client).control("more") != null
+				&& screen(client).inView("more")), "Page Down reaches the last page, which says how many more there are, in view");
 		fits(context, "the full roster's last page");
 		named(context);
+		reads(context, "the full roster's last page");
 		shot(context, "jugcraft_roster_full");
 		int width = context.computeOnClient(client -> client.getWindow().getWidth());
 		int height = context.computeOnClient(client -> client.getWindow().getHeight());
 		smallest(context);
 		fits(context, "the full roster in the smallest GUI");
+		reads(context, "the full roster in the smallest GUI");
 		shot(context, "jugcraft_roster_full_small");
 		context.getInput().resizeWindow(width, height);
 		context.runOnClient(client -> {
@@ -519,8 +577,32 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 			client.resizeGui();
 		});
 		context.waitTicks(10);
+		requestsAnswered(context, server);
 		context.getInput().pressKey(InputConstants.KEY_ESCAPE);
 		context.waitForScreen(null);
+	}
+
+	/**
+	 * The magic interfaces unit 2's review (C11): a page of request cards (each up to eight words drawn) with an answer in its
+	 * title row, read within the budget: one of the sixteen open requests cancelled from its page.
+	 */
+	private static void requestsAnswered(ClientGameTestContext context, TestDedicatedServerContext server) {
+		int open = server.computeOnServer(minecraft -> CourierLedger.of(minecraft).ledger().openFor(player(minecraft).getUUID()));
+		check(open >= 9, "Nine or more requests are open, a page of them: " + open);
+		UUID request = context.computeOnClient(client -> RosterClient.state().rows().stream()
+				.filter(row -> row.request() && row.offers(RosterRequestPayload.CANCEL)).findFirst().orElseThrow().id());
+		for (int i = 0; i < RosterStatePayload.MAX_ROWS && context.computeOnClient(client -> screen(client).page() > screen(client).pageOf(request)); i++) {
+			context.getInput().pressKey(InputConstants.KEY_PAGEUP);
+			context.waitTicks(2);
+		}
+		settled(context);
+		check(context.computeOnClient(client -> screen(client).page() == screen(client).pageOf(request)), "Page Up reaches the requests' page");
+		context.waitTicks(SETTLE);
+		tabTo(context, "cancel:" + request);
+		PactStatePayload.Result cancelled = answer(context);
+		check(cancelled.done() && "cancelled".equals(cancelled.reason()), "Cancel closes one of the open requests: " + cancelled.reason());
+		fits(context, "a page of requests with an answer");
+		reads(context, "a page of requests with an answer");
 	}
 
 	/** The roster filled past its 64 rows: 32 workers (not loaded), 32 Bound Wills (placeless records) and 16 open requests. */
@@ -597,12 +679,73 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 		context.getInput().pressKey(InputConstants.KEY_RETURN);
 		context.waitFor(client -> RosterClient.lastAnswer() > before && !RosterClient.waiting() && client.gui.screen() instanceof RosterScreen, WAIT);
 		context.waitTicks(2);
+		settled(context);
 		PactStatePayload.Result result = context.computeOnClient(client -> RosterClient.result());
 		check(result != null, "The server answered");
 		return result;
 	}
 
+	/** Waits until the roster shows its latest state (MagicScreen.settled: no rebuild pending) and no answer is awaited. */
+	private static void settled(ClientGameTestContext context) {
+		context.waitFor(client -> client.gui.screen() instanceof RosterScreen screen && screen.settled() && !RosterClient.waiting(), WAIT);
+	}
+
+	/**
+	 * Unit 2 (spec 1.1, 4.5): the settled page within the roster's budget, counted from the strings the screen drew, and no
+	 * card's words cut to fit. Since the unit 3 fixes, each card's tip within its words and lines too.
+	 */
+	private static void reads(ClientGameTestContext context, String where) {
+		settled(context);
+		List<String> drawn = context.computeOnClient(client -> screen(client).drawn());
+		int words = context.computeOnClient(client -> screen(client).words());
+		List<String> cut = context.computeOnClient(client -> screen(client).cut());
+		Jugcraft.LOGGER.info("[roster-check] {}: {} words drawn: {}", where, words, drawn);
+		check(words <= BUDGET, "The roster draws at most " + BUDGET + " words (" + where + "): " + words + " " + drawn);
+		check(cut.isEmpty(), "No card's words are cut (" + where + "): " + cut);
+		tips(context, where);
+	}
+
+	/**
+	 * The unit 3 fixes (spec 1.1): every card on the page has a tip of its state's sentence (short where whole it is over the
+	 * limits, led by its kind where the card draws none) and, where both keep to the limits, its fact's: at most
+	 * {@value #TIP_WORDS} words and {@value #TIP_LINES} lines (RosterScreen.tip: its sentences, then its lines). Every
+	 * sentence of the row stays the card's narration.
+	 */
+	private static void tips(ClientGameTestContext context, String where) {
+		List<String> over = context.computeOnClient(client -> {
+			List<String> out = new ArrayList<>();
+			for (RosterStatePayload.Row row : RosterClient.state().rows()) {
+				List<String> tip = screen(client).tip(row.id());
+				if (tip.isEmpty()) {
+					continue;
+				}
+				int lines = Integer.parseInt(tip.getLast());
+				int said = words(tip.subList(0, tip.size() - 1));
+				if (tip.size() < 2 || tip.size() > 3 || lines > TIP_LINES || said > TIP_WORDS) {
+					out.add(lines + " lines, " + said + " words: " + tip);
+				}
+			}
+			return out;
+		});
+		check(over.isEmpty(), "Each card's tip is its state's sentence and its fact's, at most " + TIP_WORDS + " words and " + TIP_LINES
+				+ " lines (" + where + "): " + over);
+	}
+
+	/** Words as spec 1.1 counts them: whitespace tokens with a letter or digit. */
+	private static int words(List<String> drawn) {
+		int words = 0;
+		for (String text : drawn) {
+			for (String token : text.split("\\s+")) {
+				if (token.chars().anyMatch(Character::isLetterOrDigit)) {
+					words++;
+				}
+			}
+		}
+		return words;
+	}
+
 	private static void fits(ClientGameTestContext context, String where) {
+		settled(context);
 		List<String> outside = context.computeOnClient(client -> {
 			RosterScreen screen = screen(client);
 			List<String> out = new ArrayList<>(screen.outside());
@@ -616,6 +759,7 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 	}
 
 	private static void named(ClientGameTestContext context) {
+		settled(context);
 		List<String> blank = context.computeOnClient(client -> blank(client.gui.screen()));
 		check(blank.isEmpty(), "Every reachable control has words for the narrator: " + blank);
 	}
@@ -688,10 +832,55 @@ public class ConcordanceRosterClientGameTests implements FabricClientGameTest {
 		return will == null || will.pact() == null ? null : will.pact().hold();
 	}
 
+	/**
+	 * A picture (the unit 3 fixes, CI's pictures: a tip over a row of the terms, the proud reading and the roster): first the
+	 * cursor parked where no control is and the mouse made the last input ({@link #park}), so neither a hover's tip nor the
+	 * keyboard's is drawn, then a tick for the hover to clear; the last input given back after, so the keyboard goes on as
+	 * before. A shot whose name says it shows a tip or a hover keeps its cursor and input.
+	 */
 	private static void shot(ClientGameTestContext context, String name) {
 		context.runOnClient(client -> client.gui.toastManager().clear());
+		InputType input = name.contains("tip") || name.contains("hover") ? null : park(context);
 		context.waitTicks(2);
 		context.takeScreenshot(name);
+		if (input != null) {
+			context.runOnClient(client -> client.setLastInputType(input));
+		}
+	}
+
+	/**
+	 * With a screen open: the cursor moved to a corner of it that no control covers (one is asserted), and the mouse made the
+	 * last input, since moving the mouse alone leaves the keyboard's (MouseHandler sets it only on a click) and a control
+	 * focused by the keyboard shows its tip while the keyboard is the last input; then a tick. Returns the input it replaced,
+	 * or null with no screen open (nothing is hovered then).
+	 */
+	private static @Nullable InputType park(ClientGameTestContext context) {
+		if (!context.computeOnClient(client -> client.gui.screen() != null)) {
+			return null;
+		}
+		double[] corner = context.computeOnClient(client -> {
+			Screen screen = client.gui.screen();
+			int[][] corners = {{1, 1}, {screen.width - 2, 1}, {1, screen.height - 2}, {screen.width - 2, screen.height - 2}};
+			for (int[] at : corners) {
+				boolean free = true;
+				for (GuiEventListener child : screen.children()) {
+					if (child instanceof AbstractWidget widget && widget.visible && widget.getRectangle().containsPoint(at[0], at[1])) {
+						free = false;
+					}
+				}
+				if (free) {
+					int scale = client.getWindow().getGuiScale();
+					return new double[] {(at[0] + 0.5) * scale, (at[1] + 0.5) * scale};
+				}
+			}
+			return null;
+		});
+		check(corner != null, "A corner of the screen with no control under it, to park the cursor on before a picture");
+		context.getInput().setCursorPos(corner[0], corner[1]);
+		InputType before = context.computeOnClient(client -> client.getLastInputType());
+		context.runOnClient(client -> client.setLastInputType(InputType.MOUSE));
+		context.waitTicks(1);
+		return before;
 	}
 
 	private static RosterScreen screen(Minecraft client) {

@@ -3,6 +3,8 @@ blockstate, item model, textures drawn here, loot), the town's usable-blocks tag
 the town itself (tools/town.py)."""
 from PIL import Image
 
+import halloween_quests
+import bounty_list
 import town_lang
 import town_commissions
 
@@ -128,9 +130,13 @@ def assets(assets_dir, write, lang):
     write(assets_dir / "items" / "atm.json", {"model": {"type": "minecraft:model", "model": rid("block/atm")}})
     town_commissions.assets(assets_dir, write, lang)
     lang.update(town_lang.lang())
+    lang.update(halloween_quests.lang())
+    lang.update(bounty_list.lang())
     lang["entity.jugcraft.town_guard_mecha"] = "City Guard Walker"
 
 
-USABLE = ["#minecraft:doors", "#minecraft:trapdoors", "#minecraft:fence_gates", "#minecraft:buttons", "minecraft:lever",
+USABLE = ["#minecraft:doors", "jugcraft:harbour_gift_fir", "#minecraft:trapdoors", "#minecraft:fence_gates", "#minecraft:buttons", "minecraft:lever",
           "minecraft:crafting_table", "#minecraft:beds", "minecraft:bell", "minecraft:enchanting_table",
-          "minecraft:ender_chest", rid("atm")]
+          "minecraft:ender_chest", rid("atm"),
+          # A public festival game: its block entity keeps only the round's two scores, no items or fluids.
+          rid("corn_toss_set")]

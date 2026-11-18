@@ -85,11 +85,46 @@ Owner request, 3 November 2026: raiders must appear in their raiding craft. Impl
   - Loading never creates crew; only a raid or a fresh spawn does.
   - A withdrawn raid takes the crew with its machine.
   - Crew never suffocate in a ceiling their machine passes under.
-- **Approaches and stuck recovery.**
-  - The walker charges only a guard it can reach on foot. Guards on a wall or behind a gate it engages from a 14-block standoff, in sight, with its hull launcher, trying a spot further round if it cannot get there.
-  - A blimp that gets no nearer for 5 seconds (a hill or a tower) climbs 8 blocks higher for 10 seconds. The count starts again whenever it heads for something new.
-  - Every marcher that gets no nearer its next waypoint for three re-paths (6 seconds) sidesteps left or right. After six re-paths it gives the waypoint up for the next. One that gives up its last waypoint plans a fresh route 30 seconds later, rather than standing for good.
+- **Approaches and stuck recovery.** Superseded on 12 November by [City approaches and visible fights](#city-approaches-and-visible-fights-november-2026), which bounds every step. In short:
+  - The walker charges only a guard it can reach on foot. One it cannot reach it engages from a standoff in sight, 10 to 20 blocks off, with its hull launcher (this was a fixed 14-block spot, tried further round without end).
+  - A blimp that gets no nearer for 5 seconds (a hill or a tower) climbs 8 blocks higher for 10 seconds, then 16; the count starts again whenever it heads for something new.
+  - Every marcher that gets no nearer its next waypoint for three re-paths (6 seconds) sidesteps left or right. After six re-paths it gives the waypoint up for the next. One that gives up its last waypoint plans a fresh route 30 seconds later, by another approach, at most three times.
   - Nothing breaks blocks or loads chunks.
+
+### City approaches and visible fights (November 2026)
+Owner report, 29 October 2026 (docs/TODO.md, city defense): raiders attacked an arbitrary corner of the city wall where the guards could not see or engage them. Implemented on 12 November with Claude Code (Claude Opus 5.5). **Not compiled or run** (see Verification).
+
+What was happening: the march already went by the gates (October 31), but ranged raiders (gunners, grenadiers) and the walker took on any guard they could see, and the guards they could see from the ring outside the wall were the flak crews on the corner towers. They walked at them, ended at the foot of the tower and stayed there. The tower guns cannot depress far enough to hit them, and nobody else could see them. The walker's standoff spot (14 blocks from a guard inside a gate) fell in the gate passage it cannot fit through, and it then circled spots inside the wall without end. A marcher whose gate was blocked re-planned to the same gate every 30 seconds for ever.
+
+- **Intentional approaches** (`raiders/CityRaidApproach`):
+  - A raid's approaches are the three gates and the middle of each straight run of wall (halfway between two towers, never at one), 14 blocks out from the wall's face, kept only if a guard post (a gate or square guard, a guard walker, a flak crew, a gate's passage or inner road) has a clear line to it through the town's blueprint. 11 of the 16 runs qualify; the north wall, which has no gate, is out of every guard's sight and is never an approach.
+  - A raider's first approach is always the nearest gate. Infantry go through to the gate's inner road. Siege walkers, too tall for the raised portcullis, stop at the gate's forecourt, 10 blocks out on the road, in sight of the gate's guards.
+  - When an approach fails a raider (it gives up every waypoint: a player's wall across the gate, say), its next plan takes the nearest approach it has not given up, a wall section counting 48 blocks further than it is. In practice it tries the watched section beside the failed gate before the long march to another gate.
+  - After three fresh plans, or with every approach failed, it makes once for the front of the approach it last tried and holds there; failing that, where it stands. It never re-plans for ever.
+- **Who a raider takes on** (`raiders/RaidEngagement`, raiders of a raid only):
+  - On the ground, it leaves the tower guns' crews to the blimps and takes on no guard standing more than 4.5 blocks above it (a wall walk, a tower). It fights the guards on the ground, at the gates and in the streets.
+  - A blimp may take on any guard.
+  - Anything within 3 blocks may be fought regardless.
+- **Stuck-target recovery, bounded:**
+  - A raider that has neither got a block nearer its target nor been able to strike, shoot or bomb it (in reach and in sight) for 10 seconds (15 for a blimp) gives that target up. It leaves the target alone for 30 seconds and marches on to its approach.
+  - A gunner or grenadier that cannot walk up to its target makes for a standoff in sight of it, within its reach (`raiders/RaidStandoff`): ten bearings at two distances, on its own side of the town wall, loaded chunks only, at most three paths worked out. It tries another spot when it gets no nearer, and gives the target up after three. The gunner does this through a new `MobGuns.FireGoal.close` hook; the grenadier through `RaiderThrowGoal`, which runs vanilla's ranged attack exactly as the grenadier used it, closing included, through the same hook.
+  - The walker uses the same standoff search, 10 to 20 blocks off, and after three tries gives the guard up. It no longer asks an unloaded column for its height.
+  - A blimp comes in over its gate's forecourt, where the gate's guards and the nearest tower guns can see it, then makes for the middle. It looks 12 blocks ahead and rises over towers and spires before it reaches them. It climbs at most twice when stuck, then gives up the guard it hunts, or, with nobody to hunt, holds over its gate's forecourt in sight of the guns. It no longer drops bombs on the empty forecourt it comes in by.
+- **Guards move to see the raiders** (`town/CityGuardVantage`, a new class; `Townsfolk` and its `GateDefenseGoal` are untouched):
+  - While a raid is under way near it and it has nobody to fight, a guard on foot or a guard walker finds the nearest raider on the ground. It moves to the first vantage with a clear line to that raider, within its sight (48 blocks on foot, 96 for a guard walker's cannon), and holds there while it can see it. Its own targeting and weapons take it from there.
+  - The vantages, in order: the threatened gate's inner road, the inner end of its passage, the passage, the gate guards' posts outside it and its forecourt. For a wall section, the nearest gate's, then points round the outside of the wall. Then points toward the raider, and last points round the raider, which find the way through a gap in a wall.
+  - A vantage it gets no nearer for three checks (6 seconds each), or reaches and still cannot see from, is set aside for that raid. With all set aside it holds where it stands.
+  - Flak crews keep their guns, and operators' custom guards keep their posts. Combat immunity is unchanged.
+  - It is a priority-0 goal, installed by `CityGuardVantage.install` (the game tests) or by a one-line hook in `Townsfolk.registerGoals` that is not yet applied (the delivery notes give it).
+- **Siege ladders** are no longer placed on or against the town's protected blocks, an operator's region or claimed land.
+- **Unchanged:**
+  - city-only targeting (guards only);
+  - guard and guard-walker invulnerability;
+  - no block is broken, and none placed in the town;
+  - no chunk is loaded;
+  - no random raids on players;
+  - no migration of the live town.
+  - Summoned raiders and camp garrisons fight as they always did. None of the new memory is saved: a raider loaded again starts its bounded recovery afresh.
 
 ### Siege ladders
 - **Walls slow raiders rather than stop them.**
@@ -195,6 +230,7 @@ Their weapons never drop, but for the gunner's gun: a player's kill wins it abou
 - Sounds are vanilla: the pillager's voice, the raid horn, the iron golem's steps.
 - Code:
   - `raiders/JugcraftRaiders`, `RaiderInfantry`, `RaiderWalker`, `RaiderBlimp`, `RaiderBomb`, `RaiderRaids`, `MarchGoal`, `RaidMember`, `Raider` and `RaiderCrew` (crews, November 2026).
+  - City approaches and visible fights (12 November 2026): `raiders/CityRaidApproach`, `RaidEngagement`, `RaidStandoff`, `RaiderThrowGoal`, `town/CityGuardVantage`, and the `close` hook in `guns/MobGuns.FireGoal`.
   - The gunner fires through `guns/MobGuns` (slice 10F of the guns), which shares the players' bullet code.
   - Client: `RaiderRenderer`/`RaiderModel` (the townsfolk's body), `RaiderWalkerRenderer` and `RaiderBlimpRenderer`.
   - `weapons/Blast` gains a version that spares some targets.
@@ -239,6 +275,29 @@ Their weapons never drop, but for the gunner's gun: a player's kill wins it abou
   - `check_repository.py` passes.
   - I reviewed the uniforms as front and back views.
   - Gradle cannot resolve the Loom snapshot offline here, so the compile, tests and screenshot run in CI.
+- **City approaches and visible fights (12 November 2026).** Nothing here was compiled or run in the game. What did run:
+  - `python3 -m unittest scripts/tests/test_city_raid_approaches.py` (6 tests, OK), with `/usr/bin/python3` 3.13. It mirrors `CityRaidApproach`, reading its constants from the Java, against `town.json.gz`. It checks:
+    - the three gates come first and match the blueprint;
+    - each gate forecourt is open for a 4.6-block walker, outside the wall, and seen from the gate's inner road;
+    - 11 watched wall sections, none at a tower, none on the north wall;
+    - routes from 24 bearings choose a gate, and their ring stays outside the wall;
+    - a failed gate falls back to the section beside it;
+    - each gate's guard vantages have four clear blocks for a guard walker.
+  - A tree-sitter syntax check of every changed Java file.
+
+  Written, not run (`RaidPathingGameTests`):
+  - a player's wall is walked round;
+  - a guard on a straight wall draws nobody to its foot;
+  - raiders come through a gate to the guard;
+  - an unreachable guard is fought from sight or given up within the patience bound;
+  - no pile-up at a wall corner;
+  - a guard with the watch goes through a gap to see the raider;
+  - every raider kind under the ground rules;
+  - a blimp rises over a tower;
+  - a march that cannot arrive ends holding;
+  - the town's approaches against its blueprint.
+
+  Also written, not run: the scenario `CityRaidScenarioGameTests`, in its own environment `jugcraft-test:city_raid`. It builds the east half of the real town far away, gives the guards the watch, and runs a level-3 raid from the east. It logs one line, `[city-raid-scenario] engagedAfter=… maxInSight=… meanInSight=… stuck=… holding=… towerPileup=… wallFoot=…`, and asserts an engagement, two raiders in a guard's sight at once, and no pile-up under a corner tower.
 - Not done:
   - a full raid played through in a client
   - a two-player server
@@ -252,3 +311,11 @@ Their weapons never drop, but for the gunner's gun: a player's kill wins it abou
 ## Rollout and open questions
 - **Next is idea 4, the armoured train.** Its framework is now built: locomotives, coaches, wagons and coupling on any rails ([trains.md](trains.md)).
 - Raider camps, siege ladders, the war horn and the raid advancement are now done (above).
+
+## November 7 local city-route repair
+
+Implemented with OpenAI Codex; not deployed. A city-bound marcher now keeps following its gate route when its acquired opponent is hidden behind a wall, with routing priority above combat movement. Seeing the opponent hands movement back to combat. Existing outside-city behavior, driver-loss shutdown and mounted infantry behavior remain in place.
+
+City mobile guards can also reposition while their opponent is occluded. They try three reachable posts four blocks inside the relevant authored gate, instead of waiting fourteen blocks behind it. All posts require a complete path to the exact ground position. If the preferred lane is obstructed, alternatives are tried; if all are obstructed, no shortcut is carved and no roof destination is accepted. Fixed flak crews and custom operator patrols keep their existing behavior. Owner builds, damage protection and guard invulnerability are unchanged.
+
+The [November 7 batch record](nov7-priorities.md) tracks focused test results and remaining acceptance. These tests use actual gate blocks and combat entities, but do not substitute for a populated-city raid soak test with live player construction.

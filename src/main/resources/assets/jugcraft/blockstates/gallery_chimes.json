@@ -1,0 +1,20 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jugcraft:block/gallery_chimes",
+      "y": 0
+    },
+    "facing=east": {
+      "model": "jugcraft:block/gallery_chimes",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jugcraft:block/gallery_chimes",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jugcraft:block/gallery_chimes",
+      "y": 270
+    }
+  }
+}

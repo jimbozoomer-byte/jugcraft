@@ -1,9 +1,11 @@
 {
-  "required": true,
-  "minVersion": "0.8",
-  "package": "io.github.jimbozoomer.jugcraft.mixin",
   "compatibilityLevel": "JAVA_21",
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8",
   "mixins": [
+    "ApartmentPlayerSaveAccess",
     "ArcaneBucketRemainderMixin",
     "ArcaneDroppedMatterMixin",
     "ArcaneAquaticMiningMixin",
@@ -177,9 +179,22 @@
     "OwnerSlidingCarrierMixin",
     "OwnerHangingSignModelMixin",
     "BotanicalDropCooldownMixin",
-    "OwnerChatDeliveryMixin"
+    "OwnerChatDeliveryMixin",
+    "PharmacologyAttackMixin",
+    "PharmacologySprintMixin",
+    "PharmacologySwimMixin",
+    "PharmacologyDamageMixin",
+    "PharmacologyFoodMixin",
+    "PharmacologyExhaustionMixin",
+    "PoweredEquipmentEquipMixin",
+    "DrillMiningServerMixin",
+    "PoweredUpgradeRecipeMixin",
+    "ClimateParameterListAccess",
+    "ClimateRTreeAccess",
+    "CompanionJukeboxMixin",
+    "LineageBreedingMixin",
+    "HorseLineageMixin"
   ],
-  "injectors": {
-    "defaultRequire": 1
-  }
+  "package": "io.github.jimbozoomer.jugcraft.mixin",
+  "required": true
 }

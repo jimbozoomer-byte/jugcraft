@@ -19,8 +19,8 @@ public final class CompanionGates {
     private CompanionGates(){}
     public static boolean guarded(BlockState state){return state.hasProperty(PASSAGE) && state.getValue(PASSAGE) && state.getValue(FenceGateBlock.OPEN);}
     public static boolean mayOpen(PeepoEntity npc,BlockPos pos,BlockState state){
-        return npc.level() instanceof ServerLevel server && npc.orders.tamed() && state.getBlock() instanceof FenceGateBlock && !state.getValue(FenceGateBlock.POWERED)
-            && CompanionJobs.permitted(npc,pos) && server.getGameRules().get(net.minecraft.world.level.gamerules.GameRules.MOB_GRIEFING);
+        return npc.level() instanceof ServerLevel && npc.orders.tamed() && state.getBlock() instanceof FenceGateBlock && !state.getValue(FenceGateBlock.POWERED)
+            && CompanionJobs.permitted(npc,pos);
     }
     public static void beforeMove(PeepoEntity npc){
         if(!(npc.level() instanceof ServerLevel level) || !npc.isAlive() || !npc.orders.tamed() || level.getGameTime()%4!=Math.floorMod(npc.getId(),4))return;

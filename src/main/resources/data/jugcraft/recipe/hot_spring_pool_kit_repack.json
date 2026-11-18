@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "jugcraft:hot_spring_overflow_spout",
+    "jugcraft:hot_spring_dipper_pail",
+    "jugcraft:hot_spring_pool_lantern"
+  ],
+  "result": {
+    "id": "jugcraft:hot_spring_pool_kit"
+  }
+}

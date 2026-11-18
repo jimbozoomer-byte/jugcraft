@@ -35,9 +35,10 @@ public final class CompanionReport {
                     value=activity!=null?activity:!npc.preferences.onShift()?CompanionStatus.SCHEDULED_REST:npc.isRecovering()?CompanionStatus.RECOVERING:CompanionStatus.READY;
                 }
             }
+            if(target!=null && target.staffPost() && value==CompanionStatus.WORKING)value=CompanionStatus.STATIONED;
             rows[i]=value;
         }
-        overall=npc.isEating()?CompanionStatus.EATING:npc.getRestMode()!=CompanionEnergy.Rest.NONE?CompanionStatus.RESTING:
+        overall=npc.isEating()?CompanionStatus.EATING:npc.staffPost.active()?CompanionStatus.STATIONED:npc.getRestMode()!=CompanionEnergy.Rest.NONE?CompanionStatus.RESTING:
             npc.social.activity()!=CompanionStatus.IDLE?npc.social.activity():
             npc.orders.mode()==0?CompanionStatus.FOLLOWING:npc.orders.mode()==1?CompanionStatus.STAYING:
             lunch()==CompanionStatus.FETCHING_FOOD?CompanionStatus.FETCHING_FOOD:

@@ -94,7 +94,7 @@
           "icon": "jugcraft:basic_circuit",
           "text": [
             "Plates, wires and circuits: the parts every later machine needs.",
-            "Make plates in the metal press and wire in the wire drawer, then basic circuits.",
+            "Craft one silicon, one copper ingot and one tin ingot into one basic circuit, even in your inventory. In the workshop bench or circuit assembler, three copper wire replace copper and solder replaces tin: either upgrade makes two circuits, both make four. Prepare plates and wire for better yields.",
             "Store power in a battery box. The pulverizer and ore washer take ore to three ingots each.",
             "Find surface deposits with the prospector and put a deposit drill on them."
           ],
@@ -863,10 +863,10 @@
             "Chromite: Y -32 to 64.",
             "Cobaltite: Y -48 to 32.",
             "Quartz: Y -16 to 96.",
-            "Titanium-rich Mineral Sand: shallow beds in the Dune Beach, the Overgrown Beach and Beach. Look for surface streaks, then shovel the buried bed or use the prospector and powered Ore Drill. Each mineral-sand block is one finite feed unit; Fortune does not increase it. The Ore Drill leaves ordinary sand. Stockpile this feed for future separation/refining; the Deposit Drill and generic ore-doubling recipes do not process it.",
-            "Zircon-rich Mineral Sand: shallow beds in the Outback, the Lush Desert, the Dry River, Desert and Badlands. Look for surface streaks, then shovel the buried bed or use the prospector and powered Ore Drill. Each mineral-sand block is one finite feed unit; Fortune does not increase it. The Ore Drill leaves ordinary sand. Stockpile this feed for future separation/refining; the Deposit Drill and generic ore-doubling recipes do not process it.",
-            "Rare-earth-rich Mineral Sand: shallow beds in the Basin, the Lake District, the Lush River and River. Look for surface streaks, then shovel the buried bed or use the prospector and powered Ore Drill. Each mineral-sand block is one finite feed unit; Fortune does not increase it. The Ore Drill leaves ordinary sand. Stockpile this feed for future separation/refining; the Deposit Drill and generic ore-doubling recipes do not process it.",
-            "Garnet-rich Mineral Sand: shallow beds in the Gravel Beach, the Highland, the Shield, Stony Shore and Windswept Gravelly Hills. Look for surface streaks, then shovel the buried bed or use the prospector and powered Ore Drill. Each mineral-sand block is one finite feed unit; Fortune does not increase it. The Ore Drill leaves ordinary sand. Stockpile this feed for future separation/refining; the Deposit Drill and generic ore-doubling recipes do not process it."
+            "Titanium-rich Mineral Sand: shallow beds in the Dune Beach, the Overgrown Beach and Beach. Look for surface streaks, then shovel the buried bed or use the prospector and powered Ore Drill. Each mineral-sand block is one finite feed unit; Fortune does not increase it. The Ore Drill leaves ordinary sand. First step: the Mineral Conditioning Station turns two sand and 500 mB water into one Raw Titanium for the existing Chemical Reactor and Arc Furnace titanium route; see Mineral Sand Processing. The Deposit Drill and generic ore-doubling recipes do not process it.",
+            "Zircon-rich Mineral Sand: shallow beds in the Outback, the Lush Desert, the Dry River, Desert and Badlands. Look for surface streaks, then shovel the buried bed or use the prospector and powered Ore Drill. Each mineral-sand block is one finite feed unit; Fortune does not increase it. The Ore Drill leaves ordinary sand. First step: the Chemical Reactor turns four sand, 500 mB lye and 250 mB water into one Zirconia Powder for the Industrial Oven and Precision Finishing Station; see Mineral Sand Processing. The Deposit Drill and generic ore-doubling recipes do not process it.",
+            "Rare-earth-rich Mineral Sand: shallow beds in the Basin, the Lake District, the Lush River and River. Look for surface streaks, then shovel the buried bed or use the prospector and powered Ore Drill. Each mineral-sand block is one finite feed unit; Fortune does not increase it. The Ore Drill leaves ordinary sand. First step: the Mineral Conditioning Station turns two sand and 500 mB water into one mixed Rare Earth Oxide, from which the Chemical Reactor recovers named oxides; see Mineral Sand Processing. The Deposit Drill and generic ore-doubling recipes do not process it.",
+            "Garnet-rich Mineral Sand: shallow beds in the Gravel Beach, the Highland, the Shield, Stony Shore and Windswept Gravelly Hills. Look for surface streaks, then shovel the buried bed or use the prospector and powered Ore Drill. Each mineral-sand block is one finite feed unit; Fortune does not increase it. The Ore Drill leaves ordinary sand. First step: the Pulverizer turns one sand into one Garnet Grit for a reusable sanding block or abrasive head; see Mineral Sand Processing. The Deposit Drill and generic ore-doubling recipes do not process it."
           ]
         },
         {
@@ -1863,7 +1863,7 @@
           "title": "Circuit Assembler",
           "icon": "jugcraft:circuit_assembler",
           "text": [
-            "Assembles circuits from up to three ingredients, in any slots.",
+            "Assembles circuits from up to three ingredients, in any slots. Basic: one silicon, one copper ingot and one tin ingot make one circuit. Use three copper wire instead of copper, or solder instead of tin, for two; both make four. Advanced: two basic circuits, one silver ingot and one invar ingot make one. Three silver wire instead of silver, or an invar plate instead of invar, make two; both make four.",
             "Uses 32 JE/t while working. Holds 20,000 JE."
           ],
           "craft": {
@@ -1889,11 +1889,11 @@
                   1
                 ],
                 [
-                  "jugcraft:copper_wire",
-                  3
+                  "minecraft:copper_ingot",
+                  1
                 ],
                 [
-                  "jugcraft:solder_ingot",
+                  "jugcraft:tin_ingot",
                   1
                 ]
               ],
@@ -1905,61 +1905,61 @@
             {
               "in": [
                 [
-                  "jugcraft:basic_circuit",
-                  2
+                  "jugcraft:silicon",
+                  1
                 ],
                 [
-                  "jugcraft:silver_wire",
+                  "jugcraft:copper_wire",
                   3
                 ],
                 [
-                  "jugcraft:invar_plate",
+                  "jugcraft:tin_ingot",
                   1
                 ]
               ],
               "out": [
-                "jugcraft:advanced_circuit",
-                1
+                "jugcraft:basic_circuit",
+                2
               ]
             },
             {
               "in": [
                 [
-                  "jugcraft:microchip",
-                  4
-                ],
-                [
-                  "jugcraft:advanced_circuit",
+                  "jugcraft:silicon",
                   1
                 ],
                 [
-                  "minecraft:gold_ingot",
+                  "minecraft:copper_ingot",
+                  1
+                ],
+                [
+                  "jugcraft:solder_ingot",
                   1
                 ]
               ],
               "out": [
-                "jugcraft:processor",
-                1
+                "jugcraft:basic_circuit",
+                2
               ]
             },
             {
               "in": [
                 [
-                  "jugcraft:microchip",
-                  4
-                ],
-                [
-                  "jugcraft:advanced_circuit",
+                  "jugcraft:silicon",
                   1
                 ],
                 [
-                  "jugcraft:optical_fibre",
-                  2
+                  "jugcraft:copper_wire",
+                  3
+                ],
+                [
+                  "jugcraft:solder_ingot",
+                  1
                 ]
               ],
               "out": [
-                "jugcraft:processor",
-                1
+                "jugcraft:basic_circuit",
+                4
               ]
             }
           ]
@@ -2415,6 +2415,272 @@
       ]
     },
     {
+      "title": "Pharmacology",
+      "icon": "jugcraft:caffeine_drink",
+      "pages": [
+        {
+          "title": "Coffee and Caffeine",
+          "icon": "jugcraft:caffeine_drink",
+          "text": [
+            "Grow the existing Coffee Plant: pick Coffee Cherries, then roast them into Coffee Beans in a furnace, smoker or campfire.",
+            "Two Coffee Beans make two Caffeine Concentrate. Four cocoa beans make one concentrate as a lower-yield alternative.",
+            "Craft two concentrates, one sugar, two glass bottles and a water bucket into two Caffeine Drinks. The bucket is returned. Drinking returns a glass bottle.",
+            "After a 10-second onset, a drink gives Haste I and 10% faster movement for five minutes, adding 10 strain; 100 is the safe threshold. Stronger potion effects take priority; they do not add their amplifiers together.",
+            "Hold a drink to see remaining onset or benefit time. The strain HUD shows your current strain and the next-dose forecast. The Caffeine status also shows the active effect.",
+            "A new dose replaces its family for a full new strain charge and restarts onset. Replacing an active stimulant causes 60 seconds of Caffeine Jitters: 20% more firearm spread.",
+            "Repeat doses have 75%, then 50% duration. Thirty online minutes without an active stimulant clears tolerance. Strain falls by 6 points per online minute during onset/benefits and 12 otherwise, independently of duration.",
+            "Leaving pauses saved drug timers. Death ends benefits without resetting recovery or tolerance. Milk cancels pending or active caffeine; it does not erase its recovery accounting.",
+            "These are fictional game effects. This system adds no injury, illness or combat-triggered debuffs. Existing coffee food recipes remain available."
+          ]
+        },
+        {
+          "title": "Early Pharmacy",
+          "icon": "jugcraft:aspirin",
+          "text": [
+            "Aspirin grants Fortitude: 10% less armor-sensitive physical damage for 12 minutes, after 5 seconds, at 10 strain. Stronger Resistance takes priority. It does not reduce fire, magic, falling or other armor-bypassing damage.",
+            "Its existing reactor routes remain: four willow logs and 500 mB water give two salicylic acid; birch gives one. Two salicylic acid, cider vinegar and 50 mB sulfuric acid give four Aspirin.",
+            "Paracetamol grants Recovery: 25% more healing from vanilla natural regeneration for 12 minutes, after 5 seconds, at 10 strain. It requires the normal food conditions and natural-regeneration rule. Extra healing pays a proportional food cost; it never amplifies instant healing or regeneration potions.",
+            "Two potatoes and paper make two Pharmaceutical Starch. In the Chemical Reactor, two starch and redstone with 250 mB water make four Paracetamol. This is a fictional game formulation.",
+            "Rehydration Salts grant Endurance: 20% less activity food exhaustion for 15 minutes, after 5 seconds, at 5 strain. They do not restore food or discount natural healing's food cost.",
+            "Craft two salt, sugar, two paper and a water bucket into two Rehydration Salts sachets. Crafting returns the water bucket. A used sachet leaves no glass bottle."
+          ]
+        },
+        {
+          "title": "Dosing and Side Effects",
+          "icon": "jugcraft:activated_charcoal",
+          "text": [
+            "Stimulant tablets grant Speed II and Haste II for 60 seconds immediately, at 25 strain. The existing reactor route uses four cocoa beans and one Pharmaceutical Starch with 250 mB bioethanol. Tablets leave no glass bottle. Drug Appetite adds 0.1 activity exhaustion per second while present.",
+            "Caffeine and Stimulant share one family and replace each other rather than stacking. Aspirin, Paracetamol and Salts have separate families. All doses charge strain; crossing 100 is allowed with penalties.",
+            "One active formulation per family. Any new formulation replaces it for a full strain charge and restarts onset. Repeat duration is 75%, then 50%; it never accumulates. Only an active stimulant redose gives Jitters.",
+            "Two charcoal, redstone and paper make two Activated Charcoal. Taking it clears Caffeine Jitters, Drug Appetite and Adrenaline Fatigue, keeps benefits and unrelated effects, and has a 60-second cooldown. It never frees strain or erases tolerance. Opioid Drowsiness instead ends with Naloxone or the opioid benefit.",
+            "Hold any timed medicine to see its phase, remaining time and total strain. Milk cancels pending and active benefits; accumulated strain continues decaying rather than resetting. Offline time pauses all accounting. Death ends benefits and preserves recovery and tolerance.",
+            "First Aid Kits and Antidote retain their existing instant effects. Aspirin and Stimulant keep their saved item and recipe IDs; older stacks acquire the new shared rules. No new injury or combat conditions are added."
+          ]
+        },
+        {
+          "title": "Laboratory Analyzer",
+          "icon": "jugcraft:laboratory_analyzer",
+          "text": [
+            "Consumes one finished medicine sample and one Blank Formula Plate with 250 mB water to write its reusable Formula Plate. 160 ticks at 32 JE/t. Each sample has a fixed authored result; no random grades, bad batches or personal research requirements.",
+            "Upper front sample and blank-plate drawers; lower front-left power and front-right formula output; rear water inlet. Formula plates are tradeable items. Their initial samples come from the existing manual or compact-reactor recipes.",
+            "Sterile medicine formulas instead analyze the prepared stock, allowing a first batch without an existing medicine sample."
+          ]
+        },
+        {
+          "title": "Pharmaceutical Separator",
+          "icon": "jugcraft:pharmaceutical_separator",
+          "text": [
+            "Powered wet separation improves crop yields: four coffee beans give eight concentrate, eight cocoa beans give four; four willow logs give four salicylic acid, four birch logs give two; four potatoes give eight pharmaceutical starch, four corn give four. Each uses 500 mB water and 160 ticks at 48 JE/t. Water is consumed as extraction loss; no waste-management chore is added.",
+            "Feed hatch on top, lower front-right extract drawer, lower front-left power, and water at the rear. The birch/potato/cocoa alternatives remain reachable without custom biome ingredients.",
+            "Also separates 500 mB Azure Antibiotic Broth into four Antibiotic Extract at 48 JE/t for 200 ticks. Use the same rear fluid inlet, leaving the solid feed empty."
+          ]
+        },
+        {
+          "title": "Formulation Press",
+          "icon": "jugcraft:formulation_press",
+          "text": [
+            "Install the matching reusable Formula Plate in the formula socket. The machine reserves output space and consumes the listed solids and fluids once, keeping the plate. Six fixed recipes produce eight caffeine drinks, eight aspirin, eight paracetamol, eight salts sachets, eight charcoal or four stimulant tablets. Every recipe takes 160 ticks at 64 JE/t.",
+            "Upper front active and binder drawers; the side drawer takes the third solid input, usually bottles. Lower front-right medicine output, lower front-left power. Rear water and reagent are separate inlets. Aspirin also needs sulfuric acid; Stimulant also needs bioethanol. The other four recipes leave the reagent tank unused. Empty incompatible fluids before switching jobs and use the existing recipe picker and lock.",
+            "Every bottled output consumes one empty bottle. No free bottle or bucket is produced by machine work. Drinking still returns its normal bottle. Bulk production changes yields and automation, never duration, potency, strain or tolerance."
+          ]
+        },
+        {
+          "title": "Building a Pharmacy",
+          "icon": "jugcraft:blank_formula_plate",
+          "text": [
+            "Build the three steel-era stations from earlier steel plates, basic circuits, motors, machine casings and copper cable. Their recipes need no formula plate or pharmaceutical output. A copper plate, paper and glass pane make two blank formula plates.",
+            "Prepare each first medicine by its existing route, then sacrifice one sample to the Analyzer. Move the resulting formula into the Press socket once; pipes and hoppers cannot steal tools. Different medicines need different plates. There is no personal research lock on traded equipment or plates.",
+            "Use the Separator for improved concentrate, bark extract and starch yields. The existing Chemical Reactor turns two starch, sugar and 250 mB water into four Prepared Pharmaceutical Base, which supplies both Paracetamol and Stimulant batches. Sugar keeps this recipe distinct from the earlier redstone-based Paracetamol route. All chains are fictional game formulations.",
+            "Connect existing cables, fluid pipes, hoppers or conveyors only at the marked ports. Full output, missing tools, power loss, pause, cancellation and saved work follow the shared machine rules. Original recipes remain useful for first samples and small-scale preparation.",
+            "Batch production makes the same stable medicine items used by early pharmacy. Saved drug rules and positive effects are unchanged. No additional injury conditions, medical debuffs, purity rolls or maintenance timers are introduced."
+          ]
+        },
+        {
+          "title": "Autoclave",
+          "icon": "jugcraft:autoclave",
+          "text": [
+            "Eight glass bottles and 500 mB water make eight Sterile Vials. Eight Pharmaceutical Starch and 500 mB water make eight Sterile Carrier. Each batch takes 200 ticks at 80 JE/t. Sterile items are stable; no contamination or maintenance timers.",
+            "Load at the upper front-left, collect at lower front-right. Power is lower front-left; water is at the rear. Build with four stainless steel plates, borosilicate glass, a motor, basic circuit, casing and copper cable."
+          ]
+        },
+        {
+          "title": "Sterile Filler",
+          "icon": "jugcraft:sterile_filler",
+          "text": [
+            "Install the matching reusable sterile Formula Plate. Two prepared stock, one Sterile Carrier, four Sterile Vials and 250 mB water make four medicines in 200 ticks at 96 JE/t. The plate stays installed. Vials also serve as internal cartridges in injectors, inhalers and sprays; using a medicine returns one ordinary empty glass container.",
+            "Stock and carrier enter at the upper front; vials enter at the marked right side. Medicine leaves at lower front-right. Power is lower front-left and water at the rear. The process conditions its own water; no additional sterile-fluid chore. Construction replaces one of the Autoclave\u2019s four plates with a piston.",
+            "Bootstrap each formula by analyzing its prepared stock with a Blank Formula Plate and 250 mB water in the existing Laboratory Analyzer. A finished medicine is never required to unlock its own manufacture."
+          ]
+        },
+        {
+          "title": "Cultures and Sterile Stocks",
+          "icon": "jugcraft:azure_culture_starter",
+          "text": [
+            "All chains here are fictional game recipes. Blue dye, brown mushroom and sugar make two Azure Culture Starter. The Chemical Reactor combines two Sterile Carrier, one starter and 250 mB water into four Culture Feed.",
+            "An Industrial or Bulk Fermenter turns one Culture Feed and 500 mB water into 500 mB Azure Antibiotic Broth in 400 ticks at 48 JE/t. Only the product outlet is used. The Pharmaceutical Separator consumes 500 mB broth for four Antibiotic Extract in 200 ticks at 48 JE/t. Analyze extract for the Penicillin formula.",
+            "Each other stock recipe uses the Chemical Reactor with 250 mB water for four stock in 160 ticks: two Sterile Carrier + quartz for Lidocaine; two Pharmaceutical Base + redstone for Adrenaline; four kelp + lapis for Salbutamol; four beetroot + amethyst shard for Redleaf Medical Stock (Morphine); two Pharmaceutical Base + quartz for Naloxone.",
+            "Analyze one stock with a blank plate to obtain the corresponding formula, then fill four medicines per batch. Tradeable plates work without a personal research lock. Sterile equipment needs the existing stainless steel and glass industries; no medicine is required to build it."
+          ]
+        },
+        {
+          "title": "Sterile Medicine Effects",
+          "icon": "jugcraft:penicillin",
+          "text": [
+            "Penicillin: 20 minutes, 5-second onset, 15 strain. Recovery II gives 50% more natural healing with proportional food cost. It shares Paracetamol\u2019s family. No infections or injury conditions are added.",
+            "Lidocaine: 10 minutes, 5-second onset, 10 strain. Grants four absorption hearts once per dose and 25% knockback resistance. A spent shield never refills each second. Vanilla Absorption takes priority.",
+            "Adrenaline: 45 seconds immediately, 35 strain. Speed II and Strength II, followed by 60 seconds of Fatigue: 10% slower movement and 15% slower mining. A new dose replaces the old benefit for a full strain charge. Strain decays independently of recovery. Charcoal clears Fatigue without resetting recovery.",
+            "Salbutamol (Albuterol): 15 minutes immediately, 15 strain. Halves ground-sprint exhaustion and improves water movement acceleration by 15%. Salts and sprint savings use the better discount. No water breathing or discount on combat, mining or natural healing.",
+            "Morphine: 12 minutes, 5-second onset, 35 strain. 20% damage reduction (Resistance takes priority) and 50% knockback resistance. Its Drowsiness slows movement and mining by 15%; charcoal does not clear it.",
+            "Naloxone: self-administered utility, 30-second cooldown. Ends opioid benefits and Drowsiness while preserving their recovery, strain and tolerance. Other drug families and unrelated potion effects remain. Milk and death end drug benefits without freeing accounting.",
+            "All timed formulations permit full-cost replacement; recovery no longer locks their family. Repeat duration falls to 75%, then 50%. Leaving pauses online timers. No combat-triggered debuffs or new medical upkeep are introduced."
+          ]
+        },
+        {
+          "title": "Precision Pharmacy",
+          "icon": "jugcraft:precision_process_module",
+          "text": [
+            "Craft a reusable Precision Process Module from existing stainless plates, advanced circuit, amethyst, quartz and a precision stainless valve. No precision medicine is required. Install the module in an existing formed processor upgrade slot; input/output slots and old saved inventories stay in place.",
+            "Four Pharmaceutical Base, an oak log and 500 mB water make 500 mB Organic Process Stock in the compact Chemical Reactor. Each reagent blend combines one Pharmaceutical Base with two Minecraft ingredients: lapis + redstone for Methylphenidate; blaze powder + sugar for Amphetamine; quartz + glowstone dust for Modafinil; amethyst + ender pearl for Ketamine; quartz + redstone for Fentanyl. Every formulation is fictional.",
+            "The existing Bulk Chemical Reactor processes one matching blend and 500 mB Organic Process Stock into four stock, using its liquid inlet and reusable precision module. Blends fit its existing one-solid-input layout. The gas tank remains empty.",
+            "The Pharmaceutical Separator processes four stock and 250 mB water into four verified active, using the precision module. Analyze one active with a blank plate and 250 mB water, also with the module, to write its reusable formula. A finished medicine is never needed to unlock its own production.",
+            "The Formulation Press makes four tablets from two matching active, one starch and 250 mB water with the formula. Ketamine and Fentanyl instead use the Sterile Filler: two active, one sterile carrier, four sterile vials and 250 mB water make four medicine vials. All formulas/modules are retained. Clear incompatible fluids and use the normal recipe picker."
+          ]
+        },
+        {
+          "title": "Precision Drug Effects",
+          "icon": "jugcraft:methylphenidate",
+          "text": [
+            "Methylphenidate: 20 minutes, 20-second onset, 35 strain. Haste II, 25% less aimed-gun hand sway and 25% tighter aimed firearm spread; activity exhaustion costs 20% more. Hip fire is unchanged. Amphetamine: 15 minutes, 20-second onset, 55 strain. Haste III and Speed II; activity exhaustion costs 50% more and natural expiry gives two minutes of Stimulant Fatigue. Modafinil: 40 minutes, 20-second onset, 25 strain. Haste I, 15% less aimed-gun hand sway and 15% less activity hunger. It holds the native phantom rest counter at zero while active; it does not force sleep or grant night vision.",
+            "These three share caffeine\u2019s stimulant family, full-cost family replacement, 75%/50% repeat duration and 30-online-minute tolerance. Replacing caffeine or Stimulant retains that tolerance and restarts onset. Methylphenidate tightens supported aimed firearm errors after the strongest strain/drug spread drawback; flame coverage and arc acquisition cones stay unchanged. Modafinil and Salts use the better activity discount rather than multiplying.",
+            "Fentanyl: eight minutes, five-second onset, 55 strain. 40% applicable damage reduction and 75% knockback resistance, with movement/mining 20% slower. Shares Morphine\u2019s opioid family/tolerance; full-cost replacement and decaying strain. Existing Naloxone cancels the opioid benefit and Drowsiness without freeing strain or tolerance. Charcoal does not remove opioid Drowsiness. Stronger native potion protection wins without multiplying defenses.",
+            "Ketamine: up to 30 seconds immediately, 40 strain. Begin while grounded, unmounted and with no open menu or other remote view. Echo View scouts within 24 blocks through ordinary open space. The body HUD shows its relative direction, distance and height even with cosmetics off. The body stays put and vulnerable; damage, cancellation, cleansing, menus, logout, death or dimension changes end the view. Normal solid walls and hidden ores stay hidden, and the view cannot attack, use blocks or move inventory. A new dose pays its full strain cost. Cancellation ends the view without erasing strain or tolerance.",
+            "Overlapping a different alcohol, opioid or Ketamine family adds 25 strain per new dose. Ended doses do not create a surcharge or block use. New effects never create injury, infection or combat-triggered ailments. Fentanyl patches and Masterwork Reserve remain Batch 5."
+          ]
+        },
+        {
+          "title": "Mash and Conditioning Barrel",
+          "icon": "jugcraft:mash_conditioning_barrel",
+          "text": [
+            "A shared rustic barrel variant for new mash and conditioning jobs. It leaves all existing Cider Barrel items, recipes, saved contents and ageing unchanged. No electricity, generator or motor. New jobs advance only while the machine is loaded, and saved work/cancellation follow the common process rules.",
+            "One Mash Jug ferments into one Fermented Mash Jug in 1200 loaded ticks. Later, four Refined Spirits Concentrate plus honeycomb condition into four Reserve Whiskey Concentrate in 2400 ticks, retaining an Oak Conditioning Insert. Install that insert in the conditioning socket; the initial mash job needs no tool."
+          ]
+        },
+        {
+          "title": "Moonshine Still",
+          "icon": "jugcraft:moonshine_still",
+          "text": [
+            "A fueled copper still with no power connections. One Fermented Mash Jug, four empty glass bottles and 200 furnace-fuel ticks make four Moonshine and return one Empty Mash Jug. Fuel burns only for paid processing; idle, pause, missing tools and blocked output do not consume fuel.",
+            "Upper front mash, upper rear bottles, lower right fuel. Lower front drink output, lower rear returned-jug outlet. Empty fuel containers return once in the fuel slot and can be extracted through the lower-right fuel port; unburned fuel and recipe ingredients cannot be extracted there. This is an abstract game recipe with no real distillation controls."
+          ]
+        },
+        {
+          "title": "Alcohol and Spirits",
+          "icon": "jugcraft:moonshine",
+          "text": [
+            "Craft two Empty Mash Jugs from five bricks. Four wheat or four corn, two sugar, a water bucket and an empty jug make one Mash Jug, returning the bucket. Ferment the jug in the Mash and Conditioning Barrel, then fuel the Moonshine Still with it and four empty bottles. Four Moonshine and the empty jug are returned once.",
+            "All grades share one alcohol family and tolerance: Moonshine gives +10% melee damage/+20% knockback resistance for eight minutes at 20 strain; Refined Spirits +15%/+30% for twelve minutes at 30; Reserve Whiskey +20%/+40% for sixteen minutes at 40; High-Proof Spirits +25%/+50% for twenty minutes at 50. Their onset is ten seconds, except fifteen for High-Proof. Masterwork Reserve remains Batch 5.",
+            "Intoxication raises supported gun spread by 15/20/25/30% and slows movement 5/7.5/10/12.5% respectively. Visual motion is not required. All grades may replace the alcohol family for a full new strain charge, a fresh onset and the shared repeat-duration penalty. Unused duration never accumulates. Recovery records do not block another dose.",
+            "For steel-era supply use existing Mashing Station grain mash. An Industrial or Bulk Fermenter combines 1000 mB grain mash with one Beverage Culture Pack for 1000 mB Beverage Wash; no exhaust. The Chemical Distillation Station turns 1000 mB wash into 500 mB Refined Beverage Stock and 500 mB stillage. These are separate beverage jobs; industrial bioethanol is never drinkable.",
+            "For efficient bulk Moonshine, the Formulation Press combines one Refined Spirits Concentrate, one sugar and four bottles into four Moonshine. It retains the Refined Spirits Formula Plate. Producing stronger Refined Spirits costs four concentrate for the same four bottles; bulk bottling does not silently upgrade Moonshine.",
+            "The Pharmaceutical Separator uses two sugar and 1000 mB Refined Beverage Stock for eight Refined Spirits Concentrate. Reserve conditioning uses four concentrate and honeycomb in the rustic barrel with a reusable stainless/oak conditioning insert. The Separator turns four reserve concentrate plus another 500 mB beverage stock into four High-Proof Concentrate, with a reusable Precision Process Module in an upgrade slot.",
+            "Analyze one matching concentrate with a blank plate and 250 mB water for its formula. High-Proof analysis also needs the precision module. The Formulation Press then bottles four concentrate, one sugar and four bottles into four matching drinks with the retained formula. Higher grades consume extra stock and processing; no infinite re-bottling upgrade loop. Drink returns one bottle.",
+            "A new alcohol dose overlapping an active or pending opioid or Ketamine dose adds 25 combination strain. Ended doses do not add this charge. Existing food and cider retain their original behavior; every new consumable is self-administered. These are fixed Minecraft effects and recipes, without injury or illness management."
+          ]
+        },
+        {
+          "title": "Controlled-release Materials",
+          "icon": "jugcraft:release_control_die",
+          "text": [
+            "Craft a Release Control Die from four stainless plates, amethyst, two Advanced Circuits, a Precision Process Module and Silicone Rubber. It is reusable: put it in the Coater release socket or an existing Analyzer/Press upgrade slot. It adds no speed or efficiency bonus and locks during a job.",
+            "Four Pharmaceutical Starch, four paper and one Plastic Pellets craft four Release Matrix Blend. The Press turns four blend and 500 mB water into four Release-control Matrix. Four matrix, two Silicone Rubber and amethyst with 250 mB water make four Advanced Release-control Matrix. These jobs use the release die, 200 ticks and 96 JE/t.",
+            "The same Press makes eight Empty Pharmacy Capsules from two starch, two paper and 250 mB water with the die. Two wool, paper and rubber craft four Patch Backing. Earlier crops, coffee and plastic production remain useful; these are fictional game materials."
+          ]
+        },
+        {
+          "title": "Extended-release Pharmacy",
+          "icon": "jugcraft:caffeine_xr",
+          "text": [
+            "Coat stock in the Release Coater, then analyze one matching core/patch stock with a Blank Formula Plate and 250 mB water. Install the release die in an Analyzer upgrade slot. It takes 200 ticks at 96 JE/t and yields a reusable formula without needing the finished medicine.",
+            "The Press combines four matching cores, four empty capsules and 250 mB water into four XR capsules. For patches, four stock, one Sterile Carrier, four paper and 250 mB water produce four patches. Matching formulas stay in its ordinary formula socket; each job takes 200 ticks at 96 JE/t.",
+            "All XR stimulants begin after 30 s and allow full-cost replacement with shared tolerance. Caffeine XR: Haste I, +10% walking, 30 min, 10 strain. Methylphenidate XR: Haste II, 25% less aimed-gun hand sway and 25% tighter aimed firearm spread, +20% activity food cost, 40 min, 30 strain. Amphetamine XR: Haste II, Speed I, +30% activity food cost, 35 min, 40 strain, then 2 min Stimulant Fatigue. Modafinil XR: Haste I, 15% less supported hand sway, 15% less activity hunger and a native phantom rest counter held at zero while active, 60 min, 25 strain. No forced sleep or night vision.",
+            "All four retain the existing stimulant family, tolerance and 120-second recovery. Fentanyl Patch begins after 30 s: 20% applicable damage reduction and +50% knockback resistance for 20 min at 40 strain, with -10% movement/mining. It shares opioid tolerance and Naloxone reversal. New opioid doses replace it for a full strain charge; recovery does not lock use. Applying a patch consumes no armor slot and returns no bottle. No injury or skin system is added."
+          ]
+        },
+        {
+          "title": "Masterwork Reserve",
+          "icon": "jugcraft:masterwork_reserve",
+          "text": [
+            "This beverage uses no release coating. Craft four Masterwork Blend from four High-Proof Spirits Concentrate, two honeycomb, a gold nugget and sugar. The Pharmaceutical Separator uses four blend and an extra 1000 mB Refined Beverage Stock to make four unconditioned concentrate, retaining a Precision Process Module; 300 ticks at 128 JE/t.",
+            "Craft a Masterwork Conditioning Insert from four stainless plates, amethyst, two Advanced Circuits, the existing Oak Conditioning Insert and Silicone Rubber. Install it in the rustic barrel conditioning socket. Four unconditioned concentrate and two sweet berries condition for 4800 loaded ticks into four Masterwork Reserve Concentrate. No offline progress or medical Coater is involved.",
+            "Analyze one concentrate with a blank plate and 250 mB water, keeping the precision module, for its formula: 200 ticks at 96 JE/t. The Press uses four concentrate, sugar and four bottles to make four Masterwork Reserve, keeping that formula: 160 ticks at 128 JE/t.",
+            "After 20 s onset, Masterwork Reserve gives +30% melee damage and +60% knockback resistance for 25 min at 60 strain. Intoxication: +35% supported gun spread and -15% movement. It shares the existing alcohol family/tolerance, adds 25 extra strain when overlapping opioids or Ketamine, and allows full-cost replacement with a fresh onset. Existing cider is unchanged."
+          ]
+        },
+        {
+          "title": "Botanical Perception Crops",
+          "icon": "jugcraft:dreamcap",
+          "text": [
+            "Craft Hemp Seeds from wheat seeds, honeycomb and bone meal. Dreamcap Spores use brown mushroom, amethyst and bone meal. Prism Cactus Seeds use cactus, amethyst and bone meal. These fictional cultivated varieties all use lit farmland, bone meal and native crop growth. Breaking a mature crop gives two produce and two seeds; an immature crop returns one seed.",
+            "Four Botanical Resin and 500 mB water in the Separator make four THC Game Stock. Craft Mycelium Catalyst from red mushroom, bone meal and amethyst (four); brown mushroom makes starter spores instead. In the compact Chemical Reactor, four Dreamcap plus one catalyst and 500 mB water make four Dream Concentrate; four Prism Cactus Fruit plus amethyst and the same water make four Prismatic Concentrate.",
+            "In that reactor, four Dream Concentrate plus redstone make four Psilocybin Stock; four Prismatic Concentrate plus quartz make four Mescaline Stock. Each compact job takes 180 ticks. None specifies real extraction or synthesis."
+          ]
+        },
+        {
+          "title": "Perception Manufacturing",
+          "icon": "jugcraft:psilocybin",
+          "text": [
+            "The Separator verifies four matching stock into four active with 250 mB water, 180 ticks at 64 JE/t. THC, Psilocybin and Mescaline need no precision tool. LSD and DMT require the existing Precision Process Module in an upgrade slot.",
+            "Analyze one matching active with one Blank Formula Plate and 250 mB water for a reusable formula (180 ticks, 48 JE/t). LSD and DMT analysis requires the precision module. The Press combines four verified active, four paid packaging items and 250 mB water into four doses with that formula (180 ticks, 64 JE/t; LSD/DMT 96 JE/t). THC, Psilocybin and Mescaline use Botanical Capsule Shells, crafted from two starch and two paper (four); DMT uses advanced Empty Pharmacy Capsules. LSD uses four paper for four perforated paper doses. Paper/capsule doses leave no bottle and retain their 0.8-second use time.",
+            "Complete Memory with Psilocybin to earn a Lucid Imprint. Craft it with four Dream Concentrate, redstone and amethyst into Perception Substrate. The existing Bulk Chemical Reactor with a precision module and 500 mB Organic Process Stock makes four LSD Stock (240 ticks, 96 JE/t).",
+            "Complete Mirror with LSD to earn a Pattern Imprint. Craft it with four Dream Concentrate, two Chorus Fruit and an Echo Shard into Oneiric Stock. The same precision reactor job makes four DMT Stock, using Overworld and End supplies. These are wholly fictional recipes."
+          ]
+        },
+        {
+          "title": "Perception Effects and Dream Study",
+          "icon": "jugcraft:dream_folio",
+          "text": [
+            "THC: Luck I and 25% less pre-bite fishing wait while stationary for 10 min, 10 s onset, 20 strain. It does not stack its fishing bonus with stronger Allure. Mining is 10% slower; natural expiry causes 60 s Drug Appetite. Charcoal clears that appetite. Luck uses vanilla fishing rules and loot tables.",
+            "Psilocybin: 8 min Dream Sight, 10 s onset, 20 strain, plinth clues within 16 blocks and line of sight. Mescaline: 15 min Resonance Sense, 15 s onset, 25 strain, compass pulses toward the nearest recorded loaded plinth within 96 blocks. No undiscovered structures, ores, mobs or player bases are searched.",
+            "LSD: 25 min Pattern Sight, 20 s onset, 35 strain; visible recorded plinths within 24 blocks, Memory and Mirror lessons. Supported aimed-gun hand sway is 20% higher, without altering shot spread. DMT: 5 min Overworld Deep Reverie, 20 s onset, 50 strain; all three lessons and 24-block sight.",
+            "Craft a Dream Folio from a book, compass and amethyst. Craft a Dream Study Plinth from three stone, two copper, a book and amethyst. Carry the folio and use the plinth to record one of up to 16 Overworld sites. The last 16 physically visited sites persist in the folio; no chunks are force-loaded.",
+            "At the plinth, Memory repeats the visible sequence, Mirror reverses it, and Reverie advances each symbol through Sun, Wave, Leaf, Star. These layers require Psilocybin or stronger, LSD or DMT, and DMT respectively. Three correct symbols consume one Study Canvas and award one Lucid, Pattern or Oneiric Imprint. Four canvases craft from three paper, lapis and amethyst. Wrong input simply restarts; no combat or injury debuff is created.",
+            "Reopen the plinth to start another paid study. Clues are private and remain readable with reduced magic visuals. Studying uses your own carried canvas and ordinary inventory; Censer expeditions remain their own activity. All four psychedelics share family tolerance and decaying strain; THC has its own family. New doses replace their family for a full strain charge. All use the same strain, online timers, milk and death rules."
+          ]
+        },
+        {
+          "title": "Strain and Redosing",
+          "icon": "jugcraft:caffeine_drink",
+          "text": [
+            "100 strain is a safe threshold, not a consumption cap. Every new dose immediately adds its full strain cost, including replacements. Strain falls by 6 points per online minute during onset or an active dose, and by 12 per minute when no doses remain active. Long benefits can outlast their strain.",
+            "Above 100 through 125: Strained, activity food cost +15% and firearm spread +10%. Above 125 through 150: Overloaded, movement/mining -10%, food cost +25% and spread +20%.",
+            "Above 150 through 200: Severe, movement -20%, mining -25%, attack speed -15%, food cost +40% and spread +35%. Above 200: Critical, movement -30%, mining -40%, attack speed -25%, food cost +60% and spread +50%. Matching drug and strain penalties use the stronger value rather than multiplying.",
+            "A new formulation replaces its family, ends the old benefit and restarts its own onset. Earlier strain is not refunded. Repeated family doses last 75%, then 50%; remaining duration never accumulates. Recovery records do not block use. Active stimulant replacement still causes Jitters.",
+            "A new dose overlapping another alcohol, opioid or Ketamine family costs 25 extra strain, once per new dose even when two such families overlap. Ended doses and replacing the same family alone do not create this surcharge.",
+            "Ten horizontal pills above the hunger bar show strain. Each pill holds 10 points: ivory fills through 100, then amber/orange/red paints over that row through 200, followed by violet through 300. Decay removes the newest fill first. Above 100 the readout shows exact strain and severity, including values above 300. Air bubbles and mounted health keep their vanilla positions; the pill row moves above them when needed.",
+            "While strain is above zero, holding a formulation adds a patterned preview and next-cost readout, including combination strain. At zero the empty row remains for three seconds, then hides, even while a drug is held or benefits remain active. A held drug at zero does not bring it back; the tooltip still gives the next-dose forecast and predicted severity. Visual Off and Reduced Motion do not change penalties.",
+            "Milk, Charcoal, Naloxone and death do not erase strain or tolerance. Death ends benefits. Logout pauses drug, tolerance and strain clocks together. Existing saved reservations seed the new decaying pool once; they are never recharged on subsequent loads."
+          ]
+        },
+        {
+          "title": "Drug Display Settings",
+          "icon": "jugcraft:caffeine_drink",
+          "text": [
+            "Open Jugcraft display settings through Mod Menu, or bind its action in Controls. Drug visuals has an On/Off switch and intensity, blur, sway and double-vision sliders. Minecraft Distortion Effects also limits everything. Reduced motion makes warning rims static and removes sway and visual Jitters. These choices never change drug benefits, strain, hunger or firearm rules.",
+            "Caffeine has a subtle warm contrast lift. Methylphenidate has cool focus contrast; Modafinil has a restrained neutral clarity treatment. Amphetamine and Stimulant have a warmer peripheral tunnel, and Adrenaline has a stronger initial rush that settles. Drug Jitters move only peripheral image samples; Stimulant Fatigue gently desaturates the view.",
+            "Above 100 strain, an amber peripheral warning grows through the strain bands toward a red critical rim. At higher strain, edge blur can accompany it. The center, crosshair and interface remain readable. The strain HUD still names the band when visual effects are off. Milk ends dose visuals but does not erase this strain warning.",
+            "THC adds a gentle warm botanical tint and light edge softness. Morphine and Fentanyl have muted color and softened edges; Fentanyl is stronger, while its patch stays lighter. Naloxone ends opioid visuals together with the opioid benefit.",
+            "Ketamine has a cooler, lightly separated peripheral image during the actual Echo View. Reduced motion removes its peripheral breathing. Its body-direction HUD remains readable with visual effects off: it shows the distance, direction and height back to your vulnerable body. Sneak or open a menu to return.",
+            "Psilocybin adds gentle organic peripheral breathing and violet warmth. Its wisps mark only recorded, visible study plinths. Mescaline has a restrained crystalline rim and a slow resonance pulse; its persistent compass uses only the nearest recorded, loaded plinth within 96 blocks.",
+            "Study and navigation text remain readable with drug visuals off. Carry a Dream Folio and physically record a plinth; Psilocybin then reveals its Memory lesson. Three numbered clue cards show the source and required input, highlight the current source step and describe the rule/trace in narrated tooltips. Mirror reverses the input order; Reverie advances each symbol through Sun, Wave, Leaf, Star, Sun. A successful lesson still pays one Study Canvas for one imprint.",
+            "LSD adds a six-fold geometric lattice and up to three faint directional afterimages when you turn. DMT adds deeper eight-fold geometry and slow peripheral Clockwork arches, gears and schematic pointed figures. These glimpses preview the Clockwork theme; they do not open a portal or provide trading. Actual travel and elven trades remain a later content batch.",
+            "Afterimages use the recent view direction to offset the currently visible world; they do not retain past world frames. They settle within six view ticks when turning stops, and reset on a scene change, menu or sudden jump. Reduced Motion, zero motion or zero double vision removes them while static patterns and real study information remain useful.",
+            "Reduced Motion or zero motion removes moving dream wisps and peripheral breathing. Lower motion reduces wisp count; the shared magic particle budget also applies. No Folio or no eligible site is explained by the dream HUD. It never finds undiscovered plinths or loads chunks.",
+            "Alcohol, focus, calm, dream, Jitters and strain combine in one bounded world filter. Opening an interface suspends the filter. Cosmetic effects never turn the camera, change input, flash or reveal hidden blocks."
+          ]
+        }
+      ]
+    },
+    {
       "title": "Steel",
       "icon": "jugcraft:steel_ingot",
       "pages": [
@@ -2500,7 +2766,7 @@
           "title": "Charging Station",
           "icon": "jugcraft:charging_station",
           "text": [
-            "Two blocks tall. Hang a drill, chainsaw or rocket pack on its cradle and it fills it from cables, 512 JE a tick; take it back with an empty hand. Its lamp lights while it charges."
+            "Right-click either half to open two equipment bays. Each lists its installed modules. Use + to install from your cursor or inventory and - to recover one. The bays fairly share 512 JE/t from cables; one item alone receives the full rate. The buffer holds 100,000 JE."
           ],
           "craft": {
             "grid": [
@@ -2522,7 +2788,7 @@
           "title": "Mining Drill",
           "icon": "jugcraft:mining_drill",
           "text": [
-            "Runs on JE instead of wearing out: 60 JE a block, 100,000 JE when full. Mines everything a pickaxe or shovel does, faster than netherite. Sneak and use it to switch mode: one block, a 3x3 square, or a whole ore vein. Empty, it mines like a bare hand."
+            "Runs on JE instead of wearing out: 60 JE a block, 250,000 JE when full. Mines everything a pickaxe or shovel does, faster than netherite. Sneak and use it to switch mode: one block, a 3x3 square, or a whole ore vein. Empty, it mines like a bare hand."
           ],
           "craft": {
             "grid": [
@@ -2544,7 +2810,7 @@
           "title": "Chainsaw",
           "icon": "jugcraft:chainsaw",
           "text": [
-            "A JE-powered axe that also cuts leaves: 40 JE a block. Cutting a log fells the whole tree above it; sneak to cut one log."
+            "A JE-powered axe that also cuts leaves: 40 JE a block. Cutting a log fells the whole tree above it; sneak to cut one log. Shift-use cycles tree, single-log and leaf-clearing modes. Leaf clearing costs 10 JE/block."
           ],
           "craft": {
             "grid": [
@@ -2566,7 +2832,7 @@
           "title": "Rocket Pack",
           "icon": "jugcraft:rocket_pack",
           "text": [
-            "Wear it and hold jump in the air to fly, 50 JE a tick (200,000 JE when full). Landing is safe while it fires. On a dedicated server, set allow-flight=true or long hovers get you kicked."
+            "Wear it and hold jump in the air to fly, 20 JE a tick (200,000 JE when full). Landing is safe while it fires. Shift-use the held pack to choose gentle, cruise or full thrust (all 20 JE/t). On a dedicated server, set allow-flight=true or long hovers get you kicked."
           ],
           "craft": {
             "grid": [
@@ -2585,10 +2851,32 @@
           }
         },
         {
+          "title": "Efficiency Module",
+          "icon": "jugcraft:efficiency_module",
+          "text": [
+            "15% less tool energy per level after Overclock, rounded up (max 2); no speed change. Open the charging station menu, place the equipment in either bay, then use + to fit a module from your inventory or - to recover one. Discharge before reducing capacity."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:steel_plate",
+              "jugcraft:copper_cable",
+              "jugcraft:steel_plate",
+              "jugcraft:copper_cable",
+              "jugcraft:advanced_circuit",
+              "jugcraft:copper_cable",
+              "jugcraft:steel_plate",
+              "jugcraft:copper_cable",
+              "jugcraft:steel_plate"
+            ],
+            "result": "jugcraft:efficiency_module",
+            "count": 1
+          }
+        },
+        {
           "title": "Overclock Module",
           "icon": "jugcraft:overclock_module",
           "text": [
-            "Mines 50% faster for twice the JE a block (up to 2). Fit it by using it on a charging station holding the tool; it is used up and stays in the tool."
+            "Adds 50% base mining speed and JE per block (up to 2). Open the charging station menu, place the equipment in either bay, then use + to fit a module from your inventory or - to recover one. Discharge before reducing capacity."
           ],
           "craft": {
             "grid": [
@@ -2610,7 +2898,7 @@
           "title": "Range Module",
           "icon": "jugcraft:range_module",
           "text": [
-            "The drill's area mode mines 5\u00d75 (drill only). Fit it by using it on a charging station holding the tool; it is used up and stays in the tool."
+            "Unlocks selectable 5\u00d75 mining and doubles the vein limit (drill only). Open the charging station menu, place the equipment in either bay, then use + to fit a module from your inventory or - to recover one. Discharge before reducing capacity."
           ],
           "craft": {
             "grid": [
@@ -2632,7 +2920,7 @@
           "title": "Capacity Module",
           "icon": "jugcraft:capacity_module",
           "text": [
-            "Holds its base charge again (up to 2). Fit it by using it on a charging station holding the tool; it is used up and stays in the tool."
+            "Doubles energy capacity each time (up to 2). Open the charging station menu, place the equipment in either bay, then use + to fit a module from your inventory or - to recover one. Discharge before reducing capacity."
           ],
           "craft": {
             "grid": [
@@ -2654,7 +2942,7 @@
           "title": "Silk Touch Module",
           "icon": "jugcraft:silk_touch_module",
           "text": [
-            "Blocks drop themselves (drill or chainsaw; not with fortune). Fit it by using it on a charging station holding the tool; it is used up and stays in the tool."
+            "Blocks drop themselves (drill or chainsaw; not with fortune). Open the charging station menu, place the equipment in either bay, then use + to fit a module from your inventory or - to recover one. Discharge before reducing capacity."
           ],
           "craft": {
             "grid": [
@@ -2676,7 +2964,7 @@
           "title": "Fortune Module",
           "icon": "jugcraft:fortune_module",
           "text": [
-            "More ore drops, up to Fortune III (drill only; not with silk touch). Fit it by using it on a charging station holding the tool; it is used up and stays in the tool."
+            "More ore drops, up to Fortune III (drill only; not with silk touch). Open the charging station menu, place the equipment in either bay, then use + to fit a module from your inventory or - to recover one. Discharge before reducing capacity."
           ],
           "craft": {
             "grid": [
@@ -3238,13 +3526,13 @@
             "The Crypt Lich, in the Archive of Last Names: Soulreaver and Gravewarden.",
             "The Iron Dreadnought, in the Foundry Trench: Dynamo Halberd and Piston Hammer.",
             "The Cydonian Sentinel, in the Cydonian Sanctum: Corelance and Redstar Cleaver.",
+            "The Storm Roc, in the Crown of Thunder: Stormcaller and Galefeather.",
             "Vesperine, the Last Reaper, in the Hollow Acre: Vesper Scythe.",
             "Madame Tatterlace, in the Spindle Loft: Needle Rapier.",
             "The Pumpkin King, in the Crowfield: Hallowreap and Crowbill.",
             "The Headless Horseman, in the Church Bridge: Hollowflail and Hessian Sabre.",
             "These are yet to be met in the world, and will each carry two:",
             "The Alpha Werewolf: Moonfang and Howler.",
-            "The Storm Roc: Stormcaller and Galefeather.",
             "The Abyssal Leviathan: Tidebreaker and Leviathan's Hook.",
             "Trophies last twice as long as steel, and fight as their kinds do."
           ]
@@ -3300,9 +3588,9 @@
           "title": "Powered Exosuit",
           "icon": "jugcraft:exosuit_helmet",
           "text": [
-            "Four pieces of armor as strong as netherite that run on JE. Each piece holds 400,000 JE and charges at a charging station; capacity modules fit.",
+            "Four pieces of armor as strong as netherite that run on JE. Each piece holds 500,000 JE and charges at a charging station; two capacity modules double storage each time.",
             "Helmet: night vision whenever it is dark. Chestplate: an energy shield that regrows up to four hearts of absorption, and a jetpack (hold jump in the air). Leggings: 30% more speed. Boots: no fall damage and a full-block step.",
-            "Each piece works only while it is charged; a flat piece is plain armor."
+            "Boots spend 100 JE per heart of fall damage actually prevented. Shield recovery costs 1,000 JE per point; thrust costs 20 JE/t. Legs spend only during boosted movement. A flat piece is plain armor."
           ]
         },
         {
@@ -3365,8 +3653,8 @@
           "icon": "jugcraft:first_aid_kit",
           "text": [
             "Made in the chemical reactor. First aid kit: two cotton and a soap in bioethanol. Heals four hearts, then a 10 s wait.",
-            "Antidote: two charcoal and a bottle in lye. Clears poison, wither and every other harmful effect, and keeps the good ones (milk clears both).",
-            "Stimulant: four cocoa beans and a bottle in bioethanol. Speed II and Haste II for 60 s, with hunger."
+            "Antidote: two charcoal and a bottle in lye. Clears its listed vanilla harmful effects and keeps benefits (milk clears both). Activated Charcoal handles drug drawbacks.",
+            "Stimulant: four cocoa beans and a bottle in bioethanol. Speed II and Haste II for 60 s, with Stimulant Appetite and shared caffeine-family dosing. See Pharmacology for all sustained medicines."
           ]
         }
       ]
@@ -3727,7 +4015,7 @@
           "title": "Polymerization Reactor",
           "icon": "jugcraft:polymerization_reactor",
           "text": [
-            "Two by two and three blocks tall. Polymerizes refinery gas into plastic: a bucket of gas gives four plastic pellets, every 5 seconds. The metal press flattens each pellet into a plastic sheet.",
+            "Two by two and three blocks tall. Polymerizes refinery gas or naphtha into plastic: a bucket of either gives four plastic pellets, every 5 seconds. The metal press flattens each pellet into a plastic sheet.",
             "Uses 96 JE/t while working. Holds 30,000 JE."
           ],
           "craft": {
@@ -4060,7 +4348,8 @@
             "Three wide, three deep and four tall: a tall stirred vessel on four legs, built from steel plates, a Steel Tank, glass, an electric motor, a basic circuit and a Machine Casing. Every block it fills must be free when it is placed.",
             "Drop eight crops (wheat, sugar cane, potatoes, carrots, beetroot, berries, melon or apples) into the hatch on its crown and pipe water into the inlet low at the back left. With a bucket of water they ferment into 375 mB of bioethanol at the broth outlet low at the front (half again what the Chemical Reactor gets from the same crops), and 250 mB of carbon dioxide at the flange high at the back, in five seconds at 96 JE/t.",
             "The carbon dioxide feeds the Chemical Infuser's methane. Collecting it is optional: when its tank is full the rest is vented and fermentation goes on.",
-            "Expanded processing is also available. Open Recipes to inspect each route's exact inputs, outputs and power, then lock a recipe for automation. Empty incompatible fluids before changing processes; old factory connections and recipes remain supported."
+            "Expanded processing is also available. Open Recipes to inspect each route's exact inputs, outputs and power, then lock a recipe for automation. Empty incompatible fluids before changing processes; old factory connections and recipes remain supported.",
+            "Also cultures Prepared Culture Feed with water into Azure Antibiotic Broth at the product outlet. No exhaust is produced by this recipe."
           ],
           "craft": {
             "grid": [
@@ -4085,7 +4374,8 @@
             "Five wide, five deep and six tall: the Industrial Fermenter's vessel enlarged, built from an Industrial Fermenter, two Steel Tanks, steel plates, an electric motor and a basic circuit. Every block it fills must be free when it is placed.",
             "It ferments like the Industrial Fermenter, eight crops and a bucket of water into 375 mB of bioethanol and 250 mB of carbon dioxide, but runs four batches at once from 16,000 mB tanks, at 80% of the draw a batch. Crops go in at the hatch on its crown, water at the inlet low at the back left; the alcohol leaves at the outlet low at the front and the gas at the flange high at the back, which vents what is not collected.",
             "It draws its power through the services box low at the back right. Its screen says what it is waiting for, and upgrade cards fit its terminal.",
-            "Supports the same current recipes as the Industrial Fermenter. Use the recipe picker and lock to switch jobs; empty incompatible stored fluids first."
+            "Supports the same current recipes as the Industrial Fermenter. Use the recipe picker and lock to switch jobs; empty incompatible stored fluids first.",
+            "Also supports the same Azure Antibiotic Broth culture recipe as the Industrial Fermenter."
           ],
           "craft": {
             "grid": [
@@ -4114,7 +4404,8 @@
             "Nitric acid in the side inlet and ammonia in the lid inlet neutralize each other: 250 mB of the acid and 125 mB of ammonia give four ammonium nitrate at the chute. It is a strong nitrogen fertilizer, and it packs grenades and high-explosive rockets in place of guncotton.",
             "Eight washed nickel ores in the hatch, a bucket of hydrochloric acid and 250 mB of chlorine leave one ruthenium powder in twenty seconds: the metal of the Chemical Infuser's faster methanation bed.",
             "Also makes Wet Superphosphate from ground phosphate and phosphoric acid, or dissolves Mixed-farm Fertilizer into existing Nutrient Solution. Recipe lock selects the intended job.",
-            "Also prepares storable hydrazine and N2O4 propellants, each with a solid process residue. See Cryogenics and Rocket Fuels for compatible loaded motors and waste recovery."
+            "Also prepares storable hydrazine and N2O4 propellants, each with a solid process residue. See Cryogenics and Rocket Fuels for compatible loaded motors and waste recovery.",
+            "Also processes fictional precision reagent blends with Organic Process Stock. Install a reusable Precision Process Module in an existing upgrade slot; no input/tank layout change."
           ],
           "craft": {
             "grid": [
@@ -4430,7 +4721,7 @@
           "text": [
             "Air is four parts nitrogen to one of oxygen. The air separation unit splits it; hydrogen comes from the electrolytic cell.",
             "The synthesis converter joins hydrogen and nitrogen into ammonia, and burns ammonia in oxygen over water into nitric acid.",
-            "Ammonia and phosphate make fertilizer (six for two phosphate, against four with sulfuric acid). Nitric acid etches microchips with half as much acid as sulfuric."
+            "Ammonia and phosphate make fertilizer (six for two phosphate, against four with sulfuric acid). Nitric acid etches eight microchips per wafer with 50 mB of acid; sulfuric makes four with 100 mB."
           ]
         },
         {
@@ -4860,6 +5151,7 @@
             "Three wide, four deep and three tall. Two hydroxide -> two existing Alumina + 250 mB recovered water, 200 ticks at 64 JE/t. Reuse this water with the press water. Enclosed ceramic kiln, guarded drive, insulated service hood and front charge door; all heating is paid electricity. Alumina keeps its existing catalyst and metal consumers.",
             "Power: lower front left socket. Left/right descriptions use the view from the front. Rear: recovered water midway up at the left, alumina in the right hatch. Solid inputs are front-right hatches and solid outputs rear-right hatches. Each pipe is physically routed into its vessel, pump or collection tray. Use existing pipes, tanks, cylinders, cables and conveyors; earlier steel/copper/ceramics supply all crafting bills.",
             "Also fires porcelain, alumina and zirconia blanks and calcines zirconia precursor. The solution tank must be empty for dry firing. Use Recipes to select a ceramic job; old calcination, drying and PTFE recipes remain supported.",
+            "Also fires one Zirconia Powder directly into one Fired Zirconia Blank, 320 ticks at 80 JE/t, for the short zircon-sand line.",
             "Also dries Wet Superphosphate, returning water, and prepares Washed Gypsum into the existing Gypsum Binder. Empty incompatible stored outputs before switching jobs."
           ],
           "craft": {
@@ -4959,6 +5251,7 @@
             "Drain old tanks before switching recipes. Settle 500 mB spent wash into one existing salt and 250 mB water for 120 ticks at 16 JE/t; the rest is evaporation/loss in game accounting. The same station treats titanium-distillation wash. Neither wash nor ordinary salt brine supplies magnesium.",
             "Power socket: lower front-left. Solid feed hatches: front-right, bottom to top. Solid outputs: rear-right, bottom to top. Liquid inputs: rear middle height, left to right viewed from the front. Liquid outputs: rear bottom, left to right. Read JEI for exact materials. All tubes terminate at the parts they serve; machines share existing pipes, cables and automation. Game quantities are not real manufacturing instructions.",
             "Also prepares ceramic powder charges with water and recovers trace zircon from sand. See Ceramics and Precision in the Handbook for the whole route. Clear incompatible fluids and lock the desired job when switching.",
+            "Also conditions mineral sand: two Titanium-rich Mineral Sand make one Raw Titanium, and two Rare-earth-rich Mineral Sand make one mixed Rare Earth Oxide, each with 500 mB water in 200 ticks at 32 JE/t. See Mineral Sand Processing.",
             "Also washes regional chromite: two minerals and 250 mB water make two concentrate. The Arc Furnace reduces two concentrate with one Coke into two Ferrochromium Ingots for stainless alloying.",
             "Also prepares organic fertilizer carriers from compost or digestate fibre, and washes gypsum-rich residue with water. The gypsum route requires room for Spent Mineral Wash.",
             "Also prepares primary cobalt stock and treats wafer waste with calcite and lye. Treated water and recovery concentrate require separate outlets; concentrate can be stabilized with clay. No acid or solvent is recovered from the fungible mixture."
@@ -5103,7 +5396,7 @@
           "title": "Monomer Preparation Unit",
           "icon": "jugcraft:monomer_preparation_unit",
           "text": [
-            "Refinery gas (1000 mB) yields 500 mB named ethylene. Renewable route: 1000 mB bioethanol yields 500 mB ethylene and 250 mB water, with paid dehydration. All process heat is included in JE use; no manual pressure controls.",
+            "Refinery gas (1000 mB) yields 500 mB named ethylene; naphtha (1000 mB) is cracked to 750 mB. Renewable route: 1000 mB bioethanol yields 500 mB ethylene and 250 mB water, with paid dehydration. All process heat is included in JE use; no manual pressure controls.",
             "500 mB ethylene + 500 mB chlorine -> 1000 mB ethylene dichloride; then 1000 mB dichloride -> 500 mB vinyl chloride and 500 mB hydrogen chloride gas. Absorb recovered HCl in the existing Chemical Reactor. Empty incompatible tank contents before switching jobs. Both outlets must fit; nothing is silently vented. Earlier PVC routes remain available.",
             "Power: lower front-left. Solid feed: front-right. Finished product: rear-right middle; extrusion offcuts: rear-right upper. Fluid feed: rear middle; fluid products: rear bottom. Pause, Cancel, progress, tank levels, energy, tool locks and upgrade slots use the shared factory screen. Recipes are fictional game quantities."
           ],
@@ -5348,6 +5641,7 @@
             "Each job takes one blank and 125 mB water, runs for 200 ticks at 48 JE/t before upgrades, and returns all 125 mB to its separate outlet. Both the product drawer and water outlet must fit. Pipe the return into the feed to reuse coolant; a full outlet pauses production rather than destroying it.",
             "Front lower left: power. Front right: blank input. Rear left, middle height: water inlet; directly below: returned water. Rear right: finished part. The visible splash tray, drain and coolant line serve those ports.",
             "Use Recipes to preview costs and required tools, then Lock recipe. Alumina blanks have two jobs: plates or bearing balls. Automatic defaults to the alphabetically first compatible job, so lock the product before automating. A running batch keeps its reserved inputs when you change the next job.",
+            "A Garnet Abrasive Head finishes steel shaft blanks only, in 300 ticks; a Cerium Polishing Head polishes optical blanks into lenses in 160 ticks. Neither machines hard fired ceramics. See Mineral Sand Processing.",
             "Finish an assembled Stainless Valve with the Felt Polishing Head: 240 ticks at 48 JE/t, returning the same 125 mB cooling water. Its alternate vessel recipes feed existing chemical equipment."
           ],
           "craft": {
@@ -5391,6 +5685,30 @@
           }
         },
         {
+          "title": "Release Coater",
+          "icon": "jugcraft:release_coater",
+          "text": [
+            "A 3x3x3 advanced formed processor on the existing power, fluid, ports, escrow and recipe system. Three solid inlets, a rear water inlet and a coated-stock outlet. Its release socket keeps a Release Control Die; normal upgrades remain separate.",
+            "Coat fixed named formulations only. Four matrices and 500 mB water accompany 24 Caffeine Concentrate, four Verified Methylphenidate Active, six Verified Amphetamine Active or four Verified Modafinil Active, producing four matching cores in 300 ticks at 128 JE/t. Modafinil uses Advanced Release Matrix.",
+            "Eight Verified Fentanyl Active, four matrices, four patch backings and 500 mB water instead produce four unverified patch stock. No finished vial is multiplied into patches. Missing tools or output room spend nothing. Cancellation refunds solids and process water; breaking drops original solids/tooling and loses loose fluids as other processors do. Saved work resumes normally."
+          ],
+          "craft": {
+            "grid": [
+              "jugcraft:stainless_steel_plate",
+              "jugcraft:borosilicate_glass",
+              "jugcraft:stainless_steel_plate",
+              "jugcraft:electric_motor",
+              "jugcraft:advanced_circuit",
+              "jugcraft:polymer_housing",
+              "jugcraft:precision_stainless_valve",
+              "jugcraft:release_control_die",
+              "jugcraft:precision_stainless_valve"
+            ],
+            "result": "jugcraft:release_coater",
+            "count": 1
+          }
+        },
+        {
           "title": "Four shared process machines",
           "icon": "jugcraft:brine_concentrator",
           "text": [
@@ -5417,7 +5735,7 @@
           "title": "Lithography Station",
           "icon": "jugcraft:lithography_station",
           "text": [
-            "Three wide, two tall and two deep: a cleanroom and an operator's desk with a monitor bank. A silicon wafer, two copper wire and 100 mB of sulfuric acid make four microchips, every 10 seconds at 192 JE/t. Pipe the acid into its tank.",
+            "Three wide, two tall and two deep: a cleanroom and an operator's desk with a monitor bank. A silicon wafer, two copper wire and 100 mB of sulfuric acid make four microchips, every 10 seconds at 192 JE/t. Substitute 50 mB of nitric acid for eight microchips in the same time. Pipe the acid into its tank.",
             "Uses 192 JE/t while working. Holds 60,000 JE."
           ],
           "craft": {
@@ -6131,7 +6449,7 @@
           "title": "Hydroponic Bay",
           "icon": "jugcraft:hydroponic_bay",
           "text": [
-            "Grows a seed or cutting in nutrient solution under grow lights: no soil, sunlight or farmland, so it works underground, in the Nether or the End. A harvest every 30 seconds uses 100 mB of solution (a fertilizer in a bucket of water, in the chemical reactor) and gives the seed back.",
+            "Grows a seed or cutting in nutrient solution under grow lights: no soil, sunlight or farmland, so it works underground, in the Nether or the End. A harvest every 30 seconds uses 100 mB of solution and gives the seed back. It takes only Nutrient Solution, never plain water: dissolve a fertilizer in a bucket of water in the chemical reactor (1,000 mB, ten harvests), then pump it through pipes into any block of the bay, or pour in a Nutrient Solution Bucket. Water sent to it is refused and stays in the pump or bucket.",
             "Uses 12 JE/t while working. Holds 20,000 JE."
           ],
           "craft": {
@@ -6347,7 +6665,7 @@
           "title": "Precision parts and their uses",
           "icon": "jugcraft:precision_bearing",
           "text": [
-            "Two steel plates hand-assemble two shaft blanks. Finish them with the abrasive head. A shaft, a steel plate and a set of ceramic balls assemble a Precision Bearing. Bearings and shafts make two motors per advanced assembly, or a Speed Upgrade with less gear-making.",
+            "Two steel plates hand-assemble two shaft blanks. Finish them with the abrasive head. A shaft, a steel plate and a set of ceramic balls assemble a Precision Bearing. Ordinary iron parts make one motor; bearings and shafts make two. Add a polymer housing and neodymium magnet to precision parts for four motors. Bearings also make a Speed Upgrade with less gear-making.",
             "Finished Alumina Plates provide the insulating body of an alternate Efficiency Upgrade. Porcelain insulators make existing placed Ceramic Insulators and an alternate Copper Cable recipe. These are extra recipes: old recipes and saved equipment stay available.",
             "Two borosilicate glass make two Optical Blanks. The Felt Polishing Head finishes each into a lens; two lenses, a brass plate and a compass make the existing Range Finder. Lenses also make spyglasses. Advanced wafer equipment will use this same finishing specialty in a later package."
           ]
@@ -6370,6 +6688,7 @@
             "Each job takes one blank and 125 mB water, runs for 200 ticks at 48 JE/t before upgrades, and returns all 125 mB to its separate outlet. Both the product drawer and water outlet must fit. Pipe the return into the feed to reuse coolant; a full outlet pauses production rather than destroying it.",
             "Front lower left: power. Front right: blank input. Rear left, middle height: water inlet; directly below: returned water. Rear right: finished part. The visible splash tray, drain and coolant line serve those ports.",
             "Use Recipes to preview costs and required tools, then Lock recipe. Alumina blanks have two jobs: plates or bearing balls. Automatic defaults to the alphabetically first compatible job, so lock the product before automating. A running batch keeps its reserved inputs when you change the next job.",
+            "A Garnet Abrasive Head finishes steel shaft blanks only, in 300 ticks; a Cerium Polishing Head polishes optical blanks into lenses in 160 ticks. Neither machines hard fired ceramics. See Mineral Sand Processing.",
             "Finish an assembled Stainless Valve with the Felt Polishing Head: 240 ticks at 48 JE/t, returning the same 125 mB cooling water. Its alternate vessel recipes feed existing chemical equipment."
           ],
           "craft": {
@@ -6387,6 +6706,57 @@
             "result": "jugcraft:precision_finisher",
             "count": 1
           }
+        }
+      ]
+    },
+    {
+      "title": "Mineral Sand Processing",
+      "icon": "jugcraft:rare_earth_sand",
+      "pages": [
+        {
+          "title": "Start here: find and choose a sand",
+          "icon": "jugcraft:prospector",
+          "text": [
+            "Each family forms shallow beds with visible surface streaks in its own regions: titanium in the Dune Beach, the Overgrown Beach and Beach; zircon in the Outback, the Lush Desert, the Dry River, Desert and Badlands; rare earths in the Basin, the Lake District, the Lush River and River; garnet in the Gravel Beach, the Highland, the Shield, Stony Shore and Windswept Gravelly Hills. Beds appear only in newly generated chunks. The Prospector names each family; dig with any shovel or the powered Ore Drill. Every block is one finite feed unit and never regrows.",
+            "Garnet is the earliest line: a Pulverizer turns each sand into grit for a reusable sanding block or abrasive head. Titanium and rare earths start in the Mineral Conditioning Station with water; zircon starts in the Chemical Reactor with lye and water. Later steps reuse the Chemical Reactor, Industrial Oven, Arc Furnace, Alloy Smelter and Precision Finishing Station. No extra machine is needed.",
+            "Prepare reagents first: water for every line, chlorine and Coke for titanium sponge, lye for zirconia, and sulfuric acid for rare-earth recovery or white pigment. In multi-job stations open Recipes and lock the sand job before automating. Ordinary and red sand never gain these recipes. Saved Zircon Concentrate, zirconia precursor, charges and blanks still finish through their original recipes; concentrate can also enter the short zirconia recipe."
+          ]
+        },
+        {
+          "title": "Four sands, familiar machines",
+          "icon": "jugcraft:titanium_sand",
+          "text": [
+            "Each regional mineral-bearing sand has its own useful short processing route. Shovel startup feed or use the existing powered Ore Drill; the sand blocks themselves are the finite reserve. No extra extractor, separator or waste-processing line is required.",
+            "Titanium: two sand and 500 mB water in the Mineral Conditioner give one Raw Titanium. The existing Chemical Reactor takes that raw mineral, one Coke and 250 mB chlorine into Titanium Sponge; the Arc Furnace melts it into an ingot. Existing titanium equipment uses the result.",
+            "The reactor can instead turn one Raw Titanium, 250 mB sulfuric acid and 250 mB water into four White Dye. Pigment and metal are separate choices that each spend their feed. Ordinary sand does not gain these recipes."
+          ]
+        },
+        {
+          "title": "Short zirconia tooling",
+          "icon": "jugcraft:zirconia_insert",
+          "text": [
+            "The Chemical Reactor prepares one Zirconia Powder from four Zircon-rich Mineral Sand, 500 mB lye and 250 mB water, in 320 ticks. Two existing Zircon Concentrate can replace the four sand.",
+            "The Industrial Oven prepares and fires one powder directly into one Fired Zirconia Blank in 320 ticks at 80 JE/t. The Precision Finisher with its retained Diamond Abrasive Head makes two cutting inserts in 200 ticks at 48 JE/t and returns its 125 mB cooling water.",
+            "Inserts already make reusable polymer molds and extrusion dies. The older full ceramic route, regional concentrate recipe and expensive trace-sand recipe remain available for existing factories."
+          ]
+        },
+        {
+          "title": "Independent rare-earth recovery",
+          "icon": "jugcraft:rare_earth_oxide",
+          "text": [
+            "Two Rare-earth-rich Mineral Sand and 500 mB water give one mixed Rare Earth Oxide in the Mineral Conditioner. The Chemical Reactor uses one mixed oxide and 250 mB sulfuric acid for one 240-tick recovery batch.",
+            "Each batch rolls three independent 50% chances: one Neodymium Oxide, two Cerium Oxide and one Yttrium Oxide. Any combination is possible: all three occurs 12.5% of the time, and none also occurs 12.5%. A failed roll still spends the batch inputs and power. Reserve room for every possible output before processing; pausing or reloading never grants another roll.",
+            "One Neodymium Oxide and one Ferroboron make four existing Neodymium Magnets in the Alloy Smelter. Two Cerium Oxide upgrade a Felt Polishing Head into a reusable Cerium Polishing Head: one lens in 160 rather than 200 ticks. Yttrium Oxide replaces the ceramic body in an alternate existing Efficiency Upgrade recipe, with unchanged upgrade behavior."
+          ]
+        },
+        {
+          "title": "Garnet abrasives",
+          "icon": "jugcraft:garnet_grit",
+          "text": [
+            "The Pulverizer makes one Garnet Grit from one Garnet-rich Mineral Sand in 120 ticks. Craft a grit, wool and plank into a reusable sanding block; the Workshop Bench smooths cut sandstone or cut red sandstone, one block for one, in 200 ticks.",
+            "Four grit, an iron ingot and copper wire make a reusable Garnet Abrasive Head. In the same Precision Finisher socket it finishes a steel shaft blank in 300 ticks at 48 JE/t, returning its 125 mB cooling water. The diamond head is faster and still handles hard fired ceramics; garnet is not an optical polish.",
+            "All added heads are retained tools. There is no routine replacement, extra machine or abrasive refill. Existing machine recipe locks and blocked-output protections apply."
+          ]
         }
       ]
     },
@@ -6686,6 +7056,30 @@
           "text": [
             "Set a car on the line just behind a train's last car and use the Coupler on it: it joins the train, up to eight cars behind one locomotive, and the locomotive pulls or pushes them all. Sneak and use the Coupler to uncouple a car and those behind it, or every car from the locomotive.",
             "The locomotive burns diesel or kerosene: use a bucket of either on it (it holds eight). Each notch of throttle burns 2 mB a second. Cargo Wagons hold 27 stacks, opened by using them anywhere along the line; coaches seat four."
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Powered Ore Surveys",
+      "icon": "jugcraft:jimta_ore_scanner",
+      "pages": [
+        {
+          "title": "Ore Scanner",
+          "icon": "jugcraft:jimta_ore_scanner",
+          "text": [
+            "A powered upgrade in convenience over the Geo-Resonance Prospector: 250,000 JE, doubled by each of two Capacity Modules.",
+            "Use for a loaded 3x3-chunk survey at 500 JE per completed scan. Distance bands describe the nearest detected sample, not an exact ore location. Shift-use to reopen the last saved survey for free.",
+            "Use the survey screen filters, page controls and recent history. Coverage reports skipped terrain; no signal is not proof that no ore exists."
+          ]
+        },
+        {
+          "title": "Advanced Ore Scanner",
+          "icon": "jugcraft:jimta_advanced_ore_scanner",
+          "text": [
+            "The same battery capacity with better instrumentation: detailed 3x3 sampling costs 1,000 JE; wide 5x5 sampling costs 4,000 JE.",
+            "Shift-use to switch mode. Detailed readings add eight-block distance bands, compass bearings and approximate depth bands. Distance refers to the nearest sampled resource.",
+            "Sprint and shift-use to reopen the last saved survey without spending energy. Surveying unloaded terrain never generates or loads chunks."
           ]
         }
       ]

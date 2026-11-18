@@ -71,16 +71,16 @@ import net.minecraft.world.phys.Vec3;
  * reaches farther, {@value Encounter#REACH} blocks (lair/Encounter), than the arena keeps other tests (at least 43.5
  * blocks from his centre), so another test's player may take part in it while it is on: these tests assert exact counts
  * and experience shares only for a fight begun and ended within one synchronous block, where nothing else runs, and
- * otherwise only what their own players got.
+ * otherwise only what their own players got. Its helpers are shared with {@link CinderTyrantConcordanceGameTests}.
  */
 public class CinderTyrantGameTests {
 	/** An arena of air the kiln's width and length (72 x 80), so everything of his fight is loaded and ticking. */
-	private static final String KILN = "jugcraft-test:kiln_bowl";
+	static final String KILN = "jugcraft-test:kiln_bowl";
 	/**
 	 * A new player cannot be hurt until its client has loaded the world, or for 60 ticks; a mock player has no client, so
 	 * a test that hurts one waits this long first.
 	 */
-	private static final int LOADING_TICKS = 80;
+	static final int LOADING_TICKS = 80;
 	/** A creature hurt shrugs off a blow no harder than the last for 10 ticks after (vanilla's); a test waits this long between blows. */
 	private static final int HURT_COOLDOWN = 12;
 	/** How many shares a page test rolls: each count then lies far inside five standard deviations of its chance's mean. */
@@ -94,17 +94,17 @@ public class CinderTyrantGameTests {
 	}
 
 	/** The origin of a kiln laid out from the arena's corner, a block under it: its crucible's floor on the arena's. */
-	private static BlockPos origin(GameTestHelper helper) {
+	static BlockPos origin(GameTestHelper helper) {
 		return helper.absolutePos(new BlockPos(0, -1, 0));
 	}
 
 	/** He waits sunk in the crucible of the kiln laid out from {@code origin}. */
-	private static CinderTyrantEntity waiting(GameTestHelper helper, BlockPos origin) {
+	static CinderTyrantEntity waiting(GameTestHelper helper, BlockPos origin) {
 		return CinderTyrantEntity.summon(helper.getLevel(), origin, null);
 	}
 
 	/** The bowl's cracked basalt under the template's cells {@code x0..x1}, {@code z0..z1}, for him and players to stand on. */
-	private static void floor(ServerLevel level, BlockPos origin, int x0, int z0, int x1, int z1) {
+	static void floor(ServerLevel level, BlockPos origin, int x0, int z0, int x1, int z1) {
 		for (int x = x0; x <= x1; x++) {
 			for (int z = z0; z <= z1; z++) {
 				level.setBlockAndUpdate(origin.offset(x, CinderKiln.BOWL, z), JugcraftLairs.CRACKED_BASALT.defaultBlockState());
@@ -113,7 +113,7 @@ public class CinderTyrantGameTests {
 	}
 
 	/** Trough stone, flooded or dry, in the bowl's floor under the template's cells {@code x0..x1}, {@code z0..z1}. */
-	private static void trough(ServerLevel level, BlockPos origin, int x0, int z0, int x1, int z1, boolean flooded) {
+	static void trough(ServerLevel level, BlockPos origin, int x0, int z0, int x1, int z1, boolean flooded) {
 		for (int x = x0; x <= x1; x++) {
 			for (int z = z0; z <= z1; z++) {
 				level.setBlockAndUpdate(origin.offset(x, CinderKiln.BOWL, z),
@@ -123,7 +123,7 @@ public class CinderTyrantGameTests {
 	}
 
 	/** A survival player standing {@code dx}, {@code dz} from his bowl's centre, on its floor. */
-	private static ServerPlayer player(GameTestHelper helper, CinderTyrantEntity tyrant, double dx, double dz) {
+	static ServerPlayer player(GameTestHelper helper, CinderTyrantEntity tyrant, double dx, double dz) {
 		ServerPlayer player = helper.makeMockServerPlayerInLevel();
 		player.setGameMode(GameType.SURVIVAL);
 		Vec3 at = tyrant.centre().add(dx, 0.0, dz);
@@ -132,14 +132,14 @@ public class CinderTyrantGameTests {
 	}
 
 	/** Puts him in the middle of his bowl on its floor, facing south. */
-	private static void middle(CinderTyrantEntity tyrant) {
+	static void middle(CinderTyrantEntity tyrant) {
 		Vec3 centre = tyrant.centre();
 		tyrant.teleportTo(centre.x, tyrant.floorY(), centre.z);
 		tyrant.setYRot(0.0F);
 	}
 
 	/** Checks {@code body}, then sends him away whether it passed or failed, so a failed test leaves no Tyrant fighting on. */
-	private static void ending(ServerLevel level, CinderTyrantEntity tyrant, Runnable body) {
+	static void ending(ServerLevel level, CinderTyrantEntity tyrant, Runnable body) {
 		try {
 			body.run();
 		} finally {

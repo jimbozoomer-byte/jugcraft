@@ -56,17 +56,25 @@ public final class Jugs {
 	public static final class Data extends SavedData {
 		public static final Codec<Data> CODEC = RecordCodecBuilder.create(i -> i.group(
 				Codec.unboundedMap(UUIDUtil.STRING_CODEC, Codec.LONG).fieldOf("balances").forGetter(d -> d.balances),
-                Codec.unboundedMap(Codec.STRING, TownCommissions.Delivery.CODEC).optionalFieldOf("civic", Map.of()).forGetter(d -> d.civic))
+                Codec.unboundedMap(Codec.STRING, TownCommissions.Delivery.CODEC).optionalFieldOf("civic", Map.of()).forGetter(d -> d.civic),
+                ApartmentBook.CODEC.optionalFieldOf("apartments").forGetter(d -> java.util.Optional.of(d.apartments)),
+                Codec.unboundedMap(UUIDUtil.STRING_CODEC,net.minecraft.core.BlockPos.CODEC.listOf()).optionalFieldOf("reclaim_locations",Map.of()).forGetter(d->d.reclaimLocations))
 				.apply(i, Data::new));
 		static final SavedDataType<Data> TYPE = new SavedDataType<>(Jugcraft.id("jugs"), Data::new, CODEC, null);
 
 		private final Map<UUID, Long> balances = new HashMap<>();
         final Map<String, TownCommissions.Delivery> civic = new HashMap<>();
+        final ApartmentBook apartments;
+        final Map<UUID,java.util.List<net.minecraft.core.BlockPos>> reclaimLocations = new HashMap<>();
 
 		Data() {
+			apartments = new ApartmentBook();
 		}
 
-		Data(Map<UUID, Long> saved, Map<String, TownCommissions.Delivery> civic) {
+		Data(Map<UUID, Long> saved, Map<String, TownCommissions.Delivery> civic, java.util.Optional<ApartmentBook> apartments,
+                Map<UUID,java.util.List<net.minecraft.core.BlockPos>> reclaimLocations) {
+            this.reclaimLocations.putAll(reclaimLocations);
+            this.apartments = apartments.orElseGet(ApartmentBook::new);
             this.civic.putAll(civic);
 			saved.forEach((player, balance) -> {
 				if (balance > 0) {

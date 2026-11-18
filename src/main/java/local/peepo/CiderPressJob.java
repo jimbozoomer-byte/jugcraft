@@ -33,6 +33,10 @@ public final class CiderPressJob implements CompanionJob {
     private PeepoEntity occupant(){return press.getLevel() instanceof ServerLevel l && worker!=null && l.getEntity(worker) instanceof PeepoEntity p?p:null;}
     private void expire(){if(worker!=null && (press.isRemoved() || occupant()==null || !occupant().isAlive() || press.getLevel().getGameTime()>lease))removed();}
     public void removed(){var p=occupant();if(p!=null)p.setWorkAnimation(WorkAnimation.NONE,stationPosition());worker=null;nextSpace=0;}
+    public boolean finishLoadedBatch(PeepoEntity p){return press.companionStatus()==CompanionStatus.READY;}
+    public boolean collectAfterWork(){return true;}
+    /** Finish the current cheese before collecting its pomace, then bottle the juice on a real Supply trip. */
+    public boolean completionNeedsSupplies(PeepoEntity p){return press.apples()==0 && press.pulp()==0 && press.juice()>0;}
     public Kind kind(){return Kind.WORK;}
     public WorkAnimation animation(){return WorkAnimation.PRESS;}
     public void approachFailed(PeepoEntity npc){nextSpace=nextClearance=0;entrance=null;}

@@ -2805,5 +2805,47 @@
     "source_model": "jugcraft:block/harvest/dinner_roll",
     "source_texture": "minecraft:block/sandstone_top",
     "native_geometry": true
+  },
+  {
+    "id": "jugcraft:ember_onion_pasty",
+    "family": "bread",
+    "source_model": "jugcraft:block/guild_kitchen/ember_onion_pasty",
+    "source_texture": "jugcraft:block/guild/crust",
+    "native_geometry": true
+  },
+  {
+    "id": "jugcraft:saltcap_skewers",
+    "family": "meat",
+    "source_model": "jugcraft:block/guild_kitchen/saltcap_skewers",
+    "source_texture": "jugcraft:block/guild/mushroom",
+    "native_geometry": true
+  },
+  {
+    "id": "jugcraft:golden_leek_tart",
+    "family": "slice",
+    "source_model": "jugcraft:block/guild_kitchen/golden_leek_tart",
+    "source_texture": "jugcraft:block/guild/crust",
+    "native_geometry": true
+  },
+  {
+    "id": "jugcraft:emberpepper_hotpot",
+    "family": "bowl",
+    "source_model": "jugcraft:block/guild_kitchen/emberpepper_hotpot",
+    "source_texture": "jugcraft:block/guild/pepper",
+    "native_geometry": true
+  },
+  {
+    "id": "jugcraft:caveberry_shrub",
+    "family": "bottle",
+    "source_model": "jugcraft:block/guild_kitchen/caveberry_shrub",
+    "source_texture": "jugcraft:block/guild/berry",
+    "native_geometry": true
+  },
+  {
+    "id": "jugcraft:glowroot_steep",
+    "family": "bottle",
+    "source_model": "jugcraft:block/guild_kitchen/glowroot_steep",
+    "source_texture": "jugcraft:block/guild/teal",
+    "native_geometry": true
   }
 ]

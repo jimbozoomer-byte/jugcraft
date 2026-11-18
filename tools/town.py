@@ -247,12 +247,13 @@ class Town:
 
     # ------------------------------------------------ the wall, towers and gatehouses
 
-    def wall(self):
+    def wall(self, gates=None):
+        gates = GATES if gates is None else gates
         rng = self.rng
         n = len(self.points)
         gate_boxes = []
         # Gatehouses first, so the wall leaves their passage open.
-        for i, outward in GATES.items():
+        for i, outward in gates.items():
             vx, vz = self.points[i]
             ux, uz = math.cos(2 * math.pi * i / VERTICES), math.sin(2 * math.pi * i / VERTICES)
             cx, cz = vx - ux * 2.5, vz - uz * 2.5
@@ -273,7 +274,7 @@ class Town:
         def in_gate(x, z):
             return any(b[0] <= x <= b[2] and b[1] <= z <= b[3] for b in gate_boxes)
 
-        towers = [self.points[i] for i in range(n) if i not in GATES]
+        towers = [self.points[i] for i in range(n) if i not in gates]
         for z in range(SIZE):
             for x in range(SIZE):
                 d = self.sd[z, x]
@@ -753,13 +754,17 @@ def tree(v, rng, x, z, kind):
 
 
 def centerpiece_site(x0, z0, x1, z1):
-    """The square's centrepiece: one site spanning its plinth and the air above (up to 13 high); each theme fills its
-    own blocks (slot numbers index tools/town_decor.py's CENTERPIECES)."""
+    """Keep the original plinth slots first, then append the larger civic fir’s authored positions."""
     blocks = []
     for x in range(x0, x1 + 1):
         for z in range(z0, z1 + 1):
             for y in range(1, 14):
                 blocks.append([x, y, z, (x - x0) + 7 * (z - z0) + 49 * (y - 1)])
+    from civic_fir import blocks as fir_blocks, slot
+    for dx, y, dz in sorted(fir_blocks()):
+        key = slot(dx, y, dz)
+        if key >= 637:
+            blocks.append([(x0 + x1) // 2 + dx, y, (z0 + z1) // 2 + dz, key])
     return {"kind": "centerpiece", "facing": "north", "blocks": blocks}
 
 

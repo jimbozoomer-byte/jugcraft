@@ -39,6 +39,20 @@ public final class AssignmentPreview {
             for(int row=0;row<assignments.size();row++){
                 var target=assignments.get(row);
                 if(target==null || !target.local(mc.level) || !mc.level.hasChunkAt(target.at().pos()) || target.at().pos().distToCenterSqr(mc.player.position())>128*128)continue;
+                if(target.staffPost()){
+                    var pos=target.at().pos();int color=target.present(mc.level)?0xFF55FF88:0xFFFF8844;
+                    frames.add(new Frame(new AABB(pos).inflate(.025).move(-camera.x,-camera.y,-camera.z),color));
+                    var from=net.minecraft.world.phys.Vec3.atCenterOf(pos).add(0,.55,0).subtract(camera);
+                    var forward=new net.minecraft.world.phys.Vec3(target.face().getStepX(),0,target.face().getStepZ());
+                    var side=new net.minecraft.world.phys.Vec3(-forward.z,0,forward.x);
+                    var tip=from.add(forward.scale(.85));var wing=tip.subtract(forward.scale(.24));
+                    var a=wing.add(side.scale(.16));var b=wing.subtract(side.scale(.16));
+                    context.submitNodeCollector().submitCustomGeometry(context.poseStack(),RenderTypes.lines(),(pose,c)->{
+                        line(pose,c,from.x,from.y,from.z,tip.x,tip.y,tip.z,color);
+                        line(pose,c,tip.x,tip.y,tip.z,a.x,a.y,a.z,color);
+                        line(pose,c,tip.x,tip.y,tip.z,b.x,b.y,b.z,color);
+                    });continue;
+                }
                 if(target.fishing() && target.fishingWater()!=null){
                     frames.add(new Frame(new AABB(target.at().pos()).inflate(.025).move(-camera.x,-camera.y,-camera.z),0xFF55FF66));
                     frames.add(new Frame(new AABB(target.fishingWater()).inflate(.025).move(-camera.x,-camera.y,-camera.z),CompanionWater.source(mc.level,target.fishingWater())?0xFF55FF66:0xFFFF8844));

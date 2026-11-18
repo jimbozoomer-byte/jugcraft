@@ -56,6 +56,8 @@ public class GourdStemBlock extends VegetationBlock implements BonemealableBlock
 		return JugcraftAgriculture.block(gourdId);
 	}
 
+	public net.minecraft.world.item.Item seed() { return JugcraftAgriculture.item(seedId); }
+
 	@Override
 	protected boolean mayPlaceOn(BlockState state, BlockGetter level, BlockPos pos) {
 		return state.is(BlockTags.SUPPORTS_STEM_CROPS);

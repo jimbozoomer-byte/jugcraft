@@ -117,7 +117,10 @@ public class ConcordanceGameTests {
 		SpellExecution.performSpell(level, player, spell, SpellTarget.SearchResult.empty(), SpellCast.Action.RELEASE, 1.0F);
 	}
 
-	/** Jugcraft's own rules load whole: one entry with no prerequisite, its invocation and three workings. */
+	/**
+	 * Jugcraft's own rules load whole: one entry with no prerequisite, its invocation and four workings (the three lanterns
+	 * and the Glass Accord, docs/features/glass-chapel.md).
+	 */
 	@GameTest(maxTicks = 20)
 	public void rulesLoadClean(GameTestHelper helper) {
 		ConcordanceRules rules = ConcordanceData.rules();
@@ -125,7 +128,8 @@ public class ConcordanceGameTests {
 		helper.assertTrue(rules.research(FIRST_LIGHT) != null && rules.entryPoints().contains(FIRST_LIGHT),
 				"First Light loads and needs nothing before it");
 		helper.assertTrue(rules.invocationForSpell(KINDLE) != null, "Kindle is the invocation for the kindle spell");
-		helper.assertTrue(rules.workings().size() == 3, "Three bench workings load: " + rules.workings().keySet());
+		helper.assertTrue(rules.workings().size() == 4 && rules.workings().containsKey("jugcraft:glass_accord"),
+				"Four bench workings load, the Glass Accord's among them: " + rules.workings().keySet());
 		// A broken file from some data pack is left out with a reason; the good one beside it still loads.
 		ConcordanceRules mixed = ConcordanceRules.build(List.of(
 				new ConcordanceRules.Source("research", "test:broken", JsonParser.parseString("{\"schema\": 1, \"colour\": \"red\"}")),

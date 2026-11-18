@@ -139,12 +139,23 @@ public final class Jugcraft implements ModInitializer {
 		JugcraftExosuit.register();
 		JugcraftGrapple.register();
 		io.github.jimbozoomer.jugcraft.weapons.JugcraftArms.register();
+		io.github.jimbozoomer.jugcraft.weapons.NavalCutlassItem.register();
+		io.github.jimbozoomer.jugcraft.weapons.HuntingWeapons.register();
 		io.github.jimbozoomer.jugcraft.guns.JugcraftGuns.register();
+		io.github.jimbozoomer.jugcraft.pharmacology.Pharmacology.register();
 		io.github.jimbozoomer.jugcraft.weapons.FieldChemistry.register();
 		io.github.jimbozoomer.jugcraft.chemistry.ConstructionChemistry.register();
 		JugcraftGuide.register();
 		JugcraftFinance.register();
+		io.github.jimbozoomer.jugcraft.server.TownDispatch.register();
 		JugcraftAgriculture.register();
+		io.github.jimbozoomer.jugcraft.furniture.HotSpringFurnishings.register();
+		io.github.jimbozoomer.jugcraft.agriculture.PeppermintLamps.register();
+        io.github.jimbozoomer.jugcraft.agriculture.HarbourGiftFir.register();
+        io.github.jimbozoomer.jugcraft.town.WinterMarket.register();
+		io.github.jimbozoomer.jugcraft.agriculture.WinterTrimmings.register();
+		// Star-bred lines: farm animals carry a line, take a sign from the sky, and the Astrawand reads them.
+		io.github.jimbozoomer.jugcraft.lineage.Lineage.register();
 		io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialCrops.register();
 		io.github.jimbozoomer.jugcraft.lair.JugcraftLairs.register();
 		io.github.jimbozoomer.jugcraft.lair.vesperine.JugcraftVesperine.register();
@@ -158,6 +169,8 @@ public final class Jugcraft implements ModInitializer {
 		io.github.jimbozoomer.jugcraft.lair.king.JugcraftPumpkinKing.register();
 		io.github.jimbozoomer.jugcraft.lair.horseman.JugcraftHorseman.register();
 		io.github.jimbozoomer.jugcraft.lair.sentinel.JugcraftSentinel.register();
+		io.github.jimbozoomer.jugcraft.lair.roc.JugcraftRoc.register();
+		io.github.jimbozoomer.jugcraft.lair.abbot.JugcraftAbbot.register();
 		io.github.jimbozoomer.jugcraft.styx.JugcraftStyx.register();
 		JugcraftDrones.register();
 		io.github.jimbozoomer.jugcraft.tower.JugcraftTower.register();
@@ -178,8 +191,13 @@ public final class Jugcraft implements ModInitializer {
 		JugcraftRegions.register();
 		JugcraftDimensions.register();
 		JugcraftSeasons.register();
+		io.github.jimbozoomer.jugcraft.season.Beardshy.register();
 		new io.github.jimbozoomer.jugcraft.creatures.scary.ScaryMod().onInitialize();
 		io.github.jimbozoomer.jugcraft.creatures.chima.ChimaMod.register();
+		// The Pegasus, a flying horse (docs/features/pegasus.md).
+		io.github.jimbozoomer.jugcraft.pegasus.JugcraftPegasus.register();
+		// Five horse breeds, their saddlebags and crossbreeding (docs/features/horse-breeds.md).
+		io.github.jimbozoomer.jugcraft.horses.HorseBreeds.register();
 		io.github.jimbozoomer.jugcraft.server.ServerUtilities.register();
 		io.github.jimbozoomer.jugcraft.town.JugcraftTown.register();
 		io.github.jimbozoomer.jugcraft.concordance.JugcraftConcordance.register();
@@ -198,6 +216,7 @@ public final class Jugcraft implements ModInitializer {
         io.github.jimbozoomer.jugcraft.aquatic.OwnerAquaculture.register();
         io.github.jimbozoomer.jugcraft.ribbits.OwnerRibbits.register();
         io.github.jimbozoomer.jugcraft.menagerie.OwnerSupplementaries.register();
+        io.github.jimbozoomer.jugcraft.menagerie.PirateShips.register();
         io.github.jimbozoomer.jugcraft.menagerie.OwnerAmendments.register();
         io.github.jimbozoomer.jugcraft.botany.Jugtania.register();
         io.github.jimbozoomer.jugcraft.arcane.ForbiddenArcane.register();

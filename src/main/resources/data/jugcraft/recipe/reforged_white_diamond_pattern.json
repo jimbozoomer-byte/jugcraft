@@ -1,0 +1,24 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "machines"
+    }
+  ],
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "QQQ",
+    "DPD",
+    "QQQ"
+  ],
+  "key": {
+    "Q": "minecraft:quartz",
+    "D": "minecraft:diamond",
+    "P": "minecraft:paper"
+  },
+  "result": {
+    "id": "jugcraft:reforged_white_diamond_pattern",
+    "count": 4
+  }
+}

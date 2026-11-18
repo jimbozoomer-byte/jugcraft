@@ -45,7 +45,7 @@ import net.minecraft.world.phys.Vec3;
  * In-game tests for Arms VII (batch 56): every variant is registered as an arm of its kind with its line's perk; each
  * boon does what it says when its arm strikes, as the server works it; each style's smithing recipe and pattern recipe
  * load; each boss's loot table drops one of its two trophies; an armor set's arm, epic and as hard-wearing as a
- * trophy, has no recipe and no boss table yet (creative only until the owner settles how a set is won); and an armor
+ * trophy, has no recipe and no trophy table of its own (its set's boss gives it: ArmorTiersGameTests); and an armor
  * set's shield blocks as its base shield does. Wielders are
  * mock players facing south (+z) with a full attack charge; foes are still pigs (living, not undead, so poison and the
  * rest take) or, for Gravebane, husks.
@@ -213,7 +213,7 @@ public class ArmsVIIGameTests {
 
 	/**
 	 * Every style variant's smithing recipe and every pattern's recipe load; each boss's table drops only its trophies;
-	 * an armor set's arm has no recipe, and its set no boss table, yet.
+	 * an armor set's arm has no recipe, and its set no trophy table of its own.
 	 */
 	@GameTest(maxTicks = 20)
 	public void recipesAndTrophyTablesLoad(GameTestHelper helper) {
@@ -231,7 +231,7 @@ public class ArmsVIIGameTests {
 			}
 		}
 		helper.assertTrue(missing.isEmpty(), "These recipes did not load: " + missing);
-		// An armor set's arm is creative only until the owner settles how a set is won: no recipe, no boss table.
+		// An armor set's arm comes only from its set's boss (docs/features/armor-tier-sources.md): no recipe, no trophy table.
 		for (ArmVariants.Variant variant : ArmVariants.VARIANTS) {
 			if (!ArmVariants.SETS.contains(variant.line())) {
 				continue;

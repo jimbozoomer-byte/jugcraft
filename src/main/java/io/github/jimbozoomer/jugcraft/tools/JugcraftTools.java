@@ -44,9 +44,9 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
  * station that fills them from cables.
  */
 public final class JugcraftTools {
-	public static final long DRILL_CAPACITY = 100_000;
+	public static final long DRILL_CAPACITY = 250_000;
 	public static final long DRILL_ENERGY_PER_BLOCK = 60;
-	public static final long CHAINSAW_CAPACITY = 100_000;
+	public static final long CHAINSAW_CAPACITY = 250_000;
 	public static final long CHAINSAW_ENERGY_PER_BLOCK = 40;
 	/** Blocks the drill mines fast: everything a pickaxe or shovel mines (data/jugcraft/tags/block/mineable/drill.json). */
 	public static final TagKey<Block> MINEABLE_WITH_DRILL = TagKey.create(Registries.BLOCK, Jugcraft.id("mineable/drill"));
@@ -62,12 +62,14 @@ public final class JugcraftTools {
 	public static DataComponentType<Integer> OVERCLOCK;
 	public static DataComponentType<Integer> RANGE;
 	public static DataComponentType<Integer> CAPACITY;
+    public static DataComponentType<Integer> EFFICIENCY;
 	public static final Map<ToolUpgrades.Kind, Item> MODULES = new EnumMap<>(ToolUpgrades.Kind.class);
 	public static Item MINING_DRILL;
 	public static Item CHAINSAW;
 	public static Item ROCKET_PACK;
 	public static Block CHARGING_STATION;
 	public static BlockEntityType<ChargingStationBlockEntity> CHARGING_STATION_ENTITY;
+    public static net.minecraft.world.inventory.MenuType<ChargingStationMenu> CHARGING_STATION_MENU;
 
 	private JugcraftTools() {
 	}
@@ -79,6 +81,7 @@ public final class JugcraftTools {
 		OVERCLOCK = intComponent("overclock");
 		RANGE = intComponent("range");
 		CAPACITY = intComponent("capacity");
+        EFFICIENCY = intComponent("tool_efficiency");
 		for (ToolUpgrades.Kind kind : ToolUpgrades.Kind.values()) {
 			MODULES.put(kind, item(kind.id + "_module", properties -> new UpgradeModuleItem(properties.stacksTo(16), kind)));
 		}
@@ -103,7 +106,9 @@ public final class JugcraftTools {
 				new BlockItem(CHARGING_STATION, new Item.Properties().setId(stationItem).useBlockDescriptionPrefix()));
 		CHARGING_STATION_ENTITY = Registry.register(BuiltInRegistries.BLOCK_ENTITY_TYPE, Jugcraft.id("charging_station"),
 				FabricBlockEntityTypeBuilder.create(ChargingStationBlockEntity::new, CHARGING_STATION).build());
-		// Cables reach the station through either half.
+		CHARGING_STATION_MENU = Registry.register(BuiltInRegistries.MENU, Jugcraft.id("charging_station"),
+                new net.minecraft.world.inventory.MenuType<>(ChargingStationMenu::new, net.minecraft.world.flag.FeatureFlags.VANILLA_SET));
+        // Cables reach the station through either half.
 		EnergyStorage.SIDED.registerForBlocks((level, pos, state, entity, side) ->
 				level.getBlockEntity(ChargingStationBlock.lowerPos(state, pos)) instanceof ChargingStationBlockEntity station
 						? station.energy : null, CHARGING_STATION);

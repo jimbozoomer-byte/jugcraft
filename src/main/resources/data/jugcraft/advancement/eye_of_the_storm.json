@@ -1,0 +1,22 @@
+{
+  "parent": "minecraft:adventure/root",
+  "display": {
+    "icon": {
+      "id": "jugcraft:stormcaller"
+    },
+    "title": {
+      "translate": "advancements.jugcraft.eye_of_the_storm.title"
+    },
+    "description": {
+      "translate": "advancements.jugcraft.eye_of_the_storm.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true
+  },
+  "criteria": {
+    "done": {
+      "trigger": "minecraft:impossible"
+    }
+  }
+}

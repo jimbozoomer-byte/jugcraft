@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    "minecraft:skeleton_skull",
+    "jugcraft:jugtania_life_essence",
+    "jugcraft:jugtania_life_essence",
+    "jugcraft:jugtania_life_essence",
+    "jugcraft:jugtania_life_essence"
+  ],
+  "result": {
+    "id": "jugcraft:jugtania_gaia_head",
+    "count": 1
+  }
+}

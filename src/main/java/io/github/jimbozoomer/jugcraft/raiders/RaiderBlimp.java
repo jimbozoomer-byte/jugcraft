@@ -38,8 +38,14 @@ import org.jspecify.annotations.Nullable;
  * fall damage; flak, arrows and anything else that reaches it bring it down.
  *
  * <p>Its pilot ({@link RaiderCrew}) sits at the helm of the gondola. Without its pilot a crewed blimp drifts, smokes
- * and goes down; when it falls, the pilot bails out and drifts down to fight on foot. A blimp that has got no nearer
- * where it is going for {@value #STUCK_TICKS} ticks (a hill or a tall building in its way) climbs higher for a while.
+ * and goes down; when it falls, the pilot bails out and drifts down to fight on foot.
+ *
+ * <p>On the walled town it comes in over one of the town's gates ({@link CityRaidApproach}), where the gate's guards and
+ * the nearest tower guns can see it, before it makes for the middle; it looks {@value #LOOK_AHEAD} blocks ahead and rises
+ * over towers and spires before it reaches them. Stuck recovery is bounded: a blimp that has got no nearer where it is
+ * going for {@value #STUCK_TICKS} ticks climbs {@value #STUCK_CLIMB} blocks higher for a while, then higher again, at
+ * most {@value #MAX_CLIMBS} times; still stuck, a blimp of a raid gives up the guard it hunts
+ * ({@link RaidEngagement}), or, with nobody to hunt, holds over its gate's forecourt in sight of the guns.
  */
 public class RaiderBlimp extends Monster implements Raider {
 	private static final int CLEARANCE = 8;
@@ -47,7 +53,18 @@ public class RaiderBlimp extends Monster implements Raider {
 	static final int STUCK_TICKS = 100;
 	static final int STUCK_CLIMB = 8;
 	static final int CLIMB_TICKS = 200;
+	/** Climbs it tries for one heading before it gives that heading up. */
+	static final int MAX_CLIMBS = 2;
+	/** How far ahead it looks for what it must rise over, in blocks. */
+	static final int LOOK_AHEAD = 12;
 	private final RaidMember member = new RaidMember();
+	/** Its memory of its fight in a raid (made when first asked for). */
+	private @Nullable RaidEngagement engagement;
+	/** The town approach it comes in by (null off the town), whether it has been over it, and whether it holds there. */
+	private CityRaidApproach.@Nullable Approach approach;
+	private boolean approached;
+	private boolean holding;
+	private int climbs;
 	private int bomb = JugcraftRaiders.BLIMP_BOMB_COOLDOWN;
 	/** Whether it has had a crew (saved): a blimp that has lost its crew fails; one that never had one flies as before. */
 	private boolean crewed;
@@ -70,9 +87,54 @@ public class RaiderBlimp extends Monster implements Raider {
 				.add(Attributes.KNOCKBACK_RESISTANCE, 0.6);
 	}
 
+	/** Guards only ({@link RaiderTargets}); in a raid, not one it has given up ({@link RaidEngagement#allows}). */
 	@Override
 	public boolean canAttack(net.minecraft.world.entity.LivingEntity target) {
-		return RaiderTargets.allowed(target) && super.canAttack(target);
+		return RaiderTargets.allowed(target) && engagement().allows(target) && super.canAttack(target);
+	}
+
+	@Override
+	public RaidEngagement engagement() {
+		if (engagement == null) {
+			engagement = new RaidEngagement(this);
+		}
+		return engagement;
+	}
+
+	/** Whether it has given up getting further and holds over its approach. */
+	public boolean holding() {
+		return holding;
+	}
+
+	/**
+	 * With nobody to hunt, where it flies and what that heading is (for the stuck count): on the town first over its
+	 * approach (gates first), then the objective; once it has given up, over its approach for good.
+	 */
+	private Object cityHeading(ServerLevel level, BlockPos objective, Vec3[] over) {
+		BlockPos origin = io.github.jimbozoomer.jugcraft.town.Town.origin(level);
+		if (origin == null || !objective.equals(io.github.jimbozoomer.jugcraft.town.Town.centre(origin))) {
+			over[0] = Vec3.atBottomCenterOf(objective);
+			return objective;
+		}
+		if (approach == null) {
+			approach = CityRaidApproach.choose(origin, position(), java.util.Set.<Integer>of());
+		}
+		if (approach == null) {
+			over[0] = Vec3.atBottomCenterOf(objective);
+			return objective;
+		}
+		Vec3 front = Vec3.atBottomCenterOf(approach.front());
+		if (!approached && !holding) {
+			double dx = front.x - getX();
+			double dz = front.z - getZ();
+			approached = dx * dx + dz * dz <= 64.0;
+		}
+		if (holding || !approached) {
+			over[0] = front;
+			return approach;
+		}
+		over[0] = Vec3.atBottomCenterOf(objective);
+		return objective;
 	}
 
 	@Override
@@ -127,35 +189,64 @@ public class RaiderBlimp extends Monster implements Raider {
 			return;
 		}
 		abandoned = 0;
+		engagement().tick();
 		LivingEntity target = getTarget();
 		if (target != null && !target.isAlive()) {
 			setTarget(null);
 			target = null;
 		}
-		Vec3 over = target != null ? target.position() : member.objective != null ? Vec3.atBottomCenterOf(member.objective) : null;
-		if (over == null) {
+		Vec3[] goal = {null};
+		Object heading = target != null ? target : member.objective != null ? cityHeading(level, member.objective, goal) : null;
+		Vec3 over = target != null ? target.position() : goal[0];
+		if (over == null || heading == null) {
 			// Nothing to do: hold station, drifting gently down to cruising height over the ground.
 			setDeltaMovement(getDeltaMovement().scale(0.8));
 			return;
 		}
 		double ground = level.getHeight(Heightmap.Types.MOTION_BLOCKING, getBlockX(), getBlockZ());
-		// Stuck against a hill or a tower: climb over it for a while. A new target or objective starts the count afresh.
-		Object heading = target != null ? target : member.objective;
+		// Look ahead along its way and rise over a tower or a spire before it gets there (loaded chunks only).
+		double ox = over.x - getX();
+		double oz = over.z - getZ();
+		double length = Math.sqrt(ox * ox + oz * oz);
+		if (length > 1.0) {
+			for (int ahead = 4; ahead <= LOOK_AHEAD; ahead += 4) {
+				double k = Math.min(ahead, length) / length;
+				int ax = net.minecraft.util.Mth.floor(getX() + ox * k);
+				int az = net.minecraft.util.Mth.floor(getZ() + oz * k);
+				if (level.isLoaded(new BlockPos(ax, getBlockY(), az))) {
+					ground = Math.max(ground, level.getHeight(Heightmap.Types.MOTION_BLOCKING, ax, az));
+				}
+			}
+		}
+		// Stuck against a hill or a tower: climb over it for a while, then higher; at most MAX_CLIMBS times, then give the
+		// heading up. A new target or heading starts the count afresh.
 		if (heading != goingFor) {
 			goingFor = heading;
 			nearest = Double.MAX_VALUE;
 			noCloser = 0;
+			climbs = 0;
 		}
 		double away = new Vec3(over.x - getX(), 0, over.z - getZ()).horizontalDistanceSqr();
 		if (away < nearest - 1.0 || away <= JugcraftRaiders.BLIMP_BOMB_REACH * JugcraftRaiders.BLIMP_BOMB_REACH) {
 			nearest = away;
 			noCloser = 0;
 		} else if (++noCloser >= STUCK_TICKS) {
-			climbing = CLIMB_TICKS;
 			noCloser = 0;
 			nearest = away;
+			if (climbs < MAX_CLIMBS) {
+				climbs++;
+				climbing = CLIMB_TICKS;
+			} else if (!RaidEngagement.inRaid(this)) {
+				climbs = 0;   // a blimp of no raid keeps trying, as it always did
+			} else if (target != null) {
+				engagement().giveUp(target);
+				climbs = 0;
+			} else if (!holding) {
+				holding = true;   // over its gate's forecourt, in sight of the guns
+				climbs = 0;
+			}
 		}
-		double cruise = Math.max(over.y + JugcraftRaiders.BLIMP_CRUISE, ground + CLEARANCE) + (climbing > 0 ? STUCK_CLIMB : 0);
+		double cruise = Math.max(over.y + JugcraftRaiders.BLIMP_CRUISE, ground + CLEARANCE) + (climbing > 0 ? STUCK_CLIMB * Math.max(1, climbs) : 0);
 		if (climbing > 0) {
 			climbing--;
 		}
@@ -171,7 +262,9 @@ public class RaiderBlimp extends Monster implements Raider {
 		}
 		double dx = over.x - getX();
 		double dz = over.z - getZ();
-		if (--bomb <= 0 && dx * dx + dz * dz <= JugcraftRaiders.BLIMP_BOMB_REACH * JugcraftRaiders.BLIMP_BOMB_REACH) {
+		// Bombs for a guard it hunts, or over the objective; none over the approach it comes in by or holds over.
+		boolean bombing = target != null || heading == member.objective;
+		if (--bomb <= 0 && bombing && dx * dx + dz * dz <= JugcraftRaiders.BLIMP_BOMB_REACH * JugcraftRaiders.BLIMP_BOMB_REACH) {
 			RaiderBomb drop = new RaiderBomb(level, this, true);
 			drop.setPos(getX(), getY() - 0.4, getZ());
 			drop.shoot(0, -1, 0, 0.3F, 2.0F);

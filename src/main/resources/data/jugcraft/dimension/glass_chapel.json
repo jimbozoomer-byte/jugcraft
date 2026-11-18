@@ -1,0 +1,17 @@
+{
+  "type": "jugcraft:glass_chapel",
+  "generator": {
+    "type": "minecraft:flat",
+    "settings": {
+      "layers": [
+        {
+          "height": 1,
+          "block": "minecraft:air"
+        }
+      ],
+      "lakes": false,
+      "features": false,
+      "biome": "jugcraft:glass_chapel"
+    }
+  }
+}

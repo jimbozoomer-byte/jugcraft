@@ -69,6 +69,8 @@ One adaptation: **ornamental corn's ripe stage** (`ornamental_corn_crop_stage7`,
 Removed: Jugcraft's own drawings of these crops, their items, the wild corn and wild tomato, and ornamental corn's ripe middle (28 block textures and 26 models no longer used, and the code that drew them in `tools/crop_textures.py`, `tools/kitchen_textures.py` and `tools/halloween_textures.py`). No Mojang texture is read, traced or recoloured.
 
 ## Verification
+
+PR 600 CI repair (OpenAI Codex GPT-6): after the roof exists, the mushroom-colony fixture waits for Minecraft's pending light work in the enclosure and control chunks, with a ten-second deadline that pumps server tasks. It then requires the actual enclosed and open-sky light readings before running growth and bone-meal actions once. The sequence is bounded at 200 ticks and retains both light thresholds and all growth assertions. Waiting only for more game ticks still reproduced stale lighting locally. A second case installs the roof at tick 60, after the previous fixed 40-tick check, to exercise delayed lighting. Production mushroom growth is unchanged.
 CI (9 October 2026, GitHub Actions, the pins in [PLATFORM.md](../PLATFORM.md)):
 
 | Commit | What ran | Result |

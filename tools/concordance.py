@@ -237,7 +237,7 @@ RESEARCH = {
         },
         "unlocks": {"understood": {"invocations": [f"{MOD}:kindle", f"{MOD}:aegis", f"{MOD}:revelation"],
                                    "workings": [f"{MOD}:kindle_lantern", f"{MOD}:infuse_lantern",
-                                                f"{MOD}:channel_lantern"]},
+                                                f"{MOD}:channel_lantern", f"{MOD}:glass_accord"]},
                     "mastered": {"invocations": [f"{MOD}:lance", f"{MOD}:flashstep", f"{MOD}:lanternward"]}},
     },
 }
@@ -341,6 +341,10 @@ WORKINGS = {
                        "result": f"{MOD}:kindled_lantern", "radiance": LANTERN_START},
     "infuse_lantern": {"type": "infuse", "work": f"{MOD}:kindled_lantern", "specimens": SPECIMENS},
     "channel_lantern": {"type": "channel", "work": f"{MOD}:kindled_lantern", "conversion": f"{MOD}:focus_to_radiance"},
+    # The Glass Chapel's summoning (docs/features/glass-chapel.md), cheaper here than at a crafting table (tools/lairs.py
+    # RECIPES glass_accord): a spyglass's lens and a block of glass, bound with Radiance instead of gold and amethyst.
+    "glass_accord": {"type": "craft", "work": "minecraft:spyglass", "specimen": "minecraft:glass",
+                     "result": f"{MOD}:glass_accord", "radiance": 8},
 }
 
 # Explicit conversions between resource types (Java: resource/Conversion, ConversionTable). Nothing converts without
@@ -371,7 +375,8 @@ EFFECT_KINDS = {
 # Creatures that harmful control (pushes and statuses) does not move or slow, and those it reaches at half strength.
 EFFECT_IMMUNE = ["minecraft:ender_dragon", "minecraft:wither", "minecraft:warden", "minecraft:elder_guardian"]
 EFFECT_RESISTANT = ["minecraft:iron_golem", "minecraft:ravager", "minecraft:piglin_brute",
-                    f"{MOD}:yeti_king", f"{MOD}:cinder_tyrant"]  # B-P8: only these two lair keepers
+                    f"{MOD}:yeti_king", f"{MOD}:cinder_tyrant",  # B-P8: only these two of the first six lair keepers
+                    f"{MOD}:glass_abbot"]  # his own plan (docs/branches/BOSSES.md, "The Glass Abbot: the plan")
 # Blocks an interaction effect may use as a player would, and plants a harvesting effect may gather (besides ripe
 # crops, which are always gathered and replanted).
 # Vanilla tags are optional entries, so a renamed tag in a later version empties the entry instead of breaking the list.
@@ -521,15 +526,22 @@ ember.SLOT_ITEMS.update(rime_kit.TRINKETS)
 import concordance_pacts as pacts  # noqa: E402
 RESEARCH.update(pacts.RESEARCH)
 BLOCKS.update(pacts.BLOCKS)
+# The garden cohort (tools/concordance_garden_pacts.py; docs/features/concordance-garden-cohort.md): The Garden's Regard (GC-03).
+import concordance_garden_pacts as garden_pacts  # noqa: E402
+RESEARCH.update(garden_pacts.RESEARCH)
 # Concordance Chunk D, D-07 (tools/concordance_roster.py): the roster's words, limits and icons, the journal's pacts lines
 # and the Ars Nouveau helpers' roster kinds (G13).
 import concordance_roster as roster  # noqa: E402
+# The magic interfaces (tools/magic_ui.py; docs/features/magic-interfaces.md): the short words the magic screens draw (each
+# glance fed the server's own arguments), the chooser's reasons and the short labels.
+import magic_ui  # noqa: E402
 # Everything a player can examine or study: each research entry's specimens (Java: JugcraftConcordance.SPECIMENS).
 SPECIMEN_TAGS = [SPECIMEN_TAG, rituals.CIRCLE_SPECIMEN_TAG, alchemy.ALCHEMY_SPECIMEN_TAG, ecology.GARDEN_SPECIMEN_TAG,
                  celestial.CELESTIAL_SPECIMEN_TAG, crimson.CRIMSON_SPECIMEN_TAG, workers.BINDING_SPECIMEN_TAG,
                  artifice.ARTIFICE_SPECIMEN_TAG, relics.RELIC_SPECIMEN_TAG, equivalence.ASSAY_SPECIMEN_TAG,
                  hexes.SYMPATHY_SPECIMEN_TAG, hexes.DREAM_SPECIMEN_TAG, ember.EMBER_SPECIMEN_TAG,
-                 rime.RIME_SPECIMEN_TAG, strata.STRATA_SPECIMEN_TAG, pacts.STOLAS_SPECIMEN_TAG]
+                 rime.RIME_SPECIMEN_TAG, strata.STRATA_SPECIMEN_TAG, pacts.STOLAS_SPECIMEN_TAG,
+                 garden_pacts.SPECIMEN_TAG]
 ALL_SPECIMENS_TAG = f"{MOD}:concordance_specimens"
 
 _UNDERSTOOD = {"research": f"{MOD}:first_light", "state": "understood"}
@@ -782,7 +794,7 @@ def operation_summary(op):
         return f"{STATUS_NAMES.get(op['status'], op['status'])} for {seconds(op['duration'])} seconds"
     if effect == "alteration":
         if op.get("school") == ember.COMPONENTS["kindling"]["operation"]["school"]:
-            return "kindles a hearth"
+            return "kindles a hearth, or tempers an Alembic Crucible"
         if op.get("school") == rime.COMPONENTS[rime.PRESERVE_WORD]["operation"]["school"]:
             return (f"holds an Alembic Crucible's heat in its band for {seconds(rime.PRESERVE_HOLD_TICKS)} seconds (longer with "
                     "a focus of water)")
@@ -815,7 +827,7 @@ def invocation_codex():
     positions = {("first_light", "understood"): [(2, 0), (2, 2), (0, 2)],
                  ("first_light", "mastered"): [(4, 0), (4, 2), (4, 4)],
                  ("hearthbinding", "understood"): [(0, 6), (2, 6), (4, 6)], ("hearthbinding", "mastered"): [(6, 6)],
-                 ("rimekeeping", "understood"): [(0, 8), (2, 8)], ("stratawrighting", "understood"): [(0, 10)]}
+                 ("rimekeeping", "understood"): [(0, 8), (2, 8), (4, 8)], ("stratawrighting", "understood"): [(0, 10)]}
     for key, info in INVOCATIONS.items():
         research = info["research"].split(":")[1]
         teacher = RESEARCH[research]["name"]
@@ -1070,6 +1082,7 @@ def codex():
         **crimson.codex(),
         **workers.codex(),
         **pacts.codex(),
+        **garden_pacts.codex(),
         **jug_nouveau.codex(),
         **logistics.codex(),
         **artifice.codex(),
@@ -1565,10 +1578,11 @@ SOUND_FILES = {**ember.SOUND_FILES, **strata.SOUND_FILES, **pacts.SOUND_FILES}
 def sounds():
     """Each event plays its drawn cue (tools/concordance_sounds.py), or the owner's recordings it is given instead
     (SOUND_FILES: tools/concordance_ember.py's and tools/concordance_strata.py's), or, for Stolas's cues, runtime files
-    (tools/concordance_pacts.py's), one picked at random. The Exchange artifacts' events are
-    tools/concordance_ee_artifacts.py's."""
+    (tools/concordance_pacts.py's), one picked at random; a pact cue the generator pitches (tools/concordance_pacts.py
+    SOUND_PITCH) carries its pitch. The Exchange artifacts' events are tools/concordance_ee_artifacts.py's."""
     return {**{event: {"subtitle": f"subtitles.{MOD}.{event}",
-                       "sounds": [{"name": f"{MOD}:{name}", "attenuation_distance": 16}
+                       "sounds": [dict({"name": f"{MOD}:{name}", "attenuation_distance": 16},
+                                       **({"pitch": pacts.SOUND_PITCH[event]} if event in pacts.SOUND_PITCH else {}))
                                   for name in SOUND_FILES.get(event, [f"concordance/{event.split('.', 1)[1]}"])]}
                for event in SOUND_EVENTS}, **ee_artifacts.sounds()}
 
@@ -1643,6 +1657,7 @@ MESSAGES = {
     **rime.MESSAGES,
     **strata.MESSAGES,
     **pacts.MESSAGES,
+    **garden_pacts.MESSAGES,
     **conclave.MESSAGES,
     **progression.MESSAGES,
     **spire.MESSAGES,
@@ -1662,11 +1677,11 @@ SCREEN_TEXT = {
     "bench.charge": "Radiance: %s / %s",
     "bench.help": "Hover a button to see what it needs",
     "focus.hud": "Focus %s/%s",
-    "config.title": "Jugcraft: Arcane Concordance",
+    "config.title": "Jugcraft display settings",
     "config.hud": "Show the Focus bar",
     "config.hud.tooltip": "Shows your Focus above the hotbar while you hold a Concordance instrument",
     "config.reduced_motion": "Reduced motion",
-    "config.reduced_motion.tooltip": "Fewer and calmer particles from Kindled light and the bench",
+    "config.reduced_motion.tooltip": "Calmer Concordance particles and interfaces; disables drug visual sway",
 }
 
 TOOLTIPS = {
@@ -1696,6 +1711,7 @@ TOOLTIPS = {
     **spire.TOOLTIPS,
     **rime.TOOLTIPS,
     **pacts.TOOLTIPS,
+    **garden_pacts.TOOLTIPS,
 }
 
 
@@ -1845,7 +1861,7 @@ def lang_entries(lang):
     # JEI's bench category (client/compat/JugcraftJeiPlugin): what a working leaves in the lantern.
     lang[f"jei.{MOD}.concordance.craft"] = "Kindled with %s Radiance; needs First Light"
     lang[f"jei.{MOD}.concordance.infuse"] = "+%s Radiance; needs First Light"
-    lang[f"key.{MOD}.concordance_config"] = "Concordance settings"
+    lang[f"key.{MOD}.concordance_config"] = "Jugcraft display settings"
 
 
 def bench_model():
@@ -1906,7 +1922,9 @@ def write_all(write, assets, data, lang, condition, self_drop):
     signs.lang_entries(lang)
     diagnostics.lang_entries(lang)
     pacts.lang_entries(lang)
+    garden_pacts.lang_entries(lang)
     roster.lang_entries(lang)
+    magic_ui.lang_entries(lang)
     # Items.
     write(assets / "models" / "item" / "initiate_wand.json",
           {"parent": "minecraft:item/handheld", "textures": {"layer0": rid("item/initiate_wand")}})
@@ -2081,6 +2099,7 @@ def tags(tags):
     rime_kit.tags(tags)
     strata.tags(tags)
     pacts.tags(tags)
+    garden_pacts.tags(tags)
     hexes.tags(tags)
     conclave.tags(tags)
     spire.tags(tags)

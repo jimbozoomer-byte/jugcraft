@@ -104,6 +104,14 @@ GLOWING = ("hessian_horseman", "phantom_rider", "hessian_pumpkin", "hessian_head
 ITEMS = {"hessians_spur": "Hessian's Spur"}
 COSTUMES = {"hessians_tricorn": "Hessian's Tricorn"}
 
+RECIPES = {
+    # His part of what summons him again (Concordance Chunk E, E4): his own lantern for the Hessian's Bridle's
+    # jack-o'-lantern and iron bit rings, on two leather straps. One lantern a share (the Overworld Horseman of the
+    # Halloween season drops one too), one bridle a lantern, and nothing makes a lantern: no loop.
+    "hessians_bridle_from_lantern": {"shapeless": ["jugcraft:horseman_lantern", "minecraft:leather", "minecraft:leather"],
+                                     "result": "hessians_bridle"},
+}
+
 MESSAGES = {
     "wakes": "His horse rears out of the dark, his lantern bursts into flame, and the Headless Horseman laughs",
     "snuff": "He rides the Dark Road: the %s and the %s braziers go dark. Light them again!",

@@ -42,6 +42,11 @@ public class AttachedGourdStemBlock extends VegetationBlock {
 		registerDefaultState(stateDefinition.any().setValue(FACING, Direction.NORTH));
 	}
 
+	/** The native fruit, growing stem and seed identities used by garden automation. */
+	public Block gourd() { return JugcraftAgriculture.block(gourdId); }
+	public Block stem() { return JugcraftAgriculture.block(gourdId + "_stem"); }
+	public net.minecraft.world.item.Item seed() { return JugcraftAgriculture.item(seedId); }
+
 	/** Whether this attached stem, at {@code stemPos}, points at the gourd at {@code gourdPos}. */
 	public boolean holds(BlockState state, BlockPos stemPos, BlockPos gourdPos) {
 		return stemPos.relative(state.getValue(FACING)).equals(gourdPos);

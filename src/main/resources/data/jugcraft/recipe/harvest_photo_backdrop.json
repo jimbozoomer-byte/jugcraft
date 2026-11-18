@@ -1,0 +1,25 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "#minecraft:planks",
+    "#minecraft:planks",
+    "#minecraft:planks",
+    "minecraft:gold_nugget",
+    "minecraft:hay_block",
+    "minecraft:pumpkin",
+    "jugcraft:corn",
+    "#minecraft:leaves",
+    "minecraft:torch"
+  ],
+  "result": {
+    "id": "jugcraft:harvest_photo_backdrop",
+    "count": 1
+  }
+}

@@ -1,0 +1,1 @@
+{"parent":"minecraft:recipes/root","criteria":{"sapling":{"trigger":"minecraft:inventory_changed","conditions":{"items":[{"items":"minecraft:spruce_sapling"}]}}},"rewards":{"recipes":["jugcraft:harbour_gift_fir"]}}

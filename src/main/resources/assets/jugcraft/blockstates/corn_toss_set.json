@@ -1,0 +1,663 @@
+{
+  "multipart": [
+    {
+      "when": {
+        "facing": "north"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_base"
+      }
+    },
+    {
+      "when": {
+        "facing": "east"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_base",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_base",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_base",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "tossed": "0|1|2|3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_rust_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "rust_board": "1|2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_rust_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "tossed": "0|1|2|3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_rust_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "rust_board": "1|2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_rust_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "tossed": "0|1|2|3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_rust_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "rust_board": "1|2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_rust_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "tossed": "0|1|2|3|4|5|6"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_rust_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "rust_board": "1|2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_rust_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "tossed": "0|1|2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_rust_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "rust_board": "2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_rust_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "tossed": "0|1|2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_rust_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "rust_board": "2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_rust_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "tossed": "0|1|2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_rust_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "rust_board": "2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_rust_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "tossed": "0|1|2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_rust_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "rust_board": "2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_rust_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "tossed": "0|1|2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_rust_2"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "rust_board": "3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_rust_2"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "tossed": "0|1|2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_rust_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "rust_board": "3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_rust_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "tossed": "0|1|2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_rust_2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "rust_board": "3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_rust_2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "tossed": "0|1|2"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_rust_2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "rust_board": "3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_rust_2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "tossed": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_rust_3"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "rust_board": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_rust_3"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "tossed": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_rust_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "rust_board": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_rust_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "tossed": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_rust_3",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "rust_board": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_rust_3",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "tossed": "0"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_rust_3",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "rust_board": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_rust_3",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "tossed": "0|1|2|3|4|5|6|7"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_cream_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "cream_board": "1|2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_cream_0"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "tossed": "0|1|2|3|4|5|6|7"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_cream_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "cream_board": "1|2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_cream_0",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "tossed": "0|1|2|3|4|5|6|7"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_cream_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "cream_board": "1|2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_cream_0",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "tossed": "0|1|2|3|4|5|6|7"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_cream_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "cream_board": "1|2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_cream_0",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "tossed": "0|1|2|3|4|5"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_cream_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "cream_board": "2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_cream_1"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "tossed": "0|1|2|3|4|5"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_cream_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "cream_board": "2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_cream_1",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "tossed": "0|1|2|3|4|5"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_cream_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "cream_board": "2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_cream_1",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "tossed": "0|1|2|3|4|5"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_cream_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "cream_board": "2|3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_cream_1",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "tossed": "0|1|2|3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_cream_2"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "cream_board": "3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_cream_2"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "tossed": "0|1|2|3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_cream_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "cream_board": "3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_cream_2",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "tossed": "0|1|2|3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_cream_2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "cream_board": "3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_cream_2",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "tossed": "0|1|2|3"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_cream_2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "cream_board": "3|4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_cream_2",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "tossed": "0|1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_cream_3"
+      }
+    },
+    {
+      "when": {
+        "facing": "north",
+        "cream_board": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_cream_3"
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "tossed": "0|1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_cream_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "east",
+        "cream_board": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_cream_3",
+        "y": 90
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "tossed": "0|1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_cream_3",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "south",
+        "cream_board": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_cream_3",
+        "y": 180
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "tossed": "0|1"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_rack_cream_3",
+        "y": 270
+      }
+    },
+    {
+      "when": {
+        "facing": "west",
+        "cream_board": "4"
+      },
+      "apply": {
+        "model": "jugcraft:block/corn_toss_set_board_cream_3",
+        "y": 270
+      }
+    }
+  ]
+}

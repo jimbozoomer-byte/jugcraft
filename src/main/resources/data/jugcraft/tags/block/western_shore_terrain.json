@@ -1,0 +1,18 @@
+{
+  "values": [
+    "#minecraft:coal_ores", "#minecraft:copper_ores", "#minecraft:iron_ores",
+    "#minecraft:redstone_ores", "#minecraft:lapis_ores", "#minecraft:gold_ores",
+    "#minecraft:diamond_ores", "#minecraft:emerald_ores",
+    "minecraft:stone", "minecraft:granite", "minecraft:diorite", "minecraft:andesite",
+    "minecraft:deepslate", "minecraft:tuff", "minecraft:sandstone", "minecraft:clay",
+    "minecraft:water", "minecraft:lava", "minecraft:bubble_column", "minecraft:magma_block",
+    "minecraft:kelp", "minecraft:kelp_plant", "minecraft:seagrass", "minecraft:tall_seagrass",
+    "minecraft:leaf_litter", "minecraft:glow_lichen", "minecraft:infested_stone", "minecraft:raw_copper_block",
+    "minecraft:lilac", "minecraft:poppy", "minecraft:bush", "minecraft:birch_sapling",
+    "jugcraft:salt_ore", "jugcraft:zinc_ore", "jugcraft:tin_ore", "jugcraft:phosphate_ore",
+    "jugcraft:lead_ore", "jugcraft:thallite_ore", "jugcraft:lepidolite_ore", "jugcraft:silver_ore",
+    "jugcraft:wildlife_shellstone", "jugcraft:jack_o_lantern_mushroom", "jugcraft:puffball",
+    "jugcraft:chestnut_log", "jugcraft:chestnut_leaves", "jugcraft:plum_leaves",
+    "jugcraft:wild_parsley", "jugcraft:wild_spinach", "jugcraft:wild_peas", "jugcraft:nouveau_sourceberry_bush"
+  ]
+}

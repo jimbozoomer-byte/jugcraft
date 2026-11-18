@@ -64,7 +64,7 @@ public final class ArtisanFurniture {
         var key=ResourceKey.create(Registries.ITEM,id);Registry.register(BuiltInRegistries.ITEM,key,new BlockItem(block,new Item.Properties().setId(key).useBlockDescriptionPrefix()));return block;
     }
     public static ItemStack stack(FurnitureDesign design){var s=new ItemStack(FURNITURE);s.set(DESIGN,design.json());s.set(DataComponents.CUSTOM_NAME,Component.literal(design.name()));return s;}
-    public static boolean mayUse(Level l,Player p,BlockPos pos){return p!=null&&(l.isClientSide()||l instanceof net.minecraft.server.level.ServerLevel server&&Authority.mayChange(server,p,pos));}
+    public static boolean mayUse(Level l,Player p,BlockPos pos){return p!=null&&(l.isClientSide()||io.github.jimbozoomer.jugcraft.town.ApartmentRentals.mayUseFurniture(p,l,pos)||l instanceof net.minecraft.server.level.ServerLevel server&&Authority.mayChange(server,p,pos));}
     public static boolean manufacture(ServerPlayer player,Request request){
         var level=player.level();var pos=request.bench();long now=level.getGameTime();
         if(!player.isAlive()||player.isSpectator()||player.distanceToSqr(Vec3.atCenterOf(pos))>64||!level.hasChunkAt(pos)||!level.getBlockState(pos).is(WORKBENCH)||!Authority.mayChange(level,player,pos))return false;

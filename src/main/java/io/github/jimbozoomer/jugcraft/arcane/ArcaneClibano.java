@@ -61,7 +61,7 @@ public final class ArcaneClibano extends BaseContainerBlockEntity implements Wor
     }
     private static Direction cornerFacing(int x,int z){return x>0?(z<0?Direction.NORTH:Direction.EAST):z>0?Direction.SOUTH:Direction.WEST;}
     private boolean intact(){if(level==null||center==null||!worldPosition.equals(center))return false;for(var p:BlockPos.betweenClosed(center.offset(-1,-1,-1),center.offset(1,1,1)))if(!level.hasChunkAt(p)||!(level.getBlockEntity(p) instanceof ArcaneClibano part)||!center.equals(part.center))return false;return true;}
-    public static int soulType(ItemStack s){return s.is(TagKey.create(Registries.ITEM,Jugcraft.id("forbidden_clibano_creates_enchanted_fire")))?2:s.is(TagKey.create(Registries.ITEM,Jugcraft.id("forbidden_clibano_creates_soul_fire")))?1:0;}
+    public static int soulType(ItemStack s){return s.is(TagKey.create(Registries.ITEM,Jugcraft.id("forbidden_clibano/creates_enchanted_fire")))?2:s.is(TagKey.create(Registries.ITEM,Jugcraft.id("forbidden_clibano/creates_soul_fire")))?1:0;}
     private int fuel(){return level instanceof ServerLevel s?Math.clamp(ResolvableInt.getFromItem(items.get(2),DataComponents.COOKING_FUEL,CookingFuel::burnTime,getLootContext(s),0),0,1000000):0;}
     private boolean fit(int slot,ItemStack result){var s=items.get(slot);return !result.isEmpty()&&(s.isEmpty()?result.getCount()<=result.getMaxStackSize():ItemStack.isSameItemSameComponents(s,result)&&s.getCount()+result.getCount()<=s.getMaxStackSize());}
     private boolean light(){var stack=items.get(2);int ticks=fuel();if(ticks==0)return false;var remainder=stack.getItem().getCraftingRemainder();if(remainder!=null&&stack.getCount()!=1)return false;

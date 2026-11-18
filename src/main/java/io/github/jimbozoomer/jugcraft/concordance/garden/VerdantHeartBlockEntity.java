@@ -38,7 +38,9 @@ import org.jspecify.annotations.Nullable;
  * <p>
  * Its Verdance leaves only through the shared transfer rules: a Gleaner draws it ({@link #drawInto}), and it pours
  * into the Ley Pylons beside it through the conversion {@code jugcraft:verdance_to_ley} (3 for 2), into pylons its
- * keeper's party owns or no one does. Nothing turns back into Verdance.
+ * keeper's party owns or no one does. Nothing turns back into Verdance. Since the garden cohort (GC-05) a pact spirit may
+ * name the Gleaner ({@link GleanerBlockEntity#receiveFrom}) or the pylon ({@link #pourInto}) at a distance; the rules are
+ * the same ones.
  */
 public class VerdantHeartBlockEntity extends LivingDeviceBlockEntity implements GeoBlockEntity {
 	public static final int BEAT_TICKS = 200;
@@ -127,8 +129,8 @@ public class VerdantHeartBlockEntity extends LivingDeviceBlockEntity implements 
 
 	/** Pours whole batches of Verdance into the Ley Pylons beside it that its keeper's party (or no one) owns. */
 	private void pour(ServerLevel level) {
-		Conversion conversion = ConcordanceData.rules().conversions().get(Garden.CONVERSION);
-		if (conversion == null || !conversion.from().equals(Garden.VERDANCE) || !conversion.to().equals(LeyPylonBlockEntity.LEY)) {
+		Conversion conversion = conversion();
+		if (conversion == null) {
 			return;
 		}
 		for (Direction side : Direction.values()) {
@@ -136,17 +138,76 @@ public class VerdantHeartBlockEntity extends LivingDeviceBlockEntity implements 
 				return;
 			}
 			BlockPos at = worldPosition.relative(side);
-			if (!level.isLoaded(at) || !(level.getBlockEntity(at) instanceof LeyPylonBlockEntity pylon) || !mayFeed(pylon.owner())) {
-				continue;
-			}
-			long batches = conversion.batches(verdance, LeyPylonBlockEntity.CAPACITY - pylon.ley(), Long.MAX_VALUE);
-			if (batches > 0) {
-				long made = pylon.fill(level, batches * conversion.toAmount());
-				verdance -= made / conversion.toAmount() * conversion.fromAmount();
-				setChanged();
-				sync();
+			if (level.isLoaded(at) && level.getBlockEntity(at) instanceof LeyPylonBlockEntity pylon) {
+				pourBatches(level, conversion, pylon, Long.MAX_VALUE);
 			}
 		}
+	}
+
+	/**
+	 * Concordance garden cohort, GC-05 (Bathin's pylon road): pours at most {@code maxBatches} whole batches into the named
+	 * {@code pylon}, wherever it stands in this level, by the rule of its pour beside it: the data conversion
+	 * jugcraft:verdance_to_ley (3 Verdance for 2 Ley Charge), only into a pylon its keeper's party owns or no one does, only
+	 * what fits in whole batches. The Verdance spent and the Ley Charge made change in this one call; nothing is on the way.
+	 * Returns the Ley Charge made: 0 when nothing moved (switched off, asleep, another level, not its keeper's party's, too
+	 * little Verdance or too little room).
+	 */
+	public long pourInto(LeyPylonBlockEntity pylon, ServerLevel level, long maxBatches) {
+		Conversion conversion = conversion();
+		if (conversion == null || !Garden.enabled() || !awake || maxBatches < 1 || pylon.isRemoved() || pylon.getLevel() != level) {
+			return 0L;
+		}
+		return pourBatches(level, conversion, pylon, maxBatches);
+	}
+
+	/**
+	 * GC-05: whether {@link #pourInto} may pour at least one batch into {@code pylon} by its owner and both amounts alone
+	 * (not whether this Heart is awake or the garden switched on; pourInto checks those). Reads only.
+	 */
+	public boolean mayPourInto(LeyPylonBlockEntity pylon) {
+		Conversion conversion = conversion();
+		return conversion != null && mayFeed(pylon.owner()) && conversion.batches(verdance, LeyPylonBlockEntity.CAPACITY - pylon.ley(), 1L) > 0;
+	}
+
+	/** GC-05: whether {@code pos} shares a face with this Heart (where its own pour reaches). */
+	public boolean beside(BlockPos pos) {
+		return worldPosition.distManhattan(pos) == 1;
+	}
+
+	/**
+	 * GC-05 (the two roads): whether a Ley Pylon on one of its faces is one its own pour feeds (its keeper's party's or no
+	 * one's), full or not: a Heart with its own road. At most six reads, in loaded chunks only; changes nothing.
+	 */
+	public boolean feedsAPylonBeside(ServerLevel level) {
+		for (Direction side : Direction.values()) {
+			BlockPos at = worldPosition.relative(side);
+			if (level.isLoaded(at) && level.getBlockEntity(at) instanceof LeyPylonBlockEntity pylon && mayFeed(pylon.owner())) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/** The one conversion its Verdance leaves by (data: Garden.CONVERSION), or null while that is not Verdance into Ley Charge. */
+	private static @Nullable Conversion conversion() {
+		Conversion conversion = ConcordanceData.rules().conversions().get(Garden.CONVERSION);
+		return conversion != null && conversion.from().equals(Garden.VERDANCE) && conversion.to().equals(LeyPylonBlockEntity.LEY) ? conversion : null;
+	}
+
+	/** Whole batches into {@code pylon}, at most {@code maxBatches}, if its keeper's party (or no one) owns it; the Ley Charge made. */
+	private long pourBatches(ServerLevel level, Conversion conversion, LeyPylonBlockEntity pylon, long maxBatches) {
+		if (!mayFeed(pylon.owner())) {
+			return 0L;
+		}
+		long batches = conversion.batches(verdance, LeyPylonBlockEntity.CAPACITY - pylon.ley(), maxBatches);
+		if (batches <= 0) {
+			return 0L;
+		}
+		long made = pylon.fill(level, batches * conversion.toAmount());
+		verdance -= made / conversion.toAmount() * conversion.fromAmount();
+		setChanged();
+		sync();
+		return made;
 	}
 
 	private boolean mayFeed(@Nullable UUID owner) {

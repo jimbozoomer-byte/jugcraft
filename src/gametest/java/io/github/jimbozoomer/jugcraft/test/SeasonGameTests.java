@@ -50,6 +50,35 @@ public class SeasonGameTests {
     }
 
 	@GameTest
+	public void generationTestClockSpansMidnightAndRestoresItsScope(GameTestHelper helper) {
+		var settings = JugcraftSeasons.settings();
+		try (TestSeasonClock beforeMidnight = TestSeasonClock.freezeAt(Instant.parse("2026-11-01T23:59:59Z"))) {
+			LocalDate date = TestSeasonClock.frozenInstant().atZone(settings.zone()).toLocalDate();
+			equal(helper, JugcraftSeasons.date(), date, "frozen date uses configured zone");
+			equal(helper, JugcraftSeasons.today(), settings.dayOn(date), "generation day before midnight");
+			equal(helper, TestSeasonClock.frozenInstant().atZone(ZoneId.of("Pacific/Auckland")).toLocalDate(),
+					LocalDate.of(2026, 11, 2), "the same instant retains zone semantics");
+			boolean refused = false;
+			try (var nested = TestSeasonClock.freezeAt(Instant.parse("2026-11-02T00:00:01Z"))) {
+				// A second live scope would change the date seen by parallel generation tasks.
+			} catch (IllegalStateException expected) { refused = true; }
+			helper.assertTrue(refused, "A concurrent clock scope must be refused");
+			equal(helper, JugcraftSeasons.date(), date, "a refused scope leaves the original date");
+		}
+		try (var afterMidnight = TestSeasonClock.freezeAt(Instant.parse("2026-11-02T00:00:01Z"))) {
+			LocalDate date = TestSeasonClock.frozenInstant().atZone(settings.zone()).toLocalDate();
+			equal(helper, JugcraftSeasons.date(), date, "a new scope after midnight");
+			equal(helper, JugcraftSeasons.today(), settings.dayOn(date), "generation day after midnight");
+		}
+		equal(helper, JugcraftSeasons.settings(), settings, "freezing the clock leaves operator settings unchanged");
+		LocalDate realBefore = LocalDate.now(settings.zone());
+		LocalDate restored = JugcraftSeasons.date();
+		LocalDate realAfter = LocalDate.now(settings.zone());
+		helper.assertTrue(restored.equals(realBefore) || restored.equals(realAfter), "Closing the test scope restores the real clock, even across midnight");
+		helper.succeed();
+	}
+
+	@GameTest
 	public void seasonDaysFollowTheCalendar(GameTestHelper helper) {
 		// 20 October is peak autumn in the north and spring (half a year on) in the south.
 		equal(helper, SeasonCalendar.seasonDay(LocalDate.of(2026, 10, 20), false), 293, "20 October, north");

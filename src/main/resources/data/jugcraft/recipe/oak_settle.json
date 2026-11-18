@@ -1,0 +1,23 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "minecraft:oak_planks",
+    "minecraft:oak_planks",
+    "minecraft:oak_planks",
+    "minecraft:oak_planks",
+    "minecraft:oak_slab",
+    "minecraft:oak_slab",
+    "#minecraft:wool"
+  ],
+  "result": {
+    "id": "jugcraft:oak_settle",
+    "count": 1
+  }
+}

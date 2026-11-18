@@ -112,7 +112,7 @@ Not applicable: it is crafted and placed by players only. No raider version yet.
 ## Rollout and open questions
 - The name "Howitzer Walker" comes from the owner's request; they may want another.
 - The feet are part of the shins, so they tilt with the swing; a hinged foot would be a third part a leg.
-- The fuel reading every 2 seconds shares the action bar with the gun's messages, so a message can be replaced quickly.
+- The cockpit pass ([walker-cockpit.md](walker-cockpit.md)) moved the fuel reading to gauges, so the gun's messages keep the action bar. The pilot now sits in a commander's seat over the roof (the hatch seat looked out from inside the cab), and the gun's arc and landing are drawn as it lays.
 - It fires only for a pilot: it does not take orders from a Fire Control Table, and does not use other players' marks. Either could come later if the owner wants a walker battery.
 - Possible later: a raider version, other shells (smoke, flak), and a second seat for a spotter.
 

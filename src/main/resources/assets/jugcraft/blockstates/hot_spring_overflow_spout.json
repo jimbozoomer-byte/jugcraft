@@ -1,0 +1,64 @@
+{
+  "variants": {
+    "facing=north,flowing=false,open=false": {
+      "model": "jugcraft:block/hot_spring_overflow_spout"
+    },
+    "facing=north,flowing=true,open=false": {
+      "model": "jugcraft:block/hot_spring_overflow_spout"
+    },
+    "facing=north,flowing=false,open=true": {
+      "model": "jugcraft:block/hot_spring_overflow_spout_dry"
+    },
+    "facing=north,flowing=true,open=true": {
+      "model": "jugcraft:block/hot_spring_overflow_spout_flowing"
+    },
+    "facing=east,flowing=false,open=false": {
+      "model": "jugcraft:block/hot_spring_overflow_spout",
+      "y": 90
+    },
+    "facing=east,flowing=true,open=false": {
+      "model": "jugcraft:block/hot_spring_overflow_spout",
+      "y": 90
+    },
+    "facing=east,flowing=false,open=true": {
+      "model": "jugcraft:block/hot_spring_overflow_spout_dry",
+      "y": 90
+    },
+    "facing=east,flowing=true,open=true": {
+      "model": "jugcraft:block/hot_spring_overflow_spout_flowing",
+      "y": 90
+    },
+    "facing=south,flowing=false,open=false": {
+      "model": "jugcraft:block/hot_spring_overflow_spout",
+      "y": 180
+    },
+    "facing=south,flowing=true,open=false": {
+      "model": "jugcraft:block/hot_spring_overflow_spout",
+      "y": 180
+    },
+    "facing=south,flowing=false,open=true": {
+      "model": "jugcraft:block/hot_spring_overflow_spout_dry",
+      "y": 180
+    },
+    "facing=south,flowing=true,open=true": {
+      "model": "jugcraft:block/hot_spring_overflow_spout_flowing",
+      "y": 180
+    },
+    "facing=west,flowing=false,open=false": {
+      "model": "jugcraft:block/hot_spring_overflow_spout",
+      "y": 270
+    },
+    "facing=west,flowing=true,open=false": {
+      "model": "jugcraft:block/hot_spring_overflow_spout",
+      "y": 270
+    },
+    "facing=west,flowing=false,open=true": {
+      "model": "jugcraft:block/hot_spring_overflow_spout_dry",
+      "y": 270
+    },
+    "facing=west,flowing=true,open=true": {
+      "model": "jugcraft:block/hot_spring_overflow_spout_flowing",
+      "y": 270
+    }
+  }
+}

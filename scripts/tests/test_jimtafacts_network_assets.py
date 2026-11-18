@@ -30,15 +30,18 @@ class JimtafactsNetworkAssetsTests(unittest.TestCase):
             original = json.loads((ROOT / row['source']).read_text(encoding='utf-8'))
             runtime = json.loads((ROOT / row['runtime']).read_text(encoding='utf-8'))
             self.assertEqual(len(original.get('elements', [])), len(runtime.get('elements', [])))
-            for before, after in zip(original.get('elements', []), runtime.get('elements', [])):
-                from jimtafacts_model_repairs import REPAIRED, CLOSED
-                repaired=row['runtime'].split('/models/',1)[1].removesuffix('.json') in REPAIRED | CLOSED
+            from jimtafacts_model_repairs import REPAIRED, CLOSED, BURIED
+            ref=row['runtime'].split('/models/',1)[1].removesuffix('.json')
+            for index, (before, after) in enumerate(zip(original.get('elements', []), runtime.get('elements', []))):
+                repaired=ref in REPAIRED | CLOSED
                 for key in ['from', 'to']:
                     if repaired:
                         self.assertTrue(all(abs(a-b)<=0.601 for a,b in zip(before[key],after[key])), row['runtime'])
                     else:self.assertEqual(before.get(key),after.get(key),row['runtime'])
                 self.assertEqual(before.get('rotation'),after.get('rotation'),row['runtime'])
                 for side, face in before.get('faces', {}).items():
+                    if side in BURIED.get(ref, {}).get(index, ()):
+                        self.assertNotIn(side, after['faces'], row['runtime']); continue  # audited buried face
                     if not repaired:self.assertEqual(face.get('uv'), after['faces'][side].get('uv'), row['runtime'])
                     elif 'uv' in face:self.assertTrue(all(abs(a-b)<=0.601 for a,b in zip(face['uv'],after['faces'][side]['uv'])),row['runtime'])
 

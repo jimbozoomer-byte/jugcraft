@@ -1,0 +1,2276 @@
+{
+  "version": 1,
+  "routes": [
+    {
+      "id": "technology",
+      "page": "route_technology",
+      "title": "Technology route map",
+      "icon": "jugcraft:coal_generator",
+      "accent": "B08A3A",
+      "summary": [
+        "From ore to your first power, your first machines and the next tier. Steel and the starter workshop are parallel routes, not a ladder."
+      ],
+      "groups": [
+        {
+          "id": "ores",
+          "title": "Mine and smelt tin and zinc",
+          "text": "Everything below starts with ore you can mine with a stone pickaxe and an ordinary furnace. Copper, iron, coal and redstone are vanilla materials.",
+          "milestone": false,
+          "steps": [
+            {
+              "id": "raw_tin",
+              "kind": "step",
+              "role": "required",
+              "item": "jugcraft:raw_tin",
+              "method": "gathering",
+              "machine": null,
+              "source": "gathering",
+              "recipe": null,
+              "from": "jugcraft:tin_ore",
+              "vanilla": false,
+              "inputs": [],
+              "outputs": [
+                {
+                  "item": "jugcraft:raw_tin",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [],
+              "alt_needs": [],
+              "note": "Tin ore breaks into raw tin; Fortune gives more. Deepslate tin ore works the same way.",
+              "link": {
+                "type": "handbook",
+                "chapter": 4,
+                "page": 0
+              }
+            },
+            {
+              "id": "tin_ingot",
+              "kind": "step",
+              "role": "required",
+              "item": "jugcraft:tin_ingot",
+              "method": "smelting",
+              "machine": "minecraft:furnace",
+              "source": "recipe",
+              "recipe": "jugcraft:tin_ingot_from_smelting_raw_tin",
+              "inputs": [
+                {
+                  "item": "jugcraft:raw_tin",
+                  "count": 1,
+                  "accepts": "#c:raw_materials/tin",
+                  "from_step": "raw_tin"
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:tin_ingot",
+                  "count": 1
+                }
+              ],
+              "alternatives": [
+                {
+                  "recipe": "jugcraft:tin_ingot_from_blasting_raw_tin",
+                  "method": "smelting",
+                  "machine": "minecraft:blast_furnace"
+                }
+              ],
+              "needs": [
+                "raw_tin"
+              ],
+              "alt_needs": [],
+              "note": "",
+              "link": {
+                "type": "handbook",
+                "chapter": 4,
+                "page": 0
+              }
+            },
+            {
+              "id": "raw_zinc",
+              "kind": "step",
+              "role": "required",
+              "item": "jugcraft:raw_zinc",
+              "method": "gathering",
+              "machine": null,
+              "source": "gathering",
+              "recipe": null,
+              "from": "jugcraft:zinc_ore",
+              "vanilla": false,
+              "inputs": [],
+              "outputs": [
+                {
+                  "item": "jugcraft:raw_zinc",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [],
+              "alt_needs": [],
+              "note": "Zinc goes into the machine casing and, later, brass.",
+              "link": {
+                "type": "handbook",
+                "chapter": 4,
+                "page": 0
+              }
+            },
+            {
+              "id": "zinc_ingot",
+              "kind": "step",
+              "role": "required",
+              "item": "jugcraft:zinc_ingot",
+              "method": "smelting",
+              "machine": "minecraft:furnace",
+              "source": "recipe",
+              "recipe": "jugcraft:zinc_ingot_from_smelting_raw_zinc",
+              "inputs": [
+                {
+                  "item": "jugcraft:raw_zinc",
+                  "count": 1,
+                  "accepts": "#c:raw_materials/zinc",
+                  "from_step": "raw_zinc"
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:zinc_ingot",
+                  "count": 1
+                }
+              ],
+              "alternatives": [
+                {
+                  "recipe": "jugcraft:zinc_ingot_from_blasting_raw_zinc",
+                  "method": "smelting",
+                  "machine": "minecraft:blast_furnace"
+                }
+              ],
+              "needs": [
+                "raw_zinc"
+              ],
+              "alt_needs": [],
+              "note": "",
+              "link": {
+                "type": "handbook",
+                "chapter": 4,
+                "page": 0
+              }
+            }
+          ]
+        },
+        {
+          "id": "casing",
+          "title": "Bronze and the machine casing",
+          "text": "The first gate: every early machine is built around a Machine Casing, and the casing needs bronze. No powered machine is needed to make it.",
+          "milestone": true,
+          "steps": [
+            {
+              "id": "bronze_blend",
+              "kind": "step",
+              "role": "required",
+              "item": "jugcraft:bronze_blend",
+              "method": "crafting",
+              "machine": "minecraft:crafting_table",
+              "source": "recipe",
+              "recipe": "jugcraft:bronze_blend",
+              "inputs": [
+                {
+                  "item": "minecraft:copper_ingot",
+                  "count": 3,
+                  "accepts": "#c:ingots/copper",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "jugcraft:tin_ingot",
+                  "count": 1,
+                  "accepts": "#c:ingots/tin",
+                  "from_step": "tin_ingot"
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:bronze_blend",
+                  "count": 4
+                }
+              ],
+              "alternatives": [],
+              "needs": [
+                "tin_ingot"
+              ],
+              "alt_needs": [],
+              "note": "Mix by hand: three copper ingots and one tin ingot make four blend.",
+              "link": {
+                "type": "handbook",
+                "chapter": 3,
+                "page": 1
+              }
+            },
+            {
+              "id": "bronze_ingot",
+              "kind": "step",
+              "role": "required",
+              "item": "jugcraft:bronze_ingot",
+              "method": "smelting",
+              "machine": "minecraft:furnace",
+              "source": "recipe",
+              "recipe": "jugcraft:bronze_ingot_from_smelting_bronze_blend",
+              "inputs": [
+                {
+                  "item": "jugcraft:bronze_blend",
+                  "count": 1,
+                  "accepts": "jugcraft:bronze_blend",
+                  "from_step": "bronze_blend"
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:bronze_ingot",
+                  "count": 1
+                }
+              ],
+              "alternatives": [
+                {
+                  "recipe": "jugcraft:starter_workshop/bronze_ingot",
+                  "method": "workshop",
+                  "machine": "jugcraft:small_crucible_furnace"
+                },
+                {
+                  "recipe": "jugcraft:alloying/bronze_ingot",
+                  "method": "machine",
+                  "machine": "jugcraft:alloy_smelter"
+                }
+              ],
+              "needs": [
+                "bronze_blend"
+              ],
+              "alt_needs": [],
+              "note": "Smelting the blend is enough. The crucible and the Alloy Smelter are other ways, not requirements.",
+              "link": {
+                "type": "handbook",
+                "chapter": 3,
+                "page": 1
+              }
+            },
+            {
+              "id": "machine_casing",
+              "kind": "step",
+              "role": "required",
+              "item": "jugcraft:machine_casing",
+              "method": "crafting",
+              "machine": "minecraft:crafting_table",
+              "source": "recipe",
+              "recipe": "jugcraft:machine_casing",
+              "inputs": [
+                {
+                  "item": "jugcraft:bronze_ingot",
+                  "count": 4,
+                  "accepts": "#c:ingots/bronze",
+                  "from_step": "bronze_ingot"
+                },
+                {
+                  "item": "jugcraft:zinc_ingot",
+                  "count": 4,
+                  "accepts": "#c:ingots/zinc",
+                  "from_step": "zinc_ingot"
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:machine_casing",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [
+                "bronze_ingot",
+                "zinc_ingot"
+              ],
+              "alt_needs": [],
+              "note": "A casing is a crafting part: placed alone it is not a working machine.",
+              "link": {
+                "type": "handbook",
+                "chapter": 3,
+                "page": 1
+              }
+            }
+          ]
+        },
+        {
+          "id": "power",
+          "title": "Your first power",
+          "text": "A generator, cable and one machine are enough to start. JE is electrical energy; JE/t is per game tick.",
+          "milestone": true,
+          "steps": [
+            {
+              "id": "copper_cable",
+              "kind": "step",
+              "role": "required",
+              "item": "jugcraft:copper_cable",
+              "method": "crafting",
+              "machine": "minecraft:crafting_table",
+              "source": "recipe",
+              "recipe": "jugcraft:copper_cable",
+              "inputs": [
+                {
+                  "item": "minecraft:copper_ingot",
+                  "count": 2,
+                  "accepts": "#c:ingots/copper",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "jugcraft:tin_ingot",
+                  "count": 1,
+                  "accepts": "#c:ingots/tin",
+                  "from_step": "tin_ingot"
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:copper_cable",
+                  "count": 4
+                }
+              ],
+              "alternatives": [],
+              "needs": [
+                "tin_ingot"
+              ],
+              "alt_needs": [],
+              "note": "Cable must touch the generator's power port and the machine's socket, not a decorative panel.",
+              "link": {
+                "type": "handbook",
+                "chapter": 5,
+                "page": 7
+              }
+            },
+            {
+              "id": "coal_generator",
+              "kind": "step",
+              "role": "required",
+              "item": "jugcraft:coal_generator",
+              "method": "crafting",
+              "machine": "minecraft:crafting_table",
+              "source": "recipe",
+              "recipe": "jugcraft:coal_generator",
+              "inputs": [
+                {
+                  "item": "jugcraft:bronze_ingot",
+                  "count": 6,
+                  "accepts": "#c:ingots/bronze",
+                  "from_step": "bronze_ingot"
+                },
+                {
+                  "item": "jugcraft:copper_cable",
+                  "count": 1,
+                  "accepts": "jugcraft:copper_cable",
+                  "from_step": "copper_cable"
+                },
+                {
+                  "item": "minecraft:furnace",
+                  "count": 1,
+                  "accepts": "minecraft:furnace",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "jugcraft:machine_casing",
+                  "count": 1,
+                  "accepts": "jugcraft:machine_casing",
+                  "from_step": "machine_casing"
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:coal_generator",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [
+                "bronze_ingot",
+                "copper_cable",
+                "machine_casing"
+              ],
+              "alt_needs": [],
+              "note": "Burns coal, charcoal or coke. It stops burning when full, so no fuel is wasted.",
+              "link": {
+                "type": "handbook",
+                "chapter": 5,
+                "page": 0
+              }
+            },
+            {
+              "id": "first_power",
+              "kind": "milestone",
+              "role": "required",
+              "title": "Power is flowing",
+              "item": "jugcraft:coal_generator",
+              "method": "milestone",
+              "machine": null,
+              "source": "none",
+              "recipe": null,
+              "inputs": [],
+              "outputs": [],
+              "alternatives": [],
+              "needs": [
+                "copper_cable",
+                "coal_generator"
+              ],
+              "alt_needs": [],
+              "note": "Fuel in the generator and cable to a machine: your first power source.",
+              "link": {
+                "type": "handbook",
+                "chapter": 3,
+                "page": 1
+              }
+            }
+          ]
+        },
+        {
+          "id": "machines",
+          "title": "Your first powered machines",
+          "text": "The Electric Furnace is the first useful output. The Crusher is optional, but it doubles what an ore block gives.",
+          "milestone": true,
+          "steps": [
+            {
+              "id": "electric_furnace",
+              "kind": "step",
+              "role": "required",
+              "item": "jugcraft:electric_furnace",
+              "method": "crafting",
+              "machine": "minecraft:crafting_table",
+              "source": "recipe",
+              "recipe": "jugcraft:electric_furnace",
+              "inputs": [
+                {
+                  "item": "jugcraft:bronze_ingot",
+                  "count": 4,
+                  "accepts": "#c:ingots/bronze",
+                  "from_step": "bronze_ingot"
+                },
+                {
+                  "item": "minecraft:redstone",
+                  "count": 1,
+                  "accepts": "minecraft:redstone",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "jugcraft:copper_cable",
+                  "count": 2,
+                  "accepts": "jugcraft:copper_cable",
+                  "from_step": "copper_cable"
+                },
+                {
+                  "item": "minecraft:furnace",
+                  "count": 1,
+                  "accepts": "minecraft:furnace",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "jugcraft:machine_casing",
+                  "count": 1,
+                  "accepts": "jugcraft:machine_casing",
+                  "from_step": "machine_casing"
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:electric_furnace",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [
+                "bronze_ingot",
+                "copper_cable",
+                "machine_casing"
+              ],
+              "alt_needs": [],
+              "note": "Smelts anything a vanilla furnace can, twice as fast. Leave its output slot free.",
+              "link": {
+                "type": "handbook",
+                "chapter": 6,
+                "page": 0
+              }
+            },
+            {
+              "id": "crusher",
+              "kind": "step",
+              "role": "recommended",
+              "item": "jugcraft:crusher",
+              "method": "crafting",
+              "machine": "minecraft:crafting_table",
+              "source": "recipe",
+              "recipe": "jugcraft:crusher",
+              "inputs": [
+                {
+                  "item": "minecraft:flint",
+                  "count": 3,
+                  "accepts": "minecraft:flint",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "jugcraft:copper_cable",
+                  "count": 2,
+                  "accepts": "jugcraft:copper_cable",
+                  "from_step": "copper_cable"
+                },
+                {
+                  "item": "jugcraft:machine_casing",
+                  "count": 1,
+                  "accepts": "jugcraft:machine_casing",
+                  "from_step": "machine_casing"
+                },
+                {
+                  "item": "jugcraft:bronze_ingot",
+                  "count": 2,
+                  "accepts": "#c:ingots/bronze",
+                  "from_step": "bronze_ingot"
+                },
+                {
+                  "item": "minecraft:redstone",
+                  "count": 1,
+                  "accepts": "minecraft:redstone",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:crusher",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [
+                "copper_cable",
+                "machine_casing",
+                "bronze_ingot"
+              ],
+              "alt_needs": [],
+              "note": "",
+              "link": {
+                "type": "handbook",
+                "chapter": 6,
+                "page": 1
+              }
+            },
+            {
+              "id": "crushed_iron",
+              "kind": "step",
+              "role": "recommended",
+              "item": "minecraft:raw_iron",
+              "method": "machine",
+              "machine": "jugcraft:crusher",
+              "source": "recipe",
+              "recipe": "jugcraft:crushing/iron_ore",
+              "inputs": [
+                {
+                  "item": "minecraft:iron_ore",
+                  "count": 1,
+                  "accepts": "minecraft:iron_ore",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "minecraft:raw_iron",
+                  "count": 2
+                }
+              ],
+              "alternatives": [],
+              "needs": [
+                "crusher"
+              ],
+              "alt_needs": [],
+              "note": "The crusher takes the ore block itself: mine it with Silk Touch, or use a drill.",
+              "link": {
+                "type": "handbook",
+                "chapter": 6,
+                "page": 1
+              }
+            },
+            {
+              "id": "first_machine",
+              "kind": "milestone",
+              "role": "required",
+              "title": "A working production line",
+              "item": "jugcraft:electric_furnace",
+              "method": "milestone",
+              "machine": null,
+              "source": "none",
+              "recipe": null,
+              "inputs": [],
+              "outputs": [],
+              "alternatives": [],
+              "needs": [
+                "first_power",
+                "electric_furnace"
+              ],
+              "alt_needs": [],
+              "note": "Generator, cable and a powered machine working together. Expand only where it helps.",
+              "link": {
+                "type": "handbook",
+                "chapter": 0,
+                "page": 1
+              }
+            }
+          ]
+        },
+        {
+          "id": "workshop",
+          "title": "The pre-electric workshop (parallel)",
+          "text": "The starter workshop makes plates, wire and alloys without power. It is a sideways route beside electricity, and its iron plates are what make steel independent of the generator.",
+          "milestone": false,
+          "steps": [
+            {
+              "id": "workshop_bench",
+              "kind": "step",
+              "role": "required",
+              "item": "jugcraft:workshop_bench",
+              "method": "crafting",
+              "machine": "minecraft:crafting_table",
+              "source": "recipe",
+              "recipe": "jugcraft:starter_workshop/workshop_bench",
+              "inputs": [
+                {
+                  "item": "minecraft:crafting_table",
+                  "count": 1,
+                  "accepts": "minecraft:crafting_table",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "minecraft:oak_planks",
+                  "count": 4,
+                  "accepts": "#minecraft:planks",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "minecraft:cobblestone",
+                  "count": 2,
+                  "accepts": "minecraft:cobblestone",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:workshop_bench",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [],
+              "alt_needs": [],
+              "note": "",
+              "link": {
+                "type": "handbook",
+                "chapter": 1,
+                "page": 1
+              }
+            },
+            {
+              "id": "workshop_hammer",
+              "kind": "step",
+              "role": "required",
+              "item": "jugcraft:workshop_hammer",
+              "method": "crafting",
+              "machine": "minecraft:crafting_table",
+              "source": "recipe",
+              "recipe": "jugcraft:starter_workshop/workshop_hammer",
+              "inputs": [
+                {
+                  "item": "minecraft:iron_ingot",
+                  "count": 2,
+                  "accepts": "minecraft:iron_ingot",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "minecraft:stick",
+                  "count": 1,
+                  "accepts": "minecraft:stick",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:workshop_hammer",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [],
+              "alt_needs": [],
+              "note": "",
+              "link": {
+                "type": "handbook",
+                "chapter": 1,
+                "page": 1
+              }
+            },
+            {
+              "id": "iron_plate",
+              "kind": "step",
+              "role": "required",
+              "item": "jugcraft:iron_plate",
+              "method": "workshop",
+              "machine": "jugcraft:workshop_bench",
+              "source": "recipe",
+              "recipe": "jugcraft:starter_workshop/iron_plate",
+              "inputs": [
+                {
+                  "item": "minecraft:iron_ingot",
+                  "count": 1,
+                  "accepts": "minecraft:iron_ingot",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:iron_plate",
+                  "count": 1
+                }
+              ],
+              "alternatives": [
+                {
+                  "recipe": "jugcraft:pressing/iron_ingot",
+                  "method": "machine",
+                  "machine": "jugcraft:metal_press"
+                }
+              ],
+              "tool": "jugcraft:workshop_hammer",
+              "needs": [
+                "workshop_bench",
+                "workshop_hammer"
+              ],
+              "alt_needs": [],
+              "note": "The hammer stays on the bench; each use wears it a little.",
+              "link": {
+                "type": "handbook",
+                "chapter": 1,
+                "page": 1
+              }
+            }
+          ]
+        },
+        {
+          "id": "circuits",
+          "title": "Plates, wire and circuits",
+          "text": "The gate to the next tier: later machines need plates, wire and basic circuits.",
+          "milestone": true,
+          "steps": [
+            {
+              "id": "alloy_smelter",
+              "kind": "step",
+              "role": "required",
+              "item": "jugcraft:alloy_smelter",
+              "method": "crafting",
+              "machine": "minecraft:crafting_table",
+              "source": "recipe",
+              "recipe": "jugcraft:alloy_smelter",
+              "inputs": [
+                {
+                  "item": "jugcraft:bronze_ingot",
+                  "count": 4,
+                  "accepts": "#c:ingots/bronze",
+                  "from_step": "bronze_ingot"
+                },
+                {
+                  "item": "jugcraft:copper_cable",
+                  "count": 1,
+                  "accepts": "jugcraft:copper_cable",
+                  "from_step": "copper_cable"
+                },
+                {
+                  "item": "minecraft:furnace",
+                  "count": 2,
+                  "accepts": "minecraft:furnace",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "jugcraft:machine_casing",
+                  "count": 1,
+                  "accepts": "jugcraft:machine_casing",
+                  "from_step": "machine_casing"
+                },
+                {
+                  "item": "minecraft:redstone",
+                  "count": 1,
+                  "accepts": "minecraft:redstone",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:alloy_smelter",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [
+                "bronze_ingot",
+                "copper_cable",
+                "machine_casing"
+              ],
+              "alt_needs": [],
+              "note": "",
+              "link": {
+                "type": "handbook",
+                "chapter": 6,
+                "page": 2
+              }
+            },
+            {
+              "id": "crucible_furnace",
+              "kind": "step",
+              "role": "alternative",
+              "item": "jugcraft:small_crucible_furnace",
+              "method": "crafting",
+              "machine": "minecraft:crafting_table",
+              "source": "recipe",
+              "recipe": "jugcraft:starter_workshop/small_crucible_furnace",
+              "inputs": [
+                {
+                  "item": "minecraft:bricks",
+                  "count": 4,
+                  "accepts": "minecraft:bricks",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "minecraft:furnace",
+                  "count": 1,
+                  "accepts": "minecraft:furnace",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:small_crucible_furnace",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [],
+              "alt_needs": [],
+              "note": "An unpowered way to alloy brass and bronze, instead of the Alloy Smelter.",
+              "link": {
+                "type": "handbook",
+                "chapter": 1,
+                "page": 0
+              }
+            },
+            {
+              "id": "brass_ingot",
+              "kind": "step",
+              "role": "required",
+              "item": "jugcraft:brass_ingot",
+              "method": "machine",
+              "machine": "jugcraft:alloy_smelter",
+              "source": "recipe",
+              "recipe": "jugcraft:alloying/brass_ingot",
+              "inputs": [
+                {
+                  "item": "minecraft:copper_ingot",
+                  "count": 3,
+                  "accepts": "minecraft:copper_ingot",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "jugcraft:zinc_ingot",
+                  "count": 1,
+                  "accepts": "jugcraft:zinc_ingot",
+                  "from_step": "zinc_ingot"
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:brass_ingot",
+                  "count": 4
+                }
+              ],
+              "alternatives": [
+                {
+                  "recipe": "jugcraft:starter_workshop/brass_ingot",
+                  "method": "workshop",
+                  "machine": "jugcraft:small_crucible_furnace"
+                }
+              ],
+              "needs": [
+                "zinc_ingot",
+                "alloy_smelter"
+              ],
+              "alt_needs": [
+                "crucible_furnace"
+              ],
+              "note": "The wire drawer is built from brass. The small crucible furnace makes brass without power.",
+              "link": {
+                "type": "handbook",
+                "chapter": 6,
+                "page": 2
+              }
+            },
+            {
+              "id": "metal_press",
+              "kind": "step",
+              "role": "required",
+              "item": "jugcraft:metal_press",
+              "method": "crafting",
+              "machine": "minecraft:crafting_table",
+              "source": "recipe",
+              "recipe": "jugcraft:metal_press",
+              "inputs": [
+                {
+                  "item": "jugcraft:bronze_ingot",
+                  "count": 4,
+                  "accepts": "#c:ingots/bronze",
+                  "from_step": "bronze_ingot"
+                },
+                {
+                  "item": "minecraft:piston",
+                  "count": 1,
+                  "accepts": "minecraft:piston",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "jugcraft:copper_cable",
+                  "count": 2,
+                  "accepts": "jugcraft:copper_cable",
+                  "from_step": "copper_cable"
+                },
+                {
+                  "item": "jugcraft:machine_casing",
+                  "count": 1,
+                  "accepts": "jugcraft:machine_casing",
+                  "from_step": "machine_casing"
+                },
+                {
+                  "item": "minecraft:anvil",
+                  "count": 1,
+                  "accepts": "minecraft:anvil",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:metal_press",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [
+                "bronze_ingot",
+                "copper_cable",
+                "machine_casing"
+              ],
+              "alt_needs": [],
+              "note": "",
+              "link": {
+                "type": "handbook",
+                "chapter": 6,
+                "page": 3
+              }
+            },
+            {
+              "id": "wire_drawer",
+              "kind": "step",
+              "role": "required",
+              "item": "jugcraft:wire_drawer",
+              "method": "crafting",
+              "machine": "minecraft:crafting_table",
+              "source": "recipe",
+              "recipe": "jugcraft:wire_drawer",
+              "inputs": [
+                {
+                  "item": "jugcraft:brass_ingot",
+                  "count": 4,
+                  "accepts": "#c:ingots/brass",
+                  "from_step": "brass_ingot"
+                },
+                {
+                  "item": "minecraft:shears",
+                  "count": 1,
+                  "accepts": "minecraft:shears",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "jugcraft:copper_cable",
+                  "count": 2,
+                  "accepts": "jugcraft:copper_cable",
+                  "from_step": "copper_cable"
+                },
+                {
+                  "item": "jugcraft:machine_casing",
+                  "count": 1,
+                  "accepts": "jugcraft:machine_casing",
+                  "from_step": "machine_casing"
+                },
+                {
+                  "item": "minecraft:redstone",
+                  "count": 1,
+                  "accepts": "minecraft:redstone",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:wire_drawer",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [
+                "brass_ingot",
+                "copper_cable",
+                "machine_casing"
+              ],
+              "alt_needs": [],
+              "note": "",
+              "link": {
+                "type": "handbook",
+                "chapter": 6,
+                "page": 4
+              }
+            },
+            {
+              "id": "circuit_assembler",
+              "kind": "step",
+              "role": "required",
+              "item": "jugcraft:circuit_assembler",
+              "method": "crafting",
+              "machine": "minecraft:crafting_table",
+              "source": "recipe",
+              "recipe": "jugcraft:circuit_assembler",
+              "inputs": [
+                {
+                  "item": "jugcraft:tin_plate",
+                  "count": 4,
+                  "accepts": "#c:plates/tin",
+                  "how": {
+                    "method": "machine",
+                    "machine": "jugcraft:metal_press",
+                    "recipe": "jugcraft:pressing/tin_ingot"
+                  }
+                },
+                {
+                  "item": "jugcraft:bronze_gear",
+                  "count": 1,
+                  "accepts": "#c:gears/bronze",
+                  "how": {
+                    "method": "crafting",
+                    "machine": "minecraft:crafting_table",
+                    "recipe": "jugcraft:bronze_gear"
+                  }
+                },
+                {
+                  "item": "jugcraft:copper_cable",
+                  "count": 2,
+                  "accepts": "jugcraft:copper_cable",
+                  "from_step": "copper_cable"
+                },
+                {
+                  "item": "jugcraft:machine_casing",
+                  "count": 1,
+                  "accepts": "jugcraft:machine_casing",
+                  "from_step": "machine_casing"
+                },
+                {
+                  "item": "minecraft:redstone",
+                  "count": 1,
+                  "accepts": "minecraft:redstone",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:circuit_assembler",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [
+                "tin_ingot",
+                "metal_press",
+                "copper_cable",
+                "machine_casing"
+              ],
+              "alt_needs": [],
+              "note": "",
+              "link": {
+                "type": "handbook",
+                "chapter": 6,
+                "page": 5
+              }
+            },
+            {
+              "id": "basic_circuit",
+              "kind": "step",
+              "role": "required",
+              "item": "jugcraft:basic_circuit",
+              "method": "machine",
+              "machine": "jugcraft:circuit_assembler",
+              "source": "recipe",
+              "recipe": "jugcraft:circuit_assembly/basic_circuit",
+              "inputs": [
+                {
+                  "item": "jugcraft:silicon",
+                  "count": 1,
+                  "accepts": "jugcraft:silicon",
+                  "how": {
+                    "method": "smelting",
+                    "machine": "minecraft:blast_furnace",
+                    "recipe": "jugcraft:silicon_from_blasting_quartz"
+                  }
+                },
+                {
+                  "item": "jugcraft:copper_wire",
+                  "count": 3,
+                  "accepts": "jugcraft:copper_wire",
+                  "how": {
+                    "method": "machine",
+                    "machine": "jugcraft:wire_drawer",
+                    "recipe": "jugcraft:wire_drawing/copper_ingot"
+                  }
+                },
+                {
+                  "item": "jugcraft:solder_ingot",
+                  "count": 1,
+                  "accepts": "jugcraft:solder_ingot",
+                  "how": {
+                    "method": "machine",
+                    "machine": "jugcraft:alloy_smelter",
+                    "recipe": "jugcraft:alloying/solder_ingot"
+                  }
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:basic_circuit",
+                  "count": 4
+                }
+              ],
+              "alternatives": [],
+              "needs": [
+                "wire_drawer",
+                "tin_ingot",
+                "alloy_smelter",
+                "circuit_assembler"
+              ],
+              "alt_needs": [],
+              "note": "Silicon comes from quartz; solder from tin and lead.",
+              "link": {
+                "type": "handbook",
+                "chapter": 6,
+                "page": 5
+              }
+            },
+            {
+              "id": "first_circuit",
+              "kind": "milestone",
+              "role": "required",
+              "title": "Basic circuits",
+              "item": "jugcraft:basic_circuit",
+              "method": "milestone",
+              "machine": null,
+              "source": "none",
+              "recipe": null,
+              "inputs": [],
+              "outputs": [],
+              "alternatives": [],
+              "needs": [
+                "basic_circuit"
+              ],
+              "alt_needs": [],
+              "note": "Plates, wire and circuits: the parts every later machine needs.",
+              "link": {
+                "type": "handbook",
+                "chapter": 0,
+                "page": 2
+              }
+            }
+          ]
+        },
+        {
+          "id": "steel",
+          "title": "Steel, a parallel capability",
+          "text": "Steel needs no electricity: the coke oven and the steel foundry run on heat. It opens the heavy machines.",
+          "milestone": true,
+          "steps": [
+            {
+              "id": "coke_oven",
+              "kind": "step",
+              "role": "required",
+              "item": "jugcraft:coke_oven",
+              "method": "crafting",
+              "machine": "minecraft:crafting_table",
+              "source": "recipe",
+              "recipe": "jugcraft:coke_oven",
+              "inputs": [
+                {
+                  "item": "minecraft:bricks",
+                  "count": 6,
+                  "accepts": "minecraft:bricks",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "minecraft:iron_ingot",
+                  "count": 2,
+                  "accepts": "#c:ingots/iron",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "minecraft:furnace",
+                  "count": 1,
+                  "accepts": "minecraft:furnace",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:coke_oven",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [],
+              "alt_needs": [],
+              "note": "",
+              "link": {
+                "type": "handbook",
+                "chapter": 9,
+                "page": 0
+              }
+            },
+            {
+              "id": "coke",
+              "kind": "step",
+              "role": "required",
+              "item": "jugcraft:coke",
+              "method": "machine",
+              "machine": "jugcraft:coke_oven",
+              "source": "recipe",
+              "recipe": "jugcraft:coking/coal",
+              "inputs": [
+                {
+                  "item": "minecraft:coal",
+                  "count": 1,
+                  "accepts": "minecraft:coal",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:coke",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [
+                "coke_oven"
+              ],
+              "alt_needs": [],
+              "note": "Coke is a hotter fuel and the carbon for steel.",
+              "link": {
+                "type": "handbook",
+                "chapter": 9,
+                "page": 0
+              }
+            },
+            {
+              "id": "steel_foundry",
+              "kind": "step",
+              "role": "required",
+              "item": "jugcraft:steel_foundry",
+              "method": "crafting",
+              "machine": "minecraft:crafting_table",
+              "source": "recipe",
+              "recipe": "jugcraft:steel_foundry",
+              "inputs": [
+                {
+                  "item": "minecraft:bricks",
+                  "count": 5,
+                  "accepts": "minecraft:bricks",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "minecraft:hopper",
+                  "count": 1,
+                  "accepts": "minecraft:hopper",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "jugcraft:iron_plate",
+                  "count": 2,
+                  "accepts": "#c:plates/iron",
+                  "from_step": "iron_plate"
+                },
+                {
+                  "item": "minecraft:blast_furnace",
+                  "count": 1,
+                  "accepts": "minecraft:blast_furnace",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:steel_foundry",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [
+                "iron_plate"
+              ],
+              "alt_needs": [],
+              "note": "Iron plates come from the workshop bench or the metal press.",
+              "link": {
+                "type": "handbook",
+                "chapter": 9,
+                "page": 1
+              }
+            },
+            {
+              "id": "steel_ingot",
+              "kind": "step",
+              "role": "required",
+              "item": "jugcraft:steel_ingot",
+              "method": "machine",
+              "machine": "jugcraft:steel_foundry",
+              "source": "recipe",
+              "recipe": "jugcraft:steelmaking/steel_ingot",
+              "inputs": [
+                {
+                  "item": "minecraft:iron_ingot",
+                  "count": 1,
+                  "accepts": "#c:ingots/iron",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "jugcraft:coke",
+                  "count": 1,
+                  "accepts": "jugcraft:coke",
+                  "from_step": "coke"
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:steel_ingot",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [
+                "coke",
+                "steel_foundry"
+              ],
+              "alt_needs": [],
+              "note": "Piping in oxygen doubles the foundry's speed; it is optional.",
+              "link": {
+                "type": "handbook",
+                "chapter": 9,
+                "page": 1
+              }
+            },
+            {
+              "id": "first_steel",
+              "kind": "milestone",
+              "role": "required",
+              "title": "Steel",
+              "item": "jugcraft:steel_ingot",
+              "method": "milestone",
+              "machine": null,
+              "source": "none",
+              "recipe": null,
+              "inputs": [],
+              "outputs": [],
+              "alternatives": [],
+              "needs": [
+                "steel_ingot"
+              ],
+              "alt_needs": [],
+              "note": "Steel opens the arc furnace, advanced circuits and powered tools.",
+              "link": {
+                "type": "handbook",
+                "chapter": 0,
+                "page": 4
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "magic",
+      "page": "route_magic",
+      "title": "Magic route map",
+      "icon": "jugcraft:initiate_wand",
+      "accent": "8A6FD0",
+      "summary": [
+        "Casting, a magical workshop and transmutation are independent starts. Begin with any of them."
+      ],
+      "groups": [
+        {
+          "id": "glow",
+          "title": "Find something that glows",
+          "text": "Every magic branch can begin here. Luminous matter is an amethyst shard or glowstone dust; nothing needs a boss, a quest or electricity.",
+          "milestone": false,
+          "steps": [
+            {
+              "id": "amethyst_shard",
+              "kind": "step",
+              "role": "required",
+              "item": "minecraft:amethyst_shard",
+              "method": "gathering",
+              "machine": null,
+              "source": "gathering",
+              "recipe": null,
+              "from": "minecraft:amethyst_cluster",
+              "vanilla": true,
+              "inputs": [],
+              "outputs": [
+                {
+                  "item": "minecraft:amethyst_shard",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [],
+              "alt_needs": [],
+              "note": "Break amethyst clusters in a geode. Glowstone dust from the Nether also counts.",
+              "link": {
+                "type": "page",
+                "target": "discover"
+              }
+            },
+            {
+              "id": "glowstone_dust",
+              "kind": "step",
+              "role": "alternative",
+              "item": "minecraft:glowstone_dust",
+              "method": "gathering",
+              "machine": null,
+              "source": "gathering",
+              "recipe": null,
+              "from": "minecraft:glowstone",
+              "vanilla": true,
+              "inputs": [],
+              "outputs": [
+                {
+                  "item": "minecraft:glowstone_dust",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [],
+              "alt_needs": [],
+              "note": "Glowstone from the Nether breaks into glowstone dust, which is luminous matter too.",
+              "link": {
+                "type": "page",
+                "target": "discover"
+              }
+            },
+            {
+              "id": "first_light",
+              "kind": "milestone",
+              "role": "required",
+              "title": "Examine a glow",
+              "item": "minecraft:amethyst_shard",
+              "method": "milestone",
+              "machine": null,
+              "source": "none",
+              "recipe": null,
+              "inputs": [],
+              "outputs": [],
+              "alternatives": [],
+              "needs": [
+                "amethyst_shard"
+              ],
+              "alt_needs": [],
+              "note": "Sneak and use the shard to examine it. Your live First Light route shows what your research still needs.",
+              "link": {
+                "type": "page",
+                "target": "discover"
+              }
+            }
+          ]
+        },
+        {
+          "id": "casting",
+          "title": "Casting: your first instrument",
+          "text": "Owning an instrument is enough to use it. Compose a small light spell first.",
+          "milestone": true,
+          "steps": [
+            {
+              "id": "initiate_wand",
+              "kind": "step",
+              "role": "required",
+              "item": "jugcraft:initiate_wand",
+              "method": "crafting",
+              "machine": "minecraft:crafting_table",
+              "source": "recipe",
+              "recipe": "jugcraft:initiate_wand",
+              "inputs": [
+                {
+                  "item": "minecraft:amethyst_shard",
+                  "count": 1,
+                  "accepts": "#jugcraft:concordance/luminous_matter",
+                  "from_step": "amethyst_shard"
+                },
+                {
+                  "item": "minecraft:stick",
+                  "count": 1,
+                  "accepts": "minecraft:stick",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "minecraft:copper_ingot",
+                  "count": 1,
+                  "accepts": "minecraft:copper_ingot",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:initiate_wand",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [
+                "amethyst_shard"
+              ],
+              "alt_needs": [
+                "glowstone_dust"
+              ],
+              "note": "Sneak-use the wand to open the constellation composer.",
+              "link": {
+                "type": "codex",
+                "category": "jugcraft:foundations"
+              }
+            },
+            {
+              "id": "lampwright_bench",
+              "kind": "step",
+              "role": "recommended",
+              "item": "jugcraft:lampwright_bench",
+              "method": "crafting",
+              "machine": "minecraft:crafting_table",
+              "source": "recipe",
+              "recipe": "jugcraft:lampwright_bench",
+              "inputs": [
+                {
+                  "item": "minecraft:copper_ingot",
+                  "count": 2,
+                  "accepts": "minecraft:copper_ingot",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "minecraft:amethyst_shard",
+                  "count": 1,
+                  "accepts": "#jugcraft:concordance/luminous_matter",
+                  "from_step": "amethyst_shard"
+                },
+                {
+                  "item": "minecraft:oak_planks",
+                  "count": 3,
+                  "accepts": "#minecraft:planks",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "minecraft:stick",
+                  "count": 2,
+                  "accepts": "minecraft:stick",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:lampwright_bench",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [
+                "amethyst_shard"
+              ],
+              "alt_needs": [
+                "glowstone_dust"
+              ],
+              "note": "Studying at the bench is one way to understand First Light.",
+              "link": {
+                "type": "codex",
+                "category": "jugcraft:radiance"
+              }
+            },
+            {
+              "id": "first_spell",
+              "kind": "milestone",
+              "role": "required",
+              "title": "Your first spell",
+              "item": "jugcraft:initiate_wand",
+              "method": "milestone",
+              "machine": null,
+              "source": "none",
+              "recipe": null,
+              "inputs": [],
+              "outputs": [],
+              "alternatives": [],
+              "needs": [
+                "initiate_wand",
+                "first_light"
+              ],
+              "alt_needs": [],
+              "note": "Kindle, or any spell you compose and inscribe. Spellcraft shows what you hold.",
+              "link": {
+                "type": "page",
+                "target": "spellcraft"
+              }
+            }
+          ]
+        },
+        {
+          "id": "workshop",
+          "title": "A magical workshop: the first apparatus and Source",
+          "text": "Jug Nouveau is an independent start. The Imbuement Chamber works slowly without charge, so it needs no power to begin.",
+          "milestone": true,
+          "steps": [
+            {
+              "id": "novice_spell_book",
+              "kind": "step",
+              "role": "recommended",
+              "item": "jugcraft:nouveau_novice_spell_book",
+              "method": "crafting",
+              "machine": "minecraft:crafting_table",
+              "source": "recipe",
+              "recipe": "jugcraft:nouveau/novice_spell_book",
+              "inputs": [
+                {
+                  "item": "minecraft:book",
+                  "count": 1,
+                  "accepts": "minecraft:book",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "minecraft:iron_shovel",
+                  "count": 1,
+                  "accepts": "minecraft:iron_shovel",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "minecraft:iron_pickaxe",
+                  "count": 1,
+                  "accepts": "minecraft:iron_pickaxe",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "minecraft:iron_axe",
+                  "count": 1,
+                  "accepts": "minecraft:iron_axe",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "minecraft:iron_sword",
+                  "count": 1,
+                  "accepts": "minecraft:iron_sword",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:nouveau_novice_spell_book",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [],
+              "alt_needs": [],
+              "note": "Jug Nouveau's own spellbook, for glyph spells. The chamber below does not need it.",
+              "link": {
+                "type": "page",
+                "target": "nouveau"
+              }
+            },
+            {
+              "id": "archwood_log",
+              "kind": "step",
+              "role": "required",
+              "item": "jugcraft:nouveau_green_archwood_log",
+              "method": "gathering",
+              "machine": null,
+              "source": "gathering",
+              "recipe": null,
+              "from": "jugcraft:nouveau_green_archwood_log",
+              "vanilla": false,
+              "inputs": [],
+              "outputs": [
+                {
+                  "item": "jugcraft:nouveau_green_archwood_log",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [],
+              "alt_needs": [],
+              "note": "Archwood grows in its own forests in four colours; any archwood log works.",
+              "link": {
+                "type": "page",
+                "target": "nouveau"
+              }
+            },
+            {
+              "id": "archwood_planks",
+              "kind": "step",
+              "role": "required",
+              "item": "jugcraft:nouveau_archwood_planks",
+              "method": "crafting",
+              "machine": "minecraft:crafting_table",
+              "source": "recipe",
+              "recipe": "jugcraft:nouveau/archwood_planks",
+              "inputs": [
+                {
+                  "item": "jugcraft:nouveau_green_archwood_log",
+                  "count": 1,
+                  "accepts": "#c:logs/archwood",
+                  "from_step": "archwood_log"
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:nouveau_archwood_planks",
+                  "count": 4
+                }
+              ],
+              "alternatives": [],
+              "needs": [
+                "archwood_log"
+              ],
+              "alt_needs": [],
+              "note": "",
+              "link": {
+                "type": "page",
+                "target": "nouveau"
+              }
+            },
+            {
+              "id": "imbuement_chamber",
+              "kind": "step",
+              "role": "required",
+              "item": "jugcraft:nouveau_imbuement_chamber",
+              "method": "crafting",
+              "machine": "minecraft:crafting_table",
+              "source": "recipe",
+              "recipe": "jugcraft:nouveau/imbuement_chamber",
+              "inputs": [
+                {
+                  "item": "jugcraft:nouveau_archwood_planks",
+                  "count": 6,
+                  "accepts": "jugcraft:nouveau_archwood_planks",
+                  "from_step": "archwood_planks"
+                },
+                {
+                  "item": "minecraft:gold_ingot",
+                  "count": 2,
+                  "accepts": "#c:ingots/gold",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:nouveau_imbuement_chamber",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [
+                "archwood_planks"
+              ],
+              "alt_needs": [],
+              "note": "Your first magical apparatus.",
+              "link": {
+                "type": "page",
+                "target": "nouveau"
+              }
+            },
+            {
+              "id": "source_gem",
+              "kind": "step",
+              "role": "required",
+              "item": "jugcraft:nouveau_source_gem",
+              "method": "imbuement",
+              "machine": "jugcraft:nouveau_imbuement_chamber",
+              "source": "nouveau",
+              "recipe": "jugcraft:nouveau/imbuement_amethyst",
+              "inputs": [
+                {
+                  "item": "minecraft:amethyst_shard",
+                  "count": 1,
+                  "accepts": "minecraft:amethyst_shard",
+                  "from_step": "amethyst_shard"
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:nouveau_source_gem",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [
+                "amethyst_shard",
+                "imbuement_chamber"
+              ],
+              "alt_needs": [],
+              "note": "Place an amethyst shard in the chamber. Ley Charge speeds it up; it is not required.",
+              "link": {
+                "type": "page",
+                "target": "nouveau"
+              }
+            },
+            {
+              "id": "dominion_wand",
+              "kind": "step",
+              "role": "recommended",
+              "item": "jugcraft:dominion_wand",
+              "method": "crafting",
+              "machine": "minecraft:crafting_table",
+              "source": "recipe",
+              "recipe": "jugcraft:dominion_wand",
+              "inputs": [
+                {
+                  "item": "minecraft:amethyst_shard",
+                  "count": 1,
+                  "accepts": "minecraft:amethyst_shard",
+                  "from_step": "amethyst_shard"
+                },
+                {
+                  "item": "minecraft:stick",
+                  "count": 1,
+                  "accepts": "minecraft:stick",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "minecraft:gold_nugget",
+                  "count": 1,
+                  "accepts": "minecraft:gold_nugget",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:dominion_wand",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [
+                "amethyst_shard"
+              ],
+              "alt_needs": [],
+              "note": "Links Source Jars, Sourcelinks and workshop apparatus.",
+              "link": {
+                "type": "codex",
+                "category": "jugcraft:nouveau"
+              }
+            },
+            {
+              "id": "source_jar",
+              "kind": "step",
+              "role": "recommended",
+              "item": "jugcraft:nouveau_source_jar",
+              "method": "crafting",
+              "machine": "minecraft:crafting_table",
+              "source": "recipe",
+              "recipe": "jugcraft:nouveau/source_jar",
+              "inputs": [
+                {
+                  "item": "jugcraft:nouveau_archwood_slab",
+                  "count": 6,
+                  "accepts": "jugcraft:nouveau_archwood_slab",
+                  "how": {
+                    "method": "crafting",
+                    "machine": "minecraft:crafting_table",
+                    "recipe": "jugcraft:nouveau/archwood_slab"
+                  }
+                },
+                {
+                  "item": "minecraft:glass",
+                  "count": 2,
+                  "accepts": "#c:glass_blocks",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:nouveau_source_jar",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [
+                "archwood_planks"
+              ],
+              "alt_needs": [],
+              "note": "Stores Source for powered workshops and helpers.",
+              "link": {
+                "type": "codex",
+                "category": "jugcraft:nouveau"
+              }
+            },
+            {
+              "id": "first_source",
+              "kind": "milestone",
+              "role": "required",
+              "title": "Your first Source Gem",
+              "item": "jugcraft:nouveau_source_gem",
+              "method": "milestone",
+              "machine": null,
+              "source": "none",
+              "recipe": null,
+              "inputs": [],
+              "outputs": [],
+              "alternatives": [],
+              "needs": [
+                "imbuement_chamber",
+                "source_gem"
+              ],
+              "alt_needs": [],
+              "note": "Source Gems open glyphs, apparatus and helpers.",
+              "link": {
+                "type": "page",
+                "target": "nouveau"
+              }
+            }
+          ]
+        },
+        {
+          "id": "ley",
+          "title": "Shared charge with technology",
+          "text": "A Ley Pylon stores Ley Charge for rituals and compatible apparatus. Fill it with Radiance from a Kindled Lantern or with electrical JE, so a technology player can supply a mage.",
+          "milestone": false,
+          "steps": [
+            {
+              "id": "ley_pylon",
+              "kind": "step",
+              "role": "recommended",
+              "item": "jugcraft:ley_pylon",
+              "method": "crafting",
+              "machine": "minecraft:crafting_table",
+              "source": "recipe",
+              "recipe": "jugcraft:ley_pylon",
+              "inputs": [
+                {
+                  "item": "minecraft:amethyst_shard",
+                  "count": 1,
+                  "accepts": "minecraft:amethyst_shard",
+                  "from_step": "amethyst_shard"
+                },
+                {
+                  "item": "minecraft:copper_ingot",
+                  "count": 2,
+                  "accepts": "minecraft:copper_ingot",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "minecraft:lapis_lazuli",
+                  "count": 1,
+                  "accepts": "minecraft:lapis_lazuli",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "minecraft:stone_bricks",
+                  "count": 3,
+                  "accepts": "minecraft:stone_bricks",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:ley_pylon",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [
+                "amethyst_shard"
+              ],
+              "alt_needs": [],
+              "note": "1000 JE make one Ley Charge; it never converts back.",
+              "link": {
+                "type": "codex",
+                "category": "jugcraft:circles"
+              }
+            }
+          ]
+        },
+        {
+          "id": "transmutation",
+          "title": "Transmutation without casting",
+          "text": "A separate specialty: no spellcasting needed. Learning and output permission are separate, so valuables stay protected.",
+          "milestone": true,
+          "steps": [
+            {
+              "id": "assayers_scale",
+              "kind": "step",
+              "role": "required",
+              "item": "jugcraft:assayers_scale",
+              "method": "crafting",
+              "machine": "minecraft:crafting_table",
+              "source": "recipe",
+              "recipe": "jugcraft:assayers_scale",
+              "inputs": [
+                {
+                  "item": "minecraft:gold_ingot",
+                  "count": 2,
+                  "accepts": "minecraft:gold_ingot",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "minecraft:copper_ingot",
+                  "count": 1,
+                  "accepts": "minecraft:copper_ingot",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "minecraft:iron_ingot",
+                  "count": 1,
+                  "accepts": "minecraft:iron_ingot",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "minecraft:smooth_stone_slab",
+                  "count": 2,
+                  "accepts": "minecraft:smooth_stone_slab",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "minecraft:dark_oak_planks",
+                  "count": 1,
+                  "accepts": "minecraft:dark_oak_planks",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:assayers_scale",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [],
+              "alt_needs": [],
+              "note": "",
+              "link": {
+                "type": "page",
+                "target": "alchemy_start"
+              }
+            },
+            {
+              "id": "philosophers_stone",
+              "kind": "step",
+              "role": "required",
+              "item": "jugcraft:philosophers_stone",
+              "method": "crafting",
+              "machine": "minecraft:crafting_table",
+              "source": "recipe",
+              "recipe": "jugcraft:philosophers_stone",
+              "inputs": [
+                {
+                  "item": "minecraft:redstone",
+                  "count": 4,
+                  "accepts": "minecraft:redstone",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "minecraft:gold_ingot",
+                  "count": 4,
+                  "accepts": "minecraft:gold_ingot",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "jugcraft:assayers_scale",
+                  "count": 1,
+                  "accepts": "jugcraft:assayers_scale",
+                  "from_step": "assayers_scale"
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:philosophers_stone",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [
+                "assayers_scale"
+              ],
+              "alt_needs": [],
+              "note": "",
+              "link": {
+                "type": "page",
+                "target": "alchemy_start"
+              }
+            },
+            {
+              "id": "transmutation_table",
+              "kind": "step",
+              "role": "recommended",
+              "item": "jugcraft:transmutation_table",
+              "method": "crafting",
+              "machine": "minecraft:crafting_table",
+              "source": "recipe",
+              "recipe": "jugcraft:transmutation_table",
+              "inputs": [
+                {
+                  "item": "minecraft:stone",
+                  "count": 3,
+                  "accepts": "minecraft:stone",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "minecraft:obsidian",
+                  "count": 5,
+                  "accepts": "minecraft:obsidian",
+                  "how": {
+                    "method": "vanilla"
+                  }
+                },
+                {
+                  "item": "jugcraft:dark_matter",
+                  "count": 1,
+                  "accepts": "jugcraft:dark_matter",
+                  "how": {
+                    "method": "crafting",
+                    "machine": "minecraft:crafting_table",
+                    "recipe": "jugcraft:dark_matter"
+                  }
+                }
+              ],
+              "outputs": [
+                {
+                  "item": "jugcraft:transmutation_table",
+                  "count": 1
+                }
+              ],
+              "alternatives": [],
+              "needs": [],
+              "alt_needs": [],
+              "note": "A later upgrade: Dark Matter is made from Aeternalis Fuel and a diamond block.",
+              "link": {
+                "type": "codex",
+                "category": "jugcraft:equivalence"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

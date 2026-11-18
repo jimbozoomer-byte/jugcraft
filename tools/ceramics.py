@@ -122,7 +122,7 @@ GUIDE_PAGES = [
         'Alumina from the existing bauxite line follows the same conditioning, pressing and firing route. Finish one blank into an Alumina Plate or one set of Ceramic Bearing Balls. Lock the desired recipe; there is no separate ceramic press or kiln to build.',
         'Before ceramics, the original terracotta insulator, motor and upgrade recipes still work. Ordinary clay bricks still start steel and chemistry. Ceramics are an optional productive specialty, not a retroactive gate.']},
     {'title': 'Precision parts and their uses', 'icon': 'jugcraft:precision_bearing', 'text': [
-        'Two steel plates hand-assemble two shaft blanks. Finish them with the abrasive head. A shaft, a steel plate and a set of ceramic balls assemble a Precision Bearing. Bearings and shafts make two motors per advanced assembly, or a Speed Upgrade with less gear-making.',
+        'Two steel plates hand-assemble two shaft blanks. Finish them with the abrasive head. A shaft, a steel plate and a set of ceramic balls assemble a Precision Bearing. Ordinary iron parts make one motor; bearings and shafts make two. Add a polymer housing and neodymium magnet to precision parts for four motors. Bearings also make a Speed Upgrade with less gear-making.',
         'Finished Alumina Plates provide the insulating body of an alternate Efficiency Upgrade. Porcelain insulators make existing placed Ceramic Insulators and an alternate Copper Cable recipe. These are extra recipes: old recipes and saved equipment stay available.',
         'Two borosilicate glass make two Optical Blanks. The Felt Polishing Head finishes each into a lens; two lenses, a brass plate and a compass make the existing Range Finder. Lenses also make spyglasses. Advanced wafer equipment will use this same finishing specialty in a later package.']},
     {'title': 'Specialist zirconia tooling', 'icon': 'jugcraft:zirconia_insert', 'text': [
@@ -171,6 +171,11 @@ def write_extras(write, assets, data, lang, condition):
            {'P': '#c:plates/iron', 'W': '#c:wires/copper', 'B': 'jugcraft:precision_bearing',
             'S': 'jugcraft:precision_shaft', 'C': 'jugcraft:copper_cable', 'I': 'jugcraft:porcelain_insulator'},
            'jugcraft:electric_motor', 2, ['aluminum', 'silicon'])
+    shaped('motors_prepared', ['BWB', 'SMP', 'CIC'],
+           {'B': 'jugcraft:precision_bearing', 'W': '#c:wires/copper', 'S': 'jugcraft:precision_shaft',
+            'M': 'jugcraft:neodymium_magnet', 'P': 'jugcraft:polymer_housing',
+            'C': 'jugcraft:copper_cable', 'I': 'jugcraft:porcelain_insulator'},
+           'jugcraft:electric_motor', 4, ['aluminum', 'silicon', 'rare_earths', 'crude_oil'])
     shaped('speed_upgrade', ['PRP', 'BCB', ' S '],
            {'P': '#c:plates/steel', 'R': 'minecraft:redstone', 'B': 'jugcraft:precision_bearing',
             'C': 'jugcraft:basic_circuit', 'S': 'jugcraft:precision_shaft'}, 'jugcraft:speed_upgrade', features=['aluminum'])

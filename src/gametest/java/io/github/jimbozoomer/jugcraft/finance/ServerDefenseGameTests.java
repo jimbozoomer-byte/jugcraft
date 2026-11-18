@@ -32,6 +32,7 @@ public final class ServerDefenseGameTests {
         var connection=new net.minecraft.network.Connection(net.minecraft.network.protocol.PacketFlow.SERVERBOUND);
         new io.netty.channel.embedded.EmbeddedChannel(connection);
         h.getLevel().getServer().getPlayerList().placeNewPlayer(connection,p,net.minecraft.server.network.CommonListenerCookie.createInitial(profile,false));
+        io.github.jimbozoomer.jugcraft.test.TestPlayers.track(h,p);
         p.setGameMode(GameType.SURVIVAL);p.getInventory().clearContent();
         p.snapTo(Vec3.atCenterOf(h.absolutePos(new BlockPos(2,3,2))));
         h.assertFalse(p.isCreative(),"Real survival fixture, not the permanently creative vanilla mock");return p;

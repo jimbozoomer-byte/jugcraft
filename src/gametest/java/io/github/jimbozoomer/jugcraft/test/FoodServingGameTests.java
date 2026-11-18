@@ -27,7 +27,8 @@ public final class FoodServingGameTests {
             if(!java.util.Set.of("minecraft","jugcraft").contains(id.getNamespace()) || item.getDefaultInstance().get(DataComponents.FOOD)==null)continue;
             boolean old=MenuDishes.PLACED.stream().anyMatch(d->id.toString().equals("jugcraft:"+d.id()));
             boolean nativeBlock=item instanceof BlockItem bi && bi.getBlock() instanceof io.github.jimbozoomer.jugcraft.menagerie.HouseholdBlock;
-            h.assertTrue(old||nativeBlock||item==Items.PUMPKIN_PIE||FoodServings.entries().containsKey(item),"No serving for "+id);
+            boolean seasonal=ThanksgivingDishes.DISHES.stream().anyMatch(d->id.toString().equals("jugcraft:"+d.id()));
+            h.assertTrue(old||seasonal||nativeBlock||item==Items.PUMPKIN_PIE||FoodServings.entries().containsKey(item),"No serving for "+id);
         }
         for(var entry:FoodServings.entries().entrySet()) {
             var stack=new ItemStack(entry.getKey(),2);stack.set(DataComponents.CUSTOM_NAME,Component.literal("Dinner test"));

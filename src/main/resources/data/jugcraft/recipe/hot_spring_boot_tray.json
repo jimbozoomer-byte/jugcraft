@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    "L L",
+    "SSS"
+  ],
+  "key": {
+    "L": "minecraft:leather",
+    "S": "#minecraft:wooden_slabs"
+  },
+  "result": {
+    "id": "jugcraft:hot_spring_boot_tray"
+  }
+}

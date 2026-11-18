@@ -22,6 +22,7 @@ needles and displays), as the motor control centre's."""
 import math
 
 from PIL import Image, ImageDraw
+from asset_fonts import font_path
 
 import control_boards as C
 from control_boards import sw, pic, named, _r, LENS
@@ -58,7 +59,7 @@ GAUGE_DP, GAUGE_P = 2, 3
 
 def _font(size):
     from PIL import ImageFont
-    return ImageFont.truetype(C._LETTER_FONT, size)
+    return ImageFont.truetype(font_path(C._LETTER_FONT), size)
 
 
 def _fit(d, cx, cy, w, legend, ink, size):

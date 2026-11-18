@@ -6,7 +6,8 @@ the other variants (tools/arms_variants.py), and so is his trophy loot table (lo
 Dread boon spares the bosses #jugcraft:frightless names (written by tools/pumpkin_king_data.py from
 arms_variants.FRIGHTLESS). His hollow, the Church Bridge, is part 1's (tools/church_bridge.py, tools/lair_data.py).
 
-Called from tools/agriculture_data.py (assets, loot, tags, advancements).
+Called from tools/agriculture_data.py (assets, loot, recipes, tags, advancements). Since Concordance Chunk E (E4), his
+recipes: a cheaper Hessian's Bridle from his lantern.
 """
 from agriculture import COSTUME_HAT_TAG, COSTUME_TAG
 from decor_data import MOD, rid
@@ -94,6 +95,15 @@ def loot(out, write):
     write(out.parent / "entities" / "hessian_horseman.json", {"type": "minecraft:gift",
                                                               "random_sequence": rid("entities/hessian_horseman"),
                                                               "pools": pools})
+
+
+def recipes(out, write, conditions):
+    for key, recipe in hh.RECIPES.items():
+        result = recipe["result"]
+        result = result if ":" in result else rid(result)
+        body = {"type": "minecraft:crafting_shapeless", "category": "misc", "ingredients": recipe["shapeless"]}
+        write(out / f"{key}.json", {"fabric:load_conditions": conditions(), **body,
+                                    "result": {"id": result, "count": recipe.get("count", 1)}})
 
 
 def tags(tags):

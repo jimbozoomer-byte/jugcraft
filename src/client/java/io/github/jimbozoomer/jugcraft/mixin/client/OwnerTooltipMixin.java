@@ -12,6 +12,10 @@ import org.spongepowered.asm.mixin.*;
 public abstract class OwnerTooltipMixin {
     @Shadow private Runnable deferredTooltip;
     @Unique private ItemStack jugcraft$requested=ItemStack.EMPTY,jugcraft$rendering=ItemStack.EMPTY;
+    @WrapMethod(method="setTooltipForNextFrame(Lnet/minecraft/client/gui/Font;Ljava/util/List;Ljava/util/Optional;IILnet/minecraft/resources/Identifier;Z)V")
+    private void jugcraft$boundedText(Font font,List<net.minecraft.network.chat.Component> lines,java.util.Optional<net.minecraft.world.inventory.tooltip.TooltipComponent> image,int x,int y,Identifier style,boolean replace,Operation<Void> original){
+        original.call(font,OwnerTooltipFrames.boundedLines(font,lines,((GuiGraphicsExtractor)(Object)this).guiWidth()),image,x,y,style,replace);
+    }
     @WrapMethod(method="setTooltipForNextFrame(Lnet/minecraft/client/gui/Font;Lnet/minecraft/world/item/ItemStack;II)V")
     private void jugcraft$item(Font font,ItemStack stack,int x,int y,Operation<Void> original){
         var previous=jugcraft$requested;jugcraft$requested=stack.copy();try{original.call(font,stack,x,y);}finally{jugcraft$requested=previous;}

@@ -1,0 +1,23 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "agriculture"
+    }
+  ],
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    "#minecraft:wooden_slabs",
+    "#minecraft:wooden_slabs",
+    "minecraft:stick",
+    "minecraft:stick",
+    "minecraft:pumpkin",
+    "minecraft:iron_nugget",
+    "minecraft:bowl"
+  ],
+  "result": {
+    "id": "jugcraft:pumpkin_carving_bench",
+    "count": 1
+  }
+}

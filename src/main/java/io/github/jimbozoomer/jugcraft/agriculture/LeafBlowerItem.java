@@ -61,7 +61,7 @@ import net.minecraft.world.phys.Vec3;
  */
 public class LeafBlowerItem extends Item implements Chargeable {
 	public static final String ID = "leaf_blower";
-	public static final long CAPACITY = 40000;
+	public static final long CAPACITY = 250000;
 	public static final long BLOW_JE = 4;
 	public static final long VACUUM_JE = 6;
 	public static final double RANGE = 8.0;
@@ -87,7 +87,13 @@ public class LeafBlowerItem extends Item implements Chargeable {
 	@Override
 	public InteractionResult use(Level level, Player player, InteractionHand hand) {
 		ItemStack stack = player.getItemInHand(hand);
-		if (Chargeable.energy(stack) < BLOW_JE) {
+        if (player instanceof ServerPlayer user && player.isShiftKeyDown() && user.getLastClientInput().sprint()) {
+            int strength = (Math.floorMod(io.github.jimbozoomer.jugcraft.tools.EquipmentSettings.number(stack, "blower_strength", 2),3) + 1) % 3;
+            io.github.jimbozoomer.jugcraft.tools.EquipmentSettings.setNumber(stack, "blower_strength", strength);
+            user.sendOverlayMessage(Component.literal("Leaf Blower: " + new String[]{"gentle", "medium", "full"}[strength]));
+            return InteractionResult.SUCCESS;
+        }
+		if (Chargeable.energy(stack) < (long) Math.ceil((player.isShiftKeyDown() ? VACUUM_JE : BLOW_JE) * power(stack))) {
 			if (player instanceof ServerPlayer user) {
 				user.sendOverlayMessage(Component.translatable("message.jugcraft.leaf_blower.flat"));
 			}
@@ -118,7 +124,7 @@ public class LeafBlowerItem extends Item implements Chargeable {
 			stream(level, player, vacuum);
 			return;
 		}
-		if (!Chargeable.drain(stack, vacuum ? VACUUM_JE : BLOW_JE)) {
+		if (!Chargeable.drain(stack, (long) Math.ceil((vacuum ? VACUUM_JE : BLOW_JE) * power(stack)))) {
 			player.stopUsingItem();
 			if (player instanceof ServerPlayer user) {
 				user.sendOverlayMessage(Component.translatable("message.jugcraft.leaf_blower.flat"));
@@ -149,6 +155,12 @@ public class LeafBlowerItem extends Item implements Chargeable {
 	}
 
 	/** The push the stream gives something {@code distance} blocks off: {@code push}, falling off towards its end. */
+    private static double power(Player player) {
+        return power(player.getUseItem().isEmpty() ? player.getMainHandItem() : player.getUseItem());
+    }
+    private static double power(ItemStack stack) {
+        return .5 + .25 * Math.clamp(io.github.jimbozoomer.jugcraft.tools.EquipmentSettings.number(stack, "blower_strength", 2), 0, 2);
+    }
 	public static double falloff(double push, double distance) {
 		return push * Mth.clamp(1.0 - distance / (RANGE + 2.0), 0.0, 1.0);
 	}
@@ -157,22 +169,22 @@ public class LeafBlowerItem extends Item implements Chargeable {
 	public static void blow(ServerLevel level, Player player, boolean leafTick) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getLookAngle();
-		for (Entity entity : level.getEntities(player, new AABB(eye, eye).inflate(RANGE))) {
+		for (Entity entity : level.getEntities(player, new AABB(eye, eye).inflate(RANGE * power(player)))) {
 			Vec3 at = entity.getBoundingBox().getCenter();
-			if (!inCone(eye, look, at, RANGE, CONE)) {
+			if (!inCone(eye, look, at, RANGE * power(player), CONE)) {
 				continue;
 			}
 			double distance = at.distanceTo(eye);
 			double push;
 			if (entity instanceof ItemEntity || entity instanceof ExperienceOrb) {
-				push = falloff(PUSH_ITEMS, distance);
+				push = falloff(PUSH_ITEMS * power(player), distance);
 			} else if (entity instanceof Player other && !player.canHarmPlayer(other)) {
 				// Other players only where they could be fought (PvP on, not a team-mate).
 				continue;
 			} else if (entity instanceof LivingEntity living) {
 				// A push: a Brace meets it and is spent, bracing only the rest of this tick (concordance/strata/Brace).
 				Brace.spend(living);
-				push = falloff(PUSH_MOBS, distance) * (1.0 - Mth.clamp(living.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE), 0.0, 1.0));
+				push = falloff(PUSH_MOBS * power(player), distance) * (1.0 - Mth.clamp(living.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE), 0.0, 1.0));
 			} else {
 				continue;
 			}
@@ -238,7 +250,7 @@ public class LeafBlowerItem extends Item implements Chargeable {
 		int dx = (int) Math.round(flat.x);
 		int dz = (int) Math.round(flat.z);
 		int moved = 0;
-		for (BlockPos pos : inStream(level, player, eye, look, PILE_RANGE, state -> state.getBlock() instanceof LeafPileBlock)) {
+		for (BlockPos pos : inStream(level, player, eye, look, Math.max(1,(int)Math.ceil(PILE_RANGE * power(player))), state -> state.getBlock() instanceof LeafPileBlock)) {
 			BlockState pile = level.getBlockState(pos);
 			if (!(pile.getBlock() instanceof LeafPileBlock)) {
 				continue;
@@ -277,7 +289,7 @@ public class LeafBlowerItem extends Item implements Chargeable {
 
 	/** Blows out the lit candles (and candle cakes) in the stream. */
 	public static int blowOutCandles(ServerLevel level, Player player, Vec3 eye, Vec3 look) {
-		List<BlockPos> lit = inStream(level, player, eye, look, PILE_RANGE,
+		List<BlockPos> lit = inStream(level, player, eye, look, Math.max(1,(int)Math.ceil(PILE_RANGE * power(player))),
 				state -> state.getBlock() instanceof AbstractCandleBlock && state.hasProperty(BlockStateProperties.LIT) && state.getValue(BlockStateProperties.LIT));
 		for (BlockPos pos : lit) {
 			AbstractCandleBlock.extinguish(player, level.getBlockState(pos), level, pos);
@@ -289,19 +301,22 @@ public class LeafBlowerItem extends Item implements Chargeable {
 	public static void vacuum(ServerLevel level, Player player, boolean leafTick) {
 		Vec3 eye = player.getEyePosition();
 		Vec3 look = player.getLookAngle();
-		for (Entity entity : level.getEntities(player, new AABB(eye, eye).inflate(VACUUM_RANGE))) {
+        ItemStack filter = player.getOffhandItem();
+		for (Entity entity : level.getEntities(player, new AABB(eye, eye).inflate(VACUUM_RANGE * power(player)))) {
+            if (!filter.isEmpty() && (!(entity instanceof ItemEntity item) || !item.getItem().is(filter.getItem()))) continue;
 			Vec3 at = entity.getBoundingBox().getCenter();
-			if ((entity instanceof ItemEntity || entity instanceof ExperienceOrb) && inCone(eye, look, at, VACUUM_RANGE, CONE * 1.5)) {
-				drive(entity, eye.subtract(at).normalize().scale(PUSH_ITEMS));
+			if ((entity instanceof ItemEntity || entity instanceof ExperienceOrb) && inCone(eye, look, at, VACUUM_RANGE * power(player), CONE * 1.5)) {
+				drive(entity, eye.subtract(at).normalize().scale(PUSH_ITEMS * power(player)));
 			}
 		}
 		if (!leafTick) {
 			return;
 		}
 		Block litter = BuiltInRegistries.BLOCK.getValue(Identifier.withDefaultNamespace("leaf_litter"));
-		for (BlockPos pos : inStream(level, player, eye, look, VACUUM_RANGE,
+		for (BlockPos pos : inStream(level, player, eye, look, Math.max(1,(int)Math.ceil(VACUUM_RANGE * power(player))),
 				state -> state.getBlock() instanceof LeafPileBlock || state.is(litter) && litter != Blocks.AIR)) {
 			BlockState state = level.getBlockState(pos);
+            if (!filter.isEmpty() && !filter.is(state.getBlock().asItem())) continue;
 			if (takeLayer(level, pos, state)) {
 				// Into the inventory, or at its user's feet if it is full.
 				player.getInventory().placeItemBackInInventory(new ItemStack(state.getBlock().asItem()), Prediction.SERVER_ONLY);

@@ -695,6 +695,22 @@ public class PetroGameTests {
 		});
 	}
 
+	/** Naphtha polymerizes into plastic pellets too: a bucket gives four, as refinery gas does. */
+	@GameTest(maxTicks = 300)
+	public void reactorMakesPlasticPelletsFromNaphtha(GameTestHelper helper) {
+		if (TestFocus.skip("petro")) {
+			helper.succeed();
+			return;
+		}
+		MachineBlockEntity reactor = place(helper, MachineKind.POLYMERIZATION_REACTOR, new BlockPos(4, 1, 2));
+		reactor.tanks().input(0).fill(PetroFluids.NAPHTHA.source(), 1000);
+		helper.succeedWhen(() -> {
+			helper.assertTrue(reactor.getItem(0).is(PetroItems.PLASTIC_PELLETS) && reactor.getItem(0).getCount() == 4,
+					"Pellets: " + reactor.getItem(0));
+			helper.assertTrue(reactor.tanks().input(0).isResourceBlank(), "Naphtha left: " + reactor.tanks().input(0).millibuckets());
+		});
+	}
+
 	/**
 	 * Synthetic rubber (batch 14): the chemical reactor cracks a bucket of naphtha into 500 mB of butadiene, and the
 	 * polymerization reactor turns 500 mB of butadiene into four rubber.
@@ -1399,7 +1415,7 @@ public class PetroGameTests {
 		});
 	}
 
-	/** Nitric acid etches microchips too, using 50 mB where sulfuric acid takes 100. */
+	/** Nitric acid doubles the microchip yield, using 50 mB where sulfuric acid takes 100. */
 	@GameTest(maxTicks = 400)
 	public void lithographyEtchesWithNitricAcid(GameTestHelper helper) {
 		if (TestFocus.skip("petro")) {
@@ -1412,7 +1428,7 @@ public class PetroGameTests {
 		station.setItem(1, new ItemStack(BuiltInRegistries.ITEM.getValue(Jugcraft.id("copper_wire")), 2));
 		helper.succeedWhen(() -> {
 			ItemStack out = station.getItem(station.kind().outputSlot());
-			helper.assertTrue(out.is(PetroItems.MICROCHIP) && out.getCount() == 4, "Microchips: " + out);
+			helper.assertTrue(out.is(PetroItems.MICROCHIP) && out.getCount() == 8, "Microchips: " + out);
 			helper.assertTrue(station.tanks().input(0).millibuckets() == 950,
 					"Nitric acid left: " + station.tanks().input(0).millibuckets());
 		});
@@ -1923,8 +1939,9 @@ public class PetroGameTests {
 		new ItemStack(FieldChemistry.ANTIDOTE).finishUsingItem(helper.getLevel(), pig);
 		helper.assertTrue(!pig.hasEffect(MobEffects.POISON), "The antidote left the poison");
 		helper.assertTrue(pig.hasEffect(MobEffects.SPEED), "The antidote cleared speed");
-		new ItemStack(FieldChemistry.STIMULANT).finishUsingItem(helper.getLevel(), pig);
-		helper.assertTrue(pig.hasEffect(MobEffects.HASTE), "The stimulant gave no haste");
+		ServerPlayer medicated = TestPlayers.survivor(helper);
+		new ItemStack(FieldChemistry.STIMULANT).finishUsingItem(helper.getLevel(), medicated);
+		helper.assertTrue(medicated.hasEffect(MobEffects.HASTE), "The stimulant gave no haste");
 		pig.setHealth(2.0F);
 		new ItemStack(FieldChemistry.FIRST_AID_KIT).finishUsingItem(helper.getLevel(), pig);
 		// Instant health works on the pig's next tick.
