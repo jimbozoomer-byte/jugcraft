@@ -346,7 +346,9 @@ public class TownRoutineGameTests {
 		h.assertTrue(general != null && general.openAt(3000) && !general.openAt(500) && !general.openAt(12000) && !general.openAt(20000),
 				"The General Store keeps 7am to 6pm");
 		for (TownShops.Shop shop : TownShops.get().shops.values()) {
-			h.assertTrue(shop.openAt(6000) && !shop.openAt(13000) && !shop.openAt(19000), shop.name() + " is open at noon and shut in the evening and at night");
+			boolean mineShift = io.github.jimbozoomer.jugcraft.town.DeepsteadWares.isGuildShop(shop.id());
+			h.assertTrue(shop.openAt(6000) && shop.openAt(13000) == mineShift && shop.openAt(19000) == mineShift,
+					shop.name() + " observes its advertised surface hours or all-shift mine service");
 		}
 		h.assertTrue(TownShops.get().essentialsShop() == general && general.essentials().containsAll(
 				List.of("minecraft:torch", "minecraft:bread", "minecraft:cooked_beef", "minecraft:white_bed")),

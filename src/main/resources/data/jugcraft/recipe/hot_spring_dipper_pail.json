@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    " S ",
+    "P P",
+    "PCP"
+  ],
+  "key": {
+    "S": "minecraft:stick",
+    "P": "#minecraft:planks",
+    "C": "minecraft:copper_ingot"
+  },
+  "result": {
+    "id": "jugcraft:hot_spring_dipper_pail"
+  }
+}

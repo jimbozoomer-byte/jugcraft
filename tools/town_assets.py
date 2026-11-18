@@ -135,7 +135,7 @@ def assets(assets_dir, write, lang):
     lang["entity.jugcraft.town_guard_mecha"] = "City Guard Walker"
 
 
-USABLE = ["#minecraft:doors", "#minecraft:trapdoors", "#minecraft:fence_gates", "#minecraft:buttons", "minecraft:lever",
+USABLE = ["#minecraft:doors", "jugcraft:harbour_gift_fir", "#minecraft:trapdoors", "#minecraft:fence_gates", "#minecraft:buttons", "minecraft:lever",
           "minecraft:crafting_table", "#minecraft:beds", "minecraft:bell", "minecraft:enchanting_table",
           "minecraft:ender_chest", rid("atm"),
           # A public festival game: its block entity keeps only the round's two scores, no items or fluids.

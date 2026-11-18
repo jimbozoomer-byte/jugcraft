@@ -1,5 +1,67 @@
 # Jugcraft TODO
 
+## November 18 — West Gate Harbour winter market
+
+- [x] Give the original city square its own 31-block Christmas fir after Thanksgiving, with public gifts and a seasonal changeover that preserves builds and outstanding parcels.
+
+- [x] Author a local quay market, the 3×3×5 public gift tree, both peppermint lamps, snowdrifts, piles and solid eave icicles. See the [first collection and seven Christmas batches](features/winter-market.md).
+- [x] Build the Icelandic changing-room and poolside furniture packages. Park the other Iceland ideas below while the furniture gets its first player review.
+- [ ] Preview the market on a copy of the harbour, survey existing player builds and select an installation site before changing the seasonal town layout. Provide for gifts left under the tree at season's end.
+- [x] Give the quay three staffed, craftable counters and a private parcel service for online and returning players.
+- [ ] Continue with evergreen garlands, waterfront lights, hearth furniture, large street pieces and harbour snow details.
+
+## November 17 — goblin settlements, elves, Christmas and Iceland
+
+- [ ] Review the Holidayworks bulb models and preserve player decorations when choosing the live market site.
+- [ ] **Create a goblin NPC people with inhabited settlements and world structures.** Start with a riveter, a salvage trader and a pilot who work different shifts at a ground settlement. The small, medium and large goblin camp templates and the goblin relics already in the repository give explorers a history to discover. Prototype an optional floating steampunk air station with a balloon envelope, copper boilers, docking arms and a freight lift. A windsock and signal mast at the ground settlement could lead players to it. A first job could be carrying a replacement pressure gauge up to the pilot and riding the lift back down with the first crate.
+- [ ] **Explore elves as year-round neighbors.** Compare two prototypes before choosing a direction. Woodland bridgewrights could grow crossings between old trees and trade grafts. Coastal elven star-readers could tend an observatory and chart sailing routes for the harbour. Give each candidate a home, a working NPC and one errand players would seek out again. The existing Clockwork Elf dimension has its own backlog entry.
+- [ ] **Develop a keepsake collection for the owner's Iceland trip.** Pick a memory, landmark or photo from the trip for the first postcard and its in-game counterpart. The ideas below are candidates for selection. Use the existing Icelandic horse and hot-spring terrain where they fit. Generate any new natural sites in future chunks of the current world using its spawn-relative climate bands.
+
+| Iceland idea | What players could do |
+| --- | --- |
+| Geothermal rye pots | Bury a lidded pot of dough in warm ground by a spring, mark the spot, then dig up a dark loaf to slice and share. A baker at the Christmas market could demonstrate it. [Laugarvatn Fontana bakery](https://fontana.is/rye-bread-tour) |
+| Turf-roof building set | Lay flowering or snow-dusted turf over gables, edge it with stone and join several small houses along one passage. A timber drying shack could hold nets and racks of fish. [Keldur turf farm](https://thjodminjasafn.is/en/soguleg-husasofn/keldur) · [Vatnsfjörður drying shack](https://www.thjodminjasafn.is/en/soguleg-husasofn/hjallur-i-vatnsfirdi) |
+| Bathhouse furniture | Fit a spring-fed outdoor pool with a slatted changing bench, a peg rail for cloaks, a carved dipper and a stone overflow spout that visibly runs when connected to water. |
+| Knitted horse tack and apartment textiles | Weave a two-color geometric border once and carry the same pattern onto a saddle blanket, a bed runner or a wall hanging. |
+| Black-sand headlands | Place occasional basalt-column sea arches and a small, tide-worn boathouse along cold coasts. Leave a navigable gap under the arch for players to sail through. |
+| Puffin colonies | Watch puffins nest in cliff-top burrows, dive from ledges and return with fish. A field-journal sketch could reward observing a dive and a landing. |
+| Icelandic horse post | Ride the existing breed between trail huts, stamp a route card at each stop and earn a patterned blanket for finishing the route. |
+| A souvenir for the harbour | Collect illustrated postcards at the huts, write a message on the back and display them in apartment frames. Use an owner-chosen view for the first card so the collection commemorates this particular trip. |
+
+## November 16 — city expansion first, then the selected Jug sinks
+
+Owner priority is to build the district first, then fit the businesses individually. The local waterfront layout adds a working rental market, Deepstead under the original town and West Gate Harbour. Live-site acceptance and guard/raid integration remain open. [Implementation, commands and evidence](features/western-city-and-undercity.md).
+
+- [x] **Second walled quarter (November 17).** The revised local design encloses the western courts in a separate curtain with two gatehouses and fourteen round towers. A five-block-wide crossing links the facing gates across open ground. The north wall clears the existing wheat field and buried masonry. Use this ring for the terraced migration. [Design and validation](features/western-city-and-undercity.md).
+- [x] Build the local architectural prototype: 48 furnished rooms across three five-storey buildings, six service shells, market pitches, a rotunda/gallery and two underground stair routes. Geometry and normal-walking checks pass. The flat prototype's complete rendered installation/rollback/reopen lifecycle passed; the furnished architectural views have also been reviewed locally.
+- [x] Obtain read-only current western-region copies and identify the large elevation drop/water basin. Keep world copies outside Git. The flat prototype is unsuitable for the live site; retain the installer's refusal until a terraced/waterfront plan and owner-build preservation review are complete.
+- [x] Validate the flat prototype's local installer: persistent before-images, full revalidation, later-edit refusal, pause/resume/rollback, save/reopen and public doors. The rendered lifecycle passed and restored every authored cell; this does not make the flat layout suitable for the live basin.
+- [x] Build the separate terraced architectural review: three courts at Y66/84/102, a stair avenue, 48 rooms, two lower undercity entrances and known-build exclusion pockets. All walking/exclusion checks pass; it is a test-only alternative pending visual/site acceptance and a water-safe installation plan. Moved both underground wings north and adjusted the stair entry/supports around existing mine blocks; the latest copied-world audit finds no affected stairs, doors, torches or containers. A disposable copied-terrain review preserves container payloads. The reference aquifer check exposed 41 openings; the candidate now closes them with a full underground shell, and the final copied-terrain run remains dry after scheduled fluid updates. All 18 geometry/reader checks and four focused server checks pass. Fresh ownership/tunnel/fluid review and the terraced migration remain required. Excluding known blocks alone is insufficient.
+
+- [ ] **First: survey and expand the existing server city westward from its west gate.** Preserve the old city, church slot machines, player buildings, inventories, claims and existing NPC identities. Build the connecting avenue, terrain transitions, new perimeter and district protection through an explicit expansion migration; do not regenerate the city or resize its existing blueprint.
+- [x] **Taller apartments:** build six-, seven- and eight-storey houses with 72 rentable interiors and shared roof terraces in the new quarter. Existing occupied buildings require an individual retrofit survey.
+- [x] **Deepstead:** extend the underground district beneath the original town. Link three circular tiers, nine workshops, the central watchtower and the lower waterworks to the bridge between the two city gates.
+- [x] **West Gate Harbour:** connect the western gate to the water with a quay, three piers, harbour light, customs clock, waterfront shops, market and two moored display ships.
+- [x] Validate routes and render the combined apartments, mine and waterfront on a local copy of the saved terrain. The install opened 72 units, preserved the shipwreck chest and other containers, and kept the mine dry. Rollback restored all 1,662,582 surveyed states after normal fluid and gravity ticks.
+- [x] Add a modest upper storey to four original-city properties, with compact craftable counterweight lifts and individually surveyed retrofits.
+- [x] Staff the original streets, western courts and docks with human guards. Add three apartment managers, dwarven residents, two guild shops and a three-tier watch in Deepstead.
+- [x] Build Stonewright’s Hall and the Copper Kettle in Deepstead, each with a resident dwarf and ten shop-exclusive products. Add an in-place upgrade for previously installed waterfronts. [Stock and operator commands](features/western-city-and-undercity.md).
+- [ ] Before live application, review the current terrain, ownership and inhabited areas and prepare the site's loaded chunks. Raid routing through the new district needs a separate pass. Live maintenance requires separate restart confirmation and a full 30-second warning.
+
+After the city shell is ready, implement these selected features individually in this proposed order:
+
+1. [x] Apartment rentals (idea 3): weekly Jug leases, tenant-owned furniture and an operator tool for custom interiors. Include lease and belongings recovery checks in local acceptance.
+2. [ ] Furniture showroom (1), then decorative building kits (11).
+3. [ ] Player market-stall leases (4), then auction-house fees (5).
+4. [ ] Postal service (6), then equipment refurbishment (10).
+5. [ ] Horse tack boutique (14), then stable services (15).
+6. [ ] Pet cosmetics (16), then tailor/wardrobe shop (17).
+7. [ ] Personal statues and portraits (13), then expensive prestige purchases (25).
+8. [ ] Community town improvement projects (12), using explicitly reserved upgrade sites.
+9. [ ] **Design further before implementation:** public workshop rentals (8) and commissioned manufacturing (9). Define ingredient custody, energy/tool costs, queue ownership, cancellation and delivery before enabling payments; do not grant permanent advanced recipes or free inputs just by renting a station.
+
+The owner accepts the tree-farm-to-shop apple/cocoa routes as ordinary farming income. Do not remove broad building/sapling support solely to eliminate those routes. Money sinks, rather than punitive restrictions on normal farming, are the selected direction. Other numerical essence findings remain separately documented; do not silently describe their audit as passing. No charges for basic pet recall/recovery or protected-death belongings are approved here.
+
 - [ ] **Owner correction Nov15 — current live world climate bands:** deploy the prepared migration for future Overworld generation around the saved spawn-city origin (X1296/Z400), preserving all generated chunks/builds. Disposable old-save reopen/new-terrain validation passed; combine with the November 16 release, re-read the stopped server's metadata, and obtain restart confirmation with the 30-second warning. This replaces the earlier new-world-only rollout assumption. See [migration evidence](features/existing-world-climate.md).
 
 - [ ] **November 16 release integration:** finish combined resource/runtime validation and the decorative-transmutation economy decision, then merge the 32 integrated PRs through the existing squash policy. PR #612 remains held for its separate compatibility/helper/audio review. Prepare matching client/server artifacts, obtain maintenance confirmation and a fresh backup, deploy the server, then promote client updates. [Current evidence and blockers](features/nov16-combined-release.md).

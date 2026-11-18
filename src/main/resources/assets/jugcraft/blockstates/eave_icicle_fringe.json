@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jugcraft:block/eave_icicle_fringe"
+    },
+    "facing=east": {
+      "model": "jugcraft:block/eave_icicle_fringe",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jugcraft:block/eave_icicle_fringe",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jugcraft:block/eave_icicle_fringe",
+      "y": 270
+    }
+  }
+}

@@ -1,0 +1,1 @@
+{"type":"minecraft:crafting_shaped","category":"building","pattern":["RWL"," I "," C "],"key":{"R":"minecraft:red_dye","W":"minecraft:white_dye","L":"minecraft:lantern","I":"minecraft:iron_ingot","C":"minecraft:copper_ingot"},"result":{"id":"jugcraft:peppermint_lane_lamp","count":1}}

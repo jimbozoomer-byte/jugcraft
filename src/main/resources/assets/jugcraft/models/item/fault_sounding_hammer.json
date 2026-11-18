@@ -1,0 +1,470 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "jugcraft:block/guild/iron",
+    "brass": "jugcraft:block/deepstead_hammered_brass",
+    "endgrain": "jugcraft:block/guild/endgrain",
+    "forged": "jugcraft:block/guild/forged",
+    "iron": "jugcraft:block/guild/iron",
+    "oak": "jugcraft:block/guild/oak",
+    "oak_upright": "jugcraft:block/guild/oak_upright",
+    "willow": "jugcraft:block/guild/willow"
+  },
+  "elements": [
+    {
+      "from": [
+        6.9,
+        1,
+        7.1
+      ],
+      "to": [
+        9.1,
+        11.2,
+        8.9
+      ],
+      "faces": {
+        "north": {
+          "texture": "#oak_upright"
+        },
+        "south": {
+          "texture": "#oak_upright"
+        },
+        "east": {
+          "texture": "#oak_upright"
+        },
+        "west": {
+          "texture": "#oak_upright"
+        },
+        "up": {
+          "texture": "#endgrain"
+        },
+        "down": {
+          "texture": "#endgrain"
+        }
+      }
+    },
+    {
+      "from": [
+        6.6,
+        0.6,
+        6.9
+      ],
+      "to": [
+        9.4,
+        1.5,
+        9.1
+      ],
+      "faces": {
+        "north": {
+          "texture": "#brass"
+        },
+        "south": {
+          "texture": "#brass"
+        },
+        "east": {
+          "texture": "#brass"
+        },
+        "west": {
+          "texture": "#brass"
+        },
+        "up": {
+          "texture": "#brass"
+        },
+        "down": {
+          "texture": "#brass"
+        }
+      }
+    },
+    {
+      "from": [
+        6.65,
+        2,
+        6.9
+      ],
+      "to": [
+        9.35,
+        5.8,
+        9.1
+      ],
+      "faces": {
+        "north": {
+          "texture": "#willow"
+        },
+        "south": {
+          "texture": "#willow"
+        },
+        "east": {
+          "texture": "#willow"
+        },
+        "west": {
+          "texture": "#willow"
+        },
+        "up": {
+          "texture": "#willow"
+        },
+        "down": {
+          "texture": "#willow"
+        }
+      }
+    },
+    {
+      "from": [
+        6.6,
+        9.2,
+        6.8
+      ],
+      "to": [
+        9.4,
+        10.6,
+        9.2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#brass"
+        },
+        "south": {
+          "texture": "#brass"
+        },
+        "east": {
+          "texture": "#brass"
+        },
+        "west": {
+          "texture": "#brass"
+        },
+        "up": {
+          "texture": "#brass"
+        },
+        "down": {
+          "texture": "#brass"
+        }
+      }
+    },
+    {
+      "from": [
+        4.4,
+        10.6,
+        6.3
+      ],
+      "to": [
+        10.8,
+        13.9,
+        9.7
+      ],
+      "faces": {
+        "north": {
+          "texture": "#forged",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#forged",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#forged",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "from": [
+        2.3,
+        10.1,
+        6
+      ],
+      "to": [
+        4.4,
+        14.4,
+        10
+      ],
+      "faces": {
+        "north": {
+          "texture": "#forged",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#forged",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#forged",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "from": [
+        10.8,
+        11.4,
+        6.8
+      ],
+      "to": [
+        12.7,
+        13.9,
+        9.2
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "from": [
+        12.7,
+        12.1,
+        7.3
+      ],
+      "to": [
+        14.2,
+        13.5,
+        8.7
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "from": [
+        14.2,
+        12,
+        7.6
+      ],
+      "to": [
+        15.2,
+        12.9,
+        8.4
+      ],
+      "faces": {
+        "north": {
+          "texture": "#iron"
+        },
+        "south": {
+          "texture": "#iron"
+        },
+        "east": {
+          "texture": "#iron"
+        },
+        "west": {
+          "texture": "#iron"
+        },
+        "up": {
+          "texture": "#iron"
+        },
+        "down": {
+          "texture": "#iron"
+        }
+      }
+    },
+    {
+      "from": [
+        7,
+        13.9,
+        7.1
+      ],
+      "to": [
+        8.8,
+        14.25,
+        8.9
+      ],
+      "faces": {
+        "north": {
+          "texture": "#oak"
+        },
+        "south": {
+          "texture": "#oak"
+        },
+        "east": {
+          "texture": "#oak"
+        },
+        "west": {
+          "texture": "#oak"
+        },
+        "up": {
+          "texture": "#oak"
+        },
+        "down": {
+          "texture": "#oak"
+        }
+      }
+    }
+  ],
+  "display": {
+    "gui": {
+      "rotation": [
+        14,
+        163,
+        -32
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.02,
+        1.02,
+        1.02
+      ]
+    },
+    "thirdperson_righthand": {
+      "rotation": [
+        0,
+        -90,
+        25
+      ],
+      "translation": [
+        0,
+        1,
+        0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [
+        0,
+        -90,
+        25
+      ],
+      "translation": [
+        0,
+        1,
+        0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        0,
+        -65,
+        13
+      ],
+      "translation": [
+        1,
+        2,
+        0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ]
+    },
+    "firstperson_lefthand": {
+      "rotation": [
+        0,
+        -65,
+        13
+      ],
+      "translation": [
+        1,
+        2,
+        0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ]
+    },
+    "fixed": {
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.95,
+        0.95,
+        0.95
+      ]
+    }
+  }
+}

@@ -408,6 +408,9 @@ public class TownGameTests {
 				sites.add(BlockPos.asLong(b[0], b[1], b[2]));
 			}
 		}
+        var upperFloors = new java.util.HashMap<BlockPos,BlockState>();
+        for (var house : io.github.jimbozoomer.jugcraft.town.UpperTown.houses()) upperFloors.putAll(house.changes());
+        for (var jetty : io.github.jimbozoomer.jugcraft.town.UpperTown.jetties()) upperFloors.putAll(jetty.changes());
 		int checked = 0;
 		int wrong = 0;
 		int feast = 0;
@@ -419,15 +422,17 @@ public class TownGameTests {
 					int z = wz - origin.getZ();
 					for (int y = data.yMin; y < data.yMin + data.height; y++) {
 						int index = data.index(x, y, z);
-						if (index == TownData.KEEP || sites.contains(BlockPos.asLong(x, y, z))) {
+						var roof = upperFloors.get(new BlockPos(x,y,z));
+						if ((roof == null && index == TownData.KEEP) || sites.contains(BlockPos.asLong(x, y, z))) {
 							continue;
 						}
                         // Exterior towers share columns with the natural slope;
                         // blendColumn intentionally leaves blueprint air as terrain.
-                        if (data.mask(x,z) != TownData.INSIDE && data.state(index).isAir()) continue;
+                        if (roof == null && data.mask(x,z) != TownData.INSIDE && data.state(index).isAir()) continue;
+                        BlockState expected = roof != null ? roof : data.state(index);
 						checked++;
 						BlockState found = level.getBlockState(origin.offset(x, y, z));
-						if (found != data.state(index)) {
+						if (found != expected) {
 							// The town's Thanksgiving feast (TownFeast) is authored, not a change: a cell counts only while the
 							// town's ledger has its site set out and the cell is exactly the town's own placement.
 							if (TownFeast.authored(level, origin.offset(x, y, z)) || harvestCraftAuthored(level, origin, origin.offset(x, y, z))) {
@@ -436,7 +441,7 @@ public class TownGameTests {
 							}
 							wrong++;
 							if (firstWrong == null) {
-								firstWrong = x + " " + y + " " + z + ": " + found + " instead of " + data.state(index);
+								firstWrong = x + " " + y + " " + z + ": " + found + " instead of " + expected;
 							}
 						}
 					}
@@ -528,7 +533,7 @@ public class TownGameTests {
 				// The town stays as built once its chunks tick: no water spreading from the fountain or wells, no blocks
 				// falling or leaves decaying (decor sites aside). Only air and fluid are compared, since random ticks may
 				// rightly change other states (grass under a block, a crop's age).
-				String drift = drift(level, data, origin, chunks, sites);
+				String drift = drift(level, data, origin, chunks, sites, upperFloors);
 				// The townsfolk are in the world, each the one the town recorded for its place.
 				List<Townsfolk> people = recordedTownsfolk(level, state, places);
 				if (people.size() != places.size()) {
@@ -582,7 +587,8 @@ public class TownGameTests {
 						&& e.cells().stream().allMatch(c -> level.getBlockState(c.pos()) == c.placed()));
 	}
 
-	private static String drift(ServerLevel level, TownData data, BlockPos origin, List<ChunkPos> chunks, Set<Long> sites) {
+	private static String drift(ServerLevel level, TownData data, BlockPos origin, List<ChunkPos> chunks, Set<Long> sites,
+            java.util.Map<BlockPos,BlockState> upperFloors) {
 		int drifted = 0;
 		int feast = 0;
 		String first = null;
@@ -596,13 +602,14 @@ public class TownGameTests {
 					int z = wz - origin.getZ();
 					for (int y = data.yMin; y < data.yMin + data.height; y++) {
 						int index = data.index(x, y, z);
-						if (index == TownData.KEEP || sites.contains(BlockPos.asLong(x, y, z))) {
+						var roof = upperFloors.get(new BlockPos(x,y,z));
+						if ((roof == null && index == TownData.KEEP) || sites.contains(BlockPos.asLong(x, y, z))) {
 							continue;
 						}
-						BlockState want = data.state(index);
+						BlockState want = roof != null ? roof : data.state(index);
                         // The exterior blending ring retains natural terrain in
                         // blueprint-air cells; it is not part of the authored room.
-                        if (data.mask(x,z) != TownData.INSIDE && want.isAir()) continue;
+                        if (roof == null && data.mask(x,z) != TownData.INSIDE && want.isAir()) continue;
 						BlockState found = level.getBlockState(origin.offset(x, y, z));
 						if (want.isAir() != found.isAir() || want.getFluidState().isEmpty() != found.getFluidState().isEmpty()) {
 							// The town's own feast, set out as recorded (TownFeast.authored), is not drift; anything else is.

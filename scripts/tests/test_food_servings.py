@@ -7,7 +7,10 @@ class FoodServingAssets(unittest.TestCase):
  def test_catalog_and_models(self):
   rows=json.loads((ROOT/'tools/food_servings_catalog.json').read_text())
   manifest=json.loads((f.RES/'jugcraft/food_servings.json').read_text())
-  self.assertEqual(len(rows),401);self.assertEqual(len({r['id'] for r in rows}),401)
+  from deepstead_shop_goods import FOODS
+  guild={'jugcraft:'+key for key in FOODS}
+  self.assertEqual(len(rows),401+len(guild));self.assertEqual(len({r['id'] for r in rows}),len(rows))
+  self.assertEqual({r['id'] for r in rows if r['id'] in guild and r.get('native_geometry')},guild)
   self.assertEqual({r['id'] for r in rows},{r['id'] for r in manifest})
   atlas=json.loads((f.RES/'assets/minecraft/atlases/blocks.json').read_text())['sources']
   for row in rows:

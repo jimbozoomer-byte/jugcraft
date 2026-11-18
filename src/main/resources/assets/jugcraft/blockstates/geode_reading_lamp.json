@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "brightness=0": {
+      "model": "jugcraft:block/geode_reading_lamp_off"
+    },
+    "brightness=1": {
+      "model": "jugcraft:block/geode_reading_lamp_dim"
+    },
+    "brightness=2": {
+      "model": "jugcraft:block/geode_reading_lamp_lit"
+    }
+  }
+}

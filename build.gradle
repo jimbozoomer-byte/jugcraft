@@ -100,6 +100,7 @@ def updateHelperJar = tasks.register('updateHelperJar', Jar) {
     manifest { attributes 'Main-Class': 'io.github.jimbozoomer.jugcraft.update.UpdateApplier' }
 }
 processResources {
+    from('distribution/RELEASE-NOTES.md') { into 'jugcraft/bulletin' }
     dependsOn updateHelperJar
     from(updateHelperJar.flatMap { it.archiveFile }) { into 'jugcraft' }
 	from('tools/world-designer') {

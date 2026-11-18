@@ -1,0 +1,43 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "jugcraft:block/guild/basalt",
+    "basalt": "jugcraft:block/guild/basalt",
+    "course": "jugcraft:block/guild/course",
+    "paver": "jugcraft:block/guild/paver"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "texture": "#course"
+        },
+        "south": {
+          "texture": "#course"
+        },
+        "east": {
+          "texture": "#course"
+        },
+        "west": {
+          "texture": "#course"
+        },
+        "up": {
+          "texture": "#paver"
+        },
+        "down": {
+          "texture": "#basalt"
+        }
+      }
+    }
+  ]
+}

@@ -2,6 +2,9 @@
   "replace": false,
   "values": [
     "#jugcraft:jimtafacts_automation",
+    "jugcraft:eave_icicle_fringe",
+    "jugcraft:peppermint_lane_lamp",
+    "jugcraft:peppermint_boulevard_lamp",
     "#jugcraft:jimtafacts_civil",
     "#jugcraft:jimtafacts_industry",
     "#jugcraft:jimtafacts_infrastructure",
@@ -45,6 +48,16 @@
     "jugcraft:asphalt_road_line",
     "jugcraft:asphalt_slab",
     "jugcraft:atm",
+    "jugcraft:miners_knot_tile",
+    "jugcraft:geode_reading_lamp",
+    "jugcraft:gallery_chimes",
+    "jugcraft:guild_border_paver",
+    "jugcraft:archmasters_keystone",
+    "jugcraft:scrollwork_corbel",
+    "jugcraft:survey_benchmark",
+    "jugcraft:stonemasons_cutting_bench",
+    "jugcraft:copper_samovar",
+    "jugcraft:shift_supper_gong",
     "jugcraft:auto_crafter",
     "jugcraft:autoclave",
     "jugcraft:barbed_wire",
@@ -4871,6 +4884,8 @@
     "jugcraft:forbidden_black_hole",
     "jugcraft:forbidden_whirlwind",
     "jugcraft:forbidden_upwind",
-    "jugcraft:forbidden_quantum_core"
+    "jugcraft:forbidden_quantum_core",
+    "jugcraft:hot_spring_overflow_spout",
+    "jugcraft:hot_spring_pool_lantern"
   ]
 }

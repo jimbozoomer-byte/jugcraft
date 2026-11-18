@@ -81,7 +81,7 @@ class OwnerJoinedFurniture extends HouseholdBlock {
     @Override public double seatHeight() { return name.endsWith("_couch") || name.endsWith("_chaise") ? 7.0 / 16 : .5; }
     @Override protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
         if (kind.equals("storage")) {
-            if (!Menagerie.mayChange(level, player, pos)) return InteractionResult.FAIL;
+            if (!Menagerie.mayChange(level, player, pos) && !io.github.jimbozoomer.jugcraft.town.ApartmentRentals.mayUseFurniture(player,level,pos)) return InteractionResult.FAIL;
             if (level instanceof ServerLevel && level.getBlockEntity(pos) instanceof KitchenCabinetBlockEntity cabinet) player.openMenu(cabinet);
             return InteractionResult.SUCCESS;
         }

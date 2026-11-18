@@ -197,7 +197,8 @@ ROUTINE_LINES = {
     },
 }
 
-SHOP_NAMES = {"general": "General Store", "seasonal": "Seasonal Stall", "curios": "Curiosities", "florist": "Florist"}
+SHOP_NAMES = {"general": "General Store", "seasonal": "Seasonal Stall", "curios": "Curiosities", "florist": "Florist",
+              "deepstead_lampwright": "Deepstead Lampwright", "deepstead_outfitter": "Deepstead Survey Outfitters"}
 
 
 def lang():
@@ -252,7 +253,8 @@ def lang():
     }
     for theme, name in THEME_NAMES.items():
         out[f"theme.jugcraft.{theme}"] = name
-    for shop, name in SHOP_NAMES.items():
+    import deepstead_shop_goods as guild
+    for shop, name in (SHOP_NAMES | guild.SHOPS).items():
         out[f"shop.jugcraft.{shop}"] = name
     for role, themes in LINES.items():
         for theme, lines in themes.items():
@@ -271,4 +273,7 @@ def lang():
         "message.jugcraft.town.have_map": "You already carry our town map. North is up: 1 Church, 2 Bank, 3 Hall, 4 Store.",
         "message.jugcraft.town.map_full": "Make one empty inventory slot and ask me again for a free map.",
     })
+    from deepstead_wares import LANG
+    out.update(LANG)
+    out.update(guild.LANG)
     return out

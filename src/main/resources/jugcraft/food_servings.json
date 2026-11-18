@@ -4810,5 +4810,77 @@
       4.95,
       12.0
     ]
+  },
+  {
+    "id": "jugcraft:ember_onion_pasty",
+    "shape": "SERVING",
+    "bounds": [
+      2.0,
+      0.0,
+      2.0,
+      14.0,
+      5.03,
+      14.0
+    ]
+  },
+  {
+    "id": "jugcraft:saltcap_skewers",
+    "shape": "SERVING",
+    "bounds": [
+      2.0,
+      0.0,
+      2.0,
+      14.0,
+      4.3,
+      14.0
+    ]
+  },
+  {
+    "id": "jugcraft:golden_leek_tart",
+    "shape": "SERVING",
+    "bounds": [
+      2.0,
+      0.0,
+      2.0,
+      14.0,
+      3.9,
+      14.0
+    ]
+  },
+  {
+    "id": "jugcraft:emberpepper_hotpot",
+    "shape": "SERVING",
+    "bounds": [
+      2.0,
+      0.0,
+      3.06849,
+      14.0,
+      4.94795,
+      12.93151
+    ]
+  },
+  {
+    "id": "jugcraft:caveberry_shrub",
+    "shape": "SERVING",
+    "bounds": [
+      4.0,
+      0,
+      3.73,
+      12.0,
+      12.2,
+      12.27
+    ]
+  },
+  {
+    "id": "jugcraft:glowroot_steep",
+    "shape": "SERVING",
+    "bounds": [
+      2.36,
+      0,
+      2.72,
+      13.64,
+      5.65,
+      13.28
+    ]
   }
 ]

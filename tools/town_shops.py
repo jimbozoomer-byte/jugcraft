@@ -20,11 +20,30 @@ white wool (32 for 1) let daylight collectors mint Jugs the same way, at 2,048 a
 
 import json
 from pathlib import Path
+import deepstead_shop_goods as guild
 
 # The server-owned convenience catalogue: the items transmutation may form (concordance/assay/TabletOutputs.java).
 TABLET_OUTPUTS = Path(__file__).resolve().parents[1] / "src/main/resources/data/jugcraft/tags/item/tablet_outputs.json"
 
 SHOPS = {
+    **{shop: {"name": guild.SHOPS[shop], "sells": [["jugcraft:"+key, count, price] for key,count,price,_,_ in stock], "buys": []}
+       for shop,stock in guild.STOCK.items()},
+    "deepstead_lampwright": {
+        "name": "Deepstead Lampwright",
+        "sells": [
+            ["jugcraft:miners_knot_tile", 4, 2], ["jugcraft:geode_reading_lamp", 1, 5],
+            ["jugcraft:gallery_chimes", 1, 7],
+        ],
+        "buys": [],
+    },
+    "deepstead_outfitter": {
+        "name": "Deepstead Survey Outfitters",
+        "sells": [
+            ["jugcraft:shaft_plummet", 1, 8], ["jugcraft:surveyors_reel", 1, 12],
+            ["jugcraft:miners_knot_tile", 4, 2],
+        ],
+        "buys": [],
+    },
     "general": {
         "name": "General Store",
         "sells": [
@@ -110,6 +129,11 @@ SHOPS = {
 # keeper goes out for the evening (town/TownRoutine.java). The taverns never shut: at any hour their innkeepers sell the
 # General Store's ESSENTIALS, at the store's own prices, so nobody is ever left without light, food or a bed.
 HOURS = {shop: [1000, 12000] for shop in SHOPS}
+# The guild counter below daylight serves all three mine shifts.
+HOURS["deepstead_lampwright"] = [0, 24000]
+HOURS["deepstead_outfitter"] = [0, 24000]
+for shop in guild.SHOPS:
+    HOURS[shop] = [0, 24000]
 ESSENTIALS_FROM = "general"
 ESSENTIALS = ["minecraft:torch", "minecraft:bread", "minecraft:cooked_beef", "minecraft:white_bed"]
 
@@ -184,7 +208,10 @@ def loop_errors(shops=None, formable=None):
                 if count < 1 or count > 64 or price < 1:
                     errors.append(f"{shop} {side} {item}: count {count}, price {price}")
         open_at, close_at = HOURS[shop]
-        if not 0 <= open_at < close_at <= 18000:
+        if shop in ("deepstead_lampwright", "deepstead_outfitter", *guild.SHOPS):
+            if [open_at, close_at] != [0, 24000]:
+                errors.append("Deepstead's shift counter must cover the whole day")
+        elif not 0 <= open_at < close_at <= 18000:
             errors.append(f"{shop}: hours {open_at}-{close_at} must fall between dawn and midnight")
     always = {item for item, _, _, themes in offers(ESSENTIALS_FROM, "sells", shops) if themes is None}
     for item in ESSENTIALS:

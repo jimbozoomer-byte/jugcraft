@@ -36,6 +36,10 @@ public final class TownCommand {
 	private static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		dispatcher.register(Commands.literal("jugcraft")
 				.then(Commands.literal("town")
+						.then(WesternDistrict.command())
+                        .then(Commands.literal("upperfloors").requires(TownCommand::isOperator)
+                            .executes(c -> UpperTown.retrofit(c.getSource(), false))
+                            .then(Commands.literal("apply").executes(c -> UpperTown.retrofit(c.getSource(), true))))
 						.executes(context -> info(context.getSource()))
                         .then(Commands.literal("feast").requires(TownCommand::isOperator)
                                 .executes(c -> feastReport(c.getSource(), false))

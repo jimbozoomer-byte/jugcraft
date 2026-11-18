@@ -54,6 +54,8 @@ public class ShopMenu extends AbstractContainerMenu {
 	public final Opening opening;
 	private final ContainerData data;
 	private final @Nullable Townsfolk keeper;
+	private final Player customer;
+	private boolean closed;
 
 	/** Client side. */
 	public ShopMenu(int containerId, Inventory inventory, Opening opening) {
@@ -65,6 +67,7 @@ public class ShopMenu extends AbstractContainerMenu {
 		this.opening = opening;
 		this.data = data;
 		this.keeper = keeper;
+		this.customer = inventory.player;
 		addDataSlots(data);
 	}
 
@@ -87,11 +90,12 @@ public class ShopMenu extends AbstractContainerMenu {
 	/** The server's menu for a keeper's shop, or (with {@code essentials}) for the essentials counter; null if none. */
 	public static @Nullable ShopMenu serve(int containerId, ServerPlayer player, Townsfolk keeper, boolean essentials) {
 		TownShops.Shop shop = essentials ? TownShops.get().essentialsShop() : TownShops.get().shop(keeper.shop());
-		return shop == null ? null : new ShopMenu(containerId, player.getInventory(),
+		return shop == null || !serves(keeper, shop) ? null : new ShopMenu(containerId, player.getInventory(),
 				new Opening(shop.id(), TownDecor.theme(), keeper.getId(), essentials), balanceData(player.level().getServer(), player.getUUID()), keeper);
 	}
 
 	private static void open(ServerPlayer player, Townsfolk keeper, TownShops.Shop shop, boolean essentials, Component title) {
+		if (!serves(keeper, shop)) return;
 		Opening opening = new Opening(shop.id(), TownDecor.theme(), keeper.getId(), essentials);
 		MinecraftServer server = player.level().getServer();
 		player.openMenu(new ExtendedMenuProvider<Opening>() {
@@ -110,6 +114,16 @@ public class ShopMenu extends AbstractContainerMenu {
 				return new ShopMenu(containerId, inventory, opening, balanceData(server, p.getUUID()), keeper);
 			}
 		});
+	}
+
+	private static boolean serves(Townsfolk keeper, TownShops.Shop shop) {
+		return !DeepsteadWares.isGuildShop(shop.id()) || keeper instanceof DeepsteadDwarf dwarf
+				&& dwarf.isMerchant() && shop.id().equals(keeper.shop());
+	}
+
+	@Override public void removed(Player player) {
+		closed = true;
+		super.removed(player);
 	}
 
 	/** A player's Jugs as two 16-bit menu values (menu data travels as shorts). */
@@ -155,11 +169,15 @@ public class ShopMenu extends AbstractContainerMenu {
 
 	@Override
 	public boolean stillValid(Player player) {
+		if (closed || customer != player || !player.isAlive() || player.isRemoved()) return false;
 		if (keeper == null) {
 			return true;
 		}
 		double range = TownShops.get().tradeRange;
-		return keeper.isAlive() && keeper.distanceToSqr(player) <= range * range;
+		return keeper.isAlive() && keeper.level() == player.level() && !player.isSpectator()
+				&& (!DeepsteadWares.isGuildShop(opening.shop()) || keeper instanceof DeepsteadDwarf dwarf && dwarf.isMerchant()
+						&& opening.shop().equals(keeper.shop()))
+				&& keeper.distanceToSqr(player) <= range * range;
 	}
 
 	@Override
@@ -190,11 +208,28 @@ public class ShopMenu extends AbstractContainerMenu {
 		}
 		if (id >= 0 && id < SELL_BASE) {
 			List<TownShops.Offer> sales = sales();
-			return id < sales.size() && buy(server, sales.get(id));
+			if (id >= sales.size()) return false;
+			var offer = sales.get(id);
+			if (DeepsteadWares.isGuildShop(opening.shop()) && !roomFor(server, offer)) {
+				server.sendOverlayMessage(Component.translatable("message.jugcraft.guild_shop.full"));
+				return false;
+			}
+			return buy(server, offer);
 		}
 		List<TownShops.Offer> purchases = purchases();
 		int index = id - SELL_BASE;
 		return index >= 0 && index < purchases.size() && sell(server, purchases.get(index));
+	}
+
+	private static boolean roomFor(ServerPlayer player, TownShops.Offer offer) {
+		var wares = new ItemStack(offer.itemType());
+		int needed = offer.count();
+		for (ItemStack slot : player.getInventory().getNonEquipmentItems()) {
+			if (slot.isEmpty()) needed -= wares.getMaxStackSize();
+			else if (ItemStack.isSameItemSameComponents(slot, wares)) needed -= wares.getMaxStackSize() - slot.getCount();
+			if (needed <= 0) return true;
+		}
+		return false;
 	}
 
 	/** The player buys an offer: the shop must still have it on sale today, and the player must have the Jugs. */

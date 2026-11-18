@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jugcraft:block/winter_bakery_counter"
+    },
+    "facing=east": {
+      "model": "jugcraft:block/winter_bakery_counter",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jugcraft:block/winter_bakery_counter",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jugcraft:block/winter_bakery_counter",
+      "y": 270
+    }
+  }
+}

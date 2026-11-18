@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "jugcraft:block/hot_spring_bench"
+    },
+    "facing=east": {
+      "model": "jugcraft:block/hot_spring_bench",
+      "y": 90
+    },
+    "facing=south": {
+      "model": "jugcraft:block/hot_spring_bench",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "jugcraft:block/hot_spring_bench",
+      "y": 270
+    }
+  }
+}

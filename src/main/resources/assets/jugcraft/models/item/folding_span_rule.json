@@ -1,0 +1,315 @@
+{
+  "parent": "minecraft:block/block",
+  "textures": {
+    "particle": "jugcraft:block/guild/willow",
+    "brass": "jugcraft:block/deepstead_hammered_brass",
+    "graduations": "jugcraft:block/guild/graduations",
+    "willow": "jugcraft:block/guild/willow"
+  },
+  "elements": [
+    {
+      "from": [
+        2,
+        3.6,
+        7.6
+      ],
+      "to": [
+        13.3,
+        5.4,
+        8.58
+      ],
+      "faces": {
+        "north": {
+          "texture": "#graduations",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#graduations",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#willow"
+        },
+        "west": {
+          "texture": "#willow"
+        },
+        "up": {
+          "texture": "#willow"
+        },
+        "down": {
+          "texture": "#willow"
+        }
+      }
+    },
+    {
+      "from": [
+        2,
+        3.6,
+        6.6
+      ],
+      "to": [
+        13.3,
+        5.4,
+        7.58
+      ],
+      "faces": {
+        "north": {
+          "texture": "#graduations",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#graduations",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#willow"
+        },
+        "west": {
+          "texture": "#willow"
+        },
+        "up": {
+          "texture": "#willow"
+        },
+        "down": {
+          "texture": "#willow"
+        }
+      },
+      "rotation": {
+        "axis": "z",
+        "angle": 45,
+        "origin": [
+          3,
+          4.5,
+          7
+        ]
+      }
+    },
+    {
+      "from": [
+        2.5,
+        10.5,
+        5.6
+      ],
+      "to": [
+        11.1,
+        12.3,
+        6.58
+      ],
+      "faces": {
+        "north": {
+          "texture": "#graduations",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "south": {
+          "texture": "#graduations",
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ]
+        },
+        "east": {
+          "texture": "#willow"
+        },
+        "west": {
+          "texture": "#willow"
+        },
+        "up": {
+          "texture": "#willow"
+        },
+        "down": {
+          "texture": "#willow"
+        }
+      }
+    },
+    {
+      "from": [
+        2.45,
+        3.95,
+        6.3
+      ],
+      "to": [
+        3.55,
+        5.05,
+        8.75
+      ],
+      "faces": {
+        "north": {
+          "texture": "#brass"
+        },
+        "south": {
+          "texture": "#brass"
+        },
+        "east": {
+          "texture": "#brass"
+        },
+        "west": {
+          "texture": "#brass"
+        },
+        "up": {
+          "texture": "#brass"
+        },
+        "down": {
+          "texture": "#brass"
+        }
+      }
+    },
+    {
+      "from": [
+        9.45,
+        10.85,
+        5.3
+      ],
+      "to": [
+        10.55,
+        11.950000000000001,
+        7.75
+      ],
+      "faces": {
+        "north": {
+          "texture": "#brass"
+        },
+        "south": {
+          "texture": "#brass"
+        },
+        "east": {
+          "texture": "#brass"
+        },
+        "west": {
+          "texture": "#brass"
+        },
+        "up": {
+          "texture": "#brass"
+        },
+        "down": {
+          "texture": "#brass"
+        }
+      }
+    }
+  ],
+  "display": {
+    "gui": {
+      "rotation": [
+        14,
+        163,
+        -12
+      ],
+      "translation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        1.04,
+        1.04,
+        1.04
+      ]
+    },
+    "thirdperson_righthand": {
+      "rotation": [
+        0,
+        -90,
+        25
+      ],
+      "translation": [
+        0,
+        1,
+        0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ]
+    },
+    "thirdperson_lefthand": {
+      "rotation": [
+        0,
+        -90,
+        25
+      ],
+      "translation": [
+        0,
+        1,
+        0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ]
+    },
+    "firstperson_righthand": {
+      "rotation": [
+        0,
+        -65,
+        13
+      ],
+      "translation": [
+        1,
+        2,
+        0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ]
+    },
+    "firstperson_lefthand": {
+      "rotation": [
+        0,
+        -65,
+        13
+      ],
+      "translation": [
+        1,
+        2,
+        0
+      ],
+      "scale": [
+        0.8,
+        0.8,
+        0.8
+      ]
+    },
+    "fixed": {
+      "rotation": [
+        0,
+        0,
+        0
+      ],
+      "scale": [
+        0.95,
+        0.95,
+        0.95
+      ]
+    }
+  }
+}

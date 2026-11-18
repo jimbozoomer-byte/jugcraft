@@ -35,6 +35,7 @@ public final class Town {
 			return false;
 		}
 		int dy = pos.getY() - origin.getY();
+		if (level instanceof ServerLevel server && WesternDistrict.protects(server, pos)) return true;
 		if (dy < -PROTECT_BELOW || dy > PROTECT_ABOVE) {
 			return false;
 		}
@@ -49,6 +50,7 @@ public final class Town {
 			return false;
 		}
 		int dy = pos.getY() - origin.getY();
+		if (level instanceof ServerLevel server && WesternDistrict.protects(server, pos)) return true;
 		return dy >= -PROTECT_BELOW && dy <= PROTECT_ABOVE
 				&& (TownData.get().mask(pos.getX() - origin.getX(), pos.getZ() - origin.getZ()) == TownData.INSIDE
 				|| districtColumn(level, origin, pos));

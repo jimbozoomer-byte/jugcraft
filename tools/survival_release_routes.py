@@ -17,6 +17,17 @@ def extend(root, edge, evidence, items):
     def found(names, source, note):
         for n in names:
             evidence[j(n)].append(dict(kind='native_acquisition', source=java+source+'.java', note=note))
+    # A signed book is one concrete route through the wrapping counter. The output is addressed
+    # to a second player and the original book is kept by the parcel ledger until collection.
+    route('town/WinterGiftPost', ['jugcraft:winter_wrapping_counter','minecraft:written_book'],
+          ['addressed_winter_gift'], 'wrap_for_another_player')
+    shop_file = data / 'town/shops.json'
+    for shop_id, shop in read(shop_file)['shops'].items():
+        if not shop_id.startswith('deepstead_'):
+            continue
+        for offer in shop['sells']:
+            evidence[offer['item']].append(dict(kind='town_merchant',source=shop_file.relative_to(root).as_posix(),
+                note=f"{shop['name']} sells {offer['count']} for {offer['price']} Jugs in the installed western district."))
     def ref(v):
         if isinstance(v, list): return [ref(x) for x in v]
         if isinstance(v, dict):

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "pattern": [
+    " B ",
+    "CLC",
+    "BBB"
+  ],
+  "key": {
+    "B": "minecraft:polished_basalt",
+    "C": "minecraft:copper_ingot",
+    "L": "minecraft:lantern"
+  },
+  "result": {
+    "id": "jugcraft:hot_spring_pool_lantern"
+  }
+}

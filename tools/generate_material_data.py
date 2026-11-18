@@ -205,6 +205,8 @@ def assets():
     arms_variants.write_all(write, ASSETS, DATA / MOD, lang, condition)
     import thanksgiving_weapons  # Thanksgiving weapons (docs/features/thanksgiving-weapons.md): models, item definitions, recipes, lang
     thanksgiving_weapons.write_all(write, ASSETS, DATA / MOD, lang, condition)
+    import hot_spring_furniture
+    hot_spring_furniture.write_all(write, ASSETS, DATA / MOD, lang)
     import arms_motion
     arms_motion.write_all(write, ASSETS)
     import grapple
@@ -335,6 +337,11 @@ def assets():
     chima_data.write_all(write, RES, lang)
     import pegasus_data
     pegasus_data.write_all(write, RES, lang)
+    import winter_trimmings
+    lang.update(winter_trimmings.LANGUAGE)
+    import winter_market_counters
+    winter_market_counters.generate()
+    lang.update(winter_market_counters.LANGUAGE)
     import horse_breeds_data
     horse_breeds_data.write_all(write, RES, lang)
     import vanilla_logs
@@ -1599,6 +1606,8 @@ def tags():
     import industrial_forms
     for block in industrial_forms.FORMS:
         tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+    import hot_spring_furniture
+    hot_spring_furniture.mining_tags(tags)
     # Crops grow on farmland, take bone meal and fertilizer, and keep the farmland under them.
     for crop, info in CROPS.items():
         tags.add("block", "minecraft:crops", rid(crop))
@@ -1626,8 +1635,20 @@ def tags():
     for block in town_assets.blocks():
         tool = "axe" if block == "town_commission_board" else "pickaxe"
         tags.add("block", f"minecraft:mineable/{tool}", rid(block))
+    from deepstead_wares import BLOCKS as guild_furnishings
+    for block in guild_furnishings:
+        tags.add("block", "minecraft:mineable/pickaxe", rid(block))
+    import deepstead_shop_goods as guild
+    for block in guild.FURNISHINGS:
+        tool = "axe" if block in guild.WOOD else "pickaxe"
+        tags.add("block", f"minecraft:mineable/{tool}", rid(block))
     for value in town_assets.USABLE:
         tags.add("block", "jugcraft:town_usable", value)
+    for tool, blocks in (("shovel", ("wind_carved_snowdrift", "shovelled_snow_pile")),
+                         ("pickaxe", ("eave_icicle_fringe", "peppermint_lane_lamp", "peppermint_boulevard_lamp")),
+                         ("axe", ("harbour_gift_fir",))):
+        for block in blocks:
+            tags.add("block", f"minecraft:mineable/{tool}", rid(block))
     tags.add("block", "minecraft:mineable/axe", rid(ph.CABINET))
     for tag in ph.BIOME_TAGS:
         tags.add("worldgen/biome", tag, rid("pixel_hollows"))

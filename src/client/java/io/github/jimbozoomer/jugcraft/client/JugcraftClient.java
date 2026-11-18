@@ -252,6 +252,7 @@ public final class JugcraftClient implements ClientModInitializer {
         HarvestCostumeLayer.register();
         BoardGameScreen.register();
         PetInventoryScreen.register();
+        TownDispatchScreen.register();
         BlockEntityRenderers.register(io.github.jimbozoomer.jugcraft.boardgames.BoardGames.ENTITY,BoardTableRenderer::new);
 		FacePaintLayer.register();
 		RetroTraderLayer.register();
@@ -525,12 +526,14 @@ public final class JugcraftClient implements ClientModInitializer {
 		net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry.registerModelLayer(TownsfolkModel.LAYER, TownsfolkModel::createLayer);
 		net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry.registerModelLayer(TownsfolkModel.SKINNABLE_LAYER, TownsfolkModel::createSkinnableLayer);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.town.JugcraftTown.TOWNSFOLK, TownsfolkRenderer::new);
+        DeepsteadDwarfRenderer.register();
         EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.town.JugcraftTown.GUARD_MECHA, TownGuardMechaRenderer::new);
 		net.fabricmc.fabric.api.client.rendering.v1.ModelLayerRegistry.registerModelLayer(StyxModel.LAYER, StyxModel::createLayer);
 		EntityRendererRegistry.register(io.github.jimbozoomer.jugcraft.styx.JugcraftStyx.WIZARD, StyxRenderer::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.town.JugcraftTown.SHOP_MENU, ShopScreen::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.town.JugcraftTown.ATM_MENU, AtmScreen::new);
         MenuScreens.register(io.github.jimbozoomer.jugcraft.town.JugcraftTown.COMMISSION_MENU, CommissionScreen::new);
+        MenuScreens.register(io.github.jimbozoomer.jugcraft.town.WinterMarket.MENU, WinterMarketScreen::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.town.guests.GuestService.MENU, GuestScreen::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.control.JugcraftControl.CONTROLLER_MENU, LogicControllerScreen::new);
 		MenuScreens.register(io.github.jimbozoomer.jugcraft.jimtafacts.industry.IndustrialGateParameters.TYPE, io.github.jimbozoomer.jugcraft.client.jimtafacts.GateParametersScreen::new);

@@ -2,6 +2,7 @@
   "replace": false,
   "values": [
     "jugcraft:acacia_cabinet",
+    "jugcraft:harbour_gift_fir",
     "jugcraft:acorn_leaf_mobile",
     "jugcraft:acorn_squash",
     "jugcraft:aged_maple_planks",
@@ -442,6 +443,9 @@
     "jugcraft:tomato_crate",
     "jugcraft:tool_rack",
     "jugcraft:town_commission_board",
+    "jugcraft:quarry_sample_cabinet",
+    "jugcraft:braided_bread_basket",
+    "jugcraft:tankard_tree",
     "jugcraft:trebuchet",
     "jugcraft:tree_fern_trunk",
     "jugcraft:tree_tap",
@@ -2569,6 +2573,10 @@
     "jugcraft:forbidden_potted_growing_edelwood",
     "jugcraft:wilds_painted_acacia",
     "jugcraft:wilds_painted_acacia_slab",
-    "jugcraft:wilds_clawed_log"
+    "jugcraft:wilds_clawed_log",
+    "jugcraft:hot_spring_bench",
+    "jugcraft:hot_spring_peg_rail",
+    "jugcraft:hot_spring_boot_tray",
+    "jugcraft:hot_spring_dipper_pail"
   ]
 }

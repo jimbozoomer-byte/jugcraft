@@ -69,7 +69,7 @@ public final class CityGuardVantage {
 
 	/** Whether a townsperson keeps watch this way: a guard on foot or a guard walker, not a gun's crew or a custom guard. */
 	public static boolean eligible(Townsfolk guard) {
-		return guard.isGuard() && guard.custom() == null && !guard.role().equals("flak_guard") && !guard.isPassenger();
+		return guard.isGuard() && guard.civicPost==0 && guard.custom() == null && !guard.role().equals("flak_guard") && !guard.isPassenger();
 	}
 
 	/** How far this guard wants to see a raider from. */

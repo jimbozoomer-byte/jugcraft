@@ -1,0 +1,52 @@
+{
+  "variants": {
+    "facing=north,setting=0": {
+      "model": "jugcraft:block/scrollwork_corbel",
+      "y": 0
+    },
+    "facing=east,setting=0": {
+      "model": "jugcraft:block/scrollwork_corbel",
+      "y": 90
+    },
+    "facing=south,setting=0": {
+      "model": "jugcraft:block/scrollwork_corbel",
+      "y": 180
+    },
+    "facing=west,setting=0": {
+      "model": "jugcraft:block/scrollwork_corbel",
+      "y": 270
+    },
+    "facing=north,setting=1": {
+      "model": "jugcraft:block/scrollwork_corbel",
+      "y": 0
+    },
+    "facing=east,setting=1": {
+      "model": "jugcraft:block/scrollwork_corbel",
+      "y": 90
+    },
+    "facing=south,setting=1": {
+      "model": "jugcraft:block/scrollwork_corbel",
+      "y": 180
+    },
+    "facing=west,setting=1": {
+      "model": "jugcraft:block/scrollwork_corbel",
+      "y": 270
+    },
+    "facing=north,setting=2": {
+      "model": "jugcraft:block/scrollwork_corbel",
+      "y": 0
+    },
+    "facing=east,setting=2": {
+      "model": "jugcraft:block/scrollwork_corbel",
+      "y": 90
+    },
+    "facing=south,setting=2": {
+      "model": "jugcraft:block/scrollwork_corbel",
+      "y": 180
+    },
+    "facing=west,setting=2": {
+      "model": "jugcraft:block/scrollwork_corbel",
+      "y": 270
+    }
+  }
+}

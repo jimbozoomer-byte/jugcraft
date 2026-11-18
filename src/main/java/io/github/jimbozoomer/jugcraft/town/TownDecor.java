@@ -1,6 +1,10 @@
 package io.github.jimbozoomer.jugcraft.town;
 
+import io.github.jimbozoomer.jugcraft.agriculture.FirGifts;
+import io.github.jimbozoomer.jugcraft.agriculture.HarbourGiftFir;
 import io.github.jimbozoomer.jugcraft.agriculture.HalloweenSeason;
+import java.time.LocalDate;
+import java.time.MonthDay;
 import io.github.jimbozoomer.jugcraft.season.JugcraftSeasons;
 import io.github.jimbozoomer.jugcraft.season.SeasonCalendar;
 import java.util.HashMap;
@@ -40,6 +44,7 @@ public final class TownDecor {
 	/** Sites a decorator is walking to: site -> decorator. */
 	private static final Map<Integer, UUID> CLAIMS = new HashMap<>();
 	private static @Nullable String forced;
+    private static long retryCenterpieceAt;
 
 	private TownDecor() {
 	}
@@ -59,6 +64,7 @@ public final class TownDecor {
 		ServerLifecycleEvents.SERVER_STOPPED.register(server -> {
 			CLAIMS.clear();
 			forced = null;
+            retryCenterpieceAt = 0;
 		});
 	}
 
@@ -86,6 +92,31 @@ public final class TownDecor {
         return date.getMonthValue() == 11 && date.getDayOfMonth() >= 4;
     }
 
+    /** Only the square starts Christmas early. An explicitly configured December window keeps its own start. */
+    static boolean cityTreeOn(SeasonCalendar.Settings settings, LocalDate today) {
+        LocalDate day = settings.effectiveDate(today);
+        if (settings.december() == null) return false;
+        var feast = settings.feastWindow(day.getYear());
+        if (feast != null && !day.isBefore(feast[0]) && !day.isAfter(feast[1])) return false;
+        if (settings.december().contains(day)) return true;
+        return settings.feast() == SeasonCalendar.Feast.US && day.getMonthValue() == 11
+            && day.isAfter(feast[1]) && settings.december().start().equals(MonthDay.of(12, 1));
+    }
+
+    public static boolean cityTreeInSeason() {
+        return forced == null ? cityTreeOn(JugcraftSeasons.settings(), JugcraftSeasons.date()) : forced.equals("december");
+    }
+
+    private static String siteLayout(TownData.Site site, String theme) {
+        if (site.kind().equals("centerpiece") && TownData.get().centerpiece.containsKey("december_v2")) {
+            if (cityTreeInSeason()) return "december_v2";
+            if (theme.equals("december")) {
+                return layoutTheme(JugcraftSeasons.isActive(SeasonCalendar.Event.HARVEST_FEAST) ? "harvest" : theme());
+            }
+        }
+        return layoutTheme(theme);
+    }
+
     /** Version only persisted site layouts, leaving shop/dialogue/calendar theme keys stable. */
     static String layoutTheme(String theme) {
         return theme.equals("harvest") && TownData.get().centerpiece.containsKey("harvest_v2") ? "harvest_v2" : theme;
@@ -94,6 +125,7 @@ public final class TownDecor {
 	/** Holds a theme until the server stops (null: follow the calendar again), for operators and tests. */
 	public static void force(@Nullable String theme) {
 		forced = theme;
+        retryCenterpieceAt = 0;
 	}
 
 	private static void tick(MinecraftServer server) {
@@ -122,7 +154,7 @@ public final class TownDecor {
 				if (done >= DIRECT_PER_TICK) {
 					break;
 				}
-				if (!state.siteTheme(site.index()).equals(layoutTheme(state.theme())) && !CLAIMS.containsKey(site.index()) && loaded(level, origin, site)) {
+				if (due(level, state, site) && !CLAIMS.containsKey(site.index()) && loaded(level, origin, site)) {
 					apply(level, site.index());
 					done++;
 				}
@@ -142,8 +174,9 @@ public final class TownDecor {
 		}
 		for (TownData.Site site : TownData.get().sites) {
 			BlockPos anchor = origin.offset(site.anchor());
-			if ((anchor.getX() >> 4) == chunk.x() && (anchor.getZ() >> 4) == chunk.z()
-					&& !state.siteTheme(site.index()).equals(layoutTheme(state.theme())) && loaded(level, origin, site)) {
+            boolean anchorChunk = (anchor.getX() >> 4) == chunk.x() && (anchor.getZ() >> 4) == chunk.z();
+            // For the wide tree, the last completed chunk may be across the square from its anchor.
+            if ((anchorChunk || site.kind().equals("centerpiece")) && due(level, state, site) && loaded(level, origin, site)) {
 				apply(level, site.index());
 			}
 		}
@@ -160,7 +193,7 @@ public final class TownDecor {
 		int best = -1;
 		double bestDistance = (double) reach * reach;
 		for (TownData.Site site : TownData.get().sites) {
-			if (state.siteTheme(site.index()).equals(layoutTheme(state.theme())) || CLAIMS.containsKey(site.index())) {
+			if (!due(level, state, site) || CLAIMS.containsKey(site.index())) {
 				continue;
 			}
 			double d = origin.offset(site.anchor()).distSqr(from);
@@ -188,7 +221,12 @@ public final class TownDecor {
 	/** Whether a site still shows an older theme. */
 	public static boolean stale(ServerLevel level, int site) {
 		TownState state = TownState.get(level);
-		return !state.siteTheme(site).equals(layoutTheme(state.theme()));
+		return due(level, state, TownData.get().sites.get(site));
+    }
+
+    private static boolean due(ServerLevel level, TownState state, TownData.Site site) {
+        return (!site.kind().equals("centerpiece") || level.getGameTime() >= retryCenterpieceAt)
+            && !state.siteTheme(site.index()).equals(siteLayout(site, state.theme()));
 	}
 
 	/** Changes a site to the current theme. */
@@ -201,11 +239,25 @@ public final class TownDecor {
 		TownData data = TownData.get();
 		TownData.Site site = data.sites.get(index);
         if (!loaded(level, origin, site)) { CLAIMS.remove(index); return; }
-		String theme = layoutTheme(state.theme());
+		String theme = siteLayout(site, state.theme());
         if (site.kind().equals("retired")) {
             state.setSiteTheme(index, theme); CLAIMS.remove(index); return;
         }
-        applyCells(level, cells(data, site, origin, state.siteTheme(index), theme));
+        String previous = state.siteTheme(index);
+        if (previous.equals(theme)) { CLAIMS.remove(index); return; }
+        var planned = cells(data, site, origin, previous, theme);
+        if (site.kind().equals("centerpiece") && (previous.equals("december_v2") || theme.equals("december_v2"))) {
+            // A player's build or an uncollected gift delays this one display. Retry after the space clears.
+            if (blockedCityDisplay(level, planned, theme.equals("december_v2"))) {
+                retryCenterpieceAt = level.getGameTime() + 1200;
+                CLAIMS.remove(index);
+                return;
+            }
+            writeDisplay(level, planned);
+            retryCenterpieceAt = 0;
+        } else {
+            applyCells(level, planned);
+        }
 		state.setSiteTheme(index, theme);
 		CLAIMS.remove(index);
 	}
@@ -217,9 +269,20 @@ public final class TownDecor {
         for (int[] b : site.blocks()) {
             var expected = previous.isEmpty() ? data.state(data.index(b[0], b[1], b[2]))
                 : stateFor(data, site, previous, b[3]);
-            cells.add(new DecorCell(origin.offset(b[0], b[1], b[2]), expected, stateFor(data, site, theme, b[3])));
+            var wanted = stateFor(data, site, theme, b[3]);
+            // The extended canopy occupies only its authored blocks. Keep player furnishings in the gaps.
+            if (site.kind().equals("centerpiece") && expected.isAir() && wanted.isAir()
+                    && (b[3] >= 637 || previous.equals("december_v2") || theme.equals("december_v2"))) continue;
+            cells.add(new DecorCell(origin.offset(b[0], b[1], b[2]), expected, wanted));
         }
         return cells;
+    }
+
+    private static boolean blockedCityDisplay(ServerLevel level, List<DecorCell> planned, boolean installing) {
+        // An existing player block identical to a future branch is still theirs. Do not adopt it and remove it in January.
+        if (installing && planned.stream().anyMatch(c -> c.expected() != c.wanted() && !c.wanted().isAir()
+                && matchesAuthored(level.getBlockState(c.pos()), c.wanted()))) return true;
+        return blockedDisplay(level, planned);
     }
 
     /** A multiblock display must remain whole. One conflict preserves its entire authored site. */
@@ -259,6 +322,11 @@ public final class TownDecor {
             cells.forEach(c -> updateAuthoredDecor(level,c.pos(),c.expected(),c.wanted()));
             return true;
         }
+        writeDisplay(level, cells);
+        return true;
+    }
+
+    private static void writeDisplay(ServerLevel level, List<DecorCell> cells) {
         // All cells were checked together on the server thread. Removal callbacks can clear their siblings;
         // write from the validated snapshot rather than mistaking those cleared cells for player edits.
         for (DecorCell c : cells) {
@@ -267,12 +335,15 @@ public final class TownDecor {
                     && matchesAuthored(level.getBlockState(c.pos()), c.expected())) TownBuilder.set(level,c.pos(),Blocks.AIR.defaultBlockState());
         }
         for (DecorCell c : cells) TownBuilder.set(level,c.pos(),c.wanted());
-        return true;
     }
 
     /** Public lantern toggles are interaction state, not replacement of an authored prop. */
     private static boolean matchesAuthored(BlockState actual, BlockState expected) {
         if (actual == expected) return true;
+        if (expected.is(Blocks.SPRUCE_LEAVES) && actual.is(Blocks.SPRUCE_LEAVES)) {
+            var distance = net.minecraft.world.level.block.state.properties.BlockStateProperties.DISTANCE;
+            return actual.setValue(distance, expected.getValue(distance)) == expected;
+        }
         if (isMulti(expected) && actual.is(expected.getBlock())) {
             var lit = io.github.jimbozoomer.jugcraft.agriculture.MultiDecorationBlock.LIT;
             return actual.setValue(lit, expected.getValue(lit)) == expected;
@@ -289,7 +360,8 @@ public final class TownDecor {
         var entity = level.getBlockEntity(pos);
         boolean plainBanner = entity instanceof net.minecraft.world.level.block.entity.BannerBlockEntity banner
             && banner.getCustomName() == null && banner.getPatterns().layers().isEmpty();
-        if (!matchesAuthored(level.getBlockState(pos), expected) || (entity != null && !plainBanner) || TownUpgrades.fixtureNearby(level,pos)) {
+        boolean emptyCitySkirt = expected.is(HarbourGiftFir.CITY_SKIRT) && entity instanceof FirGifts gifts && !gifts.hasGifts();
+        if (!matchesAuthored(level.getBlockState(pos), expected) || (entity != null && !plainBanner && !emptyCitySkirt) || TownUpgrades.fixtureNearby(level,pos)) {
             return CellChange.PRESERVE;
         }
         return CellChange.REPLACE;
@@ -320,8 +392,13 @@ public final class TownDecor {
         for (TownData.Site site : data.sites) {
             if (site.kind().equals("retired")) continue;
             if (!loaded(level, origin, site)) { unloaded++; continue; }
-            var planned = cells(data, site, origin, state.siteTheme(site.index()), layoutTheme(theme));
-            if (blockedDisplay(level, planned)) { preserved += planned.size(); continue; }
+            String target = site.kind().equals("centerpiece") && theme.equals("december") ? "december_v2" : layoutTheme(theme);
+            var planned = cells(data, site, origin, state.siteTheme(site.index()), target);
+            boolean civic = site.kind().equals("centerpiece") && (target.equals("december_v2") || state.siteTheme(site.index()).equals("december_v2"));
+            if (civic ? blockedCityDisplay(level, planned, target.equals("december_v2")) : blockedDisplay(level, planned)) {
+                preserved += planned.size();
+                continue;
+            }
             for (DecorCell cell : planned) {
                 switch (cellChange(level, cell.pos(), cell.expected(), cell.wanted())) {
                     case REPLACE -> replacements++;
@@ -365,10 +442,17 @@ public final class TownDecor {
 	}
 
 	private static boolean loaded(ServerLevel level, BlockPos origin, TownData.Site site) {
-		for (int[] b : site.blocks()) {
-			int x = origin.getX() + b[0];
-			int z = origin.getZ() + b[2];
-			if (level.getChunkSource().getChunkNow(x >> 4, z >> 4) == null) {
+        boolean square = site.kind().equals("centerpiece");
+        TownState state = TownState.get(level);
+        long last = Long.MIN_VALUE;
+        for (int[] b : site.blocks()) {
+            int cx = (origin.getX() + b[0]) >> 4;
+            int cz = (origin.getZ() + b[2]) >> 4;
+            long key = new ChunkPos(cx, cz).pack();
+            if (key == last) continue;
+            last = key;
+            // Loaded terrain can still be queued for town construction, which clears the air above each street.
+            if (level.getChunkSource().getChunkNow(cx, cz) == null || (square && !state.built(key))) {
 				return false;
 			}
 		}

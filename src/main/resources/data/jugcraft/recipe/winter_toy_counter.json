@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "XWX",
+    "PPP",
+    "S S"
+  ],
+  "key": {
+    "X": "minecraft:oak_button",
+    "W": "minecraft:blue_wool",
+    "P": "minecraft:spruce_planks",
+    "S": "minecraft:stick"
+  },
+  "result": {
+    "id": "jugcraft:winter_toy_counter"
+  }
+}

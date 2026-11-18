@@ -145,6 +145,11 @@ public class HouseholdBlock extends Block {
     @Override protected BlockState rotate(BlockState s,Rotation r){return set(s,"facing",r.rotate(facing(s)).getSerializedName());}
     @Override protected BlockState mirror(BlockState s,Mirror m){return rotate(s,m.getRotation(facing(s)));}
     public double seatHeight(){return name.endsWith("bath")?.25:name.endsWith("stool")?.65:.5;}
+    /** The residential placement path supports the audited single-block household furniture families. */
+    public boolean apartmentFurnishing() {
+        return (this instanceof CraftedBlock || this instanceof OwnerJoinedFurniture)
+            && !paired() && !kind.equals("sink");
+    }
     private boolean paired(){var type=stateDefinition.getProperty("type");return type!=null&&type.getValue("head").isPresent()&&type.getValue("bottom").isPresent();}
     private boolean joins(BlockState other){return other.getBlock() instanceof HouseholdBlock b&&family().equals(b.family());}
     private String family(){return name.replaceFirst("^(pale_oak|dark_oak|oak|spruce|birch|jungle|acacia|mangrove|cherry|bamboo|crimson|warped|light_blue|light_gray|white|orange|magenta|yellow|lime|pink|gray|cyan|purple|blue|brown|green|red|black)_","");}

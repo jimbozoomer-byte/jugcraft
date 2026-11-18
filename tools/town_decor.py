@@ -4,11 +4,12 @@ the season, in that order (TownDecor.theme()).
 
 For every kind of site but the centrepiece, a theme gives one list of choices per slot; the mod picks
 choices[site index % len(choices)], so neighbouring sites differ. "{facing}" and "{rotation}" in a state are the site's
-own. The centrepiece (7 x 7 columns by 13 high on the square) is a whole scene per theme: slot = dx + 7 dz + 49 dy.
+own. The centrepiece gives one scene per theme. Its original plinth keeps its 7 x 7 x 13 slot numbering. The city fir
+extends that site with the occupied positions of its wider canopy and crown (tools/civic_fir.py).
 
-Everything is vanilla blocks that stand on their own (pots, leaves kept persistent, full blocks, wall banners on a
-wall), so no decoration pops off when something next to it changes.
+Decor uses persistent foliage and freestanding blocks alongside the town’s authored multiblock displays.
 """
+import civic_fir
 from town_voxels import S
 
 THEMES = ["spring", "summer", "autumn", "winter", "halloween", "harvest", "december"]
@@ -261,7 +262,7 @@ def harvest_centerpiece():
 CENTERPIECES = {
     "spring": maypole, "summer": flower_bed, "autumn": harvest_display, "winter": snowman,
     "halloween": jack_pile, "harvest": lambda: harvest_display(feast=True), "december": tree_of_lights,
-    "harvest_v2": harvest_centerpiece,
+    "harvest_v2": harvest_centerpiece, "december_v2": civic_fir.scene,
 }
 
 
