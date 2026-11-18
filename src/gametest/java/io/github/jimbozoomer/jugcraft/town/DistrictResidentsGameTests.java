@@ -50,7 +50,7 @@ public final class DistrictResidentsGameTests {
             player.snapTo(manager.position());
             if(DistrictResidents.managerNear(player)!=DistrictResidents.post(8) || ApartmentCommands.desk(player,1)!=1)
                 throw new AssertionError("Brick Court lobby ledger unavailable");
-            Jugs.add(server,player.getUUID(),24);
+            Jugs.add(server,player.getUUID(),250);
             long start=Jugs.balance(server,player.getUUID());
             String room="west_1_7L1";
             if(commands.execute("apartment rent west_2_6L1",source)!=0 || Jugs.balance(server,player.getUUID())!=start)

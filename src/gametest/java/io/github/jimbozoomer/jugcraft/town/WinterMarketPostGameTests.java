@@ -77,7 +77,7 @@ public final class WinterMarketPostGameTests {
         var level=h.getLevel();
         var pos=h.absolutePos(new BlockPos(2,2,2));
         p.snapTo(Vec3.atBottomCenterOf(pos.south()));
-        Jugs.add(level.getServer(),p.getUUID(),25);
+        Jugs.add(level.getServer(),p.getUUID(),300);
         for (var booth : new WinterMarket.Counter[]{WinterMarket.BAKERY,WinterMarket.TOYS}) {
             level.setBlockAndUpdate(pos,booth.defaultBlockState());
             for (int row=0; row<booth.offers.size(); row++) {

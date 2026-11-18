@@ -6,52 +6,52 @@
         {
           "item": "jugcraft:guild_border_paver",
           "count": 4,
-          "price": 2
+          "price": 12
         },
         {
           "item": "jugcraft:archmasters_keystone",
           "count": 1,
-          "price": 3
+          "price": 35
         },
         {
           "item": "jugcraft:scrollwork_corbel",
           "count": 1,
-          "price": 4
+          "price": 28
         },
         {
           "item": "jugcraft:survey_benchmark",
           "count": 1,
-          "price": 5
+          "price": 45
         },
         {
           "item": "jugcraft:quarry_sample_cabinet",
           "count": 1,
-          "price": 7
+          "price": 120
         },
         {
           "item": "jugcraft:stonemasons_cutting_bench",
           "count": 1,
-          "price": 12
+          "price": 160
         },
         {
           "item": "jugcraft:fault_sounding_hammer",
           "count": 1,
-          "price": 9
+          "price": 140
         },
         {
           "item": "jugcraft:masons_spirit_level",
           "count": 1,
-          "price": 8
+          "price": 90
         },
         {
           "item": "jugcraft:folding_span_rule",
           "count": 1,
-          "price": 7
+          "price": 75
         },
         {
           "item": "jugcraft:lampwatch_photometer",
           "count": 1,
-          "price": 6
+          "price": 85
         }
       ],
       "buys": [],
@@ -66,52 +66,52 @@
         {
           "item": "jugcraft:ember_onion_pasty",
           "count": 2,
-          "price": 3
+          "price": 12
         },
         {
           "item": "jugcraft:saltcap_skewers",
           "count": 3,
-          "price": 3
+          "price": 12
         },
         {
           "item": "jugcraft:golden_leek_tart",
           "count": 2,
-          "price": 4
+          "price": 16
         },
         {
           "item": "jugcraft:emberpepper_hotpot",
           "count": 1,
-          "price": 4
+          "price": 20
         },
         {
           "item": "jugcraft:caveberry_shrub",
           "count": 1,
-          "price": 3
+          "price": 24
         },
         {
           "item": "jugcraft:glowroot_steep",
           "count": 1,
-          "price": 4
+          "price": 32
         },
         {
           "item": "jugcraft:copper_samovar",
           "count": 1,
-          "price": 8
+          "price": 145
         },
         {
           "item": "jugcraft:braided_bread_basket",
           "count": 1,
-          "price": 4
+          "price": 40
         },
         {
           "item": "jugcraft:tankard_tree",
           "count": 1,
-          "price": 5
+          "price": 65
         },
         {
           "item": "jugcraft:shift_supper_gong",
           "count": 1,
-          "price": 7
+          "price": 130
         }
       ],
       "buys": [],
@@ -126,17 +126,17 @@
         {
           "item": "jugcraft:miners_knot_tile",
           "count": 4,
-          "price": 2
+          "price": 12
         },
         {
           "item": "jugcraft:geode_reading_lamp",
           "count": 1,
-          "price": 5
+          "price": 85
         },
         {
           "item": "jugcraft:gallery_chimes",
           "count": 1,
-          "price": 7
+          "price": 125
         }
       ],
       "buys": [],
@@ -151,17 +151,17 @@
         {
           "item": "jugcraft:shaft_plummet",
           "count": 1,
-          "price": 8
+          "price": 80
         },
         {
           "item": "jugcraft:surveyors_reel",
           "count": 1,
-          "price": 12
+          "price": 120
         },
         {
           "item": "jugcraft:miners_knot_tile",
           "count": 4,
-          "price": 2
+          "price": 12
         }
       ],
       "buys": [],
@@ -464,7 +464,7 @@
         {
           "item": "minecraft:tropical_fish_bucket",
           "count": 1,
-          "price": 12,
+          "price": 45,
           "themes": [
             "summer"
           ]
@@ -480,7 +480,7 @@
         {
           "item": "minecraft:firework_rocket",
           "count": 8,
-          "price": 5,
+          "price": 15,
           "themes": [
             "summer",
             "december"
@@ -594,7 +594,7 @@
         {
           "item": "minecraft:soul_lantern",
           "count": 2,
-          "price": 4,
+          "price": 18,
           "themes": [
             "halloween"
           ]
@@ -602,7 +602,7 @@
         {
           "item": "minecraft:skeleton_skull",
           "count": 1,
-          "price": 40,
+          "price": 200,
           "themes": [
             "halloween"
           ]
@@ -610,7 +610,7 @@
         {
           "item": "minecraft:zombie_head",
           "count": 1,
-          "price": 40,
+          "price": 200,
           "themes": [
             "halloween"
           ]
@@ -618,7 +618,7 @@
         {
           "item": "minecraft:cake",
           "count": 1,
-          "price": 6,
+          "price": 18,
           "themes": [
             "harvest",
             "december"
@@ -694,112 +694,112 @@
         {
           "item": "minecraft:firework_rocket",
           "count": 8,
-          "price": 5
+          "price": 15
         },
         {
           "item": "minecraft:name_tag",
           "count": 1,
-          "price": 15
+          "price": 60
         },
         {
           "item": "minecraft:lead",
           "count": 1,
-          "price": 6
+          "price": 15
         },
         {
           "item": "minecraft:saddle",
           "count": 1,
-          "price": 20
+          "price": 95
         },
         {
           "item": "minecraft:spyglass",
           "count": 1,
-          "price": 12
+          "price": 45
         },
         {
           "item": "minecraft:bundle",
           "count": 1,
-          "price": 8
+          "price": 30
         },
         {
           "item": "minecraft:painting",
           "count": 2,
-          "price": 4
+          "price": 22
         },
         {
           "item": "minecraft:item_frame",
           "count": 4,
-          "price": 4
+          "price": 16
         },
         {
           "item": "minecraft:armor_stand",
           "count": 1,
-          "price": 6
+          "price": 35
         },
         {
           "item": "minecraft:jukebox",
           "count": 1,
-          "price": 12
+          "price": 150
         },
         {
           "item": "minecraft:note_block",
           "count": 2,
-          "price": 4
+          "price": 25
         },
         {
           "item": "minecraft:bell",
           "count": 1,
-          "price": 25
+          "price": 175
         },
         {
           "item": "minecraft:music_disc_cat",
           "count": 1,
-          "price": 30
+          "price": 125
         },
         {
           "item": "minecraft:music_disc_blocks",
           "count": 1,
-          "price": 30
+          "price": 125
         },
         {
           "item": "minecraft:music_disc_chirp",
           "count": 1,
-          "price": 30
+          "price": 125
         },
         {
           "item": "minecraft:music_disc_mall",
           "count": 1,
-          "price": 30
+          "price": 125
         },
         {
           "item": "minecraft:music_disc_mellohi",
           "count": 1,
-          "price": 30
+          "price": 125
         },
         {
           "item": "minecraft:music_disc_strad",
           "count": 1,
-          "price": 30
+          "price": 125
         },
         {
           "item": "minecraft:glow_ink_sac",
           "count": 4,
-          "price": 4
+          "price": 10
         },
         {
           "item": "minecraft:slime_ball",
           "count": 4,
-          "price": 5
+          "price": 12
         },
         {
           "item": "minecraft:candle",
           "count": 4,
-          "price": 3
+          "price": 8
         },
         {
           "item": "minecraft:glow_item_frame",
           "count": 2,
-          "price": 5
+          "price": 30
         }
       ],
       "buys": [],

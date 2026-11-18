@@ -35,10 +35,10 @@ public final class WinterMarket {
 
     public static void register() {
         POST = counter("winter_wrapping_counter",List.of());
-        BAKERY = counter("winter_bakery_counter",List.of(new Offer("gingerbread_cookie",3,1),
-            new Offer("apple_cider_donut",2,1),new Offer("mulled_cider",1,2)));
-        TOYS = counter("winter_toy_counter",List.of(new Offer("spinning_top",1,2),
-            new Offer("turkey_pull_toy",1,3),new Offer("mayflower_model_ship",1,5)));
+        BAKERY = counter("winter_bakery_counter",List.of(new Offer("gingerbread_cookie",3,8),
+            new Offer("apple_cider_donut",2,10),new Offer("mulled_cider",1,15)));
+        TOYS = counter("winter_toy_counter",List.of(new Offer("spinning_top",1,35),
+            new Offer("turkey_pull_toy",1,60),new Offer("mayflower_model_ship",1,125)));
         var key = ResourceKey.create(Registries.ITEM,Jugcraft.id("addressed_winter_gift"));
         WRAPPED = Registry.register(BuiltInRegistries.ITEM,key,new Item(new Item.Properties().setId(key).stacksTo(1)) {
             @Override public InteractionResult use(Level level, Player player, InteractionHand hand) {

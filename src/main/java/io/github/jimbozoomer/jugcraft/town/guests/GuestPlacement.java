@@ -128,6 +128,10 @@ public final class GuestPlacement {
 	 * why not, with nothing changed. Server thread.
 	 */
 	static Outcome place(CommandSourceStack source, String id, ServerLevel level, Vec3 at, float yaw) {
+		return place(source, id, level, at, yaw, false);
+	}
+
+	static Outcome place(CommandSourceStack source, String id, ServerLevel level, Vec3 at, float yaw, boolean surveyedConsoleSite) {
 		if (!CustomNpcs.isOperator(source)) {
 			return refused(Refusal.NOT_OPERATOR, "operator", "Only operators can place town guests.");
 		}
@@ -166,12 +170,17 @@ public final class GuestPlacement {
 		}
 		Entity placer = source.getEntity();
 		UUID operator = placer == null ? null : placer.getUUID();
+		boolean civicConsole = surveyedConsoleSite && GuestCityPlacement.isServerConsole(source);
+		if (civicConsole && !GuestCityPlacement.clearLawn(level, BlockPos.containing(at))) {
+			return refused(Refusal.OCCUPIED, "lawn_changed", "This public lawn is no longer clear.");
+		}
 		for (BlockPos cell : BlockPos.betweenClosed(low, high)) {
 			if (!LandRegistry.mayBuildFor(operator, level, cell)) {
 				return refused(Refusal.CLAIMED, "claimed", "That spot is in land claimed by %s. Place guests only where you may build.",
 						LandRegistry.ownerAt(level, cell.immutable()));
 			}
-			if (placer instanceof Player player ? TownProtection.denies(player, level, cell) : TownProtection.shieldsBlock(level, cell)) {
+			boolean shielded = placer instanceof Player player ? TownProtection.denies(player, level, cell) : TownProtection.shieldsBlock(level, cell);
+			if (shielded && !civicConsole) {
 				return refused(Refusal.PROTECTED, "protected",
 						"That spot is protected by the town or an operator region. Only an operator in creative mode may place a guest there.");
 			}

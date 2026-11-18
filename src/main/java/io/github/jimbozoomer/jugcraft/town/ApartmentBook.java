@@ -41,7 +41,15 @@ public final class ApartmentBook {
             Codec.LONG.optionalFieldOf("until", 0L).forGetter(r -> r.until),
             Piece.CODEC.listOf().optionalFieldOf("furniture", List.of()).forGetter(r -> r.furniture.entrySet().stream()
                 .map(e -> new Piece(e.getKey(), e.getValue())).toList()),
-            Codec.BOOL.optionalFieldOf("packing",false).forGetter(r->r.packing)).apply(i, Room::new));
+            Codec.BOOL.optionalFieldOf("packing",false).forGetter(r->r.packing)).apply(i,
+                (id, lo, hi, weekly, generated, tenant, until, pieces, packing) ->
+                    new Room(id, lo, hi, generated ? cityWeeklyRent(lo, hi) : weekly, generated,
+                        tenant, until, pieces, packing)));
+
+        static int cityWeeklyRent(BlockPos lo, BlockPos hi) {
+            long floorArea = (hi.getX() - (long)lo.getX() + 1) * (hi.getZ() - (long)lo.getZ() + 1);
+            return floorArea >= 190 ? 250 : 200;
+        }
 
         Room(String id, BlockPos lo, BlockPos hi, int price, boolean generated, Optional<UUID> tenant, long until, List<Piece> pieces, boolean packing) {
             this.id = id; this.lo = lo.immutable(); this.hi = hi.immutable(); this.price = price; this.generated = generated;

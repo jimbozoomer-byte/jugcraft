@@ -18,7 +18,7 @@ The **23×22** quay has three timber stalls and a five-block promenade between t
 
 Hold the stack you want to give, open the wrapping counter and pick someone from the address book. **Wrap & post** puts the whole stack in their private inbox. **Wrap & carry** gives you a labelled parcel for hand delivery or placement under either gift fir. Only the named recipient can open it. They can also collect at any wrapping counter if the parcel goes missing. Collecting by either route redeems it once. Player names enter the address book when they join and stay available while offline. Custom names, book pages and item components travel with the original stack.
 
-Oskar sells three gingerbread cookies for 1 Jug, two apple cider doughnuts for 1 Jug or a mulled cider for 2 Jugs. Marta sells a spinning top for 2 Jugs, a turkey pull toy for 3 and a Mayflower model for 5. Gift wrapping and collection are free.
+Oskar sells three gingerbread cookies for 8 Jugs, two apple cider doughnuts for 10 Jugs or a mulled cider for 15 Jugs. Marta sells a spinning top for 35 Jugs, a turkey pull toy for 60 and a Mayflower model for 125. Gift wrapping and collection are free.
 
 An operator can place the market once on a surveyed empty site with `/place template jugcraft:holiday/west_gate_winter_market ~ ~ ~`. The origin is the northwest deck corner at paving height with water to the north. Allow nine blocks vertically. Placement writes the authored blocks and spawns the three keepers. The live quay needs a site survey before installation.
 
