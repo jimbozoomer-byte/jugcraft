@@ -3,28 +3,28 @@ STONEWRIGHT = "deepstead_stonewright"
 COPPER_KETTLE = "deepstead_copper_kettle"
 SHOPS = {STONEWRIGHT: "Stonewright's Hall", COPPER_KETTLE: "The Copper Kettle"}
 STONE = (
-    ("guild_border_paver", 4, 2, "Guild Border Paver", "A repeatable band of brass chevrons set in black slate."),
-    ("archmasters_keystone", 1, 3, "Archmaster's Keystone", "A cut voussoir with a polished carnelian boss."),
-    ("scrollwork_corbel", 1, 4, "Scrollwork Corbel", "A carved bracket for doorways and gallery balconies."),
-    ("survey_benchmark", 1, 5, "Survey Benchmark", "Use the bronze witness mark to read its coordinates."),
-    ("quarry_sample_cabinet", 1, 7, "Quarry Sample Cabinet", "Use to exhibit amethyst, copper or sky geode."),
-    ("stonemasons_cutting_bench", 1, 12, "Stonemason's Cutting Bench", "Use the guild bench for standard stonecutting recipes."),
-    ("fault_sounding_hammer", 1, 9, "Fault-Sounding Hammer", "Tap a face to sound up to eight blocks inward for a hollow."),
-    ("masons_spirit_level", 1, 8, "Mason's Spirit Level", "Use on a floor to check the five positions across your view."),
-    ("folding_span_rule", 1, 7, "Folding Span Rule", "Use a face to measure the matching blocks across a course."),
-    ("lampwatch_photometer", 1, 6, "Lampwatch Photometer", "Use a face to read sky light and block light beside it."),
+    ("guild_border_paver", 4, 12, "Guild Border Paver", "A repeatable band of brass chevrons set in black slate."),
+    ("archmasters_keystone", 1, 35, "Archmaster's Keystone", "A cut voussoir with a polished carnelian boss."),
+    ("scrollwork_corbel", 1, 28, "Scrollwork Corbel", "A carved bracket for doorways and gallery balconies."),
+    ("survey_benchmark", 1, 45, "Survey Benchmark", "Use the bronze witness mark to read its coordinates."),
+    ("quarry_sample_cabinet", 1, 120, "Quarry Sample Cabinet", "Use to exhibit amethyst, copper or sky geode."),
+    ("stonemasons_cutting_bench", 1, 160, "Stonemason's Cutting Bench", "Use the guild bench for standard stonecutting recipes."),
+    ("fault_sounding_hammer", 1, 140, "Fault-Sounding Hammer", "Tap a face to sound up to eight blocks inward for a hollow."),
+    ("masons_spirit_level", 1, 90, "Mason's Spirit Level", "Use on a floor to check the five positions across your view."),
+    ("folding_span_rule", 1, 75, "Folding Span Rule", "Use a face to measure the matching blocks across a course."),
+    ("lampwatch_photometer", 1, 85, "Lampwatch Photometer", "Use a face to read sky light and block light beside it."),
 )
 KETTLE = (
-    ("ember_onion_pasty", 2, 3, "Ember Onion Pasty", "Charred onions in crimped rye pastry."),
-    ("saltcap_skewers", 3, 3, "Saltcap Skewers", "Griddled mushroom caps threaded on juniper sticks."),
-    ("golden_leek_tart", 2, 4, "Golden Leek Tart", "Leek rings and aged cheese in a scalloped crust."),
-    ("emberpepper_hotpot", 1, 4, "Emberpepper Hotpot", "An ironstone bowl of peppers, mushrooms and beans."),
-    ("caveberry_shrub", 1, 3, "Caveberry Shrub", "A tart cordial that clears nausea."),
-    ("glowroot_steep", 1, 4, "Glowroot Steep", "Golden root tea grants 45 seconds of night vision."),
-    ("copper_samovar", 1, 8, "Copper Samovar", "Use to light or extinguish its charcoal brazier."),
-    ("braided_bread_basket", 1, 4, "Braided Bread Basket", "Two scored loaves in a low, woven serving tray."),
-    ("tankard_tree", 1, 5, "Tankard Tree", "A three-armed drying stand hung with banded mugs."),
-    ("shift_supper_gong", 1, 7, "Shift-Supper Gong", "Strike the brass gong to call the mine shift to supper."),
+    ("ember_onion_pasty", 2, 12, "Ember Onion Pasty", "Charred onions in crimped rye pastry."),
+    ("saltcap_skewers", 3, 12, "Saltcap Skewers", "Griddled mushroom caps threaded on juniper sticks."),
+    ("golden_leek_tart", 2, 16, "Golden Leek Tart", "Leek rings and aged cheese in a scalloped crust."),
+    ("emberpepper_hotpot", 1, 20, "Emberpepper Hotpot", "An ironstone bowl of peppers, mushrooms and beans."),
+    ("caveberry_shrub", 1, 24, "Caveberry Shrub", "A tart cordial that clears nausea."),
+    ("glowroot_steep", 1, 32, "Glowroot Steep", "Golden root tea grants 45 seconds of night vision."),
+    ("copper_samovar", 1, 145, "Copper Samovar", "Use to light or extinguish its charcoal brazier."),
+    ("braided_bread_basket", 1, 40, "Braided Bread Basket", "Two scored loaves in a low, woven serving tray."),
+    ("tankard_tree", 1, 65, "Tankard Tree", "A three-armed drying stand hung with banded mugs."),
+    ("shift_supper_gong", 1, 130, "Shift-Supper Gong", "Strike the brass gong to call the mine shift to supper."),
 )
 STOCK = {STONEWRIGHT: STONE, COPPER_KETTLE: KETTLE}
 FURNISHINGS = tuple(row[0] for row in (*STONE[:6], *KETTLE[6:]))

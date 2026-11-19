@@ -2205,6 +2205,36 @@
     },
     {
       "type": "minecraft:single",
+      "resource": "jugcraft:block/guild/crust",
+      "sprite": "jugcraft:block/food_serving_material/jugcraft/ember_onion_pasty"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "jugcraft:block/guild/mushroom",
+      "sprite": "jugcraft:block/food_serving_material/jugcraft/saltcap_skewers"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "jugcraft:block/guild/crust",
+      "sprite": "jugcraft:block/food_serving_material/jugcraft/golden_leek_tart"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "jugcraft:block/guild/pepper",
+      "sprite": "jugcraft:block/food_serving_material/jugcraft/emberpepper_hotpot"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "jugcraft:block/guild/berry",
+      "sprite": "jugcraft:block/food_serving_material/jugcraft/caveberry_shrub"
+    },
+    {
+      "type": "minecraft:single",
+      "resource": "jugcraft:block/guild/teal",
+      "sprite": "jugcraft:block/food_serving_material/jugcraft/glowroot_steep"
+    },
+    {
+      "type": "minecraft:single",
       "resource": "minecraft:entity/chest/normal"
     },
     {
@@ -37138,36 +37168,6 @@
     {
       "type": "minecraft:single",
       "resource": "jugcraft:newest/supps/block/lumisene/lumisene"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "jugcraft:block/guild/crust",
-      "sprite": "jugcraft:block/food_serving_material/jugcraft/ember_onion_pasty"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "jugcraft:block/guild/mushroom",
-      "sprite": "jugcraft:block/food_serving_material/jugcraft/saltcap_skewers"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "jugcraft:block/guild/crust",
-      "sprite": "jugcraft:block/food_serving_material/jugcraft/golden_leek_tart"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "jugcraft:block/guild/pepper",
-      "sprite": "jugcraft:block/food_serving_material/jugcraft/emberpepper_hotpot"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "jugcraft:block/guild/berry",
-      "sprite": "jugcraft:block/food_serving_material/jugcraft/caveberry_shrub"
-    },
-    {
-      "type": "minecraft:single",
-      "resource": "jugcraft:block/guild/teal",
-      "sprite": "jugcraft:block/food_serving_material/jugcraft/glowroot_steep"
     }
   ]
 }

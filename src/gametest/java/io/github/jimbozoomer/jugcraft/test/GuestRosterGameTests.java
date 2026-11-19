@@ -67,6 +67,10 @@ public class GuestRosterGameTests {
     public void cityLawnPlacementPreservesStructuresAndOwnerObjects(GameTestHelper h) {
         BlockPos feet = h.absolutePos(new BlockPos(4, 2, 4));
         var level = h.getLevel();
+        var console = level.getServer().createCommandSourceStack();
+        h.assertTrue(GuestPlacementTesting.cityConsole(console), "The actual server console can install surveyed guests");
+        h.assertTrue(!GuestPlacementTesting.cityConsole(console.withSource(net.minecraft.commands.CommandSource.NULL)),
+            "An entityless command source does not inherit console placement privileges");
         for (BlockPos cell : BlockPos.betweenClosed(feet.offset(-2,-1,-2), feet.offset(2,2,2))) {
             level.setBlockAndUpdate(cell, cell.getY() == feet.getY()-1 ? Blocks.GRASS_BLOCK.defaultBlockState() : Blocks.AIR.defaultBlockState());
         }

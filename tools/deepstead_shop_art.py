@@ -25,7 +25,7 @@ def furniture():
         write(ART/"blockstates"/(name+".json"),{"variants":states})
         item(name,variant(0))
         write(RES/"data/jugcraft/loot_table/blocks"/(name+".json"),{"type":"minecraft:block","pools":[{"rolls":1,
-            "entries":[{"type":"minecraft:item","name":"jugcraft:"+name}],"conditions":[{"condition":"minecraft:survives_explosion"}]}]})
+            "entries":[{"type":"minecraft:item","name":"jugcraft:"+name}],"condition":{"type":"minecraft:survives_explosion"}}]})
 
 def item(name, model):
     write(ART/"items"/(name+".json"),{"model":{"type":"minecraft:model","model":model}})

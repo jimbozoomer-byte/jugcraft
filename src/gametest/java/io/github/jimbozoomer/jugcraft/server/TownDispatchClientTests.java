@@ -2,6 +2,7 @@ package io.github.jimbozoomer.jugcraft.server;
 
 import io.github.jimbozoomer.jugcraft.client.TownDispatchScreen;
 import io.github.jimbozoomer.jugcraft.test.InProcessServerConfigs;
+import io.github.jimbozoomer.jugcraft.test.TestLoginBulletin;
 import java.util.Properties;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
 import net.fabricmc.fabric.api.client.gametest.v1.context.ClientGameTestContext;
@@ -13,6 +14,15 @@ import net.minecraft.world.level.levelgen.presets.WorldPresets;
 /** Real dedicated joins, dismissal, reopening, reward acknowledgement and a second login with the same save. */
 public final class TownDispatchClientTests implements FabricClientGameTest {
     @Override public void runTest(ClientGameTestContext c) {
+        TestLoginBulletin.inspect(true);
+        try {
+            exerciseBulletin(c);
+        } finally {
+            TestLoginBulletin.inspect(false);
+        }
+    }
+
+    private void exerciseBulletin(ClientGameTestContext c) {
         var properties = new Properties();
         properties.setProperty("server-ip", "127.0.0.1");
         properties.setProperty("motd", "Welcome to the West Gate");

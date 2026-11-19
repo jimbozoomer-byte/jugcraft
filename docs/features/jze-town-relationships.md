@@ -1,5 +1,7 @@
 # JZE town guests and relationships
 
+The live host console can run `guests city preview` and `guests city place` against the saved Overworld town. These commands use loaded, authored public lawns and skip private claims, apartments, operator regions and occupied sites. Repeating placement fills missing roster slots only for never-placed guests. The general coordinate-based placement command retains its original protections.
+
 Status: gameplay foundation implemented and validated locally on November 11. Named appearances, placement planning and the roster-eligibility discrepancy remain unfinished. Not released. OpenAI Codex coordinates local integration and Claude Code delegation. Preserve all existing dirty November work. No main merges, releases, updater or live-server actions.
 
 ## Approved player outcome

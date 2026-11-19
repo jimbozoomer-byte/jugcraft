@@ -107,11 +107,11 @@ def generate():
             for j,d in enumerate(("north","east","south","west"))}})
         doc(ART/"items"/(name+".json"),{"model":{"type":"minecraft:model","model":model}})
         materials = ("minecraft:paper","minecraft:cookie","minecraft:oak_button")
-        doc(DATA/"recipe"/(name+".json"),{"type":"minecraft:crafting_shaped","category":"misc","pattern":["XWX","PPP","S S"],
+        doc(DATA/"recipe"/(name+".json"),{"type":"minecraft:crafting_shaped","fabric:load_conditions":[{"condition":"jugcraft:feature_enabled","feature":"town"}],"category":"misc","pattern":["XWX","PPP","S S"],
             "key":{"X":materials[i],"W":("minecraft:green_wool","minecraft:red_wool","minecraft:blue_wool")[i],
                    "P":"minecraft:spruce_planks","S":"minecraft:stick"},"result":{"id":"jugcraft:"+name}})
         doc(DATA/"loot_table/blocks"/(name+".json"),{"type":"minecraft:block","pools":[{"rolls":1,
-            "conditions":[{"condition":"minecraft:survives_explosion"}],"entries":[{"type":"minecraft:item","name":"jugcraft:"+name}]}]})
+            "condition":{"type":"minecraft:survives_explosion"},"entries":[{"type":"minecraft:item","name":"jugcraft:"+name}]}]})
     doc(ART/"items/addressed_winter_gift.json",{"model":{"type":"minecraft:model","model":"jugcraft:newest/holidayworks/block/christmas/red_present"}})
 
 

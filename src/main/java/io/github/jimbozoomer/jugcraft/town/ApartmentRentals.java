@@ -44,7 +44,7 @@ public final class ApartmentRentals {
     private static ApartmentBook.Room fromPlan(BlockPos origin, WesternDistrictPlan.Room definition) {
         var b=definition.bounds();
         var lo=origin.offset(b[0],b[1],b[2]); var hi=origin.offset(b[3],b[4],b[5]);
-        return new ApartmentBook.Room(definition.id(),lo,hi,(b[3]-b[0]+1)*(b[5]-b[2]+1)>=190 ? 12 : 8,true);
+        return new ApartmentBook.Room(definition.id(),lo,hi,ApartmentBook.Room.cityWeeklyRent(lo,hi),true);
     }
     /** Preflight the entire batch before registering any. Retries preserve every existing lease. */
     private static List<ApartmentBook.Room> pendingRooms(ServerLevel level, BlockPos origin, List<WesternDistrictPlan.Room> definitions) {

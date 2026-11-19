@@ -149,6 +149,7 @@ final class SecondClient {
 		tests.add(test.getName());
 		json.getAsJsonObject("entrypoints").add("fabric-client-gametest", tests);
 		JsonArray client = new JsonArray();
+		client.add(TestLoginBulletin.class.getName());
 		client.add(test.getName() + "$PeerStartup");
 		json.getAsJsonObject("entrypoints").add("client", client);
 		Files.writeString(resources.resolve("fabric.mod.json"), json.toString());

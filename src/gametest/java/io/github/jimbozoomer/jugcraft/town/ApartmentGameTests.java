@@ -104,6 +104,30 @@ public final class ApartmentGameTests {
         h.succeed();
     }
 
+    @GameTest public void existingCityLeasesUseNewRatesOnlyOnTheNextPayment(GameTestHelper h) {
+        var wallet = new Jugs.Data();
+        var tenant = UUID.randomUUID();
+        var small = new ApartmentBook.Room("fixed", BlockPos.ZERO, new BlockPos(18, 3, 8), 8, true);
+        var large = new ApartmentBook.Room("large", small.lo.above(5), new BlockPos(18, 8, 9), 12, true);
+        var custom = new ApartmentBook.Room("custom", small.lo.above(15), small.hi.above(15), 8, false);
+        for (var room : List.of(small, large, custom)) wallet.apartments.add(room);
+        wallet.add(tenant, 200);
+        small.tenant = tenant;
+        small.until = 1000L + ApartmentBook.WEEK;
+        small.furniture.put(small.lo, "minecraft:barrel");
+        var saved = Jugs.Data.CODEC.encodeStart(JsonOps.INSTANCE, wallet).getOrThrow();
+        var loaded = Jugs.Data.CODEC.parse(JsonOps.INSTANCE, saved).getOrThrow();
+        var book = loaded.apartments;
+        var reopened = book.named("fixed");
+        h.assertTrue(reopened.price == 200 && book.named("large").price == 250 && book.named("custom").price == 8,
+            "City sizes reprice and admin-defined leases retain their own rates");
+        h.assertTrue(loaded.balance(tenant) == 200 && reopened.active(tenant, 1000L)
+            && reopened.until == small.until && reopened.furniture.equals(small.furniture), "Migration preserves paid time, contents and balance");
+        h.assertTrue(book.pay(loaded, reopened, tenant, true, 1000L) == null && loaded.balance(tenant) == 0
+            && reopened.until == small.until + ApartmentBook.WEEK, "Explicit renewal buys one week for the new price");
+        h.succeed();
+    }
+
     private static InteractionResult click(ServerPlayer p,BlockPos pos,Direction face) {
         return UseBlockCallback.EVENT.invoker().interact(p,p.level(),InteractionHand.MAIN_HAND,
             new BlockHitResult(Vec3.atCenterOf(pos).add(face.getStepX()*.5,face.getStepY()*.5,face.getStepZ()*.5),face,pos,false));

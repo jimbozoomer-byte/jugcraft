@@ -1,6 +1,9 @@
 package io.github.jimbozoomer.jugcraft.town.guests;
 
 import com.mojang.brigadier.CommandDispatcher;
+import io.github.jimbozoomer.jugcraft.finance.LandRegistry;
+import io.github.jimbozoomer.jugcraft.server.OperatorRegions;
+import io.github.jimbozoomer.jugcraft.town.ApartmentRentals;
 import io.github.jimbozoomer.jugcraft.town.CustomNpcs;
 import io.github.jimbozoomer.jugcraft.town.TownData;
 import io.github.jimbozoomer.jugcraft.town.TownState;
@@ -27,8 +30,9 @@ public final class GuestCityPlacement {
     }
 
     private static int run(CommandSourceStack source, boolean apply) {
-        if (!CustomNpcs.isOperator(source) || source.getPlayer() == null || !source.getPlayer().isCreative()) {
-            source.sendFailure(Component.literal("Use this command as an operator in creative mode in the spawn city."));
+        boolean console = isServerConsole(source);
+        if (!CustomNpcs.isOperator(source) || !console && (source.getPlayer() == null || !source.getPlayer().isCreative())) {
+            source.sendFailure(Component.literal("Use the server console or a creative operator in the Overworld."));
             return 0;
         }
         ServerLevel level = source.getLevel();
@@ -46,7 +50,7 @@ public final class GuestCityPlacement {
             var guest = waiting.get(i);
             BlockPos site = sites.get(i);
             if (apply) {
-                var result = GuestPlacement.place(source, guest.id(), level, Vec3.atBottomCenterOf(site), 180);
+                var result = GuestPlacement.place(source, guest.id(), level, Vec3.atBottomCenterOf(site), 180, console);
                 if (result.placed()) placed++;
                 else source.sendFailure(result.message());
             } else {
@@ -59,6 +63,12 @@ public final class GuestCityPlacement {
                 : "Preview: " + count + " available lawn sites for " + waiting.size()
                         + " guests. Load more city chunks if needed. /guests city place rechecks before placing."), false);
         return apply ? placed : count;
+    }
+
+    static boolean isServerConsole(CommandSourceStack source) {
+        // withSource returns the same stack exactly when its underlying command source already matches.
+        return source.getEntity() == null && source.withSource(source.getServer()) == source
+                && Commands.LEVEL_OWNERS.check(source.permissions());
     }
 
     /** Grass only: never a street, shop, doorstep, decoration, water or existing entity's space. */
@@ -83,6 +93,8 @@ public final class GuestCityPlacement {
     static boolean clearLawn(ServerLevel level, BlockPos feet) {
         for (BlockPos cell : BlockPos.betweenClosed(feet.offset(-1, -1, -1), feet.offset(1, 2, 1))) {
             if (!level.isInWorldBounds(cell) || !level.getWorldBorder().isWithinBounds(cell) || !level.isLoaded(cell)) return false;
+            if (!LandRegistry.mayBuildFor(null, level, cell) || OperatorRegions.protects(level, cell)
+                    || ApartmentRentals.protects(level, cell)) return false;
             if (cell.getY() == feet.getY() - 1) {
                 if (!level.getBlockState(cell).is(Blocks.GRASS_BLOCK)) return false;
             } else if (!level.getBlockState(cell).isAir()) return false;

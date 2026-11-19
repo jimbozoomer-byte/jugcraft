@@ -9,11 +9,9 @@
           "name": "jugcraft:stonemasons_cutting_bench"
         }
       ],
-      "conditions": [
-        {
-          "condition": "minecraft:survives_explosion"
-        }
-      ]
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      }
     }
   ]
 }

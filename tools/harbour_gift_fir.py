@@ -4,8 +4,9 @@ Model coordinates are pixels about the centre of the trunk. Clip complete elemen
 borders, retaining UVs and omitting cut faces so the assembled boughs have no seams.
 """
 import json
-from math import cos, sin, tau
+from math import ceil, cos, floor, sin, tau
 from pathlib import Path
+from model_writer import finish_elements, separate_parts
 
 RES = Path(__file__).resolve().parents[1] / "src/main/resources"
 ASSETS = RES / "assets/jugcraft"
@@ -193,9 +194,9 @@ def element(material, lo, hi, local_lo, local_hi, translate, scale=1):
             "to":[round((p-t)*scale,3) for p,t in zip(local_hi,translate)],"faces":faces}
 
 
-def bake(scene, cell=None):
+def bake(scene, cell=None, sources=None):
     parts = []
-    for m,lo,hi in scene:
+    for index,(m,lo,hi) in enumerate(scene):
         if cell is None:
             # World tree is 80 px high. Centre its miniature around the inventory pivot.
             parts.append(element(m,lo,hi,lo,hi,(-40,0,-40),.2))
@@ -206,19 +207,62 @@ def bake(scene, cell=None):
         h=tuple(min(hi[k],start[k]+16) for k in range(3))
         if all(h[k]-l[k]>.001 for k in range(3)):
             e=element(m,lo,hi,l,h,start)
-            if e["faces"]: parts.append(e)
+            if e["faces"]:
+                parts.append(e)
+                if sources is not None: sources.append(index)
     used = {f["texture"][1:] for e in parts for f in e["faces"].values()} | {"particle"}
     return {"parent":"minecraft:block/block","ambientocclusion":False,
             "textures":{k:t for k,t in TEX.items() if k in used},"elements":parts}
 
 
+
+def inventory_model(scene):
+    """Sample the complete dressed tree onto a two-pixel lattice so fine cords stay legible at inventory scale."""
+    voxels = {}
+    for material, lo, hi in scene:
+        spans = []
+        for start, end in zip(lo, hi):
+            # Include voxel centres inside the sculpt. A thin ribbon or star point still gets one voxel.
+            first, stop = ceil(start / 2 - .5), ceil(end / 2 - .5)
+            if stop <= first:
+                first = floor((start + end) / 4)
+                stop = first + 1
+            spans.append(range(first, stop))
+        for x in spans[0]:
+            for y in spans[1]:
+                for z in spans[2]:
+                    voxels[x,y,z] = material
+    boxes = []
+    for x,y,z in sorted(voxels):
+        material = voxels.get((x,y,z))
+        if material is None:
+            continue
+        X,Y,Z = x+1,y+1,z+1
+        while voxels.get((X,y,z)) == material:
+            X += 1
+        while all(voxels.get((a,y,Z)) == material for a in range(x,X)):
+            Z += 1
+        while all(voxels.get((a,Y,c)) == material for a in range(x,X) for c in range(z,Z)):
+            Y += 1
+        for a in range(x,X):
+            for b in range(y,Y):
+                for c in range(z,Z):
+                    del voxels[a,b,c]
+        boxes.append((material,(2*x,2*y,2*z),(2*X,2*Y,2*Z)))
+    return bake(boxes)
+
+
 def main():
     scene = fir()
     multipart = []
+    sources = [[] for cell in CELLS]
+    sections = [bake(scene, cell, source) for cell, source in zip(CELLS, sources)]
+    separate_parts([section["elements"] for section in sections], CELLS, sources)
     for i, cell in enumerate(CELLS):
         for index, geom in enumerate([scene] + ([parcel(i-1,0),parcel(i-1,1)] if 0<i<9 else [])):
             name = str(i) if index == 0 else f"{i}_parcel_{index}"
-            doc = bake(geom, cell)
+            doc = sections[i] if index == 0 else bake(geom, cell)
+            if index > 0: finish_elements(doc["elements"])
             if not doc["elements"]:
                 raise ValueError(f"Empty geometry in {name}")
             write(ASSETS/"models/block"/ID/(name+".json"), doc)
@@ -234,13 +278,14 @@ def main():
     skirt = [row for row in skirt if row["when"]["part"] != "0"]
     skirt.append({"when":{"part":"0"},"apply":{"model":"minecraft:block/spruce_log"}})
     write(ASSETS/"blockstates/civic_gift_skirt.json", {"multipart":skirt})
-    miniature = bake(scene+parcel(2,0)+parcel(6,0))
+    miniature = inventory_model(scene+parcel(2,0)+parcel(6,0))
+    finish_elements(miniature["elements"])
     miniature["display"]={"gui":{"rotation":[12,-32,0],"translation":[0,0,0],"scale":[.98,.98,.98]}}
     write(ASSETS/"models/item"/(ID+".json"),miniature)
     write(ASSETS/"items"/(ID+".json"),{"model":{"type":"minecraft:model","model":"jugcraft:item/"+ID}})
     loot = json.loads((DATA/"loot_table/blocks/haunted_mailbox.json").read_text())
     write(DATA/"loot_table/blocks"/(ID+".json"),json.loads(json.dumps(loot).replace("haunted_mailbox",ID)))
-    write(DATA/"recipe"/(ID+".json"),{"type":"minecraft:crafting_shaped","category":"misc","pattern":[" S ","LGL","WFW"],
+    write(DATA/"recipe"/(ID+".json"),{"type":"minecraft:crafting_shaped","fabric:load_conditions":[{"condition":"jugcraft:feature_enabled","feature":"agriculture"}],"category":"misc","pattern":[" S ","LGL","WFW"],
           "key":{"S":"minecraft:gold_nugget","L":"minecraft:spruce_leaves","G":"minecraft:spruce_sapling",
                  "W":"minecraft:red_wool","F":"minecraft:spruce_log"},"result":{"id":"jugcraft:"+ID,"count":1}})
     write(DATA/"advancement/recipes/building"/(ID+".json"), {"parent":"minecraft:recipes/root",

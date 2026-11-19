@@ -101,6 +101,7 @@ import trees as tr
 import plants
 import styx
 import town_assets
+import civic_registry
 import graveyard as gy
 import diagonal_connections as dg
 import menagerie_registry as menagerie
@@ -222,6 +223,11 @@ def texture(ref):
         # Animated textures are a vertical strip of square frames of 16x16, 32x32, 48x48 or 64x64 with an .mcmeta beside
         # them.
         width, height = img.size
+        if ref in {"jugcraft:block/peppermint_boulevard_lamp", "jugcraft:block/peppermint_boulevard_lamp_off"}:
+            # The five-block lamp packs 989 rectangles with mipmap gutters (17,110 texels); 128 squared only fits 16,384.
+            if animated or img.size != (256, 256):
+                err(f"Texture {ref} must be a static 256x256 packed boulevard lamp atlas")
+            return
         if not animated and max(img.size) <= 1024 and jimtafacts_catalog.original_texture(png):
             return  # Supplied rectangular face atlases retain their original pixels and mapped UVs.
         if not animated and ref == "jugcraft:menagerie/rotten/block/treasure_chest" and img.size == (48, 32):
@@ -314,7 +320,7 @@ def check_assets(registered):
     import starter_workshop
     import storage_crates
     import newest_registry
-    native_blocks = newest_registry.entries()["block"] | {"chess_table", "checkers_table", "giant_turkey_feast"}
+    native_blocks = newest_registry.entries()["block"] | civic_registry.BLOCKS | {"chess_table", "checkers_table", "giant_turkey_feast"}
     crates = [metal + '_crate' for metal, _ in storage_crates.TIERS]
     lang = load(ASSETS / "lang" / "en_us.json") or {}
     for block in (all_blocks() + machine_blocks() + ag.all_blocks() + petro.petro_blocks() + deposits.all_blocks()
@@ -458,7 +464,7 @@ RIBBITS_WOOD_RECIPE_OUTPUTS = {
     **{name + "_from_moss_block": name for name in RIBBITS_WOOD_ITEMS if name != "ribbits_mossy_oak_door"},
     "ribbits_mossy_oak_planks_from_vine": "ribbits_mossy_oak_planks",
 }
-NON_METAL = {"chess_table", "checkers_table", "giant_turkey_feast", "candied_sweet_potatoes", "dinner_roll", "harvest_pea_casserole", "mashed_potatoes_and_gravy", "pilgrim_coat_costume", "pilgrim_dress_costume", "cursed_mirror"} | set(guide_books.BOOKS) | {"sawdust"} | set(MINERALS) | set(ITEMS) | set(machine_blocks()) | set(machine_items()) | set(CIRCUITS) | {b for m in MINERALS for b in (f"{m}_ore", f"deepslate_{m}_ore", f"{m}_block")} | {"oil_sand"} | set(petro.petro_items()) | set(ag.all_blocks()) | set(ag.all_items()) | set(petro.petro_blocks()) | set(tank_display.BLOCKS) | set(ph.blocks()) | set(ph.items()) | set((town_assets.blocks() + styx.blocks()))
+NON_METAL = civic_registry.ITEMS | {"chess_table", "checkers_table", "giant_turkey_feast", "candied_sweet_potatoes", "dinner_roll", "harvest_pea_casserole", "mashed_potatoes_and_gravy", "pilgrim_coat_costume", "pilgrim_dress_costume", "cursed_mirror"} | set(guide_books.BOOKS) | {"sawdust"} | set(MINERALS) | set(ITEMS) | set(machine_blocks()) | set(machine_items()) | set(CIRCUITS) | {b for m in MINERALS for b in (f"{m}_ore", f"deepslate_{m}_ore", f"{m}_block")} | {"oil_sand"} | set(petro.petro_items()) | set(ag.all_blocks()) | set(ag.all_items()) | set(petro.petro_blocks()) | set(tank_display.BLOCKS) | set(ph.blocks()) | set(ph.items()) | set((town_assets.blocks() + styx.blocks()))
 
 
 @cache
@@ -939,6 +945,8 @@ def check_tags():
                                                     + concordance.items() + concordance.blocks() + concordance.itemless_blocks())
         import nouveau_content
         known = set(known)
+        if registry == 'block': known.update(civic_registry.BLOCKS)
+        if registry == 'item': known.update(civic_registry.ITEMS)
         if registry == 'block': known.update(pharmacology.blocks())
         import newest_registry
         known.update(newest_registry.entries().get(registry, set()))
@@ -29083,7 +29091,7 @@ def KINDLE_MOTE_STEPS_FIT(co):
 
 def registered_items():
     import vehicle_bays
-    registered = (set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items())
+    registered = (civic_registry.ITEMS | set(all_blocks()) | set(all_items()) | set(machine_blocks()) | set(machine_items())
                   | set(ag.all_blocks()) | set(ag.all_items()) | set(petro.petro_items()) | set(petro.petro_blocks())
                   | set(deposits.all_blocks()) | set(guide_books.BOOKS) | set(tank_display.BLOCKS) | set(exchange_blocks.BLOCKS) | set(exchange_poker.BLOCKS) | set(exchange_casino.BLOCKS) | set(exchange_casino.ITEMS)
                   | set(arms.items()) | set(arms_variants.items()) | set(thanksgiving_weapons.items())

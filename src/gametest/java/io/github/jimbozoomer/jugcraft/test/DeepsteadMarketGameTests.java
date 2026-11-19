@@ -34,7 +34,7 @@ public final class DeepsteadMarketGameTests {
         buyer.setGameMode(GameType.SURVIVAL);
         var other = h.makeMockServerPlayerInLevel();
         var treasury = level.getServer();
-        Jugs.add(treasury, buyer.getUUID(), 180);
+        Jugs.add(treasury, buyer.getUUID(), 2000);
         var merchant = new DeepsteadDwarf(DeepsteadDwarf.TYPE, level);
         merchant.snapTo(buyer.getX(), buyer.getY(), buyer.getZ(), 0, 0);
         var distinct = new HashSet<String>();
@@ -92,8 +92,8 @@ public final class DeepsteadMarketGameTests {
         Jugs.add(server,id,20);
         ShopMenu.clear();
         h.assertTrue(shop.sales().getFirst().itemType()==DeepsteadWares.KNOT_TILE.asItem()
-                && shop.clickMenuButton(player,0) && Jugs.balance(server,id)==18
-                && player.getInventory().countItem(DeepsteadWares.KNOT_TILE.asItem())==4, "Four inlay tiles cost two Jugs");
+                && shop.clickMenuButton(player,0) && Jugs.balance(server,id)==8
+                && player.getInventory().countItem(DeepsteadWares.KNOT_TILE.asItem())==4, "Four inlay tiles cost twelve Jugs");
         h.assertTrue(!shop.clickMenuButton(player,0), "A replayed click in the same tick buys nothing");
         npc.configure(DeepsteadDwarf.Role.MERCHANT,"Outfitter",player.blockPosition(),1);
         h.assertTrue(!shop.stillValid(player), "Changing counter or keeper invalidates the old screen");
@@ -102,7 +102,7 @@ public final class DeepsteadMarketGameTests {
                 && outfitter.sales().stream().noneMatch(o->o.itemType()==DeepsteadWares.READING_LAMP.asItem()),"Outfitter has its own utility stock");
         npc.setPos(player.getX()+TownShops.get().tradeRange+1,player.getY(),player.getZ());
         ShopMenu.clear();
-        h.assertTrue(!outfitter.clickMenuButton(player,0) && Jugs.balance(server,id)==18, "Walking away prevents payment and delivery");
+        h.assertTrue(!outfitter.clickMenuButton(player,0) && Jugs.balance(server,id)==8, "Walking away prevents payment and delivery");
         h.succeed();
     }
 

@@ -1,5 +1,11 @@
 {
   "type": "minecraft:crafting_shaped",
+  "fabric:load_conditions": [
+    {
+      "condition": "jugcraft:feature_enabled",
+      "feature": "town"
+    }
+  ],
   "category": "misc",
   "pattern": [
     "XWX",

@@ -289,7 +289,12 @@ def feature_of(entry_id):
     if entry_id in thanksgiving_weapons.items():
         return thanksgiving_weapons.feature_of(entry_id)
     import town_assets
-    if entry_id in town_assets.BLOCKS:
+    import civic_registry
+    if entry_id in civic_registry.WINTER_BLOCKS:
+        return "agriculture"
+    if entry_id in civic_registry.SPRING_BLOCKS or entry_id in civic_registry.SPRING_KITS:
+        return "town"
+    if entry_id in civic_registry.TOWN_BLOCKS or entry_id in town_assets.BLOCKS:
         return "town"
     import jimtafacts
     if entry_id in jimtafacts.items():

@@ -65,7 +65,7 @@ Fix, server-side and narrow:
 | Rounding | Dissolving rounds down and forming rounds up, so no fractional round trip gains. |
 | Mineral sands | None of the four sands is formable or in any item tag, no recipe recreates one, and every sand-line conversion returns no more essence than it spends (`test_mineral_sand_processing.py`). None appears in the minting list below. |
 
-### Recorded, awaiting the owner: machine conversions that mint essence
+### November 12 audit findings (superseded by the November 18 decision)
 
 These machine conversions return more essence than forming their inputs costs. Each runs on machine time and power, and with the town fix the extra essence can only form more convenience supplies or pay for essence services (furnace, pedestals, repairs, charges), which collectors already fund. Fixing any of them needs a recipe-yield change, a change to a reference value (cobblestone 1, gravel 4, planks 8, logs 32, clay ball 16) or removing a core building supply from the tablet, so they are left for the owner. `test_economy_loops.py` pins the exact list and numbers, so any new one fails.
 
@@ -86,3 +86,8 @@ The sifter's iron and tin nuggets are the one metal output, but a cobblestone ge
 
 - `scripts/tests/test_economy_loops.py` (ran here, see the delivery notes): no formable town purchase, the five pre-audit offers rejected by the generator (negative case), the loop's exact numbers, no profit from town goods through recipes, commission items not formable, the recorded minting list, no single conversion from formable supplies to a town purchase, and fuel-upgrade conservation.
 - `EconomyLoopGameTests` (written, not run): the 384-essence cobblestone loop refused at the store and conserved on dissolving back, every audited offer refused at any price, an ordinary sale paid once with replays and short counts refused, and the fuel ladder's prices against the live catalogue.
+
+
+### November 18 balance decision
+
+The owner confirmed that the existing production routes are intentional. The audit checks all 109 previously shipped profitable recipe conversions against their exact input costs and maximum returns. It separately checks the three 400-tick tree-grower recipes: oak and dark oak have a 10% chance of one apple, and jungle has a 10% chance of one cocoa bean. The General Store pays one Jug for 32 apples or 64 cocoa beans. New routes, changed returns, faster processing or higher buybacks require review. Direct sales of tablet-formable supplies remain disabled.
