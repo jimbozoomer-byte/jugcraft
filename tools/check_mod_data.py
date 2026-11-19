@@ -223,6 +223,11 @@ def texture(ref):
         # Animated textures are a vertical strip of square frames of 16x16, 32x32, 48x48 or 64x64 with an .mcmeta beside
         # them.
         width, height = img.size
+        if ref in {"jugcraft:block/peppermint_boulevard_lamp", "jugcraft:block/peppermint_boulevard_lamp_off"}:
+            # The five-block lamp packs 989 rectangles with mipmap gutters (17,110 texels); 128 squared only fits 16,384.
+            if animated or img.size != (256, 256):
+                err(f"Texture {ref} must be a static 256x256 packed boulevard lamp atlas")
+            return
         if not animated and max(img.size) <= 1024 and jimtafacts_catalog.original_texture(png):
             return  # Supplied rectangular face atlases retain their original pixels and mapped UVs.
         if not animated and ref == "jugcraft:menagerie/rotten/block/treasure_chest" and img.size == (48, 32):
