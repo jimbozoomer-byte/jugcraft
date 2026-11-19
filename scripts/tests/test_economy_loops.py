@@ -116,11 +116,8 @@ def formable_conversions():
         yield name, spent, returned
 
 
-# Machine-time conversions that return more essence than forming their inputs costs. They are recorded audit
-# findings awaiting the owner's balance decision (docs/features/convenience-transmutation.md), not accepted balance:
-# each needs a recipe-yield or reference-value change that this audit must not make on its own. None reaches Jugs or a
-# metal/gem the tablet denies except the gravel sifter, whose cobblestone input is free from any cobblestone generator.
-# recipe: (essence spent, maximum essence returned)
+# Maximum per-batch returns approved by the owner. Keep exact fractions and scan the entire shipped catalogue.
+# Each entry is (cheapest formable input cost, maximum output value including every possible byproduct).
 RECORDED_MINTING = {
     # 1 mud (reviewed decorative root: five essence) -> 4 clay balls at the 16-essence reference.
     'jugcraft/recipe/water_treatment/mud': (5, 64),
@@ -141,6 +138,12 @@ RECORDED_MINTING = {
     # The combined catalogue derives cinder bricks and mud furnishings from
     # their recipes. Their 22 former fallback-price exceptions are now closed.
 }
+# These additional rates were measured in the shipped November 18 build, independently of current recipe data.
+RECORDED_MINTING.update({
+    name: tuple(Fraction(amount) for amount in amounts)
+    for name, amounts in json.loads((Path(__file__).parent / 'fixtures/town_conversions_20261118.json').read_text(
+        encoding='utf-8')).items()
+})
 
 
 def collector_fuel_price(current, upgraded):
@@ -245,13 +248,28 @@ class TransmutationOutputConversionTests(unittest.TestCase):
         # A conserving conversion is scanned too and passes: dyed wool washes back to white wool, 48 for 48.
         self.assertEqual((48, 48), found['jugcraft/recipe/jimtafacts_industry/extract_red_wool'])
 
-    def test_no_single_conversion_turns_formable_supplies_into_town_purchases(self):
+    def test_only_the_three_reviewed_tree_byproducts_sell_to_the_town(self):
         bought = {o['item'] for info in RUNTIME_SHOPS.values() for o in info['buys']}
+        found = {}
         for name, (consumed, fluids, outputs) in RECIPES.items():
             if not consumed or any(f not in FREE_FLUIDS for f in fluids):
                 continue
             if all(options & FORMABLE for options, _ in consumed):
-                self.assertFalse({item for item, _, _ in outputs} & bought, name + ' turns formable supplies into Jugs')
+                sellable = sorted((item, n, Fraction(str(chance))) for item, n, chance in outputs if item in bought and chance > 0)
+                if sellable:
+                    found[name] = sellable
+        fruit = {'dark_oak': 'minecraft:apple', 'oak': 'minecraft:apple', 'jungle': 'minecraft:cocoa_beans'}
+        self.assertEqual({f'jugcraft/recipe/tree_growing/{tree}_sapling': [(item, 1, Fraction(1, 10))]
+                          for tree, item in fruit.items()}, found)
+        for tree in fruit:
+            name = f'jugcraft/recipe/tree_growing/{tree}_sapling'
+            recipe = json.loads((RES / 'data' / (name + '.json')).read_text(encoding='utf-8'))
+            self.assertEqual(([({f'minecraft:{tree}_sapling'}, 1)], [], 400),
+                             (RECIPES[name][0], RECIPES[name][1], recipe['time']))
+            self.assertEqual('jugcraft:tree_growing', recipe['type'])
+        rates = sorted((shop, o['item'], o['count'], o['price'])
+                       for shop, info in RUNTIME_SHOPS.items() for o in info['buys'] if o['item'] in fruit.values())
+        self.assertEqual([('general', 'minecraft:apple', 32, 1), ('general', 'minecraft:cocoa_beans', 64, 1)], rates)
 
 
 class CollectorFuelUpgradeTests(unittest.TestCase):
