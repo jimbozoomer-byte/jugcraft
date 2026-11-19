@@ -43,8 +43,10 @@ public final class WesternCityClientGameTests implements FabricClientGameTest {
                     long chunk=new net.minecraft.world.level.ChunkPos(x,z).pack();
                     TownState.get(s).markBuilt(chunk); TownUpgrades.markCurrent(s.overworld(),chunk);
                 }
+                // Restored ground can sit beneath the wall while rollback is paused at the
+                // owner's chest. Coarse dirt keeps the before-image stable across random ticks.
                 for(int x=-196;x<=19;x++) for(int z=12;z<=180;z++)
-                    TownBuilder.set(s.overworld(),origin.offset(x,0,z),net.minecraft.world.level.block.Blocks.GRASS_BLOCK.defaultBlockState());
+                    TownBuilder.set(s.overworld(),origin.offset(x,0,z),net.minecraft.world.level.block.Blocks.COARSE_DIRT.defaultBlockState());
             });
             context.waitTicks(40);
             server.runCommand("jugcraft town expansion survey");
