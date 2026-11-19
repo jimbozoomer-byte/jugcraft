@@ -40,3 +40,6 @@ Preserve the source library. Copy selected files into the feature's runtime reso
 ## Owner restart confirmation — October 22, 2026
 
 Always obtain the owner's explicit confirmation before stopping or restarting the live Jugcraft server. Permission to prepare or push updates is not restart permission. Prepare and validate the files first. After confirmation, notify connected players in-game that the server will restart in 30 seconds, wait the full 30 seconds, then stop/restart. The owner authorizes this maintenance warning.
+## Named guest models
+
+For new waifus, named guest portraits and guest wardrobes, start with [Authoring Jugcraft town guests](docs/GUEST_MODELING.md). It points to the owner's portable modeling kit, the approved Minecraft lineup, original Blender inputs and reference index.
