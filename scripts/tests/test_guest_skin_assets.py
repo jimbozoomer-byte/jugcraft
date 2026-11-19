@@ -68,6 +68,14 @@ def used_regions(name):
 
 
 class GuestSkinAssets(unittest.TestCase):
+    def test_all_available_guests_have_detailed_models_and_matching_textures(self):
+        assets = ROOT / 'src/main/resources/assets/jugcraft'
+        guests = set(DESIGNS)
+        self.assertEqual(set(java_strings(CLIENT / 'GuestPortraitModel.java', 'GUESTS')), guests)
+        self.assertEqual({p.stem for p in (assets / 'town_models/guests').glob('*.json')}, guests)
+        self.assertEqual({p.stem.removeprefix('guest_') for p in
+                          (assets / 'textures/entity/town_guests').glob('guest_*.png')}, guests)
+
     def test_every_authored_roster_skin_is_packaged_and_unique(self):
         java = (GUESTS / 'GuestAppearances.java').read_text(encoding='utf-8')
         mapped = dict(re.findall(r'Map.entry\("([^"]+)", "([^"]+)"\)', java))
@@ -137,7 +145,7 @@ class GuestSkinAssets(unittest.TestCase):
     def test_every_guest_has_all_four_outfits_and_no_pending_guest_has_any(self):
         """Every available roster guest has a skin in each of the four outfits; a pending one (identity unknown) none."""
         roster = (GUESTS / 'GuestRoster.java').read_text(encoding='utf-8')
-        available = set(re.findall(r'\b(?:real|fiction|student|uncertain)\("([a-z0-9_]+)"', roster))
+        available = set(re.findall(r'\b(?:real|fiction|timeSkip)\("([a-z0-9_]+)"', roster))
         pending = set(re.findall(r'\bpending\("([a-z0-9_]+)"', roster))
         self.assertEqual(available, set(DESIGNS), 'one design for each available guest')
         self.assertTrue(pending and not pending & available, pending)
@@ -188,9 +196,9 @@ class GuestSkinAssets(unittest.TestCase):
         self.assertEqual(sum(map(len, groups)), len(DESIGNS), 'and in only one')
         self.assertEqual(set(HELD), OWNER_HELD, 'the 14 guests the owner holds out of shaping')
         roster = (GUESTS / 'GuestRoster.java').read_text(encoding='utf-8')
-        self.assertEqual(set(HELD), set(re.findall(r'(?:student|uncertain)\("([a-z0-9_]+)"', roster)), 'held = not marriage-eligible')
+        self.assertEqual(set(HELD), set(re.findall(r'\btimeSkip\("([a-z0-9_]+)"', roster)), 'time-skip editions use the classic fallback layout')
         self.assertEqual(set(REAL), set(re.findall(r'\breal\("([a-z0-9_]+)"', roster)), 'the real people')
-        self.assertEqual(set(FITTED) | set(PETITE), set(re.findall(r'\bfiction\("([a-z0-9_]+)"', roster)), 'adult fictional guests')
+        self.assertEqual(set(FITTED) | set(PETITE), set(re.findall(r'\bfiction\("([a-z0-9_]+)"', roster)), 'existing adult editions outside the time-skip group')
         self.assertFalse(set(SLIM) & (set(HELD) | set(REAL)), 'slim arms for adult fictional guests only')
         self.assertFalse(set(FLARE) & set(HELD), 'no flare geometry for a held guest')
         self.assertEqual(set(java_strings(CLIENT / 'GuestBody.java', 'SLIM')), set(SLIM))

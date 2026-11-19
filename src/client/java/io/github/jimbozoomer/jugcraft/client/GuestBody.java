@@ -35,7 +35,7 @@ public final class GuestBody {
 	public static final Set<String> SLIM = Set.of("makima", "himeno", "misato_katsuragi", "tifa_lockhart", "yorha_2b", "chun_li",
 			"ada_wong", "lara_croft", "kafka", "miyabi", "nicole_demara", "frieren");
 	/** Guests whose gown or robe flares at the hip (tools/guest_skins.py FLARE): clothing, never a held guest. */
-	public static final Set<String> FLARE = Set.of("sarah_stock", "frieren");
+	public static final Set<String> FLARE = Set.of("frieren");
 	/** Head accessories (closed boxes sampling the skin's reserved 8x8 islands), by guest ({@link #addHeadParts}). */
 	public static final Set<String> EARS = Set.of("tokai_teio", "agnes_tachyon", "gold_ship", "oguri_cap", "special_week", "miyabi");
 	public static final Set<String> HORNS = Set.of("power", "zero_two");

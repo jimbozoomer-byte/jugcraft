@@ -1,5 +1,9 @@
 # Jugcraft TODO
 
+## November 19 — town guest models first
+
+- [x] Finish the individual models for all 32 available named town guests. Use the approved first eight and Himeno as the visual reference. Preserve the imported body geometry, original clothed Reze and painted midriffs for cropped outfits. [Characters and review record](audits/jze-guest-appearances.md)
+
 ## November 18 — West Gate Harbour winter market
 
 - [x] Give the original city square its own 31-block Christmas fir after Thanksgiving, with public gifts and a seasonal changeover that preserves builds and outstanding parcels.

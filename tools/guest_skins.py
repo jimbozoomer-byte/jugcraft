@@ -12,7 +12,7 @@ or a light bolero, flowers at the hem and a flower crown.
 Body rule (owner, binding, 11 November 2026):
 - HELD: characters depicted as minors or school students, and those whose age is uncertain. Classic 4-pixel arms,
   straight proportions, no shaping of any kind; clothing and hair only; their seasonal outfits stay age-appropriate.
-  No aged-up or "adult alternate" versions.
+  The playable version of each is now the Jugcraft adult time-skip edition (19 November 2026).
 - REAL: real people. Classic arms; clothing and hair only, no body emphasis; respectful, non-exaggerated likenesses.
 - FITTED: clearly adult fictional characters. Slim 3-pixel arms and modest shaping only: a rounded shoulder seam and
   a slightly tapered waist seam at the sides of the torso.
@@ -35,24 +35,24 @@ def mix(a, b, t):
 
 # Hair, eyes, outfit, lower garment, trim, skin; hair style; outfit style. One deliberate design per identity.
 DESIGNS = {
-    'emiru': ('34272c','715449','34313e','383343','bb718a','efd0bd','long','hoodie'),
-    'lauren_chen': ('292329','533c30','ece4db','344257','b58d5a','e5bfa5','long','blazer'),
-    'brittany_venti': ('34251f','574334','743d4d','32313e','c1966c','d7ac8c','curls','blazer'),
-    'aoc': ('372821','533e30','f1e8d9','ddd4c7','b78949','c99473','long','blazer'),
-    'sarah_stock': ('b99b63','627b88','eee5d6','e3d9c8','a08bb0','b1bb9e','long','bride'),
-    'pokimane': ('5b3d30','614b35','c79bab','4d435a','efe4d5','e2b897','curls','hoodie'),
+    'emiru': ('2b2328','825a42','403840','221e27','e8e2d7','edd0c1','long','gothic_lace'),
+    'lauren_chen': ('292329','664a39','344762','e1d6c6','e8e3d4','dfb99f','long','mariner'),
+    'brittany_venti': ('302823','76553e','e8e1cb','89907a','476156','d3a783','curls','wrap_skort'),
+    'aoc': ('372821','714b38','6a344b','663247','b78e69','c39372','long','wrap_dress'),
+    'sarah_stock': ('b99b63','627b88','43726a','333342','d6aa69','efc9b1','long','knit'),
+    'pokimane': ('584132','83563a','42444b','393b42','797981','deb793','curls','satin_dress'),
     'power': ('e3bb99','bd623a','e9e5dc','343649','253c61','f1cbb6','long','tie'),
     'makima': ('ae594b','c6a148','e9e5df','30313b','292b34','f0ceba','braid','tie'),
-    'reze': ('51405f','648866','e8e3db','333344','27232f','edc8b9','bob','tie'),
-    'asa_mitaka': ('282733','645348','e7e5df','263344','352b3a','efd1c2','long','uniform'),
-    'himeno': ('263c3d','6c9978','30353d','272c35','ede5dc','e8c7af','bob','suit'),
+    'reze': ('51405f','729e69','211f25','19191e','e4e1db','edc8b9','bob','drawstring'),
+    'asa_mitaka': ('282733','645348','4a505b','34343d','93654c','efd1c2','long','blazer'),
+    'himeno': ('263c3d','74ab93','332f3d','343342','b9a8bb','e9c5ad','bob','halter'),
     'tokai_teio': ('9a5b39','73538f','e9e4d8','e3ddd3','326f9f','f0cbb8','long','race'),
     'agnes_tachyon': ('9b6345','a55565','ece6d8','423344','ad3546','f0cdb7','bob','lab'),
     'gold_ship': ('c6c6d0','b64e62','9a3449','8c3044','ddd8c6','f1d5c5','long','race'),
     'oguri_cap': ('c5c4d1','617aa0','e8e4db','ddd7ce','3d5b88','edcebb','long','race'),
     'special_week': ('6e453e','8064a6','eae3d9','e3dace','715090','efcbb9','long','race'),
-    'rei_ayanami': ('a5bfd0','a74b53','ebe9de','3f667a','943b42','eed4c7','bob','uniform'),
-    'asuka_langley': ('b76d39','4d79aa','e8e4d8','34597a','a53936','f0c9ad','long','uniform'),
+    'rei_ayanami': ('a5bfd0','a74b53','e1e8e8','b5c7d2','ad453f','eed4c7','bob','plugsuit'),
+    'asuka_langley': ('b76d39','4d79aa','c63932','ab3335','de7a43','f0c9ad','long','plugsuit'),
     'misato_katsuragi': ('383148','745071','9c3c45','37313f','d9bd62','edc3ae','long','jacket'),
     'frieren': ('dcdcd5','4a866d','eee9d8','33313e','c6a15d','f2d6c3','tails','mage'),
     'rem': ('7dadd1','486fbb','33313d','302e3a','e5e3df','f0d3c4','bob','maid'),
@@ -80,7 +80,7 @@ PETITE = ('frieren',)
 SLIM = FITTED + PETITE
 # A long gown or robe whose skirt flares a little at the hip, drawn by GuestBody's closed flare panels, which sample
 # FLARE_UV. Clothing only, never body shape, and never for a held guest.
-FLARE = ('sarah_stock', 'frieren')
+FLARE = ('frieren',)
 # The flare panels' texture island, unused by the player layout: x 56-63, y 16-31.
 FLARE_UV = (56, 16, 8, 16)
 
@@ -90,31 +90,31 @@ OUTFITS = ('normal', 'winter', 'harvest', 'spring')
 # Below the waist: a skirt (the rows of leg it covers, then legwear and shoes), a gown, or trousers (the default). Over
 # the top: an open coat or jacket over an inner top, a long coat's tails, a cape; sleeve length in rows; extras.
 LOOKS = {
-    'emiru': dict(sleeves=10),
-    'lauren_chen': dict(coat='2f3a4f', inner='ece4db', sleeves=10),
-    'brittany_venti': dict(coat='743d4d', inner='eee5d8', sleeves=10),
-    'aoc': dict(coat='f1e8d9', inner='3b4254', sleeves=10),
-    'sarah_stock': dict(lower='gown', sleeves=10),
-    'pokimane': dict(sleeves=10),
+    'emiru': dict(lower='skirt', skirt=4, legwear='eee8dc', shoes='28242e', sleeves=0),
+    'lauren_chen': dict(sleeves=8, shoes='775948', belt='ab7954'),
+    'brittany_venti': dict(lower='skirt', skirt=4, legwear='d3a783', shoes='f2f0e6', sleeves=3, cuffs=False),
+    'aoc': dict(lower='skirt', skirt=5, legwear='52444c', shoes='393641', sleeves=4),
+    'sarah_stock': dict(sleeves=10, belt='795a48', shoes='705244'),
+    'pokimane': dict(lower='skirt', skirt=4, legwear='deb793', shoes='39363c', sleeves=0),
     'power': dict(sleeves=10),
     'makima': dict(sleeves=10, belt='292b34'),
-    'reze': dict(sleeves=10, belt='27232f'),
-    'asa_mitaka': dict(lower='skirt', skirt=7, legwear='2b2a34', shoes='2a2328', sleeves=10),
-    'himeno': dict(coat='30353d', inner='ede5dc', tie='272c35', sleeves=10),
+    'reze': dict(sleeves=11, cuffs=False),
+    'asa_mitaka': dict(coat='4a505b', inner='e5ddcd', lower='skirt', skirt=5, legwear='3c3945', shoes='392e2a', sleeves=11),
+    'himeno': dict(sleeves=0, shoes='423d49'),
     'tokai_teio': dict(sleeves=10),
     'agnes_tachyon': dict(coat='ece6d8', inner='ddc98f', tie='ad3546', tails=6, sleeves=12),
     'gold_ship': dict(sleeves=10),
     'oguri_cap': dict(sleeves=10),
     'special_week': dict(sleeves=10),
-    'rei_ayanami': dict(lower='skirt', skirt=7, legwear='e8e6df', shoes='6b4a3a', sleeves=4, cuffs=False, pinafore=True),
-    'asuka_langley': dict(lower='skirt', skirt=7, legwear='e8e6df', shoes='6b3a32', sleeves=4, cuffs=False, pinafore=True),
+    'rei_ayanami': dict(shoes='8497a8', sleeves=12, gloves='354454'),
+    'asuka_langley': dict(shoes='85272d', sleeves=12, gloves='3c3039'),
     'misato_katsuragi': dict(lower='skirt', skirt=6, legwear='2d2a33', shoes='3a2a2a', coat='9c3c45', inner='37313f',
                              sleeves=10),
     'frieren': dict(lower='skirt', skirt=8, skirt_colour='eee9d8', legwear='33313e', shoes='5d4636', sleeves=10),
     'rem': dict(lower='skirt', skirt=8, legwear='2d2b36', shoes='2a2630', sleeves=10),
     'megumin': dict(lower='skirt', skirt=8, legwear='2e2a33', shoes='5a3a2e', cape='2b2930', sleeves=10),
     'zero_two': dict(sleeves=10, belt='e5dfcf'),
-    'rin_ishtar': dict(lower='skirt', skirt=6, legwear='26242e', shoes='3a2a28', sleeves=10),
+    'rin_ishtar': dict(coat='a5343c', inner='743039', belt='4f3231', shoes='3a2a28', sleeves=11),
     'tifa_lockhart': dict(lower='skirt', skirt=5, legwear='2a2830', shoes='5a4a40', sleeves=3, cuffs=False),
     'yorha_2b': dict(lower='skirt', skirt=6, legwear='25232c', shoes='25232c', sleeves=12),
     'chun_li': dict(lower='skirt', skirt=5, legwear='6e4e3b', shoes='ece7dc', sleeves=5),
@@ -462,6 +462,102 @@ def clothes(p, name, spec):
     if 'tie' in look and style != 'suit':
         p.rect('body', 'front', 3, 2, 2, 5, rgb(look['tie']))
         p.dot('body', 'front', 3, 7, rgb(look['tie']))
+    if style == 'drawstring':
+        p.ring('body',7,10,skin)
+        p.ring('body',10,12,lower)
+        for side in SIDES:
+            p.rect('body',side,0,6,p.w('body',side),1,darker(cloth,.74))
+        p.dot('body','front',3,1,trim)
+        for leg in ('right_leg','left_leg'):
+            p.fill(leg,skin)
+            p.ring(leg,0,3,lower)
+            p.ring(leg,2,3,trim)
+        for x in (3,4):
+            p.dot('body','front',x,10,trim)
+        p.dot('body','front',3,11,trim)
+    if style == 'wrap_dress':
+        for x in range(8):
+            p.dot('body','front',x,2+x*6//8,trim)
+        p.ring('body',9,10,darker(cloth,.76))
+        p.dot('body','front',5,9,rgb('dfb77a'))
+        for y,x in enumerate((0,0,1,1,2)):
+            p.dot('left_pants','front',x,y,trim)
+    if style == 'mariner':
+        for row in (3,5,7):
+            p.ring('body',row,row+1,trim)
+            for arm in ('left_arm','right_arm'):
+                p.ring(arm,row,row+1,trim)
+    if style == 'halter':
+        p.ring('body',0,2,skin)
+        for x in (1,6):
+            p.rect('body','front',x,0,1,3,cloth)
+        p.ring('body',7,9,skin)
+        p.ring('body',9,12,lower)
+        p.dot('body','front',4,9,trim)
+        for leg in ('right_leg','left_leg'):
+            p.ring(leg,4,9,rgb('494452'))
+            p.ring(leg,3,4,trim)
+            p.ring(leg,9,12,rgb('423d49'))
+    if name == 'asa_mitaka':
+        p.rect('jacket','front',5,3,2,1,rgb('bd9971'))
+        p.rect('jacket','front',5,4,2,2,rgb('ddd0b3'))
+    if name == 'zero_two':
+        for x,y in ((5,2),(6,3),(5,4)):
+            p.dot('jacket','front',x,y,rgb('f0d294'))
+    if name == 'rem':
+        for x,y in ((6,7),(6,8),(5,9),(6,10)):
+            p.dot('jacket','front',x,y,rgb('c9a36d'))
+    if name == 'megumin':
+        p.rect('jacket','front',1,2,2,2,rgb('b79559'))
+        p.dot('jacket','front',2,2,rgb('708c84'))
+    if style == 'gothic_lace':
+        for side in ('front','back'):
+            p.rect('body',side,1,0,6,2,skin)
+            for col in range(8):
+                for row in range(3,10):
+                    if (col+row)%4 == 0 or (col-row)%4 == 0:
+                        p.dot('body',side,col,row,darker(cloth,.58))
+        for leg,overlay in (('right_leg','right_pants'),('left_leg','left_pants')):
+            p.ring(overlay,2,3,trim)
+            p.ring(leg,4,5,skin)
+            for row in range(6,10):
+                p.dot(leg,'front',1+row%2,row,rgb('cfc7b9'))
+    if style == 'satin_dress':
+        for col in (2,5):
+            p.dot('body','front',col,1,trim)
+            p.rect('body','front',col,5,1,5,darker(cloth,.67))
+        for row in (3,5,7,9):
+            p.dot('body','front',4,row,rgb('a39c92'))
+        p.ring('body',10,12,lower)
+        p.ring('left_arm',9,10,rgb('bb9966'))
+    if style in ('wrap_skort', 'knit'):
+        p.ring('body',8,10,skin)
+        p.dot('body','front',3,9,darker(skin,.80))
+        p.dot('body','front',4,8,lighter(skin,1.045))
+        for x in (1,6):
+            p.dot('body','front',x,8,darker(skin,.94))
+        p.ring('body',10,12,lower)
+    if style == 'wrap_skort':
+        for col in range(8):
+            p.dot('body','front',col,3+(col in (0,7)),trim)
+            if col%3: p.dot('body','front',col,4,trim)
+        for row,col in enumerate((2,2,1,0)):
+            p.dot('left_pants','front',col,row,rgb('5c6352'))
+        for row in (0,2):
+            p.dot('left_pants','front',2,row,rgb('655345'))
+    if style == 'plugsuit':
+        seal = rgb(look['gloves'])
+        p.ring('body', 0, 2, seal)
+        for side in ('front', 'back'):
+            p.rect('body', side, 1, 3, 6, 2, seal)
+            p.rect('body', side, 2, 8, 4, 1, seal)
+        for x in (1, 6):
+            p.dot('body', 'front', x, 3, rgb('7cdbb2'))
+        for part in ('right_leg', 'left_leg'):
+            p.ring(part, 5, 7, seal)
+            p.rect(part, 'front', 1, 5, 2, 2, cloth)
+        for part in ('right_arm', 'left_arm'):
+            p.ring(part, 5, 7, seal)
     if style == 'uniform':
         for x, y in ((2, 1), (5, 1), (3, 2), (4, 2)):
             p.dot('body', 'front', x, y, trim)
@@ -605,6 +701,10 @@ def marks(p, name, spec):
         p.fill('hat', rgb('e8e0d1'), sides=['back'], alpha=150)
         for x in (2, 5):
             p.dot('hat', 'front', x, 1, trim)
+    if style == 'plugsuit':
+        for x in (0, 7):
+            p.rect('hat', 'front', x, 0, 1, 2, rgb(spec[2]))
+            p.dot('hat', 'front', x, 2, rgb(LOOKS[name]['gloves']))
     if style == 'android':
         p.rect('hat', 'front', 0, 3, 8, 2, rgb('302e37'))
     if style == 'qipao':
