@@ -361,11 +361,12 @@ public class PegasusGameTests {
 		Pegasus flying = pegasus(helper, new Vec3(4.5, 9.0, 4.5), owner, true);
 		Pegasus grounded = pegasus(helper, new Vec3(1.5, 2.0, 1.5), owner, true);
 		owner.startRiding(flying, true, false);
-		flying.setHealth(17.0F);
 		Vec3[] velocity = {Vec3.ZERO};
 		each(helper, 1, PegasusFlight.AIR_TAKEOFF_TICKS + 3, () -> pilotTick(owner, flying, true, false, velocity));
 		helper.runAfterDelay(PegasusFlight.AIR_TAKEOFF_TICKS + 5, () -> {
 			helper.assertTrue(flying.flightActive(), "It is in the air when saved: " + flightDiagnostic(flying, owner));
+			// Horses can heal during takeoff. Set the wounded state at the save boundary.
+			flying.setHealth(17.0F);
 			for (Pegasus original : List.of(flying, grounded)) {
 				TagValueOutput saved = TagValueOutput.createWithContext(ProblemReporter.DISCARDING, level.registryAccess());
 				original.saveWithoutId(saved);

@@ -48,11 +48,16 @@ public class PharmacologyFocusGameTests {
 		}
 		h.succeed();
 	}
-	@GameTest(structure="jugcraft-test:arms_arena")
+	@GameTest(structure="jugcraft-test:drone_tower")
 	public void aRealAimedShotHitsWithFocusWhereTheSameSeedMissesWithoutIt(GameTestHelper h) {
-		var p=player(h);var origin=h.absolutePos(new BlockPos(2,8,1));p.setPos(origin.getX()+.5,origin.getY(),origin.getZ()+.5);p.setYRot(0);p.setXRot(0);
-		var pig=GunsGameTests.pig(h,new BlockPos(2,8,31));pig.setNoGravity(true);
-		pig.setPos(p.getX(),p.getEyeY()-.45,p.getZ()+30);float health=pig.getHealth();
+		// Both endpoints and the full 30-block sightline belong to this test's empty 44-block arena.
+		var p=player(h);var origin=h.absolutePos(new BlockPos(21,8,7));
+		var target=new BlockPos(21,8,37);var end=h.absolutePos(target);
+		p.setPos(origin.getX()+.5,origin.getY(),origin.getZ()+.5);
+		p.lookAt(net.minecraft.commands.arguments.EntityAnchorArgument.Anchor.EYES,
+				new net.minecraft.world.phys.Vec3(end.getX()+.5,p.getEyeY(),end.getZ()+.5));
+		var pig=GunsGameTests.pig(h,target);pig.setNoGravity(true);
+		pig.setPos(end.getX()+.5,p.getEyeY()-.45,end.getZ()+.5);float health=pig.getHealth();
 		// Fixed fixture: a near-edge spread sample beside a narrow target, 30 blocks along a clear sightline.
 		long seed=0;
 		for(;seed<100000;seed++) { var r=RandomSource.create(seed);if(r.nextDouble()>.98 && Math.abs(Math.cos(r.nextDouble()*Math.PI*2))>.99)break; }
@@ -62,7 +67,8 @@ public class PharmacologyFocusGameTests {
 		h.assertTrue(pig.getHealth()==health,"The near-edge native shot misses the narrow target without focus");
 		Pharmacology.drink(p,PrecisionPharmacy.METHYLPHENIDATE);seconds(p,20);p.getRandom().setSeed(seed);
 		h.assertTrue(GunShots.fire(p),"Focused native aimed shot fires");
-		h.assertTrue(pig.getHealth()<health && GunItem.loaded(gun)==2,"Same aim/sample now hits through the real shot path and spends exactly two rounds total");
+		h.assertTrue(pig.getHealth()<health,"Same aim/sample hits the target with focus");
+		h.assertTrue(GunItem.loaded(gun)==2,"The two shots spend exactly two rounds total");
 		h.succeed();
 	}
 }
