@@ -6,6 +6,7 @@ import io.github.jimbozoomer.jugcraft.horses.HorseBreed;
 import io.github.jimbozoomer.jugcraft.horses.HorseBreeds;
 import io.github.jimbozoomer.jugcraft.horses.HorseLineage;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import net.fabricmc.fabric.api.client.gametest.v1.FabricClientGameTest;
@@ -112,24 +113,24 @@ public class HorseBreedsClientGameTests implements FabricClientGameTest {
 			context.takeScreenshot("jugcraft_horse_breeds_tacked_row_back");
 
 			// Walking: each walks a few blocks east on its own (AI back on), photographed mid-stride.
-			server.runOnServer(minecraft -> {
+			var startingPositions = server.computeOnServer(minecraft -> {
+				var positions = new HashMap<Integer, net.minecraft.world.phys.Vec3>();
 				for (int id : row) {
 					Mob horse = (Mob) minecraft.overworld().getEntity(id);
+					positions.put(id, horse.position());
 					horse.setNoAi(false);
 					horse.getNavigation().moveTo(horse.getX() + 3, horse.getY(), horse.getZ() + 6, 1.0);
 				}
+				return positions;
 			});
-			context.waitTicks(12);
+			int moved = 0;
+			for (int tick = 0; tick < 80 && moved < 3; tick += 4) {
+				context.waitTicks(4);
+				moved = server.computeOnServer(minecraft -> (int) row.stream().filter(id ->
+						minecraft.overworld().getEntity(id).position().subtract(startingPositions.get(id)).horizontalDistanceSqr() >= 0.25).count());
+			}
+			check(moved >= 3, moved + " breeds walked at least half a block");
 			context.takeScreenshot("jugcraft_horse_breeds_walking");
-			check(server.computeOnServer(minecraft -> {
-				int moved = 0;
-				for (int id : row) {
-					if (minecraft.overworld().getEntity(id).getDeltaMovement().horizontalDistanceSqr() > 1.0E-5) {
-						moved++;
-					}
-				}
-				return moved;
-			}) >= 3, "The breeds walk");
 
 			// Rearing: an untamed horse that is shown an item it does not eat rears (vanilla Horse.mobInteract -> makeMad).
 			List<Integer> wild = server.computeOnServer(minecraft -> {
