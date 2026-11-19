@@ -41,7 +41,7 @@ public final class JimtaPocketGuestClientGameTests implements FabricClientGameTe
     private static void check(boolean value,String message){if(!value)throw new AssertionError(message);}
     private static void loaded(ServerPlayer player){player.hasChangedDimension();player.connection.handleAcceptPlayerLoad(new net.minecraft.network.protocol.game.ServerboundPlayerLoadedPacket());}
     private static ServerPlayer player(MinecraftServer server){
-        var profile=new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(),"pocket-guest-test");
+        var profile=new com.mojang.authlib.GameProfile(java.util.UUID.randomUUID(),"pocket-guest");
         var cookie=net.minecraft.server.network.CommonListenerCookie.createInitial(profile,false);
         var player=new ServerPlayer(server,server.overworld(),profile,cookie.clientInformation());
         var connection=new net.minecraft.network.Connection(net.minecraft.network.protocol.PacketFlow.SERVERBOUND);new io.netty.channel.embedded.EmbeddedChannel(connection);

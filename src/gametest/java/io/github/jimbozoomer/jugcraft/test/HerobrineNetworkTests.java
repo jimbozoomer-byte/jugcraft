@@ -117,7 +117,9 @@ public final class HerobrineNetworkTests implements FabricClientGameTest {
         try(var paths=Files.walk(metadata.getParent())){for(var file:paths.filter(Files::isRegularFile).toList()){var target=resources.resolve(metadata.getParent().relativize(file));Files.createDirectories(target.getParent());Files.copy(file,target,StandardCopyOption.REPLACE_EXISTING);}}
         var json=com.google.gson.JsonParser.parseString(Files.readString(metadata)).getAsJsonObject();
         var tests=new com.google.gson.JsonArray();tests.add(HerobrineNetworkTests.class.getName());json.getAsJsonObject("entrypoints").add("fabric-client-gametest",tests);
-        var client=new com.google.gson.JsonArray();client.add(HerobrineNetworkTests.class.getName()+"$PeerStartup");json.getAsJsonObject("entrypoints").add("client",client);
+        var client=new com.google.gson.JsonArray();
+        client.add(TestLoginBulletin.class.getName());
+        client.add(HerobrineNetworkTests.class.getName()+"$PeerStartup");json.getAsJsonObject("entrypoints").add("client",client);
         Files.writeString(resources.resolve("fabric.mod.json"),json.toString());
         String oldResources=metadata.getParent().toAbsolutePath().toString();
         // DevLaunchInjector removes its private system property after applying it.

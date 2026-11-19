@@ -6,7 +6,8 @@
   "description": "Automated in-game tests for Jugcraft. Not shipped with the mod.",
   "entrypoints": {
     "client": [
-      "io.github.jimbozoomer.jugcraft.test.TestVesselsClient"
+      "io.github.jimbozoomer.jugcraft.test.TestVesselsClient",
+      "io.github.jimbozoomer.jugcraft.test.TestLoginBulletin"
     ],
     "fabric-client-gametest": [
       "io.github.jimbozoomer.jugcraft.test.EquipmentAccessClientGameTests",
