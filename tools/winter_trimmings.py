@@ -88,7 +88,7 @@ def generate():
         save(ART/"items"/(name+".json"), {"model":{"type":"minecraft:model","model":model}})
         save(ART/"blockstates"/(name+".json"), {"variants":{"facing="+d:{"model":model,**({"y":i*90} if i else {})}
                 for i,d in enumerate(("north","east","south","west"))}})
-        save(DATA/"recipe"/(name+".json"), {"type":"minecraft:crafting_shapeless","category":"building",
+        save(DATA/"recipe"/(name+".json"), {"type":"minecraft:crafting_shapeless","fabric:load_conditions":[{"condition":"jugcraft:feature_enabled","feature":"agriculture"}],"category":"building",
                 "ingredients":ingredients,"result":{"id":item,"count":count}})
         save(DATA/"advancement/recipes/building"/(name+".json"), {"parent":"minecraft:recipes/root",
                 "criteria":{"material":{"trigger":"minecraft:inventory_changed","conditions":{"items":[{"items":ingredients[0]}]}}},

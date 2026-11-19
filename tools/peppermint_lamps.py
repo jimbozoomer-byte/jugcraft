@@ -9,6 +9,7 @@ from math import atan2, pi, hypot
 from pathlib import Path
 import json
 
+from asset_png import save_rgba
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1] / "src/main/resources"
@@ -251,6 +252,11 @@ def mesh(name, tall):
                     pos = pixels[min(max(dv,0),h-1)*w+min(max(du,0),w-1)]
                     atlas.putpixel((ox+du,oy+dv),pigment(voxels[pos],*pos,side,lit))
             uv = [v*16/size for v in (ox,oy,ox+w,oy+h)]
+            # The greedy mesh consists of oriented quads. Store each at its visible voxel surface.
+            axis = next(i for i, direction in enumerate(DIRECTIONS[side]) if direction)
+            low, high = list(low), list(high)
+            plane = high[axis] if DIRECTIONS[side][axis] > 0 else low[axis]
+            low[axis] = high[axis] = plane
             surface = {"faces":{side:{"uv":uv,"texture":"#skin"}}}
             if glow and lit:
                 surface["light_emission"] = 13
@@ -263,7 +269,7 @@ def mesh(name, tall):
                     return [round(8+(coords[0]-16)*scale,4), round(.5+coords[1]*scale,4),round(8+(coords[2]-8)*scale,4)]
                 item.append(dict(surface, **{"from":small(low), "to":small(high)}))
         suffix = "" if lit else "_off"
-        atlas.save(ASSETS / f"textures/block/{name}{suffix}.png", optimize=True)
+        save_rgba(atlas, ASSETS / f"textures/block/{name}{suffix}.png")
         textures = {"particle":particle,"skin":assets+suffix}
         for i, elements in enumerate(parts):
             # Only the lower lantern cell changes; other part models are shared.
@@ -290,7 +296,7 @@ def mesh(name, tall):
         pattern = [" GL"," P ","ICI"]
         key = {"G":"minecraft:gold_ingot","L":"minecraft:lantern","P":"jugcraft:"+NAMES[0],
                "I":"minecraft:iron_ingot","C":"minecraft:copper_ingot"}
-    write(DATA/f"recipe/{name}.json",{"type":"minecraft:crafting_shaped","category":"building","pattern":pattern,
+    write(DATA/f"recipe/{name}.json",{"type":"minecraft:crafting_shaped","fabric:load_conditions":[{"condition":"jugcraft:feature_enabled","feature":"agriculture"}],"category":"building","pattern":pattern,
                                      "key":key,"result":{"id":"jugcraft:"+name,"count":1}})
     recipe = "jugcraft:"+name
     ingredient = "jugcraft:"+NAMES[0] if tall else "minecraft:lantern"

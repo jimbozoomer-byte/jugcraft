@@ -353,9 +353,9 @@ def write_all(write, assets, data, lang):
         write(assets/"items"/(name+".json"), {"model":{"type":"minecraft:model","model":MOD+":item/"+name}})
         if key in KITS:
             pattern, ingredients = KIT_RECIPES[key]
-            write(data/"recipe"/(name+".json"), {"type":"minecraft:crafting_shaped","category":"building",
+            write(data/"recipe"/(name+".json"), {"type":"minecraft:crafting_shaped","fabric:load_conditions":[{"condition":"jugcraft:feature_enabled","feature":"town"}],"category":"building",
                 "pattern":pattern,"key":ingredients,"result":{"id":rid(key)}})
-            write(data/"recipe"/(name+"_repack.json"), {"type":"minecraft:crafting_shapeless","category":"building",
+            write(data/"recipe"/(name+"_repack.json"), {"type":"minecraft:crafting_shapeless","fabric:load_conditions":[{"condition":"jugcraft:feature_enabled","feature":"town"}],"category":"building",
                 "ingredients":[rid(k) for k in KITS[key][1]], "result":{"id":rid(key)}})
             continue
         variants = {}
@@ -371,7 +371,7 @@ def write_all(write, assets, data, lang):
             "condition":{"type":"minecraft:survives_explosion"},"rolls":1,
             "entries":[{"type":"minecraft:item","name":rid(key)}]}],"random_sequence":MOD+":blocks/"+name})
         pattern, ingredients = RECIPES[key]
-        write(data/"recipe"/(name+".json"), {"type":"minecraft:crafting_shaped","category":"building",
+        write(data/"recipe"/(name+".json"), {"type":"minecraft:crafting_shaped","fabric:load_conditions":[{"condition":"jugcraft:feature_enabled","feature":"town"}],"category":"building",
               "pattern":pattern,"key":ingredients,"result":{"id":rid(key)}})
 
 
