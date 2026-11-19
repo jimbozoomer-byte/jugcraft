@@ -2,8 +2,6 @@
   "replace": false,
   "values": [
     "jugcraft:sandbags",
-    "jugcraft:wind_carved_snowdrift",
-    "jugcraft:shovelled_snow_pile",
     "jugcraft:sandbags_slab",
     "jugcraft:sandbags_stairs",
     "jugcraft:oil_sand",
@@ -11,6 +9,8 @@
     "jugcraft:zircon_sand",
     "jugcraft:rare_earth_sand",
     "jugcraft:garnet_sand",
+    "jugcraft:wind_carved_snowdrift",
+    "jugcraft:shovelled_snow_pile",
     "jugcraft:bone_pile",
     "jugcraft:effigy_ashes",
     "jugcraft:rising_zombie",

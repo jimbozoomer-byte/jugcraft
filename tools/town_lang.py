@@ -276,4 +276,15 @@ def lang():
     from deepstead_wares import LANG
     out.update(LANG)
     out.update(guild.LANG)
+    out.update({
+        "block.jugcraft.counterweight_lift": "Counterweight Lift",
+        "entity.jugcraft.deepstead_dwarf": "Deepstead Dwarf",
+        "hint.jugcraft.counterweight_lift": "Stand on the platform. Use with an empty hand to rise; sneak and use to descend.",
+        "message.jugcraft.deepstead.guard.0": "Mind the bridge rails. I can chase a zombie off this landing, but I can't teach it to fly.",
+        "message.jugcraft.deepstead.guard.1": "This gallery is my watch. Follow the copper trim back to the tower if you need the way up.",
+        "message.jugcraft.deepstead.guard.2": "No toll on the bridge. The outfitter takes Jugs; the watch takes its turn.",
+        "message.jugcraft.deepstead.miner.0": "Hear that ring? Good stone sings. A cracked seam just swallows the note.",
+        "message.jugcraft.deepstead.miner.1": "The copper hoops around the tower mark the galleries. Count them if you lose your way.",
+        "message.jugcraft.deepstead.miner.2": "Follow the stairs to the market. The lampwright makes a better light than any candle on my bench.",
+    })
     return out

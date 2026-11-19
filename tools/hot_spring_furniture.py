@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 
 import flora_art as art
+from asset_png import save_rgba
 from model_writer import finish_closed
 from pumpkin_patch_data import flat, lengthwise, panel
 from thanksgiving_homestead_data import ring, floor, wool
@@ -343,7 +344,7 @@ def write_all(write, assets, data, lang):
             finish_closed(elements)
             model = art.model(name, elements)
             write(assets / "models/block" / (filename + ".json"), model)
-        sc.atlas.img.save(texture_dir / (name + ".png"), optimize=True)
+        save_rgba(sc.atlas.img, texture_dir / (name + ".png"))
         item_view = dict(art.PLANT_DISPLAY)
         item_view["gui"] = {"rotation":[26,218,0], "translation":[0,2,0], "scale":[.91,.91,.91]}
         if key in ("boot_tray","dipper_pail","bench"):
