@@ -6,7 +6,7 @@
  * <ul>
  * <li>{@link io.github.jimbozoomer.jugcraft.town.guests.GuestRoster}: the only identities. Ids are saved: never rename or
  * reuse one. Every available guest has the same exclusive companionship mechanics; nothing is sexual for anyone.
- * Pending entries can be neither placed nor befriended. Guests depicted as minors or school students in their source
+ * Every playable edition is adult. Former students appear in the Jugcraft time skip. Pending entries can be neither placed nor befriended. Guests depicted as minors or school students in their source
  * work have companionship but no proposal or marriage ({@code Guest.mayMarry()}).</li>
  * <li>A guest is a custom NPC ({@code CustomNpcs}) whose {@code Townsfolk.guest()} is a roster id, saved in the entity
  * under {@code jugcraft_guest}. Talking to it opens {@link io.github.jimbozoomer.jugcraft.town.guests.GuestMenu}

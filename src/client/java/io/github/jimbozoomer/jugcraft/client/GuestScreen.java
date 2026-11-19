@@ -377,6 +377,14 @@ public final class GuestScreen extends AbstractContainerScreen<GuestMenu> implem
 		g.text(font, series, 230 - font.width(series), 8, TradeLook.TAN, false);
 		GuestAppearances.Appearance look = GuestAppearances.of(guest.id());
 		Component note = look == null ? GuestAppearances.note() : look.note();
+		var age = guest.timeSkipAge();
+		if (age.isPresent()) {
+			note = ui("pilot_time_skip", "Jugcraft time skip · EVA pilot · Age %s", age.getAsInt());
+		} else if (guest.edition() == GuestRoster.Edition.ADULT_TIME_SKIP) {
+			note = ui("adult_time_skip", "Jugcraft time skip · Adult");
+		} else if (guest.origin() == GuestRoster.Origin.FICTIONAL) {
+			note = ui("adult_edition", "Adult edition");
+		}
 		g.text(font, ScreenKit.fit(font, capitalised(note.getString()), 280), 10, 19, TradeLook.DIM, false);
 		if (giftList) {
 			giftList(g, guest, mx - leftPos, my - topPos);

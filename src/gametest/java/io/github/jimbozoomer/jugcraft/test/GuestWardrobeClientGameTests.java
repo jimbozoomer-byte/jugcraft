@@ -36,7 +36,7 @@ import org.joml.Vector3f;
  * <li>an adult fictional guest (Tifa Lockhart: slim arms, modest tailoring);</li>
  * <li>a younger, held guest (Tokai Teio: classic arms, straight proportions, ears);</li>
  * <li>a real person (Lauren Chen: classic arms, clothing and hair only);</li>
- * <li>Sarah Stock's non-gory wedding dress (classic arms, the gown's modest flare);</li>
+ * <li>Sarah Stock's knit top and jeans (classic arms, no flare);</li>
  * <li>Frieren (an adult fictional guest: slim arms, the robe's flare and her ears).</li>
  * </ul>
  * Screenshots: {@code guest_wardrobe_<outfit>} and {@code guest_wardrobe_<outfit>_back} for winter, harvest and spring,
@@ -57,7 +57,7 @@ import org.joml.Vector3f;
 public class GuestWardrobeClientGameTests implements FabricClientGameTest {
 	/** The set, left to right as the player sees it. */
 	private static final List<Sample> SET = List.of(new Sample("tifa_lockhart", true, false), new Sample("tokai_teio", false, false),
-			new Sample("lauren_chen", false, false), new Sample("sarah_stock", false, true), new Sample("frieren", true, true));
+			new Sample("lauren_chen", false, false), new Sample("sarah_stock", false, false), new Sample("frieren", true, true));
 	/** The seasonal outfits, in the order they are worn. */
 	private static final List<String> SEASONS = List.of("winter", "harvest", "spring");
 
@@ -173,6 +173,16 @@ public class GuestWardrobeClientGameTests implements FabricClientGameTest {
 				Sample sample = SET.get(i);
 				TownsfolkModel model = posed(mc, ids[i]);
 				String where = sample.guest() + " in " + outfit;
+				if (io.github.jimbozoomer.jugcraft.client.GuestPortraitModel.GUESTS.contains(sample.guest())) {
+					check(model instanceof io.github.jimbozoomer.jugcraft.client.GuestPortraitModel, where + " uses the fitted guest rig");
+					check(model.body.getChild("winter_collar").visible == outfit.equals("winter")
+							&& model.head.getChild("spring_pin").visible == outfit.equals("spring")
+							&& model.head.getChild("harvest_pin").visible == outfit.equals("harvest"), where + " switches seasonal layers");
+					check(model.rightArm.x < -2F && near(model.leftArm.x, -model.rightArm.x)
+							&& near(model.leftArm.y, model.rightArm.y)
+							&& near(model.rightArm.x, model.rightArm.getInitialPose().x()), where + " keeps both authored arm pivots");
+					continue;
+				}
 				check(model.rightArm.getChild("slim").visible == sample.slim() && model.leftArm.getChild("slim").visible == sample.slim()
 						&& model.rightArm.getChild("wide").visible != sample.slim() && model.leftArm.getChild("wide").visible != sample.slim(),
 						where + (sample.slim() ? " is drawn on slim arms" : " is drawn on classic arms"));
@@ -203,7 +213,7 @@ public class GuestWardrobeClientGameTests implements FabricClientGameTest {
 		}
 		TownsfolkRenderer.State state = renderer.createRenderState();
 		renderer.extractRenderState(npc, state, 0.0F);
-		TownsfolkModel model = renderer.getModel();
+		TownsfolkModel model = renderer.modelFor(state);
 		model.setupAnim(state);
 		return model;
 	}
@@ -294,8 +304,8 @@ public class GuestWardrobeClientGameTests implements FabricClientGameTest {
 				leftLeg.resetPose();
 				rightLeg.setRotation(pose[0], pose[1], pose[2]);
 				leftLeg.setRotation(pose[3], pose[4], pose[5]);
-				panels.setup("guest_sarah_stock", false, body, rightLeg, leftLeg);
-				check(flare.visible, "The flare shows for Sarah Stock's gown");
+				panels.setup("guest_frieren", false, body, rightLeg, leftLeg);
+				check(flare.visible, "The flare shows for Frieren's robe");
 				for (String side : List.of("front", "back")) {
 					String inside = intrusion(body, flare, flare.getChild(side), side.equals("front"), rightLeg, leftLeg);
 					check(inside == null, "No leg passes through the flare's " + side + " panel (legs " + java.util.Arrays.toString(pose) + "): " + inside);
@@ -303,10 +313,10 @@ public class GuestWardrobeClientGameTests implements FabricClientGameTest {
 			}
 			rightLeg.resetPose();
 			leftLeg.resetPose();
-			panels.setup("guest_sarah_stock", false, body, rightLeg, leftLeg);
+			panels.setup("guest_frieren", false, body, rightLeg, leftLeg);
 			Vector3f top = at(body, flare, flare.getChild("front"), 0.0F, GuestBody.FLARE_DROP, -GuestBody.FLARE_GAP);
 			check(Math.abs(top.y - 12.0F) < 0.02F && Math.abs(top.z + 2.1F) < 0.05F, "At rest the front panel's inner top edge lies on the hip line: " + top);
-			panels.setup("guest_sarah_stock", true, body, rightLeg, leftLeg);
+			panels.setup("guest_frieren", true, body, rightLeg, leftLeg);
 			check(!flare.visible, "and never over a player skin");
 		});
 	}

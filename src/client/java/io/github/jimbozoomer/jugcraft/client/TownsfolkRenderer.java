@@ -6,6 +6,7 @@ import io.github.jimbozoomer.jugcraft.town.TownRoutine;
 import io.github.jimbozoomer.jugcraft.town.Townsfolk;
 import java.util.HashMap;
 import java.util.Map;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.client.renderer.entity.state.HumanoidRenderState;
@@ -18,9 +19,12 @@ import org.jspecify.annotations.Nullable;
  */
 public class TownsfolkRenderer extends HumanoidMobRenderer<Townsfolk, TownsfolkRenderer.State, TownsfolkModel> {
 	private static final Map<String, Identifier> TEXTURES = new HashMap<>();
+	private final TownsfolkModel standard;
+	private final Map<String, GuestPortraitModel> portraits = new HashMap<>();
 
 	public static class State extends HumanoidRenderState {
 		String skin = "townsfolk_1";
+		@Nullable GuestPortraitModel portrait;
 		/** What they are doing at their place (TownRoutine), posed by TownsfolkModel. */
 		TownRoutine.Activity activity = TownRoutine.Activity.NONE;
 		/** Each person's own offset into their gestures, so a crowd does not move in step. */
@@ -33,6 +37,20 @@ public class TownsfolkRenderer extends HumanoidMobRenderer<Townsfolk, TownsfolkR
 
 	public TownsfolkRenderer(EntityRendererProvider.Context context) {
 		super(context, new TownsfolkModel(context.bakeLayer(TownsfolkModel.SKINNABLE_LAYER)), 0.5F);
+		standard = model;
+		for (String id : GuestPortraitModel.GUESTS) portraits.put(id, GuestPortraitModel.read(id));
+	}
+
+	public TownsfolkModel modelFor(State state) {
+		return state.portrait == null ? standard : state.portrait;
+	}
+
+	@Override
+	protected @Nullable RenderType getRenderType(State state, boolean visible, boolean translucent, boolean outline) {
+		// AgeableMobRenderer selects its own base rig at the start of submit. Choose the guest
+		// here, when the draw call binds the atlas, so the body and every equipment layer use it.
+		model = modelFor(state);
+		return super.getRenderType(state, visible, translucent, outline);
 	}
 
 	@Override
@@ -53,6 +71,7 @@ public class TownsfolkRenderer extends HumanoidMobRenderer<Townsfolk, TownsfolkR
 			skin = "townsfolk_1";
 		}
 		state.skin = skin.matches("[a-z0-9_]{1,40}") ? skin : "townsfolk_1";
+		state.portrait = state.playerSkin == null ? portraits.get(GuestBody.guest(state.skin)) : null;
 		if (state.playerSkin == null) {
 			// A clearly adult fictional guest's town skin, in any outfit, is drawn on the model's slim arms (GuestBody.SLIM).
 			state.slim = GuestBody.slim(state.skin);
@@ -76,6 +95,7 @@ public class TownsfolkRenderer extends HumanoidMobRenderer<Townsfolk, TownsfolkR
 		if (state.playerSkin != null) {
 			return state.playerSkin;
 		}
+		if (state.portrait != null) return state.portrait.texture;
 		return TEXTURES.computeIfAbsent(state.skin, skin -> Jugcraft.id("textures/entity/townsfolk/" + skin + ".png"));
 	}
 }

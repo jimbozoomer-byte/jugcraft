@@ -1,6 +1,9 @@
 package io.github.jimbozoomer.jugcraft.test;
 
 import com.mojang.blaze3d.platform.InputConstants;
+import com.mojang.blaze3d.vertex.PoseStack;
+import io.github.jimbozoomer.jugcraft.client.GuestPortraitModel;
+import io.github.jimbozoomer.jugcraft.client.TownsfolkRenderer;
 import io.github.jimbozoomer.jugcraft.client.GuestScreen;
 import io.github.jimbozoomer.jugcraft.client.ScreenKit;
 import io.github.jimbozoomer.jugcraft.finance.LandRegistry;
@@ -24,6 +27,11 @@ import net.fabricmc.fabric.api.client.gametest.v1.context.TestServerContext;
 import net.fabricmc.fabric.api.client.gametest.v1.context.TestSingleplayerContext;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHandler;
+import net.minecraft.client.model.Model;
+import net.minecraft.client.renderer.SubmitNodeStorage;
+import net.minecraft.client.renderer.rendertype.RenderType;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
+import net.minecraft.client.renderer.texture.UvMapping;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.worldselection.WorldCreationUiState;
@@ -172,6 +180,19 @@ public class GuestClientGameTests implements FabricClientGameTest {
 			context.waitTicks(10);
 			context.takeScreenshot("guest_character_skins");
 			gallery(context, server, origin, first);
+			for (var guest : GuestRoster.ALL) {
+				if (guest.edition() != GuestRoster.Edition.ADULT_TIME_SKIP) continue;
+				String id = guest.id();
+				if (id.equals("asuka_langley") || id.equals("rei_ayanami")) {
+					check(guest.timeSkipAge().orElse(-1) == 18, "EVA pilot is 18 in the Jugcraft time skip: " + id);
+				}
+				context.runOnClient(mc -> mc.gui.setScreen(new GuestScreen(
+						new GuestMenu(0, mc.player.getInventory(), new GuestMenu.Opening(-1, id)),
+						mc.player.getInventory(), Component.literal(guest.name()))));
+				context.waitTicks(3);
+				context.takeScreenshot("guest_time_skip_menu_" + id);
+				context.runOnClient(mc -> mc.gui.setScreen(null));
+			}
 
 			// A guest that is not available: a stand-in menu for a pending entry shows only that.
 			context.runOnClient(mc -> mc.gui.setScreen(new GuestScreen(new GuestMenu(0, mc.player.getInventory(), new GuestMenu.Opening(-1, "rooni")),
@@ -195,6 +216,17 @@ public class GuestClientGameTests implements FabricClientGameTest {
 
     /** Render every packaged skin on an actual NPC, including all head accessories. */
     private static void gallery(ClientGameTestContext context, TestServerContext server, BlockPos origin, int npcId) {
+        double x = origin.getX() - 2.5, y = origin.getY(), z = origin.getZ() + 4.5;
+        server.runOnServer(s -> {
+            var npc = (Townsfolk) s.overworld().getEntity(npcId);
+            npc.setNoAi(true);
+            npc.getNavigation().stop();
+            npc.setDeltaMovement(0, 0, 0);
+            npc.snapTo(x, y, z, 180F, 0F);
+        });
+        server.runCommand("tp @a " + x + " " + y + " " + (z - 4) + " 0 8.5");
+        context.waitFor(mc -> mc.level.getEntity(npcId).distanceToSqr(x, y, z) < .01
+                && mc.player.distanceToSqr(x, y, z - 4) < .01, 100);
         context.runOnClient(mc -> { mc.gui.hud.getChat().clearMessages(true); if (!mc.gui.hud.isHidden()) mc.gui.hud.toggle(); });
         for (GuestRoster.Guest guest : GuestRoster.ALL) {
             if (!guest.available()) continue;
@@ -206,13 +238,64 @@ public class GuestClientGameTests implements FabricClientGameTest {
                 Townsfolk npc = (Townsfolk) s.overworld().getEntity(npcId);
                 check(io.github.jimbozoomer.jugcraft.town.CustomNpcs.setTownSkin(npc, look.townSkin()), "Skin accepted " + guest.id());
                 npc.setNoAi(true);
+                var viewer = s.getPlayerList().getPlayers().getFirst();
+                float yaw = (float) Math.toDegrees(Math.atan2(npc.getX() - viewer.getX(), viewer.getZ() - npc.getZ()));
+                npc.setYRot(yaw);
+                npc.setYHeadRot(yaw);
+                npc.setYBodyRot(yaw);
                 npc.setCustomName(Component.literal(guest.name()));
             });
-            context.getInput().lookAt(origin.offset(0,1,3));
-            context.waitTicks(3);
-            context.takeScreenshot("guest_skin_" + guest.id());
+            context.waitFor(mc -> mc.level.getEntity(npcId) instanceof Townsfolk present
+                    && present.skin().equals(look.townSkin()), 100);
+            context.runOnClient(mc -> {
+                var present = (Townsfolk) mc.level.getEntity(npcId);
+                var renderer = (TownsfolkRenderer) mc.getEntityRenderDispatcher().getRenderer(present);
+                var state = renderer.createRenderState();
+                renderer.extractRenderState(present, state, 0);
+                var submission = new SubmitNodeStorage() {
+                    Model<?> body;
+                    @Override public <S> void submitModel(Model<? super S> model, S frame, PoseStack pose,
+                            RenderType type, int light, int overlay, int color, UvMapping uv, int outline) {
+                        if (body == null) body = model;
+                    }
+                };
+                renderer.submit(state, new PoseStack(), submission, new CameraRenderState());
+                boolean detailed = GuestPortraitModel.GUESTS.contains(guest.id());
+                check(submission.body == renderer.modelFor(state) && (submission.body instanceof GuestPortraitModel) == detailed,
+                        "Submitted mesh matches the atlas for " + guest.id());
+                check(mc.getResourceManager().getResource(renderer.getTextureLocation(state)).isPresent(),
+                        "Visible rig has its own atlas for " + guest.id());
+            });
+            context.waitTicks(6);
+            captureAngle(context, server, npcId, 0F, "guest_skin_" + guest.id());
+            if (GuestPortraitModel.GUESTS.contains(guest.id())) {
+                captureAngle(context, server, npcId, 90F, "guest_profile_" + guest.id());
+                if (guest.id().equals("misato_katsuragi")) {
+                    captureAngle(context, server, npcId, 180F, "guest_back_" + guest.id());
+                    captureAngle(context, server, npcId, -90F, "guest_left_" + guest.id());
+                }
+            }
         }
         context.runOnClient(mc -> { if (mc.gui.hud.isHidden()) mc.gui.hud.toggle(); });
+    }
+
+    private static void captureAngle(ClientGameTestContext context, TestServerContext server, int id, float angle, String file) {
+        server.runOnServer(s -> {
+            Townsfolk npc = (Townsfolk) s.overworld().getEntity(id);
+            var viewer = s.getPlayerList().getPlayers().getFirst();
+            float yaw = angle + (float) Math.toDegrees(Math.atan2(npc.getX()-viewer.getX(), viewer.getZ()-npc.getZ()));
+            npc.setYRot(yaw);
+            npc.setYHeadRot(yaw);
+            npc.setYBodyRot(yaw);
+        });
+        context.waitTicks(4);
+        context.runOnClient(mc -> {
+            var npc = (Townsfolk) mc.level.getEntity(id);
+            float yaw = angle + (float) Math.toDegrees(Math.atan2(npc.getX()-mc.player.getX(), mc.player.getZ()-npc.getZ()));
+            npc.setYRot(yaw);
+            npc.yRotO = npc.yBodyRot = npc.yBodyRotO = npc.yHeadRot = npc.yHeadRotO = yaw;
+        });
+        context.takeScreenshot(file);
     }
 
 	/** Exercise both confirmations over the real menu packets; only affection and the proposal item are fixture setup. */
