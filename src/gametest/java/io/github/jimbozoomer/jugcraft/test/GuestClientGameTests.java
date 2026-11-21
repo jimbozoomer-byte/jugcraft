@@ -247,25 +247,15 @@ public class GuestClientGameTests implements FabricClientGameTest {
             });
             context.waitFor(mc -> mc.level.getEntity(npcId) instanceof Townsfolk present
                     && present.skin().equals(look.townSkin()), 100);
-            context.runOnClient(mc -> {
-                var present = (Townsfolk) mc.level.getEntity(npcId);
-                var renderer = (TownsfolkRenderer) mc.getEntityRenderDispatcher().getRenderer(present);
-                var state = renderer.createRenderState();
-                renderer.extractRenderState(present, state, 0);
-                var submission = new SubmitNodeStorage() {
-                    Model<?> body;
-                    @Override public <S> void submitModel(Model<? super S> model, S frame, PoseStack pose,
-                            RenderType type, int light, int overlay, int color, UvMapping uv, int outline) {
-                        if (body == null) body = model;
-                    }
-                };
-                renderer.submit(state, new PoseStack(), submission, new CameraRenderState());
-                boolean detailed = GuestPortraitModel.GUESTS.contains(guest.id());
-                check(submission.body == renderer.modelFor(state) && (submission.body instanceof GuestPortraitModel) == detailed,
-                        "Submitted mesh matches the atlas for " + guest.id());
-                check(mc.getResourceManager().getResource(renderer.getTextureLocation(state)).isPresent(),
-                        "Visible rig has its own atlas for " + guest.id());
-            });
+            context.runOnClient(mc -> checkGuestRender(mc, npcId, GuestPortraitModel.GUESTS.contains(guest.id())));
+            if (guest.id().equals("reze")) {
+                server.runCommand("tp @a " + x + " " + y + " " + (z - 24) + " 0 0");
+                context.waitFor(mc -> mc.gameRenderer.mainCamera().position().distanceToSqr(x, y, z) > 20 * 20, 100);
+                context.runOnClient(mc -> checkGuestRender(mc, npcId, false));
+                server.runCommand("tp @a " + x + " " + y + " " + (z - 4) + " 0 8.5");
+                context.waitFor(mc -> mc.gameRenderer.mainCamera().position().distanceToSqr(x, y, z) < 6 * 6, 100);
+                context.runOnClient(mc -> checkGuestRender(mc, npcId, true));
+            }
             context.waitTicks(6);
             captureAngle(context, server, npcId, 0F, "guest_skin_" + guest.id());
             if (GuestPortraitModel.GUESTS.contains(guest.id())) {
@@ -277,6 +267,35 @@ public class GuestClientGameTests implements FabricClientGameTest {
             }
         }
         context.runOnClient(mc -> { if (mc.gui.hud.isHidden()) mc.gui.hud.toggle(); });
+    }
+
+    private static void checkGuestRender(Minecraft mc, int npcId, boolean detailed) {
+        var npc = (Townsfolk) mc.level.getEntity(npcId);
+        var dispatcher = mc.getEntityRenderDispatcher();
+        var renderer = (TownsfolkRenderer) dispatcher.getRenderer(npc);
+        var state = renderer.createRenderState();
+        // This assertion runs between frames, when vanilla can already have cleared the pass camera.
+        var previous = dispatcher.camera;
+        try {
+            dispatcher.camera = mc.gameRenderer.mainCamera();
+            renderer.extractRenderState(npc, state, 0);
+        } finally {
+            dispatcher.camera = previous;
+        }
+        var submission = new SubmitNodeStorage() {
+            Model<?> body;
+            @Override public <S> void submitModel(Model<? super S> model, S frame, PoseStack pose,
+                    RenderType type, int light, int overlay, int color, UvMapping uv, int outline) {
+                if (body == null) body = model;
+            }
+        };
+        renderer.submit(state, new PoseStack(), submission, new CameraRenderState());
+        check(submission.body == renderer.modelFor(state) && (submission.body instanceof GuestPortraitModel) == detailed,
+                "Submitted the expected mesh for " + npc.skin());
+        var texture = renderer.getTextureLocation(state);
+        check(mc.getResourceManager().getResource(texture).isPresent(), "Missing atlas for " + npc.skin());
+        if (!detailed) check(texture.equals(io.github.jimbozoomer.jugcraft.Jugcraft.id(
+                "textures/entity/townsfolk/" + npc.skin() + ".png")), "Distant guest lost their named skin");
     }
 
     private static void captureAngle(ClientGameTestContext context, TestServerContext server, int id, float angle, String file) {
