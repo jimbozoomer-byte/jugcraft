@@ -2,6 +2,14 @@
 
 The live host console can run `guests city preview` and `guests city place` against the saved Overworld town. These commands use loaded, authored public lawns and skip private claims, apartments, operator regions and occupied sites. Repeating placement fills missing roster slots only for never-placed guests. The general coordinate-based placement command retains its original protections.
 
+### Guest crowds
+
+New city placements favor the clear lawn farthest from other known posts. To redistribute a town with existing guests, run `guests city spread preview` in the server console to see names and coordinates, then `guests city spread apply` to move eligible guests. Each new post has at least 12 blocks of clearance from other reserved guest posts. Both commands inspect loaded city lawns. Visit another part of town and rerun the preview if too few lawns were loaded.
+
+The spread command moves the existing NPC and its home post together. It skips married guests, guests on outings or patrols, and guests away from their city posts. The client uses the detailed portrait within 12 blocks of the camera and the guest's lightweight seasonal skin farther away. A solid wall covering the guest's entire padded silhouette can suppress drawing. Doorways, windows and partial cover keep visible guests on screen.
+
+Implemented by OpenAI Codex (GPT-6).
+
 Status: gameplay foundation implemented and validated locally on November 11. Named appearances, placement planning and the roster-eligibility discrepancy remain unfinished. Not released. OpenAI Codex coordinates local integration and Claude Code delegation. Preserve all existing dirty November work. No main merges, releases, updater or live-server actions.
 
 ## Approved player outcome

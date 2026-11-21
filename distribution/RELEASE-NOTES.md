@@ -1,10 +1,9 @@
-# JUGCRAFT · Town guest wardrobe
+# JUGCRAFT · Spawn city guest performance
 
-Guest model update prepared with OpenAI Codex (GPT-6).
+Guest performance update prepared with OpenAI Codex (GPT-6).
 
 <!-- player-notes -->
-- All 32 available named town guests now have individual 3D models. Existing guests wear their new looks when you update and rejoin.
-- Reze wears the original imported outfit. The rest of the lineup has individually fitted clothing, hairstyles and faces, including the seven newly finished guests.
-- Look for Frieren's ivory travel cape, Rem's lace headdress, Megumin's broad mage hat, Zero Two's crimson uniform, Rin's cross sweater, Miyabi's split coat and Nicole's cropped jacket.
-- Winter scarves and cuffs, harvest accessories and spring pins follow the guest models as their outfits change.
+- Named guests keep their detailed models within 12 blocks. Farther away, they use lighter models with their own seasonal outfits.
+- The client can skip drawing a guest fully hidden behind a solid wall. Guests remain visible through windows, doorways and gaps.
+- City guests can now have home posts spread across the public lawns around spawn. Your relationships follow the same NPCs to their new posts.
 <!-- /player-notes -->
